@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from .run import Run
 
 
@@ -10,5 +11,11 @@ class RunManager:
 
         self.active_runs = {}
 
-    def create_run(self, run_name, workflow_config=None):
-        self.active_runs[run_name] = Run(run_name, workflow_config)
+    def create_run(self, run_name, workflow_config_name):
+        assert run_name not in self.available_runs
+        self.active_runs[run_name] = Run.create(run_name, workflow_config_name)
+        self.available_runs.append(run_name)
+
+    def continue_run(self, run_name):
+        assert run_name in self.available_runs
+        self.active_runs[run_name] = Run.continue_existing(run_name)
