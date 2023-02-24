@@ -1,0 +1,82 @@
+{
+  "analysis-level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "main-data-import"
+        },
+        {
+          "name": "metadata-import"
+        }
+      ]
+    },
+    "data-preprocessing": {
+      "steps": [
+        {
+          "name": "filter-proteins",
+          "method": "low-frequency-filter",
+          "parameters": {
+            "threshold": 0.2,
+            "graph-one-type": "Pie chart"
+          }
+        },
+        {
+          "name": "filter-samples",
+          "method": "protein-intensity-sum-filter",
+          "parameters": {
+            "threshold": 2,
+            "graph-one-type": "Bar chart"
+          }
+        },
+        {
+          "name": "outlier-detection",
+          "method": "local-outlier-factor",
+          "parameters": {
+            "no_neighbours": 3
+          }
+        },
+        {
+          "name": "transformation",
+          "method": "log-transformation",
+          "parameters": {
+            "log-base": "log2",
+            "graph-one-type": "Boxplot",
+            "graph-one-group-by": "Sample"
+          }
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4,
+            "graph-one-type": "Boxplot",
+            "graph-one-group-by": "Sample"
+          }
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number-of-neighbours": 10,
+            "graph-one-type": "Bar chart",
+            "graph-one-group-by": "Sample",
+            "graph-two-type": "Pie chart"
+          }
+        }
+      ]
+    },
+    "data-analysis": {
+      "steps": [
+        {
+          "name": "differential-expression",
+          "method": "anova",
+          "parameters": {}
+        }
+      ]
+    },
+    "data-integration": {
+      "steps": {}
+    }
+  }
+}
