@@ -2,7 +2,10 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from ...protzilla.run_manager import RunManager
+import sys
+from main.settings import BASE_DIR
+sys.path.append(f"{BASE_DIR}/..")
+from protzilla.run_manager import RunManager
 
 run_manager = RunManager()
 

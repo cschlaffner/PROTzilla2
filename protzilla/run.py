@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
-
-from constants import method_mapping
+from .constants import method_mapping
 
 
 class Run:
