@@ -1,12 +1,17 @@
 # Create your views here.
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.shortcuts import render
-
+import os
 import sys
-from main.settings import BASE_DIR
 
-sys.path.append(f"{BASE_DIR}/..")
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
+
+from ui.main.settings import BASE_DIR
+
+print("base", BASE_DIR)
+print("pre:", os.getcwd())
+sys.path.append(f"{BASE_DIR}")
+print("post", os.getcwd())
 from protzilla.run_manager import RunManager
 from protzilla.workflow_manager import WorkflowManager
 
