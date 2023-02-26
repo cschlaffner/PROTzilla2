@@ -1,6 +1,6 @@
 .DS_Store
 .idea/
-
+protzilla/user_data/runs/*
 
 # --- below: github python .gitignore template ---
 
