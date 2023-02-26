@@ -19,6 +19,7 @@
 </form>
 <br>
 <form action="{% url 'runs:continue' %}" method="post"> {# should this be get? #}
+    {% csrf_token %}
     <label for="run_name_option">choose existing run:</label>
     <select name="run_name" id="run_name_option">
         {% for name in available_runs %}
