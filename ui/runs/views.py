@@ -8,15 +8,21 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run_manager import RunManager
+from protzilla.workflow_manager import WorkflowManager
 
 run_manager = RunManager()
+workflow_manager = WorkflowManager()
 
 
 def index(request):
     return render(
         request,
         "runs/index.html",
-        context={"run_name_prefill": f"hello{123:03d}"},
+        context={
+            "run_name_prefill": f"hello{123:03d}",
+            "available_workflows": workflow_manager.available_workflows,
+            "available_runs": run_manager.available_runs,
+        },
     )
 
 

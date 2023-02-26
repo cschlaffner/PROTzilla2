@@ -10,8 +10,22 @@
     <label for="run_name">run name:</label>
     <input name="run_name" id="run_name" value="{{ run_name_prefill }}">
     <label for="workflow_config_name">workflow:</label>
-    <input name="workflow_config_name" id="workflow_config_name" value="standard">
-    <input type="submit" value="Start">
+    <select name="workflow_config_name" id="workflow_config_name">
+        {% for name in available_workflows %}
+            <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Create">
+</form>
+<br>
+<form action="{% url 'runs:continue' %}" method="post"> {# should this be get? #}
+    <label for="run_name_option">choose existing run:</label>
+    <select name="run_name" id="run_name_option">
+        {% for name in available_runs %}
+            <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="continue">
 </form>
 </body>
 </html>
