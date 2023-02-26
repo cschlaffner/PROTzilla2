@@ -4,10 +4,14 @@ from .run import Run
 
 
 class RunManager:
-    def __int__(self):
+    def __init__(self):
         self.available_runs = []
-        for p in Path("user_data/runs").iterdir():
-            self.available_runs.append(p.name)
+        runs_path = Path("user_data/runs")
+        if runs_path.exists():
+            for p in runs_path.iterdir():
+                self.available_runs.append(p.name)
+        else:
+            runs_path.mkdir(parents=True)
 
         self.active_runs = {}
 

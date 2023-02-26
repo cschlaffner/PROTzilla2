@@ -30,4 +30,4 @@ def create(request):
         run_manager.continue_run(run_name)
     else:
         run_manager.create_run(run_name, request.POST["workflow_config_name"])
-    return HttpResponseRedirect(reverse("detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

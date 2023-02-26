@@ -9,6 +9,8 @@
     {% csrf_token %}
     <label for="run_name">run name:</label>
     <input name="run_name" id="run_name" value="{{ run_name_prefill }}">
+    <label for="workflow_config_name">workflow:</label>
+    <input name="workflow_config_name" id="workflow_config_name" value="standard">
     <input type="submit" value="Start">
 </form>
 </body>
