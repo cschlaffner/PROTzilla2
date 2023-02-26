@@ -1,9 +1,11 @@
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.shortcuts import render
 
 import sys
 from main.settings import BASE_DIR
+
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run_manager import RunManager
 
@@ -11,7 +13,11 @@ run_manager = RunManager()
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the runs index.")
+    return render(
+        request,
+        "runs/index.html",
+        context={"run_name_prefill": f"hello{123:03d}"},
+    )
 
 
 def detail(request, run_name):
