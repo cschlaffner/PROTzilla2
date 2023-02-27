@@ -37,6 +37,21 @@ class Run:
         self.step = None
         self.method = None
 
+        print(self.workflow_config)
+        self.section = "data-preprocessing"
+        self.step = self.workflow_config["sections"][self.section]["steps"][0]["name"]
+        self.method = self.workflow_config["sections"][self.section]["steps"][0][
+            "method"
+        ]
+        self.step_dict = self.workflow_meta["sections"][self.section][self.step]
+
+        # TODO this should probaly be part of the history
+
+        self.preset_args = self.workflow_config["sections"][self.section]["steps"][
+            self.step_index
+        ]
+        self.current_args = []
+
         self.df = None
         self.result_df = None
         self.current_out = None
