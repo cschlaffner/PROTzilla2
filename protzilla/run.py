@@ -29,9 +29,22 @@ class Run:
         with open(f"{PATH_TO_PROJECT}/constants/workflow_meta.json", "r") as f:
             self.workflow_meta = json.load(f)
 
-        self.section = None
-        self.step = None
-        self.method = None
+        self.step_index = 0
+
+        print(self.workflow_config)
+        self.section = "data-preprocessing"
+        self.step = self.workflow_config["sections"][self.section]["steps"][0]["name"]
+        self.method = self.workflow_config["sections"][self.section]["steps"][0][
+            "method"
+        ]
+        self.step_dict = self.workflow_meta["sections"][self.section][self.step]
+
+        # TODO this should probaly be part of the history
+
+        self.preset_args = self.workflow_config["sections"][self.section]["steps"][
+            self.step_index
+        ]
+        self.current_args = []
 
         self.previous_df = None
         self.current_df = None

@@ -1,0 +1,10 @@
+<label for="{{ step }}">{{ step_name }}</label>
+<select name="{{ step }}" id="{{ key }}" {% if disabled %}
+        disabled
+    {% endif %} >
+    {% for method in methods %}
+        <option value="{{ method }}" {% if method == default %}
+            selected="selected"
+        {% endif %} >{{ method }}</option>
+    {% endfor %}
+</select>
