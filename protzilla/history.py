@@ -39,7 +39,7 @@ class History:
             "method": method_name,
             "params": params,
             "plots": plots,
-            "outputs": {
+            "output": {
                 "df": None,
                 "dict": output_dict
             }
@@ -49,7 +49,7 @@ class History:
         if self.df_mode == "disk":
             output_df.to_csv(self.df_path(index))
         if self.df_mode == "memory":
-            step_dict["outputs"]["df"] = output_df
+            step_dict["output"]["df"] = output_df
 
         self.steps.append(step_dict)
 
@@ -57,4 +57,4 @@ class History:
         return Path(PATH_TO_RUNS + self.run_name + "/df_" + index + ".csv")
 
     def name_to_indexes(self, name):
-        return [self.steps.index(step) for step in self.steps if step["step"] is name]
+        return [self.steps.index(step) for step in self.steps if step["step"] == name]
