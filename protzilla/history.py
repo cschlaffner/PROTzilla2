@@ -5,7 +5,7 @@ from .constants.constants import PATH_TO_RUNS
 
 
 class History:
-    def __init__(self, run_name, df_mode="disk"):
+    def __init__(self, run_name, df_mode):
         assert df_mode in ("disk", "memory")
 
         self.df_mode = df_mode
@@ -33,6 +33,7 @@ class History:
             section, step, method, parameters, path_or_df, outputs, plots
         )
         self.steps.append(executed_step)
+        # save steps to disk?
 
     def df_path(self, index):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
