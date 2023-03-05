@@ -7,6 +7,7 @@ from .constants.constants import PATH_TO_RUNS
 class History:
     def __init__(self, run_name, df_mode):  # remane to save_df?
         assert df_mode in ("disk", "memory", "disk_memory")
+        # add mode with no back button and no saving df?
 
         self.df_mode = df_mode
         self.run_name = run_name

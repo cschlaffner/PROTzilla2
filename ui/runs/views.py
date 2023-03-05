@@ -44,3 +44,6 @@ def continue_(request):
     run_name = request.POST["run_name"]
     active_runs[run_name] = Run.continue_existing(run_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+# run1.get_next_item_in_workflow() -> (section, step, method)

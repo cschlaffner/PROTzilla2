@@ -8,3 +8,4 @@ class WorkflowManager:
         for p in self.workflows_path.iterdir():
             self.available_workflows.append(p.stem)
         # TODO check for new workflows
+        # use classmethod
