@@ -1,10 +1,9 @@
 import pandas as pd
-from protzilla.constants.constants import PATH_TO_PROJECT
 
 SELECTED_COLUMNS = ["Protein IDs", "Gene names"]
 
 
-def max_quant_import(file, intensity_name):
+def max_quant_import(_, file, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     read = pd.read_csv(
         file,
@@ -26,10 +25,8 @@ def max_quant_import(file, intensity_name):
     molten = molten.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    return ordered
+    return ordered, {}
 
 
-if __name__ == "__main__":
-    df = max_quant_import(PATH_TO_PROJECT / "proteinGroups_small.txt", "Intensity")
-    pd.set_option("display.width", None)
-    print(df.tail(1000))
+def protzilla_csv_import(_, file):
+    return pd.read_csv(file), {}
