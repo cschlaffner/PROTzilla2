@@ -5,8 +5,8 @@ from .constants.constants import PATH_TO_RUNS
 
 
 class History:
-    def __init__(self, run_name, df_mode):
-        assert df_mode in ("disk", "memory")
+    def __init__(self, run_name, df_mode):  # remane to save_df?
+        assert df_mode in ("disk", "memory", "disk_memory")
 
         self.df_mode = df_mode
         self.run_name = run_name
@@ -22,18 +22,26 @@ class History:
         outputs: dict,
         plots,
     ):
-        if self.df_mode == "disk":
+        df_path = None
+        df = None
+        if "disk" in self.df_mode:
             index = len(self.steps)
             (PATH_TO_RUNS / self.run_name).mkdir(parents=True, exist_ok=True)
             dataframe.to_csv(self.df_path(index), index=False)
-            path_or_df = self.df_path(index)
-        else:
-            path_or_df = dataframe
+            df_path = self.df_path(index)
+        if "memory" in self.df_mode:
+            df = dataframe
         executed_step = ExecutedStep(
-            section, step, method, parameters, path_or_df, outputs, plots
+            section, step, method, parameters, df, df_path, outputs, plots
         )
         self.steps.append(executed_step)
         # save steps to disk?
+
+    def pop_step(self):
+        step = self.steps.pop()
+        if "disk" in self.df_mode:
+            step.dataframe_path.unlink()
+        return step
 
     def df_path(self, index):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
@@ -45,12 +53,13 @@ class ExecutedStep:
     step: str
     method: str
     parameters: dict
-    _dataframe: pd.DataFrame | Path
+    _dataframe: pd.DataFrame | None
+    dataframe_path: Path | None
     outputs: dict
     plots: list
 
     @property
     def dataframe(self):
-        if isinstance(self._dataframe, Path):
-            return pd.read_csv(self._dataframe)
-        return self._dataframe
+        if self._dataframe:
+            return self._dataframe
+        return pd.read_csv(self.dataframe_path)
