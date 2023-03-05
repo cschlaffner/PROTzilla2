@@ -1,4 +1,7 @@
-# Create your views here.
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
+from django.shortcuts import render
+
 import sys
 
 from django.http import HttpResponseRedirect
@@ -7,14 +10,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-print(sys.path)
 sys.path.append(f"{BASE_DIR}/..")
-print(sys.path)
-from protzilla.run_manager import RunManager
+from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
-run_manager = RunManager()
 workflow_manager = WorkflowManager()
+active_runs = {}
 
 
 def index(request):
@@ -24,14 +25,14 @@ def index(request):
         context={
             "run_name_prefill": f"hello{123:03d}",
             "available_workflows": workflow_manager.available_workflows,
-            "available_runs": run_manager.available_runs,
+            "available_runs": Run.available_runs(),
         },
     )
 
 
 def detail(request, run_name):
     # TODO load run into active runs when if it hasn't been loaded but is called?
-    run = run_manager.active_runs[run_name]
+    run = active_runs[run_name]
 
     # add fields, plots, etc. from show history here
 
@@ -135,23 +136,29 @@ def detail(request, run_name):
 
 
 def create(request):
+    # TODO handle already existing, ask if overwrite
     run_name = request.POST["run_name"]
-    if run_name in run_manager.available_runs:
-        run_manager.continue_run(run_name)
-    else:
-        run_manager.create_run(run_name, request.POST["workflow_config_name"])
+    active_runs[run_name] = Run.create(
+        request.POST["run_name"], request.POST["workflow_config_name"]
+    )
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def continue_(request):
+    run_name = request.POST["run_name"]
+    active_runs[run_name] = Run.continue_existing(run_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def next(request, run_name):
     run_name = request.POST["run_name"]
-    run = run_manager.runs[run_name]
+    run = active_runs[run_name]
     run.next_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def back(request, run_name):
-    run = run_manager.runs[run_name]
+    run = active_runs[run_name]
     run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

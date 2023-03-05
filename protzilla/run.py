@@ -1,16 +1,25 @@
 import json
 from pathlib import Path
 
-from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
 from .constants.method_mapping import method_map
+from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
 from .history import History
 
 
 class Run:
     @classmethod
+    def available_runs(cls):
+        available_runs = []
+        runs_path = PATH_TO_RUNS
+        if runs_path.exists():
+            for p in runs_path.iterdir():
+                available_runs.append(p.name)
+        return available_runs
+
+    @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{PATH_TO_RUNS}/{run_name}")
-        run_path.mkdir(exist_ok=False)
+        run_path.mkdir(exist_ok=True, parents=True)
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
