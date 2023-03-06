@@ -7,7 +7,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
+print(sys.path)
 sys.path.append(f"{BASE_DIR}/..")
+print(sys.path)
 from protzilla.run_manager import RunManager
 from protzilla.workflow_manager import WorkflowManager
 
@@ -39,6 +41,8 @@ def detail(request, run_name):
 
     method_divs = []
 
+    print("preset args", run.preset_args)
+
     for method in run.step_dict.keys():
         parameters = run.workflow_meta["sections"][run.section][run.step][method][
             "parameters"
@@ -52,8 +56,8 @@ def detail(request, run_name):
                         **param_dict,
                         disabled=False,
                         key=key,
-                        default=run.preset_args[key]
-                        if run.current_args is None
+                        default=run.preset_args["parameters"][key]
+                        if not run.current_args
                         else run.current_args[key],
                     ),
                 )
@@ -64,8 +68,8 @@ def detail(request, run_name):
                         **param_dict,
                         disabled=False,
                         key=key,
-                        default=run.presets[key]
-                        if run.current_args is None
+                        default=run.preset_args["parameters"][key]
+                        if not run.current_args
                         else run.current_args[key],
                     ),
                 )
@@ -75,27 +79,47 @@ def detail(request, run_name):
             fields.append(f)
         method_divs.append(fields)
 
+    # NEXT UP: look at prototype, apparently there is one too many layers of
+    # lists involved in the current method_divs
+
     print("step_dict", run.step_dict)
+
+    print("method_keys", run.step_dict.keys())
+    print("method_divs", method_divs)
+
+    method_names = [n.replace("-", " ").title() for n in run.step_dict.keys()]
+    methods_dict = zip(run.step_dict.keys(), method_names, method_divs)
+
+    print("methods_dict", methods_dict)
+    for key, name, fields in methods_dict:
+        print("Key:", key)
+        print("Name:", name)
+        print("fields:", fields)
 
     step_methods = render_to_string(
         "runs/field_select_method.html",
         context=dict(
             step=run.step,
             step_name=run.step.replace("-", " ").title(),
-            methods=run.step_dict.keys(),
             step_dict=run.step_dict,
             disabled=False,
             default=run.preset_args["method"]
-            if not run.selected_args
-            else run.selected_args,
-            method_divs=method_divs,
+            if not run.current_args
+            else run.current_args,
+            methods_dict=methods_dict,
+            method_field=method_divs[0][0],
         ),
     )
+
+    print("step_methods", step_methods)
 
     return render(
         request,
         "runs/details.html",
-        context=dict(run_name=run_name, step_methods=step_methods),
+        context=dict(
+            run_name=run_name,
+            step_methods=step_methods,
+        ),
     )
 
 
