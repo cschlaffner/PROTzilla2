@@ -1,10 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    import Page
-</body>
-</html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Minimal Django File Upload Example</title>   
+    </head>
+    <body>
+
+        <!-- Upload form. Note enctype attribute! -->
+        <form action="{% url 'runs:ms_import' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>{{ form.non_field_errors }}</p>
+            <p>{{ form.intensity_file.label_tag }} {{ form.intensity_file }}</p>
+            <p>
+                {{ form.intensity_file.errors }}
+            </p>
+            <p>{{ form.intensity_name.label }} {{ form.intensity_name }}</p>
+            <p>
+                {{ form.intensity_name.errors }}
+            </p>
+            <p><input type="submit" value="Upload" /></p>
+        </form>
+    </body>
+</html> 

@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from main.settings import BASE_DIR
+from runs.forms import MSImportForm
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
@@ -28,10 +29,11 @@ def index(request):
 def detail(request, run_name):
     if run_name not in active_runs:
         return HttpResponse(f"404: {run_name} not currently active")
+    form = MSImportForm()  # A empty, unbound form
     return render(
         request,
         "runs/import.html",
-        context={},
+        context={"form": form},
     )
 
 
@@ -51,3 +53,23 @@ def continue_(request):
 
 
 # run1.get_next_item_in_workflow() -> (section, step, method)
+
+
+def ms_import(request):
+    # Handle file upload
+    if request.method == "POST":
+        form = MSImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            print(request.FILES["docfile"])
+
+            # Redirect to the document list after POST
+            return HttpResponseRedirect(reverse("myapp.views.list"))
+    else:
+        form = MSImportForm()  # A empty, unbound form
+
+    # Render list page with the documents and the form
+    return render(
+        request,
+        "runs/import.html",
+        context={"form": form},
+    )
