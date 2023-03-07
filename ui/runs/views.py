@@ -1,8 +1,8 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.shortcuts import render
-
 import sys
+
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
@@ -28,7 +28,11 @@ def index(request):
 def detail(request, run_name):
     if run_name not in active_runs:
         return HttpResponse(f"404: {run_name} not currently active")
-    return HttpResponse(f"viewing details of {run_name}")
+    return render(
+        request,
+        "runs/import.html",
+        context={},
+    )
 
 
 def create(request):
