@@ -46,20 +46,19 @@ class Run:
         self.step = None
         self.method = None
 
-        self.previous_df = None
-        self.current_df = None
+        self.df = None
+        self.result_df = None
         self.current_out = None
         self.current_parameters = None
         self.history = History(self.run_name, df_mode)
+        self.next_step()  # to be able to go back after first step
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         self.perform_calculation(method_map[location], parameters)
 
     def perform_calculation(self, method_callable, parameters):
-        self.current_df, self.current_out = method_callable(
-            self.previous_df, **parameters
-        )
+        self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
@@ -74,12 +73,22 @@ class Run:
             self.step,
             self.method,
             self.current_parameters,
-            self.current_df,
+            self.result_df,
             self.current_out,
             plots=[],
         )
-        self.previous_df = self.current_df
-        self.current_df = None
+        self.df = self.result_df
+        self.result_df = None
 
     def back_step(self):
-        pass
+        assert self.history.steps
+        self.history.back_step()
+        self.df = self.history.steps[-1].dataframe
+        # popping from history.steps possible to get values again
+        self.result_df = None
+        self.current_out = None
+        self.current_parameters = None
+
+        self.section = None
+        self.step = None
+        self.method = None

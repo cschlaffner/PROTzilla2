@@ -38,11 +38,10 @@ class History:
         self.steps.append(executed_step)
         # save steps to disk?
 
-    def pop_step(self):
+    def back_step(self):
         step = self.steps.pop()
         if "disk" in self.df_mode:
             step.dataframe_path.unlink()
-        return step
 
     def df_path(self, index):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
@@ -61,6 +60,8 @@ class ExecutedStep:
 
     @property
     def dataframe(self):
-        if self._dataframe:
+        if self._dataframe is not None:
             return self._dataframe
-        return pd.read_csv(self.dataframe_path)
+        if self.dataframe_path is not None:
+            return pd.read_csv(self.dataframe_path)
+        return None
