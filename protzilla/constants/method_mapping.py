@@ -1,7 +1,17 @@
 from ..data_preprocessing import filter_proteins, filter_samples
-
+from ..importing import main_data_import
 
 method_map = {
+    (
+        "importing",
+        "ms-data-import",
+        "max-quant-data-import",
+    ): main_data_import.max_quant_import,
+    (
+        "importing",
+        "ms-data-import",
+        "ms-fragger-data-import",
+    ): main_data_import.ms_fragger_import,
     (
         "data_preprocessing",
         "filter_proteins",

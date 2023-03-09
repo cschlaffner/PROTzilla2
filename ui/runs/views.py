@@ -7,7 +7,6 @@ from main.settings import BASE_DIR
 from runs.forms import MSImportForm
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.importing.main_data_import import max_quant_import
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -30,12 +29,19 @@ def index(request):
 def detail(request, run_name):
     if run_name not in active_runs:
         return HttpResponse(f"404: {run_name} not currently active")
-    form = MSImportForm()  # A empty, unbound form
-    return render(
-        request,
-        "runs/import.html",
-        context={"run_name": run_name, "form": form},
-    )
+    if active_runs[run_name].section == "importing":
+        form = MSImportForm()  # A empty, unbound form
+        return render(
+            request,
+            "runs/import.html",
+            context={"run_name": run_name, "form": form},
+        )
+    else:
+        return render(
+            request,
+            "runs/success.html",
+            context={"df": active_runs[run_name].section},
+        )
 
 
 def create(request):
@@ -58,20 +64,22 @@ def continue_(request):
 
 def ms_import(request, run_name):
     # Handle file upload
+    run = active_runs[run_name]
     if request.method == "POST":
         form = MSImportForm(request.POST, request.FILES)
         if form.is_valid():
-            df = max_quant_import(
-                "something",
-                request.FILES["intensity_file"],
-                request.POST["intensity_name"],
-            )[0].head()
-            # return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
-            return render(
-                request,
-                "runs/success.html",
-                context={"df": df},
+            run.perform_calculation_from_location(
+                run.section,
+                run.step,
+                run.methods,
+                {
+                    run.df,
+                    request.FILES["intensity_file"],
+                    request.POST["intensity_name"],
+                },
             )
+
+            return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
     else:
         form = MSImportForm()  # A empty, unbound form

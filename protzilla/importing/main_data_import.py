@@ -3,6 +3,10 @@ import pandas as pd
 SELECTED_COLUMNS = ["Protein IDs", "Gene names"]
 
 
+def ms_fragger_import():
+    pass
+
+
 def max_quant_import(_, file, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     read = pd.read_csv(
@@ -12,6 +16,7 @@ def max_quant_import(_, file, intensity_name):
         na_values=["", 0],
         keep_default_na=True,
     )
+    print(read.columns)
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"])
     id_df = df[SELECTED_COLUMNS]
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
