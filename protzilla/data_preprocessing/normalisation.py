@@ -65,7 +65,7 @@ def by_median(
     )
 
 
-def by_median_plot(graph_type, df, result_df, current_out):
+def by_median_plot(df, result_df, current_out, graph_type):
     if graph_type == "box":
         fig = create_box_plots(
             dataframe_a=df,

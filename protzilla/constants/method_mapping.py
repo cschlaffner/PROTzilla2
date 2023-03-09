@@ -1,7 +1,13 @@
+from ..importing import main_data_import
 from ..data_preprocessing import filter_proteins, filter_samples, normalisation
 
 
 method_map = {
+    (
+        "importing",
+        "main-data-import",
+        "ms-data-import",
+    ): main_data_import.max_quant_import,
     (
         "data-preprocessing",
         "filter-proteins",
@@ -22,7 +28,6 @@ plot_map = {
         "data-preprocessing",
         "filter-proteins",
         "low-frequency-filter",
-        "graph-type"
     ): filter_proteins.by_low_frequency_plot,
     (
         "data_preprocessing",

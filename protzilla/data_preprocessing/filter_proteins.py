@@ -2,7 +2,7 @@ from ..utilities.transform_dfs import long_to_wide
 from protzilla.data_preprocessing.plots import create_pie_plot, create_bar_plot
 
 
-def by_low_frequency(intensity_df, plot, threshold):
+def by_low_frequency(intensity_df, threshold):
     min_threshold = threshold * len(intensity_df.Sample.unique())
     transformed_df = long_to_wide(intensity_df)
 
@@ -19,7 +19,7 @@ def by_low_frequency(intensity_df, plot, threshold):
     )
 
 
-def by_low_frequency_plot(graph_type, df, result_df, current_out):
+def by_low_frequency_plot(df, result_df, current_out, graph_type):
     if graph_type == "pie":
         fig = create_pie_plot(
             values_of_sectors=[
@@ -38,4 +38,4 @@ def by_low_frequency_plot(graph_type, df, result_df, current_out):
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
         )
-    return fig
+    return [fig]

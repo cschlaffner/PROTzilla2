@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from .constants.method_mapping import method_map
+from .constants.method_mapping import method_map, plot_map
 from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
 from .history import History
 
@@ -41,6 +41,7 @@ class Run:
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
+        self.plots = None
         self.history = History(self.run_name, df_mode)
         self.next_step()  # to be able to go back after first step
 
@@ -57,6 +58,12 @@ class Run:
         self.next_step()
 
     # TODO: plots (same method with plots param/<method_name>_plots)
+    def create_plot_from_location(self, section, step, method, parameters):
+        location = (section, step, method)
+        self.create_plot(plot_map[location], parameters)
+
+    def create_plot(self, method_callable, parameters):
+        self.plots = method_callable(self.df, self.result_df, self.current_out, **parameters)
 
     def next_step(self):
         self.history.add_step(
@@ -66,12 +73,8 @@ class Run:
             self.current_parameters,
             self.result_df,
             self.current_out,
-            plots=[],
+            self.plots,
         )
-
-    def perform_plotting_from_location(self, section, step, method, graph_type):
-        location = (section, step, method)
-        self.execute(method_mapping[location], graph_type, self.df, self.result_df, self.current_out)
         self.df = self.result_df
         self.result_df = None
 
