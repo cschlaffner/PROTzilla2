@@ -41,7 +41,7 @@ def detail(request, run_name):
 
     method_divs = []
 
-    print("preset args", run.preset_args)
+    # print("preset args", run.preset_args)
 
     for method in run.step_dict.keys():
         parameters = run.workflow_meta["sections"][run.section][run.step][method][
@@ -77,24 +77,15 @@ def detail(request, run_name):
                 param_type = param_dict["type"]
                 ValueError(f"cannot match parameter type {param_type}")
             fields.append(f)
-        method_divs.append(fields)
+        method_divs.append(dict(fields=fields))
 
     # NEXT UP: look at prototype, apparently there is one too many layers of
     # lists involved in the current method_divs
 
-    print("step_dict", run.step_dict)
-
-    print("method_keys", run.step_dict.keys())
     print("method_divs", method_divs)
 
     method_names = [n.replace("-", " ").title() for n in run.step_dict.keys()]
     methods_dict = zip(run.step_dict.keys(), method_names, method_divs)
-
-    print("methods_dict", methods_dict)
-    for key, name, fields in methods_dict:
-        print("Key:", key)
-        print("Name:", name)
-        print("fields:", fields)
 
     step_methods = render_to_string(
         "runs/field_select_method.html",
@@ -107,7 +98,7 @@ def detail(request, run_name):
             if not run.current_args
             else run.current_args,
             methods_dict=methods_dict,
-            method_field=method_divs[0][0],
+            method_field=method_divs[0],
         ),
     )
 
@@ -130,3 +121,26 @@ def create(request):
     else:
         run_manager.create_run(run_name, request.POST["workflow_config_name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def next(request, run_name):
+    run_name = request.POST["run_name"]
+    run = run_manager.runs[run_name]
+    run.next_step()
+    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
+
+
+def back(request, run_name):
+    run = run_manager.runs[run_name]
+    run.back_step()
+    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
+
+
+def calculate(request, run_name):
+    arguments = dict(request.POST)
+    del arguments["csrfmiddlewaretoken"]
+    arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
+    print(arguments)
+    run_manager.calculate(run_name, arguments)
+
+    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
