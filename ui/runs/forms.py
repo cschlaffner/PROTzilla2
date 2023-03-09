@@ -8,7 +8,7 @@ class MSImportForm(forms.Form):
     intensity_name = forms.CharField(
         label="Select Intensity Name",
         widget=forms.Select(
-            [
+            choices=[
                 ("Intensity", "Intensity"),
                 ("iBAQ", "iBAQ"),
                 ("LFQ intensity", "LFQ intensity"),
@@ -17,7 +17,9 @@ class MSImportForm(forms.Form):
     )
     ms_data_type = forms.CharField(
         label="Select MS Data Type",
-        widget=forms.Select([("ms_fragger", "MS Fragger"), ("max_quant", "Max Quant")]),
+        widget=forms.Select(
+            choices=[("ms_fragger", "MS Fragger"), ("max_quant", "Max Quant")]
+        ),
     )
 
     metadata_file = forms.FileField(

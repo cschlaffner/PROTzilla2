@@ -7,17 +7,18 @@
     <body>
 
         <!-- Upload form. Note enctype attribute! -->
-        <form action="{% url 'runs:ms_import' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'runs:ms_import' run_name %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <p>{{ form.non_field_errors }}</p>
+            {% for field in form %}
+                {{ field }}
+                <br>
+            {% endfor %}
+            <!-- <p>{{ form.non_field_errors }}</p>
             <p>{{ form.intensity_file.label_tag }} {{ form.intensity_file }}</p>
             <p>
                 {{ form.intensity_file.errors }}
-            </p>
-            <p>{{ form.intensity_name.label }} {{ form.intensity_name }}</p>
-            <p>
-                {{ form.intensity_name.errors }}
-            </p>
+            </p> -->
+            
             <p><input type="submit" value="Upload" /></p>
         </form>
     </body>

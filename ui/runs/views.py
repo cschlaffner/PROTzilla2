@@ -7,6 +7,7 @@ from main.settings import BASE_DIR
 from runs.forms import MSImportForm
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla.importing.main_data_import import max_quant_import
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -33,7 +34,7 @@ def detail(request, run_name):
     return render(
         request,
         "runs/import.html",
-        context={"form": form},
+        context={"run_name": run_name, "form": form},
     )
 
 
@@ -55,19 +56,27 @@ def continue_(request):
 # run1.get_next_item_in_workflow() -> (section, step, method)
 
 
-def ms_import(request):
+def ms_import(request, run_name):
     # Handle file upload
     if request.method == "POST":
         form = MSImportForm(request.POST, request.FILES)
         if form.is_valid():
-            print(request.FILES["docfile"])
+            df = max_quant_import(
+                "something",
+                request.FILES["intensity_file"],
+                request.POST["intensity_name"],
+            )[0].head()
+            # return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+            return render(
+                request,
+                "runs/success.html",
+                context={"df": df},
+            )
 
-            # Redirect to the document list after POST
-            return HttpResponseRedirect(reverse("myapp.views.list"))
     else:
         form = MSImportForm()  # A empty, unbound form
 
-    # Render list page with the documents and the form
+    # Render the form
     return render(
         request,
         "runs/import.html",
