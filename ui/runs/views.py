@@ -40,9 +40,6 @@ def detail(request, run_name):
     # visible div for selected method
 
     method_divs = []
-
-    # print("preset args", run.preset_args)
-
     for method in run.step_dict.keys():
         parameters = run.workflow_meta["sections"][run.section][run.step][method][
             "parameters"
@@ -61,6 +58,7 @@ def detail(request, run_name):
                         else run.current_args[key],
                     ),
                 )
+            # why if else in default?
             if param_dict["type"] == "categorical":
                 f = render_to_string(
                     "runs/field_select.html",
@@ -79,10 +77,13 @@ def detail(request, run_name):
             fields.append(f)
         method_divs.append(dict(fields=fields))
 
-    # NEXT UP: look at prototype, apparently there is one too many layers of
-    # lists involved in the current method_divs
-
-    print("method_divs", method_divs)
+    # WHAT I DID: removed too many layers of lists involved in the current method_divs
+    # copied quite a lot from prototype to get to a point of it not breaking
+    # added next and calculate view functions and buttons
+    # NEXT STEPS - TODO: 
+    #   * connect frontend to calculating
+    #   * check functionality of next back buttons etc (hat to stop coding while this was in progress)
+    #   * clean up existing code (after ensuring basic funtionality)
 
     method_names = [n.replace("-", " ").title() for n in run.step_dict.keys()]
     methods_dict = zip(run.step_dict.keys(), method_names, method_divs)
@@ -103,6 +104,10 @@ def detail(request, run_name):
     )
 
     print("step_methods", step_methods)
+    # TODO: check whether this is the correct df
+    # check this logic: is history args = preset_args?
+    show_next = run.result_df is not None
+    show_back = bool(run.preset_args)
 
     return render(
         request,
@@ -110,6 +115,9 @@ def detail(request, run_name):
         context=dict(
             run_name=run_name,
             step_methods=step_methods,
+            show_next= show_next,
+            method_divs=method_divs,
+            show_back = show_back,
         ),
     )
 
@@ -127,20 +135,21 @@ def next(request, run_name):
     run_name = request.POST["run_name"]
     run = run_manager.runs[run_name]
     run.next_step()
-    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def back(request, run_name):
     run = run_manager.runs[run_name]
     run.back_step()
-    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def calculate(request, run_name):
+    # TODO: check correctness and add calculate here
     arguments = dict(request.POST)
     del arguments["csrfmiddlewaretoken"]
     arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
+    print("arguments")
     print(arguments)
-    run_manager.calculate(run_name, arguments)
 
-    return HttpResponseRedirect(reverse("run_detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
