@@ -47,3 +47,7 @@ class Run:
         self.current_df, self.current_out = method_callable(
             self.previous_df, **parameters
         )
+
+    def perform_plotting_from_location(self, section, step, method, graph_type):
+        location = (section, step, method)
+        self.execute(method_mapping[location], graph_type, self.df, self.result_df, self.current_out)

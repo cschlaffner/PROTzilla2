@@ -4,7 +4,6 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 
 def by_median(
         intensity_df: pd.DataFrame,
-        plot,
         q=0.5,  # quartile, default is median
 ):
     """
@@ -60,10 +59,17 @@ def by_median(
 
     pd.reset_option("mode.chained_assignment")
 
-    if plot == "box":
+    return (
+        scaled_df,
+        dict(),
+    )
+
+
+def by_median_plot(graph_type, df, result_df, current_out):
+    if graph_type == "box":
         fig = create_box_plots(
-            dataframe_a=intensity_df,
-            dataframe_b=scaled_df,
+            dataframe_a=df,
+            dataframe_b=result_df,
             name_a="Before Normalisation",
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
@@ -71,20 +77,14 @@ def by_median(
             y_title="",
             group_by="Sample",
         )
-    if plot == "histogram":
+    if graph_type == "histogram":
         fig = create_histograms(
-            dataframe_a=intensity_df,
-            dataframe_b=scaled_df,
+            dataframe_a=df,
+            dataframe_b=result_df,
             name_a="Before Normalisation",
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
             x_title="",
             y_title="",
         )
-
-    return (
-        scaled_df,
-        [fig],
-        dict(),
-    )
-
+    return fig

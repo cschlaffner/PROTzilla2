@@ -12,28 +12,30 @@ def by_low_frequency(intensity_df, plot, threshold):
 
     filtered_proteins_list = removed_proteins_df.columns.unique().tolist()
 
-    if plot == "pie":
-        fig = create_pie_plot(
-            values_of_sectors=[
-                len(remaining_proteins),
-                len(filtered_proteins_list),
-            ],
-            names_of_sectors=["Proteins kept", "Proteins filtered"],
-            heading="Number of Filtered Proteins",
-        )
-    if plot == "bar":
-        fig = create_bar_plot(
-            values_of_sectors=[
-                len(remaining_proteins),
-                len(filtered_proteins_list),
-            ],
-            names_of_sectors=["Proteins kept", "Proteins filtered"],
-            heading="Number of Filtered Proteins",
-        )
-
     # TODO: might be redundant to remaining_proteins
     return (
         intensity_df[~(intensity_df["Protein ID"].isin(filtered_proteins_list))],
-        [fig],
-        dict(filtered_proteins=filtered_proteins_list),
+        dict(filtered_proteins=filtered_proteins_list, remaining_proteins=remaining_proteins.tolist()),
     )
+
+
+def by_low_frequency_plot(graph_type, df, result_df, current_out):
+    if graph_type == "pie":
+        fig = create_pie_plot(
+            values_of_sectors=[
+                len(current_out["remaining_proteins"]),
+                len(current_out["filtered_proteins"]),
+            ],
+            names_of_sectors=["Proteins kept", "Proteins filtered"],
+            heading="Number of Filtered Proteins",
+        )
+    if graph_type == "bar":
+        fig = create_bar_plot(
+            values_of_sectors=[
+                len(current_out["remaining_proteins"]),
+                len(current_out["filtered_proteins"]),
+            ],
+            names_of_sectors=["Proteins kept", "Proteins filtered"],
+            heading="Number of Filtered Proteins",
+        )
+    return fig
