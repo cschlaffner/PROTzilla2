@@ -50,3 +50,18 @@ def test_run_back():
 # CLI: steps, complete workflow
 # UI: location, back+next, workflow defaults
 # different classes?
+
+
+def test_run_continue():
+    run_name = "test_run_continue"
+    rmtree(PATH_TO_RUNS / run_name)
+    run = Run.create(run_name, df_mode="disk")
+    run.calculate_and_next(
+        main_data_import.max_quant_import,
+        file=PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    df = run.df
+    del run
+    run2 = Run.continue_existing(run_name)
+    assert df.equals(run2.df)
