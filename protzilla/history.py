@@ -1,11 +1,19 @@
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+
 import pandas as pd
+
 from .constants.constants import PATH_TO_RUNS
 
 
 class History:
-    def __init__(self, run_name, df_mode):  # remane to save_df?
+    """
+    This class has the responsibility to save what methods were previously executed
+    in a Run. Each Run has one History. It is responsible for saving dataframes to
+    disk.
+    """
+
+    def __init__(self, run_name: str, df_mode: str):  # remane to save_df?
         assert df_mode in ("disk", "memory", "disk_memory")
         # add mode with no back button and no saving df?
 
@@ -15,13 +23,13 @@ class History:
 
     def add_step(
         self,
-        section,
-        step,
-        method,
-        parameters,
+        section: str,
+        step: str,
+        method: str,
+        parameters: dict,
         dataframe: pd.DataFrame,
         outputs: dict,
-        plots,
+        plots: list,
     ):
         df_path = None
         df = None
@@ -43,12 +51,17 @@ class History:
         if "disk" in self.df_mode:
             step.dataframe_path.unlink()
 
-    def df_path(self, index):
+    def df_path(self, index: int):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
 
 
 @dataclass
 class ExecutedStep:
+    """
+    This class represents a step that was executed in a run. Instances of this object
+    are not supposed to change. It holds the outputs of that step.
+    """
+
     section: str
     step: str
     method: str
@@ -59,7 +72,11 @@ class ExecutedStep:
     plots: list
 
     @property
-    def dataframe(self):
+    def dataframe(self) -> pd.DataFrame | None:
+        """
+        :return: The dataframe that was the output of this step. Loads from disk if
+        necessary.
+        """
         if self._dataframe is not None:
             return self._dataframe
         if self.dataframe_path is not None:
