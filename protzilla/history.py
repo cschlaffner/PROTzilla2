@@ -25,9 +25,9 @@ class History:
     def from_disk(cls, run_name: str, df_mode: str):
         instance = cls(run_name, df_mode)
         with open(PATH_TO_RUNS / run_name / "history.json", "r") as f:
-            d = json.load(f)
-        for i, step in enumerate(d):
-            df_path = instance.df_path(i)
+            history_json = json.load(f)
+        for index, step in enumerate(history_json):
+            df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
                 df = pd.read_csv(df_path)
             else:
@@ -46,7 +46,7 @@ class History:
             )
         return instance
 
-    def __init__(self, run_name: str, df_mode: str):  # remane to save_df?
+    def __init__(self, run_name: str, df_mode: str):
         assert df_mode in ("disk", "memory", "disk_memory")
 
         self.df_mode = df_mode
@@ -85,25 +85,24 @@ class History:
             step.dataframe_path.unlink()
 
     def save(self):
-        s = []
-        for step in self.steps:
-            s.append(
-                dict(
-                    section=step.section,
-                    step=step.step,
-                    method=step.method,
-                    parameters={k: v for k, v in step.parameters.items()},
-                    outputs={k: v for k, v in step.outputs.items()},
-                )
+        to_save = [
+            dict(
+                section=step.section,
+                step=step.step,
+                method=step.method,
+                parameters=step.parameters,
+                outputs=step.outputs,
             )
+            for step in self.steps
+        ]
         with open(PATH_TO_RUNS / self.run_name / "history.json", "w") as f:
-            json.dump(s, f, indent=2)
+            json.dump(to_save, f, indent=2)
 
     def df_path(self, index: int):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExecutedStep:
     """
     This class represents a step that was executed in a run. It holds the outputs of

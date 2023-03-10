@@ -11,6 +11,7 @@ class Run:
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{PATH_TO_RUNS}/{run_name}")
         run_path.mkdir(exist_ok=False)
+        # TODO add "are you sure you want to overwrite" to frontend
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
@@ -21,8 +22,6 @@ class Run:
     def continue_existing(cls, run_name):
         with open(f"{PATH_TO_RUNS}/{run_name}/run_config.json", "r") as f:
             run_config = json.load(f)
-        # add reading history from disk
-        # add reading df from history
         history = History.from_disk(run_name, run_config["df_mode"])
         return cls(
             run_name, run_config["workflow_config_name"], run_config["df_mode"], history
