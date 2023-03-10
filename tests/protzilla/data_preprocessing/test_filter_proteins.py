@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
-from protzilla.data_preprocessing.filter_proteins import by_low_frequency
+import pytest
+from protzilla.data_preprocessing.filter_proteins import by_low_frequency, by_low_frequency_plot
 
 
-def test_filter_proteins_by_low_frequency():
-
-    test_intensity_list = (
+@pytest.fixture
+def test_intensity_df():
+    df = pd.DataFrame((
         ["Sample2", "Protein2", "Gene2", 1],
         ["Sample4", "Protein4", "Gene4", 1],
         ["Sample1", "Protein1", "Gene1", np.nan],
@@ -22,19 +23,19 @@ def test_filter_proteins_by_low_frequency():
         ["Sample2", "Protein4", "Gene4", 1],
         ["Sample3", "Protein4", "Gene4", np.nan],
         ["Sample4", "Protein1", "Gene1", 1],
-    )
+    ), columns=["Sample", "Protein ID", "Gene", "Intensity"])
 
-    test_intensity_df = pd.DataFrame(
-        data=test_intensity_list,
-        columns=["Sample", "Protein ID", "Gene", "Intensity"],
-    )
-    test_intensity_df.sort_values(
+    df.sort_values(
         by=["Sample", "Protein ID"], ignore_index=True, inplace=True
     )
 
-    results = by_low_frequency(test_intensity_df, "bar", threshold=0.6)
-    list_proteins_excluded = results[2]["filtered_proteins"]
-    fig = results[1][0]
+    return df
+
+
+def test_filter_proteins_by_low_frequency(test_intensity_df):
+    result_df, dropouts = by_low_frequency(test_intensity_df, threshold=0.6)
+    list_proteins_excluded = dropouts["filtered_proteins"]
+    fig = by_low_frequency_plot(test_intensity_df, result_df, dropouts, "Pie chart")[0]
     fig.show()
 
     assert [

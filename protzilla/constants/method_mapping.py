@@ -18,6 +18,21 @@ method_map = {
         "filter-proteins",
         "protein-intensity-sum-filter",
     ): filter_samples.by_protein_intensity_sum,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "median",
+    ): normalisation.by_median,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "totalsum",
+    ): normalisation.by_totalsum,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "ref-protein",
+    ): normalisation.by_reference_protein,
 }
 
 # reverse_map = {v: k for k, v in method_map.items()}
@@ -33,5 +48,15 @@ plot_map = {
         "data_preprocessing",
         "normalisation",
         "median",
-    ): normalisation.by_median,
+    ): normalisation.by_median_plot,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "totalsum",
+    ): normalisation.by_totalsum_plot,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "ref-protein",
+    ): normalisation.by_reference_protein_plot,
 }

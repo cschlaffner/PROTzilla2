@@ -15,12 +15,15 @@ def by_low_frequency(intensity_df, threshold):
     # TODO: might be redundant to remaining_proteins
     return (
         intensity_df[~(intensity_df["Protein ID"].isin(filtered_proteins_list))],
-        dict(filtered_proteins=filtered_proteins_list, remaining_proteins=remaining_proteins.tolist()),
+        dict(
+            filtered_proteins=filtered_proteins_list,
+            remaining_proteins=remaining_proteins.tolist()
+        ),
     )
 
 
 def by_low_frequency_plot(df, result_df, current_out, graph_type):
-    if graph_type == "pie":
+    if graph_type == "Pie chart":
         fig = create_pie_plot(
             values_of_sectors=[
                 len(current_out["remaining_proteins"]),
@@ -29,7 +32,7 @@ def by_low_frequency_plot(df, result_df, current_out, graph_type):
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
         )
-    if graph_type == "bar":
+    if graph_type == "Bar chart":
         fig = create_bar_plot(
             values_of_sectors=[
                 len(current_out["remaining_proteins"]),

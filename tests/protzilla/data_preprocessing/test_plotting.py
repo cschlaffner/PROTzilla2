@@ -3,8 +3,6 @@ from shutil import rmtree
 from protzilla.constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS
 from protzilla.run import Run
 
-# no idea why this is necessary
-
 
 def test_plotting():
     rmtree(PATH_TO_RUNS / "test_plotting", ignore_errors=True)
@@ -29,5 +27,5 @@ def test_plotting():
         "data-preprocessing",
         "filter-proteins",
         "low-frequency-filter",
-        dict(graph_type="pie"),
+        dict(graph_type="Pie Chart"),
     )
