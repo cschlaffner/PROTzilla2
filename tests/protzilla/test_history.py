@@ -59,5 +59,8 @@ def test_history_save():
         plots=[],
     )
     history.save()
+    steps = history.steps
     del history
-    # history2 = History()
+    history2 = History.from_disk("test_history_save", df_mode="disk")
+    assert steps[0].dataframe.equals(history2.steps[0].dataframe)
+    assert steps[1].dataframe.equals(history2.steps[1].dataframe)

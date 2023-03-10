@@ -20,9 +20,11 @@ class Run:
     def continue_existing(cls, run_name):
         with open(f"{PATH_TO_RUNS}/{run_name}/run_config.json", "r") as f:
             run_config = json.load(f)
+        # add reading history from disk
+        # add reading df from history
         return cls(run_name, run_config["workflow_config_name"], run_config["df_mode"])
 
-    def __init__(self, run_name, workflow_config_name, df_mode):
+    def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
         with open(f"{PATH_TO_WORKFLOWS}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)

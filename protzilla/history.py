@@ -21,6 +21,31 @@ class History:
         save things at the correct disk location.
     """
 
+    @classmethod
+    def from_disk(cls, run_name: str, df_mode: str):
+        instance = cls(run_name, df_mode)
+        with open(PATH_TO_RUNS / run_name / "history.json", "r") as f:
+            d = json.load(f)
+        for i, step in enumerate(d):
+            df_path = instance.df_path(i)
+            if df_path.exists() and "memory" in instance.df_mode:
+                df = pd.read_csv(df_path)
+            else:
+                df = None
+            instance.steps.append(
+                ExecutedStep(
+                    step["section"],
+                    step["step"],
+                    step["method"],
+                    step["parameters"],
+                    df,
+                    df_path if df_path.exists() else None,
+                    step["outputs"],
+                    plots=[],
+                )
+            )
+        return instance
+
     def __init__(self, run_name: str, df_mode: str):  # remane to save_df?
         assert df_mode in ("disk", "memory", "disk_memory")
 
@@ -72,7 +97,6 @@ class History:
                         "outputs",
                     ]
                 }
-                | {"dataframe_path": str(step.dataframe_path.relative_to(PATH_TO_RUNS))}
             )
         with open(PATH_TO_RUNS / self.run_name / "history.json", "w") as f:
             json.dump(s, f, indent=2)
