@@ -63,4 +63,6 @@ def test_history_save():
     del history
     history2 = History.from_disk("test_history_save", df_mode="disk")
     assert steps[0].dataframe.equals(history2.steps[0].dataframe)
+    assert history2.steps[0]._dataframe is None
     assert steps[1].dataframe.equals(history2.steps[1].dataframe)
+    assert history2.steps[1]._dataframe is None

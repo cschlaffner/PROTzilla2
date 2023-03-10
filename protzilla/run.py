@@ -14,7 +14,8 @@ class Run:
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
-        return cls(run_name, workflow_config_name, df_mode)
+        history = History(run_name, df_mode)
+        return cls(run_name, workflow_config_name, df_mode, history)
 
     @classmethod
     def continue_existing(cls, run_name):
@@ -22,10 +23,15 @@ class Run:
             run_config = json.load(f)
         # add reading history from disk
         # add reading df from history
-        return cls(run_name, run_config["workflow_config_name"], run_config["df_mode"])
+        history = History.from_disk(run_name, run_config["df_mode"])
+        return cls(
+            run_name, run_config["workflow_config_name"], run_config["df_mode"], history
+        )
 
     def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
+        self.history = history
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         with open(f"{PATH_TO_WORKFLOWS}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
 
@@ -39,11 +45,9 @@ class Run:
         self.step = None
         self.method = None
 
-        self.df = None
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
-        self.history = History(self.run_name, df_mode)
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)

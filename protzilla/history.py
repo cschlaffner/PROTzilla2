@@ -77,6 +77,7 @@ class History:
             section, step, method, parameters, df, df_path, outputs, plots
         )
         self.steps.append(executed_step)
+        self.save()
 
     def remove_step(self):
         step = self.steps.pop()
@@ -87,16 +88,13 @@ class History:
         s = []
         for step in self.steps:
             s.append(
-                {
-                    key: step.__getattribute__(key)
-                    for key in [
-                        "section",
-                        "step",
-                        "method",
-                        "parameters",
-                        "outputs",
-                    ]
-                }
+                dict(
+                    section=step.section,
+                    step=step.step,
+                    method=step.method,
+                    parameters={k: v for k, v in step.parameters.items()},
+                    outputs={k: v for k, v in step.outputs.items()},
+                )
             )
         with open(PATH_TO_RUNS / self.run_name / "history.json", "w") as f:
             json.dump(s, f, indent=2)
