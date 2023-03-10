@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from .constants.method_mapping import method_map
 from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
+from .constants.method_mapping import method_map
 from .history import History
 
 
@@ -19,7 +19,7 @@ class Run:
     @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{PATH_TO_RUNS}/{run_name}")
-        run_path.mkdir(exist_ok=True, parents=True)
+        run_path.mkdir(exist_ok=False)
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
@@ -51,7 +51,6 @@ class Run:
         self.current_out = None
         self.current_parameters = None
         self.history = History(self.run_name, df_mode)
-        self.next_step()  # to be able to go back after first step
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
@@ -82,8 +81,8 @@ class Run:
 
     def back_step(self):
         assert self.history.steps
-        self.history.back_step()
-        self.df = self.history.steps[-1].dataframe
+        self.history.remove_step()
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None

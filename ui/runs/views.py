@@ -29,7 +29,7 @@ def index(request):
 def detail(request, run_name):
     if run_name not in active_runs:
         return HttpResponse(f"404: {run_name} not currently active")
-    if active_runs[run_name].section == "importing":
+    if True:  # active_runs[run_name].section == "importing":
         form = MSImportForm()  # A empty, unbound form
         return render(
             request,
@@ -71,7 +71,7 @@ def ms_import(request, run_name):
             run.perform_calculation_from_location(
                 run.section,
                 run.step,
-                run.methods,
+                run.method,
                 {
                     run.df,
                     request.FILES["intensity_file"],
