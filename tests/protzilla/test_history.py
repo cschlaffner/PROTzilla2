@@ -40,3 +40,24 @@ def test_history_disk_delete():
     assert history.df_path(0).exists()
     history.remove_step()
     assert not history.df_path(0).exists()
+
+
+def test_history_save():
+    history = History("test_history_save", df_mode="disk")
+    df1 = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    history.add_step(
+        "section1", "step1", "method1", {"param1": 3}, df1, outputs={}, plots=[]
+    )
+    df2 = pd.DataFrame(data={"hellocol": [2, 2], "col2": [4, 4]})
+    history.add_step(
+        "section2",
+        "step2",
+        "method2",
+        {"param3": 3, "other": "no"},
+        df2,
+        outputs={"out": 5},
+        plots=[],
+    )
+    history.save()
+    del history
+    # history2 = History()

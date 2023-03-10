@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,6 +27,7 @@ class History:
         self.df_mode = df_mode
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
+        (PATH_TO_RUNS / run_name).mkdir(exist_ok=True)
 
     def add_step(
         self,
@@ -55,6 +57,25 @@ class History:
         step = self.steps.pop()
         if "disk" in self.df_mode:
             step.dataframe_path.unlink()
+
+    def save(self):
+        s = []
+        for step in self.steps:
+            s.append(
+                {
+                    key: step.__getattribute__(key)
+                    for key in [
+                        "section",
+                        "step",
+                        "method",
+                        "parameters",
+                        "outputs",
+                    ]
+                }
+                | {"dataframe_path": str(step.dataframe_path.relative_to(PATH_TO_RUNS))}
+            )
+        with open(PATH_TO_RUNS / self.run_name / "history.json", "w") as f:
+            json.dump(s, f, indent=2)
 
     def df_path(self, index: int):
         return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
