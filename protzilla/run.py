@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from .constants.method_mapping import method_map
 from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
+from .constants.method_mapping import method_map
 from .history import History
 
 
@@ -44,9 +44,12 @@ class Run:
         self.preset_args = self.workflow_config["sections"][self.section]["steps"][
             self.step_index
         ]
-        self.current_args = self.workflow_config["sections"][self.section]["steps"][0]["parameters"]
-        self.current_parameters = self.workflow_config["sections"][self.section]["steps"][0]["parameters"]
-        
+        self.current_args = self.workflow_config["sections"][self.section]["steps"][0][
+            "parameters"
+        ]
+        self.current_parameters = self.workflow_config["sections"][self.section][
+            "steps"
+        ][0]["parameters"]
 
         # make these a result of the step to be compatible with CLI?
         # self.section = None
