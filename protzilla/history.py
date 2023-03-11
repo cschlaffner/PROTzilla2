@@ -85,6 +85,8 @@ class History:
             step.dataframe_path.unlink()
 
     def save(self):
+        # this assumes that parameters and outpus are json serializable
+        # e.g. dict/list/number/str or a nesting of these
         to_save = [
             dict(
                 section=step.section,
