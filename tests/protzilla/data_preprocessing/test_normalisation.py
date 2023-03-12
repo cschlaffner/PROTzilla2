@@ -1,8 +1,15 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
-from protzilla.data_preprocessing.normalisation import *
+from protzilla.data_preprocessing.normalisation import (
+    by_median,
+    by_median_plot,
+    by_reference_protein,
+    by_reference_protein_plot,
+    by_totalsum,
+    by_totalsum_plot,
+)
 
 
 @pytest.fixture
@@ -26,7 +33,7 @@ def test_intensity_df():
             "Protein_7",
             "Protein_8",
             "Protein_9",
-        ]
+        ],
     )
 
     return pd.melt(
@@ -94,7 +101,7 @@ def expected_result_df_by_median_normalisation():
             "Protein_7",
             "Protein_8",
             "Protein_9",
-        ]
+        ],
     )
     return pd.melt(
         expected_df,
@@ -161,7 +168,7 @@ def expected_result_df_by_totalsum_normalisation():
             "Protein_7",
             "Protein_8",
             "Protein_9",
-        ]
+        ],
     )
     return pd.melt(
         expected_df,
@@ -173,7 +180,7 @@ def expected_result_df_by_totalsum_normalisation():
 
 @pytest.fixture
 def test_intensity_df_by_ref_protein_normalisation():
-    return pd.DataFrame(
+    intensity_df = pd.DataFrame(
         data=(
             ["Sample_1", "Gene_1", 0, 0, 30],
             ["Sample_2", "Gene_2", 10, 2, 3],
@@ -186,7 +193,13 @@ def test_intensity_df_by_ref_protein_normalisation():
             "XCV993;ABC32;BBD55;AB9393",
             "MNSZ9",
             "G99490;ABC321",
-        ]
+        ],
+    )
+    return pd.melt(
+        intensity_df,
+        id_vars=["Sample", "Gene"],
+        var_name="Protein ID",
+        value_name="Intensity",
     )
 
 
@@ -203,7 +216,7 @@ def expected_result_by_ref_protein_normalisation():
             "XCV993;ABC32;BBD55;AB9393",
             "MNSZ9",
             "G99490;ABC321",
-        ]
+        ],
     )
 
     return (
@@ -212,24 +225,18 @@ def expected_result_by_ref_protein_normalisation():
             id_vars=["Sample", "Gene"],
             var_name="Protein ID",
             value_name="Normalised Intensity",
-        ).sort_values(by=["Sample", "Protein ID"], ignore_index=True)
-        , pd.DataFrame(
-            ["Sample_1", "Sample_4"], columns=["Dropped Samples"]
-        )
+        ).sort_values(by=["Sample", "Protein ID"], ignore_index=True),
+        dict(dropped_samples=["Sample_1", "Sample_4"]),
     )
 
 
 def test_normalisation_by_median(
-        test_intensity_df,
-        expected_result_df_by_median_normalisation,
-        show_figures=True
+    test_intensity_df, expected_result_df_by_median_normalisation, show_figures=True
 ):
     result_df, dropouts = by_median(test_intensity_df)
 
     if show_figures:
-        fig = by_median_plot(
-           test_intensity_df, result_df, dropouts, "box"
-        )
+        fig = by_median_plot(test_intensity_df, result_df, dropouts, "box")
         fig.show()
 
     assert result_df.round(3).equals(
@@ -239,16 +246,12 @@ def test_normalisation_by_median(
 
 
 def test_totalsum_normalisation(
-        test_intensity_df,
-        expected_result_df_by_totalsum_normalisation,
-        show_figures=True
+    test_intensity_df, expected_result_df_by_totalsum_normalisation, show_figures=True
 ):
     result_df, dropouts = by_totalsum(test_intensity_df)
 
     if show_figures:
-        fig = by_totalsum_plot(
-           test_intensity_df, result_df, dropouts, "box"
-        )
+        fig = by_totalsum_plot(test_intensity_df, result_df, dropouts, "box")
         fig.show()
 
     assert result_df.round(3).equals(
@@ -258,53 +261,36 @@ def test_totalsum_normalisation(
 
 
 def test_ref_protein_normalisation(
-        test_intensity_df_by_ref_protein_normalisation,
-        expected_result_by_ref_protein_normalisation,
-        show_figures=True
+    test_intensity_df_by_ref_protein_normalisation,
+    expected_result_by_ref_protein_normalisation,
+    show_figures=True,
 ):
     expected_df = expected_result_by_ref_protein_normalisation[0]
     expected_dropped_samples = expected_result_by_ref_protein_normalisation[1]
 
-    (
-        result_df,
-        dropouts
-    ) = by_reference_protein(test_intensity_df_by_ref_protein_normalisation, "ABC32")
+    (result_df, dropouts) = by_reference_protein(
+        test_intensity_df_by_ref_protein_normalisation, "ABC32"
+    )
 
     if show_figures:
         fig = by_reference_protein_plot(
-           test_intensity_df, result_df, dropouts, "box"
+            test_intensity_df_by_ref_protein_normalisation, result_df, dropouts, "box"
         )
         fig.show()
 
     result_df_sorted = result_df.sort_values(
-        by=["Sample"], ignore_index=True
+        by=["Sample", "Protein ID"], ignore_index=True
     )
     assert result_df_sorted.round(3).equals(
         expected_df
     ), "reference protein normalisation does not match!"
-    pd.testing.assert_frame_equal(
-        expected_dropped_samples, result_df_sorted
+    assert expected_dropped_samples["dropped_samples"] == dropouts["dropped_samples"]
+
+
+def test_ref_protein_missing(capsys, test_intensity_df_by_ref_protein_normalisation):
+    by_reference_protein(
+        test_intensity_df_by_ref_protein_normalisation, "non_existing_Protein"
     )
-
-
-def test_ref_protein_missing(capsys):
-    intensities = (
-        ["Sample_1", "Gene_1", 0, 0, 30],
-        ["Sample_2", "Gene_2", 10, 2, 3],
-        ["Sample_3", "Gene_3", 30, 30, 90],
-        ["Sample_4", "Gene_4", np.nan, 0, 0],
-    )
-    columns = [
-        "Sample",
-        "Gene",
-        "XCV993;ABC32;BBD55;AB9393",
-        "MNSZ9",
-        "G99490;ABC321",
-    ]
-    test_df = setup_test_df(intensities, columns)
-
-    standardiser = RefProteinScalerScaling()
-    standardiser.get_scaled_or_normalised_data(test_df, "non_existing_Protein")
     out, err = capsys.readouterr()
     assert "The protein was not found" in out
 
