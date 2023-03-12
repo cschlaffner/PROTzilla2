@@ -18,8 +18,9 @@ def by_median(
     :param q: the chosen quartile of the sample intensities for\
     normalisation
     :type q: float
-    :return: returns a scaled dataframe in typical protzilla long format
-    :rtype: pandas DataFrame
+    :return: returns a scaled dataframe in typical protzilla long format\
+    and an empty dict.
+    :rtype: Tuple[pandas DataFrame, dict]
     """
 
     # Suppress SettingWithCopyWarning:
@@ -75,8 +76,9 @@ def by_totalsum(intensity_df: pd.DataFrame):
     :param intensity_df: the dataframe that should be filtered in\
     long format
     :type intensity_df: pandas DataFrame
-    :return: returns a scaled dataframe in typical protzilla long format
-    :rtype: pandas DataFrame
+    :return: returns a scaled dataframe in typical protzilla long format\
+    and an empty dict
+    :rtype: Tuple[pandas DataFrame, dict]
     """
 
     # Suppress SettingWithCopyWarning:
@@ -142,8 +144,8 @@ def by_reference_protein(
     :param reference_protein_id: Protein ID of the protein to normalise by
     type reference_protein_id: str
     :return: returns a scaled dataframe in typical protzilla long format \
-    and a list of the indices of the dropped samples
-    :rtype: Tuple[pandas DataFrame, list]
+    and dict with a list of the indices of the dropped samples
+    :rtype: Tuple[pandas DataFrame, dict]
     """
     scaled_df = pd.DataFrame()
     dropped_samples = []

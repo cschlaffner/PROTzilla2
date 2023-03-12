@@ -23,25 +23,7 @@ def create_pie_plot(
     :type values_of_sectors: list[str]
     :param heading: Header for the graph - for example the topic
     :type heading: str
-    :param graph_type: Defines the type of graph used. Can be "pie" or\
-    "bar". Default is "pie".
-    :type graph_type: str
-    :param colour: Defines the sequence used for the graph. Can be any\
-    sequence from px.colors.qualitative or simply a self-designed list\
-    containing hex strings for colors. Uses same order as names and values.\
-    Default is a sequence that matches protzilla typical colors\
-    (PROTZILLA_DISCRETE_COLOR_SEQUENCE). Alternative for depicting\
-    outliers in standard protzilla colours is the\
-    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE scheme, which can be entered\
-    as colour (assumes non-outliers first in values_for_sectors).
-    :type colour: list[str]
-    :param y_title: Optional y axis title for bar graphs.
-    :type y_title: str
-    :param x_title: Optional x axis title for bar graphs.
-    :type x_title: str
-    **kwargs: Additional parameters passed to plotly.express\
-    bar or pie functions
-    :return: returns a pie or bar chart of the data
+    :return: returns a pie chart of the data
     :rtype: Figure (plotly object)
     """
     fig = px.pie(
@@ -83,25 +65,11 @@ def create_bar_plot(
     :type values_of_sectors: list[str]
     :param heading: Header for the graph - for example the topic
     :type heading: str
-    :param graph_type: Defines the type of graph used. Can be "pie" or\
-    "bar". Default is "pie".
-    :type graph_type: str
-    :param colour: Defines the sequence used for the graph. Can be any\
-    sequence from px.colors.qualitative or simply a self-designed list\
-    containing hex strings for colors. Uses same order as names and values.\
-    Default is a sequence that matches protzilla typical colors\
-    (PROTZILLA_DISCRETE_COLOR_SEQUENCE). Alternative for depicting\
-    outliers in standard protzilla colours is the\
-    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE scheme, which can be entered\
-    as colour (assumes non-outliers first in values_for_sectors).
-    :type colour: list[str]
-    :param y_title: Optional y axis title for bar graphs.
+    :param y_title: Optional y axis title.
     :type y_title: str
-    :param x_title: Optional x axis title for bar graphs.
+    :param x_title: Optional x axis title.
     :type x_title: str
-    **kwargs: Additional parameters passed to plotly.express\
-    bar or pie functions
-    :return: returns a pie or bar chart of the data
+    :return: returns a bar chart of the data
     :rtype: Figure (plotly object)
     """
 
