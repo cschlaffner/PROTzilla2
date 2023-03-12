@@ -3,6 +3,25 @@ from protzilla.data_preprocessing.plots import create_pie_plot, create_bar_plot
 
 
 def by_low_frequency(intensity_df, threshold):
+    """
+    This function filters proteins with a low frequency of occurrence from
+    a protein dataframe based on a set threshold. The threshold is defined
+    by the relative amount of samples a protein is detected in.
+
+    :param intensity_df: the dataframe that should be filtered\
+    in long format
+    :type intensity_df: pd.DataFrame
+    :param threshold: float ranging from 0 to 1. Defining the\
+    relative share of samples the proteins should be present in\
+    order to be included. Example 0.5 - all proteins with intensities\
+    equal to zero in at least 50% of samples are discarded. Default: 0.5
+    :type threshold: float
+    :return: returns a Dataframe with the samples that meet the\
+    filtering criteria, a dict with a list with names of samples\
+    that were discarded and a list with names of samples\
+    that were kept
+    :rtype: list
+    """
     min_threshold = threshold * len(intensity_df.Sample.unique())
     transformed_df = long_to_wide(intensity_df)
 

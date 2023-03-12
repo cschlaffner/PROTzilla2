@@ -13,7 +13,7 @@ def create_pie_plot(
     heading="",
 ) -> Figure:
     """
-    Function to create generic bar or pie graphs from data.
+    Function to create generic pie graph from data.
     Especially helpful for visualisation of basic parts of
     a whole.
 
@@ -55,7 +55,7 @@ def create_bar_plot(
     x_title="",
 ) -> Figure:
     """
-    Function to create generic bar or pie graphs from data.
+    Function to create generic bar graph from data.
     Especially helpful for visualisation of basic parts of
     a whole.
 
@@ -112,12 +112,12 @@ def create_box_plots(
     group_by: str = "None",
 ) -> Figure:
     """
-    A function to create a boxplots and histograms for visualisation
+    A function to create a boxplot for visualisation
     of distributions. Assumes that you are comparing two dataframes
     (for example before and after filtering/normalisation) and creates
     a visualisation for each one.
 
-    :param dataframe_a: First dataframe in portzilla long format for\
+    :param dataframe_a: First dataframe in protzilla long format for\
     first boxplot
     :type dataframe_a: pd.DataFrame
     :param dataframe_b: Second dataframe in protzilla long format\
@@ -129,19 +129,9 @@ def create_box_plots(
     :type name_b: str
     :param heading: Header or title for the graph (optional)
     :type heading: str
-    :param graph_type: Defines the type of graph displayed. Can be\
-    either "box" (boxplot) or "hist" (histogram). Default is "box"
-    :type graph_type: str
-    :param colour: Defines the sequence of colours used for the graph.\
-    Can be any sequence from px.colors.qualitative or simply a\
-    self-designed list containing hex strings for colors. Uses same\
-    order as names and values.Default is a sequence that\
-    matches protzilla typical colors\
-    (PROTZILLA_DISCRETE_COLOR_SEQUENCE).
-    :type colour: list[str]
-    :param y_title: Optional y axis title for graphs.
+    :param y_title: Optional y-axis title for graphs.
     :type y_title: str
-    :param x_title: Optional x axis title for graphs.
+    :param x_title: Optional x-axis title for graphs.
     :type x_title: str
     :param group_by: Optional argument to create a grouped boxplot\
     graph. Arguments can be either "Sample" to group by sample or\
@@ -149,9 +139,7 @@ def create_box_plots(
     conventional graphs. If set the function will ignore the\
     graph_type argument. Default is "None".
     :type group_by: str
-    **kwargs: Additional parameters passed to go.BoxPlot\
-    or histogram functions
-    :return: returns a pie or bar chart of the data
+    :return: returns a boxplot of the data
     :rtype: Figure (plotly object)
     """
     if group_by not in {"None", "Sample", "Protein ID"}:
@@ -224,45 +212,27 @@ def create_histograms(
     x_title="",
 ) -> Figure:
     """
-    A function to create a boxplots and histograms for visualisation
+    A function to create a histogram for visualisation
     of distributions. Assumes that you are comparing two dataframes
     (for example before and after filtering/normalisation) and creates
     a visualisation for each one.
 
-    :param dataframe_a: First dataframe in portzilla long format for\
-    first boxplot
+    :param dataframe_a: First dataframe in protzilla long format for\
+    first histogram
     :type dataframe_a: pd.DataFrame
     :param dataframe_b: Second dataframe in protzilla long format\
-    for second boxplot
+    for second histogram
     :type dataframe_b: pd.DataFrame
-    :param name_a: Name of first boxplot
+    :param name_a: Name of first histogram
     :type name_a: str
-    :param name_b: Name of second boxplot
+    :param name_b: Name of second histogram
     :type name_b: str
     :param heading: Header or title for the graph (optional)
     :type heading: str
-    :param graph_type: Defines the type of graph displayed. Can be\
-    either "box" (boxplot) or "hist" (histogram). Default is "box"
-    :type graph_type: str
-    :param colour: Defines the sequence of colours used for the graph.\
-    Can be any sequence from px.colors.qualitative or simply a\
-    self-designed list containing hex strings for colors. Uses same\
-    order as names and values.Default is a sequence that\
-    matches protzilla typical colors\
-    (PROTZILLA_DISCRETE_COLOR_SEQUENCE).
-    :type colour: list[str]
     :param y_title: Optional y axis title for graphs.
     :type y_title: str
     :param x_title: Optional x axis title for graphs.
     :type x_title: str
-    :param group_by: Optional argument to create a grouped boxplot\
-    graph. Arguments can be either "Sample" to group by sample or\
-    "Protein ID" to group by protein. Leave "None" to get ungrouped\
-    conventional graphs. If set the function will ignore the\
-    graph_type argument. Default is "None".
-    :type group_by: str
-    **kwargs: Additional parameters passed to go.BoxPlot\
-    or histogram functions
     :return: returns a pie or bar chart of the data
     :rtype: Figure (plotly object)
     """
