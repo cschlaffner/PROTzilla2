@@ -1,5 +1,6 @@
-from protzilla.history import History
 import pandas as pd
+
+from protzilla.history import History
 
 
 def test_history_memory_identity():
@@ -24,7 +25,9 @@ def test_history_disk():
     history.add_step(
         "section1", "step1", "method1", {"param1": 3}, df1, outputs={}, plots=[]
     )
-    assert not isinstance(history.steps[0]._dataframe, pd.DataFrame)
+    # the history should not contain a dataframe in memory when using disk mode
+    assert history.steps[0]._dataframe is None
+    # the dataframe should be loaded from disk correctly when using .dataframe
     assert history.steps[0].dataframe.equals(df1)
 
 
@@ -35,5 +38,5 @@ def test_history_disk_delete():
         "section1", "step1", "method1", {"param1": 3}, df1, outputs={}, plots=[]
     )
     assert history.df_path(0).exists()
-    history.pop_step()
+    history.remove_step()
     assert not history.df_path(0).exists()

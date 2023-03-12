@@ -11,6 +11,13 @@ class History:
     This class has the responsibility to save what methods were previously executed
     in a Run. Each Run has one History. It is responsible for saving dataframes to
     disk.
+    :ivar steps is a list of the steps that have been executed, represented by
+        ExecutedStep instances.
+    :ivar df_mode determines if the dataframe of a completed step that is added to the
+        history is saved to disk and not held im memory ("disk" mode), held in memory
+        but not saved to disk ("memory" mode) or both ("disk_memory" mode).
+    :ivar run_name is the name of the run a history instance belongs to. It is used to
+        save things at the correct disk location.
     """
 
     def __init__(self, run_name: str, df_mode: str):  # remane to save_df?
@@ -43,9 +50,8 @@ class History:
             section, step, method, parameters, df, df_path, outputs, plots
         )
         self.steps.append(executed_step)
-        # save steps to disk?
 
-    def back_step(self):
+    def remove_step(self):
         step = self.steps.pop()
         if "disk" in self.df_mode:
             step.dataframe_path.unlink()
@@ -57,8 +63,8 @@ class History:
 @dataclass
 class ExecutedStep:
     """
-    This class represents a step that was executed in a run. Instances of this object
-    are not supposed to change. It holds the outputs of that step.
+    This class represents a step that was executed in a run. It holds the outputs of
+    that step. Instances of this class are not supposed to change.
     """
 
     section: str
