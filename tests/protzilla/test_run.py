@@ -8,7 +8,7 @@ from protzilla.run import Run
 
 def test_run_create():
     # here the run should be used like in the CLI
-    rmtree(PATH_TO_RUNS / "test_run")
+    rmtree(PATH_TO_RUNS / "test_run", ignore_errors=True)
     run = Run.create("test_run")
     run.calculate_and_next(
         main_data_import.max_quant_import,
@@ -53,8 +53,8 @@ def test_run_back():
 
 
 def test_run_calculate_from_location():
-    rmtree(PATH_TO_RUNS / "test_plotting", ignore_errors=True)
-    run = Run.create("test_plotting")
+    rmtree(PATH_TO_RUNS / "test_run_calculate_from_location", ignore_errors=True)
+    run = Run.create("test_run_calculate_from_location")
     run.perform_calculation_from_location(
         "importing",
         "main-data-import",
