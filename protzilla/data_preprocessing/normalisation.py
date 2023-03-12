@@ -189,8 +189,8 @@ def by_reference_protein(
     )
 
 
-def by_median_plot(df, result_df, current_out, graph_type):
-    if graph_type == "box":
+def by_median_plot(df, result_df, current_out, graph_type, group_by):
+    if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -199,9 +199,9 @@ def by_median_plot(df, result_df, current_out, graph_type):
             heading="Distribution of Protein Intensities",
             x_title="",
             y_title="",
-            group_by="Sample",
+            group_by=group_by,
         )
-    if graph_type == "histogram":
+    if graph_type == "Histogram":
         fig = create_histograms(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -214,8 +214,8 @@ def by_median_plot(df, result_df, current_out, graph_type):
     return fig
 
 
-def by_totalsum_plot(df, result_df, current_out, graph_type):
-    if graph_type == "box":
+def by_totalsum_plot(df, result_df, current_out, graph_type, group_by):
+    if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -224,9 +224,9 @@ def by_totalsum_plot(df, result_df, current_out, graph_type):
             heading="Distribution of Protein Intensities",
             x_title="",
             y_title="",
-            group_by="Sample",
+            group_by=group_by,
         )
-    if graph_type == "histogram":
+    if graph_type == "Histogram":
         fig = create_histograms(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -239,8 +239,8 @@ def by_totalsum_plot(df, result_df, current_out, graph_type):
     return fig
 
 
-def by_reference_protein_plot(df, result_df, current_out, graph_type):
-    if graph_type == "box":
+def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by):
+    if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -249,9 +249,9 @@ def by_reference_protein_plot(df, result_df, current_out, graph_type):
             heading="Distribution of Protein Intensities",
             x_title="",
             y_title="",
-            group_by="Sample",
+            group_by=group_by,
         )
-    if graph_type == "histogram":
+    if graph_type == "Histogram":
         fig = create_histograms(
             dataframe_a=df,
             dataframe_b=result_df,
