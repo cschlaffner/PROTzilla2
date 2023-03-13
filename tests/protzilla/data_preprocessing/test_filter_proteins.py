@@ -9,8 +9,8 @@ from protzilla.data_preprocessing.filter_proteins import (
 
 
 @pytest.fixture
-def test_intensity_df():
-    df = pd.DataFrame(
+def filter_proteins_df():
+    filter_proteins_df = pd.DataFrame(
         (
             ["Sample2", "Protein2", "Gene2", 1],
             ["Sample4", "Protein4", "Gene4", 1],
@@ -32,16 +32,21 @@ def test_intensity_df():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    filter_proteins_df.sort_values(
+        by=["Sample", "Protein ID"], ignore_index=True, inplace=True
+    )
 
-    return df
+    return filter_proteins_df
 
 
-def test_filter_proteins_by_low_frequency(test_intensity_df):
-    result_df, dropouts = by_low_frequency(test_intensity_df, threshold=0.6)
+def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
+    result_df, dropouts = by_low_frequency(filter_proteins_df, threshold=0.6)
     list_proteins_excluded = dropouts["filtered_proteins"]
-    fig = by_low_frequency_plot(test_intensity_df, result_df, dropouts, "Pie chart")[0]
-    fig.show()
+    if show_figures:
+        fig = by_low_frequency_plot(
+            filter_proteins_df, result_df, dropouts, "Pie chart"
+        )[0]
+        fig.show()
 
     assert [
         "Protein1",
