@@ -35,7 +35,6 @@ method_map = {
     ): normalisation.by_reference_protein,
 }
 
-# reverse_map = {v: k for k, v in method_map.items()}
 
 
 plot_map = {
