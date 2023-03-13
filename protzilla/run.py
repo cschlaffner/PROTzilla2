@@ -92,6 +92,7 @@ class Run:
         )
         self.df = self.result_df
         self.result_df = None
+        self.step_index += 1
 
     def back_step(self):
         assert self.history.steps
@@ -105,6 +106,7 @@ class Run:
         self.section = None
         self.step = None
         self.method = None
+        self.step_index -= 1
 
     def workflow_location(self):
         steps = []

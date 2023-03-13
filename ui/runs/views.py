@@ -7,6 +7,8 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla.constants.constants import PATH_TO_PROJECT
+from protzilla.importing.main_data_import import max_quant_import
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -26,10 +28,55 @@ def index(request):
     )
 
 
-def detail(request, run_name):
-    # TODO load run into active runs when if it hasn't been loaded but is called?
-    run = active_runs[run_name]
+def make_parameter_input(key, param_dict):
+    print(param_dict)
+    if param_dict["type"] == "numeric":
+        return render_to_string(
+            "runs/field_number.html",
+            context=dict(
+                **param_dict,
+                disabled=False,
+                key=key,
+                default=param_dict["default-value"],
+            ),
+        )
+    elif param_dict["type"] == "categorical":
+        return render_to_string(
+            "runs/field_select.html",
+            context=dict(
+                **param_dict,
+                disabled=False,
+                key=key,
+                default=param_dict["default-value"],
+            ),
+        )
+    else:
+        param_type = param_dict["type"]
+        ValueError(f"cannot match parameter type {param_type}")
 
+
+def detail(request, run_name):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+    section, step, method = run.workflow_location()
+    print(run.step_index, section, step, method)
+
+    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
+    fields = []
+    for key, param_dict in parameters.items():
+        fields.append(make_parameter_input(key, param_dict))
+
+    return render(
+        request,
+        "runs/details.html",
+        context=dict(
+            run_name=run_name,
+            fields=fields,
+            show_next=run.result_df is not None,
+            show_back=bool(len(run.history.steps) > 1),
+        ),
+    )
     # add fields, plots, etc. from show history here
 
     # current step: method dropdown,
@@ -46,33 +93,6 @@ def detail(request, run_name):
         ]
         fields = []
         for key, param_dict in parameters.items():
-            if param_dict["type"] == "numeric":
-                f = render_to_string(
-                    "runs/field_number.html",
-                    context=dict(
-                        **param_dict,
-                        disabled=False,
-                        key=key,
-                        default=run.preset_args["parameters"][key]
-                        if not run.current_args
-                        else run.current_args[key],
-                    ),
-                )
-            if param_dict["type"] == "categorical":
-                f = render_to_string(
-                    "runs/field_select.html",
-                    context=dict(
-                        **param_dict,
-                        disabled=False,
-                        key=key,
-                        default=run.preset_args["parameters"][key]
-                        if not run.current_args
-                        else run.current_args[key],
-                    ),
-                )
-            else:
-                param_type = param_dict["type"]
-                ValueError(f"cannot match parameter type {param_type}")
             fields.append(f)
         method_divs.append(dict(fields=fields))
 
@@ -135,8 +155,13 @@ def create(request):
     # TODO handle already existing, ask if overwrite
     run_name = request.POST["run_name"]
     run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
-    run.step_index = 2  # to skip importing
-    print("df_create", run.df)
+    # to skip importing
+    run.calculate_and_next(
+        max_quant_import,
+        file=PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    run.step_index = 0  # needed because importing is left out of workflow
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -147,8 +172,7 @@ def continue_(request):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
-def next(request, run_name):
-    run_name = request.POST["run_name"]
+def next_(request, run_name):
     run = active_runs[run_name]
     run.next_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -161,14 +185,13 @@ def back(request, run_name):
 
 
 def calculate(request, run_name):
-    # TODO: check correctness and add calculate here
     arguments = dict(request.POST)
-    print(arguments)
     del arguments["csrfmiddlewaretoken"]
     arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
-    active_runs[run_name]
+    run = active_runs[run_name]
     print(arguments)
-
+    run.perform_calculation(lambda df, **kwargs: (df, {}), {})
+    # TODO use selected method
     # run.perform_calculation_from_location(
     #     "data_preprocessing", "filter_proteins", "by_low_frequency", arguments
     # )

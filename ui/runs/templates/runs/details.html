@@ -8,15 +8,6 @@
 <!-- removed back here temporarily -->
 {{ run_name }}
 <br>
-{% for step in method_divs %}
-    {% for field in step.fields %}
-        {{ field }}
-        <br>
-    {% endfor %}
-    {{ step.fig|safe }}
-{% endfor %}
-
-<br>
 <form action="{% url 'runs:calculate' run_name %}" method="post">
     {% csrf_token %}
     {% for field in fields %}
@@ -26,7 +17,12 @@
     <input type="submit" value="Calculate">
 </form>
 
-<!-- removed graph here (not used yet)-->
+{% if show_next %}
+    <form action="{% url 'runs:next' run_name %}" method="post">
+        {% csrf_token %}
+        <button>Next</button>
+    </form>
+{% endif %}
 
 {% if show_back %}
     <form action="{% url 'runs:back' run_name %}" method="post">
@@ -34,11 +30,23 @@
         <button>Back</button>
     </form>
 {% endif %}
-{% if show_next %}
-    <form action="{% url 'runs:next' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Next</button>
-    </form>
-{% endif %}
+
+<br>
+
+
+
+
+{% for step in method_divs %}
+    {% for field in step.fields %}
+        {{ field }}
+        <br>
+    {% endfor %}
+    {{ step.fig|safe }}
+{% endfor %}
+
+<br>
+
+<!-- removed graph here (not used yet)-->
+
 </body>
 </html>
