@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
-from .constants.method_mapping import method_map, plot_map
+from .constants.location_mapping import method_map, plot_map
 from .history import History
 
 
