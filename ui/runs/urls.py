@@ -8,4 +8,7 @@ urlpatterns = [
     path("create", views.create, name="create"),
     path("continue", views.create, name="continue"),
     path("<str:run_name>", views.detail, name="detail"),
+    path("<str:run_name>/calculate", views.calculate, name="calculate"),
+    path("<str:run_name>/next", views.next, name="next"),
+    path("<str:run_name>/back", views.back, name="back"),
 ]

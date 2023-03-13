@@ -2,12 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ run_name }}</title>
+    <title>Title</title>
 </head>
 <body>
-{{ run_name }}
+<!-- removed back here temporarily -->
 <br>
-{{ step_methods|safe }}
+hello
+<br>
+{{ run_name }}
+{% for step in method_divs %}
+    {% for field in step.fields %}
+        {{ field }}
+        <br>
+    {% endfor %}
+    {{ step.fig|safe }}
+{% endfor %}
 
+<br>
+<form action="{% url 'runs:calculate' run_name %}" method="post">
+    {% csrf_token %}
+    {% for field in fields %}
+        {{ field }}
+        <br>
+    {% endfor %}
+    <input type="submit" value="Calculate">
+</form>
+
+<!-- removed graph here (not used yet)-->
+
+{% if show_back %}
+    <form action="{% url 'runs:back' run_name %}" method="post">
+        {% csrf_token %}
+        <button>Back</button>
+    </form>
+{% endif %}
+{% if show_next %}
+    <form action="{% url 'runs:next' run_name %}" method="post">
+        {% csrf_token %}
+        <button>Next</button>
+    </form>
+{% endif %}
 </body>
 </html>
