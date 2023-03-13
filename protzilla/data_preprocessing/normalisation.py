@@ -214,4 +214,4 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             x_title="",
             y_title="",
         )
-    return fig
+    return [fig]
