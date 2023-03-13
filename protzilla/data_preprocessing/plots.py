@@ -1,10 +1,13 @@
-from typing import Dict
-import plotly.express as px
-from plotly.graph_objects import Figure
-import plotly.graph_objects as go
-from ..constants.constants import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE, PROTZILLA_DISCRETE_COLOR_SEQUENCE
-from plotly.subplots import make_subplots
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.graph_objects import Figure
+from plotly.subplots import make_subplots
+
+from ..constants.constants import (
+    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+    PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+)
 
 
 def create_pie_plot(

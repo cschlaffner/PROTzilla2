@@ -1,10 +1,11 @@
 import pandas as pd
+
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 
 
 def by_median(
-        intensity_df: pd.DataFrame,
-        q=0.5,  # quartile, default is median
+    intensity_df: pd.DataFrame,
+    q=0.5,  # quartile, default is median
 ):
     """
     A function to perform a quartile/percentile normalisation on your
@@ -34,15 +35,13 @@ def by_median(
     samples = intensity_df["Sample"].unique().tolist()
 
     for sample in samples:
-        df_sample = intensity_df.loc[
-            intensity_df["Sample"] == sample,
-        ]
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
         quantile = df_sample[intensity_name].quantile(q=q)
 
         if quantile != 0:
-            df_sample[f"Normalised {intensity_name}"] = df_sample[
-                intensity_name
-            ].div(quantile)
+            df_sample[f"Normalised {intensity_name}"] = df_sample[intensity_name].div(
+                quantile
+            )
         else:
             try:  # TODO: think about what to do if median is zero
                 raise ValueError(
@@ -54,9 +53,7 @@ def by_median(
                 print(error)
                 df_sample[f"Normalised {intensity_name}"] = 0
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
-        scaled_df = pd.concat(
-            [scaled_df, df_sample], ignore_index=True
-        )
+        scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
     pd.reset_option("mode.chained_assignment")
 
@@ -92,15 +89,13 @@ def by_totalsum(intensity_df: pd.DataFrame):
     samples = intensity_df["Sample"].unique().tolist()
 
     for sample in samples:
-        df_sample = intensity_df.loc[
-            intensity_df["Sample"] == sample,
-        ]
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
         totalsum = df_sample[intensity_name].sum()
 
         if totalsum != 0:
-            df_sample[f"Normalised {intensity_name}"] = df_sample[
-                intensity_name
-            ].div(totalsum)
+            df_sample[f"Normalised {intensity_name}"] = df_sample[intensity_name].div(
+                totalsum
+            )
         else:
             # TODO: think about what to do if sum is zero
             try:
@@ -115,9 +110,7 @@ def by_totalsum(intensity_df: pd.DataFrame):
 
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
-        scaled_df = pd.concat(
-            [scaled_df, df_sample], ignore_index=True
-        )
+        scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
     pd.reset_option("mode.chained_assignment")
     return (
@@ -127,8 +120,8 @@ def by_totalsum(intensity_df: pd.DataFrame):
 
 
 def by_reference_protein(
-        intensity_df: pd.DataFrame,
-        reference_protein_id: str = None,
+    intensity_df: pd.DataFrame,
+    reference_protein_id: str = None,
 ):
     """
     A function to perform protein-intensity normalisation in reference
@@ -160,9 +153,7 @@ def by_reference_protein(
             raise ValueError("The protein was not found")
         except ValueError as error:
             print(error)
-        return scaled_df, pd.DataFrame(
-            dropped_samples, columns=["Dropped Samples"]
-        )
+        return scaled_df, pd.DataFrame(dropped_samples, columns=["Dropped Samples"])
 
     samples = intensity_df["Sample"].unique().tolist()
     for sample in samples:
@@ -177,13 +168,11 @@ def by_reference_protein(
             continue
 
         df_sample.loc[:, f"Normalised {intensity_name}"] = df_sample.loc[
-                                                           :, intensity_name
-                                                           ].div(reference_intensity)
+            :, intensity_name
+        ].div(reference_intensity)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
-        scaled_df = pd.concat(
-            [scaled_df, df_sample], ignore_index=True
-        )
+        scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
     return (
         scaled_df,

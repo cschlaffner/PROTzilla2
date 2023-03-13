@@ -251,7 +251,9 @@ def test_totalsum_normalisation(
     result_df, dropouts = by_totalsum(normalisation_df)
 
     if show_figures:
-        fig = by_totalsum_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")
+        fig = by_totalsum_plot(
+            normalisation_df, result_df, dropouts, "Boxplot", "Sample"
+        )
         fig.show()
 
     assert result_df.round(3).equals(
@@ -288,8 +290,6 @@ def test_ref_protein_normalisation(
 
 
 def test_ref_protein_missing(capsys, normalisation_by_ref_protein_df):
-    by_reference_protein(
-        normalisation_by_ref_protein_df, "non_existing_Protein"
-    )
+    by_reference_protein(normalisation_by_ref_protein_df, "non_existing_Protein")
     out, err = capsys.readouterr()
     assert "The protein was not found" in out

@@ -1,5 +1,6 @@
+from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
+
 from ..utilities.transform_dfs import long_to_wide
-from protzilla.data_preprocessing.plots import create_pie_plot, create_bar_plot
 
 
 def by_low_frequency(intensity_df, threshold):
@@ -36,7 +37,7 @@ def by_low_frequency(intensity_df, threshold):
         intensity_df[~(intensity_df["Protein ID"].isin(filtered_proteins_list))],
         dict(
             filtered_proteins=filtered_proteins_list,
-            remaining_proteins=remaining_proteins.tolist()
+            remaining_proteins=remaining_proteins.tolist(),
         ),
     )
 
