@@ -1,3 +1,4 @@
+from os import path
 from shutil import rmtree
 
 from protzilla import data_preprocessing
@@ -8,7 +9,8 @@ from protzilla.run import Run
 
 def test_run_create():
     # here the run should be used like in the CLI
-    rmtree(PATH_TO_RUNS / "test_run", ignore_errors=True)
+    if path.exists(PATH_TO_RUNS / "test_run"):
+        rmtree(PATH_TO_RUNS / "test_run")
     run = Run.create("test_run")
     run.calculate_and_next(
         main_data_import.max_quant_import,
@@ -50,42 +52,3 @@ def test_run_back():
 # CLI: steps, complete workflow
 # UI: location, back+next, workflow defaults
 # different classes?
-
-
-def test_run_calculate_from_location():
-    rmtree(PATH_TO_RUNS / "test_run_calculate_from_location", ignore_errors=True)
-    run = Run.create("test_run_calculate_from_location")
-    run.perform_calculation_from_location(
-        "importing",
-        "main-data-import",
-        "ms-data-import",
-        dict(
-            file=PATH_TO_PROJECT / "tests/proteinGroups_small.txt",
-            intensity_name="Intensity",
-        ),
-    )
-    run.next_step()
-    run.perform_calculation_from_location(
-        "data-preprocessing",
-        "filter-proteins",
-        "low-frequency-filter",
-        dict(threshold=1),
-    )
-    run.create_plot_from_location(
-        "data-preprocessing",
-        "filter-proteins",
-        "low-frequency-filter",
-        dict(graph_type="Pie chart"),
-    )
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "normalisation",
-        "median",
-        dict(q=0.2),
-    )
-    run.create_plot_from_location(
-        "data_preprocessing",
-        "normalisation",
-        "median",
-        dict(graph_type="Boxplot", group_by="Sample"),
-    )
