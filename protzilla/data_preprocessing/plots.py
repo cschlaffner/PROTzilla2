@@ -20,7 +20,7 @@ def create_pie_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param names_of_sectors: Name of parts (so called sectors) or categories
+    :param names_of_sectors: Name of parts (so-called sectors) or categories
     :type names_of_sectors: list[str]
     :param values_of_sectors: Corresponding values for sectors
     :type values_of_sectors: list[str]
