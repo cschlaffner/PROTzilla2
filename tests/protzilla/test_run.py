@@ -1,4 +1,3 @@
-from os import path
 from shutil import rmtree
 
 from protzilla import data_preprocessing
@@ -9,7 +8,7 @@ from protzilla.run import Run
 
 def test_run_create():
     # here the run should be used like in the CLI
-    if path.exists(PATH_TO_RUNS / "test_run"):
+    if (PATH_TO_RUNS / "test_run").exists():
         rmtree(PATH_TO_RUNS / "test_run")
     run = Run.create("test_run")
     run.calculate_and_next(

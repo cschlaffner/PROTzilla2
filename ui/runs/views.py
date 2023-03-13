@@ -80,7 +80,7 @@ def detail(request, run_name):
     # WHAT I DID: removed too many layers of lists involved in the current method_divs
     # copied quite a lot from prototype to get to a point of it not breaking
     # added next and calculate view functions and buttons
-    # NEXT STEPS - TODO: 
+    # NEXT STEPS - TODO:
     #   * connect frontend to calculating
     #   * check functionality of next back buttons etc (hat to stop coding while this was in progress)
     #   * clean up existing code (after ensuring basic funtionality)
@@ -115,9 +115,9 @@ def detail(request, run_name):
         context=dict(
             run_name=run_name,
             step_methods=step_methods,
-            show_next= show_next,
+            show_next=show_next,
             method_divs=method_divs,
-            show_back = show_back,
+            show_back=show_back,
         ),
     )
 
