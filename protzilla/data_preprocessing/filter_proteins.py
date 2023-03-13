@@ -21,7 +21,7 @@ def by_low_frequency(intensity_df, threshold):
     filtering criteria, a dict with a list with names of samples\
     that were discarded and a list with names of samples\
     that were kept
-    :rtype: list
+    :rtype: Tuple[pandas DataFrame, dict]
     """
     min_threshold = threshold * len(intensity_df.Sample.unique())
     transformed_df = long_to_wide(intensity_df)

@@ -13,8 +13,9 @@ def by_z_score(intensity_df: pd.DataFrame):
     :param intensity_df: the dataframe that should be filtered in\
     long format
     :type intensity_df: pd.DataFrame
-    :return: returns a scaled dataframe in typical protzilla long format
-    :rtype: pd.DataFrame
+    :return: returns a scaled dataframe in typical protzilla long format and an empty\
+     dictionary
+    :rtype: Tuple[pandas DataFrame, dict]
     """
 
     # Suppress SettingWithCopyWarning:
