@@ -1,7 +1,3 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.shortcuts import render
-
 import sys
 
 from django.http import HttpResponseRedirect
@@ -138,9 +134,10 @@ def detail(request, run_name):
 def create(request):
     # TODO handle already existing, ask if overwrite
     run_name = request.POST["run_name"]
-    active_runs[run_name] = Run.create(
-        request.POST["run_name"], request.POST["workflow_config_name"]
-    )
+    run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
+    run.step_index = 2  # to skip importing
+    print("df_create", run.df)
+    active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -166,8 +163,14 @@ def back(request, run_name):
 def calculate(request, run_name):
     # TODO: check correctness and add calculate here
     arguments = dict(request.POST)
+    print(arguments)
     del arguments["csrfmiddlewaretoken"]
     arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
+    active_runs[run_name]
     print(arguments)
+
+    # run.perform_calculation_from_location(
+    #     "data_preprocessing", "filter_proteins", "by_low_frequency", arguments
+    # )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

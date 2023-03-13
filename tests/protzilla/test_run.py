@@ -52,3 +52,8 @@ def test_run_back():
 # CLI: steps, complete workflow
 # UI: location, back+next, workflow defaults
 # different classes?
+
+
+def test_run_location():
+    run = Run.create("test_location")
+    run.workflow_location()

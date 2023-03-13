@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from .constants.method_mapping import method_map
 from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
+from .constants.method_mapping import method_map
 from .history import History
 
 
@@ -46,7 +46,6 @@ class Run:
         self.step = None
         self.method = None
 
-        print(self.workflow_config)
         self.section = "data-preprocessing"
         self.step = self.workflow_config["sections"][self.section]["steps"][0]["name"]
         self.method = self.workflow_config["sections"][self.section]["steps"][0][
@@ -106,3 +105,12 @@ class Run:
         self.section = None
         self.step = None
         self.method = None
+
+    def workflow_location(self):
+        steps = []
+        for section_key, section_dict in self.workflow_config["sections"].items():
+            if section_key == "importing":
+                continue  # not standardized yet
+            for step in section_dict["steps"]:
+                steps.append((section_key, step["name"], step["method"]))
+        return steps[self.step_index]
