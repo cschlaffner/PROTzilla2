@@ -68,9 +68,9 @@ def create_bar_plot(
     :type values_of_sectors: list[str]
     :param heading: Header for the graph - for example the topic
     :type heading: str
-    :param y_title: Optional y axis title.
+    :param y_title: Optional y-axis title.
     :type y_title: str
-    :param x_title: Optional x axis title.
+    :param x_title: Optional x-axis title.
     :type x_title: str
     :return: returns a bar chart of the data
     :rtype: Figure (plotly object)
