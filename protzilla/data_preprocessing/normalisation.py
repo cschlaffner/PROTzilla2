@@ -181,56 +181,18 @@ def by_reference_protein(
 
 
 def by_median_plot(df, result_df, current_out, graph_type, group_by):
-    if graph_type == "Boxplot":
-        fig = create_box_plots(
-            dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Normalisation",
-            name_b="After Normalisation",
-            heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
-            group_by=group_by,
-        )
-    if graph_type == "Histogram":
-        fig = create_histograms(
-            dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Normalisation",
-            name_b="After Normalisation",
-            heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
-        )
-    return fig
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
 
 
 def by_totalsum_plot(df, result_df, current_out, graph_type, group_by):
-    if graph_type == "Boxplot":
-        fig = create_box_plots(
-            dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Normalisation",
-            name_b="After Normalisation",
-            heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
-            group_by=group_by,
-        )
-    if graph_type == "Histogram":
-        fig = create_histograms(
-            dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Normalisation",
-            name_b="After Normalisation",
-            heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
-        )
-    return fig
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
 
 
 def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+
+
+def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
