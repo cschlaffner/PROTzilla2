@@ -30,3 +30,4 @@ six==1.16.0
 sqlparse==0.4.3
 tenacity==8.2.1
 virtualenv==20.19.0
+scikit-learn==1.2.2

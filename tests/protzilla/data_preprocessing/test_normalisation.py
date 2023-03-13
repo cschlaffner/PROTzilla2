@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.normalisation import (
+    by_z_score,
+    by_z_score_plot,
     by_median,
     by_median_plot,
     by_reference_protein,
@@ -67,6 +69,73 @@ def normalisation_by_ref_protein_df():
         var_name="Protein ID",
         value_name="Intensity",
     )
+
+
+@pytest.fixture
+def expected_df_by_z_score_normalisation():
+    expected_df = pd.DataFrame(
+        data=(
+            ["Sample_1", "Gene_1", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [
+                "Sample_2",
+                "Gene_2",
+                -1.549,
+                -1.162,
+                -0.775,
+                -0.387,
+                0.000,
+                0.387,
+                0.775,
+                1.162,
+                1.549,
+            ],
+            [
+                "Sample_3",
+                "Gene_3",
+                0.183,
+                0.183,
+                0.730,
+                -0.365,
+                -1.461,
+                1.826,
+                0.730,
+                -0.365,
+                -1.461,
+            ],
+            [
+                "Sample_4",
+                "Gene_4",
+                -0.687,
+                -0.687,
+                -0.687,
+                -0.566,
+                1.738,
+                0.525,
+                -0.687,
+                1.738,
+                -0.687,
+            ],
+        ),
+        columns=[
+            "Sample",
+            "Gene",
+            "Protein_1",
+            "Protein_2",
+            "Protein_3",
+            "Protein_4",
+            "Protein_5",
+            "Protein_6",
+            "Protein_7",
+            "Protein_8",
+            "Protein_9",
+        ],
+    )
+    return pd.melt(
+        expected_df,
+        id_vars=["Sample", "Gene"],
+        var_name="Protein ID",
+        value_name="Normalised Intensity",
+    ).sort_values(by=["Sample", "Protein ID"], ignore_index=True)
 
 
 @pytest.fixture
@@ -228,6 +297,24 @@ def expected_df_by_ref_protein_normalisation():
         ).sort_values(by=["Sample", "Protein ID"], ignore_index=True),
         dict(dropped_samples=["Sample_1", "Sample_4"]),
     )
+
+
+def test_normalisation_by_z_score(
+    normalisation_df, expected_df_by_z_score_normalisation, show_figures
+):
+    result_df, dropouts = by_z_score(normalisation_df)
+
+    if show_figures:
+        fig = by_z_score_plot(
+            normalisation_df, result_df, dropouts, "Boxplot", "Sample"
+        )[0]
+        fig.show()
+
+    # compare calculated data frame with correct answers
+    assert result_df.round(3).equals(
+        expected_df_by_z_score_normalisation
+    ), f"z scores do not match! Z scores should be \
+            {expected_df_by_z_score_normalisation} but are {result_df}"
 
 
 def test_normalisation_by_median(

@@ -1,6 +1,43 @@
 import pandas as pd
-
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
+from sklearn.preprocessing import StandardScaler
+
+
+def by_z_score(intensity_df: pd.DataFrame):
+    """
+    A function to run the sklearn StandardScaler class on your dataframe.
+    Normalises the data on the level of each sample.
+    Scales the data to zero mean and unit variance. This is often also
+    called z-score normalisation/transformation.
+
+    :param intensity_df: the dataframe that should be filtered in\
+    long format
+    :type intensity_df: pd.DataFrame
+    :return: returns a scaled dataframe in typical protzilla long format
+    :rtype: pd.DataFrame
+    """
+
+    # Suppress SettingWithCopyWarning:
+    # It gets raised because of reassignment of values to a subset of a df
+    # The alternative - making an explicit copy - could use more memory
+    # https://realpython.com/pandas-settingwithcopywarning/
+    pd.set_option("mode.chained_assignment", None)
+
+    intensity_name = intensity_df.columns[3]
+    scaled_df = pd.DataFrame()
+    samples = intensity_df["Sample"].unique().tolist()
+
+    for sample in samples:
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
+        scaler = StandardScaler().fit(df_sample[[intensity_name]])
+        df_sample[f"Normalised {intensity_name}"] = scaler.transform(
+            df_sample[[intensity_name]]
+        )
+        df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
+        scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
+
+    pd.reset_option("mode.chained_assignment")
+    return scaled_df, dict()
 
 
 def by_median(
@@ -178,6 +215,10 @@ def by_reference_protein(
         scaled_df,
         dict(dropped_samples=dropped_samples),
     )
+
+
+def by_z_score_plot(df, result_df, current_out, graph_type, group_by):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
 
 
 def by_median_plot(df, result_df, current_out, graph_type, group_by):

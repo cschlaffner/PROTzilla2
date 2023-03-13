@@ -25,6 +25,11 @@ method_map = {
     (
         "data_preprocessing",
         "normalisation",
+        "z-score",
+    ): normalisation.by_z_score,
+    (
+        "data_preprocessing",
+        "normalisation",
         "median",
     ): normalisation.by_median,
     (
@@ -50,6 +55,11 @@ plot_map = {
         "filter-proteins",
         "low-frequency-filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "normalisation",
+        "z-score",
+    ): normalisation.by_z_score_plot,
     (
         "data_preprocessing",
         "normalisation",
