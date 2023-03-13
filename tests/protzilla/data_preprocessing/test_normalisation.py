@@ -231,7 +231,7 @@ def expected_df_by_ref_protein_normalisation():
 
 
 def test_normalisation_by_median(
-    normalisation_df, expected_df_by_median_normalisation, show_figures=True
+    normalisation_df, expected_df_by_median_normalisation, show_figures
 ):
     result_df, dropouts = by_median(normalisation_df)
 
@@ -246,7 +246,7 @@ def test_normalisation_by_median(
 
 
 def test_totalsum_normalisation(
-    normalisation_df, expected_df_by_totalsum_normalisation, show_figures=True
+    normalisation_df, expected_df_by_totalsum_normalisation, show_figures
 ):
     result_df, dropouts = by_totalsum(normalisation_df)
 
@@ -265,7 +265,7 @@ def test_totalsum_normalisation(
 def test_ref_protein_normalisation(
     normalisation_by_ref_protein_df,
     expected_df_by_ref_protein_normalisation,
-    show_figures=True,
+    show_figures,
 ):
     expected_df = expected_df_by_ref_protein_normalisation[0]
     expected_dropped_samples = expected_df_by_ref_protein_normalisation[1]
