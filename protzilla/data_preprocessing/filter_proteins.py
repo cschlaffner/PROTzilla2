@@ -1,5 +1,4 @@
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
-
 from ..utilities.transform_dfs import long_to_wide
 
 
