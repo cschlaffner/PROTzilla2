@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.transformation import (
-    by_log, by_log_plot
+    by_log, by_log_plot, _build_box_hist_plot
 )
 
 
@@ -110,6 +110,25 @@ def log10_transformation_expected_df():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
+@pytest.mark.dependency()
+def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
+    # this test will build some Figures and display them if show_figures==True
+    # it tests only for occurring errors
+    fig1, fig2 = _build_box_hist_plot(input_imputation_df, assertion_df_knn, "Boxplot", "Sample")
+    fig3, fig4 = _build_box_hist_plot(input_imputation_df, assertion_df_min_value_per_df, "Histogram",
+                                      "Protein ID")
+
+    if show_figures:
+        fig1.show()
+        fig2.show()
+        fig3.show()
+        fig4.show()
+
+    # should throw Value Error
+    with pytest.raises(ValueError):
+        _build_box_hist_plot(input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"], "wrong_grouping")
+
+    return
 
 def test_log2_transformation(show_figures, log2_transformation_df, log2_transformation_expected_df):
     result_df = by_log(

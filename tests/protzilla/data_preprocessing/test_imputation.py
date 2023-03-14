@@ -126,23 +126,7 @@ def assertion_df_mean_per_protein():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-@pytest.mark.dependency()
-def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
-    # this test will build some Figures and display them if show_figures==True
-    # it tests only for occurring errors
-    fig1, fig2 = _build_box_hist_plot(input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"], "Sample")
-    fig3, fig4 = _build_box_hist_plot(input_imputation_df, assertion_df_min_value_per_df, ["Histogram", "Pie chart"], "Protein ID")
 
-    if show_figures:
-        fig1.show()
-        fig2.show()
-        fig3.show()
-        fig4.show()
-
-    with pytest.raises(ValueError):
-        _build_box_hist_plot(input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"], "wrong_grouping")
-
-    return
 
 
 
@@ -164,6 +148,7 @@ def test_imputation_min_value_per_df(show_figures, input_imputation_df, assertio
     ), f"Imputation by min value per df does not match!\
              Imputation should be \
             {assertion_df} but is {result_df}"
+
 
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_min_value_per_sample(show_figures, input_imputation_df, assertion_df_min_value_per_sample):
@@ -228,8 +213,6 @@ def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertio
             {assertion_df} but is {result_df}"
 
 
-
-
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     # perform imputation on test data frame
@@ -249,6 +232,7 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     ), f"Imputation by simple median imputation per protein does not match!\n\
              Imputation should be \n\
             {assertion_df_knn} but is\n {result_df}"
+
 
 def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
     count = number_of_imputed_values(input_imputation_df, assertion_df_knn)
