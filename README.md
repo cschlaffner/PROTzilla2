@@ -7,8 +7,8 @@
 | \_\_init\_\_.py                                   |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/\_\_init\_\_.py                         |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/\_\_init\_\_.py               |        0 |        0 |        0 |        0 |    100% |           |
-| protzilla/constants/constants.py                  |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/method\_mapping.py            |        2 |        0 |        0 |        0 |    100% |           |
+| protzilla/constants/paths.py                      |        5 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py |        8 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_samples.py  |       15 |        6 |        0 |        0 |     60% |     24-40 |
 | protzilla/history.py                              |       45 |        1 |       12 |        1 |     96% |        89 |
@@ -20,7 +20,7 @@
 | protzilla/workflow\_manager.py                    |        7 |        7 |        2 |        0 |      0% |       1-9 |
 | tests/protzilla/test\_history.py                  |       25 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                      |       25 |        1 |        2 |        1 |     93% |        13 |
-|                                         **TOTAL** |  **227** |   **40** |   **30** |    **2** | **81%** |           |
+|                                         **TOTAL** |  **228** |   **40** |   **30** |    **2** | **81%** |           |
 
 
 ## Setup coverage badge
