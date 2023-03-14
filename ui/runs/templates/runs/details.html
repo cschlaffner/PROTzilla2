@@ -5,7 +5,6 @@
     <title>Title</title>
 </head>
 <body>
-<!-- removed back here temporarily -->
 {{ run_name }}
 <br>
 <b>history</b>
@@ -37,23 +36,5 @@
         <button>Back</button>
     </form>
 {% endif %}
-
-<br>
-
-
-
-
-{% for step in method_divs %}
-    {% for field in step.fields %}
-        {{ field }}
-        <br>
-    {% endfor %}
-    {{ step.fig|safe }}
-{% endfor %}
-
-<br>
-
-<!-- removed graph here (not used yet)-->
-
 </body>
 </html>
