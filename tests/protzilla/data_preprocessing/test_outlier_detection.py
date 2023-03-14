@@ -36,19 +36,22 @@ def outlier_detection_df():
     return outlier_detection_df
 
 
-def test_outlier_detection_with_isolation_forest(outlier_detection_df):
+def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection_df):
     result_df, dropouts = with_isolation_forest(outlier_detection_df, 50, -1)
     fig = with_isolation_forest_plot(outlier_detection_df, result_df, dropouts)[0]
-    fig.show()
+    if show_figures:
+        fig.show()
 
 
-def test_outlier_detection_with_local_outlier_factor(outlier_detection_df):
+def test_outlier_detection_with_local_outlier_factor(show_figures, outlier_detection_df):
     result_df, dropouts = with_local_outlier_factor(outlier_detection_df, 35, -1)
     fig = with_local_outlier_factor_plot(outlier_detection_df, result_df, dropouts)[0]
-    fig.show()
+    if show_figures:
+        fig.show()
 
 
-def test_outlier_detection_with_pca(outlier_detection_df):
+def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
     result_df, dropouts = with_pca(outlier_detection_df, 2, 3)
     fig = with_pca_plot(outlier_detection_df, result_df, dropouts, 3)[0]
-    fig.show()
+    if show_figures:
+        fig.show()

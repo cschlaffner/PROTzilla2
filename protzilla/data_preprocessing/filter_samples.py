@@ -58,8 +58,8 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
                 len(result_df["Sample"].unique()),
                 len(current_out["filtered_samples"]),
             ],
-            names_of_sectors=["Proteins kept", "Proteins filtered"],
-            heading="Number of Filtered Proteins",
+            names_of_sectors=["Samples kept", "Samples filtered"],
+            heading="Number of Filtered Samples",
         )
     if graph_type == "Bar chart":
         fig = create_bar_plot(
@@ -67,7 +67,7 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
                 len(result_df["Sample"].unique()),
                 len(current_out["filtered_samples"]),
             ],
-            names_of_sectors=["Proteins kept", "Proteins filtered"],
-            heading="Number of Filtered Proteins",
+            names_of_sectors=["Samples kept", "Samples filtered"],
+            heading="Number of Filtered Samples",
         )
     return [fig]

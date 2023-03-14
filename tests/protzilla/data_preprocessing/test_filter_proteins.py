@@ -42,10 +42,11 @@ def filter_proteins_df():
 def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
     result_df, dropouts = by_low_frequency(filter_proteins_df, threshold=0.6)
     list_proteins_excluded = dropouts["filtered_proteins"]
+
+    fig = by_low_frequency_plot(
+        filter_proteins_df, result_df, dropouts, "Pie chart"
+    )[0]
     if show_figures:
-        fig = by_low_frequency_plot(
-            filter_proteins_df, result_df, dropouts, "Pie chart"
-        )[0]
         fig.show()
 
     assert [

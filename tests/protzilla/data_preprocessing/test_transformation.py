@@ -112,34 +112,34 @@ def log10_transformation_expected_df():
 
 
 def test_log2_transformation(show_figures, log2_transformation_df, log2_transformation_expected_df):
-    transformation_result = by_log(
+    result_df = by_log(
         log2_transformation_df, log_method="log2"
     )[0]
 
+    fig = by_log_plot(
+        log2_transformation_df, result_df, "Boxplot", "Protein ID"
+    )[0]
     if show_figures:
-        fig = by_log_plot(
-            log2_transformation_df, group_by="Protein ID"
-        )
         fig.show()
 
-    assert transformation_result.equals(
+    assert result_df.equals(
         log2_transformation_expected_df
-    ), f"The results of the transformation: {transformation_result} \
+    ), f"The results of the transformation: {result_df} \
             are not equal to the expected result: {log2_transformation_expected_df}"
 
 
 def test_log10_transformation(show_figures, log10_transformation_df, log10_transformation_expected_df):
-    transformation_result = by_log(
+    result_df = by_log(
         log10_transformation_df, log_method="log10"
     )[0]
 
+    fig = by_log_plot(
+        log10_transformation_df, result_df, "Boxplot", "Protein ID"
+    )[0]
     if show_figures:
-        fig = by_log_plot(
-            log10_transformation_df, group_by="Protein ID"
-        )
         fig.show()
 
-    assert transformation_result.equals(
+    assert result_df.equals(
         log10_transformation_expected_df
-    ), f"The results of the transformation: {transformation_result} \
+    ), f"The results of the transformation: {result_df} \
             are not equal to the expected result: {log10_transformation_expected_df}"

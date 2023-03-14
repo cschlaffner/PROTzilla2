@@ -35,10 +35,10 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
         )
     return transformed_df, dict()
 
-def by_log_plot(df, result_df, current_out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+def by_log_plot(df, result_df, graph_type, group_by):
+    return _build_box_hist_plot(df, result_df, graph_type, group_by)
 
-def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
+def _build_box_hist_plot(df, result_df, graph_type, group_by):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,

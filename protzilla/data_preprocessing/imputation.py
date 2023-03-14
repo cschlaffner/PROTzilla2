@@ -226,31 +226,31 @@ def by_min_per_dataset(intensity_df: pd.DataFrame,
     return imputed_df, dict()
 
 
-def by_knn_plot(df, result_df, current_out, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)
+def by_knn_plot(df, result_df, graph_types, group_by):
+    return _build_box_hist_plot(df, result_df, graph_types, group_by)
 
 
-def by_simple_imputer_plot(df, result_df, current_out, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)
+def by_simple_imputer_plot(df, result_df, graph_types, group_by):
+    return _build_box_hist_plot(df, result_df, graph_types, group_by)
 
 
-def by_min_per_sample_plot(df, result_df, current_out, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)
+def by_min_per_sample_plot(df, result_df, graph_types, group_by):
+    return _build_box_hist_plot(df, result_df, graph_types, group_by)
 
 
-def by_min_per_protein_plot(df, result_df, current_out, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)
+def by_min_per_protein_plot(df, result_df, graph_types, group_by):
+    return _build_box_hist_plot(df, result_df, graph_types, group_by)
 
 
-def by_min_per_dataset_plot(df, result_df, current_out, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)
+def by_min_per_dataset_plot(df, result_df, graph_types, group_by):
+    return _build_box_hist_plot(df, result_df, graph_types, group_by)
 
 
 def number_of_imputed_values(input_df, result_df):
     return abs(result_df.isnull().sum().sum() - input_df.isnull().sum().sum())
 
 
-def _build_box_hist_plot(df, result_df, current_out, graph_types, group_by)  -> List[Figure]:
+def _build_box_hist_plot(df, result_df, graph_types, group_by) -> List[Figure]:
     """
         This function creates two visualisations:
 
