@@ -28,7 +28,6 @@ def index(request):
 
 
 def make_parameter_input(key, param_dict):
-    print(param_dict)
     if param_dict["type"] == "numeric":
         return render_to_string(
             "runs/field_number.html",
