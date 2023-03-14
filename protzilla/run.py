@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
+from .constants.constants import PATH_TO_RUNS, PATH_TO_WORKFLOW_META, PATH_TO_WORKFLOWS
 from .constants.method_mapping import method_map
 from .history import History
 
@@ -27,7 +27,7 @@ class Run:
         with open(f"{PATH_TO_WORKFLOWS}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
 
-        with open(f"{PATH_TO_PROJECT}/constants/workflow_meta.json", "r") as f:
+        with open(PATH_TO_WORKFLOW_META, "r") as f:
             self.workflow_meta = json.load(f)
 
         self.step_index = 0
