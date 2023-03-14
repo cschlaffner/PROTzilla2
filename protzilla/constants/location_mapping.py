@@ -53,6 +53,26 @@ method_map = {
         "imputation",
         "knn",
     ): imputation.by_knn,
+    (
+        "data_preprocessing",
+        "imputation",
+        "simple-imputation-per-protein",
+    ): imputation.by_simple_imputer,
+    (
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-sample",
+    ): imputation.by_min_per_sample,
+    (
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-protein",
+    ): imputation.by_min_per_protein,
+    (
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-dataset",
+    ): imputation.by_min_per_dataset,
 
 }
 
@@ -97,4 +117,24 @@ plot_map = {
         "imputation",
         "knn",
     ): imputation.by_knn_plot,
+    (
+        "data_preprocessing",
+        "imputation",
+        "simple-imputation-per-protein",
+    ): imputation.by_simple_imputer_plot,
+    (
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-sample",
+    ): imputation.by_min_per_sample_plot,
+(
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-protein",
+    ): imputation.by_min_per_protein_plot,
+    (
+        "data_preprocessing",
+        "imputation",
+        "min-value-per-dataset",
+    ): imputation.by_min_per_dataset_plot,
 }
