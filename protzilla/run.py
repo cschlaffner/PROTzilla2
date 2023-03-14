@@ -12,6 +12,8 @@ class Run:
         available_runs = []
         if RUNS_PATH.exists():
             for p in RUNS_PATH.iterdir():
+                if p.name.startswith("."):
+                    continue
                 available_runs.append(p.name)
         return available_runs
 

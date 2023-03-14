@@ -58,104 +58,29 @@ def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
-    section, step, method = run.workflow_location()
-    print(run.step_index, section, step, method)
+    section, step, method = run.current_workflow_location()
 
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     fields = []
     for key, param_dict in parameters.items():
         fields.append(make_parameter_input(key, param_dict))
-    history = []
+    displayed_history = []
     for step in run.history.steps:
-        print(step)
-        history.append(step.method)
+        displayed_history.append(step.method)
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            history=history,
+            displayed_history=displayed_history,
             fields=fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
         ),
     )
-    # add fields, plots, etc. from show history here
-
-    # current step: method dropdown,
-    # hidden divs for each not selected method,
-    # visible div for selected method
-
-    method_divs = []
-
-    print("preset args", run.preset_args)
-
-    for method in run.step_dict.keys():
-        parameters = run.workflow_meta["sections"][run.section][run.step][method][
-            "parameters"
-        ]
-        fields = []
-        for key, param_dict in parameters.items():
-            fields.append(f)
-        method_divs.append(dict(fields=fields))
-
-    # WHAT I DID: removed too many layers of lists involved in the current method_divs
-    # copied quite a lot from prototype to get to a point of it not breaking
-    # added next and calculate view functions and buttons
-    # NEXT STEPS - TODO:
-    #   * connect frontend to calculating
-    #   * check functionality of next back buttons etc (hat to stop coding while this was in progress)
-    #   * clean up existing code (after ensuring basic funtionality)
-
-    print("step_dict", run.step_dict)
-
-    print("method_keys", run.step_dict.keys())
-    print("method_divs", method_divs)
-
-    method_names = [n.replace("-", " ").title() for n in run.step_dict.keys()]
-    methods_dict = zip(run.step_dict.keys(), method_names, method_divs)
-
-    print("methods_dict", methods_dict)
-    for key, name, fields in methods_dict:
-        print("Key:", key)
-        print("Name:", name)
-        print("fields:", fields)
-
-    step_methods = render_to_string(
-        "runs/field_select_method.html",
-        context=dict(
-            step=run.step,
-            step_name=run.step.replace("-", " ").title(),
-            step_dict=run.step_dict,
-            disabled=False,
-            default=run.preset_args["method"]
-            if not run.current_args
-            else run.current_args,
-            methods_dict=methods_dict,
-            method_field=method_divs[0],
-        ),
-    )
-
-    print("step_methods", step_methods)
-    # TODO: check whether this is the correct df
-    # check this logic: is history args = preset_args?
-    show_next = run.result_df is not None
-    show_back = bool(run.preset_args)
-    return render(
-        request,
-        "runs/details.html",
-        context=dict(
-            run_name=run_name,
-            step_methods=step_methods,
-            show_next=show_next,
-            method_divs=method_divs,
-            show_back=show_back,
-        ),
-    )
 
 
 def create(request):
-    # TODO handle already existing, ask if overwrite
     run_name = request.POST["run_name"]
     run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
     # to skip importing
@@ -171,7 +96,6 @@ def create(request):
         ),
     )
     run.next_step()
-    print(run.history.steps)
     run.step_index = 0  # needed because importing is left out of workflow
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -198,14 +122,13 @@ def back(request, run_name):
 def calculate(request, run_name):
     arguments = dict(request.POST)
     del arguments["csrfmiddlewaretoken"]
-    arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
+    parameters = {}
+    for k, v in arguments.items():
+        if len(v) == 1:
+            parameters[k] = v[0]
+        else:
+            parameters[k] = v
     run = active_runs[run_name]
-    print(arguments)
-    run.perform_calculation_from_location(*run.workflow_location(), arguments)
-    # run.perform_calculation(lambda df, **kwargs: (df, {}), {})
-    # TODO use selected method
-    # run.perform_calculation_from_location(
-    #     "data_preprocessing", "filter_proteins", "by_low_frequency", arguments
-    # )
+    run.perform_calculation_from_location(*run.current_workflow_location(), parameters)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
