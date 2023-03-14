@@ -4,6 +4,8 @@ import pandas as pd
 from protzilla.data_preprocessing.filter_samples import (
     by_protein_count,
     by_protein_intensity_sum,
+    by_protein_count_plot,
+    by_protein_intensity_sum_plot,
 )
 
 
@@ -58,15 +60,17 @@ def filter_samples_df():
     return filter_samples_df
 
 
-def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
+def test_filter_samples_by_protein_count(filter_samples_df, show_figures=True):
     result_df1, dropouts1 = by_protein_count(filter_samples_df, threshold=0.3)
     result_df2, dropouts2 = by_protein_count(filter_samples_df, threshold=1)
 
     list_proteins_excluded_1 = dropouts1["filtered_samples"]
     list_proteins_excluded_2 = dropouts2["filtered_samples"]
-    """if show_figures:
-        fig = sample_filter.get_visualisation(test_intensity_df)
-        fig.show()"""
+    if show_figures:
+        fig = by_protein_count_plot(
+            filter_samples_df, result_df1, dropouts1, "Pie chart"
+        )[0]
+        fig.show()
 
     assert [
         "Sample1",
@@ -80,17 +84,17 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
             Protein1 and Protein4, but are {list_proteins_excluded_2}"
 
 
-def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
+def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures=True):
     result_df1, dropouts1 = by_protein_intensity_sum(filter_samples_df, threshold=1)
     result_df2, dropouts2 = by_protein_intensity_sum(filter_samples_df, threshold=0.3)
 
     list_proteins_excluded_1 = dropouts1["filtered_samples"]
     list_proteins_excluded_2 = dropouts2["filtered_samples"]
-    """if show_figures:
-        fig = sample_filter.get_visualisation(intensity_df=test_intensity_df)
+    if show_figures:
+        fig = by_protein_intensity_sum_plot(
+            filter_samples_df, result_df1, dropouts1, "Pie chart"
+        )[0]
         fig.show()
-        fig = sample_filter.get_visualisation_2(intensity_df=test_intensity_df)
-        fig.show()"""
 
     assert [
         "Sample3",
