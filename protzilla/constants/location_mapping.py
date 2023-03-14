@@ -1,5 +1,6 @@
 from ..importing import main_data_import
-from ..data_preprocessing import filter_proteins, filter_samples, normalisation
+from ..data_preprocessing import filter_proteins, filter_samples,\
+    normalisation, transformation
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -42,6 +43,11 @@ method_map = {
         "normalisation",
         "ref-protein",
     ): normalisation.by_reference_protein,
+    (
+        "data_preprocessing",
+        "transformation",
+        "log-transformation",
+    ): transformation.by_log
 }
 
 """
@@ -75,4 +81,9 @@ plot_map = {
         "normalisation",
         "ref-protein",
     ): normalisation.by_reference_protein_plot,
+(
+        "data_preprocessing",
+        "transformation",
+        "log-transformation",
+    ): transformation.by_log_plot,
 }
