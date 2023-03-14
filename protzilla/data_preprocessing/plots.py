@@ -274,3 +274,175 @@ def create_histograms(
     )
     fig.update_yaxes(rangemode="tozero")
     return fig
+
+
+def create_anomaly_score_bar_plot(
+    anomaly_df,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+) -> Figure:
+    """
+    This function creates a graph visualising the outlier
+    and non-outlier samples using the anomaly score.
+
+    :param anomaly_df: pandas Dataframe that contains the anomaly score for each\
+    sample, including outliers and on-outliers samples
+    :type anomaly_df: pd.DataFrame
+    :param colour_outlier: hex code for colour depicting the outliers.
+    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
+    :param colour_non_outlier: hex code for colour depicting the
+    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+    non-outlier colour
+    :type colour_non_outlier: str
+    :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
+    """
+
+    fig = px.bar(
+        anomaly_df,
+        x=anomaly_df.index,
+        y="Anomaly Score",
+        hover_name=anomaly_df.index,
+        hover_data={
+            "Anomaly Score": True,
+            "Outlier": True,
+        },
+        color="Outlier",
+        color_discrete_map={
+            False: colour_non_outlier,
+            True: colour_outlier,
+        },
+        labels={
+            "Sample": "Sample ",
+            "Anomaly Score": "Local Outlier Factor Anomaly Score ",
+            "Outlier": "Outlier ",
+        },
+    )
+    fig.update_coloraxes(showscale=False)
+    fig.update_layout(xaxis={"categoryorder": "category ascending"})
+    fig.update_layout(
+        yaxis={
+            "visible": True,
+            "showticklabels": True,
+            "gridcolor": "lightgrey",
+        },
+        xaxis={"visible": False, "showticklabels": False},
+        font=dict(size=18, family="Arial"),
+        plot_bgcolor="white",
+    )
+
+    return fig
+
+
+def create_pca_2d_scatter_plot(
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+) -> Figure:
+    """
+    This function creates a graph visualising the outlier
+    and non-outlier points by showing the principal components. It
+    returns a ploty Figure object.
+
+    :param pca_df: a DataFrame that contains the projection of\
+    the intensity_df on first principal components
+    :type pca_df: pd.DataFrame
+    :param explained_variance_ratio: a list that contains the\
+    explained variation for each component
+    :type explained_variance_ratio: list
+    :param colour_outlier: hex code for colour depicting the outliers.
+    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
+    :param colour_non_outlier: hex code for colour depicting the
+    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+    non-outlier colour
+    :type colour_non_outlier: str
+    :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
+    """
+    fig = go.Figure(
+        data=go.Scatter(
+            x=pca_df["Component 1"],
+            y=pca_df["Component 2"],
+            mode="markers",
+            marker_color=pca_df["Outlier"].map(
+                {True: colour_outlier, False: colour_non_outlier}
+            ),
+            text=pca_df.index.values,
+        )
+    )
+    e_variance_0 = round(explained_variance_ratio[0], 4) * 100
+    e_variance_1 = round(explained_variance_ratio[1], 4) * 100
+    fig.update_layout(
+        xaxis_title=f"Principal Component 1 ({e_variance_0:.2f} %)",
+        yaxis_title=f"Principal Component 2 ({e_variance_1:.2f} %)",
+        font=dict(size=14, family="Arial"),
+        plot_bgcolor="white",
+        yaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
+        xaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
+    )
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+
+    return fig
+
+
+def create_pca_3d_scatter_plot(
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+) -> Figure:
+    """
+    This function creates a graph visualising the outlier
+    and non-outlier points by showing the principal components. It
+    returns a ploty Figure object.
+    
+    :param pca_df: a DataFrame that contains the projection of\
+    the intensity_df on first principal components
+    :type pca_df: pd.DataFrame
+    :param explained_variance_ratio: a list that contains the\
+    explained variation for each component
+    :type explained_variance_ratio: list
+    :param colour_outlier: hex code for colour depicting the outliers.
+    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
+    :param colour_non_outlier: hex code for colour depicting the
+    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+    non-outlier colour
+    :type colour_non_outlier: str
+    :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
+    """
+    fig = go.Figure(
+        data=go.Scatter3d(
+            x=pca_df["Component 1"],
+            y=pca_df["Component 2"],
+            z=pca_df["Component 3"],
+            mode="markers",
+            marker_color=pca_df["Outlier"].map(
+                {True: colour_outlier, False: colour_non_outlier}
+            ),
+            text=pca_df.index.values,
+        )
+    )
+    x_percent = round(explained_variance_ratio[0], 4) * 100
+    y_percent = round(explained_variance_ratio[1], 4) * 100
+    z_percent = round(explained_variance_ratio[2], 4) * 100
+
+    fig.update_layout(
+        scene=dict(
+            xaxis_title=(f"Principal Component 1 ({x_percent:.2f} %)"),
+            yaxis_title=(f"Principal Component 2 ({y_percent:.2f} %)"),
+            zaxis_title=(f"Principal Component 3 ({z_percent:.2f} %)"),
+            xaxis=dict(showticklabels=False),
+            yaxis=dict(showticklabels=False),
+            zaxis=dict(showticklabels=False),
+        ),
+        font=dict(size=14, family="Arial"),
+        plot_bgcolor="white",
+    )
+
+    return fig

@@ -3,6 +3,11 @@ from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.decomposition import PCA
 from ..utilities.transform_dfs import long_to_wide
+from protzilla.data_preprocessing.plots import (
+    create_anomaly_score_bar_plot,
+    create_pca_2d_scatter_plot,
+    create_pca_3d_scatter_plot,
+)
 
 
 def with_isolation_forest(
@@ -46,7 +51,10 @@ def with_isolation_forest(
 
     intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
 
-    return intensity_df, dict(outlier_list=outlier_list)
+    return intensity_df, dict(
+        outlier_list=outlier_list,
+        anomaly_df=df_isolation_forest_data[["Anomaly Score", "Outlier"]],
+    )
 
 
 def with_local_outlier_factor(
@@ -88,9 +96,13 @@ def with_local_outlier_factor(
     outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
 
     intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
-    return intensity_df, dict(outlier_list=outlier_list)
+    return intensity_df, dict(
+        outlier_list=outlier_list,
+        anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
+    )
 
 
+# TODO: handling NaN values
 def with_pca(
     intensity_df: pd.DataFrame,
     threshold: int = 2,
@@ -115,7 +127,9 @@ def with_pca(
     used in the PCA. Allowed: 2 or 3. Default: 3
     :type number_of_components: integer (2 or 3)
     :return: returns a Dataframe containing all samples that are not outliers and a\
-    dict with list of outlier sample names
+    dict with list of inliers sample names, a DataFrame that contains the projection of\
+    the intensity_df on first principal components and a list that contains the\
+    explained variation for each component
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -181,4 +195,25 @@ def with_pca(
 
     intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
 
-    return intensity_df, dict(outlier_list=outlier_list)
+    return intensity_df, dict(
+        outlier_list=outlier_list,
+        pca_df=df_transformed_pca_data,
+        explained_variance_ratio=pca_model.explained_variance_ratio_,
+    )
+
+
+def with_isolation_forest_plot(df, result_df, current_out):
+    return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
+
+
+def with_local_outlier_factor_plot(df, result_df, current_out):
+    return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
+
+
+def with_pca_plot(df, result_df, current_out, number_of_components):
+    pca_df = current_out["pca_df"]
+    explained_variance_ratio = current_out["explained_variance_ratio"]
+    if number_of_components == 2:
+        return [create_pca_2d_scatter_plot(pca_df, explained_variance_ratio)]
+    if number_of_components == 3:
+        return [create_pca_3d_scatter_plot(pca_df, explained_variance_ratio)]
