@@ -7,7 +7,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.constants.constants import PATH_TO_PROJECT
+from protzilla.constants.paths import PROJECT_PATH
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -165,7 +165,7 @@ def create(request):
         "max-quant-data-import",
         dict(
             file=str(
-                PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+                PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
             ),
             intensity_name="Intensity",
         ),

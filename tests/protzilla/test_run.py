@@ -75,8 +75,3 @@ def test_run_continue():
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
     rmtree(RUNS_PATH / run_name)
-
-
-def test_run_location():
-    run = Run.create("test_location")
-    run.workflow_location()

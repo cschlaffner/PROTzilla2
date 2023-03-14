@@ -10,16 +10,15 @@ class Run:
     @classmethod
     def available_runs(cls):
         available_runs = []
-        runs_path = PATH_TO_RUNS
-        if runs_path.exists():
-            for p in runs_path.iterdir():
+        if RUNS_PATH.exists():
+            for p in RUNS_PATH.iterdir():
                 available_runs.append(p.name)
         return available_runs
 
     @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
-        run_path.mkdir(exist_ok=False)
+        run_path.mkdir(exist_ok=True)
         # TODO add "are you sure you want to overwrite" to frontend
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
@@ -67,7 +66,6 @@ class Run:
         ]
         self.current_args = []
 
-        self.df = None
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
