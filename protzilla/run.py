@@ -19,7 +19,6 @@ class Run:
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         run_path.mkdir(exist_ok=True)
-        # TODO add "are you sure you want to overwrite" to frontend
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
@@ -51,21 +50,6 @@ class Run:
         self.section = None
         self.step = None
         self.method = None
-
-        self.section = "data-preprocessing"
-        self.step = self.workflow_config["sections"][self.section]["steps"][0]["name"]
-        self.method = self.workflow_config["sections"][self.section]["steps"][0][
-            "method"
-        ]
-        self.step_dict = self.workflow_meta["sections"][self.section][self.step]
-
-        # TODO this should probaly be part of the history
-
-        self.preset_args = self.workflow_config["sections"][self.section]["steps"][
-            self.step_index
-        ]
-        self.current_args = []
-
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
@@ -113,7 +97,7 @@ class Run:
         self.method = None
         self.step_index -= 1
 
-    def workflow_location(self):
+    def current_workflow_location(self):
         steps = []
         for section_key, section_dict in self.workflow_config["sections"].items():
             if section_key == "importing":
