@@ -11,16 +11,16 @@
 | protzilla/constants/paths.py                      |        5 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py |        8 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_samples.py  |       15 |        6 |        0 |        0 |     60% |     24-40 |
-| protzilla/history.py                              |       45 |        1 |       12 |        1 |     96% |        89 |
+| protzilla/history.py                              |       64 |        2 |       22 |        2 |     95% |   32, 133 |
 | protzilla/importing/main\_data\_import.py         |       16 |        1 |        2 |        0 |     94% |        32 |
-| protzilla/run.py                                  |       57 |        5 |        8 |        0 |     89% |21-23, 47-48 |
+| protzilla/run.py                                  |       59 |        2 |        8 |        0 |     97% |     52-53 |
 | protzilla/run\_manager.py                         |       19 |       19 |        4 |        0 |      0% |      1-27 |
 | protzilla/utilities/\_\_init\_\_.py               |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py             |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/workflow\_manager.py                    |        7 |        7 |        2 |        0 |      0% |       1-9 |
-| tests/protzilla/test\_history.py                  |       25 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/test\_run.py                      |       25 |        1 |        2 |        1 |     93% |        13 |
-|                                         **TOTAL** |  **228** |   **40** |   **30** |    **2** | **81%** |           |
+| tests/protzilla/test\_history.py                  |       53 |        0 |        0 |        0 |    100% |           |
+| tests/protzilla/test\_run.py                      |       38 |        0 |        0 |        0 |    100% |           |
+|                                         **TOTAL** |  **290** |   **37** |   **38** |    **2** | **86%** |           |
 
 
 ## Setup coverage badge
