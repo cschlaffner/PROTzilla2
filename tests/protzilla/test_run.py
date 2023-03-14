@@ -4,7 +4,7 @@ from string import ascii_letters
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import main_data_import
+from protzilla.importing import ms_data_import
 from protzilla.run import Run
 
 
@@ -17,7 +17,7 @@ def test_run_create():
     name = "test_run" + random_string()
     run = Run.create(name)
     run.calculate_and_next(
-        main_data_import.max_quant_import,
+        ms_data_import.max_quant_import,
         # call with str to make json serializable
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
@@ -38,7 +38,7 @@ def test_run_back():
     name = "test_run_back" + random_string()
     run = Run.create(name)
     run.calculate_and_next(
-        main_data_import.max_quant_import,
+        ms_data_import.max_quant_import,
         # call with str to make json serializable
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
@@ -66,7 +66,7 @@ def test_run_continue():
     run_name = "test_run_continue" + random_string()
     run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
-        main_data_import.max_quant_import,
+        ms_data_import.max_quant_import,
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )

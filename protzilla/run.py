@@ -8,10 +8,19 @@ from .history import History
 
 class Run:
     @classmethod
+    def available_runs(cls):
+        available_runs = []
+        if RUNS_PATH.exists():
+            for p in RUNS_PATH.iterdir():
+                if p.name.startswith("."):
+                    continue
+                available_runs.append(p.name)
+        return available_runs
+
+    @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
-        run_path.mkdir(exist_ok=False)
-        # TODO add "are you sure you want to overwrite" to frontend
+        run_path.mkdir(exist_ok=True)
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
@@ -43,14 +52,14 @@ class Run:
         self.section = None
         self.step = None
         self.method = None
-
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        location = (section, step, method)
-        self.perform_calculation(method_map[location], parameters)
+        self.section, self.step, self.method = location = (section, step, method)
+        method_callable = method_map.get(location, lambda df, **kwargs: (df, {}))
+        self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
         self.result_df, self.current_out = method_callable(self.df, **parameters)
@@ -74,6 +83,7 @@ class Run:
         )
         self.df = self.result_df
         self.result_df = None
+        self.step_index += 1
 
     def back_step(self):
         assert self.history.steps
@@ -87,3 +97,13 @@ class Run:
         self.section = None
         self.step = None
         self.method = None
+        self.step_index -= 1
+
+    def current_workflow_location(self):
+        steps = []
+        for section_key, section_dict in self.workflow_config["sections"].items():
+            if section_key == "importing":
+                continue  # not standardized yet
+            for step in section_dict["steps"]:
+                steps.append((section_key, step["name"], step["method"]))
+        return steps[self.step_index]
