@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from .constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS, PATH_TO_WORKFLOWS
 from .constants.method_mapping import method_map
+from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 
 
@@ -18,25 +18,32 @@ class Run:
 
     @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
-        run_path = Path(f"{PATH_TO_RUNS}/{run_name}")
-        run_path.mkdir(exist_ok=True, parents=True)
+        run_path = Path(f"{RUNS_PATH}/{run_name}")
+        run_path.mkdir(exist_ok=False)
+        # TODO add "are you sure you want to overwrite" to frontend
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
-        return cls(run_name, workflow_config_name, df_mode)
+        history = History(run_name, df_mode)
+        return cls(run_name, workflow_config_name, df_mode, history)
 
     @classmethod
     def continue_existing(cls, run_name):
-        with open(f"{PATH_TO_RUNS}/{run_name}/run_config.json", "r") as f:
+        with open(f"{RUNS_PATH}/{run_name}/run_config.json", "r") as f:
             run_config = json.load(f)
-        return cls(run_name, run_config["workflow_config_name"], run_config["df_mode"])
+        history = History.from_disk(run_name, run_config["df_mode"])
+        return cls(
+            run_name, run_config["workflow_config_name"], run_config["df_mode"], history
+        )
 
-    def __init__(self, run_name, workflow_config_name, df_mode):
+    def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
-        with open(f"{PATH_TO_WORKFLOWS}/{workflow_config_name}.json", "r") as f:
+        self.history = history
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
+        with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
 
-        with open(f"{PATH_TO_PROJECT}/constants/workflow_meta.json", "r") as f:
+        with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
 
         self.step_index = 0
@@ -64,7 +71,6 @@ class Run:
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
-        self.history = History(self.run_name, df_mode)
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
