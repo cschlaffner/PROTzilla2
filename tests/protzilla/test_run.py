@@ -2,19 +2,19 @@ from os import path
 from shutil import rmtree
 
 from protzilla import data_preprocessing
-from protzilla.constants.constants import PATH_TO_PROJECT, PATH_TO_RUNS
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import main_data_import
 from protzilla.run import Run
 
 
 def test_run_create():
     # here the run should be used like in the CLI
-    if path.exists(PATH_TO_RUNS / "test_run"):
-        rmtree(PATH_TO_RUNS / "test_run")
+    if path.exists(RUNS_PATH / "test_run"):
+        rmtree(RUNS_PATH / "test_run")
     run = Run.create("test_run")
     run.calculate_and_next(
         main_data_import.max_quant_import,
-        file=PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+        file=PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     run.calculate_and_next(
@@ -29,11 +29,11 @@ def test_run_create():
 
 
 def test_run_back():
-    rmtree(PATH_TO_RUNS / "test_run_back", ignore_errors=True)
+    rmtree(RUNS_PATH / "test_run_back", ignore_errors=True)
     run = Run.create("test_run_back")
     run.calculate_and_next(
         main_data_import.max_quant_import,
-        file=PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+        file=PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     df1 = run.df

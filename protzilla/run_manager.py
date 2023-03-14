@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .constants.constants import PATH_TO_PROJECT
+from .constants.paths import PROJECT_PATH
 from .run import Run
 
 
@@ -8,7 +8,7 @@ class RunManager:
     def __init__(self):
         self.available_runs = []
         # only contains all runs if only one run manager active
-        runs_path = Path(f"{PATH_TO_PROJECT}/user_data/runs")
+        runs_path = Path(f"{PROJECT_PATH}/user_data/runs")
         if runs_path.exists():
             for p in runs_path.iterdir():
                 self.available_runs.append(p.name)
