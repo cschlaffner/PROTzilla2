@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .constants.constants import PATH_TO_RUNS
+from .constants.paths import RUNS_PATH
 
 
 class History:
@@ -68,7 +68,7 @@ class History:
         df = None
         if "disk" in self.df_mode:
             index = len(self.steps)
-            (PATH_TO_RUNS / self.run_name).mkdir(parents=True, exist_ok=True)
+            (RUNS_PATH / self.run_name).mkdir(parents=True, exist_ok=True)
             dataframe.to_csv(self.df_path(index), index=False)
             df_path = self.df_path(index)
         if "memory" in self.df_mode:
@@ -101,7 +101,7 @@ class History:
             json.dump(to_save, f, indent=2)
 
     def df_path(self, index: int):
-        return PATH_TO_RUNS / self.run_name / f"df_{index}.csv"
+        return RUNS_PATH / self.run_name / f"df_{index}.csv"
 
 
 @dataclass(frozen=True)
