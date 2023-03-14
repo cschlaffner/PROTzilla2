@@ -8,6 +8,13 @@
 <!-- removed back here temporarily -->
 {{ run_name }}
 <br>
+<b>history</b>
+<br>
+{% for step in history %}
+    {{ step }}<br>
+{% endfor %}
+
+<br>
 <form action="{% url 'runs:calculate' run_name %}" method="post">
     {% csrf_token %}
     {% for field in fields %}

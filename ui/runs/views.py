@@ -8,7 +8,6 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.constants.constants import PATH_TO_PROJECT
-from protzilla.importing.main_data_import import max_quant_import
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -66,12 +65,16 @@ def detail(request, run_name):
     fields = []
     for key, param_dict in parameters.items():
         fields.append(make_parameter_input(key, param_dict))
-
+    history = []
+    for step in run.history.steps:
+        print(step)
+        history.append(step.method)
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
+            history=history,
             fields=fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
@@ -156,11 +159,19 @@ def create(request):
     run_name = request.POST["run_name"]
     run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
     # to skip importing
-    run.calculate_and_next(
-        max_quant_import,
-        file=PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
-        intensity_name="Intensity",
+    run.perform_calculation_from_location(
+        "importing",
+        "ms-data-import",
+        "max-quant-data-import",
+        dict(
+            file=str(
+                PATH_TO_PROJECT / "tests/proteinGroups_small_cut.txt",
+            ),
+            intensity_name="Intensity",
+        ),
     )
+    run.next_step()
+    print(run.history.steps)
     run.step_index = 0  # needed because importing is left out of workflow
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -190,7 +201,8 @@ def calculate(request, run_name):
     arguments = {k: v[0] if len(v) == 1 else v for k, v in arguments.items()}
     run = active_runs[run_name]
     print(arguments)
-    run.perform_calculation(lambda df, **kwargs: (df, {}), {})
+    run.perform_calculation_from_location(*run.workflow_location(), arguments)
+    # run.perform_calculation(lambda df, **kwargs: (df, {}), {})
     # TODO use selected method
     # run.perform_calculation_from_location(
     #     "data_preprocessing", "filter_proteins", "by_low_frequency", arguments
