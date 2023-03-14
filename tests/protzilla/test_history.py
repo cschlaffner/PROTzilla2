@@ -4,7 +4,7 @@ from string import ascii_letters
 
 import pandas as pd
 
-from protzilla.constants.constants import PATH_TO_RUNS
+from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
 
 
@@ -27,7 +27,7 @@ def test_history_memory_identity():
     assert history.steps[0].dataframe is not df2
     assert history.steps[1].dataframe is df2
     assert history.steps[1].dataframe is not df1
-    rmtree(PATH_TO_RUNS / name)
+    rmtree(RUNS_PATH / name)
 
 
 def test_history_disk():
@@ -41,7 +41,7 @@ def test_history_disk():
     assert history.steps[0]._dataframe is None
     # the dataframe should be loaded from disk correctly when using .dataframe
     assert history.steps[0].dataframe.equals(df1)
-    rmtree(PATH_TO_RUNS / name)
+    rmtree(RUNS_PATH / name)
 
 
 def test_history_disk_delete():
@@ -54,7 +54,7 @@ def test_history_disk_delete():
     assert history.df_path(0).exists()
     history.remove_step()
     assert not history.df_path(0).exists()
-    rmtree(PATH_TO_RUNS / name)
+    rmtree(RUNS_PATH / name)
 
 
 def test_history_save():
@@ -82,4 +82,4 @@ def test_history_save():
     assert history2.steps[0]._dataframe is None
     assert steps[1].dataframe.equals(history2.steps[1].dataframe)
     assert history2.steps[1]._dataframe is None
-    rmtree(PATH_TO_RUNS / name)
+    rmtree(RUNS_PATH / name)

@@ -24,7 +24,7 @@ class History:
     @classmethod
     def from_disk(cls, run_name: str, df_mode: str):
         instance = cls(run_name, df_mode)
-        with open(PATH_TO_RUNS / run_name / "history.json", "r") as f:
+        with open(RUNS_PATH / run_name / "history.json", "r") as f:
             history_json = json.load(f)
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
@@ -52,7 +52,7 @@ class History:
         self.df_mode = df_mode
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
-        (PATH_TO_RUNS / run_name).mkdir(exist_ok=True)
+        (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
     def add_step(
         self,
@@ -97,7 +97,7 @@ class History:
             )
             for step in self.steps
         ]
-        with open(PATH_TO_RUNS / self.run_name / "history.json", "w") as f:
+        with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
             json.dump(to_save, f, indent=2)
 
     def df_path(self, index: int):
