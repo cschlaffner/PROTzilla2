@@ -58,14 +58,31 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
+    
 
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
-    fields = []
+    fields = [] 
+
+    # append dropdown for method choice in step
+    # move to method capitalize step
+    fields.append(
+            render_to_string(
+            "runs/field_select.html",
+            context=dict(
+                disabled=False,
+                key=step.replace("-", "_"),
+                name=f"{step} Method:",
+                default=method,
+                categories=run.workflow_meta["sections"][section][step].keys(),
+            ),
+            )
+    )
+
     for key, param_dict in parameters.items():
         fields.append(make_parameter_input(key, param_dict))
     displayed_history = []
-    for step in run.history.steps:
-        displayed_history.append(step.method)
+    for history_step in run.history.steps:
+        displayed_history.append(history_step.method)
     return render(
         request,
         "runs/details.html",
@@ -75,7 +92,8 @@ def detail(request, run_name):
             fields=fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
-            static_url=STATIC_URL
+            static_url=STATIC_URL,
+            method_dropdown_id=step.replace("-", "_")
         ),
     )
 

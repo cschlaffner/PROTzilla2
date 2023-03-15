@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <script type="text/javascript" src="/{{ static_url }}js/jquery.js"></script>
-    <title>Title</title>
+    <script>
+        $( document ).ready(function() {
+            console.log( "jquery loaded" );
+            console.log("{{method_dropdown_id}}");
+
+            $("#{{ method_dropdown_id}}").change(function() {
+                console.log("method changed");
+            })
+        });
+    </script>
+    <title>PROTzilla</title>
 </head>
 <body>
 {{ run_name }}
