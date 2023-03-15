@@ -2,22 +2,13 @@
   "analysis-level": "protein",
   "sections": {
     "importing": {
-      "main-data-import": {
-        "ms-data-import": {
-          "name": "MS Data Import",
+      "ms-data-import": {
+        "max-quant-import": {
+          "name": "Max Quant Data Import",
           "description": "Import MS data",
           "parameters": {
-            "file_format": {
-              "name": "File format",
-              "type": "categorical",
-              "categories": [
-                "MaxQuant",
-                "MSFragger"
-              ],
-              "default-value": "MaxQuant"
-            },
-            "intensity_param": {
-              "name": "intensity parameter",
+            "intensity_name": {
+              "name": "intensity name",
               "type": "categorical",
               "categories": [
                 "LFQ intensity",
@@ -25,7 +16,32 @@
                 "iBAQ"
               ],
               "default-value": "Intensity"
+            },
+            "file": {
+              "name": "File:",
+              "type": "file"
             }
+          }
+        },
+        "ms-fragger-import": {
+          "name": "MS Fragger Data Import",
+          "description": "Import MS data",
+          "parameters": {
+            "intensity_name": {
+              "name": "intensity name",
+              "type": "categorical",
+              "categories": [
+                "LFQ intensity",
+                "Intensity",
+                "iBAQ"
+              ],
+              "default-value": "Intensity"
+            },
+            "file": {
+              "name": "File:",
+              "type": "file"
+            }
+
           }
         }
       },
@@ -47,8 +63,8 @@
         }
       }
     },
-    "data-preprocessing": {
-      "filter-proteins": {
+"data-preprocessing": {
+  "filter-proteins": {
         "low-frequency-filter": {
           "name": "Filter by low frequency",
           "description": "Sample filter method:",

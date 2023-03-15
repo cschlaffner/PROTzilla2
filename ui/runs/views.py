@@ -7,7 +7,6 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.constants.paths import PROJECT_PATH
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -32,10 +31,12 @@ def make_parameter_input(key, param_dict, disabled, default=None):
         template = "runs/field_number.html"
     elif param_dict["type"] == "categorical":
         template = "runs/field_select.html"
+    elif param_dict["type"] == "file":
+        template = "runs/field_file.html"
     else:
-        ValueError(f"cannot match parameter type {param_dict['type']}")
+        raise ValueError(f"cannot match parameter type {param_dict['type']}")
     if default is None:
-        default = param_dict["default-value"]
+        default = param_dict.get("default-value")
 
     return render_to_string(
         template,
@@ -60,6 +61,7 @@ def detail(request, run_name):
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = []
     for key, param_dict in parameters.items():
+        # todo use workflow default
         if run.current_parameters:
             default = run.current_parameters[key]
         else:
@@ -105,19 +107,19 @@ def create(request):
         df_mode="disk_memory",
     )
     # to skip importing
-    run.perform_calculation_from_location(
-        "importing",
-        "ms-data-import",
-        "max-quant-data-import",
-        dict(
-            file=str(
-                PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
-            ),
-            intensity_name="Intensity",
-        ),
-    )
-    run.next_step()
-    run.step_index = 0  # needed because importing is left out of workflow
+    # run.perform_calculation_from_location(
+    #     "importing",
+    #     "ms-data-import",
+    #     "max-quant-data-import",
+    #     dict(
+    #         file=str(
+    #             PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
+    #         ),
+    #         intensity_name="Intensity",
+    #     ),
+    # )
+    # run.next_step()
+    # run.step_index = 0  # needed because importing is left out of workflow
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -145,6 +147,7 @@ def back(request, run_name):
 
 
 def calculate(request, run_name):
+    print(request.FILES["file"])
     arguments = dict(request.POST)
     del arguments["csrfmiddlewaretoken"]
     parameters = {}
@@ -153,6 +156,10 @@ def calculate(request, run_name):
             parameters[k] = v[0]
         else:
             parameters[k] = v
+    for k, v in dict(request.FILES).items():
+        # assumption: only one file uploaded
+        parameters[k] = v[0].temporary_file_path()
+    print(parameters)
     run = active_runs[run_name]
     run.perform_calculation_from_location(*run.current_workflow_location(), parameters)
 

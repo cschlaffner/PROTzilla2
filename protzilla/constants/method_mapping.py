@@ -5,7 +5,7 @@ method_map = {
     (
         "importing",
         "ms-data-import",
-        "max-quant-data-import",
+        "max-quant-import",
     ): ms_data_import.max_quant_import,
     (
         "data_preprocessing",

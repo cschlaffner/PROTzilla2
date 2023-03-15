@@ -19,7 +19,7 @@
 <br>
 {{ info_str }}
 <br>
-<form action="{% url 'runs:calculate' run_name %}" method="post">
+<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in fields %}
         {{ field }}

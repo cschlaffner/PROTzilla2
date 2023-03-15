@@ -103,8 +103,8 @@ class Run:
     def current_workflow_location(self):
         steps = []
         for section_key, section_dict in self.workflow_config["sections"].items():
-            if section_key == "importing":
-                continue  # not standardized yet
+            # if section_key == "importing":
+            #     continue  # not standardized yet
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
