@@ -27,52 +27,70 @@ def index(request):
     )
 
 
-def make_parameter_input(key, param_dict):
+def make_parameter_input(key, param_dict, disabled, default=None):
     if param_dict["type"] == "numeric":
-        return render_to_string(
-            "runs/field_number.html",
-            context=dict(
-                **param_dict,
-                disabled=False,
-                key=key,
-                default=param_dict["default-value"],
-            ),
-        )
+        template = "runs/field_number.html"
     elif param_dict["type"] == "categorical":
-        return render_to_string(
-            "runs/field_select.html",
-            context=dict(
-                **param_dict,
-                disabled=False,
-                key=key,
-                default=param_dict["default-value"],
-            ),
-        )
+        template = "runs/field_select.html"
     else:
-        param_type = param_dict["type"]
-        ValueError(f"cannot match parameter type {param_type}")
+        ValueError(f"cannot match parameter type {param_dict['type']}")
+    if default is None:
+        default = param_dict["default-value"]
+
+    return render_to_string(
+        template,
+        context=dict(
+            **param_dict,
+            disabled=disabled,
+            key=key,
+            default=default,
+        ),
+    )
 
 
 def detail(request, run_name):
     if run_name not in active_runs:
-        active_runs[run_name] = Run.continue_existing(run_name)
+        run = Run.continue_existing(run_name)
+        run.step_index = len(run.history.steps) - 1
+        active_runs[run_name] = run
+
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
 
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
-    fields = []
+    current_fields = []
     for key, param_dict in parameters.items():
-        fields.append(make_parameter_input(key, param_dict))
+        if run.current_parameters:
+            default = run.current_parameters[key]
+        else:
+            default = None
+        current_fields.append(
+            make_parameter_input(key, param_dict, disabled=False, default=default)
+        )
     displayed_history = []
     for step in run.history.steps:
-        displayed_history.append(step.method)
+        fields = []
+        if step.section != "importing":
+            parameters = run.workflow_meta["sections"][step.section][step.step][
+                step.method
+            ]["parameters"]
+            for key, param_dict in parameters.items():
+                fields.append(
+                    make_parameter_input(
+                        key, param_dict, disabled=True, default=step.parameters[key]
+                    )
+                )
+        displayed_history.append(
+            dict(name=f"{step.section}/{step.step}/{step.method}", fields=fields)
+        )
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
+            info_str=str(run.current_workflow_location()),
             displayed_history=displayed_history,
-            fields=fields,
+            fields=current_fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
         ),
@@ -81,7 +99,11 @@ def detail(request, run_name):
 
 def create(request):
     run_name = request.POST["run_name"]
-    run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
+    run = Run.create(
+        request.POST["run_name"],
+        request.POST["workflow_config_name"],
+        df_mode="disk_memory",
+    )
     # to skip importing
     run.perform_calculation_from_location(
         "importing",
@@ -102,7 +124,11 @@ def create(request):
 
 def continue_(request):
     run_name = request.POST["run_name"]
-    active_runs[run_name] = Run.continue_existing(run_name)
+    run = Run.continue_existing(run_name)
+    run.step_index = len(run.history.steps) - 1
+    # this should be moved to Run.continue_existing but cant yet because
+    # importing does not exist yet
+    active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

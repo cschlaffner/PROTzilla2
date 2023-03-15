@@ -84,6 +84,7 @@ class Run:
         self.df = self.result_df
         self.result_df = None
         self.step_index += 1
+        self.current_parameters = None
 
     def back_step(self):
         assert self.history.steps
