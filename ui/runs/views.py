@@ -60,7 +60,13 @@ def detail(request, run_name):
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = []
     for key, param_dict in parameters.items():
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+        if run.current_parameters:
+            default = run.current_parameters[key]
+        else:
+            default = None
+        current_fields.append(
+            make_parameter_input(key, param_dict, disabled=False, default=default)
+        )
     displayed_history = []
     for step in run.history.steps:
         fields = []
@@ -69,7 +75,11 @@ def detail(request, run_name):
                 step.method
             ]["parameters"]
             for key, param_dict in parameters.items():
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
+                fields.append(
+                    make_parameter_input(
+                        key, param_dict, disabled=True, default=step.parameters[key]
+                    )
+                )
         displayed_history.append(
             dict(name=f"{step.section}/{step.step}/{step.method}", fields=fields)
         )
