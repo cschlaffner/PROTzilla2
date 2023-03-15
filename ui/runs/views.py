@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR, STATIC_URL
+from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.constants.paths import PROJECT_PATH
@@ -75,7 +75,6 @@ def detail(request, run_name):
             fields=fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
-            static_url=STATIC_URL
         ),
     )
 
