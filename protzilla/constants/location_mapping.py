@@ -1,4 +1,4 @@
-from ..importing import main_data_import
+from ..importing import ms_data_import
 from ..data_preprocessing import filter_proteins, filter_samples,\
     normalisation, transformation, imputation
 
@@ -10,18 +10,18 @@ file that correspond to the method.
 method_map = {
     (
         "importing",
-        "main-data-import",
         "ms-data-import",
-    ): main_data_import.max_quant_import,
+        "max-quant-data-import",
+    ): ms_data_import.max_quant_import,
     (
-        "data-preprocessing",
-        "filter-proteins",
-        "low-frequency-filter",
+        "data_preprocessing",
+        "filter_proteins",
+        "by_low_frequency",
     ): filter_proteins.by_low_frequency,
     (
-        "data-preprocessing",
-        "filter-proteins",
-        "protein-intensity-sum-filter",
+        "data_preprocessing",
+        "filter_samples",
+        "by_protein_intensity_sum",
     ): filter_samples.by_protein_intensity_sum,
     (
         "data_preprocessing",
