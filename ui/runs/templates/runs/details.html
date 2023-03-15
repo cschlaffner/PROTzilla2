@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{{ run_name }}
+<br>
+<b>history</b>
+<br>
+{% for step in displayed_history %}
+    {{ step }}<br>
+{% endfor %}
+
+<br>
+<form action="{% url 'runs:calculate' run_name %}" method="post">
+    {% csrf_token %}
+    {% for field in fields %}
+        {{ field }}
+        <br>
+    {% endfor %}
+    <input type="submit" value="Calculate">
+</form>
+
+{% if show_next %}
+    <form action="{% url 'runs:next' run_name %}" method="post">
+        {% csrf_token %}
+        <button>Next</button>
+    </form>
+{% endif %}
+
+{% if show_back %}
+    <form action="{% url 'runs:back' run_name %}" method="post">
+        {% csrf_token %}
+        <button>Back</button>
+    </form>
+{% endif %}
+</body>
+</html>
