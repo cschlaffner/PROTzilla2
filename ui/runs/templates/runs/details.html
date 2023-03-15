@@ -21,9 +21,14 @@
 <b>history</b>
 <br>
 {% for step in displayed_history %}
-    {{ step }}<br>
+    {{ step.name }}<br>
+    {% for field in step.fields %}
+        {{ field }}<br>
+    {% endfor %}
+    <br>
 {% endfor %}
-
+<br>
+{{ info_str }}
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post">
     {% csrf_token %}
