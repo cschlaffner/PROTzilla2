@@ -29,6 +29,9 @@ def create_pie_plot(
     :return: returns a pie chart of the data
     :rtype: Figure (plotly object)
     """
+    if any(i < 0 for i in values_of_sectors):
+        raise ValueError
+
     fig = px.pie(
         names=names_of_sectors,
         values=values_of_sectors,

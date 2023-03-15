@@ -2,6 +2,7 @@ import pytest
 
 from protzilla.data_preprocessing.imputation import *
 from protzilla.data_preprocessing.imputation import _build_box_hist_plot
+from tests.protzilla.data_preprocessing import test_plots
 
 
 @pytest.fixture
@@ -127,9 +128,7 @@ def assertion_df_mean_per_protein():
     )
 
 
-
-
-
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_min_value_per_df(show_figures, input_imputation_df, assertion_df_min_value_per_df):
     assertion_df = assertion_df_min_value_per_df
@@ -150,6 +149,7 @@ def test_imputation_min_value_per_df(show_figures, input_imputation_df, assertio
             {assertion_df} but is {result_df}"
 
 
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_min_value_per_sample(show_figures, input_imputation_df, assertion_df_min_value_per_sample):
     assertion_df = assertion_df_min_value_per_sample
@@ -170,6 +170,7 @@ def test_imputation_min_value_per_sample(show_figures, input_imputation_df, asse
             {assertion_df} but is {result_df}"
 
 
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_min_value_per_protein(show_figures, input_imputation_df, assertion_df_min_value_per_protein):
     # generate dummy data
@@ -190,6 +191,7 @@ def test_imputation_min_value_per_protein(show_figures, input_imputation_df, ass
             {assertion_df} but is {result_df}"
 
 
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertion_df_mean_per_protein):
     # generate dummy data
@@ -213,6 +215,7 @@ def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertio
             {assertion_df} but is {result_df}"
 
 
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     # perform imputation on test data frame
@@ -240,3 +243,9 @@ def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
             count == 3
     ), f"Wrong number of imputed samples\
                3 but is {count}"
+
+
+@pytest.mark.order(1)
+@pytest.mark.dependency()
+def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
+    test_plots.test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df)

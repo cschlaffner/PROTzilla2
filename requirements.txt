@@ -32,3 +32,4 @@ tenacity==8.2.1
 virtualenv==20.19.0
 scikit-learn==1.2.2
 pytest-dependency==0.5.1
+pytest-order==1.1.0
