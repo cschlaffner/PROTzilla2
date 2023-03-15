@@ -71,6 +71,7 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
+            info_str=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=fields,
             show_next=run.result_df is not None,
@@ -81,7 +82,11 @@ def detail(request, run_name):
 
 def create(request):
     run_name = request.POST["run_name"]
-    run = Run.create(request.POST["run_name"], request.POST["workflow_config_name"])
+    run = Run.create(
+        request.POST["run_name"],
+        request.POST["workflow_config_name"],
+        df_mode="disk_memory",
+    )
     # to skip importing
     run.perform_calculation_from_location(
         "importing",
@@ -102,7 +107,11 @@ def create(request):
 
 def continue_(request):
     run_name = request.POST["run_name"]
-    active_runs[run_name] = Run.continue_existing(run_name)
+    run = Run.continue_existing(run_name)
+    run.step_index = len(run.history.steps) - 1
+    # this should be moved to Run.continue_existing but cant yet because
+    # importing does not exist yet
+    active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

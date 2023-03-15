@@ -12,7 +12,8 @@
 {% for step in displayed_history %}
     {{ step }}<br>
 {% endfor %}
-
+<br>
+{{ info_str }}
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post">
     {% csrf_token %}
