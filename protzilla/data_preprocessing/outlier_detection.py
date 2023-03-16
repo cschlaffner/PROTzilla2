@@ -12,7 +12,7 @@ from protzilla.data_preprocessing.plots import (
 
 def by_isolation_forest(
     intensity_df: pd.DataFrame, n_estimators: int = 50, n_jobs: int = -1
-):
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters out outliers using a clustering
     isolation forest approach.
@@ -61,7 +61,7 @@ def with_local_outlier_factor(
     intensity_df: pd.DataFrame,
     number_of_neighbors: int = 35,
     n_jobs: int = -1,
-):
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters out outliers using a clustering
     Local Outlier Factor approach based on k nearest
@@ -107,7 +107,7 @@ def by_pca(
     intensity_df: pd.DataFrame,
     threshold: int = 2,
     number_of_components: int = 3,
-):
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters out outliers using a PCA
     based approach based geometrical distance to the median

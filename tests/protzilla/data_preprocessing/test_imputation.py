@@ -247,3 +247,4 @@ def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
 @pytest.mark.dependency()
 def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
     test_plots.test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df)
+

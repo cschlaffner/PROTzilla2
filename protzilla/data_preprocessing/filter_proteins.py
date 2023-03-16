@@ -13,7 +13,7 @@ def by_low_frequency(intensity_df, threshold):
     :type intensity_df: pd.DataFrame
     :param threshold: float ranging from 0 to 1. Defining the\
     relative share of samples the proteins should be present in\
-    order to be included. Example 0.5 - all proteins with intensities\
+    order to be included. Example: threshold = 0.5 – all proteins with intensities\
     equal to zero in at least 50% of samples are discarded. Default: 0.5
     :type threshold: float
     :return: returns a Dataframe with the samples that meet the\
@@ -51,7 +51,7 @@ def by_low_frequency_plot(df, result_df, current_out, graph_type):
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
         )
-    if graph_type == "Bar chart":
+    elif graph_type == "Bar chart":
         fig = create_bar_plot(
             values_of_sectors=[
                 len(current_out["remaining_proteins"]),

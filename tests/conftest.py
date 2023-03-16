@@ -6,7 +6,7 @@ def pytest_addoption(parser):
         "--show-figures",
         action="store",
         default=False,
-        help="If true tests will open figures using the default renderer",
+        help="If 'True', tests will open figures using the default renderer",
     )
 
 

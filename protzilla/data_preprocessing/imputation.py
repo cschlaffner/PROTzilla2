@@ -1,5 +1,3 @@
-from typing import Tuple, List
-
 import pandas as pd
 import numpy as np
 from plotly.graph_objs import Figure
@@ -18,7 +16,7 @@ def by_knn(intensity_df: pd.DataFrame, n_neighbors=5,
     sample based on intensity-wise similar samples.
     Two samples are close if the features that neither is
     missing are close.
-    CAVE: Proteins that have NaN in alle samples will be
+    CAVE: Proteins that have NaN in all samples will be
     filtered out if not previously filtered out!
 
     Implements an instance of the sklearn.impute KNNImputer
@@ -60,7 +58,7 @@ def by_knn(intensity_df: pd.DataFrame, n_neighbors=5,
 def by_simple_imputer(
         intensity_df: pd.DataFrame,
         strategy="mean",
-) -> Tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict]:
     """
     A class to perform protein-wise imputations
     on your dataframe. Imputes missing values for each protein
@@ -105,7 +103,7 @@ def by_simple_imputer(
 
 def by_min_per_sample(intensity_df: pd.DataFrame,
                       shrinking_value=0.5,
-                      ) -> Tuple[pd.DataFrame, dict]:
+                      ) -> tuple[pd.DataFrame, dict]:
     """
     A class to perform  minimal value imputation on the level
     of samples of your dataframe. Imputes missing values for each
@@ -116,7 +114,7 @@ def by_min_per_sample(intensity_df: pd.DataFrame,
     take a fraction of that minimum value for imputation.
     CAVE: Data for samples without any intensity values will not
     be filtered out and NaN values could remain in the dataframe.
-    If not wanted, make sure to filter 0 intesnity samples in the
+    If not wanted, make sure to filter 0 intensity samples in the
     filtering step.
 
     :param intensity_df: the dataframe that should be filtered in\
@@ -148,7 +146,7 @@ def by_min_per_sample(intensity_df: pd.DataFrame,
 
 def by_min_per_protein(intensity_df: pd.DataFrame,
                        shrinking_value=0.5,
-                       ) -> Tuple[pd.DataFrame, dict]:
+                       ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
     by taking into account data from each protein.
@@ -182,7 +180,7 @@ def by_min_per_protein(intensity_df: pd.DataFrame,
     # contain data if used with 0 intensity protein filtering
     # it would work perfectly
     # CAVE: By use of the shrinking value all NaN's are turned to 0
-    # - we thus decided to filter them out previously.
+    # - we thus decided to filter them out beforehand.
 
     # Turn the wide format into the long format
     imputed_df = wide_to_long(
@@ -194,7 +192,7 @@ def by_min_per_protein(intensity_df: pd.DataFrame,
 
 def by_min_per_dataset(intensity_df: pd.DataFrame,
                        shrinking_value=0.5,
-                       ) -> Tuple[pd.DataFrame, dict]:
+                       ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
     by taking into account data from the entire dataframe.
@@ -247,7 +245,7 @@ def number_of_imputed_values(input_df, result_df):
     return abs(result_df.isnull().sum().sum() - input_df.isnull().sum().sum())
 
 
-def _build_box_hist_plot(df, result_df, graph_types, group_by) -> List[Figure]:
+def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
     """
         This function creates two visualisations:
 

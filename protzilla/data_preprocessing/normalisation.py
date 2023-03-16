@@ -3,7 +3,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from sklearn.preprocessing import StandardScaler
 
 
-def by_z_score(intensity_df: pd.DataFrame):
+def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """
     A function to run the sklearn StandardScaler class on your dataframe.
     Normalises the data on the level of each sample.
@@ -42,9 +42,9 @@ def by_z_score(intensity_df: pd.DataFrame):
 
 
 def by_median(
-        intensity_df: pd.DataFrame,
-        q=0.5,  # quartile, default is median
-):
+    intensity_df: pd.DataFrame,
+    q=0.5,  # quartile, default is median
+) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform a quartile/percentile normalisation on your
     dataframe. Normalises the data on the level of each sample.
@@ -101,7 +101,7 @@ def by_median(
     )
 
 
-def by_totalsum(intensity_df: pd.DataFrame):
+def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform normalisation using the total sum
     of sample intensities on your dataframe.
@@ -158,9 +158,9 @@ def by_totalsum(intensity_df: pd.DataFrame):
 
 
 def by_reference_protein(
-        intensity_df: pd.DataFrame,
-        reference_protein_id: str = None,
-):
+    intensity_df: pd.DataFrame,
+    reference_protein_id: str = None,
+) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-intensity normalisation in reference
     to a selected protein on your dataframe.
@@ -206,8 +206,8 @@ def by_reference_protein(
             continue
 
         df_sample.loc[:, f"Normalised {intensity_name}"] = df_sample.loc[
-                                                           :, intensity_name
-                                                           ].div(reference_intensity)
+            :, intensity_name
+        ].div(reference_intensity)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
