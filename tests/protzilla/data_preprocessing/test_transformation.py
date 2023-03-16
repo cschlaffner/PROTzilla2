@@ -2,11 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.data_preprocessing.transformation import (
-    by_log,
-    by_log_plot,
-    _build_box_hist_plot,
-)
+from protzilla.data_preprocessing.transformation import by_log, by_log_plot
 
 
 @pytest.fixture

@@ -4,7 +4,6 @@ from protzilla.data_preprocessing import imputation
 from protzilla.data_preprocessing.plots import *
 from tests.protzilla.data_preprocessing.test_imputation import *
 
-
 # this tests will build some Figures and display them if show_figures==True
 # it tests only for occurring errors
 
