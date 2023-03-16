@@ -41,7 +41,6 @@
               "name": "File:",
               "type": "file"
             }
-
           }
         }
       },
@@ -58,6 +57,10 @@
                 "Columns (samples in rows, features in columns)"
               ],
               "default-value": "Rows (features in rows, samples in columns)"
+            },
+            "file": {
+              "name": "File:",
+              "type": "file"
             }
           }
         }
