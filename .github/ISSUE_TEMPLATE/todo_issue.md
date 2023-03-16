@@ -3,7 +3,7 @@ name: TODO Template
 about: TODO Issue Template
 title: '#TODO x'
 labels: todo
-project: PROTzilla2
+project: 'PROTzilla2'
 
 ---
 
