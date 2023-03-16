@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 
 
