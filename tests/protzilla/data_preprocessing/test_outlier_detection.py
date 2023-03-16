@@ -3,13 +3,12 @@ import pytest
 
 from protzilla.data_preprocessing.outlier_detection import (
     by_isolation_forest,
-    with_local_outlier_factor,
-    by_pca,
     by_isolation_forest_plot,
     by_local_outlier_factor_plot,
+    by_pca,
     by_pca_plot,
+    with_local_outlier_factor,
 )
-
 
 # TODO: implement actual tests for outlier detection
 

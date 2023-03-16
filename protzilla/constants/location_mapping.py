@@ -1,11 +1,11 @@
-from ..importing import ms_data_import
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
+    imputation,
     normalisation,
     transformation,
-    imputation,
 )
+from ..importing import ms_data_import
 
 """
 In this data structure, a method is associated with a location. The location is

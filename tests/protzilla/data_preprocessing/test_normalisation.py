@@ -3,14 +3,14 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.normalisation import (
-    by_z_score,
-    by_z_score_plot,
     by_median,
     by_median_plot,
     by_reference_protein,
     by_reference_protein_plot,
     by_totalsum,
     by_totalsum_plot,
+    by_z_score,
+    by_z_score_plot,
 )
 
 
