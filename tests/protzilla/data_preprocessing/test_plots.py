@@ -10,6 +10,7 @@ from tests.protzilla.data_preprocessing.test_imputation import *
 
 # for reviewers: all these tests are  new
 
+
 @pytest.mark.order(1)
 @pytest.mark.dependency()
 def test_create_pie_plot(show_figures):
@@ -43,7 +44,9 @@ def test_create_bar_plot(show_figures):
 
 @pytest.mark.order(1)
 @pytest.mark.dependency()
-def test_create_box_plots(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
+def test_create_box_plots(
+    show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
+):
     fig = create_box_plots(
         dataframe_a=input_imputation_df,
         dataframe_b=assertion_df_knn,
@@ -60,13 +63,16 @@ def test_create_box_plots(show_figures, input_imputation_df, assertion_df_knn, a
         create_box_plots(
             dataframe_a=input_imputation_df,
             dataframe_b=assertion_df_knn,
-            group_by="wrong_group_by")
+            group_by="wrong_group_by",
+        )
     return
 
 
 @pytest.mark.order(1)
 @pytest.mark.dependency()
-def test_create_histograms(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
+def test_create_histograms(
+    show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
+):
     fig = create_histograms(
         dataframe_a=input_imputation_df,
         dataframe_b=assertion_df_knn,
@@ -82,19 +88,32 @@ def test_create_histograms(show_figures, input_imputation_df, assertion_df_knn, 
         create_box_plots(
             dataframe_a=input_imputation_df,
             dataframe_b=assertion_df_knn,
-            group_by="wrong_group_by")
+            group_by="wrong_group_by",
+        )
     return
 
 
 @pytest.mark.order(2)
 @pytest.mark.dependency(
-    depends=["test_create_pie_plot", "test_create_bar_plot", "test_create_box_plots", "test_create_histograms"])
-def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
-    fig1, fig2 = imputation._build_box_hist_plot(input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"],
-                                                 "Sample")
-    fig3, fig4 = imputation._build_box_hist_plot(input_imputation_df, assertion_df_min_value_per_df,
-                                                 ["Histogram", "Pie chart"],
-                                                 "Protein ID")
+    depends=[
+        "test_create_pie_plot",
+        "test_create_bar_plot",
+        "test_create_box_plots",
+        "test_create_histograms",
+    ]
+)
+def test_build_box_hist_plot(
+    show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
+):
+    fig1, fig2 = imputation._build_box_hist_plot(
+        input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"], "Sample"
+    )
+    fig3, fig4 = imputation._build_box_hist_plot(
+        input_imputation_df,
+        assertion_df_min_value_per_df,
+        ["Histogram", "Pie chart"],
+        "Protein ID",
+    )
 
     if show_figures:
         fig1.show()

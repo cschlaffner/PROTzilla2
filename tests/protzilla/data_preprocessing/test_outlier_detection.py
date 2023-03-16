@@ -43,7 +43,9 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
         fig.show()
 
 
-def test_outlier_detection_with_local_outlier_factor(show_figures, outlier_detection_df):
+def test_outlier_detection_with_local_outlier_factor(
+    show_figures, outlier_detection_df
+):
     result_df, dropouts = with_local_outlier_factor(outlier_detection_df, 35, -1)
     fig = by_local_outlier_factor_plot(outlier_detection_df, result_df, dropouts)[0]
     if show_figures:

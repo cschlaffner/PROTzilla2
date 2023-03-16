@@ -2,14 +2,19 @@ import pandas as pd
 import numpy as np
 from plotly.graph_objs import Figure
 
-from protzilla.data_preprocessing.plots import create_box_plots, create_histograms, create_bar_plot, create_pie_plot
+from protzilla.data_preprocessing.plots import (
+    create_box_plots,
+    create_histograms,
+    create_bar_plot,
+    create_pie_plot,
+)
 from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 from sklearn.impute import KNNImputer, SimpleImputer
 
 
-def by_knn(intensity_df: pd.DataFrame, n_neighbors=5,
-           **kwargs  # quantile, default is median
-           ) -> tuple[pd.DataFrame, dict]:
+def by_knn(
+    intensity_df: pd.DataFrame, n_neighbors=5, **kwargs  # quantile, default is median
+) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -43,21 +48,17 @@ def by_knn(intensity_df: pd.DataFrame, n_neighbors=5,
 
     imputer = KNNImputer(n_neighbors=n_neighbors)
     transformed_df = imputer.fit_transform(transformed_df, **kwargs)
-    transformed_df = pd.DataFrame(
-        transformed_df, columns=columns, index=index
-    )
+    transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(
-        transformed_df, intensity_df
-    )
+    imputed_df = wide_to_long(transformed_df, intensity_df)
 
     return imputed_df, dict()
 
 
 def by_simple_imputer(
-        intensity_df: pd.DataFrame,
-        strategy="mean",
+    intensity_df: pd.DataFrame,
+    strategy="mean",
 ) -> tuple[pd.DataFrame, dict]:
     """
     A class to perform protein-wise imputations
@@ -90,20 +91,17 @@ def by_simple_imputer(
 
     imputer = SimpleImputer(missing_values=np.nan, strategy=strategy)
     transformed_df = imputer.fit_transform(transformed_df)
-    transformed_df = pd.DataFrame(
-        transformed_df, columns=columns, index=index
-    )
+    transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(
-        transformed_df, intensity_df
-    )
+    imputed_df = wide_to_long(transformed_df, intensity_df)
     return imputed_df, dict()
 
 
-def by_min_per_sample(intensity_df: pd.DataFrame,
-                      shrinking_value=0.5,
-                      ) -> tuple[pd.DataFrame, dict]:
+def by_min_per_sample(
+    intensity_df: pd.DataFrame,
+    shrinking_value=0.5,
+) -> tuple[pd.DataFrame, dict]:
     """
     A class to perform  minimal value imputation on the level
     of samples of your dataframe. Imputes missing values for each
@@ -144,9 +142,10 @@ def by_min_per_sample(intensity_df: pd.DataFrame,
     return intensity_df_copy, dict()
 
 
-def by_min_per_protein(intensity_df: pd.DataFrame,
-                       shrinking_value=0.5,
-                       ) -> tuple[pd.DataFrame, dict]:
+def by_min_per_protein(
+    intensity_df: pd.DataFrame,
+    shrinking_value=0.5,
+) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
     by taking into account data from each protein.
@@ -183,16 +182,15 @@ def by_min_per_protein(intensity_df: pd.DataFrame,
     # - we thus decided to filter them out beforehand.
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(
-        transformed_df, intensity_df
-    )
+    imputed_df = wide_to_long(transformed_df, intensity_df)
 
     return imputed_df, dict()
 
 
-def by_min_per_dataset(intensity_df: pd.DataFrame,
-                       shrinking_value=0.5,
-                       ) -> tuple[pd.DataFrame, dict]:
+def by_min_per_dataset(
+    intensity_df: pd.DataFrame,
+    shrinking_value=0.5,
+) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
     by taking into account data from the entire dataframe.
@@ -247,15 +245,15 @@ def number_of_imputed_values(input_df, result_df):
 
 def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
     """
-        This function creates two visualisations:
+    This function creates two visualisations:
 
-        1. graph visualising the distributional
-        differences between the protein intensities prior to
-        and after imputation. Default is set to display a grouped
-        graph (see group_by parameter).
+    1. graph visualising the distributional
+    differences between the protein intensities prior to
+    and after imputation. Default is set to display a grouped
+    graph (see group_by parameter).
 
-        2. a graph summarising the amount of
-        filtered proteins.
+    2. a graph summarising the amount of
+    filtered proteins.
 
     """
     if "Boxplot" in graph_types:

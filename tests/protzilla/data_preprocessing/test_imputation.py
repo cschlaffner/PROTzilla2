@@ -126,13 +126,17 @@ def assertion_df_mean_per_protein():
 
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
-def test_imputation_min_value_per_df(show_figures, input_imputation_df, assertion_df_min_value_per_df):
+def test_imputation_min_value_per_df(
+    show_figures, input_imputation_df, assertion_df_min_value_per_df
+):
     assertion_df = assertion_df_min_value_per_df
 
     # perform imputation on test data frame
     result_df = by_min_per_dataset(input_imputation_df, shrinking_value=0.1)[0]
 
-    fig1, fig2 = by_min_per_dataset_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_min_per_dataset_plot(
+        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+    )
     if show_figures:
         fig1.show()
         fig2.show()
@@ -147,13 +151,17 @@ def test_imputation_min_value_per_df(show_figures, input_imputation_df, assertio
 
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
-def test_imputation_min_value_per_sample(show_figures, input_imputation_df, assertion_df_min_value_per_sample):
+def test_imputation_min_value_per_sample(
+    show_figures, input_imputation_df, assertion_df_min_value_per_sample
+):
     assertion_df = assertion_df_min_value_per_sample
 
     # perform imputation on test data frame
     result_df = by_min_per_sample(input_imputation_df, shrinking_value=0.2)[0]
 
-    fig1, fig2 = by_min_per_sample_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_min_per_sample_plot(
+        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+    )
     if show_figures:
         fig1.show()
         fig2.show()
@@ -168,13 +176,17 @@ def test_imputation_min_value_per_sample(show_figures, input_imputation_df, asse
 
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
-def test_imputation_min_value_per_protein(show_figures, input_imputation_df, assertion_df_min_value_per_protein):
+def test_imputation_min_value_per_protein(
+    show_figures, input_imputation_df, assertion_df_min_value_per_protein
+):
     assertion_df = assertion_df_min_value_per_protein
 
     # perform imputation on test data frame
     result_df = by_min_per_protein(input_imputation_df, shrinking_value=1.0)[0]
 
-    fig1, fig2 = by_min_per_protein_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_min_per_protein_plot(
+        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+    )
     if show_figures:
         fig1.show()
         fig2.show()
@@ -189,7 +201,9 @@ def test_imputation_min_value_per_protein(show_figures, input_imputation_df, ass
 
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
-def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertion_df_mean_per_protein):
+def test_imputation_mean_per_protein(
+    show_figures, input_imputation_df, assertion_df_mean_per_protein
+):
     assertion_df = assertion_df_mean_per_protein
 
     # perform imputation on test data frame
@@ -198,7 +212,9 @@ def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertio
         strategy="mean",
     )[0]
 
-    fig1, fig2 = by_simple_imputer_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_simple_imputer_plot(
+        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+    )
     if show_figures:
         fig1.show()
         fig2.show()
@@ -222,7 +238,9 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
         n_neighbors=2,
     )[0]
 
-    fig1, fig2 = by_knn_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_knn_plot(
+        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+    )
     if show_figures:
         fig1.show()
         fig2.show()
@@ -238,13 +256,19 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
 def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
     count = number_of_imputed_values(input_imputation_df, assertion_df_knn)
     assert (
-            count == 3
+        count == 3
     ), f"Wrong number of imputed samples\
                3 but is {count}"
 
 
 @pytest.mark.order(1)
 @pytest.mark.dependency()
-def test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df):
-    test_plots.test_build_box_hist_plot(show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df)
-
+def test_build_box_hist_plot(
+    show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
+):
+    test_plots.test_build_box_hist_plot(
+        show_figures,
+        input_imputation_df,
+        assertion_df_knn,
+        assertion_df_min_value_per_df,
+    )

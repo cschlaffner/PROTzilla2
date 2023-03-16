@@ -1,6 +1,11 @@
 from ..importing import ms_data_import
-from ..data_preprocessing import filter_proteins, filter_samples,\
-    normalisation, transformation, imputation
+from ..data_preprocessing import (
+    filter_proteins,
+    filter_samples,
+    normalisation,
+    transformation,
+    imputation,
+)
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -73,7 +78,6 @@ method_map = {
         "imputation",
         "min-value-per-dataset",
     ): imputation.by_min_per_dataset,
-
 }
 
 """
@@ -127,7 +131,7 @@ plot_map = {
         "imputation",
         "min-value-per-sample",
     ): imputation.by_min_per_sample_plot,
-(
+    (
         "data_preprocessing",
         "imputation",
         "min-value-per-protein",

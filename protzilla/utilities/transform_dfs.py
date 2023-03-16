@@ -20,9 +20,7 @@ def long_to_wide(intensity_df: pd.DataFrame):
     )
 
 
-def wide_to_long(
-        wide_df: pd.DataFrame, original_long_df: pd.DataFrame
-):
+def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     """
     This functions transforms the dataframe from a wide
     format to the typical protzilla long format.

@@ -18,14 +18,10 @@ class Run:
         return available_runs
 
     @classmethod
-    def create(
-        cls, run_name, workflow_config_name="standard", df_mode="memory"
-    ):
+    def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         run_path.mkdir(exist_ok=True)
-        run_config = dict(
-            workflow_config_name=workflow_config_name, df_mode=df_mode
-        )
+        run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
         history = History(run_name, df_mode)
@@ -46,9 +42,7 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
         self.history = history
-        self.df = (
-            self.history.steps[-1].dataframe if self.history.steps else None
-        )
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
 
@@ -66,28 +60,20 @@ class Run:
         self.current_parameters = None
         self.plots = None
 
-    def perform_calculation_from_location(
-        self, section, step, method, parameters
-    ):
+    def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (
             section,
             step,
             method,
         )
-        method_callable = method_map.get(
-            location, lambda df, **kwargs: (df, {})
-        )
+        method_callable = method_map.get(location, lambda df, **kwargs: (df, {}))
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
-        self.result_df, self.current_out = method_callable(
-            self.df, **parameters
-        )
+        self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
 
-    def calculate_and_next(
-        self, method_callable, **parameters
-    ):  # to be used for CLI
+    def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
         self.next_step()
 
@@ -117,9 +103,7 @@ class Run:
     def back_step(self):
         assert self.history.steps
         self.history.remove_step()
-        self.df = (
-            self.history.steps[-1].dataframe if self.history.steps else None
-        )
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None
@@ -132,9 +116,7 @@ class Run:
 
     def current_workflow_location(self):
         steps = []
-        for section_key, section_dict in self.workflow_config[
-            "sections"
-        ].items():
+        for section_key, section_dict in self.workflow_config["sections"].items():
             if section_key == "importing":
                 continue  # not standardized yet
             for step in section_dict["steps"]:

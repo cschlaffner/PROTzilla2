@@ -21,15 +21,11 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
     intensity_name = intensity_df.columns.values.tolist()[3]
     transformed_df = intensity_df.copy()
 
-    #TODO 41 drop data when intensity is 0 and return them in dict
+    # TODO 41 drop data when intensity is 0 and return them in dict
     if log_method == "log2":
-        transformed_df[intensity_name] = np.log2(
-            transformed_df[intensity_name]
-        )
+        transformed_df[intensity_name] = np.log2(transformed_df[intensity_name])
     elif log_method == "log10":
-        transformed_df[intensity_name] = np.log10(
-            transformed_df[intensity_name]
-        )
+        transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
     else:
         raise ValueError(
             """Unknown log method. Known log methods are
@@ -37,8 +33,10 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
         )
     return transformed_df, dict()
 
+
 def by_log_plot(df, result_df, graph_type, group_by):
     return _build_box_hist_plot(df, result_df, graph_type, group_by)
+
 
 def _build_box_hist_plot(df, result_df, graph_type, group_by):
     if graph_type == "Boxplot":

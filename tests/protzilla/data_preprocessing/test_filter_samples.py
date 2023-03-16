@@ -66,9 +66,9 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
     list_proteins_excluded_1 = dropouts1["filtered_samples"]
     list_proteins_excluded_2 = dropouts2["filtered_samples"]
 
-    fig = by_protein_count_plot(
-        filter_samples_df, result_df1, dropouts1, "Pie chart"
-    )[0]
+    fig = by_protein_count_plot(filter_samples_df, result_df1, dropouts1, "Pie chart")[
+        0
+    ]
     if show_figures:
         fig.show()
 
