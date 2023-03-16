@@ -1,7 +1,7 @@
 ---
 name: TODO Template
 about: TODO Issue Template
-title: '#TODO x'
+title: '#TODO <issue_nr>'
 labels: todo
 project: 'PROTzilla2'
 
@@ -9,4 +9,4 @@ project: 'PROTzilla2'
 
 <Description>
 
-search for #TODO x
+search for #TODO <issue_nr>
