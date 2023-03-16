@@ -21,6 +21,7 @@ def test_create_pie_plot(show_figures):
     if show_figures:
         fig.show()
 
+    # should throw Value Error
     with pytest.raises(ValueError):
         create_pie_plot(
             names_of_sectors=["", ""],
@@ -31,7 +32,7 @@ def test_create_pie_plot(show_figures):
 @pytest.mark.order(1)
 @pytest.mark.dependency()
 def test_create_bar_plot(show_figures):
-    fig = create_pie_plot(
+    fig = create_bar_plot(
         names_of_sectors=["Non-imputed values", "Imputed values"],
         values_of_sectors=[10, 21],
         heading="Number of Imputed Values",

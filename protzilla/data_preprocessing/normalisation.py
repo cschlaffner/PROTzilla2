@@ -42,8 +42,8 @@ def by_z_score(intensity_df: pd.DataFrame):
 
 
 def by_median(
-    intensity_df: pd.DataFrame,
-    q=0.5,  # quartile, default is median
+        intensity_df: pd.DataFrame,
+        q=0.5,  # quartile, default is median
 ):
     """
     A function to perform a quartile/percentile normalisation on your
@@ -81,7 +81,7 @@ def by_median(
                 quantile
             )
         else:
-            try:  # TODO: think about what to do if median is zero
+            try:
                 raise ValueError(
                     "Careful, your median is zero - we recommend\
                     adapting your filtering strategy or using a higher\
@@ -97,7 +97,7 @@ def by_median(
 
     return (
         scaled_df,
-        dict(),
+        dict(),  # TODO 40 Since samples are set to 0 here I think it makes sense to return a list of said samples
     )
 
 
@@ -154,12 +154,12 @@ def by_totalsum(intensity_df: pd.DataFrame):
     return (
         scaled_df,
         dict(),
-    )
+    )  # TODO 40 Same as above, I think returning the nulled samples would make sense
 
 
 def by_reference_protein(
-    intensity_df: pd.DataFrame,
-    reference_protein_id: str = None,
+        intensity_df: pd.DataFrame,
+        reference_protein_id: str = None,
 ):
     """
     A function to perform protein-intensity normalisation in reference
@@ -206,8 +206,8 @@ def by_reference_protein(
             continue
 
         df_sample.loc[:, f"Normalised {intensity_name}"] = df_sample.loc[
-            :, intensity_name
-        ].div(reference_intensity)
+                                                           :, intensity_name
+                                                           ].div(reference_intensity)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)

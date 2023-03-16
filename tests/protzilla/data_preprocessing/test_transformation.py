@@ -143,3 +143,14 @@ def test_log10_transformation(show_figures, log10_transformation_df, log10_trans
         log10_transformation_expected_df
     ), f"The results of the transformation: {result_df} \
             are not equal to the expected result: {log10_transformation_expected_df}"
+
+def test_log_by_0_transformation():
+    # TODO 41 test expected behaviour when 0 occurs in df
+    df = pd.DataFrame(
+        data=(["Sample1", "Protein1", "Gene1", 0.0],),
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+
+    by_log(
+        df, log_method="log2"
+    )

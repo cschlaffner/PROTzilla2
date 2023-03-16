@@ -49,7 +49,6 @@ def assertion_df_knn():
 
 @pytest.fixture
 def assertion_df_min_value_per_df():
-    # create data frame with correct answers
     assertion_list = (
         ["Sample1", "Protein1", "Gene1", 0.1],
         ["Sample1", "Protein2", "Gene2", 20],
@@ -70,7 +69,6 @@ def assertion_df_min_value_per_df():
 
 @pytest.fixture
 def assertion_df_min_value_per_sample():
-    # create data frame with correct answers
     assertion_list = (
         ["Sample1", "Protein1", "Gene1", 2],
         ["Sample1", "Protein2", "Gene2", 20],
@@ -90,7 +88,6 @@ def assertion_df_min_value_per_sample():
 
 @pytest.fixture
 def assertion_df_min_value_per_protein():
-    # create data frame with correct answers
     assertion_list = (
         ["Sample1", "Protein1", "Gene1", 1],
         ["Sample1", "Protein2", "Gene2", 20],
@@ -110,7 +107,6 @@ def assertion_df_min_value_per_protein():
 
 @pytest.fixture
 def assertion_df_mean_per_protein():
-    # create data frame with correct answers
     assertion_list = (
         ["Sample1", "Protein1", "Gene1", 50.5],
         ["Sample1", "Protein2", "Gene2", 20],
@@ -173,8 +169,8 @@ def test_imputation_min_value_per_sample(show_figures, input_imputation_df, asse
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_min_value_per_protein(show_figures, input_imputation_df, assertion_df_min_value_per_protein):
-    # generate dummy data
     assertion_df = assertion_df_min_value_per_protein
+
     # perform imputation on test data frame
     result_df = by_min_per_protein(input_imputation_df, shrinking_value=1.0)[0]
 
@@ -194,15 +190,15 @@ def test_imputation_min_value_per_protein(show_figures, input_imputation_df, ass
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertion_df_mean_per_protein):
-    # generate dummy data
     assertion_df = assertion_df_mean_per_protein
+
     # perform imputation on test data frame
     result_df = by_simple_imputer(
         input_imputation_df,
         strategy="mean",
     )[0]
 
-    (fig1, fig2) = by_simple_imputer_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
+    fig1, fig2 = by_simple_imputer_plot(input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample")
     if show_figures:
         fig1.show()
         fig2.show()
@@ -218,6 +214,8 @@ def test_imputation_mean_per_protein(show_figures, input_imputation_df, assertio
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_build_box_hist_plot"])
 def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
+    assertion_df = assertion_df_knn
+
     # perform imputation on test data frame
     result_df = by_knn(
         input_imputation_df,
@@ -231,10 +229,10 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
 
     # test whether dataframes match
     assert result_df.equals(
-        assertion_df_knn
+        assertion_df
     ), f"Imputation by simple median imputation per protein does not match!\n\
              Imputation should be \n\
-            {assertion_df_knn} but is\n {result_df}"
+            {assertion_df} but is\n {result_df}"
 
 
 def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):

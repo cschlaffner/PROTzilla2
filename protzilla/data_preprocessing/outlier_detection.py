@@ -10,7 +10,7 @@ from protzilla.data_preprocessing.plots import (
 )
 
 
-def with_isolation_forest(
+def by_isolation_forest(
     intensity_df: pd.DataFrame, n_estimators: int = 50, n_jobs: int = -1
 ):
     """
@@ -103,7 +103,7 @@ def with_local_outlier_factor(
 
 
 # TODO: handling NaN values
-def with_pca(
+def by_pca(
     intensity_df: pd.DataFrame,
     threshold: int = 2,
     number_of_components: int = 3,
@@ -202,15 +202,15 @@ def with_pca(
     )
 
 
-def with_isolation_forest_plot(df, result_df, current_out):
+def by_isolation_forest_plot(df, result_df, current_out):
     return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
 
 
-def with_local_outlier_factor_plot(df, result_df, current_out):
+def by_local_outlier_factor_plot(df, result_df, current_out):
     return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
 
 
-def with_pca_plot(df, result_df, current_out, number_of_components):
+def by_pca_plot(df, result_df, current_out, number_of_components):
     pca_df = current_out["pca_df"]
     explained_variance_ratio = current_out["explained_variance_ratio"]
     if number_of_components == 2:

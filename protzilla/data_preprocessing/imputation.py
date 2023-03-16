@@ -11,7 +11,7 @@ from sklearn.impute import KNNImputer, SimpleImputer
 
 def by_knn(intensity_df: pd.DataFrame, n_neighbors=5,
            **kwargs  # quantile, default is median
-           ) -> Tuple[pd.DataFrame, dict]:
+           ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -83,6 +83,7 @@ def by_simple_imputer(
     and an empty dict
     :rtype: pd.DataFrame, int
     """
+    assert strategy in ["mean", "median", "most_frequent"]
     transformed_df = long_to_wide(intensity_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
 
@@ -142,8 +143,7 @@ def by_min_per_sample(intensity_df: pd.DataFrame,
         else:
             location.fillna(location.min() * shrinking_value, inplace=True)
             intensity_df_copy[intensity_name].update(location)
-    imputed_df = intensity_df_copy
-    return imputed_df, dict()
+    return intensity_df_copy, dict()
 
 
 def by_min_per_protein(intensity_df: pd.DataFrame,
@@ -171,7 +171,6 @@ def by_min_per_protein(intensity_df: pd.DataFrame,
     """
     transformed_df = long_to_wide(intensity_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
-    before_nans = transformed_df.isnull().sum().sum()
     columns = transformed_df.columns
 
     # Iterate over proteins to impute minimal value
@@ -221,9 +220,7 @@ def by_min_per_dataset(intensity_df: pd.DataFrame,
         intensity_df_copy[intensity_name].min() * shrinking_value,
         inplace=True,
     )
-    imputed_df = intensity_df_copy
-
-    return imputed_df, dict()
+    return intensity_df_copy, dict()
 
 
 def by_knn_plot(df, result_df, graph_types, group_by):

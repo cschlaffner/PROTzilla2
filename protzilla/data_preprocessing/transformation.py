@@ -20,6 +20,8 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
             """
     intensity_name = intensity_df.columns.values.tolist()[3]
     transformed_df = intensity_df.copy()
+
+    #TODO 41 drop data when intensity is 0 and return them in dict
     if log_method == "log2":
         transformed_df[intensity_name] = np.log2(
             transformed_df[intensity_name]
