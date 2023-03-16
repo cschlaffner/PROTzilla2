@@ -1,7 +1,7 @@
 ---
 name: TODO Template
 about: TODO Issue Template
-title: #TODO x
+title: '#TODO x'
 labels: todo
 project: PROTzilla2
 
