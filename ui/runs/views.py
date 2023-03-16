@@ -52,7 +52,6 @@ def make_parameter_input(key, param_dict, disabled, default=None):
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
-
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
 
