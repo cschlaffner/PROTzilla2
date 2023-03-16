@@ -1,9 +1,10 @@
-import pytest
 import pandas as pd
+import pytest
+
 from protzilla.data_preprocessing.filter_samples import (
     by_protein_count,
-    by_protein_intensity_sum,
     by_protein_count_plot,
+    by_protein_intensity_sum,
     by_protein_intensity_sum_plot,
 )
 
