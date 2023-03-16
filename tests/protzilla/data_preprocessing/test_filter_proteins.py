@@ -54,3 +54,4 @@ def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
         "Protein4",
     ] == list_proteins_excluded, f"excluded proteins do not match \
             Protein1 and Protein4, but are {list_proteins_excluded}"
+

@@ -5,19 +5,19 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 
 def by_log(intensity_df: pd.DataFrame, log_method="log10"):
     """
-            A class of a transformer to log-transform intensity
-            DataFrames. Supports log-transformation to the base
-            of 2 or 10.
+    A class of a transformer to log-transform intensity
+    DataFrames. Supports log-transformation to the base
+    of 2 or 10.
 
-            :param intensity_df: a protein data frame in long format
-            :type intensity_df: pd.DataFrame
-            :param log_method: String of the used log method "log10" (base 10)\
-            or "log2" (base 2). Default: "log10"
-            :type log_method: Str
-            :return: returns a pandas DataFrame in typical protzilla\
-            long format with the transformed data and an empty dict.
-            :rtype: Tuple[pandas DataFrame, dict]
-            """
+    :param intensity_df: a protein data frame in long format
+    :type intensity_df: pd.DataFrame
+    :param log_method: String of the used log method "log10" (base 10)\
+    or "log2" (base 2). Default: "log10"
+    :type log_method: Str
+    :return: returns a pandas DataFrame in typical protzilla\
+    long format with the transformed data and an empty dict.
+    :rtype: Tuple[pandas DataFrame, dict]
+    """
     intensity_name = intensity_df.columns.values.tolist()[3]
     transformed_df = intensity_df.copy()
     if log_method == "log2":
