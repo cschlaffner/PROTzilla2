@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from .constants.method_mapping import method_map
+from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 
@@ -33,7 +33,10 @@ class Run:
             run_config = json.load(f)
         history = History.from_disk(run_name, run_config["df_mode"])
         return cls(
-            run_name, run_config["workflow_config_name"], run_config["df_mode"], history
+            run_name,
+            run_config["workflow_config_name"],
+            run_config["df_mode"],
+            history,
         )
 
     def __init__(self, run_name, workflow_config_name, df_mode, history):
@@ -55,9 +58,14 @@ class Run:
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
+        self.plots = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        self.section, self.step, self.method = location = (section, step, method)
+        self.section, self.step, self.method = location = (
+            section,
+            step,
+            method,
+        )
         method_callable = method_map.get(location, lambda df, **kwargs: (df, {}))
         self.perform_calculation(method_callable, parameters)
 
@@ -69,7 +77,14 @@ class Run:
         self.perform_calculation(method_callable, parameters)
         self.next_step()
 
-    # TODO: plots (same method with plots param/<method_name>_plots)
+    def create_plot_from_location(self, section, step, method, parameters):
+        location = (section, step, method)
+        self.create_plot(plot_map[location], parameters)
+
+    def create_plot(self, method_callable, parameters):
+        self.plots = method_callable(
+            self.df, self.result_df, self.current_out, **parameters
+        )
 
     def next_step(self):
         self.history.add_step(
@@ -79,7 +94,7 @@ class Run:
             self.current_parameters,
             self.result_df,
             self.current_out,
-            plots=[],
+            self.plots,
         )
         self.df = self.result_df
         self.result_df = None
