@@ -53,6 +53,6 @@ def test_outlier_detection_with_local_outlier_factor(
 
 def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
     result_df, dropouts = by_pca(outlier_detection_df, 2, 3)
-    fig = by_pca_plot(outlier_detection_df, result_df, dropouts, 3)[0]
+    fig = by_pca_plot(outlier_detection_df, result_df, dropouts)[0]
     if show_figures:
         fig.show()
