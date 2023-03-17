@@ -97,8 +97,9 @@ class History:
             )
             for step in self.steps
         ]
+        history_json = json.dumps(to_save, indent=2)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
-            json.dump(to_save, f, indent=2)
+            f.write(history_json)
 
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"df_{index}.csv"
