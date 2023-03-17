@@ -22,8 +22,11 @@
                         console.log(response);
                         $("#{{method_details_id}}").html(response);
                     }
-                    //TODO: ajax error handling?
-                });
+                }).fail(function(xhr, status, error) {
+                    //ajax request failed.
+                    let errorMessage = xhr.status + ': ' + xhr.statusText
+                    alert('Error - ' + errorMessage);
+              });
             })
         });
     </script>
