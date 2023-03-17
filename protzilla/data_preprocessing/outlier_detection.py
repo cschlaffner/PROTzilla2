@@ -201,6 +201,7 @@ def by_pca(
         outlier_list=outlier_list,
         pca_df=df_transformed_pca_data,
         explained_variance_ratio=pca_model.explained_variance_ratio_,
+        number_of_components=number_of_components,
     )
 
 
@@ -212,8 +213,9 @@ def by_local_outlier_factor_plot(df, result_df, current_out):
     return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
 
 
-def by_pca_plot(df, result_df, current_out, number_of_components):
+def by_pca_plot(df, result_df, current_out):
     pca_df = current_out["pca_df"]
+    number_of_components = current_out["number_of_components"]
     explained_variance_ratio = current_out["explained_variance_ratio"]
     if number_of_components == 2:
         return [create_pca_2d_scatter_plot(pca_df, explained_variance_ratio)]
