@@ -61,8 +61,9 @@ def detail(request, run_name):
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = []
 
-        # append dropdown for method choice in step
+    # append dropdown for method choice in step
     # move to method capitalize step
+    # add method to name or dropdown or something
     current_fields.append(
             render_to_string(
             "runs/field_select.html",
@@ -107,12 +108,19 @@ def detail(request, run_name):
             info_str=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=current_fields,
+            method_dropdown_id=step.replace("-", "_"),
+            method_details_id="details",
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
             static_url=STATIC_URL,
-            method_dropdown_id=step.replace("-", "_")
         ),
     )
+
+
+def change_method(request, run_name):
+    # TODO: return fields for new method
+    method = request.POST["method"]
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def create(request):

@@ -9,7 +9,21 @@
             console.log("{{method_dropdown_id}}");
 
             $("#{{ method_dropdown_id}}").change(function() {
-                console.log("method changed");
+                const selected_method = $(this).val();
+                const method_details = $("#{{method_details_id}}")
+
+                $.ajax({
+                    url: "{% url 'runs:change_method' run_name %}",
+                    type: "POST",
+                    data: {
+                        method: selected_method,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        //window.location.reload();
+                    }
+                });
             })
         });
     </script>
@@ -32,10 +46,17 @@
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post">
     {% csrf_token %}
-    {% for field in fields %}
-        {{ field }}
-        <br>
-    {% endfor %}
+        {{ fields|first }}
+        <div id="{{ method_details_id }}">
+            {% for field in fields %}
+                {% if forloop.first %}
+                {% else %}
+                    {{ field }}
+                    <br>
+                    {% endif %}
+            {% endfor %}
+        </div>
+    
     <input type="submit" value="Calculate">
 </form>
 
