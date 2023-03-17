@@ -15,7 +15,7 @@
 | protzilla/data\_preprocessing/filter\_samples.py                |       26 |        1 |        4 |        2 |     90% |56->65, 66 |
 | protzilla/data\_preprocessing/imputation.py                     |       74 |        1 |       14 |        1 |     98% |       138 |
 | protzilla/data\_preprocessing/normalisation.py                  |       93 |        1 |       22 |        2 |     97% |239->250, 251 |
-| protzilla/data\_preprocessing/outlier\_detection.py             |       56 |        4 |       16 |        6 |     83% |151, 156->165, 169-178, 182->198, 219, 220->exit |
+| protzilla/data\_preprocessing/outlier\_detection.py             |       57 |        4 |       16 |        6 |     84% |152, 157->166, 170-179, 183->199, 222, 223->exit |
 | protzilla/data\_preprocessing/plots.py                          |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                 |       20 |        2 |        8 |        3 |     82% |31, 43->52, 53 |
 | protzilla/history.py                                            |       64 |        2 |       22 |        2 |     95% |   32, 133 |
@@ -36,7 +36,7 @@
 | tests/protzilla/test\_history.py                                |       53 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       38 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                         |        0 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** |  **969** |   **97** |  **179** |   **40** | **86%** |           |
+|                                                       **TOTAL** |  **970** |   **97** |  **179** |   **40** | **86%** |           |
 
 
 ## Setup coverage badge
