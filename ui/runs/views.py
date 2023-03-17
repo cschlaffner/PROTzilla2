@@ -1,6 +1,6 @@
 import sys
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -118,9 +118,29 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
-    # TODO: return fields for new method
+    if run_name not in active_runs:
+        run = Run.continue_existing(run_name)
+        run.step_index = len(run.history.steps) - 1
+        active_runs[run_name] = run
+
+    run = active_runs[run_name]
+    section, step, _ = run.current_workflow_location()
     method = request.POST["method"]
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
+    current_fields = []
+
+    for key, param_dict in parameters.items():
+        if run.current_parameters:
+            default = run.current_parameters[key]
+        else:
+            default = None
+        current_fields.append(
+            make_parameter_input(key, param_dict, disabled=False, default=default)
+        )
+
+    # TODO: return fields for new method
+    html = current_fields[0]
+    return JsonResponse(html, safe=False)
 
 
 def create(request):
