@@ -26,7 +26,7 @@ def index(request):
     )
 
 
-def make_parameter_input(key, param_dict, disabled, default=None):
+def make_parameter_input(key, param_dict, disabled):
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
         if "step" not in param_dict:
@@ -59,12 +59,8 @@ def detail(request, run_name):
     for key, param_dict in parameters.items():
         # todo use workflow default
         if run.current_parameters:
-            default = run.current_parameters[key]
-        else:
-            default = None
-        current_fields.append(
-            make_parameter_input(key, param_dict, disabled=False, default=default)
-        )
+            param_dict["default"] = run.current_parameters[key]
+        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     displayed_history = []
     for step in run.history.steps:
         fields = []
@@ -73,11 +69,8 @@ def detail(request, run_name):
                 "parameters"
             ]
             for key, param_dict in parameters.items():
-                fields.append(
-                    make_parameter_input(
-                        key, param_dict, disabled=True, default=step.parameters[key]
-                    )
-                )
+                param_dict["default"] = step.parameters[key]
+                fields.append(make_parameter_input(key, param_dict, disabled=True))
         displayed_history.append(
             dict(name=f"{step.section}/{step.step}/{step.method}", fields=fields)
         )
