@@ -10,7 +10,6 @@
 
             $("#{{ method_dropdown_id}}").change(function() {
                 const selected_method = $(this).val();
-                const method_details = $("#{{method_details_id}}")
 
                 $.ajax({
                     url: "{% url 'runs:change_method' run_name %}",
@@ -23,6 +22,7 @@
                         console.log(response);
                         $("#{{method_details_id}}").html(response);
                     }
+                    //TODO: ajax error handling?
                 });
             })
         });
@@ -48,15 +48,8 @@
     {% csrf_token %}
         {{ fields|first }}
         <div id="{{ method_details_id }}">
-            {% for field in fields %}
-                {% if forloop.first %}
-                {% else %}
-                    {{ field }}
-                    <br>
-                    {% endif %}
-            {% endfor %}
+            {% include "runs/fields.html" with fields=fields|slice:"1:" %} 
         </div>
-    
     <input type="submit" value="Calculate">
 </form>
 

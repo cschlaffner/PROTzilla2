@@ -57,20 +57,17 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
     
-
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = []
+    method_dropdown_id = f"{step.replace('-', '_')}_method"
 
-    # append dropdown for method choice in step
-    # move to method capitalize step
-    # add method to name or dropdown or something
     current_fields.append(
             render_to_string(
             "runs/field_select.html",
             context=dict(
                 disabled=False,
-                key=step.replace("-", "_"),
-                name=f"{step} Method:",
+                key=method_dropdown_id,
+                name=f"{step.replace('-', '_').capitalize()} Method:",
                 default=method,
                 categories=run.workflow_meta["sections"][section][step].keys(),
             ),
@@ -108,8 +105,8 @@ def detail(request, run_name):
             info_str=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=current_fields,
-            method_dropdown_id=step.replace("-", "_"),
-            method_details_id="details",
+            method_dropdown_id=method_dropdown_id,
+            method_details_id=f"{step.replace('-', '_')}_details",
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
             static_url=STATIC_URL,
@@ -138,8 +135,12 @@ def change_method(request, run_name):
             make_parameter_input(key, param_dict, disabled=False, default=default)
         )
 
-    # TODO: return fields for new method
-    html = current_fields[0]
+    html = render_to_string(
+                "runs/fields.html",
+                context=dict(
+                    fields=current_fields
+                ),
+            )
     return JsonResponse(html, safe=False)
 
 
