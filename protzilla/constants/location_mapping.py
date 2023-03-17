@@ -4,6 +4,7 @@ from ..data_preprocessing import (
     imputation,
     normalisation,
     transformation,
+    outlier_detection,
 )
 from ..importing import ms_data_import
 
@@ -15,29 +16,61 @@ file that correspond to the method.
 method_map = {
     (
         "importing",
-        "ms-data-import",
-        "max-quant-data-import",
+        "ms_data_import",
+        "max_quant_import",
     ): ms_data_import.max_quant_import,
+    (
+        "importing",
+        "ms_data_import",
+        "ms_fragger_import",
+    ): lambda df, feature_orientation, file: print("warning: not implemented")
+    or (df, {}),
+    (
+        "importing",
+        "metadata_import",
+        "metadata_import_method",
+    ): lambda df, feature_orientation, file: print("warning: not implemented")
+    or (df, {}),
     (
         "data_preprocessing",
         "filter_proteins",
-        "by_low_frequency",
+        "low_frequency_filter",
     ): filter_proteins.by_low_frequency,
     (
         "data_preprocessing",
         "filter_samples",
-        "by_protein_intensity_sum",
+        "protein_intensity_sum_filter",
     ): filter_samples.by_protein_intensity_sum,
     (
         "data_preprocessing",
-        "normalisation",
-        "z-score",
-    ): normalisation.by_z_score,
+        "filter_samples",
+        "protein_count_filter",
+    ): filter_samples.by_protein_count,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "pca",
+    ): outlier_detection.by_pca,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "isolation_forest",
+    ): outlier_detection.by_isolation_forest,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "local_outlier_factor",
+    ): outlier_detection.with_local_outlier_factor,
+    (
+        "data_preprocessing",
+        "transformation",
+        "log_transformation",
+    ): transformation.by_log,
     (
         "data_preprocessing",
         "normalisation",
-        "median",
-    ): normalisation.by_median,
+        "z_score",
+    ): normalisation.by_z_score,
     (
         "data_preprocessing",
         "normalisation",
@@ -46,13 +79,13 @@ method_map = {
     (
         "data_preprocessing",
         "normalisation",
-        "ref-protein",
-    ): normalisation.by_reference_protein,
+        "median",
+    ): normalisation.by_median,
     (
         "data_preprocessing",
-        "transformation",
-        "log-transformation",
-    ): transformation.by_log,
+        "normalisation",
+        "ref_protein",
+    ): normalisation.by_reference_protein,
     (
         "data_preprocessing",
         "imputation",
@@ -61,22 +94,22 @@ method_map = {
     (
         "data_preprocessing",
         "imputation",
-        "simple-imputation-per-protein",
+        "simple_imputation_per_protein",
     ): imputation.by_simple_imputer,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-sample",
+        "min_value_per_sample",
     ): imputation.by_min_per_sample,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-protein",
+        "min_value_per_protein",
     ): imputation.by_min_per_protein,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-dataset",
+        "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
 }
 
@@ -87,14 +120,14 @@ found in the workflow_meta file that correspond to the method.
 """
 plot_map = {
     (
-        "data-preprocessing",
-        "filter-proteins",
-        "low-frequency-filter",
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
     (
         "data_preprocessing",
         "normalisation",
-        "z-score",
+        "z_score",
     ): normalisation.by_z_score_plot,
     (
         "data_preprocessing",
@@ -109,12 +142,12 @@ plot_map = {
     (
         "data_preprocessing",
         "normalisation",
-        "ref-protein",
+        "ref_protein",
     ): normalisation.by_reference_protein_plot,
     (
         "data_preprocessing",
         "transformation",
-        "log-transformation",
+        "log_transformation",
     ): transformation.by_log_plot,
     (
         "data_preprocessing",
@@ -124,21 +157,21 @@ plot_map = {
     (
         "data_preprocessing",
         "imputation",
-        "simple-imputation-per-protein",
+        "simple_imputation_per_protein",
     ): imputation.by_simple_imputer_plot,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-sample",
+        "min_value_per_sample",
     ): imputation.by_min_per_sample_plot,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-protein",
+        "min_value_per_protein",
     ): imputation.by_min_per_protein_plot,
     (
         "data_preprocessing",
         "imputation",
-        "min-value-per-dataset",
+        "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
 }
