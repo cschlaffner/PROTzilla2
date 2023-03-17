@@ -47,6 +47,20 @@ def make_parameter_input(key, param_dict, disabled, default=None):
         ),
     )
 
+def get_current_fields(run, section, step, method):
+    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
+    current_fields = []
+
+    for key, param_dict in parameters.items():
+        if run.current_parameters:
+            default = run.current_parameters[key]
+        else:
+            default = None
+        current_fields.append(
+            make_parameter_input(key, param_dict, disabled=False, default=default)
+        )
+    return current_fields
+
 
 def detail(request, run_name):
     if run_name not in active_runs:
@@ -57,11 +71,10 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
     
-    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
-    current_fields = []
+    current_fields = get_current_fields(run, section, step, method)
     method_dropdown_id = f"{step.replace('-', '_')}_method"
 
-    current_fields.append(
+    current_fields.insert(0,
             render_to_string(
             "runs/field_select.html",
             context=dict(
@@ -73,14 +86,7 @@ def detail(request, run_name):
             ),
             )
     )
-    for key, param_dict in parameters.items():
-        if run.current_parameters:
-            default = run.current_parameters[key]
-        else:
-            default = None
-        current_fields.append(
-            make_parameter_input(key, param_dict, disabled=False, default=default)
-        )
+
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
@@ -115,25 +121,9 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
-    if run_name not in active_runs:
-        run = Run.continue_existing(run_name)
-        run.step_index = len(run.history.steps) - 1
-        active_runs[run_name] = run
-
     run = active_runs[run_name]
     section, step, _ = run.current_workflow_location()
-    method = request.POST["method"]
-    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
-    current_fields = []
-
-    for key, param_dict in parameters.items():
-        if run.current_parameters:
-            default = run.current_parameters[key]
-        else:
-            default = None
-        current_fields.append(
-            make_parameter_input(key, param_dict, disabled=False, default=default)
-        )
+    current_fields = get_current_fields(run, section, step, request.POST["method"])
 
     html = render_to_string(
                 "runs/fields.html",
