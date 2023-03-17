@@ -128,10 +128,11 @@ def by_pca(
     :param number_of_components: number of principal components
     used in the PCA. Allowed: 2 or 3. Default: 3
     :type number_of_components: integer (2 or 3)
-    :return: returns a Dataframe containing all samples that are not outliers and a\
-    dict with list of inliers sample names, a DataFrame that contains the projection of\
-    the intensity_df on first principal components and a list that contains the\
-    explained variation for each component
+    :return: returns a Dataframe containing all samples that are not outliers.
+    A dict with list of inlier sample names, a DataFrame that contains the projection of \
+    the intensity_df on first principal components, a list that contains the \
+    explained variation for each component and an int, the number of components \
+    the calculations were executed with
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -201,6 +202,7 @@ def by_pca(
         outlier_list=outlier_list,
         pca_df=df_transformed_pca_data,
         explained_variance_ratio=pca_model.explained_variance_ratio_,
+        number_of_components=number_of_components,
     )
 
 
@@ -212,8 +214,9 @@ def by_local_outlier_factor_plot(df, result_df, current_out):
     return [create_anomaly_score_bar_plot(current_out["anomaly_df"])]
 
 
-def by_pca_plot(df, result_df, current_out, number_of_components):
+def by_pca_plot(df, result_df, current_out):
     pca_df = current_out["pca_df"]
+    number_of_components = current_out["number_of_components"]
     explained_variance_ratio = current_out["explained_variance_ratio"]
     if number_of_components == 2:
         return [create_pca_2d_scatter_plot(pca_df, explained_variance_ratio)]

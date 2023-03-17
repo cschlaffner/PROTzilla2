@@ -1,577 +1,644 @@
 {
-  "analysis-level": "protein",
-  "sections": {
-    "importing": {
-      "ms-data-import": {
-        "max-quant-import": {
-          "name": "Max Quant Data Import",
-          "description": "Import MS data",
-          "parameters": {
-            "intensity_name": {
-              "name": "intensity name",
-              "type": "categorical",
-              "categories": [
-                "LFQ intensity",
-                "Intensity",
-                "iBAQ"
-              ],
-              "default-value": "Intensity"
-            },
-            "file": {
-              "name": "File:",
-              "type": "file"
-            }
-          }
-        },
-        "ms-fragger-import": {
-          "name": "MS Fragger Data Import",
-          "description": "Import MS data",
-          "parameters": {
-            "intensity_name": {
-              "name": "intensity name",
-              "type": "categorical",
-              "categories": [
-                "LFQ intensity",
-                "Intensity",
-                "iBAQ"
-              ],
-              "default-value": "Intensity"
-            },
-            "file": {
-              "name": "File:",
-              "type": "file"
-            }
+  "importing": {
+    "ms_data_import": {
+      "max_quant_import": {
+        "name": "Max Quant Data Import",
+        "description": "",
+        "parameters": {
+          "intensity_name": {
+            "name": "intensity parameter",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default": "Intensity"
+          },
+          "file": {
+            "name": "File:",
+            "type": "file"
           }
         }
       },
-      "metadata-import": {
-        "metadata-import-method": {
-          "name": "Metadata Import",
-          "description": "Import metadata",
-          "parameters": {
-            "feature_orientation": {
-              "name": "feature orientation",
-              "type": "categorical",
-              "categories": [
-                "Rows (features in rows, samples in columns)",
-                "Columns (samples in rows, features in columns)"
-              ],
-              "default-value": "Rows (features in rows, samples in columns)"
-            },
-            "file": {
-              "name": "File:",
-              "type": "file"
-            }
+      "ms_fragger_import": {
+        "name": "MS Fragger Data Import",
+        "description": "",
+        "parameters": {
+          "intensity_name": {
+            "name": "intensity name",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default-value": "Intensity"
+          },
+          "file": {
+            "name": "File:",
+            "type": "file"
           }
         }
       }
     },
-"data-preprocessing": {
-  "filter-proteins": {
-        "low-frequency-filter": {
-          "name": "Filter by low frequency",
-          "description": "Sample filter method:",
-          "parameters": {
-            "threshold": {
-              "name": "Threshold for the relative amount of samples a protein is detected in:",
-              "type": "numeric",
-              "min": 0,
-              "max": 1,
-              "step": 0.1,
-              "default-value": 0.5
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Bar chart"
-            }
-          }
-        }
-      },
-      "filter-samples": {
-        "protein-count-filter": {
-          "name": "Filter by protein count per sample",
-          "description": "",
-          "parameters": {
-            "threshold": {
-              "name": "Number of standard deviations from the median:",
-              "type": "numeric",
-              "min": 0,
-              "max": 100,
-              "step": 1.0,
-              "default-value": 3
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        },
-        "protein-intensity-sum-filter": {
-          "name": "Filter by sum of protein intensities per sample",
-          "description": "",
-          "parameters": {
-            "threshold": {
-              "name": "Number of standard deviations from the median:",
-              "type": "numeric",
-              "min": 0,
-              "max": 100,
-              "step": 1.0,
-              "default-value": 4
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        }
-      },
-      "outlier-detection": {
-        "pca": {
-          "name": "PCA (Principal component analysis)",
-          "description": "",
-          "parameters": {
-            "threshold": {
-              "name": "Threshold for number of standard deviations from the median:",
-              "type": "numeric",
-              "min": 1,
-              "max": 5,
-              "step": 1.0,
-              "default-value": 2
-            },
-            "no_components": {
-              "name": "Number of components:",
-              "type": "numeric",
-              "min": 2,
-              "max": 3,
-              "step": 1.0,
-              "default-value": 3
-            }
-          }
-        },
-        "isolation-forest": {
-          "name": "Isolation forest",
-          "description": "",
-          "parameters": {
-            "no_estimators": {
-              "name": "Number of estimators:",
-              "type": "numeric",
-              "min": 1,
-              "max": 100,
-              "step": 1.0,
-              "default-value": 50
-            }
-          }
-        },
-        "local-outlier-factor": {
-          "name": "Local outlier factor",
-          "description": "",
-          "parameters": {
-            "no_neighbours": {
-              "name": "Number of neighbours:",
-              "type": "numeric",
-              "min": 1,
-              "max": 100,
-              "step": 1.0,
-              "default-value": 35
-            }
-          }
-        }
-      },
-      "transformation": {
-        "log-transformation": {
-          "name": "Log transformation",
-          "description": "",
-          "parameters": {
-            "log-base": {
-              "name": "Log transformation base:",
-              "type": "categorical",
-              "categories": [
-                "log2",
-                "log10"
-              ],
-              "default-value": "log2"
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            }
-          }
-        }
-      },
-      "normalisation": {
-        "z-score": {
-          "name": "Z-score normalisation",
-          "description": "",
-          "parameters": {
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            }
-          }
-        },
-        "totalsum": {
-          "name": "Sumtotal normalisation",
-          "description": "",
-          "parameters": {
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            }
-          }
-        },
-        "median": {
-          "name": "Median normalisation",
-          "description": "",
-          "parameters": {
-            "percentile": {
-              "name": "Percentile for normalisation:",
-              "type": "numeric",
-              "min": 0,
-              "max": 1,
-              "step": 0.05,
-              "default-value": 0.5
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            }
-          }
-        },
-        "ref-protein": {
-          "name": "Reference Protein Normalisation",
-          "description": "",
-          "parameters": {
-            "reference-protein": {
-              "name": "Reference Protein:",
-              "type": "protein_dropdown",
-              "default-value": ""
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            }
-          }
-        }
-      },
-      "imputation": {
-        "min-value-per-dataset": {
-          "name": "Minimum value per dataset",
-          "description": "",
-          "parameters": {
-            "shrinking-value": {
-              "name": "Shrinking Value:",
-              "type": "numeric",
-              "min": 0,
-              "max": 1,
-              "step": 0.01,
-              "default-value": 0.1
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            },
-            "graph-two-type": {
-              "name": "Graph type - Imputed Values:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        },
-        "min-value-per-protein": {
-          "name": "Minimum value per protein",
-          "description": "",
-          "parameters": {
-            "shrinking-value": {
-              "name": "Shrinking Value:",
-              "type": "numeric",
-              "min": 0,
-              "max": 1,
-              "step": 0.01,
-              "default-value": 0.1
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            },
-            "graph-two-type": {
-              "name": "Graph type - Imputed Values:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        },
-        "min-value-per-sample": {
-          "name": "Minimum value per sample",
-          "description": "",
-          "parameters": {
-            "shrinking-value": {
-              "name": "Shrinking Value:",
-              "type": "numeric",
-              "min": 0,
-              "max": 1,
-              "step": 0.01,
-              "default-value": 0.1
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            },
-            "graph-two-type": {
-              "name": "Graph type - Imputed Values:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        },
-        "simple-imputation-per-protein": {
-          "name": "Mean/ median/ mode per protein",
-          "description": "",
-          "parameters": {
-            "strategy": {
-              "name": "Strategy:",
-              "type": "categorical",
-              "categories": [
-                "mean",
-                "median",
-                "most frequent"
-              ],
-              "default-value": "median"
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Boxplot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            },
-            "graph-two-type": {
-              "name": "Graph type - Imputed Values:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Pie chart"
-            }
-          }
-        },
-        "knn": {
-          "name": "k-nearest neighbours (kNN)",
-          "description": "",
-          "parameters": {
-            "number-of-neighbours": {
-              "name": "Number of neighbours:",
-              "type": "numeric",
-              "min": 1,
-              "max": 100,
-              "step": 1,
-              "default-value": 5
-            },
-            "graph-one-type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Boxplot",
-                "Histogram"
-              ],
-              "default-value": "Box plot"
-            },
-            "graph-one-group-by": {
-              "name": "Group by:",
-              "type": "categorical",
-              "categories": [
-                "None",
-                "Sample",
-                "Protein ID"
-              ],
-              "default-value": "None"
-            },
-            "graph-two-type": {
-              "name": "Graph type - Imputed Values:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default-value": "Bar Chart"
-            }
+    "metadata_import": {
+      "metadata_import_method": {
+        "name": "Metadata Import",
+        "description": "Import metadata",
+        "parameters": {
+          "feature_orientation": {
+            "name": "feature orientation",
+            "type": "categorical",
+            "categories": [
+              "Rows (features in rows, samples in columns)",
+              "Columns (samples in rows, features in columns)"
+            ],
+            "default": "Rows (features in rows, samples in columns)"
+          },
+          "file": {
+            "name": "File:",
+            "type": "file"
           }
         }
       }
-    },
-    "data-analysis": {
-      "differential-expression": {
-        "anova": {
-          "name": "ANOVA",
-          "description": "Analysis of Variance:",
-          "parameters": {}
+    }
+  },
+  "data_preprocessing": {
+    "filter_proteins": {
+      "low_frequency_filter": {
+        "name": "Filter by low frequency",
+        "description": "Sample filter method:",
+        "parameters": {
+          "threshold": {
+            "name": "Threshold for the relative amount of samples a protein is detected in:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
         },
-        "t-test": {
-          "name": "T-Test",
-          "description": "Statistical test assuming a t-distribution:",
-          "parameters": {}
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Bar chart"
+            }
+          }
+        ]
+      }
+    },
+    "filter_samples": {
+      "protein_count_filter": {
+        "name": "Filter by protein count per sample",
+        "description": "",
+        "parameters": {
+          "threshold": {
+            "name": "Number of standard deviations from the median:",
+            "type": "numeric",
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "default": 3
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "protein_intensity_sum_filter": {
+        "name": "Filter by sum of protein intensities per sample",
+        "description": "",
+        "parameters": {
+          "threshold": {
+            "name": "Number of standard deviations from the median:",
+            "type": "numeric",
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "default": 4
+          },
+          "graphs": [
+            {
+              "graph_type": {
+                "name": "Graph type:",
+                "type": "categorical",
+                "categories": [
+                  "Bar chart",
+                  "Pie chart"
+                ],
+                "default": "Pie chart"
+              }
+            }
+          ]
         }
       }
     },
-    "data-integration": {}
-  }
+    "outlier_detection": {
+      "pca": {
+        "name": "PCA (Principal component analysis)",
+        "description": "",
+        "parameters": {
+          "threshold": {
+            "name": "Threshold for number of standard deviations from the median:",
+            "type": "numeric",
+            "min": 1,
+            "max": 5,
+            "step": 1,
+            "default": 2
+          },
+          "no_components": {
+            "name": "Number of components:",
+            "type": "numeric",
+            "min": 2,
+            "max": 3,
+            "step": 1,
+            "default": 3
+          }
+        },
+        "graphs": [
+          {}
+        ]
+      },
+      "isolation_forest": {
+        "name": "Isolation forest",
+        "description": "",
+        "parameters": {
+          "no_estimators": {
+            "name": "Number of estimators:",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 50
+          }
+        },
+        "graphs": [
+          {}
+        ]
+      },
+      "local_outlier_factor": {
+        "name": "Local outlier factor",
+        "description": "",
+        "parameters": {
+          "no_neighbours": {
+            "name": "Number of neighbours:",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 35
+          }
+        },
+        "graphs": [
+          {}
+        ]
+      }
+    },
+    "transformation": {
+      "log_transformation": {
+        "name": "Log transformation",
+        "description": "",
+        "parameters": {
+          "log_base": {
+            "name": "Log transformation base:",
+            "type": "categorical",
+            "categories": [
+              "log2",
+              "log10"
+            ],
+            "default": "log2"
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          }
+        ]
+      }
+    },
+    "normalisation": {
+      "z_score": {
+        "name": "Z_score normalisation",
+        "description": "",
+        "parameters": {},
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          }
+        ]
+      },
+      "totalsum": {
+        "name": "Sumtotal normalisation",
+        "description": "",
+        "parameters": {
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          }
+        ]
+      },
+      "median": {
+        "name": "Median normalisation",
+        "description": "",
+        "parameters": {
+          "percentile": {
+            "name": "Percentile for normalisation:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.05,
+            "default": 0.5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          }
+        ]
+      },
+      "ref_protein": {
+        "name": "Reference Protein Normalisation",
+        "description": "",
+        "parameters": {
+          "reference_protein": {
+            "name": "Reference Protein:",
+            "type": "protein_dropdown",
+            "default": ""
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          }
+        ]
+      }
+    },
+    "imputation": {
+      "min_value_per_dataset": {
+        "name": "Minimum value per dataset",
+        "description": "",
+        "parameters": {
+          "shrinking_value": {
+            "name": "Shrinking Value:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type": {
+              "name": "Graph type – Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "min_value_per_protein": {
+        "name": "Minimum value per protein",
+        "description": "",
+        "parameters": {
+          "shrinking_value": {
+            "name": "Shrinking Value:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type": {
+              "name": "Graph type – Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "min_value_per_sample": {
+        "name": "Minimum value per sample",
+        "description": "",
+        "parameters": {
+          "shrinking_value": {
+            "name": "Shrinking Value:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type": {
+              "name": "Graph type – Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "simple_imputation_per_protein": {
+        "name": "Mean/ median/ mode per protein",
+        "description": "",
+        "parameters": {
+          "strategy": {
+            "name": "Strategy:",
+            "type": "categorical",
+            "categories": [
+              "mean",
+              "median",
+              "most frequent"
+            ],
+            "default": "median"
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type": {
+              "name": "Graph type – Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "knn": {
+        "name": "k_nearest neighbours (kNN)",
+        "description": "",
+        "parameters": {
+          "number_of_neighbours": {
+            "name": "Number of neighbours:",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type": {
+              "name": "Graph type – Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "data_analysis": {
+    "differential_expression": {
+      "anova": {
+        "name": "ANOVA",
+        "description": "Analysis of Variance:",
+        "parameters": {
+        }
+      },
+      "t_test": {
+        "name": "T_Test",
+        "description": "Statistical test assuming a t_distribution:",
+        "parameters": {}
+      }
+    }
+  },
+  "data_integration": {}
 }
