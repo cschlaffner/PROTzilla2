@@ -33,7 +33,7 @@
               "Intensity",
               "iBAQ"
             ],
-            "default-value": "Intensity"
+            "default": "Intensity"
           },
           "file": {
             "name": "File:",
