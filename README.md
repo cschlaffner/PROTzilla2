@@ -20,7 +20,7 @@
 | protzilla/data\_preprocessing/transformation.py                 |       20 |        2 |        8 |        3 |     82% |31, 43->52, 53 |
 | protzilla/history.py                                            |       64 |        2 |       22 |        2 |     95% |   32, 133 |
 | protzilla/importing/ms\_data\_import.py                         |       16 |        1 |        2 |        0 |     94% |        32 |
-| protzilla/run.py                                                |       86 |       20 |       22 |        0 |     69% |12-18, 64-70, 81-82, 85, 119-125 |
+| protzilla/run.py                                                |       87 |       19 |       22 |        1 |     71% |13-19, 25, 64-66, 77-78, 81, 115-119 |
 | protzilla/run\_manager.py                                       |       19 |       19 |        4 |        0 |      0% |      1-27 |
 | protzilla/utilities/\_\_init\_\_.py                             |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                           |       11 |        0 |        0 |        0 |    100% |           |
@@ -36,7 +36,7 @@
 | tests/protzilla/test\_history.py                                |       53 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       38 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                         |        0 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** |  **970** |   **97** |  **179** |   **40** | **86%** |           |
+|                                                       **TOTAL** |  **971** |   **96** |  **179** |   **41** | **86%** |           |
 
 
 ## Setup coverage badge
