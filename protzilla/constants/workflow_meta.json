@@ -16,7 +16,7 @@
             "default": "Intensity"
           },
           "file": {
-            "name": "File:",
+            "name": "MaxQuant intensities file:",
             "type": "file"
           }
         }
@@ -36,7 +36,7 @@
             "default": "Intensity"
           },
           "file": {
-            "name": "File:",
+            "name": "MSFragger intensities file:",
             "type": "file"
           }
         }
@@ -57,7 +57,7 @@
             "default": "Rows (features in rows, samples in columns)"
           },
           "file": {
-            "name": "File:",
+            "name": "Metadata file:",
             "type": "file"
           }
         }
