@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from shutil import rmtree
 
 from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
@@ -20,7 +21,9 @@ class Run:
     @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
-        run_path.mkdir(exist_ok=True)
+        if run_path.exists():
+            rmtree(run_path)
+        run_path.mkdir()
         run_config = dict(workflow_config_name=workflow_config_name, df_mode=df_mode)
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
@@ -33,23 +36,20 @@ class Run:
             run_config = json.load(f)
         history = History.from_disk(run_name, run_config["df_mode"])
         return cls(
-            run_name,
-            run_config["workflow_config_name"],
-            run_config["df_mode"],
-            history,
+            run_name, run_config["workflow_config_name"], run_config["df_mode"], history
         )
 
     def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.step_index = len(self.history.steps)
+
         with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
-
-        self.step_index = 0
 
         # make these a result of the step to be compatible with CLI?
         self.section = None
@@ -61,11 +61,7 @@ class Run:
         self.plots = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        self.section, self.step, self.method = location = (
-            section,
-            step,
-            method,
-        )
+        self.section, self.step, self.method = location = (section, step, method)
         method_callable = method_map.get(location, lambda df, **kwargs: (df, {}))
         self.perform_calculation(method_callable, parameters)
 
@@ -118,8 +114,6 @@ class Run:
     def current_workflow_location(self):
         steps = []
         for section_key, section_dict in self.workflow_config["sections"].items():
-            if section_key == "importing":
-                continue  # not standardized yet
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]

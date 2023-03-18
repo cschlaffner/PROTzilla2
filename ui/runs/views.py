@@ -7,7 +7,6 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.constants.paths import PROJECT_PATH
 from protzilla.run import Run
 from protzilla.workflow_manager import WorkflowManager
 
@@ -32,10 +31,12 @@ def make_parameter_input(key, param_dict, disabled, default=None):
         template = "runs/field_number.html"
     elif param_dict["type"] == "categorical":
         template = "runs/field_select.html"
+    elif param_dict["type"] == "file":
+        template = "runs/field_file.html"
     else:
-        ValueError(f"cannot match parameter type {param_dict['type']}")
+        raise ValueError(f"cannot match parameter type {param_dict['type']}")
     if default is None:
-        default = param_dict["default-value"]
+        default = param_dict.get("default-value")
 
     return render_to_string(
         template,
@@ -50,16 +51,14 @@ def make_parameter_input(key, param_dict, disabled, default=None):
 
 def detail(request, run_name):
     if run_name not in active_runs:
-        run = Run.continue_existing(run_name)
-        run.step_index = len(run.history.steps) - 1
-        active_runs[run_name] = run
-
+        active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
 
     parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = []
     for key, param_dict in parameters.items():
+        # todo use workflow default
         if run.current_parameters:
             default = run.current_parameters[key]
         else:
@@ -100,35 +99,17 @@ def detail(request, run_name):
 def create(request):
     run_name = request.POST["run_name"]
     run = Run.create(
-        request.POST["run_name"],
+        run_name,
         request.POST["workflow_config_name"],
         df_mode="disk_memory",
     )
-    # to skip importing
-    run.perform_calculation_from_location(
-        "importing",
-        "ms-data-import",
-        "max-quant-data-import",
-        dict(
-            file=str(
-                PROJECT_PATH / "tests/proteinGroups_small_cut.txt",
-            ),
-            intensity_name="Intensity",
-        ),
-    )
-    run.next_step()
-    run.step_index = 0  # needed because importing is left out of workflow
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def continue_(request):
     run_name = request.POST["run_name"]
-    run = Run.continue_existing(run_name)
-    run.step_index = len(run.history.steps) - 1
-    # this should be moved to Run.continue_existing but cant yet because
-    # importing does not exist yet
-    active_runs[run_name] = run
+    active_runs[run_name] = Run.continue_existing(run_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -145,14 +126,17 @@ def back(request, run_name):
 
 
 def calculate(request, run_name):
-    arguments = dict(request.POST)
-    del arguments["csrfmiddlewaretoken"]
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
     parameters = {}
-    for k, v in arguments.items():
+    for k, v in post.items():
         if len(v) == 1:
             parameters[k] = v[0]
         else:
             parameters[k] = v
+    for k, v in dict(request.FILES).items():
+        # assumption: only one file uploaded
+        parameters[k] = v[0].temporary_file_path()
     run = active_runs[run_name]
     run.perform_calculation_from_location(*run.current_workflow_location(), parameters)
 

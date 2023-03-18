@@ -4,10 +4,18 @@
     "importing": {
       "steps": [
         {
-          "name": "main-data-import"
+          "name": "ms-data-import",
+          "method": "max-quant-import",
+          "parameters": {
+            "intensity_param": "iBAQ"
+          }
         },
         {
-          "name": "metadata-import"
+          "name": "metadata-import",
+          "method": "metadata-import-method",
+          "parameters": {
+            "feature_orientation": "Rows (features in rows, samples in columns)"
+          }
         }
       ]
     },

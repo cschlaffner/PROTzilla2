@@ -1,20 +1,11 @@
 {
   "importing": {
-    "main_data_import": {
-      "ms_data_import": {
-        "name": "MS Data Import",
-        "description": "Import MS data",
+    "ms_data_import": {
+      "max_quant_import": {
+        "name": "Max Quant Data Import",
+        "description": "",
         "parameters": {
-          "file_format": {
-            "name": "File format",
-            "type": "categorical",
-            "categories": [
-              "MaxQuant",
-              "MSFragger"
-            ],
-            "default": "MaxQuant"
-          },
-          "intensity_param": {
+          "intensity_name": {
             "name": "intensity parameter",
             "type": "categorical",
             "categories": [
@@ -23,6 +14,30 @@
               "iBAQ"
             ],
             "default": "Intensity"
+          },
+          "file": {
+            "name": "MaxQuant intensities file:",
+            "type": "file"
+          }
+        }
+      },
+      "ms_fragger_import": {
+        "name": "MS Fragger Data Import",
+        "description": "",
+        "parameters": {
+          "intensity_name": {
+            "name": "intensity name",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default": "Intensity"
+          },
+          "file": {
+            "name": "MSFragger intensities file:",
+            "type": "file"
           }
         }
       }
@@ -40,6 +55,10 @@
               "Columns (samples in rows, features in columns)"
             ],
             "default": "Rows (features in rows, samples in columns)"
+          },
+          "file": {
+            "name": "Metadata file:",
+            "type": "file"
           }
         }
       }
@@ -263,7 +282,8 @@
       "totalsum": {
         "name": "Sumtotal normalisation",
         "description": "",
-        "parameters": {},
+        "parameters": {
+        },
         "graphs": [
           {
             "graph_type": {
@@ -610,7 +630,8 @@
       "anova": {
         "name": "ANOVA",
         "description": "Analysis of Variance:",
-        "parameters": {}
+        "parameters": {
+        }
       },
       "t_test": {
         "name": "T_Test",
