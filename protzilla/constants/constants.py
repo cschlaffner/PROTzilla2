@@ -1,4 +1,6 @@
 from pathlib import Path
+from string import ascii_letters
+from random import choices
 
 PATH_TO_PROJECT = Path(__file__).resolve().parent.parent.parent
 PATH_TO_RUNS = Path(f"{PATH_TO_PROJECT}/user_data/runs")
@@ -13,3 +15,7 @@ PROTZILLA_DISCRETE_COLOR_SEQUENCE = [
     "#E2A46D",
 ]
 PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = ["#4A536A", "#CE5A5A"]
+
+
+def random_string():
+    return "".join(choices(ascii_letters, k=16))

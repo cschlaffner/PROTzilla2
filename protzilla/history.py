@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from .constants.paths import RUNS_PATH
+from .constants.constants import random_string
 
 
 class History:
@@ -25,7 +26,7 @@ class History:
     def from_disk(cls, run_name: str, df_mode: str):
         instance = cls(run_name, df_mode)
         with open(RUNS_PATH / run_name / "history.json", "r") as f:
-            history_json = json.load(f)
+            history_json = json.load(f, object_hook=load_dataframes)
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
@@ -68,9 +69,9 @@ class History:
         df = None
         if "disk" in self.df_mode:
             index = len(self.steps)
-            (RUNS_PATH / self.run_name).mkdir(parents=True, exist_ok=True)
-            dataframe.to_csv(self.df_path(index), index=False)
             df_path = self.df_path(index)
+            df_path.parent.mkdir(parents=True, exist_ok=True)
+            dataframe.to_csv(df_path, index=False)
         if "memory" in self.df_mode:
             df = dataframe
         executed_step = ExecutedStep(
@@ -97,12 +98,12 @@ class History:
             )
             for step in self.steps
         ]
-        history_json = json.dumps(to_save, indent=2)
+        history_json = CusomJSONEncoder(self.run_name, indent=2).encode(to_save)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
             f.write(history_json)
 
     def df_path(self, index: int):
-        return RUNS_PATH / self.run_name / f"df_{index}.csv"
+        return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
 
 
 @dataclass(frozen=True)
@@ -132,3 +133,22 @@ class ExecutedStep:
         if self.dataframe_path is not None:
             return pd.read_csv(self.dataframe_path)
         return None
+
+
+class CusomJSONEncoder(json.JSONEncoder):
+    def __init__(self, run_name, **kw):
+        self.run_name = run_name
+        super().__init__(**kw)
+
+    def default(self, obj):
+        if isinstance(obj, pd.DataFrame):
+            path = RUNS_PATH / self.run_name / f"{random_string()}.csv"
+            obj.to_csv(path, index=False)
+            return {"__dataframe__": True, "path": str(path)}
+        return json.JSONEncoder.default(self, obj)
+
+
+def load_dataframes(dct):
+    if dct.get("__dataframe__", False):
+        return pd.read_csv(dct["path"])
+    return dct
