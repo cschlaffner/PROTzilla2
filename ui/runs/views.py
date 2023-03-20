@@ -64,22 +64,23 @@ def detail(request, run_name):
     displayed_history = []
     for step in run.history.steps:
         fields = []
-        if step.section != "importing":
+        if step.section == "importing":
+            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file'].split('/')[-1]}"
+        else:
             parameters = run.workflow_meta[step.section][step.step][step.method][
                 "parameters"
             ]
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
-        displayed_history.append(
-            dict(name=f"{step.section}/{step.step}/{step.method}", fields=fields)
-        )
+            name = f"{step.section}/{step.step}/{step.method}"
+        displayed_history.append(dict(name=name, fields=fields))
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            info_str=str(run.current_workflow_location()),
+            location=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=current_fields,
             show_next=run.result_df is not None,

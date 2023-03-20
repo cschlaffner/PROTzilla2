@@ -98,7 +98,7 @@ class History:
             )
             for step in self.steps
         ]
-        history_json = CusomJSONEncoder(self.run_name, indent=2).encode(to_save)
+        history_json = CustomJSONEncoder(self.run_name, indent=2).encode(to_save)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
             f.write(history_json)
 
@@ -135,14 +135,15 @@ class ExecutedStep:
         return None
 
 
-class CusomJSONEncoder(json.JSONEncoder):
+class CustomJSONEncoder(json.JSONEncoder):
     def __init__(self, run_name, **kw):
         self.run_name = run_name
         super().__init__(**kw)
 
     def default(self, obj):
         if isinstance(obj, pd.DataFrame):
-            path = RUNS_PATH / self.run_name / f"{random_string()}.csv"
+            path = RUNS_PATH / self.run_name / f"history_dfs/{random_string()}.csv"
+            path.parent.mkdir(exist_ok=True)
             obj.to_csv(path, index=False)
             return {"__dataframe__": True, "path": str(path)}
         return json.JSONEncoder.default(self, obj)

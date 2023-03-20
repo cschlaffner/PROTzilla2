@@ -98,4 +98,4 @@ def test_dataframe_in_json():
     del history
     history2 = History.from_disk(name, df_mode="disk")
     assert df2.equals((history2.steps[0].outputs["another_df"]))
-    rmtree(name, ignore_errors=True)
+    rmtree(RUNS_PATH / name)
