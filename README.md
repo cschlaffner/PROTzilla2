@@ -7,7 +7,7 @@
 | \_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/\_\_init\_\_.py                                       |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/\_\_init\_\_.py                             |        0 |        0 |        0 |        0 |    100% |           |
-| protzilla/constants/constants.py                                |       10 |        0 |        0 |        0 |    100% |           |
+| protzilla/constants/colors.py                                   |        2 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/location\_mapping.py                        |        6 |        0 |        2 |        1 |     88% |  16->exit |
 | protzilla/constants/paths.py                                    |        5 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                   |        0 |        0 |        0 |        0 |    100% |           |
@@ -23,6 +23,7 @@
 | protzilla/run.py                                                |       87 |       19 |       20 |        1 |     72% |13-19, 25, 64-66, 77-78, 81, 115-119 |
 | protzilla/run\_manager.py                                       |       19 |       19 |        4 |        0 |      0% |      1-27 |
 | protzilla/utilities/\_\_init\_\_.py                             |        0 |        0 |        0 |        0 |    100% |           |
+| protzilla/utilities/random.py                                   |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                           |       11 |        0 |        0 |        0 |    100% |           |
 | protzilla/workflow\_manager.py                                  |        7 |        7 |        2 |        0 |      0% |       1-9 |
 | tests/conftest.py                                               |        6 |        0 |        0 |        0 |    100% |           |
@@ -36,7 +37,7 @@
 | tests/protzilla/test\_history.py                                |       61 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       35 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                         |        0 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** |  **997** |   **97** |  **183** |   **43** | **86%** |           |
+|                                                       **TOTAL** |  **993** |   **97** |  **183** |   **43** | **86%** |           |
 
 
 ## Setup coverage badge
