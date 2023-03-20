@@ -35,6 +35,8 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
+    elif param_dict["type"] == "dynamic-categorical":
+        template = "runs/field_select.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -60,6 +62,8 @@ def detail(request, run_name):
         # todo use workflow default
         if run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
+        if param_dict["type"] == "dynamic-categorical":
+            param_dict["categories"] = run.input_df()
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     displayed_history = []
     for step in run.history.steps:

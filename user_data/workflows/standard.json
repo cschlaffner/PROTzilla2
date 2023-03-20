@@ -79,7 +79,16 @@
         {
           "name": "differential_expression",
           "method": "anova",
-          "parameters": {}
+          "parameters": {
+            "input-df": "imputation"
+          }
+        },
+        {
+          "name": "differential_expression",
+          "method": "t-test",
+          "parameters": {
+            "input-df": "imputation"
+          }
         }
       ]
     },

@@ -59,6 +59,7 @@ class Run:
         self.current_out = None
         self.current_parameters = None
         self.plots = None
+        self.step_name = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
@@ -91,6 +92,7 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
+            self.step,  # self.step_name,
         )
         self.df = self.result_df
         self.result_df = None
@@ -117,3 +119,13 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
+
+    def input_df(self):
+        categories = []
+        for step in self.history.steps:
+            if step.section == "importing":
+                continue
+            categories.append(step.step_name + "_df")
+            for output_key in step.outputs.keys():
+                categories.append(step.step_name + output_key)
+        return categories

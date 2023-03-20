@@ -631,12 +631,25 @@
         "name": "ANOVA",
         "description": "Analysis of Variance:",
         "parameters": {
+          "input-df": {
+              "name": "Choose the input df",
+              "type": "dynamic-categorical",
+              "categories": [],
+              "default": ""
+            }
         }
       },
       "t_test": {
         "name": "T_Test",
         "description": "Statistical test assuming a t_distribution:",
-        "parameters": {}
+        "parameters": {
+          "input-df": {
+              "name": "Choose the input df",
+              "type": "dynamic-categorical",
+              "categories": [],
+              "default": ""
+            }
+        }
       }
     }
   },

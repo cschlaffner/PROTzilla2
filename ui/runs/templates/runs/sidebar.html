@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<br>
+{% for step in section %}
+    {{ step.name }}<br>
+    {% for method in step %}
+        <form action="{% url 'runs:add' run_name %}" method="post">
+            {% csrf_token %}
+            <button>method.name</button>
+        </form>
+    {% endfor %}
+{% endfor %}
+<br>
+</body>

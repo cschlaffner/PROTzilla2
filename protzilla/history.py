@@ -64,6 +64,7 @@ class History:
         dataframe: pd.DataFrame,
         outputs: dict,
         plots: list,
+        step_name: str,
     ):
         df_path = None
         df = None
@@ -75,7 +76,7 @@ class History:
         if "memory" in self.df_mode:
             df = dataframe
         executed_step = ExecutedStep(
-            section, step, method, parameters, df, df_path, outputs, plots
+            section, step, method, parameters, df, df_path, outputs, plots, step_name
         )
         self.steps.append(executed_step)
         self.save()
@@ -121,6 +122,7 @@ class ExecutedStep:
     dataframe_path: Path | None
     outputs: dict
     plots: list
+    step_name: str
 
     @property
     def dataframe(self) -> pd.DataFrame | None:
