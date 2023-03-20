@@ -14,7 +14,7 @@
 | protzilla/data\_preprocessing/filter\_proteins.py               |       15 |        2 |        4 |        1 |     74% |     55-56 |
 | protzilla/data\_preprocessing/filter\_samples.py                |       26 |        1 |        4 |        2 |     90% |56->65, 66 |
 | protzilla/data\_preprocessing/imputation.py                     |       74 |        1 |       14 |        1 |     98% |       140 |
-| protzilla/data\_preprocessing/normalisation.py                  |       93 |        1 |       22 |        2 |     97% |239->250, 251 |
+| protzilla/data\_preprocessing/normalisation.py                  |       98 |        1 |       22 |        2 |     98% |244->255, 256 |
 | protzilla/data\_preprocessing/outlier\_detection.py             |       57 |        4 |       16 |        6 |     84% |152, 157->166, 170-179, 183->199, 222, 223->exit |
 | protzilla/data\_preprocessing/plots.py                          |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                 |       20 |        2 |        8 |        3 |     82% |31, 43->52, 53 |
@@ -30,14 +30,14 @@
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py   |       16 |        1 |        2 |        1 |     89% |        48 |
 | tests/protzilla/data\_preprocessing/test\_filter\_samples.py    |       29 |        2 |        4 |        2 |     88% |    74, 99 |
 | tests/protzilla/data\_preprocessing/test\_imputation.py         |       87 |       10 |       10 |        5 |     85% |154-155, 179-180, 204-205, 232-233, 258-259 |
-| tests/protzilla/data\_preprocessing/test\_normalisation.py      |       60 |        4 |        8 |        4 |     88% |309, 325, 342, 366 |
+| tests/protzilla/data\_preprocessing/test\_normalisation.py      |       67 |        4 |       12 |        4 |     90% |309, 325, 351, 377 |
 | tests/protzilla/data\_preprocessing/test\_outlier\_detection.py |       23 |        3 |        6 |        3 |     79% |42, 51, 58 |
 | tests/protzilla/data\_preprocessing/test\_plots.py              |       47 |        8 |       16 |        5 |     79% |20, 39, 56, 81, 116-119 |
 | tests/protzilla/data\_preprocessing/test\_transformation.py     |       35 |        2 |        4 |        2 |     90% |  119, 134 |
 | tests/protzilla/test\_history.py                                |       61 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       35 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                         |        0 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** |  **993** |   **97** |  **183** |   **43** | **86%** |           |
+|                                                       **TOTAL** | **1005** |   **97** |  **187** |   **43** | **87%** |           |
 
 
 ## Setup coverage badge
