@@ -13,7 +13,9 @@ from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 
 def by_knn(
-    intensity_df: pd.DataFrame, n_neighbors=5, **kwargs  # quantile, default is median
+    intensity_df: pd.DataFrame,
+    number_of_neighbours=5,
+    **kwargs  # quantile, default is median
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform value imputation based on KNN
@@ -30,9 +32,9 @@ def by_knn(
     :param intensity_df: the dataframe that should be filtered in\
     long format
     :type intensity_df: pandas DataFrame
-    :param n_neighbors: number of neighbouring samples used for\
+    :param number_of_neighbours: number of neighbouring samples used for\
     imputation. Default: 5
-    :type n_neighbors: int
+    :type number_of_neighbours: int
     :param **kwargs: additional keyword arguments passed to\
         KNNImputer.fit_transform
     :type kwargs: dict
@@ -46,7 +48,7 @@ def by_knn(
     index = transformed_df.index
     columns = transformed_df.columns
 
-    imputer = KNNImputer(n_neighbors=n_neighbors)
+    imputer = KNNImputer(n_neighbors=number_of_neighbours)
     transformed_df = imputer.fit_transform(transformed_df, **kwargs)
     transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 

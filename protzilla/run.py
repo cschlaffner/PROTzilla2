@@ -62,7 +62,7 @@ class Run:
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
-        method_callable = method_map.get(location, lambda df, **kwargs: (df, {}))
+        method_callable = method_map[location]
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):

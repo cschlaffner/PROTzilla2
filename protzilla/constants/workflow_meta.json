@@ -132,21 +132,21 @@
             "max": 100,
             "step": 1,
             "default": 4
-          },
-          "graphs": [
-            {
-              "graph_type": {
-                "name": "Graph type:",
-                "type": "categorical",
-                "categories": [
-                  "Bar chart",
-                  "Pie chart"
-                ],
-                "default": "Pie chart"
-              }
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
             }
-          ]
-        }
+          }
+        ]
       }
     },
     "outlier_detection": {
@@ -196,7 +196,7 @@
         "name": "Local outlier factor",
         "description": "",
         "parameters": {
-          "no_neighbours": {
+          "number_of_neighbors": {
             "name": "Number of neighbours:",
             "type": "numeric",
             "min": 1,

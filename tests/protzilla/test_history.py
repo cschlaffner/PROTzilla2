@@ -1,15 +1,10 @@
-from random import choices
 from shutil import rmtree
-from string import ascii_letters
 
 import pandas as pd
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
-
-
-def random_string():
-    return "".join(choices(ascii_letters, k=32))
+from protzilla.constants.constants import random_string
 
 
 def test_history_memory_identity():
@@ -82,4 +77,25 @@ def test_history_save():
     assert history2.steps[0]._dataframe is None
     assert steps[1].dataframe.equals(history2.steps[1].dataframe)
     assert history2.steps[1]._dataframe is None
+    rmtree(RUNS_PATH / name)
+
+
+def test_dataframe_in_json():
+    name = "test_history_df" + random_string()
+    history = History(name, df_mode="disk")
+    df1 = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    df2 = pd.DataFrame(data={"asdfs": [3, 2], "aaaa": [99, 1]})
+    history.add_step(
+        "section1",
+        "step1",
+        "method1",
+        {"param1": 3},
+        df1,
+        outputs={"another_df": df2},
+        plots=[],
+    )
+    assert (RUNS_PATH / name / "history.json").exists()
+    del history
+    history2 = History.from_disk(name, df_mode="disk")
+    assert df2.equals((history2.steps[0].outputs["another_df"]))
     rmtree(RUNS_PATH / name)

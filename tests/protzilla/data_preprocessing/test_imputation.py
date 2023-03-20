@@ -248,7 +248,7 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     # perform imputation on test data frame
     result_df = by_knn(
         input_imputation_df,
-        n_neighbors=2,
+        number_of_neighbours=2,
     )[0]
 
     fig1, fig2 = by_knn_plot(

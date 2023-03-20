@@ -44,7 +44,7 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
 def by_median(
     intensity_df: pd.DataFrame,
-    q=0.5,  # quartile, default is median
+    percentile=0.5,  # quartile, default is median
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform a quartile/percentile normalisation on your
@@ -55,9 +55,9 @@ def by_median(
     :param intensity_df: the dataframe that should be filtered in\
     long format
     :type intensity_df: pandas DataFrame
-    :param q: the chosen quartile of the sample intensities for\
+    :param percentile: the chosen quartile of the sample intensities for\
     normalisation
-    :type q: float
+    :type percentile: float
     :return: returns a scaled dataframe in typical protzilla long format\
     and an empty dict.
     :rtype: Tuple[pandas DataFrame, dict]
@@ -75,7 +75,7 @@ def by_median(
 
     for sample in samples:
         df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
-        quantile = df_sample[intensity_name].quantile(q=q)
+        quantile = df_sample[intensity_name].quantile(q=percentile)
 
         if quantile != 0:
             df_sample[f"Normalised {intensity_name}"] = df_sample[intensity_name].div(

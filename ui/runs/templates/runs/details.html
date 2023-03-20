@@ -18,7 +18,7 @@
 {% endfor %}
 
 <br>
-{{ info_str }}
+{{ location }}
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
