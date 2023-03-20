@@ -335,6 +335,8 @@ def test_normalisation_by_median(
 def test_normalisation_by_median_invalid_percentile(normalisation_df):
     with pytest.raises(AssertionError):
         by_median(normalisation_df, percentile=-1)
+    with pytest.raises(AssertionError):
+        by_median(normalisation_df, percentile=1.1)
 
 
 def test_totalsum_normalisation(
