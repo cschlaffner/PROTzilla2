@@ -4,7 +4,7 @@ import pandas as pd
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
-from protzilla.constants.constants import random_string
+from protzilla.utilities.random import random_string
 
 
 def test_history_memory_identity():

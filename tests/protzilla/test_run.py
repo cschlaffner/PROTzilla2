@@ -4,7 +4,7 @@ from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import ms_data_import
 from protzilla.run import Run
-from protzilla.constants.constants import random_string
+from protzilla.utilities.random import random_string
 
 
 def test_run_create():
