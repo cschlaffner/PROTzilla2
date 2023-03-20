@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from .constants.paths import RUNS_PATH
-from .constants.constants import random_string
+from .utilities.random import random_string
 
 
 class History:
