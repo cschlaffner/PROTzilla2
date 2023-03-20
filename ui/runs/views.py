@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR, STATIC_URL
+from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.constants.paths import PROJECT_PATH
@@ -79,7 +79,7 @@ def detail(request, run_name):
             context=dict(
                 disabled=False,
                 key=method_dropdown_id,
-                name=f"{step.replace('-', '_').capitalize()} Method:",
+                name=f"{step.replace('-', ' ').title()} Method:",
                 default=method,
                 categories=run.workflow_meta["sections"][section][step].keys(),
             ),
@@ -114,7 +114,6 @@ def detail(request, run_name):
             method_details_id=f"{step.replace('-', '_')}_details",
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
-            static_url=STATIC_URL,
         ),
     )
 
