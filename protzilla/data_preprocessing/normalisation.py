@@ -74,7 +74,7 @@ def by_median(
     intensity_name = intensity_df.columns[3]
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
-    zeroed_samples_list = []
+    zeroed_samples = []
 
     for sample in samples:
         df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
@@ -94,7 +94,7 @@ def by_median(
             except ValueError as error:
                 print(error)
                 df_sample[f"Normalised {intensity_name}"] = 0
-                zeroed_samples_list.append(sample)
+                zeroed_samples.append(sample)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
@@ -102,7 +102,7 @@ def by_median(
 
     return (
         scaled_df,
-        dict(zeroed_samples=zeroed_samples_list),
+        dict(zeroed_samples=zeroed_samples),
     )
 
 
