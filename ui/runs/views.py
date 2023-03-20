@@ -119,7 +119,12 @@ def detail(request, run_name):
     )
 
 def change_method(request, run_name):
-    run = active_runs[run_name]
+    try:
+        run = active_runs[run_name]
+    except:
+        response = JsonResponse({"error": "Run was not found"})
+        response.status_code = 500 # internal server error 
+        return response
     section, step, _ = run.current_workflow_location()
     current_fields = get_current_fields(run, section, step, request.POST["method"])
 

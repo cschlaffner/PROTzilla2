@@ -22,11 +22,10 @@
                         console.log(response);
                         $("#{{method_details_id}}").html(response);
                     }
-                }).fail(function(xhr, status, error) {
-                    //ajax request failed.
-                    let errorMessage = xhr.status + ': ' + xhr.statusText
-                    alert('Error - ' + errorMessage);
-              });
+                }).fail(function(e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
             })
         });
     </script>
