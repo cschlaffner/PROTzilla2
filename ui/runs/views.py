@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_protect 
 from main.settings import BASE_DIR, STATIC_URL
 
 sys.path.append(f"{BASE_DIR}/..")
@@ -62,7 +61,6 @@ def get_current_fields(run, section, step, method):
         )
     return current_fields
 
-@csrf_protect
 def detail(request, run_name):
     if run_name not in active_runs:
         run = Run.continue_existing(run_name)
@@ -120,7 +118,6 @@ def detail(request, run_name):
         ),
     )
 
-@csrf_protect
 def change_method(request, run_name):
     run = active_runs[run_name]
     section, step, _ = run.current_workflow_location()
