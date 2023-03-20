@@ -43,8 +43,8 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
 
 def by_median(
-        intensity_df: pd.DataFrame,
-        percentile=0.5,  # quartile, default is median
+    intensity_df: pd.DataFrame,
+    percentile=0.5,  # quartile, default is median
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform a quartile/percentile normalisation on your
@@ -117,7 +117,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     long format
     :type intensity_df: pandas DataFrame
     :return: returns a scaled dataframe in typical protzilla long format\
-    and an empty dict
+    and a dict, containing all zeroed samples due to sum being 0
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -130,6 +130,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     intensity_name = intensity_df.columns[3]
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
+    zeroed_samples_list = []
 
     for sample in samples:
         df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
@@ -140,16 +141,16 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                 totalsum
             )
         else:
-            # TODO: think about what to do if sum is zero
             try:
                 raise ValueError(
-                    "Careful, your total sum is zero. Try using other\
-                    filtering strategies such as filtering non- or low\
-                    intensity samples."
+                    "\nCareful, your total sum is zero. Try using other\
+                    \nfiltering strategies such as filtering non- or low\
+                    \nintensity samples."
                 )
             except ValueError as error:
                 print(error)
                 df_sample[f"Normalised {intensity_name}"] = 0
+                zeroed_samples_list.append(sample)
 
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
@@ -158,13 +159,13 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     pd.reset_option("mode.chained_assignment")
     return (
         scaled_df,
-        dict(),
-    )  # TODO 40 Same as above, I think returning the nulled samples would make sense
+        dict(zeroed_samples=zeroed_samples_list),
+    )
 
 
 def by_reference_protein(
-        intensity_df: pd.DataFrame,
-        reference_protein_id: str = None,
+    intensity_df: pd.DataFrame,
+    reference_protein_id: str = None,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-intensity normalisation in reference
@@ -211,8 +212,8 @@ def by_reference_protein(
             continue
 
         df_sample.loc[:, f"Normalised {intensity_name}"] = df_sample.loc[
-                                                           :, intensity_name
-                                                           ].div(reference_intensity)
+            :, intensity_name
+        ].div(reference_intensity)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
 
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)

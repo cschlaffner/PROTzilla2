@@ -300,7 +300,7 @@ def expected_df_by_ref_protein_normalisation():
 
 
 def test_normalisation_by_z_score(
-        normalisation_df, expected_df_by_z_score_normalisation, show_figures
+    normalisation_df, expected_df_by_z_score_normalisation, show_figures
 ):
     result_df, dropouts = by_z_score(normalisation_df)
 
@@ -316,7 +316,7 @@ def test_normalisation_by_z_score(
 
 
 def test_normalisation_by_median(
-        normalisation_df, expected_df_by_median_normalisation, show_figures
+    normalisation_df, expected_df_by_median_normalisation, show_figures
 ):
     result_df, dropouts = by_median(normalisation_df)
 
@@ -332,15 +332,13 @@ def test_normalisation_by_median(
     assert dropouts["zeroed_samples"] == ["Sample_1", "Sample_4"]
 
 
-def test_normalisation_by_median_invalid_percentile(
-        normalisation_df
-):
+def test_normalisation_by_median_invalid_percentile(normalisation_df):
     with pytest.raises(AssertionError):
         by_median(normalisation_df, percentile=-1)
 
 
 def test_totalsum_normalisation(
-        normalisation_df, expected_df_by_totalsum_normalisation, show_figures
+    normalisation_df, expected_df_by_totalsum_normalisation, show_figures
 ):
     result_df, dropouts = by_totalsum(normalisation_df)
 
@@ -355,11 +353,13 @@ def test_totalsum_normalisation(
     ), f"Total normalisation does not match! Total sum normalisation should be\
             \n{expected_df_by_totalsum_normalisation}\n but is \n{result_df}"
 
+    assert dropouts["zeroed_samples"] == ["Sample_1"]
+
 
 def test_ref_protein_normalisation(
-        normalisation_by_ref_protein_df,
-        expected_df_by_ref_protein_normalisation,
-        show_figures,
+    normalisation_by_ref_protein_df,
+    expected_df_by_ref_protein_normalisation,
+    show_figures,
 ):
     expected_df = expected_df_by_ref_protein_normalisation[0]
     expected_dropped_samples = expected_df_by_ref_protein_normalisation[1]
