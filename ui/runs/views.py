@@ -121,7 +121,8 @@ def detail(request, run_name):
 def change_method(request, run_name):
     try:
         run = active_runs[run_name]
-    except:
+    except KeyError as e:
+        print(e.message)
         response = JsonResponse({"error": "Run was not found"})
         response.status_code = 500 # internal server error 
         return response
