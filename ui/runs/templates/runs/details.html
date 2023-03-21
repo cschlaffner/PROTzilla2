@@ -59,7 +59,11 @@
       </main>
       <aside>
         <h3>Side Panel</h3>
-        {{ sidebar_dropdown }}
+        <form action="{% url 'runs:add' run_name %}" method="post">
+          {% csrf_token %}
+          {{ sidebar_dropdown }}
+          <button>add</button>
+        </form>
       </aside>
     </div>
   </body>

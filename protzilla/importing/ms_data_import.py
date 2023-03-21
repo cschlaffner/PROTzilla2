@@ -1,10 +1,12 @@
 import pandas as pd
+import os
 
 SELECTED_COLUMNS = ["Protein IDs", "Gene names"]
 
 
 def max_quant_import(_, file, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
+    assert os.path.isfile(file)
     read = pd.read_csv(
         file,
         sep="\t",
