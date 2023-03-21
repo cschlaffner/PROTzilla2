@@ -92,7 +92,7 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
-            self.step,  # self.step_name,
+            self.step_name,
         )
         self.df = self.result_df
         self.result_df = None

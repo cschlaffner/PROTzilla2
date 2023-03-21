@@ -56,7 +56,9 @@ def make_sidebar_dropdown(run):
     template = "runs/field_select.html"
 
     all_sections = run.workflow_meta.keys()
-    all_steps = [step for section in all_sections for step in run.workflow_meta[section]]
+    all_steps = [
+        step for section in all_sections for step in run.workflow_meta[section]
+    ]
     return render_to_string(
         template,
         context=dict(
@@ -68,6 +70,16 @@ def make_sidebar_dropdown(run):
     )
 
 
+def make_name_input(key, run):
+    section, step, method = run.current_workflow_location()
+    name = run.workflow_meta[section][step][method]["name"]
+    template = "runs/field_name.html"
+    return render_to_string(
+        template,
+        context=dict(key=key, name=name),
+    )
+
+
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
@@ -76,6 +88,7 @@ def detail(request, run_name):
 
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
+    current_fields.append(make_name_input("step_name", run))
     for key, param_dict in parameters.items():
         # todo use workflow default
         if run.current_parameters:
@@ -94,6 +107,7 @@ def detail(request, run_name):
             ]
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
+                # step_name anzeigen
                 fields.append(make_parameter_input(key, param_dict, run, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(dict(name=name, fields=fields))
@@ -146,6 +160,9 @@ def calculate(request, run_name):
     section, step, method = run.current_workflow_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
+    run.step_name = post["step_name"][0]
+    del post["step_name"]
+
     parameters = {}
     for k, v in post.items():
         # assumption: only one value for parameter
