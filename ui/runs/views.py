@@ -52,17 +52,19 @@ def make_parameter_input(key, param_dict, run, disabled):
     )
 
 
-def make_sidebar_dropdown(run):
+def make_add_step_dropdown(run, section):
     template = "runs/field_select.html"
 
-    all_sections = run.workflow_meta.keys()
-    all_steps = [step for section in all_sections for step in run.workflow_meta[section]]
+    steps = list(run.workflow_meta[section].keys())
+    print(steps)
+    steps.insert(0, "")
+
     return render_to_string(
         template,
         context=dict(
             name="add step:\n",
             type="categorical",
-            categories=all_steps,
+            categories=steps,
             key="add steps",
         ),
     )
@@ -107,7 +109,7 @@ def detail(request, run_name):
             fields=current_fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
-            sidebar_dropdown=make_sidebar_dropdown(run),
+            sidebar_dropdown=make_add_step_dropdown(run, section),
         ),
     )
 
@@ -138,6 +140,20 @@ def next_(request, run_name):
 def back(request, run_name):
     run = active_runs[run_name]
     run.back_step()
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def add(request, run_name):
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    step = post["add steps"][0]
+
+    if step == "":
+        return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+    run.insert_as_next_step(step)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
