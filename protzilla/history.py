@@ -42,7 +42,8 @@ class History:
                     df,
                     df_path if df_path.exists() else None,
                     step["outputs"],
-                    plots=[],
+                    [],
+                    step["step_name"],
                 )
             )
         return instance
@@ -96,6 +97,7 @@ class History:
                 method=step.method,
                 parameters=step.parameters,
                 outputs=step.outputs,
+                step_name=step.step_name,
             )
             for step in self.steps
         ]
