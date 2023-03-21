@@ -75,6 +75,14 @@ class Run:
         self.plots = None
         self.step_name = None
 
+    def prepare_calculation(self, step_name, df=None):
+        if df is not None:
+            self.df = df
+        elif self.history.steps:
+            self.df = self.history.steps[-1].dataframe
+
+        self.step_name = step_name
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
         method_callable = method_map[location]
@@ -138,9 +146,9 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
-            self.step,  # self.step_name,
+            self.step_name,
         )
-        self.df = self.result_df
+        self.df = None
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None

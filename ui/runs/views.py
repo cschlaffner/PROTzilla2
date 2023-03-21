@@ -56,7 +56,6 @@ def make_add_step_dropdown(run, section):
     template = "runs/field_select.html"
 
     steps = list(run.workflow_meta[section].keys())
-    print(steps)
     steps.insert(0, "")
 
     return render_to_string(
@@ -70,6 +69,15 @@ def make_add_step_dropdown(run, section):
     )
 
 
+def make_name_input(key, run, section, step, method):
+    name = run.workflow_meta[section][step][method]["name"]
+    template = "runs/field_name.html"
+    return render_to_string(
+        template,
+        context=dict(key=key, name=name),
+    )
+
+
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
@@ -78,6 +86,7 @@ def detail(request, run_name):
 
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
+    current_fields.append(make_name_input("step_name", run, section, step, method))
     for key, param_dict in parameters.items():
         # todo use workflow default
         if run.current_parameters:
@@ -94,6 +103,9 @@ def detail(request, run_name):
             parameters = run.workflow_meta[step.section][step.step][step.method][
                 "parameters"
             ]
+            fields.append(
+                make_name_input("step_name", run, step.section, step.step, step.method)
+            )
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, run, disabled=True))
@@ -162,6 +174,14 @@ def calculate(request, run_name):
     section, step, method = run.current_workflow_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
+
+    if section == "importing" or section == "data_preprocessing":
+        run.prepare_calculation(post["step_name"][0])
+    elif section == "data_analysis":
+        run.prepare_calculation(post["step_name"][0], post["input_df"][0])
+        del post["input_df"]
+    del post["step_name"]
+
     parameters = {}
     for k, v in post.items():
         # assumption: only one value for parameter
