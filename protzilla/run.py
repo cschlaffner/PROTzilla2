@@ -119,13 +119,3 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
-
-    def input_df(self):
-        categories = []
-        for step in self.history.steps:
-            if step.section == "importing":
-                continue
-            categories.append(step.step_name + "_df")
-            for output_key in step.outputs.keys():
-                categories.append(step.step_name + output_key)
-        return categories

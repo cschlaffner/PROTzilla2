@@ -8,6 +8,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
+from protzilla.utilities.dynamic_parameters_provider import input_df
 from protzilla.workflow_manager import WorkflowManager
 
 workflow_manager = WorkflowManager()
@@ -26,7 +27,7 @@ def index(request):
     )
 
 
-def make_parameter_input(key, param_dict, disabled):
+def make_parameter_input(key, param_dict, run, disabled):
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
         if "step" not in param_dict:
@@ -36,6 +37,7 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "dynamic-categorical":
+        param_dict["categories"] = input_df(run)
         template = "runs/field_select.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
@@ -62,9 +64,9 @@ def detail(request, run_name):
         # todo use workflow default
         if run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
-        if param_dict["type"] == "dynamic-categorical":
-            param_dict["categories"] = run.input_df()
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+        current_fields.append(
+            make_parameter_input(key, param_dict, run, disabled=False)
+        )
     displayed_history = []
     for step in run.history.steps:
         fields = []
@@ -76,7 +78,7 @@ def detail(request, run_name):
             ]
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
+                fields.append(make_parameter_input(key, param_dict, run, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(dict(name=name, fields=fields))
     return render(
