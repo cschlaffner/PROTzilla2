@@ -91,7 +91,7 @@ def detail(request, run_name):
             for key, param_dict in parameters.items():
                 fields.append(
                     make_parameter_input(
-                        key, param_dict, disabled=True, default=history_step.parameters[key]
+                        key, param_dict, disabled=True,
                     )
                 )
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
@@ -166,8 +166,9 @@ def calculate(request, run_name):
     section, step, method = run.current_workflow_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    parameters = {}
     post.pop(f"{step}_method")
+
+    parameters = {}
     for k, v in post.items():
         # assumption: only one value for parameter
         param_dict = run.workflow_meta[section][step][method]["parameters"][k]
