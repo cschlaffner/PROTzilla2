@@ -52,6 +52,22 @@ def make_parameter_input(key, param_dict, run, disabled):
     )
 
 
+def make_sidebar_dropdown(run):
+    template = "runs/field_select.html"
+
+    all_sections = run.workflow_meta.keys()
+    all_steps = [step for section in all_sections for step in run.workflow_meta[section]]
+    return render_to_string(
+        template,
+        context=dict(
+            name="add step:\n",
+            type="categorical",
+            categories=all_steps,
+            key="add steps",
+        ),
+    )
+
+
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
@@ -91,6 +107,7 @@ def detail(request, run_name):
             fields=current_fields,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
+            sidebar_dropdown=make_sidebar_dropdown(run),
         ),
     )
 

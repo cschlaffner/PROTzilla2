@@ -1,46 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-{{ run_name }}
-<br>
-<b>history</b>
-<br>
-{% for step in displayed_history %}
-    {{ step.name }}<br>
-    {% for field in step.fields %}
-        {{ field }}<br>
-    {% endfor %}
-    <br>
-{% endfor %}
-
-<br>
-{{ location }}
-<br>
-<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% for field in fields %}
-        {{ field }}
-        <br>
-    {% endfor %}
-    <input type="submit" value="Calculate">
-</form>
-
-{% if show_next %}
-    <form action="{% url 'runs:next' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Next</button>
-    </form>
-{% endif %}
-
-{% if show_back %}
-    <form action="{% url 'runs:back' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Back</button>
-    </form>
-{% endif %}
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>PROTzilla {{ run_name }}</title>
+    <style>
+      .layout-container {
+                display: flex;
+            }
+            main {
+                flex: 3;
+                padding: 20px;
+            }
+            aside {
+                flex: 1;
+                background-color: #87A8B9;
+                padding: 20px;
+            }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>PROTzilla</h1>
+      <h2>{{ run_name }}</h2>
+    </header>
+    <div class="layout-container">
+      <main>
+        <h3>History</h3>
+        {% for step in displayed_history %}
+        <h4>{{ step.name }}</h4>
+        <ul>
+          {% for field in step.fields %}
+          <li>{{ field }}</li>
+          {% endfor %}
+        </ul>
+        {% endfor %}
+        <h3>Location</h3>
+        <p>{{ location }}</p>
+        <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% for field in fields %}
+          {{ field }}
+          <br />
+          {% endfor %}
+          <input type="submit" value="Calculate" />
+        </form>
+        {% if show_next %}
+        <form action="{% url 'runs:next' run_name %}" method="post">
+          {% csrf_token %}
+          <button>Next</button>
+        </form>
+        {% endif %}
+        {% if show_back %}
+        <form action="{% url 'runs:back' run_name %}" method="post">
+          {% csrf_token %}
+          <button>Back</button>
+        </form>
+        {% endif %}
+      </main>
+      <aside>
+        <h3>Side Panel</h3>
+        {{ sidebar_dropdown }}
+      </aside>
+    </div>
+  </body>
 </html>
