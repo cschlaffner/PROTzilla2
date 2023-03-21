@@ -63,8 +63,6 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
-
-    parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = get_current_fields(run, section, step, method)
     method_dropdown_id = f"{step}_method"
 
@@ -85,6 +83,7 @@ def detail(request, run_name):
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
+        parameters = run.workflow_meta[history_step.section][history_step.step][history_step.method]["parameters"]
         if history_step.section == "importing":
             name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file'].split('/')[-1]}"
         else:
