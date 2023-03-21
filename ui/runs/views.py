@@ -8,7 +8,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
-from protzilla.utilities.dynamic_parameters_provider import input_df
+from protzilla.utilities.dynamic_parameters_provider import input_data
 from protzilla.workflow_manager import WorkflowManager
 
 workflow_manager = WorkflowManager()
@@ -37,7 +37,7 @@ def make_parameter_input(key, param_dict, run, disabled):
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "dynamic-categorical":
-        param_dict["categories"] = input_df(run)
+        param_dict["categories"], _ = input_data(run)
         template = "runs/field_select.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
@@ -179,7 +179,6 @@ def calculate(request, run_name):
             parameters[k] = float(v[0])
         else:
             parameters[k] = v[0]
-
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()

@@ -61,9 +61,11 @@ class Run:
         self.plots = None
         self.step_name = None
 
-    def prepare_calculation(self, step_name, df=None):
-        if df is not None:
-            self.df = df
+    def prepare_calculation(self, step_name, input_data=None):
+        if input_data is not None:
+            _, name_to_step_index = input_data()
+            data_step_index = name_to_step_index[input_data]
+            self.df = self.history.steps[data_step_index].dataframe
         elif self.history.steps:
             self.df = self.history.steps[-1].dataframe
 
