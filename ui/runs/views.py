@@ -161,7 +161,12 @@ def calculate(request, run_name):
     section, step, method = run.current_workflow_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    run.step_name = post["step_name"][0]
+
+    if section == "importing" or section == "data_preprocessing":
+        run.prepare_calculation(post["step_name"][0])
+    elif section == "data_analysis":
+        run.prepare_calculation(post["step_name"][0], post["input_df"][0])
+        del post["input_df"]
     del post["step_name"]
 
     parameters = {}
