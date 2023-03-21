@@ -85,16 +85,16 @@ def detail(request, run_name):
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
-        if step.section == "importing":
-            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file'].split('/')[-1]}"
+        if history_step.section == "importing":
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file'].split('/')[-1]}"
         else:
             for key, param_dict in parameters.items():
                 fields.append(
                     make_parameter_input(
-                        key, param_dict, disabled=True, default=step.parameters[key]
+                        key, param_dict, disabled=True, default=history_step.parameters[key]
                     )
                 )
-            name = f"{step.section}/{step.step}/{step.method}"
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
             dict(name=name, fields=fields)
         )
