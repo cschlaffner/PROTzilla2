@@ -11,12 +11,18 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 FILE_UPLOAD_HANDLERS = ["main.upload_handler.CustomFileUploadHandler"]
+
 FILE_UPLOAD_TEMP_DIR = BASE_DIR / "uploads"
+if not os.path.exists(FILE_UPLOAD_TEMP_DIR):
+    print("creating nonexistent", FILE_UPLOAD_TEMP_DIR)
+    os.makedirs(FILE_UPLOAD_TEMP_DIR)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 

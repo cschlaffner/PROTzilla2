@@ -112,7 +112,7 @@ def log10_transformation_expected_df():
 def test_log2_transformation(
     show_figures, log2_transformation_df, log2_transformation_expected_df
 ):
-    result_df = by_log(log2_transformation_df, log_method="log2")[0]
+    result_df = by_log(log2_transformation_df, log_base="log2")[0]
 
     fig = by_log_plot(log2_transformation_df, result_df, "Boxplot", "Protein ID")[0]
     if show_figures:
@@ -127,7 +127,7 @@ def test_log2_transformation(
 def test_log10_transformation(
     show_figures, log10_transformation_df, log10_transformation_expected_df
 ):
-    result_df = by_log(log10_transformation_df, log_method="log10")[0]
+    result_df = by_log(log10_transformation_df, log_base="log10")[0]
 
     fig = by_log_plot(log10_transformation_df, result_df, "Boxplot", "Protein ID")[0]
     if show_figures:
@@ -146,4 +146,4 @@ def test_log_by_0_transformation():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    by_log(df, log_method="log2")
+    by_log(df, log_base="log2")

@@ -4,7 +4,7 @@ import pandas as pd
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 
 
-def by_log(intensity_df: pd.DataFrame, log_method="log10"):
+def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     """
     A class of a transformer to log-transform intensity
     DataFrames. Supports log-transformation to the base
@@ -12,9 +12,9 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
 
     :param intensity_df: a protein data frame in long format
     :type intensity_df: pd.DataFrame
-    :param log_method: String of the used log method "log10" (base 10)\
+    :param log_base: String of the used log method "log10" (base 10)\
     or "log2" (base 2). Default: "log10"
-    :type log_method: Str
+    :type log_base: Str
     :return: returns a pandas DataFrame in typical protzilla\
     long format with the transformed data and an empty dict.
     :rtype: Tuple[pandas DataFrame, dict]
@@ -23,9 +23,9 @@ def by_log(intensity_df: pd.DataFrame, log_method="log10"):
     transformed_df = intensity_df.copy()
 
     # TODO 41 drop data when intensity is 0 and return them in dict
-    if log_method == "log2":
+    if log_base == "log2":
         transformed_df[intensity_name] = np.log2(transformed_df[intensity_name])
-    elif log_method == "log10":
+    elif log_base == "log10":
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
     else:
         raise ValueError(

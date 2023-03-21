@@ -26,17 +26,17 @@ def index(request):
     )
 
 
-def make_parameter_input(key, param_dict, disabled, default=None):
+def make_parameter_input(key, param_dict, disabled):
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
+        if "step" not in param_dict:
+            param_dict["step"] = "any"
     elif param_dict["type"] == "categorical":
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
-    if default is None:
-        default = param_dict.get("default-value")
 
     return render_to_string(
         template,
@@ -44,26 +44,19 @@ def make_parameter_input(key, param_dict, disabled, default=None):
             **param_dict,
             disabled=disabled,
             key=key,
-            default=default,
         ),
     )
 
-
 def get_current_fields(run, section, step, method):
-    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
+    parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
 
     for key, param_dict in parameters.items():
         # todo use workflow default
         if run.current_parameters:
-            default = run.current_parameters[key]
-        else:
-            default = None
-        current_fields.append(
-            make_parameter_input(key, param_dict, disabled=False, default=default)
-        )
+            param_dict["default"] = run.current_parameters[key]
+        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
-
 
 def detail(request, run_name):
     if run_name not in active_runs:
@@ -71,6 +64,7 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
 
+    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
     current_fields = get_current_fields(run, section, step, method)
     method_dropdown_id = f"{step.replace('-', '_')}_method"
 
@@ -83,7 +77,7 @@ def detail(request, run_name):
                 key=method_dropdown_id,
                 name=f"{step.replace('-', ' ').title()} Method:",
                 default=method,
-                categories=run.workflow_meta["sections"][section][step].keys(),
+                categories=run.workflow_meta[section][step].keys(),
             ),
         ),
     )
@@ -91,31 +85,25 @@ def detail(request, run_name):
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
-        if history_step.section != "importing":
-            parameters = run.workflow_meta["sections"][history_step.section][
-                history_step.step
-            ][history_step.method]["parameters"]
+        if step.section == "importing":
+            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file'].split('/')[-1]}"
+        else:
             for key, param_dict in parameters.items():
                 fields.append(
                     make_parameter_input(
-                        key,
-                        param_dict,
-                        disabled=True,
-                        default=history_step.parameters[key],
+                        key, param_dict, disabled=True, default=step.parameters[key]
                     )
                 )
+            name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(
-            dict(
-                name=f"{history_step.section}/{history_step.step}/{history_step.method}",
-                fields=fields,
-            )
+            dict(name=name, fields=fields)
         )
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            info_str=str(run.current_workflow_location()),
+            location=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=current_fields,
             method_dropdown_id=method_dropdown_id,
@@ -174,18 +162,24 @@ def back(request, run_name):
 
 
 def calculate(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_workflow_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in post.items():
-        if len(v) == 1:
-            parameters[k] = v[0]
+        # assumption: only one value for parameter
+        param_dict = run.workflow_meta[section][step][method]["parameters"][k]
+        if param_dict["type"] == "numeric" and param_dict["step"] == 1:
+            parameters[k] = int(v[0])
+        elif param_dict["type"] == "numeric":
+            parameters[k] = float(v[0])
         else:
-            parameters[k] = v
+            parameters[k] = v[0]
+
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
-    run = active_runs[run_name]
-    run.perform_calculation_from_location(*run.current_workflow_location(), parameters)
+    run.perform_calculation_from_location(section, step, method, parameters)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
