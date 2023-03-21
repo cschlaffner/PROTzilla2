@@ -64,9 +64,9 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
 
-    parameters = run.workflow_meta["sections"][section][step][method]["parameters"]
+    parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = get_current_fields(run, section, step, method)
-    method_dropdown_id = f"{step.replace('-', '_')}_method"
+    method_dropdown_id = f"{step}_method"
 
     current_fields.insert(
         0,
@@ -167,6 +167,7 @@ def calculate(request, run_name):
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
     parameters = {}
+    post.pop(f"{step}_method")
     for k, v in post.items():
         # assumption: only one value for parameter
         param_dict = run.workflow_meta[section][step][method]["parameters"][k]
