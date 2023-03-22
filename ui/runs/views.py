@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.contrib import messages
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
@@ -138,5 +139,10 @@ def calculate(request, run_name):
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
     run.perform_calculation_from_location(section, step, method, parameters)
+
+    result = run.current_out
+    if "messages" in result:   
+        for message in result["messages"]:
+            messages.add_message(request, message["level"], message["msg"], message["level"])
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

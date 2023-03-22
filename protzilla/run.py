@@ -68,6 +68,7 @@ class Run:
     def perform_calculation(self, method_callable, parameters):
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
+        # add error handling
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)

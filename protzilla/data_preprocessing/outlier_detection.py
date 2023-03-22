@@ -83,25 +83,37 @@ def with_local_outlier_factor(
     dict with list of outlier sample names
     :rtype: Tuple[pandas DataFrame, dict]
     """
-    transformed_df = long_to_wide(intensity_df)
-
-    clf = LocalOutlierFactor(n_neighbors=number_of_neighbors, n_jobs=n_jobs)
-
-    df_lof_data = pd.DataFrame(index=transformed_df.index)
-    df_lof_data["LOF Outlier"] = clf.fit_predict(
-        transformed_df.loc[:, transformed_df.columns != "Sample"]
-    )
-    df_lof_data["Anomaly Score"] = clf.negative_outlier_factor_
-
-    df_lof_data["Outlier"] = df_lof_data["LOF Outlier"] == -1
-
-    outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
-
-    intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
+    msg = "LocalOutlierFactor does not accept missing values encoded as NaN. Consider preprocessing your data to remove NaN values."
     return intensity_df, dict(
-        outlier_list=outlier_list,
-        anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
-    )
+            messages=[dict(level = 40, msg = msg)],
+            outlier_list=None,
+            anomaly_df=None,)
+    try:
+        transformed_df = long_to_wide(intensity_df)
+
+        clf = LocalOutlierFactor(n_neighbors=number_of_neighbors, n_jobs=n_jobs)
+
+        df_lof_data = pd.DataFrame(index=transformed_df.index)
+        df_lof_data["LOF Outlier"] = clf.fit_predict(
+            transformed_df.loc[:, transformed_df.columns != "Sample"]
+        )
+        df_lof_data["Anomaly Score"] = clf.negative_outlier_factor_
+
+        df_lof_data["Outlier"] = df_lof_data["LOF Outlier"] == -1
+
+        outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
+
+        intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
+        return intensity_df, dict(
+            outlier_list=outlier_list,
+            anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
+        )
+    except ValueError:     
+        msg = "LocalOutlierFactor does not accept missing values encoded as NaN. Consider preprocessing your data to remove NaN values."
+        return intensity_df, dict(
+            messages=[dict(level = 40, msg = msg)],
+            outlier_list=None,
+            anomaly_df=None,)
 
 
 # TODO: handling NaN values

@@ -5,6 +5,17 @@
     <title>Title</title>
 </head>
 <body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message }}
+        </li>
+        {% endfor %}
+    </ul>
+    <br>
+    {% endif %}
+
 {{ run_name }}
 <br>
 <b>history</b>
