@@ -1,32 +1,41 @@
 {
-    "analysis_level": "protein",
-    "sections": {
-        "importing": {
-            "steps": [
-                {
-                    "name": "ms_data_import",
-                    "method": "max_quant_import",
-                    "parameters": {"intensity_param": "iBAQ"},
-                },
-                {
-                    "name": "metadata_import",
-                    "method": "metadata_import_method",
-                    "parameters": {
-                        "feature_orientation": "Rows (features in rows, samples in columns)"
-                    },
-                },
-            ]
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_param": "iBAQ"
+          }
         },
-        "data_preprocessing": {
-            "steps": [
-                {
-                    "name": "filter_proteins",
-                    "method": "low_frequency_filter",
-                    "parameters": {"threshold": 0.2, "graph_one_type": "Pie chart"},
-                }
-            ]
-        },
-        "data_analysis": {"steps": {}},
-        "data_integration": {"steps": {}},
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Rows (features in rows, samples in columns)"
+          }
+        }
+      ]
     },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2,
+            "graph_one_type": "Pie chart"
+          }
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": {}
+    },
+    "data_integration": {
+      "steps": {}
+    }
+  }
 }
