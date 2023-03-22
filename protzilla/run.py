@@ -33,7 +33,7 @@ class Run:
         with open(run_path / "run_config.json", "w") as f:
             json.dump(run_config, f)
         history = History(run_name, df_mode)
-        return cls(run_name, workflow_config_name, df_mode, history)
+        return cls(run_name, workflow_config_name, df_mode, history, run_path)
 
     @classmethod
     def continue_existing(cls, run_name):
@@ -75,10 +75,10 @@ class Run:
         self.plots = None
         self.step_name = None
 
-    def prepare_calculation(self, step_name, input_data=None):
-        if input_data is not None:
+    def prepare_calculation(self, step_name, input_data_name=None):
+        if input_data_name is not None:
             _, name_to_step_index = input_data()
-            data_step_index = name_to_step_index[input_data]
+            data_step_index = name_to_step_index[input_data_name]
             self.df = self.history.steps[data_step_index].dataframe
         elif self.history.steps:
             self.df = self.history.steps[-1].dataframe
@@ -137,7 +137,6 @@ class Run:
         # TODO: ist workflow_config schon geupdatet?
         # with open(self.run_path / "workflow.json", "w+") as f:
         #     json.dump(self.workflow_config, f)
-
 
     def next_step(self):
         self.history.add_step(
