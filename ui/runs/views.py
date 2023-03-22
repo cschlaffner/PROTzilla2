@@ -66,12 +66,11 @@ def make_add_step_dropdown(run, section):
     )
 
 
-def make_name_input(key, run, section, step, method):
-    name = run.workflow_meta[section][step][method]["name"]
+def make_name_input(key, default, disabled):
     template = "runs/field_name.html"
     return render_to_string(
         template,
-        context=dict(key=key, name=name),
+        context=dict(key=key, default=default, disabled=disabled),
     )
 
 
@@ -92,7 +91,13 @@ def detail(request, run_name):
 
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
-    current_fields.append(make_name_input("step_name", run, section, step, method))
+    current_fields.append(
+        make_name_input(
+            "step_name",
+            run.workflow_meta[section][step][method]["name"],
+            disabled=False,
+        )
+    )
     if section == "data_analysis":
         current_fields.append(make_input_data_dropdown("input_data_name", run))
     for key, param_dict in parameters.items():
@@ -112,9 +117,7 @@ def detail(request, run_name):
             parameters = run.workflow_meta[step.section][step.step][step.method][
                 "parameters"
             ]
-            fields.append(
-                make_name_input("step_name", run, step.section, step.step, step.method)
-            )
+            fields.append(make_name_input("step_name", step.step_name, disabled=True))
             if section == "data_analysis":
                 fields.append(make_input_data_dropdown("input_data_name", run))
             for key, param_dict in parameters.items():
