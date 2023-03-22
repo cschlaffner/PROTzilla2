@@ -1,4 +1,6 @@
 import json
+import os.path
+import shutil
 from pathlib import Path
 from shutil import rmtree
 
@@ -57,14 +59,16 @@ class Run:
         self.step_index = len(self.history.steps)
         self.run_path = run_path
 
-        with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        if not os.path.exists(workflow_local_path):
+            workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
+            shutil.copy2(workflow_template_path, workflow_local_path)
+
+        with open(workflow_local_path, "r") as f:
             self.workflow_config = json.load(f)
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
-
-        with open(self.run_path / "workflow.json", "w+") as f:
-            json.dump(self.workflow_config, f)
 
         # make these a result of the step to be compatible with CLI?
         self.section = None
