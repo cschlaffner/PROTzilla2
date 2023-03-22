@@ -5,6 +5,7 @@ from shutil import rmtree
 from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
+from .utilities.dynamic_parameters_provider import input_data_name_to_step_index
 
 
 class Run:
@@ -77,7 +78,7 @@ class Run:
 
     def prepare_calculation(self, step_name, input_data_name=None):
         if input_data_name is not None:
-            _, name_to_step_index = input_data()
+            name_to_step_index = input_data_name_to_step_index(self)
             data_step_index = name_to_step_index[input_data_name]
             self.df = self.history.steps[data_step_index].dataframe
         elif self.history.steps:
