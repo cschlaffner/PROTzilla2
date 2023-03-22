@@ -162,7 +162,7 @@
             "step": 1,
             "default": 2
           },
-          "no_components": {
+          "number_of_components": {
             "name": "Number of components:",
             "type": "numeric",
             "min": 2,
@@ -179,7 +179,7 @@
         "name": "Isolation forest",
         "description": "",
         "parameters": {
-          "no_estimators": {
+          "n_estimators": {
             "name": "Number of estimators:",
             "type": "numeric",
             "min": 1,
@@ -282,8 +282,7 @@
       "totalsum": {
         "name": "Sumtotal normalisation",
         "description": "",
-        "parameters": {
-        },
+        "parameters": {},
         "graphs": [
           {
             "graph_type": {

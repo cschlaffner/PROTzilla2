@@ -47,16 +47,21 @@ def make_parameter_input(key, param_dict, disabled):
         ),
     )
 
+
 def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
-
+    # print("here3")
     for key, param_dict in parameters.items():
+        # print("parameters:", parameters)
         # todo use workflow default
-        if run.current_parameters:
+        if run.current_parameters and key in run.current_parameters.keys():
+            # print("run.current_parameters: ", run.current_parameters)
             param_dict["default"] = run.current_parameters[key]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    # print("here4")
     return current_fields
+
 
 def detail(request, run_name):
     if run_name not in active_runs:
@@ -83,20 +88,22 @@ def detail(request, run_name):
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
-        parameters = run.workflow_meta[history_step.section][history_step.step][history_step.method]["parameters"]
+        parameters = run.workflow_meta[history_step.section][history_step.step][
+            history_step.method
+        ]["parameters"]
         if history_step.section == "importing":
             name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file'].split('/')[-1]}"
         else:
             for key, param_dict in parameters.items():
                 fields.append(
                     make_parameter_input(
-                        key, param_dict, disabled=True,
+                        key,
+                        param_dict,
+                        disabled=True,
                     )
                 )
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
-        displayed_history.append(
-            dict(name=name, fields=fields)
-        )
+        displayed_history.append(dict(name=name, fields=fields))
     return render(
         request,
         "runs/details.html",
@@ -115,8 +122,12 @@ def detail(request, run_name):
 
 def change_method(request, run_name):
     try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
         run = active_runs[run_name]
+        # print("successful try (maybe)")
     except KeyError as e:
+        # print("try failed")
         print(e.message)
         response = JsonResponse({"error": "Run was not found"})
         response.status_code = 500  # internal server error
@@ -124,8 +135,9 @@ def change_method(request, run_name):
     section, step, _ = run.current_run_location()
     method = request.POST["method"]
     run.set_current_run_location(section, step, method)
+    # print("here")
     current_fields = get_current_fields(run, section, step, method)
-
+    # print("here2")
     html = render_to_string(
         "runs/fields.html",
         context=dict(fields=current_fields),
@@ -165,7 +177,7 @@ def back(request, run_name):
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    post = dict(request.POST)    
+    post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
     post.pop(f"{step}_method")
 
