@@ -70,7 +70,12 @@ class Run:
             shutil.copy2(workflow_template_path, workflow_local_path)
 
         with open(workflow_local_path, "r") as f:
-            self.workflow_config = json.load(f)
+            try:
+                self.workflow_config = json.load(f)
+            except Exception as e:
+                print("could not read json:", workflow_local_path)
+                raise e
+
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
