@@ -62,7 +62,7 @@ def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
+    section, step, method = run.current_run_location()
     current_fields = get_current_fields(run, section, step, method)
     method_dropdown_id = f"{step}_method"
 
@@ -102,7 +102,7 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=str(run.current_workflow_location()),
+            location=str(run.current_run_location()),
             displayed_history=displayed_history,
             fields=current_fields,
             method_dropdown_id=method_dropdown_id,
@@ -121,8 +121,10 @@ def change_method(request, run_name):
         response = JsonResponse({"error": "Run was not found"})
         response.status_code = 500  # internal server error
         return response
-    section, step, _ = run.current_workflow_location()
-    current_fields = get_current_fields(run, section, step, request.POST["method"])
+    section, step, _ = run.current_run_location()
+    method = request.POST["method"]
+    run.set_current_run_location(section, step, method)
+    current_fields = get_current_fields(run, section, step, method)
 
     html = render_to_string(
         "runs/fields.html",
@@ -162,8 +164,8 @@ def back(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
-    post = dict(request.POST)
+    section, step, method = run.current_run_location()
+    post = dict(request.POST)    
     del post["csrfmiddlewaretoken"]
     post.pop(f"{step}_method")
 

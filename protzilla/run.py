@@ -96,6 +96,7 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.set_current_run_location(*self.current_workflow_location())
 
     def back_step(self):
         assert self.history.steps
@@ -110,6 +111,7 @@ class Run:
         self.step = None
         self.method = None
         self.step_index -= 1
+        self.set_current_run_location(*self.current_workflow_location())
 
     def current_workflow_location(self):
         steps = []
@@ -117,3 +119,11 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
+
+    def current_run_location(self):
+        if not self.method:
+            return self.current_workflow_location()
+        return self.section, self.step, self.method
+    
+    def set_current_run_location(self, section, step, method):
+        self.section, self.step, self.method = section, step, method
