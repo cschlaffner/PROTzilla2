@@ -124,6 +124,6 @@ class Run:
         if not self.method:
             return self.current_workflow_location()
         return self.section, self.step, self.method
-    
+
     def set_current_run_location(self, section, step, method):
         self.section, self.step, self.method = section, step, method
