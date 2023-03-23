@@ -1,4 +1,5 @@
 import pandas as pd
+from django.contrib import messages
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -83,11 +84,6 @@ def with_local_outlier_factor(
     dict with list of outlier sample names
     :rtype: Tuple[pandas DataFrame, dict]
     """
-    msg = "LocalOutlierFactor does not accept missing values encoded as NaN. Consider preprocessing your data to remove NaN values."
-    return intensity_df, dict(
-            messages=[dict(level = 40, msg = msg)],
-            outlier_list=None,
-            anomaly_df=None,)
     try:
         transformed_df = long_to_wide(intensity_df)
 
@@ -108,12 +104,13 @@ def with_local_outlier_factor(
             outlier_list=outlier_list,
             anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
         )
-    except ValueError:     
+    except ValueError:
         msg = "LocalOutlierFactor does not accept missing values encoded as NaN. Consider preprocessing your data to remove NaN values."
         return intensity_df, dict(
-            messages=[dict(level = 40, msg = msg)],
+            messages=[dict(level=messages.ERROR, msg=msg)],
             outlier_list=None,
-            anomaly_df=None,)
+            anomaly_df=None,
+        )
 
 
 # TODO: handling NaN values

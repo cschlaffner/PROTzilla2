@@ -3,6 +3,7 @@ from pathlib import Path
 from shutil import rmtree
 
 from .constants.location_mapping import method_map, plot_map
+from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 
@@ -68,7 +69,12 @@ class Run:
     def perform_calculation(self, method_callable, parameters):
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
-        # add error handling
+        # error handling for CLI
+        if "messages" in self.current_out:
+            for message in self.current_out["messages"]:
+                log_function = MESSAGE_TO_LOGGING_FUNCTION.get(message["level"])
+                if log_function:
+                    log_function(message["msg"])
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
