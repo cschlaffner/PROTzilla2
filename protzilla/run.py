@@ -7,7 +7,7 @@ from shutil import rmtree
 from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .utilities.dynamic_parameters_provider import input_data_name_to_step_index
+from .utilities.dynamic_parameters_provider import input_data_name_to_location
 
 
 class Run:
@@ -60,12 +60,14 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
-        self.input_data_step_index = (
-            self.history.steps[-1].input_data_step_index if self.history.steps else None
+        self.input_data_location = (
+            self.history.steps[-1].input_data_location if self.history.steps else None
         )
         self.df = (
-            self.history.steps[self.input_data_step_index].dataframe
-            if self.input_data_step_index
+            self.history.steps[self.input_data_location["step_index"]].output_mapping(
+                self.input_data_location["key"]
+            )
+            if self.input_data_location
             else None
         )
         self.step_index = len(self.history.steps)
@@ -83,7 +85,6 @@ class Run:
                 print("could not read json:", workflow_local_path)
                 raise e
 
-
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
 
@@ -98,11 +99,20 @@ class Run:
         self.step_name = None
 
     def prepare_calculation(self, step_name, input_data_name=None):
+        # data_analysis or data_integration
         if input_data_name is not None:
-            name_to_step_index = input_data_name_to_step_index(self)
-            self.input_data_step_index = name_to_step_index[input_data_name]
-            self.df = self.history.steps[self.input_data_step_index].dataframe
+            self.input_data_location = input_data_name_to_location(self)[
+                input_data_name
+            ]
+            step_index = self.input_data_location["step_index"]
+            key = self.input_data_location["key"]
+
+            self.df = self.history.steps[step_index].output_mapping(key)
+        # importing or data_preprocessing
         elif self.history.steps:
+            self.input_data_location = dict(
+                step_index=self.step_index - 1, key="dataframe"
+            )
             self.df = self.history.steps[-1].dataframe
 
         self.step_name = step_name
@@ -169,12 +179,13 @@ class Run:
             self.step,
             self.method,
             self.current_parameters,
-            self.input_data_step_index,
+            self.input_data_location,
             self.result_df,
             self.current_out,
             self.plots,
             self.step_name,
         )
+        self.input_data_location = None
         self.df = None
         self.result_df = None
         self.step_index += 1
@@ -183,10 +194,14 @@ class Run:
     def back_step(self):
         assert self.history.steps
         self.history.remove_step()
-        self.input_data_step_index = self.history.steps[-1].input_data_step_index
+        self.input_data_location = (
+            self.history.steps[-1].input_data_location if self.history.steps else None
+        )
         self.df = (
-            self.history.steps[self.input_data_step_index].dataframe
-            if self.input_data_step_index
+            self.history.steps[self.input_data_location["step_index"]].output_mapping(
+                self.input_data_location["key"]
+            )
+            if self.input_data_location
             else None
         )
         # popping from history.steps possible to get values again
