@@ -118,7 +118,7 @@ def detail(request, run_name):
                 "parameters"
             ]
             fields.append(make_name_input("step_name", step.step_name, disabled=True))
-            if section == "data_analysis":
+            if step.section == "data_analysis":
                 fields.append(make_input_data_dropdown("input_data_name", run))
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
