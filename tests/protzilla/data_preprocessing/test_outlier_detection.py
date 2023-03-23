@@ -1,6 +1,6 @@
+import numpy as np
 import pandas as pd
 import pytest
-import numpy as np
 
 from protzilla.data_preprocessing.outlier_detection import (
     by_isolation_forest,
@@ -35,6 +35,7 @@ def outlier_detection_df():
 
     return outlier_detection_df
 
+
 @pytest.fixture
 def outlier_detection_df_with_nan():
     outlier_detection_df = (
@@ -63,14 +64,18 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
     if show_figures:
         fig.show()
 
+
 def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_with_nan):
     _, current_out = by_isolation_forest(outlier_detection_df_with_nan, 50, -1)
-    test_msg = "Outlier Detection by IsolationForest does not accept missing values" \
-            "encoded as NaN. Consider preprocessing your data to remove NaN values."
+    test_msg = (
+        "Outlier Detection by IsolationForest does not accept missing values"
+        "encoded as NaN. Consider preprocessing your data to remove NaN values."
+    )
     if "messages" in current_out:
         assert current_out["messages"][0]["msg"] == test_msg
     else:
         assert False, "No messages in current_out"
+
 
 def test_outlier_detection_with_local_outlier_factor(
     show_figures, outlier_detection_df
@@ -80,17 +85,20 @@ def test_outlier_detection_with_local_outlier_factor(
     if show_figures:
         fig.show()
 
+
 def test_outlier_detection_with_local_outlier_factor_and_nan(
-    outlier_detection_df_with_nan
+    outlier_detection_df_with_nan,
 ):
     _, current_out = with_local_outlier_factor(outlier_detection_df_with_nan, 35, -1)
-    test_msg = "Outlier Detection with LocalOutlierFactor does not accept missing values" \
+    test_msg = (
+        "Outlier Detection with LocalOutlierFactor does not accept missing values"
         "encoded as NaN. Consider preprocessing your data to remove NaN values."
+    )
     if "messages" in current_out:
         assert current_out["messages"][0]["msg"] == test_msg
     else:
         assert False, "No messages in current_out"
-    
+
 
 def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
     result_df, dropouts = by_pca(outlier_detection_df, 2, 3)
@@ -101,8 +109,10 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
 
 def test_outlier_detection_with_pca_and_nan(outlier_detection_df_with_nan):
     _, current_out = by_pca(outlier_detection_df_with_nan, 2, 3)
-    test_msg = "Outlier Detection by PCA does not accept missing values" \
+    test_msg = (
+        "Outlier Detection by PCA does not accept missing values"
         "encoded as NaN. Consider preprocessing your data to remove NaN values."
+    )
     if "messages" in current_out:
         assert current_out["messages"][0]["msg"] == test_msg
     else:

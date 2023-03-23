@@ -47,8 +47,12 @@ def by_isolation_forest(
         df_isolation_forest_data["IF Outlier"] = clf.fit_predict(
             transformed_df.loc[:, transformed_df.columns != "Sample"]
         )
-        df_isolation_forest_data["Anomaly Score"] = clf.decision_function(transformed_df)
-        df_isolation_forest_data["Outlier"] = df_isolation_forest_data["IF Outlier"] == -1
+        df_isolation_forest_data["Anomaly Score"] = clf.decision_function(
+            transformed_df
+        )
+        df_isolation_forest_data["Outlier"] = (
+            df_isolation_forest_data["IF Outlier"] == -1
+        )
         outlier_list = df_isolation_forest_data[
             df_isolation_forest_data["Outlier"]
         ].index.tolist()
@@ -60,13 +64,16 @@ def by_isolation_forest(
             anomaly_df=df_isolation_forest_data[["Anomaly Score", "Outlier"]],
         )
     except ValueError:
-        msg = "Outlier Detection by IsolationForest does not accept missing values" \
+        msg = (
+            "Outlier Detection by IsolationForest does not accept missing values"
             "encoded as NaN. Consider preprocessing your data to remove NaN values."
+        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
+
 
 def with_local_outlier_factor(
     intensity_df: pd.DataFrame,
@@ -113,8 +120,10 @@ def with_local_outlier_factor(
             anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
         )
     except ValueError:
-        msg = "Outlier Detection with LocalOutlierFactor does not accept missing values"\
+        msg = (
+            "Outlier Detection with LocalOutlierFactor does not accept missing values"
             "encoded as NaN. Consider preprocessing your data to remove NaN values."
+        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
@@ -222,8 +231,10 @@ def by_pca(
             number_of_components=number_of_components,
         )
     except ValueError:
-        msg = "Outlier Detection by PCA does not accept missing values" \
+        msg = (
+            "Outlier Detection by PCA does not accept missing values"
             "encoded as NaN. Consider preprocessing your data to remove NaN values."
+        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
