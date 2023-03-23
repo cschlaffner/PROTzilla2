@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
@@ -16,42 +12,41 @@
     <br>
     {% endif %}
 
-{{ run_name }}
-<br>
-<b>history</b>
-<br>
-{% for step in displayed_history %}
-    {{ step.name }}<br>
-    {% for field in step.fields %}
-        {{ field }}<br>
-    {% endfor %}
+    {{ run_name }}
     <br>
-{% endfor %}
-
-<br>
-{{ location }}
-<br>
-<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% for field in fields %}
-        {{ field }}
+    <b>history</b>
+    <br>
+    {% for step in displayed_history %}
+        {{ step.name }}<br>
+        {% for field in step.fields %}
+            {{ field }}<br>
+        {% endfor %}
         <br>
     {% endfor %}
-    <input type="submit" value="Calculate">
-</form>
 
-{% if show_next %}
-    <form action="{% url 'runs:next' run_name %}" method="post">
+    <br>
+    {{ location }}
+    <br>
+    <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <button>Next</button>
+        {% for field in fields %}
+            {{ field }}
+            <br>
+        {% endfor %}
+        <input type="submit" value="Calculate">
     </form>
-{% endif %}
 
-{% if show_back %}
-    <form action="{% url 'runs:back' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Back</button>
-    </form>
-{% endif %}
-</body>
-</html>
+    {% if show_next %}
+        <form action="{% url 'runs:next' run_name %}" method="post">
+            {% csrf_token %}
+            <button>Next</button>
+        </form>
+    {% endif %}
+
+    {% if show_back %}
+        <form action="{% url 'runs:back' run_name %}" method="post">
+            {% csrf_token %}
+            <button>Back</button>
+        </form>
+    {% endif %}
+{% endblock%}
