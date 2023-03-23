@@ -9,7 +9,7 @@ def metadata_import_method(_, file, feature_orientation):
         na_values=[""],
         keep_default_na=True,
     )
-    # always return metadata in the same orientation (Features as columns)
+    # always return metadata in the same orientation (features as columns)
     if feature_orientation.startswith("Rows"):
         df = df.transpose()
 
