@@ -53,7 +53,14 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
-        self.df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.input_data_step_index = (
+            self.history.steps[-1].input_data_step_index if self.history.steps else None
+        )
+        self.df = (
+            self.history.steps[self.input_data_step_index].dataframe
+            if self.input_data_step_index
+            else None
+        )
         self.step_index = len(self.history.steps)
         self.run_path = run_path
 
@@ -79,8 +86,8 @@ class Run:
     def prepare_calculation(self, step_name, input_data_name=None):
         if input_data_name is not None:
             name_to_step_index = input_data_name_to_step_index(self)
-            data_step_index = name_to_step_index[input_data_name]
-            self.df = self.history.steps[data_step_index].dataframe
+            self.input_data_step_index = name_to_step_index[input_data_name]
+            self.df = self.history.steps[self.input_data_step_index].dataframe
         elif self.history.steps:
             self.df = self.history.steps[-1].dataframe
 
@@ -145,6 +152,7 @@ class Run:
             self.step,
             self.method,
             self.current_parameters,
+            self.input_data_step_index,
             self.result_df,
             self.current_out,
             self.plots,
@@ -158,7 +166,12 @@ class Run:
     def back_step(self):
         assert self.history.steps
         self.history.remove_step()
-        self.df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.input_data_step_index = self.history.steps[-1].input_data_step_index
+        self.df = (
+            self.history.steps[self.input_data_step_index].dataframe
+            if self.input_data_step_index
+            else None
+        )
         # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None
