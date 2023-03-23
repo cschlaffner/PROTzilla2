@@ -117,3 +117,9 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
+
+    def get_metadata(self):
+        if self.step_index < 1:
+            raise AttributeError("Metadata was not yet imported.")
+        else:
+            return self.history.steps[1].outputs["metadata"]

@@ -3,10 +3,10 @@ from ..data_preprocessing import (
     filter_samples,
     imputation,
     normalisation,
-    transformation,
     outlier_detection,
+    transformation,
 )
-from ..importing import ms_data_import
+from ..importing import metadata_import, ms_data_import
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -29,8 +29,7 @@ method_map = {
         "importing",
         "metadata_import",
         "metadata_import_method",
-    ): lambda df, feature_orientation, file: print("warning: not implemented")
-    or (df, {}),
+    ): metadata_import.metadata_import_method,
     (
         "data_preprocessing",
         "filter_proteins",

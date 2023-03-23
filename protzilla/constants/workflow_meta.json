@@ -54,7 +54,7 @@
               "Rows (features in rows, samples in columns)",
               "Columns (samples in rows, features in columns)"
             ],
-            "default": "Rows (features in rows, samples in columns)"
+            "default": "Columns (samples in rows, features in columns)"
           },
           "file": {
             "name": "Metadata file:",
