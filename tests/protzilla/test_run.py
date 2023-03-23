@@ -70,3 +70,22 @@ def test_run_continue():
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
     rmtree(RUNS_PATH / run_name)
+
+def test_perform_calculation_logging(caplog):
+    run_name = "test_run_logging" + random_string()
+    run = Run.create(run_name, df_mode="disk")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+
+    run.perform_calculation_from_location("data_preprocessing", 
+                                          "outlier_detection", 
+                                          "local_outlier_factor", 
+                                          {"number_of_neighbors": 3})
+    
+    assert "ERROR" in caplog.text
+    assert "Outlier Detection with LocalOutlierFactor does not accept missing values"\
+        "encoded as NaN. Consider preprocessing your data to remove NaN values." in caplog.text
+    rmtree(RUNS_PATH / run_name)

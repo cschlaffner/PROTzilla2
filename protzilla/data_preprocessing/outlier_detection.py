@@ -113,8 +113,8 @@ def with_local_outlier_factor(
             anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
         )
     except ValueError:
-        msg = "Outlier Detection with LocalOutlierFactor does not accept missing values \
-            encoded as NaN. Consider preprocessing your data to remove NaN values."
+        msg = "Outlier Detection with LocalOutlierFactor does not accept missing values"\
+            "encoded as NaN. Consider preprocessing your data to remove NaN values."
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
