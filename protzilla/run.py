@@ -63,7 +63,7 @@ class Run:
         self.input_data_location = (
             self.history.steps[-1].input_data_location if self.history.steps else None
         )
-        self.df = (
+        self.input_data = (
             self.history.steps[self.input_data_location["step_index"]].output_mapping(
                 self.input_data_location["key"]
             )
@@ -107,13 +107,13 @@ class Run:
             step_index = self.input_data_location["step_index"]
             key = self.input_data_location["key"]
 
-            self.df = self.history.steps[step_index].output_mapping(key)
+            self.input_data = self.history.steps[step_index].output_mapping(key)
         # importing or data_preprocessing
         elif self.history.steps:
             self.input_data_location = dict(
                 step_index=self.step_index - 1, key="dataframe"
             )
-            self.df = self.history.steps[-1].dataframe
+            self.input_data = self.history.steps[-1].dataframe
 
         self.step_name = step_name
 
@@ -125,7 +125,9 @@ class Run:
     def perform_calculation(self, method_callable, parameters):
         # this fails because of wrong matching of parameters of methods
         # between workflow_meta.json and python method implementation
-        self.result_df, self.current_out = method_callable(self.df, **parameters)
+        self.result_df, self.current_out = method_callable(
+            self.input_data, **parameters
+        )
 
         self.current_parameters = parameters
 
@@ -139,7 +141,7 @@ class Run:
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
-            self.df, self.result_df, self.current_out, **parameters
+            self.input_data, self.result_df, self.current_out, **parameters
         )
 
     def insert_as_next_step(self, insert_step):
@@ -186,7 +188,7 @@ class Run:
             self.step_name,
         )
         self.input_data_location = None
-        self.df = None
+        self.input_data = None
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
@@ -197,7 +199,7 @@ class Run:
         self.input_data_location = (
             self.history.steps[-1].input_data_location if self.history.steps else None
         )
-        self.df = (
+        self.input_data = (
             self.history.steps[self.input_data_location["step_index"]].output_mapping(
                 self.input_data_location["key"]
             )

@@ -74,12 +74,14 @@ def make_name_input(key, default, disabled):
     )
 
 
-def make_input_data_dropdown(key, run):
+def make_input_data_dropdown(key, run, disabled):
     categories = input_data_name(run)
     template = "runs/field_select.html"
     return render_to_string(
         template,
-        context=dict(key=key, categories=categories, name="Select input data"),
+        context=dict(
+            key=key, categories=categories, name="Select input data", disabled=disabled
+        ),
     )
 
 
@@ -99,7 +101,9 @@ def detail(request, run_name):
         )
     )
     if section == "data_analysis":
-        current_fields.append(make_input_data_dropdown("input_data_name", run))
+        current_fields.append(
+            make_input_data_dropdown("input_data_name", run, disabled=False)
+        )
     for key, param_dict in parameters.items():
         # todo use workflow default
         if run.current_parameters:
@@ -117,7 +121,9 @@ def detail(request, run_name):
             ]
             fields.append(make_name_input("step_name", step.step_name, disabled=True))
             if step.section == "data_analysis":
-                fields.append(make_input_data_dropdown("input_data_name", run))
+                fields.append(
+                    make_input_data_dropdown("input_data_name", run, disabled=True)
+                )
             for key, param_dict in parameters.items():
                 param_dict["default"] = step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
