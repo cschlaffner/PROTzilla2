@@ -44,6 +44,7 @@ class Run:
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
+        self.metadata_index = None
 
         with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
             self.workflow_config = json.load(f)
@@ -63,6 +64,8 @@ class Run:
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
         method_callable = method_map[location]
+        if step == "metadata_import":
+            self.metadata_index = self.step_index
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
@@ -122,4 +125,4 @@ class Run:
         if self.step_index < 1:
             raise AttributeError("Metadata was not yet imported.")
         else:
-            return self.history.steps[1].outputs["metadata"]
+            return self.history.steps[self.metadata_index].outputs["metadata"]
