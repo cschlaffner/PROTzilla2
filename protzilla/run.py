@@ -1,4 +1,6 @@
 import json
+import os.path
+import shutil
 from pathlib import Path
 from shutil import rmtree
 
@@ -50,6 +52,11 @@ class Run:
             run_path,
         )
 
+    def write_local_workflow(self):
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        with open(workflow_local_path, "w") as f:
+            json.dump(self.workflow_config, f)
+
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
@@ -64,14 +71,21 @@ class Run:
         self.step_index = len(self.history.steps)
         self.run_path = run_path
 
-        with open(f"{WORKFLOWS_PATH}/{workflow_config_name}.json", "r") as f:
-            self.workflow_config = json.load(f)
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        if not os.path.exists(workflow_local_path):
+            workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
+            shutil.copy2(workflow_template_path, workflow_local_path)
+
+        with open(workflow_local_path, "r") as f:
+            try:
+                self.workflow_config = json.load(f)
+            except Exception as e:
+                print("could not read json:", workflow_local_path)
+                raise e
+
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
-
-        with open(self.run_path / "workflow.json", "w+") as f:
-            json.dump(self.workflow_config, f)
 
         # make these a result of the step to be compatible with CLI?
         self.section = None
@@ -99,7 +113,10 @@ class Run:
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
+        # this fails because of wrong matching of parameters of methods
+        # between workflow_meta.json and python method implementation
         self.result_df, self.current_out = method_callable(self.df, **parameters)
+
         self.current_parameters = parameters
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
@@ -121,14 +138,18 @@ class Run:
         assert self.section is not None
         steps = self.workflow_config["sections"][self.section]["steps"]
         workflow_meta_step = self.workflow_meta[self.section][insert_step]
-        print("workflow_meta_step")
-        print(workflow_meta_step)
+        first_method, first_method_attributes = next(iter(workflow_meta_step.items()))
+        params = first_method_attributes["parameters"]
 
-        insert_step_dict = dict(name=insert_step)
+        # might need that, for now the params are in the workflow_meta format
+        if params:
+            for k in params:
+                pass
+                # params[k] = params[k]["default"]
 
-        # TODO: hier weiter arbeiten
-        # es muss insert_step_dict ergänzt werden sodass es wie bei
-        # steps aussieht
+        insert_step_dict = dict(
+            name=insert_step, method=first_method, parameters=params
+        )
 
         # is there a better way of finding the step?
         counter = 0
@@ -139,12 +160,8 @@ class Run:
         else:
             raise Exception("could not find " + self.step + " in workflow_config")
 
-        #  TODO: das hier wieder ausauskommentieren
-        # steps.insert(counter, insert_step_dict)
-
-        # TODO: ist workflow_config schon geupdatet?
-        # with open(self.run_path / "workflow.json", "w+") as f:
-        #     json.dump(self.workflow_config, f)
+        steps.insert(counter, insert_step_dict)
+        self.write_local_workflow()
 
     def next_step(self):
         self.history.add_step(
