@@ -60,8 +60,8 @@ def by_isolation_forest(
             anomaly_df=df_isolation_forest_data[["Anomaly Score", "Outlier"]],
         )
     except ValueError:
-        msg = "Outlier Detection by IsolationForest does not accept missing values \
-            encoded as NaN. Consider preprocessing your data to remove NaN values."
+        msg = "Outlier Detection by IsolationForest does not accept missing values" \
+            "encoded as NaN. Consider preprocessing your data to remove NaN values."
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
@@ -222,8 +222,8 @@ def by_pca(
             number_of_components=number_of_components,
         )
     except ValueError:
-        msg = "Outlier Detection by PCA does not accept missing values \
-            encoded as NaN. Consider preprocessing your data to remove NaN values."
+        msg = "Outlier Detection by PCA does not accept missing values" \
+            "encoded as NaN. Consider preprocessing your data to remove NaN values."
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
