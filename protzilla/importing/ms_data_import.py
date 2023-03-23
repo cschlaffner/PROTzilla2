@@ -26,7 +26,3 @@ def max_quant_import(_, file, intensity_name):
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
     return ordered, {}
-
-
-def protzilla_csv_import(_, file):
-    return pd.read_csv(file), {}
