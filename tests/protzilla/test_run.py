@@ -11,15 +11,18 @@ def test_run_create():
     # here the run should be used like in the CLI
     name = "test_run" + random_string()
     run = Run.create(name)
+    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
+    run.prepare_calculation("filter_proteins")
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
+    run.prepare_calculation("filter_samples")
     run.calculate_and_next(
         data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
     )
@@ -32,6 +35,7 @@ def test_run_create():
 def test_run_back():
     name = "test_run_back" + random_string()
     run = Run.create(name)
+    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
