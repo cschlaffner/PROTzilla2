@@ -64,11 +64,11 @@ class Run:
     def perform_calculation_from_location(self, section, step, method, parameters):
         self.section, self.step, self.method = location = (section, step, method)
         method_callable = method_map[location]
-        if step == "metadata_import":
-            self.metadata_index = self.step_index
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
+        if self.step == "metadata_import":
+            self.metadata_index = self.step_index
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
 
