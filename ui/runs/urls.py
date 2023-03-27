@@ -9,6 +9,7 @@ urlpatterns = [
     path("continue", views.continue_, name="continue"),
     path("<str:run_name>", views.detail, name="detail"),
     path("<str:run_name>/calculate", views.calculate, name="calculate"),
+    path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/next", views.next_, name="next"),
     path("<str:run_name>/back", views.back, name="back"),
 ]

@@ -61,6 +61,11 @@ def detail(request, run_name):
         if run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    graphs = run.workflow_meta[section][step][method]["graphs"]
+    plot_fields = []
+    for graph in graphs:
+        for key, param_dict in graph.items():
+            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
     displayed_history = []
     for step in run.history.steps:
         fields = []
@@ -83,8 +88,11 @@ def detail(request, run_name):
             location=str(run.current_workflow_location()),
             displayed_history=displayed_history,
             fields=current_fields,
+            plot_fields=plot_fields,
+            current_plots=[plot for plot in run.plots] if run.plots else [],
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
+            show_plot_button=run.result_df is not None,
         ),
     )
 
@@ -139,4 +147,16 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_calculation_from_location(section, step, method, parameters)
 
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def plot(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_workflow_location()
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    parameters = {}
+    for k, v in post.items():
+        pass
+    run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

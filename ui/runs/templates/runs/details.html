@@ -28,6 +28,14 @@
     {% endfor %}
     <input type="submit" value="Calculate">
 </form>
+<form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in plot_fields %}
+        {{ field }}
+        <br>
+    {% endfor %}
+    <input type="submit" value="Plot">
+</form>
 
 {% if show_next %}
     <form action="{% url 'runs:next' run_name %}" method="post">
