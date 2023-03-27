@@ -122,9 +122,9 @@ def change_method(request, run_name):
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
         run = active_runs[run_name]
-    except KeyError as e:
-        print(e.message)
-        response = JsonResponse({"error": "Run was not found"})
+    except FileNotFoundError as e:
+        print(str(e))
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 500  # internal server error
         return response
     section, step, _ = run.current_run_location()
