@@ -75,7 +75,7 @@ def detail(request, run_name):
             context=dict(
                 disabled=False,
                 key=method_dropdown_id,
-                name=f"{step.replace('-', ' ').title()} Method:",
+                name=f"{step.replace('_', ' ').title()} Method:",
                 default=method,
                 categories=run.workflow_meta[section][step].keys(),
             ),
@@ -110,7 +110,7 @@ def detail(request, run_name):
             displayed_history=displayed_history,
             fields=current_fields,
             method_dropdown_id=method_dropdown_id,
-            method_details_id=f"{step.replace('-', '_')}_details",
+            method_details_id=f"{step}_details",
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
         ),
