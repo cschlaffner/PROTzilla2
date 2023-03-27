@@ -126,7 +126,7 @@ def change_method(request, run_name):
     except FileNotFoundError as e:
         print(str(e))
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
-        response.status_code = 500  # internal server error
+        response.status_code = 404  # not found
         return response
     section, step, _ = run.current_run_location()
     method = request.POST["method"]
