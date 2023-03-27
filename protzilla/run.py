@@ -100,18 +100,16 @@ class Run:
 
     def back_step(self):
         assert self.history.steps
+        self.section = self.history.steps[-1].section
+        self.step = self.history.steps[-1].step
+        self.method = self.history.steps[-1].method
         self.history.remove_step()
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
-
-        self.section = None
-        self.step = None
-        self.method = None
         self.step_index -= 1
-        self.set_current_run_location(*self.current_workflow_location())
 
     def current_workflow_location(self):
         steps = []
