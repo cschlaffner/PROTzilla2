@@ -1,8 +1,8 @@
 import pandas as pd
 
 
-def metadata_import_method(_, file, feature_orientation):
-    df = pd.read_csv(
+def metadata_import_method(df, file, feature_orientation):
+    meta_df = pd.read_csv(
         file,
         sep=",",
         low_memory=False,
@@ -11,6 +11,6 @@ def metadata_import_method(_, file, feature_orientation):
     )
     # always return metadata in the same orientation (features as columns)
     if feature_orientation.startswith("Rows"):
-        df = df.transpose()
+        meta_df = meta_df.transpose()
 
-    return _, {"metadata": df}
+    return df, {"metadata": meta_df}

@@ -69,7 +69,7 @@ def detail(request, run_name):
             df_head = (
                 step.dataframe.head()
                 if step.step == "ms_data_import"
-                else run.get_metadata().head()
+                else run.metadata.head()
             )
             fields = [df_head.to_string()]
         else:

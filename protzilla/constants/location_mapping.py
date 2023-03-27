@@ -112,6 +112,9 @@ method_map = {
     ): imputation.by_min_per_dataset,
 }
 
+# reversed mapping of method callable and location
+location_map = {v: k for k, v in method_map.items()}
+
 """
 In this data structure, a plot for a given method is associated with a 
 location. The location is determined by the section, step, and method keys 
