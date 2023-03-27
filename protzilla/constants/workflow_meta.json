@@ -17,7 +17,8 @@
           },
           "file": {
             "name": "MaxQuant intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": "None"
           }
         }
       },
@@ -37,7 +38,8 @@
           },
           "file": {
             "name": "MSFragger intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": "None"
           }
         }
       }
@@ -58,7 +60,8 @@
           },
           "file": {
             "name": "Metadata file:",
-            "type": "file"
+            "type": "file",
+            "default": "None"
           }
         }
       }

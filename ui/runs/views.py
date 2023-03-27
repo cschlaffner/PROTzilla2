@@ -54,8 +54,9 @@ def get_current_fields(run, section, step, method):
     for key, param_dict in parameters.items():
         # todo use workflow default
         # todo 59 - restructure current_parameters
-        if run.current_parameters and key in run.current_parameters.keys():
-            param_dict["default"] = run.current_parameters[key]
+        if run.current_parameters is not None:
+            param_dict["default"] = run.current_parameters.get(key, param_dict["default"])
+         
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
