@@ -5,6 +5,11 @@
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>
+        // Sets up an event listener that sends a POST request with AJAX to the server to provide 
+        // the correct parameter dropdowns as HTML when the selected method changes. 
+        // It updates the page with the new dropdowns or displays an error message if something goes wrong.
+        // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
+
         $( document ).ready(function() {
             $("#{{ method_dropdown_id}}").change(function() {
                 const selected_method = $(this).val();
