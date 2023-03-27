@@ -61,7 +61,7 @@ def detail(request, run_name):
         if run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
-    graphs = run.workflow_meta[section][step][method]["graphs"]
+    graphs = run.workflow_meta[section][step][method].get("graphs", [])
     plot_fields = []
     for graph in graphs:
         for key, param_dict in graph.items():
@@ -129,19 +129,7 @@ def back(request, run_name):
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
-    post = dict(request.POST)
-    del post["csrfmiddlewaretoken"]
-    parameters = {}
-    for k, v in post.items():
-        # assumption: only one value for parameter
-        param_dict = run.workflow_meta[section][step][method]["parameters"][k]
-        if param_dict["type"] == "numeric" and param_dict["step"] == 1:
-            parameters[k] = int(v[0])
-        elif param_dict["type"] == "numeric":
-            parameters[k] = float(v[0])
-        else:
-            parameters[k] = v[0]
-
+    parameters = parameters_from_post(request.POST)
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -153,10 +141,27 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_workflow_location()
-    post = dict(request.POST)
-    del post["csrfmiddlewaretoken"]
-    parameters = {}
-    for k, v in post.items():
-        pass
+    parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def parameters_from_post(post):
+    d = dict(post)
+    del d["csrfmiddlewaretoken"]
+    parameters = {}
+    for k, v in d.items():
+        print(v)
+        if len(v) == 1:
+            parameters[k] = convert_str_if_possible(v[0])
+        else:
+            parameters[k] = [convert_str_if_possible(x) for x in v]
+    return parameters
+
+
+def convert_str_if_possible(s):
+    try:
+        f = float(s)
+    except ValueError:
+        return s
+    return int(f) if int(f) == f else f
