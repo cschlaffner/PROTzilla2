@@ -1,6 +1,8 @@
 .DS_Store
 .idea/
 user_data/runs/*
+.vscode/*
+.flake8
 
 # --- below: github python .gitignore template ---
 

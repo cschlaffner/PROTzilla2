@@ -65,8 +65,8 @@ def by_isolation_forest(
         )
     except ValueError:
         msg = (
-            "Outlier Detection by IsolationForest does not accept missing values"
-            "encoded as NaN. Consider preprocessing your data to remove NaN values."
+            "Outlier Detection by IsolationForest does not accept missing values \
+            encoded as NaN. Consider preprocessing your data to remove NaN values."
         )
         return intensity_df, dict(
             outlier_list=None,
@@ -121,8 +121,8 @@ def by_local_outlier_factor(
         )
     except ValueError:
         msg = (
-            "Outlier Detection by LocalOutlierFactor does not accept missing values"
-            "encoded as NaN. Consider preprocessing your data to remove NaN values."
+            "Outlier Detection by LocalOutlierFactor does not accept missing values \
+            encoded as NaN. Consider preprocessing your data to remove NaN values."
         )
         return intensity_df, dict(
             outlier_list=None,
@@ -155,8 +155,8 @@ def by_pca(
     used in the PCA. Allowed: 2 or 3. Default: 3
     :type number_of_components: integer (2 or 3)
     :return: returns a Dataframe containing all samples that are not outliers.
-    A dict with list of inlier sample names, a DataFrame that contains the projection of \
-    the intensity_df on first principal components, a list that contains the \
+    A dict with list of inlier sample names, a DataFrame that contains the projection \
+    of the intensity_df on first principal components, a list that contains the \
     explained variation for each component and an int, the number of components \
     the calculations were executed with
     :rtype: Tuple[pandas DataFrame, dict]
@@ -232,8 +232,8 @@ def by_pca(
         )
     except ValueError:
         msg = (
-            "Outlier Detection by PCA does not accept missing values"
-            "encoded as NaN. Consider preprocessing your data to remove NaN values."
+            "Outlier Detection by PCA does not accept missing values \
+        encoded as NaN. Consider preprocessing your data to remove NaN values."
         )
         return intensity_df, dict(
             outlier_list=None,

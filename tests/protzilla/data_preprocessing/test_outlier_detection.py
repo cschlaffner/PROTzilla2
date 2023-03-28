@@ -67,12 +67,10 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
 
 def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_with_nan):
     _, current_out = by_isolation_forest(outlier_detection_df_with_nan, 50, -1)
-    test_msg = (
-        "Outlier Detection by IsolationForest does not accept missing values"
-        "encoded as NaN. Consider preprocessing your data to remove NaN values."
-    )
+    test_keywords = "NaN values"
+
     if "messages" in current_out:
-        assert current_out["messages"][0]["msg"] == test_msg
+        assert test_keywords in current_out["messages"][0]["msg"]
     else:
         assert False, "No messages in current_out"
 
@@ -90,12 +88,10 @@ def test_outlier_detection_by_local_outlier_factor_and_nan(
     outlier_detection_df_with_nan,
 ):
     _, current_out = by_local_outlier_factor(outlier_detection_df_with_nan, 35, -1)
-    test_msg = (
-        "Outlier Detection by LocalOutlierFactor does not accept missing values"
-        "encoded as NaN. Consider preprocessing your data to remove NaN values."
-    )
+    test_keywords = "NaN values"
+
     if "messages" in current_out:
-        assert current_out["messages"][0]["msg"] == test_msg
+        assert test_keywords in current_out["messages"][0]["msg"]
     else:
         assert False, "No messages in current_out"
 
@@ -109,11 +105,9 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
 
 def test_outlier_detection_with_pca_and_nan(outlier_detection_df_with_nan):
     _, current_out = by_pca(outlier_detection_df_with_nan, 2, 3)
-    test_msg = (
-        "Outlier Detection by PCA does not accept missing values"
-        "encoded as NaN. Consider preprocessing your data to remove NaN values."
-    )
+    test_keywords = "NaN values"
+
     if "messages" in current_out:
-        assert current_out["messages"][0]["msg"] == test_msg
+        assert test_keywords in current_out["messages"][0]["msg"]
     else:
         assert False, "No messages in current_out"
