@@ -100,12 +100,11 @@ class Run:
 
     def back_step(self):
         assert self.history.steps
-        self.section = self.history.steps[-1].section
-        self.step = self.history.steps[-1].step
-        self.method = self.history.steps[-1].method
-        self.history.remove_step()
+        popped_step = self.history.pop_step()
+        self.section = popped_step.section
+        self.step = popped_step.step
+        self.method = popped_step.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None
         self.current_parameters = None

@@ -537,7 +537,7 @@
             "categories": [
               "mean",
               "median",
-              "most frequent"
+              "most_frequent"
             ],
             "default": "median"
           }
