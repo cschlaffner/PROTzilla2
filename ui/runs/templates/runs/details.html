@@ -6,13 +6,13 @@
 </head>
 <body>
     {% if messages %}
-    <ul class="messages">
+    <div class="messages">
         {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-            {{ message }}
-        </li>
+        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message | safe}}
+        </p>
         {% endfor %}
-    </ul>
+    </div>
     <br>
     {% endif %}
 

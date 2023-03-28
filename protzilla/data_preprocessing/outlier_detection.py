@@ -63,15 +63,13 @@ def by_isolation_forest(
             outlier_list=outlier_list,
             anomaly_df=df_isolation_forest_data[["Anomaly Score", "Outlier"]],
         )
-    except ValueError:
-        msg = (
-            "Outlier Detection by IsolationForest does not accept missing values \
+    except ValueError as e:
+        msg = "Outlier Detection by IsolationForest does not accept missing values \
             encoded as NaN. Consider preprocessing your data to remove NaN values."
-        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -119,15 +117,13 @@ def by_local_outlier_factor(
             outlier_list=outlier_list,
             anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
         )
-    except ValueError:
-        msg = (
-            "Outlier Detection by LocalOutlierFactor does not accept missing values \
+    except ValueError as e:
+        msg = f"Outlier Detection by LocalOutlierFactor does not accept missing values \
             encoded as NaN. Consider preprocessing your data to remove NaN values."
-        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -230,15 +226,13 @@ def by_pca(
             explained_variance_ratio=pca_model.explained_variance_ratio_,
             number_of_components=number_of_components,
         )
-    except ValueError:
-        msg = (
-            "Outlier Detection by PCA does not accept missing values \
+    except ValueError as e:
+        msg = "Outlier Detection by PCA does not accept missing values \
         encoded as NaN. Consider preprocessing your data to remove NaN values."
-        )
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
 
 

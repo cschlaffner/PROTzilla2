@@ -74,7 +74,8 @@ class Run:
             for message in self.current_out["messages"]:
                 log_function = MESSAGE_TO_LOGGING_FUNCTION.get(message["level"])
                 if log_function:
-                    log_function(message["msg"])
+                    trace = f"\nTrace: {message['trace']}" if "trace" in message else ""
+                    log_function(f"{message['msg']}{trace}")
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
