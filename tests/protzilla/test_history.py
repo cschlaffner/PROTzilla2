@@ -97,8 +97,17 @@ def test_dataframe_in_json(sample_step_params):
     history = History(name, df_mode="disk")
     df1 = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     df2 = pd.DataFrame(data={"asdfs": [3, 2], "aaaa": [99, 1]})
-    history.add_step(**sample_step_params, dataframe=df1)
-
+    history.add_step(
+        "section1",
+        "step1",
+        "method1",
+        {"param1": 3},
+        None,
+        df1,
+        outputs={"another_df": df2},
+        plots=[],
+        step_name="Step 1",
+    )
     assert (RUNS_PATH / name / "history.json").exists()
     del history
     history2 = History.from_disk(name, df_mode="disk")
