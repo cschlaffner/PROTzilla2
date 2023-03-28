@@ -18,6 +18,11 @@ def long_to_wide(intensity_df: pd.DataFrame):
     return pd.pivot(
         intensity_df, index="Sample", columns="Protein ID", values=values_name
     )
+    # df = pd.pivot(
+    #     intensity_df, index="Sample", columns="Protein ID", values=values_name
+    # )
+    # # df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    # return df
 
 
 def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
@@ -45,9 +50,11 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
         value_name=intensity_name,
     )
     intensity_df.sort_values(
-        by=["Protein ID", "Sample"], ignore_index=True, inplace=True # TODO: swap "Protein ID", "Sample"
-        # by=["Sample", "Protein ID"], ignore_index=True, inplace=True # TODO: swap "Protein ID", "Sample"
+        # by=["Protein ID", "Sample"], ignore_index=True, inplace=True # TODO: swap "Protein ID", "Sample"
+        by=["Sample", "Protein ID"],
+        ignore_index=True,
+        inplace=True,  # TODO: swap "Protein ID", "Sample"
     )
-    intensity_df.insert(1, "Gene", gene_info) # TODO: insert at 2 instead of 1
+    intensity_df.insert(2, "Gene", gene_info)  # TODO: insert at 2 instead of 1
 
     return intensity_df

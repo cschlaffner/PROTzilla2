@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -36,21 +37,30 @@ def transform_df_long():
         ],
     )
 
-    return pd.melt(
+    df = pd.melt(
         df,
         id_vars=["Sample", "Gene"],
         var_name="Protein ID",
         value_name="Intensity",
     )
 
+    df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    return df
+    # return pd.melt(
+    #     df,
+    #     id_vars=["Sample", "Gene"],
+    #     var_name="Protein ID",
+    #     value_name="Intensity",
+    # )
+
 
 @pytest.fixture
 def transform_df_long_invalid_data():
     df = pd.DataFrame(
         data=(
-            ["Sample_1", "Gene_1", 1, 2, 3, 4, 5], # TODO fill with 0s
-            ["Sample_2", "Gene_2", 6, 7, 8, 9, 10],
-            ["Sample_3", "Gene_3", 11, 12, 13, 14, 15],
+            ["Sample_1", "Gene_1", 0, 0, 0, 0, 0],
+            ["Sample_2", "Gene_2", 0, 0, np.nan, 0, 0],
+            ["Sample_3", "Gene_3", 0, 0, 0, 0, 0],
         ),
         columns=[
             "Sample",
@@ -78,22 +88,26 @@ def test_transform_long_to_wide(transform_df_long, transform_df_wide):
 def test_transform_wide_to_long(
     transform_df_long, transform_df_wide, transform_df_long_invalid_data
 ):
-    df = wide_to_long(long_to_wide(transform_df_long), transform_df_long)
-    # df = wide_to_long(transform_df_wide, transform_df_long_invalid_data)
+    l2l = wide_to_long(long_to_wide(transform_df_long), transform_df_long)
+    # l2l = wide_to_long(transform_df_wide, transform_df_long_invalid_data)
+
     print("\n\n")
-    print(df.info())
+    print("l2l info\n", l2l.info())
     print("\n\n")
-    print(transform_df_long.info())
+    print("long info\n", transform_df_long.info())
     print("\n\n")
-    print(df)
+    print("l2l\n", l2l)
     print("\n\n")
-    print(transform_df_long)
+    print("long\n", transform_df_long)
     print("\n\nconcat")
-    print(pd.concat([transform_df_wide, transform_df_long]).drop_duplicates(keep=False))
+    print(
+        pd.concat([transform_df_wide, long_to_wide(transform_df_long)]).drop_duplicates(
+            keep=False
+        )
+    )
     print("\n\ncompare")
 
     # reicht das vielleicht einfach?
-    print(df.compare(transform_df_long))
+    print(l2l.compare(transform_df_long))
 
-
-    assert df.equals(transform_df_wide)
+    assert l2l.equals(transform_df_long)
