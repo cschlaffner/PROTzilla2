@@ -72,9 +72,12 @@ def test_run_continue():
     assert df.equals(run2.df)
     rmtree(RUNS_PATH / run_name)
 
+
 def test_current_run_location():
     run_name = "test_run_current_location" + random_string()
-    run = Run.create(run_name, df_mode="disk", workflow_config_name="test_data_preprocessing")
+    run = Run.create(
+        run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
+    )
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
@@ -83,14 +86,25 @@ def test_current_run_location():
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_intensity_sum_filter")
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    )
     run.back_step()
-    assert run.current_run_location() == ("data_preprocessing","filter_proteins","low_frequency_filter")
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    )
     rmtree(RUNS_PATH / run_name)
+
 
 def test_set_current_run_location():
     run_name = "test_set_run_current_location" + random_string()
-    run = Run.create(run_name, df_mode="disk", workflow_config_name="test_data_preprocessing")
+    run = Run.create(
+        run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
+    )
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
@@ -99,7 +113,17 @@ def test_set_current_run_location():
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_intensity_sum_filter")
-    run.set_current_run_location("data_preprocessing", "filter_samples", "protein_count_filter")
-    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_count_filter")
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    )
+    run.set_current_run_location(
+        "data_preprocessing", "filter_samples", "protein_count_filter"
+    )
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_count_filter",
+    )
     rmtree(RUNS_PATH / run_name)

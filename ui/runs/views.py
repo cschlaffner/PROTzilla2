@@ -175,7 +175,7 @@ def calculate(request, run_name):
     section, step, method = run.current_run_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    post.pop(f"{step}_method")
+    del post[f"{step}_method"]
 
     parameters = {}
     for k, v in post.items():
