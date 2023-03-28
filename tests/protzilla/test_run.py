@@ -3,6 +3,7 @@ from shutil import rmtree
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import ms_data_import
+from protzilla.data_preprocessing import filter_proteins, filter_samples
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
 
@@ -69,4 +70,36 @@ def test_run_continue():
     del run
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
+    rmtree(RUNS_PATH / run_name)
+
+def test_current_run_location():
+    run_name = "test_run_current_location" + random_string()
+    run = Run.create(run_name, df_mode="disk", workflow_config_name="test_data_preprocessing")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+    )
+    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_intensity_sum_filter")
+    run.back_step()
+    assert run.current_run_location() == ("data_preprocessing","filter_proteins","low_frequency_filter")
+    rmtree(RUNS_PATH / run_name)
+
+def test_set_current_run_location():
+    run_name = "test_set_run_current_location" + random_string()
+    run = Run.create(run_name, df_mode="disk", workflow_config_name="test_data_preprocessing")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+    )
+    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_intensity_sum_filter")
+    run.set_current_run_location("data_preprocessing", "filter_samples", "protein_count_filter")
+    assert run.current_run_location() == ("data_preprocessing","filter_samples","protein_count_filter")
     rmtree(RUNS_PATH / run_name)
