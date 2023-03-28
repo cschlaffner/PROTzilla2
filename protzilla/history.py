@@ -82,7 +82,7 @@ class History:
 
     def remove_step(self):
         step = self.steps.pop()
-        if "disk" in self.df_mode:
+        if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
 
     def save(self):

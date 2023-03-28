@@ -80,6 +80,7 @@ def detail(request, run_name):
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(dict(name=name, fields=fields))
+    p = [plot.to_html() for plot in run.plots] if run.plots else []
     return render(
         request,
         "runs/details.html",
@@ -89,7 +90,7 @@ def detail(request, run_name):
             displayed_history=displayed_history,
             fields=current_fields,
             plot_fields=plot_fields,
-            current_plots=[plot for plot in run.plots] if run.plots else [],
+            current_plots=p,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
             show_plot_button=run.result_df is not None,

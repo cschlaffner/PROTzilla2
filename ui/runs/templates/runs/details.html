@@ -34,8 +34,16 @@
         {{ field }}
         <br>
     {% endfor %}
-    <input type="submit" value="Plot">
+    <input type="submit" value="Plot" {% if not show_next %}
+        disabled
+    {% endif %} >
 </form>
+
+{% for plot in current_plots %}
+    <div style="width:600;height:500">
+        {{ plot|safe }}
+    </div>
+{% endfor %}
 
 {% if show_next %}
     <form action="{% url 'runs:next' run_name %}" method="post">
