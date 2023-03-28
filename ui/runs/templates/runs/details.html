@@ -5,8 +5,8 @@
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>
-        // Sets up an event listener that sends a POST request with AJAX to the server to provide 
-        // the correct parameter dropdowns as HTML when the selected method changes. 
+        // Sets up an event listener that sends a POST request with AJAX to the server to provide
+        // the correct parameter dropdowns as HTML when the selected method changes.
         // It updates the page with the new dropdowns or displays an error message if something goes wrong.
         // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
 
@@ -22,7 +22,7 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        $("#{{method_details_id}}").html(response);
+                        $("#method_parameters").html(response);
                     }
                 }).fail(function(e) {
                     console.log('Error:', e);
@@ -52,8 +52,8 @@
 <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
         {{ fields|first }}
-        <div id="{{ method_details_id }}">
-            {% include "runs/fields.html" with fields=fields|slice:"1:" %} 
+        <div id="method_parameters">
+            {% include "runs/fields.html" with fields=fields|slice:"1:" %}
         </div>
     <input type="submit" value="Calculate">
 </form>
