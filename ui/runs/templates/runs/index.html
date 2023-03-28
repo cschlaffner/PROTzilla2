@@ -1,6 +1,10 @@
-{% extends "base.html" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
 <form action="{% url 'runs:create' %}" method="post">
     {% csrf_token %}
     <label for="run_name">run name:</label>
@@ -24,4 +28,5 @@
     </select>
     <input type="submit" value="continue">
 </form>
-{% endblock %}
+</body>
+</html>
