@@ -75,7 +75,7 @@ def by_isolation_forest(
         )
 
 
-def with_local_outlier_factor(
+def by_local_outlier_factor(
     intensity_df: pd.DataFrame,
     number_of_neighbors: int = 35,
     n_jobs: int = -1,
@@ -121,7 +121,7 @@ def with_local_outlier_factor(
         )
     except ValueError:
         msg = (
-            "Outlier Detection with LocalOutlierFactor does not accept missing values"
+            "Outlier Detection by LocalOutlierFactor does not accept missing values"
             "encoded as NaN. Consider preprocessing your data to remove NaN values."
         )
         return intensity_df, dict(

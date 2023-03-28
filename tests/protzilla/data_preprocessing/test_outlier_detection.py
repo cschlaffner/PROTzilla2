@@ -8,10 +8,10 @@ from protzilla.data_preprocessing.outlier_detection import (
     by_local_outlier_factor_plot,
     by_pca,
     by_pca_plot,
-    with_local_outlier_factor,
+    by_local_outlier_factor,
 )
 
-# TODO: implement actual tests for outlier detection
+# TODO #21: implement actual tests for outlier detection
 
 
 @pytest.fixture
@@ -77,21 +77,21 @@ def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_wi
         assert False, "No messages in current_out"
 
 
-def test_outlier_detection_with_local_outlier_factor(
+def test_outlier_detection_by_local_outlier_factor(
     show_figures, outlier_detection_df
 ):
-    result_df, dropouts = with_local_outlier_factor(outlier_detection_df, 35, -1)
+    result_df, dropouts = by_local_outlier_factor(outlier_detection_df, 35, -1)
     fig = by_local_outlier_factor_plot(outlier_detection_df, result_df, dropouts)[0]
     if show_figures:
         fig.show()
 
 
-def test_outlier_detection_with_local_outlier_factor_and_nan(
+def test_outlier_detection_by_local_outlier_factor_and_nan(
     outlier_detection_df_with_nan,
 ):
-    _, current_out = with_local_outlier_factor(outlier_detection_df_with_nan, 35, -1)
+    _, current_out = by_local_outlier_factor(outlier_detection_df_with_nan, 35, -1)
     test_msg = (
-        "Outlier Detection with LocalOutlierFactor does not accept missing values"
+        "Outlier Detection by LocalOutlierFactor does not accept missing values"
         "encoded as NaN. Consider preprocessing your data to remove NaN values."
     )
     if "messages" in current_out:
