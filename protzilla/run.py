@@ -55,7 +55,7 @@ class Run:
     def write_local_workflow(self):
         workflow_local_path = f"{self.run_path}/workflow.json"
         with open(workflow_local_path, "w") as f:
-            json.dump(self.workflow_config, f)
+            json.dump(self.workflow_config, f, indent=2)
 
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
@@ -149,30 +149,26 @@ class Run:
 
         assert self.section is not None
         steps = self.workflow_config["sections"][self.section]["steps"]
-        workflow_meta_step = self.workflow_meta[self.section][insert_step]
-        first_method, first_method_attributes = next(iter(workflow_meta_step.items()))
-        params = first_method_attributes["parameters"]
 
-        # might need that, for now the params are in the workflow_meta format
-        if params:
-            for k in params:
-                pass
-                # params[k] = params[k]["default"]
+        workflow_meta_step = self.workflow_meta[self.section][insert_step]
+        first_method_name = list(workflow_meta_step.keys())[0]
+        first_method_params = workflow_meta_step[first_method_name]["parameters"]
+
+        params_default = {k: v["default"] for k, v in first_method_params.items()}
 
         insert_step_dict = dict(
-            name=insert_step, method=first_method, parameters=params
+            name=insert_step, method=first_method_name, parameters=params_default
         )
 
         # is there a better way of finding the step?
-        counter = 0
-        for step in steps:
-            counter += 1
+        for i, step in enumerate(steps):
             if step["name"] == self.step:
                 break
         else:
             raise Exception("could not find " + self.step + " in workflow_config")
 
-        steps.insert(counter, insert_step_dict)
+        steps.insert(i, insert_step_dict)
+
         self.write_local_workflow()
 
     def next_step(self):
