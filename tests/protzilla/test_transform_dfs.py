@@ -110,4 +110,6 @@ def test_transform_wide_to_long(
     # reicht das vielleicht einfach?
     print(l2l.compare(transform_df_long))
 
+    # Note: Sortierung nach Sample vs Protein ID ist aktuelles problem
+
     assert l2l.equals(transform_df_long)
