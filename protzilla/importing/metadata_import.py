@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 from protzilla.constants.paths import PROJECT_PATH
@@ -6,7 +8,6 @@ from protzilla.utilities.random import random_string
 
 def metadata_import_method(df, file, feature_orientation):
     if file.endswith(".csv"):
-        print("\nfile", file)
         meta_df = pd.read_csv(
             file,
             sep=",",
@@ -27,25 +28,15 @@ def metadata_import_method(df, file, feature_orientation):
         Supported file formats are csv, xlsx, psv or tsv"
         )
 
-    print("\n post read, file:", file)
-    print("meta info", meta_df.info())
-
     # always return metadata in the same orientation (features as columns)
+    # as the dtype get lost when transposing, we save the df to disk after
+    # changing the format and read it again as "Columns"-oriented
     if feature_orientation.startswith("Rows"):
-        print("file in ROWS", file)
-        print("\npre")
-        print("\nmeta rows\n", meta_df)
-        print("meta rows info ^^", meta_df.info())
-
         meta_df = meta_df.transpose()
         meta_df.reset_index(inplace=True)
         meta_df.rename(columns=meta_df.iloc[0], inplace=True)
         meta_df.drop(index=0, inplace=True)
         meta_df.index = meta_df.index - 1
-
-        print("\n\npost")
-        print("\nmeta rows\n", meta_df)
-        print("meta rows info", meta_df.info(), "\n")
 
         file_path = f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_{random_string()}.csv"
         print(file_path)
@@ -53,10 +44,6 @@ def metadata_import_method(df, file, feature_orientation):
         return metadata_import_method(df, file_path, "Columns")
 
     elif file.startswith(f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"):
-        # os.remove(file)
-        print("skipped ROWS for file ", file)
-    else:
-        print("skipped ROWS for file ", file)
+        os.remove(file)
 
-    print("\n\n end of import\n\n")
     return df, {"metadata": meta_df}

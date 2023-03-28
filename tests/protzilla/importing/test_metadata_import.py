@@ -14,10 +14,7 @@ def test_metadata_import():
         file=str(PROJECT_PATH / "tests/metadata_cut_columns.csv"),
         feature_orientation="Columns (samples in rows, features in columns)",
     )
-    test_metadata = pd.read_csv(str(PROJECT_PATH / "tests/metadata_cut_columns.csv"))
-    print("test", test_metadata)
-    print("run", run.metadata)
-    assert run.metadata.equals(test_metadata)
+    test_metadata = pd.read_csv(f"{PROJECT_PATH}/tests/metadata_cut_columns.csv")
     pd.testing.assert_frame_equal(test_metadata, run.metadata)
 
 
@@ -35,19 +32,5 @@ def test_metadata_orientation():
         metadata_import.metadata_import_method,
         file=str(PROJECT_PATH / "tests/metadata_cut_rows.csv"),
         feature_orientation="Rows (features in rows, samples in columns)",
-        # file=str(PROJECT_PATH / "tests/protzilla/importing/conversion_tmp_fxaCsBjMOAOASmmM.csv"),
-        # feature_orientation="Columns (features in rows, samples in columns)",
     )
-    print(run1.metadata.info())
-    print(run2.metadata.info())
-
-    print("\n\ncompare")
-    print(run1.metadata.compare(run2.metadata))
-    print("\n\n")
-
-    print(
-        pd.testing.assert_frame_equal(
-            run1.metadata, run2.metadata, check_dtype=False, check_exact=False
-        )
-    )
-    assert run1.metadata.equals(run2.metadata)
+    pd.testing.assert_frame_equal(run1.metadata, run2.metadata)
