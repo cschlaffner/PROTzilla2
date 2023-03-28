@@ -33,7 +33,7 @@ def test_metadata_orientation():
         file=str(PROJECT_PATH / "tests/metadata_cut_rows.csv"),
         feature_orientation="Rows (features in rows, samples in columns)",
     )
-    print(run1.metadata)
-    print(run2.metadata)
+    print(run1.metadata.info())
+    print(run2.metadata.info())
 
     assert run1.metadata.equals(run2.metadata)
