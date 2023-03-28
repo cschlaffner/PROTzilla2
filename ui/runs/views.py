@@ -159,7 +159,6 @@ def continue_(request):
 def next_(request, run_name):
     run = active_runs[run_name]
     run.next_step()
-    run.set_current_run_location(*run.current_workflow_location())
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

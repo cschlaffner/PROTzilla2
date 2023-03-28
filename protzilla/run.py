@@ -96,6 +96,7 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.set_current_run_location(*self.current_workflow_location())
 
     def back_step(self):
         assert self.history.steps
