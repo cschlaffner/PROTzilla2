@@ -14,6 +14,22 @@ class Run:
 
     """
     :ivar run_path: the path to this runs' dir
+    :ivar workflow_config
+    :ivar run_name
+    :ivar input_data_location
+    :ivar history
+    :ivar step_index
+    :ivar workflow_meta
+
+    :ivar section
+    :ivar step
+    :ivar method
+    :ivar result_df
+    :ivar current_out
+    :ivar current_parameters
+    :ivar plots
+    :ivar step_name
+    :ivar input_data
     """
 
     @classmethod
