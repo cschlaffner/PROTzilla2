@@ -52,9 +52,7 @@ class Run:
             self.workflow_meta = json.load(f)
 
         # make these a result of the step to be compatible with CLI?
-        self.section = None
-        self.step = None
-        self.method = None
+        self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
@@ -96,7 +94,7 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
-        self.set_current_run_location(*self.current_workflow_location())
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
         assert self.history.steps
@@ -118,9 +116,4 @@ class Run:
         return steps[self.step_index]
 
     def current_run_location(self):
-        if not self.method:
-            return self.current_workflow_location()
         return self.section, self.step, self.method
-
-    def set_current_run_location(self, section, step, method):
-        self.section, self.step, self.method = section, step, method

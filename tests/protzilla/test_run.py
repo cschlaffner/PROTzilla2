@@ -118,12 +118,4 @@ def test_set_current_run_location():
         "filter_samples",
         "protein_intensity_sum_filter",
     )
-    run.set_current_run_location(
-        "data_preprocessing", "filter_samples", "protein_count_filter"
-    )
-    assert run.current_run_location() == (
-        "data_preprocessing",
-        "filter_samples",
-        "protein_count_filter",
-    )
     rmtree(RUNS_PATH / run_name)

@@ -109,7 +109,7 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=str(run.current_run_location()),
+            location=f"{run.section}/{run.step}",
             displayed_history=displayed_history,
             fields=current_fields,
             method_dropdown_id=method_dropdown_id,
@@ -130,10 +130,8 @@ def change_method(request, run_name):
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
         return response
-    section, step, _ = run.current_run_location()
-    method = request.POST["method"]
-    run.set_current_run_location(section, step, method)
-    current_fields = get_current_fields(run, section, step, method)
+    run.method = request.POST["method"]
+    current_fields = get_current_fields(run, run.section, run.step, run.method)
     html = render_to_string(
         "runs/fields.html",
         context=dict(fields=current_fields),
