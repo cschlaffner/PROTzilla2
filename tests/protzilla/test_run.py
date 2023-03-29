@@ -74,3 +74,14 @@ def test_run_continue():
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
     rmtree(RUNS_PATH / run_name)
+
+def test_insert_as_next_step():
+    #TODO: not ready
+    run_name = "test_insert_as_next_step" + random_string()
+    run = Run.create(run_name, df_mode="disk")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    print("\n\n",run)
