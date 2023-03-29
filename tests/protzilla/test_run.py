@@ -15,7 +15,7 @@ def test_run_create():
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     run.prepare_calculation("filter_proteins")
@@ -41,7 +41,7 @@ def test_run_back():
         ms_data_import.max_quant_import,
         parameters={
             # call with str to make json serializable
-            "file": str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+            "file_path": str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
             "intensity_name": "Intensity",
         },
     )
@@ -77,8 +77,7 @@ def test_run_continue():
     run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
-        # call with str to make json serializable
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
 
@@ -90,10 +89,58 @@ def test_run_continue():
     run.next_step()
 
     del run
-    
+
     # run will be continued from beginning of last step
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.input_data)
+    rmtree(RUNS_PATH / run_name)
+
+
+def test_current_run_location():
+    run_name = "test_run_current_location" + random_string()
+    run = Run.create(
+        run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
+    )
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+    )
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    )
+    run.back_step()
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    )
+    rmtree(RUNS_PATH / run_name)
+
+
+def test_set_current_run_location():
+    run_name = "test_set_run_current_location" + random_string()
+    run = Run.create(
+        run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
+    )
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+    )
+    assert run.current_run_location() == (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    )
     rmtree(RUNS_PATH / run_name)
 
 

@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from shutil import rmtree
 
-from .constants.location_mapping import method_map, plot_map
+from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities.dynamic_parameters_provider import input_data_name_to_location
@@ -114,7 +114,6 @@ class Run:
 
         # make these a result of the step to be compatible with CLI?
         self.section, self.step, self.method = self.current_workflow_location()
-
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
@@ -141,11 +140,11 @@ class Run:
         self.step_name = step_name
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        self.section, self.step, self.method = location = (section, step, method)
-        method_callable = method_map[location]
+        method_callable = method_map[(section, step, method)]
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
+        self.section, self.step, self.method = location_map[method_callable]
         self.result_df, self.current_out = method_callable(
             self.input_data, **parameters
         )
@@ -205,6 +204,7 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
         assert self.history.steps is not None

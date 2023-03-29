@@ -7,20 +7,22 @@ from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
 from protzilla.utilities.random import random_string
 
+
 @pytest.fixture
 def sample_step_params():
     return dict(
-    section= "section1",
-    step= "step1",
-    method= "method1",
-    parameters= {"param1": 3},
-    input_data_location= {"step_index": 0, "key": "dataframe"},
-    outputs= {},
-    plots= [],
-    step_name= "Step 1")
+        section="section1",
+        step="step1",
+        method="method1",
+        parameters={"param1": 3},
+        input_data_location={"step_index": 0, "key": "dataframe"},
+        outputs={},
+        plots=[],
+        step_name="Step 1",
+    )
+
 
 def test_history_memory_identity(sample_step_params):
-
     name = "test_memory_identity" + random_string()
     history = History(name, df_mode="memory")
 
@@ -29,7 +31,15 @@ def test_history_memory_identity(sample_step_params):
     history.add_step(**sample_step_params, dataframe=df1)
 
     history.add_step(
-        "section2", "step2", "method2", {"param1": 5}, None, df2, outputs={}, plots=[], step_name= "Step 2"
+        "section2",
+        "step2",
+        "method2",
+        {"param1": 5},
+        None,
+        df2,
+        outputs={},
+        plots=[],
+        step_name="Step 2",
     )
     assert history.steps[0].dataframe is df1
     assert history.steps[0].dataframe is not df2
@@ -58,7 +68,7 @@ def test_history_disk_delete(sample_step_params):
     history.add_step(**sample_step_params, dataframe=df1)
 
     assert history.df_path(0).exists()
-    history.remove_step()
+    history.pop_step()
     assert not history.df_path(0).exists()
     rmtree(RUNS_PATH / name)
 
@@ -113,6 +123,7 @@ def test_dataframe_in_json(sample_step_params):
     history2 = History.from_disk(name, df_mode="disk")
     assert df2.equals((history2.steps[0].outputs["another_df"]))
     rmtree(RUNS_PATH / name)
+
 
 def test_get_past_steps_of_section(sample_step_params):
     name = "test_history_df" + random_string()

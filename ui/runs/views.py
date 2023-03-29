@@ -9,10 +9,10 @@ from main.settings import BASE_DIR
 from protzilla import workflow_helper
 
 sys.path.append(f"{BASE_DIR}/..")
+import protzilla.workflow_helper
 from protzilla.run import Run
 from protzilla.utilities.dynamic_parameters_provider import input_data_name
 from protzilla.workflow_manager import WorkflowManager
-import protzilla.workflow_helper
 
 workflow_manager = WorkflowManager()
 active_runs = {}
@@ -103,10 +103,15 @@ def get_current_fields(run, section, step, method):
         )
     for key, param_dict in parameters.items():
         # todo use workflow default
-        if run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
+        # todo 59 - restructure current_parameters
+        if run.current_parameters is not None:
+            param_dict["default"] = run.current_parameters.get(
+                key, param_dict["default"]
+            )
+
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
+
 
 def detail(request, run_name):
     if run_name not in active_runs:
@@ -152,6 +157,14 @@ def detail(request, run_name):
                     make_input_data_dropdown("input_data_name", run, disabled=True)
                 )
             for key, param_dict in parameters.items():
+                fields.append(
+                    make_parameter_input(
+                        key,
+                        param_dict,
+                        disabled=True,
+                    )
+                )
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
                 param_dict["default"] = step.parameters[key] # TODO Hannes -> richtig?
                 fields.append(
                     make_parameter_input(

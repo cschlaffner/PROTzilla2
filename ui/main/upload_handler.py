@@ -45,7 +45,10 @@ class CustomUploadedFile(UploadedFile):
     def __init__(self, name, content_type, size, charset, content_type_extra=None):
         start, ext = os.path.splitext(name)
         file = tempfile.NamedTemporaryFile(
-            suffix=ext, prefix=start + "_", dir=settings.FILE_UPLOAD_TEMP_DIR
+            suffix=ext,
+            prefix=start + "_",
+            dir=settings.FILE_UPLOAD_TEMP_DIR,
+            delete=False,
         )
         super().__init__(file, name, content_type, size, charset, content_type_extra)
 
@@ -55,7 +58,9 @@ class CustomUploadedFile(UploadedFile):
 
     def close(self):
         try:
-            return self.file.close()
+            closed = self.file.close()
+            os.unlink(self.file.name)
+            return closed
         except FileNotFoundError:
             # The file was moved or deleted before the tempfile could unlink
             # it. Still sets self.file.close_called and calls
