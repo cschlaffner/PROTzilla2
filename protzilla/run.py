@@ -146,7 +146,9 @@ class Run:
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
-        self.result_df, self.current_out = method_callable(self.df, **parameters)
+        self.result_df, self.current_out = method_callable(
+            self.input_data, **parameters
+        )
         self.current_parameters = parameters
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
