@@ -50,11 +50,10 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
         value_name=intensity_name,
     )
     intensity_df.sort_values(
-        # by=["Protein ID", "Sample"], ignore_index=True, inplace=True # TODO: swap "Protein ID", "Sample"
         by=["Sample", "Protein ID"],
         ignore_index=True,
-        inplace=True,  # TODO: swap "Protein ID", "Sample"
+        inplace=True,
     )
-    intensity_df.insert(2, "Gene", gene_info)  # TODO: insert at 2 instead of 1
+    intensity_df.insert(2, "Gene", gene_info)
 
     return intensity_df
