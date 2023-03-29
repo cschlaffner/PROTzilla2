@@ -140,12 +140,9 @@ class Run:
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
-        # this fails because of wrong matching of parameters of methods
-        # between workflow_meta.json and python method implementation
         self.result_df, self.current_out = method_callable(
             self.input_data, **parameters
         )
-
         self.current_parameters = parameters
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
@@ -204,8 +201,7 @@ class Run:
         self.current_parameters = None
 
     def back_step(self):
-        assert self.history.steps
-        self.history.remove_step()
+        assert self.history.steps is not None
         self.input_data_location = (
             self.history.steps[-1].input_data_location if self.history.steps else None
         )
@@ -216,6 +212,8 @@ class Run:
             if self.input_data_location
             else None
         )
+        self.history.remove_step()
+
         # popping from history.steps possible to get values again
         self.result_df = None
         self.current_out = None

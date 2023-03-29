@@ -35,23 +35,32 @@ def test_run_create():
 def test_run_back():
     name = "test_run_back" + random_string()
     run = Run.create(name)
+
     run.prepare_calculation("max_quant_import")
-    run.calculate_and_next(
+    run.perform_calculation(
         ms_data_import.max_quant_import,
-        # call with str to make json serializable
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
+        parameters={
+            # call with str to make json serializable
+            "file": str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+            "intensity_name": "Intensity",
+        },
     )
-    df1 = run.input_data
-    run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+    df1 = run.result_df
+    run.next_step()
+
+    run.prepare_calculation("filter_proteins")
+    assert run.input_data.equals(df1)
+    run.perform_calculation(
+        data_preprocessing.filter_proteins.by_low_frequency, parameters={"threshold": 1}
     )
-    df2 = run.input_data
+    df2 = run.result_df
+    run.next_step()
+
     assert not df1.equals(df2)
     run.back_step()
-    assert run.input_data .equals(df1)
+    assert run.input_data.equals(df1)
     run.back_step()
-    assert run.input_data  is None
+    assert run.input_data is None
     rmtree(RUNS_PATH / name)
 
 
@@ -64,19 +73,32 @@ def test_run_back():
 def test_run_continue():
     run_name = "test_run_continue" + random_string()
     run = Run.create(run_name, df_mode="disk")
+
+    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
+        # call with str to make json serializable
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    df = run.df
+
+    run.prepare_calculation("filter_proteins")
+    run.perform_calculation(
+        data_preprocessing.filter_proteins.by_low_frequency, parameters={"threshold": 1}
+    )
+    df = run.input_data
+    run.next_step()
+
     del run
+    
+    # run will be continued from beginning of last step
     run2 = Run.continue_existing(run_name)
-    assert df.equals(run2.df)
+    assert df.equals(run2.input_data)
     rmtree(RUNS_PATH / run_name)
 
+
 def test_insert_as_next_step():
-    #TODO: not ready
+    # TODO: not ready
     run_name = "test_insert_as_next_step" + random_string()
     run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
@@ -84,4 +106,4 @@ def test_insert_as_next_step():
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    print("\n\n",run)
+    print("\n\n", run)
