@@ -80,7 +80,7 @@ def test_current_run_location():
     )
     run.calculate_and_next(
         ms_data_import.max_quant_import,
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
     run.calculate_and_next(
@@ -107,7 +107,7 @@ def test_set_current_run_location():
     )
     run.calculate_and_next(
         ms_data_import.max_quant_import,
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
     run.calculate_and_next(
