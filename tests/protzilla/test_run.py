@@ -42,16 +42,16 @@ def test_run_back():
         file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    df1 = run.df
+    df1 = run.input_data
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    df2 = run.df
+    df2 = run.input_data
     assert not df1.equals(df2)
     run.back_step()
-    assert run.df.equals(df1)
+    assert run.input_data .equals(df1)
     run.back_step()
-    assert run.df is None
+    assert run.input_data  is None
     rmtree(RUNS_PATH / name)
 
 
