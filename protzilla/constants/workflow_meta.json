@@ -17,7 +17,8 @@
           },
           "file_path": {
             "name": "MaxQuant intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       },
@@ -37,7 +38,8 @@
           },
           "file_path": {
             "name": "MSFragger intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -58,7 +60,8 @@
           },
           "file_path": {
             "name": "Metadata file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -162,7 +165,7 @@
             "step": 1,
             "default": 2
           },
-          "no_components": {
+          "number_of_components": {
             "name": "Number of components:",
             "type": "numeric",
             "min": 2,
@@ -179,7 +182,7 @@
         "name": "Isolation forest",
         "description": "",
         "parameters": {
-          "no_estimators": {
+          "n_estimators": {
             "name": "Number of estimators:",
             "type": "numeric",
             "min": 1,
@@ -282,8 +285,7 @@
       "totalsum": {
         "name": "Sumtotal normalisation",
         "description": "",
-        "parameters": {
-        },
+        "parameters": {},
         "graphs": [
           {
             "graph_type": {
@@ -535,7 +537,7 @@
             "categories": [
               "mean",
               "median",
-              "most frequent"
+              "most_frequent"
             ],
             "default": "median"
           }

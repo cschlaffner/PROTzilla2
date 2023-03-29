@@ -59,9 +59,7 @@ class Run:
             self.workflow_meta = json.load(f)
 
         # make these a result of the step to be compatible with CLI?
-        self.section = None
-        self.step = None
-        self.method = None
+        self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
@@ -103,19 +101,19 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
         assert self.history.steps
-        self.history.remove_step()
+        popped_step, result_df = self.history.pop_step()
+        self.section = popped_step.section
+        self.step = popped_step.step
+        self.method = popped_step.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        # popping from history.steps possible to get values again
-        self.result_df = None
-        self.current_out = None
-        self.current_parameters = None
-
-        self.section = None
-        self.step = None
-        self.method = None
+        self.result_df = result_df
+        self.current_out = popped_step.outputs
+        self.current_parameters = popped_step.parameters
+        self.plots = popped_step.plots
         self.step_index -= 1
 
     def current_workflow_location(self):
@@ -124,3 +122,6 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
+
+    def current_run_location(self):
+        return self.section, self.step, self.method
