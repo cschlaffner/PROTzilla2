@@ -38,8 +38,8 @@
 | tests/protzilla/importing/test\_metadata\_import.py             |       19 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_history.py                                |       61 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       51 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/test\_transform\_dfs.py                         |        0 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** | **1076** |   **98** |  **205** |   **46** | **87%** |           |
+| tests/protzilla/test\_transform\_dfs.py                         |       32 |        0 |        0 |        0 |    100% |           |
+|                                                       **TOTAL** | **1108** |   **98** |  **205** |   **46** | **87%** |           |
 
 
 ## Setup coverage badge
