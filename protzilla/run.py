@@ -8,6 +8,7 @@ from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities.dynamic_parameters_provider import input_data_name_to_location
+from .workflow_helper import get_all_default_params_for_methods
 
 
 class Run:
@@ -164,19 +165,19 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
 
         assert self.section is not None
-        steps = self.workflow_config["sections"][self.section]["steps"]
 
         workflow_meta_step = self.workflow_meta[self.section][insert_step]
         first_method_name = list(workflow_meta_step.keys())[0]
-        first_method_params = workflow_meta_step[first_method_name]["parameters"]
 
-        params_default = {k: v["default"] for k, v in first_method_params.items()}
+        params_default = get_all_default_params_for_methods(
+            self.workflow_meta, self.section, insert_step, first_method_name
+        )
 
         insert_step_dict = dict(
             name=insert_step, method=first_method_name, parameters=params_default
         )
 
-        # is there a better way of finding the step?
+        steps = self.workflow_config["sections"][self.section]["steps"]
         for i, step in enumerate(steps):
             if step["name"] == self.step:
                 break
