@@ -1,4 +1,7 @@
+import json
 from shutil import rmtree
+
+import pytest
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
@@ -148,13 +151,27 @@ def test_set_current_run_location():
     rmtree(RUNS_PATH / run_name)
 
 
-def test_insert_as_next_step():
-    # TODO: not ready
+@pytest.fixture
+def example_workflow_short():
+    with open(f"{PROJECT_PATH}/tests/example_workflow_short.json", "r") as f:
+        return json.load(f)
+
+
+def test_insert_as_next_step(example_workflow_short):
     run_name = "test_insert_as_next_step" + random_string()
-    run = Run.create(run_name, df_mode="disk")
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
-    )
-    print("\n\n", run)
+    run = Run.create(run_name)
+
+    run.workflow_config = example_workflow_short
+    importing_steps = run.workflow_config["sections"]["importing"]
+    assert len(importing_steps["steps"]) == 1
+    run.insert_as_next_step("metadata_import")
+    assert len(importing_steps["steps"]) == 2
+
+    assert importing_steps["steps"][1] == {
+        "name": "metadata_import",
+        "method": "metadata_import_method",
+        "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)",
+            "file_path": None,
+        },
+    }

@@ -152,7 +152,9 @@ def detail(request, run_name):
             )
             fields = [df_head.to_string()]
         else:
-            fields.append(make_name_input("step_name", history_step.step_name, disabled=True))
+            fields.append(
+                make_name_input("step_name", history_step.step_name, disabled=True)
+            )
             if history_step.section == "data_analysis":
                 fields.append(
                     make_input_data_dropdown("input_data_name", run, disabled=True)
