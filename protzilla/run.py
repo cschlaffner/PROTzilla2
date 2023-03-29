@@ -98,14 +98,15 @@ class Run:
 
     def back_step(self):
         assert self.history.steps
-        popped_step = self.history.pop_step()
+        popped_step, result_df = self.history.pop_step()
         self.section = popped_step.section
         self.step = popped_step.step
         self.method = popped_step.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        self.result_df = None
-        self.current_out = None
-        self.current_parameters = None
+        self.result_df = result_df
+        self.current_out = popped_step.outputs
+        self.current_parameters = popped_step.parameters
+        self.plots = popped_step.plots
         self.step_index -= 1
 
     def current_workflow_location(self):
