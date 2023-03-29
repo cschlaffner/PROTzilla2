@@ -79,7 +79,9 @@ def detail(request, run_name):
                 param_dict["default"] = step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
-        displayed_history.append(dict(name=name, fields=fields))
+        displayed_history.append(
+            dict(name=name, fields=fields, plots=[p.to_html() for p in step.plots])
+        )
     p = [plot.to_html() for plot in run.plots] if run.plots else []
     return render(
         request,
@@ -91,8 +93,9 @@ def detail(request, run_name):
             fields=current_fields,
             plot_fields=plot_fields,
             current_plots=p,
+            # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
-            show_back=bool(len(run.history.steps) > 1),
+            show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
         ),
     )
@@ -152,7 +155,6 @@ def parameters_from_post(post):
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        print(v)
         if len(v) == 1:
             parameters[k] = convert_str_if_possible(v[0])
         else:
