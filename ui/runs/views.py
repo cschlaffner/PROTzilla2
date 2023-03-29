@@ -132,7 +132,9 @@ def detail(request, run_name):
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(dict(name=name, fields=fields))
-
+    workflow_steps=workflow_helper.get_all_steps(run.workflow_config)
+    highlighted_workflow_steps = [{"name": step,"highlighted": False} for step in workflow_steps]
+    highlighted_workflow_steps[run.step_index]["highlighted"] = True
     return render(
         request,
         "runs/details.html",
@@ -144,7 +146,7 @@ def detail(request, run_name):
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
             sidebar_dropdown=make_add_step_dropdown(run, section),
-            workflow_steps=workflow_helper.get_all_steps(run.workflow_config),
+            workflow_steps=highlighted_workflow_steps,
         ),
     )
 
