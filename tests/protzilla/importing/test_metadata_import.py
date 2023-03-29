@@ -11,7 +11,7 @@ def test_metadata_import():
     run = Run.create(name)
     run.calculate_and_next(
         metadata_import.metadata_import_method,
-        file=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
         feature_orientation="Columns (samples in rows, features in columns)",
     )
     test_metadata = pd.read_csv(f"{PROJECT_PATH}/tests/metadata_cut_columns.csv")
@@ -25,12 +25,12 @@ def test_metadata_orientation():
     run2 = Run.create(name2)
     run1.calculate_and_next(
         metadata_import.metadata_import_method,
-        file=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
         feature_orientation="Columns (samples in rows, features in columns)",
     )
     run2.calculate_and_next(
         metadata_import.metadata_import_method,
-        file=str(PROJECT_PATH / "tests/metadata_cut_rows.csv"),
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_rows.csv",
         feature_orientation="Rows (features in rows, samples in columns)",
     )
     pd.testing.assert_frame_equal(run1.metadata, run2.metadata)
