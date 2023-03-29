@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from shutil import rmtree
 
-from .constants.location_mapping import location_map, method_map, plot_map
+from .constants.location_mapping import method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 
@@ -39,13 +39,6 @@ class Run:
             run_name, run_config["workflow_config_name"], run_config["df_mode"], history
         )
 
-    @property
-    def metadata(self):
-        for step in self.history.steps:
-            if step.step == "metadata_import":
-                return step.outputs["metadata"]
-        raise AttributeError("Metadata was not yet imported.")
-
     def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
         self.history = history
@@ -66,11 +59,11 @@ class Run:
         self.plots = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        method_callable = method_map[(section, step, method)]
+        self.section, self.step, self.method = location = (section, step, method)
+        method_callable = method_map[location]
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
-        self.section, self.step, self.method = location_map[method_callable]
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
 

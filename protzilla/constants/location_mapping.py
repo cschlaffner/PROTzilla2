@@ -3,10 +3,10 @@ from ..data_preprocessing import (
     filter_samples,
     imputation,
     normalisation,
-    outlier_detection,
     transformation,
+    outlier_detection,
 )
-from ..importing import metadata_import, ms_data_import
+from ..importing import ms_data_import
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -29,7 +29,8 @@ method_map = {
         "importing",
         "metadata_import",
         "metadata_import_method",
-    ): metadata_import.metadata_import_method,
+    ): lambda df, feature_orientation, file: print("warning: not implemented")
+    or (df, {}),
     (
         "data_preprocessing",
         "filter_proteins",
@@ -111,9 +112,6 @@ method_map = {
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
 }
-
-# reversed mapping of method callable and location
-location_map = {v: k for k, v in method_map.items()}
 
 """
 In this data structure, a plot for a given method is associated with a 
