@@ -80,10 +80,12 @@ class History:
         self.steps.append(executed_step)
         self.save()
 
-    def remove_step(self):
+    def pop_step(self):
         step = self.steps.pop()
-        if "disk" in self.df_mode:
+        df = step.dataframe
+        if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
+        return step, df
 
     def save(self):
         # this assumes that parameters and outpus are json serializable

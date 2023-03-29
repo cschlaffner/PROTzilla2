@@ -11,4 +11,5 @@ urlpatterns = [
     path("<str:run_name>/calculate", views.calculate, name="calculate"),
     path("<str:run_name>/next", views.next_, name="next"),
     path("<str:run_name>/back", views.back, name="back"),
+    path("<str:run_name>/change_method/", views.change_method, name="change_method"),
 ]

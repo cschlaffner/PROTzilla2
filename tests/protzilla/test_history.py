@@ -47,7 +47,7 @@ def test_history_disk_delete():
         "section1", "step1", "method1", {"param1": 3}, df1, outputs={}, plots=[]
     )
     assert history.df_path(0).exists()
-    history.remove_step()
+    history.pop_step()
     assert not history.df_path(0).exists()
     rmtree(RUNS_PATH / name)
 

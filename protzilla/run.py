@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from shutil import rmtree
 
-from .constants.location_mapping import method_map, plot_map
+from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
@@ -40,6 +40,13 @@ class Run:
             run_name, run_config["workflow_config_name"], run_config["df_mode"], history
         )
 
+    @property
+    def metadata(self):
+        for step in self.history.steps:
+            if step.step == "metadata_import":
+                return step.outputs["metadata"]
+        raise AttributeError("Metadata was not yet imported.")
+
     def __init__(self, run_name, workflow_config_name, df_mode, history):
         self.run_name = run_name
         self.history = history
@@ -53,20 +60,18 @@ class Run:
             self.workflow_meta = json.load(f)
 
         # make these a result of the step to be compatible with CLI?
-        self.section = None
-        self.step = None
-        self.method = None
+        self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
         self.plots = None
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        self.section, self.step, self.method = location = (section, step, method)
-        method_callable = method_map[location]
+        method_callable = method_map[(section, step, method)]
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
+        self.section, self.step, self.method = location_map[method_callable]
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
         # error handling for CLI
@@ -104,19 +109,19 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
         assert self.history.steps
-        self.history.remove_step()
+        popped_step, result_df = self.history.pop_step()
+        self.section = popped_step.section
+        self.step = popped_step.step
+        self.method = popped_step.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        # popping from history.steps possible to get values again
-        self.result_df = None
-        self.current_out = None
-        self.current_parameters = None
-
-        self.section = None
-        self.step = None
-        self.method = None
+        self.result_df = result_df
+        self.current_out = popped_step.outputs
+        self.current_parameters = popped_step.parameters
+        self.plots = popped_step.plots
         self.step_index -= 1
 
     def current_workflow_location(self):
@@ -125,3 +130,6 @@ class Run:
             for step in section_dict["steps"]:
                 steps.append((section_key, step["name"], step["method"]))
         return steps[self.step_index]
+
+    def current_run_location(self):
+        return self.section, self.step, self.method

@@ -1,7 +1,7 @@
 import sys
 
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -49,45 +49,100 @@ def make_parameter_input(key, param_dict, disabled):
     )
 
 
-def detail(request, run_name):
-    if run_name not in active_runs:
-        active_runs[run_name] = Run.continue_existing(run_name)
-    run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
-
+def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
     for key, param_dict in parameters.items():
         # todo use workflow default
-        if run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
+        # todo 59 - restructure current_parameters
+        if run.current_parameters is not None:
+            param_dict["default"] = run.current_parameters.get(
+                key, param_dict["default"]
+            )
+
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    return current_fields
+
+
+def detail(request, run_name):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+    section, step, method = run.current_run_location()
+    current_fields = get_current_fields(run, section, step, method)
+    method_dropdown_id = f"{step}_method"
+
+    current_fields.insert(
+        0,
+        render_to_string(
+            "runs/field_select.html",
+            context=dict(
+                disabled=False,
+                key=method_dropdown_id,
+                name=f"{step.replace('_', ' ').title()} Method:",
+                default=method,
+                categories=run.workflow_meta[section][step].keys(),
+            ),
+        ),
+    )
+
     displayed_history = []
-    for step in run.history.steps:
+    for history_step in run.history.steps:
         fields = []
-        if step.section == "importing":
-            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file'].split('/')[-1]}"
+        parameters = run.workflow_meta[history_step.section][history_step.step][
+            history_step.method
+        ]["parameters"]
+        if history_step.section == "importing":
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file_path'].split('/')[-1]}"
+            df_head = (
+                history_step.dataframe.head()
+                if history_step.step == "ms_data_import"
+                else run.metadata.head()
+            )
+            fields = [df_head.to_string()]
         else:
-            parameters = run.workflow_meta[step.section][step.step][step.method][
-                "parameters"
-            ]
             for key, param_dict in parameters.items():
-                param_dict["default"] = step.parameters[key]
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
-            name = f"{step.section}/{step.step}/{step.method}"
+                fields.append(
+                    make_parameter_input(
+                        key,
+                        param_dict,
+                        disabled=True,
+                    )
+                )
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(dict(name=name, fields=fields))
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=str(run.current_workflow_location()),
+            location=f"{run.section}/{run.step}",
             displayed_history=displayed_history,
             fields=current_fields,
+            method_dropdown_id=method_dropdown_id,
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
         ),
     )
+
+
+def change_method(request, run_name):
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError as e:
+        print(str(e))
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+    run.method = request.POST["method"]
+    current_fields = get_current_fields(run, run.section, run.step, run.method)
+    html = render_to_string(
+        "runs/fields.html",
+        context=dict(fields=current_fields),
+    )
+    return JsonResponse(html, safe=False)
 
 
 def create(request):
@@ -121,9 +176,11 @@ def back(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
+    section, step, method = run.current_run_location()
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
+    del post[f"{step}_method"]
+
     parameters = {}
     for k, v in post.items():
         # assumption: only one value for parameter

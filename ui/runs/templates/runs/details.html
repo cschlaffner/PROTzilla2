@@ -2,7 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script>
+        // Sets up an event listener that sends a POST request with AJAX to the server to provide
+        // the correct parameter dropdowns as HTML when the selected method changes.
+        // It updates the page with the new dropdowns or displays an error message if something goes wrong.
+        // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
+
+        $( document ).ready(function() {
+            $("#{{ method_dropdown_id}}").change(function() {
+                const selected_method = $(this).val();
+
+                $.ajax({
+                    url: "{% url 'runs:change_method' run_name %}",
+                    type: "POST",
+                    data: {
+                        method: selected_method,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        $("#method_parameters").html(response);
+                    }
+                }).fail(function(e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
+            })
+        });
+    </script>
+    <title>PROTzilla</title>
 </head>
 <body>
     {% if messages %}
@@ -28,17 +57,17 @@
         <br>
     {% endfor %}
 
-    <br>
-    {{ location }}
-    <br>
-    <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in fields %}
-            {{ field }}
-            <br>
-        {% endfor %}
-        <input type="submit" value="Calculate">
-    </form>
+<br>
+{{ location }}
+<br>
+<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+        {{ fields|first }}
+        <div id="method_parameters">
+            {% include "runs/fields.html" with fields=fields|slice:"1:" %}
+        </div>
+    <input type="submit" value="Calculate">
+</form>
 
     {% if show_next %}
         <form action="{% url 'runs:next' run_name %}" method="post">

@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 user_data/runs/*
+ui/static/admin/*
 .vscode/*
 .flake8
 
@@ -135,3 +136,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# vscode settings
+.vscode/
