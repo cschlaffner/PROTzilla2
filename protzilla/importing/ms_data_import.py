@@ -3,10 +3,10 @@ import pandas as pd
 SELECTED_COLUMNS = ["Protein IDs", "Gene names"]
 
 
-def max_quant_import(_, file, intensity_name):
+def max_quant_import(_, file_path, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     read = pd.read_csv(
-        file,
+        file_path,
         sep="\t",
         low_memory=False,
         na_values=["", 0],
@@ -26,7 +26,3 @@ def max_quant_import(_, file, intensity_name):
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
     return ordered, {}
-
-
-def protzilla_csv_import(_, file):
-    return pd.read_csv(file), {}

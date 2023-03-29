@@ -65,7 +65,13 @@ def detail(request, run_name):
     for step in run.history.steps:
         fields = []
         if step.section == "importing":
-            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file'].split('/')[-1]}"
+            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file_path'].split('/')[-1]}"
+            df_head = (
+                step.dataframe.head()
+                if step.step == "ms_data_import"
+                else run.metadata.head()
+            )
+            fields = [df_head.to_string()]
         else:
             parameters = run.workflow_meta[step.section][step.step][step.method][
                 "parameters"
