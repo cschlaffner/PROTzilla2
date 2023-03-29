@@ -65,6 +65,7 @@ def detail(request, run_name):
     plot_fields = []
     for graph in graphs:
         for key, param_dict in graph.items():
+            # TODO put plot args into inputs
             plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
     displayed_history = []
     for step in run.history.steps:
@@ -82,7 +83,6 @@ def detail(request, run_name):
         displayed_history.append(
             dict(name=name, fields=fields, plots=[p.to_html() for p in step.plots])
         )
-    p = [plot.to_html() for plot in run.plots] if run.plots else []
     return render(
         request,
         "runs/details.html",
@@ -92,7 +92,7 @@ def detail(request, run_name):
             displayed_history=displayed_history,
             fields=current_fields,
             plot_fields=plot_fields,
-            current_plots=p,
+            current_plots=[plot.to_html() for plot in run.plots],
             # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
