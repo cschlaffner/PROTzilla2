@@ -1,0 +1,116 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_param": "iBAQ"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Rows (features in rows, samples in columns)"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2,
+            "graph_one_type": "Pie chart"
+          }
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2
+          }
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2,
+            "graph_one_type": "Bar chart"
+          }
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10,
+            "graph_one_type": "Bar chart",
+            "graph_one_group_by": "Sample",
+            "graph_two_type": "Pie chart"
+          }
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.5
+          }
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.5
+          }
+        },
+        {
+          "name": "outlier_detection",
+          "method": "local_outlier_factor",
+          "parameters": {
+            "number_of_neighbors": 3
+          }
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2",
+            "graph_one_type": "Boxplot",
+            "graph_one_group_by": "Sample"
+          }
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4,
+            "graph_one_type": "Boxplot",
+            "graph_one_group_by": "Sample"
+          }
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "anova",
+          "parameters": {}
+        },
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {}
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": {}
+    }
+  }
+}
