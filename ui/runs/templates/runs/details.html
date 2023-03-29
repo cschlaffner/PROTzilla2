@@ -64,6 +64,10 @@
           {{ sidebar_dropdown }}
           <button>add</button>
         </form>
+
+        {% for step in workflow_steps %}
+        <p>{{ step}}</p>
+        {% endfor %}
       </aside>
     </div>
   </body>

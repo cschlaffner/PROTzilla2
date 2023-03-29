@@ -6,10 +6,13 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
+from protzilla import workflow_helper
+
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
 from protzilla.utilities.dynamic_parameters_provider import input_data_name
 from protzilla.workflow_manager import WorkflowManager
+import protzilla.workflow_helper
 
 workflow_manager = WorkflowManager()
 active_runs = {}
@@ -129,6 +132,7 @@ def detail(request, run_name):
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{step.section}/{step.step}/{step.method}"
         displayed_history.append(dict(name=name, fields=fields))
+
     return render(
         request,
         "runs/details.html",
@@ -140,6 +144,7 @@ def detail(request, run_name):
             show_next=run.result_df is not None,
             show_back=bool(len(run.history.steps) > 1),
             sidebar_dropdown=make_add_step_dropdown(run, section),
+            workflow_steps=workflow_helper.get_all_steps(run.workflow_config),
         ),
     )
 
