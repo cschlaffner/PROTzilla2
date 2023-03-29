@@ -102,24 +102,15 @@ def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing
         method=multiple_testing_correction_method,
         alpha=alpha,
     )
-    
-    # maybe only return the deg proteins
-    # would need fc threshold
-    deg_proteins_df = intensity_df
 
-    # adapt commented code
     log2_fold_change = np.log2(fold_change)
     p_values_thresh = alpha if corrected_alpha is None else corrected_alpha
-    # create boolean mask from p values and fold change
     p_values_mask = corrected_p_values < p_values_thresh
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
+    deg_proteins_df = intensity_df[p_values_mask & fold_change_mask]
 
-    # self.differentially_expressed_proteins = diff_exp_df[
-    #     (diff_exp_df["p_values"] < p_values_thresh)
-    #     & (abs(diff_exp_df["fold_change"]) > fc_threshold)
-    # ]
-
-    return deg_proteins_df, dict(corrected_p_values=corrected_p_values, fold_change=fold_change, corrected_alpha=corrected_alpha)
+    return (deg_proteins_df, dict(corrected_p_values=corrected_p_values, 
+                fold_change=fold_change, corrected_alpha=corrected_alpha))
 
 def t_test_volcano_plot(df, result_df, current_out):
 
