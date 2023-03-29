@@ -7,7 +7,7 @@ SELECTED_COLUMNS = ["Protein IDs", "Gene names"]
 
 def max_quant_import(_, file_path, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
-    assert os.path.isfile(file)
+    assert os.path.isfile(file_path)
     read = pd.read_csv(
         file_path,
         sep="\t",

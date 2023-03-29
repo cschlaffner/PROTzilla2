@@ -87,6 +87,7 @@ def make_input_data_dropdown(key, run, disabled):
         ),
     )
 
+
 def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
@@ -150,9 +151,8 @@ def detail(request, run_name):
             )
             fields = [df_head.to_string()]
         else:
-
-            fields.append(make_name_input("step_name", step.step_name, disabled=True))
-            if step.section == "data_analysis":
+            fields.append(make_name_input("step_name", history_step.step_name, disabled=True))
+            if history_step.section == "data_analysis":
                 fields.append(
                     make_input_data_dropdown("input_data_name", run, disabled=True)
                 )
@@ -165,18 +165,12 @@ def detail(request, run_name):
                     )
                 )
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
-                param_dict["default"] = step.parameters[key] # TODO Hannes -> richtig?
-                fields.append(
-                    make_parameter_input(
-                        key,
-                        param_dict,
-                        disabled=True,
-                    )
-                )
-            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(dict(name=name, fields=fields))
-    workflow_steps=workflow_helper.get_all_steps(run.workflow_config)
-    highlighted_workflow_steps = [{"name": step,"highlighted": False} for step in workflow_steps]
+
+    workflow_steps = workflow_helper.get_all_steps(run.workflow_config)
+    highlighted_workflow_steps = [
+        {"name": step, "highlighted": False} for step in workflow_steps
+    ]
     highlighted_workflow_steps[run.step_index]["highlighted"] = True
     return render(
         request,
@@ -268,7 +262,8 @@ def calculate(request, run_name):
     elif section == "data_analysis":
         run.prepare_calculation(post["step_name"][0], post["input_data_name"][0])
         del post["input_data_name"]
-    del post[f"{step}_method"] # TODO Hannes
+    del post["step_name"]
+    del post[f"{step}_method"]
 
     parameters = {}
     for k, v in post.items():

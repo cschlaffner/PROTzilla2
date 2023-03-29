@@ -94,7 +94,6 @@ class Run:
             if self.input_data_location
             else None
         )
-        self.step_index = len(self.history.steps)
         self.run_path = run_path
 
         workflow_local_path = f"{self.run_path}/workflow.json"
@@ -112,13 +111,23 @@ class Run:
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
 
+        self.step_index = len(self.history.steps)
         # make these a result of the step to be compatible with CLI?
-        self.section, self.step, self.method = self.current_workflow_location()
+        try:
+            self.section, self.step, self.method = self.current_workflow_location()
+        except IndexError:
+            self.handle_all_steps_completed()
+
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
         self.plots = None
         self.step_name = None
+
+    def handle_all_steps_completed(self):
+        # TODO 74 think about what should happen when all steps are completed
+        self.step_index = len(self.all_steps()) - 1
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def prepare_calculation(self, step_name, input_data_name=None):
         # data_analysis or data_integration
@@ -204,7 +213,10 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
-        self.section, self.step, self.method = self.current_workflow_location()
+        try:
+            self.section, self.step, self.method = self.current_workflow_location()
+        except IndexError:
+            self.handle_all_steps_completed()
 
     def back_step(self):
         assert self.history.steps is not None
@@ -218,8 +230,6 @@ class Run:
             if self.input_data_location
             else None
         )
-        self.history.remove_step()
-
         # popping from history.steps possible to get values again
         popped_step, result_df = self.history.pop_step()
         self.section = popped_step.section
