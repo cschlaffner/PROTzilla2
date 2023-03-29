@@ -93,6 +93,12 @@ def detail(request, run_name):
         ]["parameters"]
         if history_step.section == "importing":
             name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file'].split('/')[-1]}"
+            df_head = (
+                step.dataframe.head()
+                if step.step == "ms_data_import"
+                else run.metadata.head()
+            )
+            fields = [df_head.to_string()]
         else:
             for key, param_dict in parameters.items():
                 fields.append(
