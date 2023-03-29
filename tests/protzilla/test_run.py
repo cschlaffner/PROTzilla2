@@ -15,7 +15,7 @@ def test_run_create():
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     run.prepare_calculation("filter_proteins")
@@ -39,7 +39,7 @@ def test_run_back():
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     df1 = run.df
@@ -66,7 +66,7 @@ def test_run_continue():
     run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
-        file=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
     df = run.df

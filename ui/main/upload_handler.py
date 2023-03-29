@@ -45,7 +45,10 @@ class CustomUploadedFile(UploadedFile):
     def __init__(self, name, content_type, size, charset, content_type_extra=None):
         start, ext = os.path.splitext(name)
         file = tempfile.NamedTemporaryFile(
-            suffix=ext, prefix=start + "_", dir=settings.FILE_UPLOAD_TEMP_DIR, delete=False
+            suffix=ext,
+            prefix=start + "_",
+            dir=settings.FILE_UPLOAD_TEMP_DIR,
+            delete=False,
         )
         super().__init__(file, name, content_type, size, charset, content_type_extra)
 

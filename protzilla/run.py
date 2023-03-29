@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from shutil import rmtree
 
-from .constants.location_mapping import method_map, plot_map
+from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities.dynamic_parameters_provider import input_data_name_to_location
@@ -67,6 +67,13 @@ class Run:
             history,
             run_path,
         )
+
+    @property
+    def metadata(self):
+        for step in self.history.steps:
+            if step.step == "metadata_import":
+                return step.outputs["metadata"]
+        raise AttributeError("Metadata was not yet imported.")
 
     def write_local_workflow(self):
         workflow_local_path = f"{self.run_path}/workflow.json"
@@ -134,17 +141,12 @@ class Run:
         self.step_name = step_name
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        self.section, self.step, self.method = location = (section, step, method)
-        method_callable = method_map[location]
+        method_callable = method_map[(section, step, method)]
         self.perform_calculation(method_callable, parameters)
 
     def perform_calculation(self, method_callable, parameters):
-        # this fails because of wrong matching of parameters of methods
-        # between workflow_meta.json and python method implementation
-        self.result_df, self.current_out = method_callable(
-            self.input_data, **parameters
-        )
-
+        self.section, self.step, self.method = location_map[method_callable]
+        self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
