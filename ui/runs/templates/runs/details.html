@@ -1,78 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script>
+        // Sets up an event listener that sends a POST request with AJAX to the server to provide
+        // the correct parameter dropdowns as HTML when the selected method changes.
+        // It updates the page with the new dropdowns or displays an error message if something goes wrong.
+        // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
+
+        $(document).ready(function () {
+            $("#{{ method_dropdown_id}}").change(function () {
+                const selected_method = $(this).val();
+
+                $.ajax({
+                    url: "{% url 'runs:change_method' run_name %}",
+                    type: "POST",
+                    data: {
+                        method: selected_method,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        $("#method_parameters").html(response);
+                    }
+                }).fail(function (e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
+            })
+        });
+    </script>
     <title>PROTzilla {{ run_name }}</title>
     <style>
-      .layout-container {
-                display: flex;
-            }
-            main {
-                flex: 3;
-                padding: 20px;
-            }
-            aside {
-                flex: 1;
-                background-color: #87A8B9;
-                padding: 20px;
-            }
+        .layout-container {
+            display: flex;
+        }
+
+        main {
+            flex: 3;
+            padding: 20px;
+        }
+
+        aside {
+            flex: 1;
+            background-color: #87A8B9;
+            padding: 20px;
+        }
     </style>
-  </head>
-  <body>
-    <header>
-      <h1>PROTzilla</h1>
-      <h2>{{ run_name }}</h2>
-    </header>
-    <div class="layout-container">
-      <main>
+</head>
+<body>
+<header>
+    <h1>PROTzilla</h1>
+    <h2>{{ run_name }}</h2>
+</header>
+<div class="layout-container">
+    <main>
         <h3>History</h3>
         {% for step in displayed_history %}
-        <h4>{{ step.name }}</h4>
-        <ul>
-          {% for field in step.fields %}
-          <li>{{ field }}</li>
-          {% endfor %}
-        </ul>
+            <h4>{{ step.name }}</h4>
+            <ul>
+                {% for field in step.fields %}
+                    <li>{{ field }}</li>
+                {% endfor %}
+            </ul>
         {% endfor %}
         <h3>Location</h3>
         <p>{{ location }}</p>
         <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-          {% for field in fields %}
-          {{ field }}
-          <br />
-          {% endfor %}
-          <input type="submit" value="Calculate" />
+            {% csrf_token %}
+            {{ fields|first }}
+            <div id="method_parameters">
+                {% include "runs/fields.html" with fields=fields|slice:"1:" %}
+            </div>
+            <input type="submit" value="Calculate">
         </form>
         {% if show_next %}
-        <form action="{% url 'runs:next' run_name %}" method="post">
-          {% csrf_token %}
-          <button>Next</button>
-        </form>
+            <form action="{% url 'runs:next' run_name %}" method="post">
+                {% csrf_token %}
+                <button>Next</button>
+            </form>
         {% endif %}
         {% if show_back %}
-        <form action="{% url 'runs:back' run_name %}" method="post">
-          {% csrf_token %}
-          <button>Back</button>
-        </form>
+            <form action="{% url 'runs:back' run_name %}" method="post">
+                {% csrf_token %}
+                <button>Back</button>
+            </form>
         {% endif %}
-      </main>
-      <aside>
+    </main>
+    <aside>
         <h3>Side Panel</h3>
         <form action="{% url 'runs:add' run_name %}" method="post">
-          {% csrf_token %}
-          {{ sidebar_dropdown }}
-          <button>add</button>
+            {% csrf_token %}
+            {{ sidebar_dropdown }}
+            <button>add</button>
         </form>
 
         {% for step in workflow_steps %}
-                <p>
-                    {% if step.highlighted %} <b> {% endif %}
-                    {{ step.name}}
-                    {% if step.highlighted %} </b> {% endif %}
-                </p>
+            <p>
+                {% if step.highlighted %} <b> {% endif %}
+                {{ step.name }}
+                {% if step.highlighted %} </b> {% endif %}
+            </p>
         {% endfor %}
-      </aside>
-    </div>
-  </body>
+    </aside>
+</div>
+</body>
 </html>
