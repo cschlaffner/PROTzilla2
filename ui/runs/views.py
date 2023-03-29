@@ -110,7 +110,11 @@ def detail(request, run_name):
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
-            dict(name=name, fields=fields, plots=[p.to_html() for p in step.plots])
+            dict(
+                name=name,
+                fields=fields,
+                plots=[p.to_html() for p in history_step.plots],
+            )
         )
 
     return render(
@@ -183,6 +187,7 @@ def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
+    del parameters[f"{step}_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
