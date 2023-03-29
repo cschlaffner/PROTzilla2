@@ -6,9 +6,10 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla import workflow_helper
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla import workflow_helper
+
 import protzilla.workflow_helper
 from protzilla.run import Run
 from protzilla.utilities.dynamic_parameters_provider import input_data_name
@@ -262,6 +263,7 @@ def calculate(request, run_name):
     elif section == "data_analysis":
         run.prepare_calculation(post["step_name"][0], post["input_data_name"][0])
         del post["input_data_name"]
+
     del post["step_name"]
     del post[f"{step}_method"]
 
