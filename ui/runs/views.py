@@ -6,11 +6,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
-
-import protzilla.workflow_helper
 from protzilla.run import Run
 from protzilla.utilities.dynamic_parameters_provider import input_data_name
 from protzilla.workflow_manager import WorkflowManager

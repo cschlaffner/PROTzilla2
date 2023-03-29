@@ -1,7 +1,7 @@
+import copy
 import json
 
 import pytest
-import copy
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
@@ -52,8 +52,9 @@ def test_get_all_default_params_for_methods(workflow_meta):
     result = workflow_helper.get_all_default_params_for_methods(
         workflow_meta, "data_preprocessing", "imputation", "knn"
     )
-    expected = {'number_of_neighbours': 5}
+    expected = {"number_of_neighbours": 5}
     assert result == expected
+
 
 def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
     workflow_meta_copy = copy.deepcopy(workflow_meta)
