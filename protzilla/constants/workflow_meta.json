@@ -634,8 +634,34 @@
       },
       "t_test": {
         "name": "T_Test",
-        "description": "Statistical test assuming a t_distribution:",
-        "parameters": {}
+        "description": "Statistical test assuming a t-distribution:",
+        "parameters": {
+          "multiple-testing-correction": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default-value": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0.0001,
+            "max": 1,
+            "step": "any",
+            "default-value": 0.05
+          },
+          "fc_threshold": {
+              "name": "Fold change threshold",
+              "type": "numeric",
+              "min": 0,
+              "max": 20,
+              "step": "any",
+              "default": 0
+          }
+        }
       }
     }
   },

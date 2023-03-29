@@ -116,6 +116,11 @@ method_map = {
         "differential_expression",
         "anova",
     ): differential_expression.anova,
+        (
+        "data_analysis",
+        "differential_expression",
+        "t_test",
+    ): differential_expression.t_test,
 }
 
 # reversed mapping of method callable and location
