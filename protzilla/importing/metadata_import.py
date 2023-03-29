@@ -1,25 +1,49 @@
+import os
+
 import pandas as pd
+
+from protzilla.constants.paths import PROJECT_PATH
+from protzilla.utilities.random import random_string
 
 
 def metadata_import_method(df, file, feature_orientation):
-    meta_df = pd.read_csv(
-        file,
-        sep=",",
-        low_memory=False,
-        na_values=[""],
-        keep_default_na=True,
-        skipinitialspace=True,
-    )
+    if file.endswith(".csv"):
+        meta_df = pd.read_csv(
+            file,
+            sep=",",
+            low_memory=False,
+            na_values=[""],
+            keep_default_na=True,
+            skipinitialspace=True,
+        )
+    elif file.endswith(".xlsx"):
+        meta_df = pd.read_excel(file)
+    elif file.endswith(".psv"):
+        meta_df = pd.read_csv(file, sep="|", low_memory=False)
+    elif file.endswith(".tsv"):
+        meta_df = pd.read_csv(file, sep="\t", low_memory=False)
+    else:
+        raise TypeError(
+            "File format not supported. \
+        Supported file formats are csv, xlsx, psv or tsv"
+        )
+
     # always return metadata in the same orientation (features as columns)
+    # as the dtype get lost when transposing, we save the df to disk after
+    # changing the format and read it again as "Columns"-oriented
     if feature_orientation.startswith("Rows"):
         meta_df = meta_df.transpose()
         meta_df.reset_index(inplace=True)
         meta_df.rename(columns=meta_df.iloc[0], inplace=True)
         meta_df.drop(index=0, inplace=True)
         meta_df.index = meta_df.index - 1
-        for columns in meta_df:
-            try:
-                meta_df["Age"] = meta_df["Age"].astype("int64")
-            except:
-                pass
+
+        file_path = f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_{random_string()}.csv"
+        print(file_path)
+        meta_df.to_csv(file_path, index=False)
+        return metadata_import_method(df, file_path, "Columns")
+
+    elif file.startswith(f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"):
+        os.remove(file)
+
     return df, {"metadata": meta_df}
