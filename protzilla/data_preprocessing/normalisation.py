@@ -30,9 +30,7 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     samples = intensity_df["Sample"].unique().tolist()
 
     for sample in samples:
-        df_sample = intensity_df.loc[
-            intensity_df["Sample"] == sample,
-        ]
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
         scaler = StandardScaler().fit(df_sample[[intensity_name]])
         df_sample[f"Normalised {intensity_name}"] = scaler.transform(
             df_sample[[intensity_name]]
@@ -79,9 +77,7 @@ def by_median(
     zeroed_samples = []
 
     for sample in samples:
-        df_sample = intensity_df.loc[
-            intensity_df["Sample"] == sample,
-        ]
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
         quantile = df_sample[intensity_name].quantile(q=percentile)
 
         if quantile != 0:
@@ -137,9 +133,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     zeroed_samples_list = []
 
     for sample in samples:
-        df_sample = intensity_df.loc[
-            intensity_df["Sample"] == sample,
-        ]
+        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
         totalsum = df_sample[intensity_name].sum()
 
         if totalsum != 0:
