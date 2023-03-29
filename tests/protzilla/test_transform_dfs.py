@@ -45,7 +45,7 @@ def transform_df_long():
     )
 
     df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    return df
+    return df[["Sample", "Protein ID", "Gene", "Intensity"]]
     # return pd.melt(
     #     df,
     #     id_vars=["Sample", "Gene"],
@@ -73,12 +73,19 @@ def transform_df_long_invalid_data():
         ],
     )
 
-    return pd.melt(
+    # return pd.melt(
+    #     df,
+    #     id_vars=["Sample", "Gene"],
+    #     var_name="Protein ID",
+    #     value_name="Intensity",
+    # )
+    df = pd.melt(
         df,
         id_vars=["Sample", "Gene"],
         var_name="Protein ID",
         value_name="Intensity",
     )
+    return df[["Sample", "Protein ID", "Gene", "Intensity"]]
 
 
 def test_transform_long_to_wide(transform_df_long, transform_df_wide):
