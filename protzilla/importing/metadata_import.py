@@ -6,22 +6,22 @@ from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities.random import random_string
 
 
-def metadata_import_method(df, file, feature_orientation):
-    if file.endswith(".csv"):
+def metadata_import_method(df, file_path, feature_orientation):
+    if file_path.endswith(".csv"):
         meta_df = pd.read_csv(
-            file,
+            file_path,
             sep=",",
             low_memory=False,
             na_values=[""],
             keep_default_na=True,
             skipinitialspace=True,
         )
-    elif file.endswith(".xlsx"):
-        meta_df = pd.read_excel(file)
-    elif file.endswith(".psv"):
-        meta_df = pd.read_csv(file, sep="|", low_memory=False)
-    elif file.endswith(".tsv"):
-        meta_df = pd.read_csv(file, sep="\t", low_memory=False)
+    elif file_path.endswith(".xlsx"):
+        meta_df = pd.read_excel(file_path)
+    elif file_path.endswith(".psv"):
+        meta_df = pd.read_csv(file_path, sep="|", low_memory=False)
+    elif file_path.endswith(".tsv"):
+        meta_df = pd.read_csv(file_path, sep="\t", low_memory=False)
     else:
         raise TypeError(
             "File format not supported. \
@@ -43,7 +43,9 @@ def metadata_import_method(df, file, feature_orientation):
         meta_df.to_csv(file_path, index=False)
         return metadata_import_method(df, file_path, "Columns")
 
-    elif file.startswith(f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"):
-        os.remove(file)
+    elif file_path.startswith(
+        f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
+    ):
+        os.remove(file_path)
 
     return df, {"metadata": meta_df}
