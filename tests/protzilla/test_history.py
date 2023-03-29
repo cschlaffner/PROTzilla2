@@ -146,3 +146,4 @@ def test_get_past_steps_of_section(sample_step_params):
 
     assert history.get_past_steps_of_section("section2") == 1
     assert history.get_past_steps_of_section("section1") == 4
+    rmtree(RUNS_PATH / name)
