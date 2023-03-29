@@ -113,3 +113,25 @@ def test_dataframe_in_json(sample_step_params):
     history2 = History.from_disk(name, df_mode="disk")
     assert df2.equals((history2.steps[0].outputs["another_df"]))
     rmtree(RUNS_PATH / name)
+
+def test_get_past_steps_of_section(sample_step_params):
+    name = "test_history_df" + random_string()
+    history = History(name, df_mode="disk")
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(
+        "section2",
+        "step2",
+        "method2",
+        {"param3": 3, "other": "no"},
+        None,
+        pd.DataFrame(),
+        outputs={"out": 5},
+        plots=[],
+        step_name="Step 1",
+    )
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+
+    assert history.get_past_steps_of_section("section2") == 1
+    assert history.get_past_steps_of_section("section1") == 4

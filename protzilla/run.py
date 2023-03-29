@@ -177,14 +177,11 @@ class Run:
             name=insert_step, method=first_method_name, parameters=params_default
         )
 
-        steps = self.workflow_config["sections"][self.section]["steps"]
-        for i, step in enumerate(steps):
-            if step["name"] == self.step:
-                break
-        else:
-            raise Exception("could not find " + self.step + " in workflow_config")
+        past_steps_of_section = self.history.get_past_steps_of_section(self.section)
 
-        steps.insert(i, insert_step_dict)
+        self.workflow_config["sections"][self.section]["steps"].insert(
+            past_steps_of_section + 1, insert_step_dict
+        )
 
         self.write_local_workflow()
 
