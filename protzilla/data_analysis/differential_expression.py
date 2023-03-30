@@ -118,6 +118,7 @@ def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing
 
 def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
     # TODO: add proteins of interest to frontend
+    # TODO: Does this method need to be added to the mapping etc?
 
     pvalues_log2fc_df = pd.DataFrame(
         {
