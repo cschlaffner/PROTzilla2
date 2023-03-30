@@ -7,9 +7,7 @@ from constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 import differential_expression_anova
 
 
-def _apply_multiple_testing_correction(
-    p_values: list, method: str, alpha: float
-):
+def _apply_multiple_testing_correction(p_values: list, method: str, alpha: float):
     """
         Applies a multiple testing correction method to a list of p-values
         using a given alpha.
@@ -25,9 +23,7 @@ def _apply_multiple_testing_correction(
         :rtype: tuple
         """
     to_param = {"Bonferroni": "bonferroni", "Benjamini-Hochberg": "fdr_bh"}
-    correction = multipletests(
-        pvals=p_values, alpha=alpha, method=to_param[method]
-    )
+    correction = multipletests(pvals=p_values, alpha=alpha, method=to_param[method])
     if method == "Bonferroni":
         return correction[1], correction[3]
     return correction[1], None
@@ -93,19 +89,14 @@ def t_test(
 
         # TODO: add new error handling
         # if the intensity of a group for a sample is 0, it should be filtered out
-        if (
-            np.mean(group1_intensities) == 0
-            or np.mean(group2_intensities) == 0
-        ):
+        if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
             raise ValueError(
                 "One of the groups has a mean of 0. Consider filtering \
                     your data before running the differential expression \
                         analysis."
             )
 
-        fold_change.append(
-            np.mean(group2_intensities) / np.mean(group1_intensities)
-        )
+        fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
 
     (corrected_p_values, corrected_alpha) = _apply_multiple_testing_correction(
         p_values=p_values,
@@ -119,18 +110,14 @@ def t_test(
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
     # something is wrong here
     not_de_proteins = [
-        protein
-        for i, protein in proteins
-        if p_values_mask[i] and fold_change_mask[i]
+        protein for i, protein in proteins if p_values_mask[i] and fold_change_mask[i]
     ]
     de_proteins = [
         protein
         for i, protein in enumerate(proteins)
         if p_values_mask[i] or fold_change_mask[i]
     ]
-    de_proteins_df = intensity_df.loc[
-        intensity_df["Protein ID"].isin(de_proteins)
-    ]
+    de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
 
     return (
         de_proteins_df,
@@ -179,9 +166,7 @@ def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
         annotation="protein",
     )
 
-    proteins_of_interest = (
-        [] if proteins_of_interest is None else proteins_of_interest
-    )
+    proteins_of_interest = [] if proteins_of_interest is None else proteins_of_interest
 
     # annotate the proteins of interest permanently in the plot
     for protein in proteins_of_interest:
