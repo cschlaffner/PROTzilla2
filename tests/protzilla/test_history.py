@@ -7,20 +7,22 @@ from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
 from protzilla.utilities.random import random_string
 
+
 @pytest.fixture
 def sample_step_params():
     return dict(
-    section= "section1",
-    step= "step1",
-    method= "method1",
-    parameters= {"param1": 3},
-    input_data_location= {"step_index": 0, "key": "dataframe"},
-    outputs= {},
-    plots= [],
-    step_name= "Step 1")
+        section="section1",
+        step="step1",
+        method="method1",
+        parameters={"param1": 3},
+        input_data_location={"step_index": 0, "key": "dataframe"},
+        outputs={},
+        plots=[],
+        step_name="Step 1",
+    )
+
 
 def test_history_memory_identity(sample_step_params):
-
     name = "test_memory_identity" + random_string()
     history = History(name, df_mode="memory")
 
@@ -29,7 +31,15 @@ def test_history_memory_identity(sample_step_params):
     history.add_step(**sample_step_params, dataframe=df1)
 
     history.add_step(
-        "section2", "step2", "method2", {"param1": 5}, None, df2, outputs={}, plots=[], step_name= "Step 2"
+        "section2",
+        "step2",
+        "method2",
+        {"param1": 5},
+        None,
+        df2,
+        outputs={},
+        plots=[],
+        step_name="Step 2",
     )
     assert history.steps[0].dataframe is df1
     assert history.steps[0].dataframe is not df2

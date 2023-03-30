@@ -116,7 +116,7 @@ method_map = {
         "differential_expression",
         "anova",
     ): differential_expression.anova,
-        (
+    (
         "data_analysis",
         "differential_expression",
         "t_test",

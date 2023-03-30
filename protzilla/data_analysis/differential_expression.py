@@ -5,10 +5,9 @@ from scipy import stats
 import dash_bio as dashbio
 from constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
-def _apply_multiple_testing_correction(
-        p_values: list, method: str, alpha: float
-    ):
-        """
+
+def _apply_multiple_testing_correction(p_values: list, method: str, alpha: float):
+    """
         Applies a multiple testing correction method to a list of p-values
         using a given alpha.
         :param p_values: list of p-values to be corrected
@@ -22,13 +21,11 @@ def _apply_multiple_testing_correction(
             corrected alpha value (if applicable)
         :rtype: tuple
         """
-        to_param = {"Bonferroni": "bonferroni", "Benjamini-Hochberg": "fdr_bh"}
-        correction = multipletests(
-            pvals=p_values, alpha=alpha, method=to_param[method]
-        )
-        if method == "Bonferroni":
-            return correction[1], correction[3]
-        return correction[1], None
+    to_param = {"Bonferroni": "bonferroni", "Benjamini-Hochberg": "fdr_bh"}
+    correction = multipletests(pvals=p_values, alpha=alpha, method=to_param[method])
+    if method == "Bonferroni":
+        return correction[1], correction[3]
+    return correction[1], None
 
 
 def anova(intensity_df):
@@ -36,7 +33,16 @@ def anova(intensity_df):
     return intensity_df, dict()
 
 
-def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing_correction_method, alpha, fc_threshold):
+def t_test(
+    intensity_df,
+    metadata_df,
+    grouping,
+    group1,
+    group2,
+    multiple_testing_correction_method,
+    alpha,
+    fc_threshold,
+):
     # TODO think about how to get the grouping and group1, group2 from the user
     print("ttest")
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
@@ -51,9 +57,7 @@ def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing
     fold_change = []
 
     for protein in proteins:
-        protein_df = intensity_df.loc[
-            intensity_df["Protein ID"] == protein
-        ]
+        protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
 
         group1_intensities = protein_df.loc[
             protein_df.loc[:, grouping] == group1, intensity_name
@@ -85,21 +89,16 @@ def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing
 
         # TODO: add new error handling
         # if the intensity of a group for a sample is 0, it should be filtered out
-        if (
-            np.mean(group1_intensities) == 0
-            or np.mean(group2_intensities) == 0
-        ):
+        if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
             raise ValueError(
                 "One of the groups has a mean of 0. Consider filtering \
                     your data before running the differential expression \
                         analysis."
             )
 
-        fold_change.append(
-            np.mean(group2_intensities) / np.mean(group1_intensities)
-        )
+        fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
 
-    (corrected_p_values,corrected_alpha) = _apply_multiple_testing_correction(
+    (corrected_p_values, corrected_alpha) = _apply_multiple_testing_correction(
         p_values=p_values,
         method=multiple_testing_correction_method,
         alpha=alpha,
@@ -109,16 +108,33 @@ def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing
     p_values_thresh = alpha if corrected_alpha is None else corrected_alpha
     p_values_mask = corrected_p_values < p_values_thresh
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
-    deg_proteins = [protein for i, protein in proteins if p_values_mask[i] and fold_change_mask[i]]
-    deg_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(deg_proteins)]
+    # something is wrong here
+    not_de_proteins = [
+        protein for i, protein in proteins if p_values_mask[i] and fold_change_mask[i]
+    ]
+    de_proteins = [
+        protein
+        for i, protein in enumerate(proteins)
+        if p_values_mask[i] or fold_change_mask[i]
+    ]
+    de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
 
-    return (deg_proteins_df, dict(corrected_p_values=corrected_p_values, 
-            log2_fold_change=log2_fold_change, fc_threshold=fc_threshold, 
-            alpha=alpha, corrected_alpha=corrected_alpha))
+    return (
+        de_proteins_df,
+        dict(
+            corrected_p_values=corrected_p_values,
+            log2_fold_change=log2_fold_change,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            corrected_alpha=corrected_alpha,
+        ),
+    )
+
 
 def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
     # TODO: add proteins of interest to frontend
     # TODO: Does this method need to be added to the mapping etc?
+    # TODO: write tests? -> think about proteins of interest
 
     pvalues_log2fc_df = pd.DataFrame(
         {
@@ -129,7 +145,7 @@ def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
     )
 
     if current_out["corrected_alpha"] is None:
-        p_values_thresh = -np.log10(current_out["alpha"])  
+        p_values_thresh = -np.log10(current_out["alpha"])
     else:
         p_values_thresh = -np.log10(current_out["corrected_alpha"])
 
@@ -179,10 +195,11 @@ def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
         "Dataset": "Not Significant Proteins",
     }
 
-    return [fig.for_each_trace(
-        lambda t: t.update(
-            name=new_names[t.name],
-            legendgroup=new_names[t.name],
+    return [
+        fig.for_each_trace(
+            lambda t: t.update(
+                name=new_names[t.name],
+                legendgroup=new_names[t.name],
+            )
         )
-    )]
-  
+    ]
