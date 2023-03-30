@@ -64,11 +64,11 @@ def get_current_fields(run, section, step, method):
     return current_fields
 
 
-def make_graph_fields(run, section, step, method):
-    graphs = run.workflow_meta[section][step][method].get("graphs", [])
+def make_plot_fields(run, section, step, method):
+    plots = run.workflow_meta[section][step][method].get("graphs", [])
     plot_fields = []
-    for graph in graphs:
-        for key, param_dict in graph.items():
+    for plot in plots:
+        for key, param_dict in plot.items():
             if run.current_plot_parameters is not None:
                 param_dict["default"] = run.current_plot_parameters[key]
             plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
@@ -91,7 +91,7 @@ def detail(request, run_name):
             categories=run.workflow_meta[section][step].keys(),
         ),
     )
-    plot_fields = make_graph_fields(run, section, step, method)
+    plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
@@ -152,7 +152,7 @@ def change_method(request, run_name):
     run.current_parameters = None
     run.current_plot_parameters = None
     current_fields = get_current_fields(run, run.section, run.step, run.method)
-    plot_fields = make_graph_fields(run, run.section, run.step, run.method)
+    plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
         dict(
             parameters=render_to_string(
