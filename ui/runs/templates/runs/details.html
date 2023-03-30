@@ -10,8 +10,8 @@
         // It updates the page with the new dropdowns or displays an error message if something goes wrong.
         // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
 
-        $( document ).ready(function() {
-            $("#choose-method").change(function() {
+        $(document).ready(function () {
+            $("#choose-method").change(function () {
                 const selected_method = $(this).val();
 
                 $.ajax({
@@ -25,7 +25,7 @@
                         $("#method_parameters").html(response.parameters);
                         $("#plot_parameters").html(response.plot_parameters);
                     }
-                }).fail(function(e) {
+                }).fail(function (e) {
                     console.log('Error:', e);
                     alert(e.responseJSON.error); // alert error message to user
                 })
@@ -58,17 +58,17 @@
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-        {{ method_dropdown }}
-        <div id="method_parameters">
-            {% include "runs/fields.html" with fields=fields %}
-        </div>
+    {{ method_dropdown }}
+    <div id="method_parameters">
+        {% include "runs/fields.html" with fields=fields %}
+    </div>
     <input type="submit" value="Calculate">
 </form>
 <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-        <div id="plot_parameters">
-            {% include "runs/fields.html" with fields=plot_fields %}
-        </div>
+    <div id="plot_parameters">
+        {% include "runs/fields.html" with fields=plot_fields %}
+    </div>
     <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
 </form>
 
