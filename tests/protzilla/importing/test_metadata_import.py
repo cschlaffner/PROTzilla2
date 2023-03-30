@@ -1,6 +1,8 @@
+from shutil import rmtree
+
 import pandas as pd
 
-from protzilla.constants.paths import PROJECT_PATH
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
@@ -16,6 +18,7 @@ def test_metadata_import():
     )
     test_metadata = pd.read_csv(f"{PROJECT_PATH}/tests/metadata_cut_columns.csv")
     pd.testing.assert_frame_equal(test_metadata, run.metadata)
+    rmtree(RUNS_PATH / name)
 
 
 def test_metadata_orientation():
@@ -34,3 +37,5 @@ def test_metadata_orientation():
         feature_orientation="Rows (features in rows, samples in columns)",
     )
     pd.testing.assert_frame_equal(run1.metadata, run2.metadata)
+    rmtree(RUNS_PATH / name1)
+    rmtree(RUNS_PATH / name2)
