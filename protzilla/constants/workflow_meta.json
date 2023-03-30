@@ -660,6 +660,25 @@
               "max": 20,
               "step": "any",
               "default": 0
+          },
+          "t_test_grouping": {
+            "name": "Grouping",
+            "type": "categorical",
+            "fill_from_metadata": "columns",
+            "categories": [],
+            "default-value": "None"
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "categories": [],
+            "default-value": "None"
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "categories": [],
+            "default-value": "None"
           }
         }
       }

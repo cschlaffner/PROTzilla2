@@ -108,6 +108,10 @@ def detail(request, run_name):
         # todo use workflow default
         if run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
+
+        if "fill_from_metadata" in param_dict:
+            if param_dict["fill_from_metadata"] == "columns":
+                param_dict["categories"] = run.metadata.columns
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     displayed_history = []
