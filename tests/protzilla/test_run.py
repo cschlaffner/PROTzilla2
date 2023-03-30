@@ -176,4 +176,3 @@ def test_insert_as_next_step(example_workflow_short):
         },
     }
     rmtree(RUNS_PATH / run_name)
-

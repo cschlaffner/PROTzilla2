@@ -122,7 +122,7 @@ class History:
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
 
-    def get_past_steps_of_section(self, section):
+    def number_of_steps_in_section(self, section):
         return len(list(filter(lambda step: step.section == section, self.steps)))
 
 

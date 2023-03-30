@@ -1,5 +1,4 @@
 import json
-import pathlib
 import shutil
 from pathlib import Path
 from shutil import rmtree
@@ -97,7 +96,7 @@ class Run:
         self.run_path = run_path
 
         workflow_local_path = f"{self.run_path}/workflow.json"
-        if not pathlib.Path.is_file(workflow_local_path):
+        if not Path(workflow_local_path).is_file():
             workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
             shutil.copy2(workflow_template_path, workflow_local_path)
 
@@ -188,7 +187,7 @@ class Run:
             name=insert_step, method=first_method_name, parameters=params_default
         )
 
-        past_steps_of_section = self.history.get_past_steps_of_section(self.section)
+        past_steps_of_section = self.history.number_of_steps_in_section(self.section)
 
         self.workflow_config["sections"][self.section]["steps"].insert(
             past_steps_of_section + 1, insert_step_dict

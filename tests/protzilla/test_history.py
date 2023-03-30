@@ -125,7 +125,7 @@ def test_dataframe_in_json(sample_step_params):
     rmtree(RUNS_PATH / name)
 
 
-def test_get_past_steps_of_section(sample_step_params):
+def test_number_of_steps_in_section(sample_step_params):
     name = "test_history_df" + random_string()
     history = History(name, df_mode="disk")
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
@@ -144,5 +144,5 @@ def test_get_past_steps_of_section(sample_step_params):
     )
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
 
-    assert history.get_past_steps_of_section("section2") == 1
-    assert history.get_past_steps_of_section("section1") == 4
+    assert history.number_of_steps_in_section("section2") == 1
+    assert history.number_of_steps_in_section("section1") == 4
