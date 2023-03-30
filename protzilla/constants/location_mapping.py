@@ -128,6 +128,16 @@ plot_map = {
     ): filter_proteins.by_low_frequency_plot,
     (
         "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    ): filter_samples.by_protein_intensity_sum_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_count_filter",
+    ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
         "normalisation",
         "z_score",
     ): normalisation.by_z_score_plot,

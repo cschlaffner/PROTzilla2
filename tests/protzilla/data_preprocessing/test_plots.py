@@ -103,12 +103,13 @@ def test_build_box_hist_plot(
     show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
 ):
     fig1, fig2 = imputation._build_box_hist_plot(
-        input_imputation_df, assertion_df_knn, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, assertion_df_knn, "Boxplot", "Bar chart", "Sample"
     )
     fig3, fig4 = imputation._build_box_hist_plot(
         input_imputation_df,
         assertion_df_min_value_per_df,
-        ["Histogram", "Pie chart"],
+        "Histogram",
+        "Pie chart",
         "Protein ID",
     )
 

@@ -419,7 +419,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -467,7 +467,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -515,7 +515,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -565,7 +565,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -613,7 +613,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [

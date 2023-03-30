@@ -1,10 +1,10 @@
 <label for="{{ key }}">{{ name }}</label>
 <select name="{{ key }}" id="{{ key }}" {% if disabled %}
-    disabled
+        disabled
 {% endif %} >
     {% for option in categories %}
         <option value="{{ option }}" {% if option == default %}
-            selected="selected"
+                selected="selected"
         {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>

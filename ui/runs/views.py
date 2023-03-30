@@ -64,28 +64,34 @@ def get_current_fields(run, section, step, method):
     return current_fields
 
 
+def make_plot_fields(run, section, step, method):
+    plots = run.workflow_meta[section][step][method].get("graphs", [])
+    plot_fields = []
+    for plot in plots:
+        for key, param_dict in plot.items():
+            if run.current_plot_parameters is not None:
+                param_dict["default"] = run.current_plot_parameters[key]
+            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    return plot_fields
+
+
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     current_fields = get_current_fields(run, section, step, method)
-    method_dropdown_id = f"{step}_method"
-
-    current_fields.insert(
-        0,
-        render_to_string(
-            "runs/field_select.html",
-            context=dict(
-                disabled=False,
-                key=method_dropdown_id,
-                name=f"{step.replace('_', ' ').title()} Method:",
-                default=method,
-                categories=run.workflow_meta[section][step].keys(),
-            ),
+    method_dropdown = render_to_string(
+        "runs/field_select.html",
+        context=dict(
+            disabled=False,
+            key="chosen_method",
+            name=f"{step.replace('_', ' ').title()} Method:",
+            default=method,
+            categories=run.workflow_meta[section][step].keys(),
         ),
     )
-
+    plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
@@ -102,15 +108,17 @@ def detail(request, run_name):
             fields = [df_head.to_string()]
         else:
             for key, param_dict in parameters.items():
-                fields.append(
-                    make_parameter_input(
-                        key,
-                        param_dict,
-                        disabled=True,
-                    )
-                )
+                param_dict["default"] = history_step.parameters[key]
+                fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
-        displayed_history.append(dict(name=name, fields=fields))
+        displayed_history.append(
+            dict(
+                name=name,
+                fields=fields,
+                plots=[p.to_html() for p in history_step.plots],
+            )
+        )
+
     return render(
         request,
         "runs/details.html",
@@ -118,10 +126,14 @@ def detail(request, run_name):
             run_name=run_name,
             location=f"{run.section}/{run.step}",
             displayed_history=displayed_history,
+            method_dropdown=method_dropdown,
             fields=current_fields,
-            method_dropdown_id=method_dropdown_id,
+            plot_fields=plot_fields,
+            current_plots=[plot.to_html() for plot in run.plots],
+            # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
-            show_back=bool(len(run.history.steps) > 1),
+            show_back=bool(run.history.steps),
+            show_plot_button=run.result_df is not None,
         ),
     )
 
@@ -137,12 +149,23 @@ def change_method(request, run_name):
         response.status_code = 404  # not found
         return response
     run.method = request.POST["method"]
+    run.current_parameters = None
+    run.current_plot_parameters = None
     current_fields = get_current_fields(run, run.section, run.step, run.method)
-    html = render_to_string(
-        "runs/fields.html",
-        context=dict(fields=current_fields),
+    plot_fields = make_plot_fields(run, run.section, run.step, run.method)
+    return JsonResponse(
+        dict(
+            parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=current_fields),
+            ),
+            plot_parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=plot_fields),
+            ),
+        ),
+        safe=False,
     )
-    return JsonResponse(html, safe=False)
 
 
 def create(request):
@@ -177,21 +200,8 @@ def back(request, run_name):
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    post = dict(request.POST)
-    del post["csrfmiddlewaretoken"]
-    del post[f"{step}_method"]
-
-    parameters = {}
-    for k, v in post.items():
-        # assumption: only one value for parameter
-        param_dict = run.workflow_meta[section][step][method]["parameters"][k]
-        if param_dict["type"] == "numeric" and param_dict["step"] == 1:
-            parameters[k] = int(v[0])
-        elif param_dict["type"] == "numeric":
-            parameters[k] = float(v[0])
-        else:
-            parameters[k] = v[0]
-
+    parameters = parameters_from_post(request.POST)
+    del parameters["chosen_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -206,3 +216,30 @@ def calculate(request, run_name):
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def plot(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_workflow_location()
+    parameters = parameters_from_post(request.POST)
+    run.create_plot_from_location(section, step, method, parameters)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def parameters_from_post(post):
+    d = dict(post)
+    del d["csrfmiddlewaretoken"]
+    parameters = {}
+    for k, v in d.items():
+        if len(v) > 1:
+            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
+        parameters[k] = convert_str_if_possible(v[0])
+    return parameters
+
+
+def convert_str_if_possible(s):
+    try:
+        f = float(s)
+    except ValueError:
+        return s
+    return int(f) if int(f) == f else f

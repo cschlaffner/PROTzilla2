@@ -64,7 +64,8 @@ class Run:
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
-        self.plots = None
+        self.current_plot_parameters = None
+        self.plots = []
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         method_callable = method_map[(section, step, method)]
@@ -94,6 +95,7 @@ class Run:
         self.plots = method_callable(
             self.df, self.result_df, self.current_out, **parameters
         )
+        self.current_plot_parameters = parameters
 
     def next_step(self):
         self.history.add_step(
@@ -109,6 +111,8 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.current_plot_parameters = None
+        self.plots = []
         self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
@@ -121,6 +125,7 @@ class Run:
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
+        self.current_plot_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
 
