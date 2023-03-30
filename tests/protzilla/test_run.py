@@ -100,7 +100,6 @@ def test_current_run_location():
     rmtree(RUNS_PATH / run_name)
 
 
-
 def test_perform_calculation_logging(caplog):
     run_name = "test_run_logging" + random_string()
     run = Run.create(run_name, df_mode="disk")
@@ -110,10 +109,12 @@ def test_perform_calculation_logging(caplog):
         intensity_name="Intensity",
     )
 
-    run.perform_calculation_from_location("data_preprocessing",
-                                          "outlier_detection",
-                                          "local_outlier_factor",
-                                          {"number_of_neighbors": 3})
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "outlier_detection",
+        "local_outlier_factor",
+        {"number_of_neighbors": 3},
+    )
 
     assert "ERROR" in caplog.text
     assert "LocalOutlierFactor" in caplog.text

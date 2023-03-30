@@ -69,15 +69,11 @@ def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_wi
     _, current_out = by_isolation_forest(outlier_detection_df_with_nan, 50, -1)
     test_keywords = "NaN values"
 
-    if "messages" in current_out:
-        assert test_keywords in current_out["messages"][0]["msg"]
-    else:
-        assert False, "No messages in current_out"
+    assert "messages" in current_out
+    assert test_keywords in current_out["messages"][0]["msg"]
 
 
-def test_outlier_detection_by_local_outlier_factor(
-    show_figures, outlier_detection_df
-):
+def test_outlier_detection_by_local_outlier_factor(show_figures, outlier_detection_df):
     result_df, dropouts = by_local_outlier_factor(outlier_detection_df, 35, -1)
     fig = by_local_outlier_factor_plot(outlier_detection_df, result_df, dropouts)[0]
     if show_figures:
@@ -90,10 +86,8 @@ def test_outlier_detection_by_local_outlier_factor_and_nan(
     _, current_out = by_local_outlier_factor(outlier_detection_df_with_nan, 35, -1)
     test_keywords = "NaN values"
 
-    if "messages" in current_out:
-        assert test_keywords in current_out["messages"][0]["msg"]
-    else:
-        assert False, "No messages in current_out"
+    assert "messages" in current_out
+    assert test_keywords in current_out["messages"][0]["msg"]
 
 
 def test_outlier_detection_with_pca(show_figures, outlier_detection_df):
@@ -107,7 +101,5 @@ def test_outlier_detection_with_pca_and_nan(outlier_detection_df_with_nan):
     _, current_out = by_pca(outlier_detection_df_with_nan, 2, 3)
     test_keywords = "NaN values"
 
-    if "messages" in current_out:
-        assert test_keywords in current_out["messages"][0]["msg"]
-    else:
-        assert False, "No messages in current_out"
+    assert "messages" in current_out
+    assert test_keywords in current_out["messages"][0]["msg"]
