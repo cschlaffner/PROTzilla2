@@ -4,6 +4,7 @@ from statsmodels.stats.multitest import multipletests
 from scipy import stats
 import dash_bio as dashbio
 from constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
+import differential_expression_anova
 
 def _apply_multiple_testing_correction(
         p_values: list, method: str, alpha: float
@@ -31,12 +32,13 @@ def _apply_multiple_testing_correction(
         return correction[1], None
 
 
-def anova(intensity_df):
-    print("anova")
-    return intensity_df, dict()
 
 
-def t_test(intensity_df, metadata_df, grouping, group1, group2, multiple_testing_correction_method, alpha, fc_threshold):
+def anova(**kwargs):
+    differential_expression_anova.anova(kwargs)
+
+
+def t_test(
     # TODO think about how to get the grouping and group1, group2 from the user
     print("ttest")
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
