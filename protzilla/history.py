@@ -40,11 +40,11 @@ class History:
                     step["method"],
                     step["parameters"],
                     step["input_data_location"],
-                    df,
-                    df_path if df_path.exists() else None,
-                    step["outputs"],
-                    [],
-                    step["step_name"],
+                    _dataframe=df,
+                    dataframe_path=df_path if df_path.exists() else None,
+                    outputs=step["outputs"],
+                    plots=[],
+                    step_name=step["step_name"],
                 )
             )
         return instance

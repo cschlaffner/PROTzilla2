@@ -1,5 +1,5 @@
 import json
-import os.path
+import pathlib
 import shutil
 from pathlib import Path
 from shutil import rmtree
@@ -97,7 +97,7 @@ class Run:
         self.run_path = run_path
 
         workflow_local_path = f"{self.run_path}/workflow.json"
-        if not os.path.exists(workflow_local_path):
+        if not pathlib.Path.is_file(workflow_local_path):
             workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
             shutil.copy2(workflow_template_path, workflow_local_path)
 
