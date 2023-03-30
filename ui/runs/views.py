@@ -63,6 +63,16 @@ def get_current_fields(run, section, step, method):
     return current_fields
 
 
+def make_graph_fields(run, section, step, method):
+    graphs = run.workflow_meta[section][step][method].get("graphs", [])
+    plot_fields = []
+    for graph in graphs:
+        for key, param_dict in graph.items():
+            # TODO put plot args into inputs when already plotted
+            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    return plot_fields
+
+
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
@@ -79,13 +89,7 @@ def detail(request, run_name):
             categories=run.workflow_meta[section][step].keys(),
         ),
     )
-
-    graphs = run.workflow_meta[section][step][method].get("graphs", [])
-    plot_fields = []
-    for graph in graphs:
-        for key, param_dict in graph.items():
-            # TODO put plot args into inputs
-            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    plot_fields = make_graph_fields(run, section, step, method)
     displayed_history = []
     for history_step in run.history.steps:
         fields = []
@@ -144,11 +148,20 @@ def change_method(request, run_name):
         return response
     run.method = request.POST["method"]
     current_fields = get_current_fields(run, run.section, run.step, run.method)
-    html = render_to_string(
-        "runs/fields.html",
-        context=dict(fields=current_fields),
+    plot_fields = make_graph_fields(run, run.section, run.step, run.method)
+    return JsonResponse(
+        dict(
+            parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=current_fields),
+            ),
+            plot_parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=plot_fields),
+            ),
+        ),
+        safe=False,
     )
-    return JsonResponse(html, safe=False)
 
 
 def create(request):

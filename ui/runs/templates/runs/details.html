@@ -22,7 +22,8 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        $("#method_parameters").html(response);
+                        $("#method_parameters").html(response.parameters);
+                        $("#plot_parameters").html(response.plot_parameters);
                     }
                 }).fail(function(e) {
                     console.log('Error:', e);
