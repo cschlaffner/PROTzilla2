@@ -35,11 +35,11 @@
 | tests/protzilla/data\_preprocessing/test\_outlier\_detection.py |       23 |        3 |        6 |        3 |     79% |42, 51, 58 |
 | tests/protzilla/data\_preprocessing/test\_plots.py              |       47 |        8 |       16 |        5 |     79% |20, 39, 56, 81, 116-119 |
 | tests/protzilla/data\_preprocessing/test\_transformation.py     |       35 |        2 |        4 |        2 |     90% |  119, 134 |
-| tests/protzilla/importing/test\_metadata\_import.py             |       19 |        0 |        0 |        0 |    100% |           |
+| tests/protzilla/importing/test\_metadata\_import.py             |       23 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_history.py                                |       61 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       51 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                         |       32 |        0 |        0 |        0 |    100% |           |
-|                                                       **TOTAL** | **1108** |   **98** |  **205** |   **46** | **87%** |           |
+|                                                       **TOTAL** | **1112** |   **98** |  **205** |   **46** | **87%** |           |
 
 
 ## Setup coverage badge
