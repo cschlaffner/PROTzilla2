@@ -2,8 +2,10 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import dash_bio as dashbio
-from constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
-from data_analysis.differential_expression import apply_multiple_testing_correction
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
+from protzilla.data_analysis.differential_expression_helper import (
+    apply_multiple_testing_correction,
+)
 
 
 def t_test(
@@ -17,6 +19,7 @@ def t_test(
     fc_threshold,
 ):
     # TODO think about how to get the grouping and group1, group2 from the user
+    # TODO: alpha does not work in frontend
     print("ttest")
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns.values.tolist()[3]
@@ -58,7 +61,7 @@ def t_test(
             )
 
         p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
-        p_values += [p]
+        p_values.append(p)
 
         # TODO: add new error handling
         # if the intensity of a group for a sample is 0, it should be filtered out
@@ -102,7 +105,6 @@ def t_test(
 
 def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
     # TODO: add proteins of interest to frontend
-    # TODO: Does this method need to be added to the mapping etc?
     # TODO: write tests? -> think about proteins of interest
 
     pvalues_log2fc_df = pd.DataFrame(

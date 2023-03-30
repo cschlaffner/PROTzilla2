@@ -4,8 +4,8 @@ from statsmodels.stats.multitest import multipletests
 from scipy import stats
 import dash_bio as dashbio
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
-from protzilla.data_analysis.differential_expression import (
-    _apply_multiple_testing_correction,
+from protzilla.data_analysis.differential_expression_helper import (
+    apply_multiple_testing_correction,
 )
 
 
@@ -64,7 +64,7 @@ def anova(
     (
         corrected_p_values,
         corrected_alpha,
-    ) = _apply_multiple_testing_correction(
+    ) = apply_multiple_testing_correction(
         p_values, multiple_testing_correction_method, alpha
     )
 
