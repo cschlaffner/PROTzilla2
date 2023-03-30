@@ -68,7 +68,8 @@ def make_graph_fields(run, section, step, method):
     plot_fields = []
     for graph in graphs:
         for key, param_dict in graph.items():
-            # TODO put plot args into inputs when already plotted
+            if run.current_plot_parameters is not None:
+                param_dict["default"] = run.current_plot_parameters[key]
             plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return plot_fields
 
@@ -147,6 +148,8 @@ def change_method(request, run_name):
         response.status_code = 404  # not found
         return response
     run.method = request.POST["method"]
+    run.current_parameters = None
+    run.current_plot_parameters = None
     current_fields = get_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_graph_fields(run, run.section, run.step, run.method)
     return JsonResponse(
@@ -197,7 +200,7 @@ def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
-    del parameters[f"{step}_method"]
+    del parameters["choose-method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -219,10 +222,9 @@ def parameters_from_post(post):
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        if len(v) == 1:
-            parameters[k] = convert_str_if_possible(v[0])
-        else:
-            parameters[k] = [convert_str_if_possible(x) for x in v]
+        if len(v) > 1:
+            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
+        parameters[k] = convert_str_if_possible(v[0])
     return parameters
 
 
