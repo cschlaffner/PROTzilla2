@@ -69,6 +69,7 @@ def test_differential_expression_t_test(show_figures):
 
     corrected_p_values = [0.0108, 0.4318, 1.000]
     log2_fc = [-1, -0.0996, 0]
+    de_proteins = ["Protein1", "Protein2"]
 
     assert (
         current_out["corrected_p_values"].round(4) == corrected_p_values
@@ -83,6 +84,12 @@ def test_differential_expression_t_test(show_figures):
                 but are {current_out['log2_fold_change'].round(4)}"
 
     assert (
+        de_proteins_df["Protein ID"].values() == de_proteins
+    ), f"\
+        Differentially expressed proteins do not match! Should be \
+            {de_proteins} but are {de_proteins_df['Protein ID'].values()}"
+
+    assert (
         current_out["fc_threshold"] == test_fc_threshold
     ), f"fold change \
         threshold does not match!"
@@ -91,4 +98,3 @@ def test_differential_expression_t_test(show_figures):
         current_out["corrected_alpha"] is None
     ), f"corrected alpha does \
         not match"
-    # assert de proteins
