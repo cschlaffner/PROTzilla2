@@ -85,7 +85,7 @@ def detail(request, run_name):
         "runs/field_select.html",
         context=dict(
             disabled=False,
-            key="choose-method",
+            key="chosen_method",
             name=f"{step.replace('_', ' ').title()} Method:",
             default=method,
             categories=run.workflow_meta[section][step].keys(),
@@ -201,7 +201,7 @@ def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
-    del parameters["choose-method"]
+    del parameters["chosen_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
