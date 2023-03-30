@@ -59,7 +59,7 @@ method_map = {
         "data_preprocessing",
         "outlier_detection",
         "local_outlier_factor",
-    ): outlier_detection.with_local_outlier_factor,
+    ): outlier_detection.by_local_outlier_factor,
     (
         "data_preprocessing",
         "transformation",
