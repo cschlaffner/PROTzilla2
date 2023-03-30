@@ -69,14 +69,13 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     current_fields = get_current_fields(run, section, step, method)
-    method_dropdown_id = f"{step}_method"
     current_fields.insert(
         0,
         render_to_string(
             "runs/field_select.html",
             context=dict(
                 disabled=False,
-                key=method_dropdown_id,
+                key="choose-method",
                 name=f"{step.replace('_', ' ').title()} Method:",
                 default=method,
                 categories=run.workflow_meta[section][step].keys(),

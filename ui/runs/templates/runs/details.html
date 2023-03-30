@@ -11,7 +11,7 @@
         // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
 
         $( document ).ready(function() {
-            $("#{{ method_dropdown_id}}").change(function() {
+            $("#choose-method").change(function() {
                 const selected_method = $(this).val();
 
                 $.ajax({
