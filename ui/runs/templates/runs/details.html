@@ -34,17 +34,28 @@
     <title>PROTzilla</title>
 </head>
 <body>
-{{ run_name }}
-<br>
-<b>history</b>
-<br>
-{% for step in displayed_history %}
-    {{ step.name }}<br>
-    {% for field in step.fields %}
-        {{ field }}<br>
-    {% endfor %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message | safe}}
+        </p>
+        {% endfor %}
+    </div>
     <br>
-{% endfor %}
+    {% endif %}
+
+    {{ run_name }}
+    <br>
+    <b>history</b>
+    <br>
+    {% for step in displayed_history %}
+        {{ step.name }}<br>
+        {% for field in step.fields %}
+            {{ field }}<br>
+        {% endfor %}
+        <br>
+    {% endfor %}
 
 <br>
 {{ location }}
@@ -58,18 +69,18 @@
     <input type="submit" value="Calculate">
 </form>
 
-{% if show_next %}
-    <form action="{% url 'runs:next' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Next</button>
-    </form>
-{% endif %}
+    {% if show_next %}
+        <form action="{% url 'runs:next' run_name %}" method="post">
+            {% csrf_token %}
+            <button>Next</button>
+        </form>
+    {% endif %}
 
-{% if show_back %}
-    <form action="{% url 'runs:back' run_name %}" method="post">
-        {% csrf_token %}
-        <button>Back</button>
-    </form>
-{% endif %}
+    {% if show_back %}
+        <form action="{% url 'runs:back' run_name %}" method="post">
+            {% csrf_token %}
+            <button>Back</button>
+        </form>
+    {% endif %}
 </body>
 </html>
