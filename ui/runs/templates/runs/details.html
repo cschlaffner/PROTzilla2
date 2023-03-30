@@ -57,21 +57,18 @@
 <br>
 <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-        {{ fields|first }}
+        {{ method_dropdown }}
         <div id="method_parameters">
-            {% include "runs/fields.html" with fields=fields|slice:"1:" %}
+            {% include "runs/fields.html" with fields=fields %}
         </div>
     <input type="submit" value="Calculate">
 </form>
 <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {% for field in plot_fields %}
-        {{ field }}
-        <br>
-    {% endfor %}
-    <input type="submit" value="Plot" {% if not show_next %}
-        disabled
-    {% endif %} >
+        <div id="plot_parameters">
+            {% include "runs/fields.html" with fields=plot_fields %}
+        </div>
+    <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
 </form>
 
 {% for plot in current_plots %}

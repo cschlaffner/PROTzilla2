@@ -69,17 +69,14 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     current_fields = get_current_fields(run, section, step, method)
-    current_fields.insert(
-        0,
-        render_to_string(
-            "runs/field_select.html",
-            context=dict(
-                disabled=False,
-                key="choose-method",
-                name=f"{step.replace('_', ' ').title()} Method:",
-                default=method,
-                categories=run.workflow_meta[section][step].keys(),
-            ),
+    method_dropdown = render_to_string(
+        "runs/field_select.html",
+        context=dict(
+            disabled=False,
+            key="choose-method",
+            name=f"{step.replace('_', ' ').title()} Method:",
+            default=method,
+            categories=run.workflow_meta[section][step].keys(),
         ),
     )
 
@@ -123,6 +120,7 @@ def detail(request, run_name):
             run_name=run_name,
             location=f"{run.section}/{run.step}",
             displayed_history=displayed_history,
+            method_dropdown=method_dropdown,
             fields=current_fields,
             plot_fields=plot_fields,
             current_plots=[plot.to_html() for plot in run.plots],
