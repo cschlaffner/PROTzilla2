@@ -1,5 +1,6 @@
 from statsmodels.stats.multitest import multipletests
 
+
 def apply_multiple_testing_correction(p_values: list, method: str, alpha: float):
     """
         Applies a multiple testing correction method to a list of p-values

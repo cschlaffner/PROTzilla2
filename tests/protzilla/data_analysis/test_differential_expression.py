@@ -1,7 +1,11 @@
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.differential_expression import t_test, t_test_volcano_plot
+from protzilla.data_analysis.differential_expression import (
+    t_test,
+    t_test_volcano_plot,
+    anova,
+)
 
 
 def test_differential_expression_t_test(show_figures):
@@ -98,3 +102,71 @@ def test_differential_expression_t_test(show_figures):
         current_out["corrected_alpha"] is None
     ), f"corrected alpha does \
         not match"
+
+
+def test_differential_expression_anova(show_figures):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 18],
+        ["Sample1", "Protein2", "Gene1", 16],
+        ["Sample1", "Protein3", "Gene1", 1],
+        ["Sample2", "Protein1", "Gene1", 20],
+        ["Sample2", "Protein2", "Gene1", 15],
+        ["Sample2", "Protein3", "Gene1", 2],
+        ["Sample3", "Protein1", "Gene1", 22],
+        ["Sample3", "Protein2", "Gene1", 14],
+        ["Sample3", "Protein3", "Gene1", 3],
+        ["Sample4", "Protein1", "Gene1", 8],
+        ["Sample4", "Protein2", "Gene1", 2],
+        ["Sample4", "Protein3", "Gene1", 1],
+        ["Sample5", "Protein1", "Gene1", 10],
+        ["Sample5", "Protein2", "Gene1", 5],
+        ["Sample5", "Protein3", "Gene1", 2],
+        ["Sample6", "Protein1", "Gene1", 12],
+        ["Sample6", "Protein2", "Gene1", 4],
+        ["Sample6", "Protein3", "Gene1", 3],
+    )
+
+    test_intensity_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+
+    test_metadata_list = (
+        ["Sample1", "Group1"],
+        ["Sample2", "Group1"],
+        ["Sample3", "Group1"],
+        ["Sample4", "Group2"],
+        ["Sample5", "Group2"],
+        ["Sample6", "Group2"],
+    )
+
+    test_metadata_df = pd.DataFrame(
+        data=test_metadata_list,
+        columns=["Sample", "Group"],
+    )
+
+    output_df, output_dict = anova(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        selected_groups=test_metadata_df["Group"].unique().tolist(),
+        multiple_testing_correction_method="Bonferroni",
+        alpha=0.05,
+    )
+    p_values = output_dict["p_values"]
+
+    p_values_rounded = [round(x, 4) for x in p_values]
+
+    # fig = anova.get_visualisation(grouping="Group")
+
+    if show_figures:
+        pass
+        # fig.show()
+
+    assertion_p_values = [
+        0.0036,
+        0.0004,
+        1.0000,
+    ]
+
+    assert assertion_p_values == p_values_rounded

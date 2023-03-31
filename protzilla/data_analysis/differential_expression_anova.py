@@ -79,4 +79,4 @@ def anova(
         on="Protein ID",
         copy=False,
     )
-    return tested_df, {"corrected_alpha": corrected_alpha}
+    return tested_df, {"p_values": p_values, "corrected_alpha": corrected_alpha}
