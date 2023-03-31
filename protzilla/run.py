@@ -20,6 +20,16 @@ class Run:
         return available_runs
 
     @classmethod
+    def available_workflows(cls):
+        available_workflows = []
+        if WORKFLOWS_PATH.exists():
+            for p in WORKFLOWS_PATH.iterdir():
+                if p.name.startswith("."):
+                    continue
+                available_workflows.append(p.stem)
+        return available_workflows
+
+    @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         if run_path.exists():
