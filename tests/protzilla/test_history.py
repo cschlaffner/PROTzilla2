@@ -1,6 +1,7 @@
 from shutil import rmtree
 
 import pandas as pd
+import pytest
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
@@ -98,4 +99,24 @@ def test_dataframe_in_json():
     del history
     history2 = History.from_disk(name, df_mode="disk")
     assert df2.equals((history2.steps[0].outputs["another_df"]))
+    rmtree(RUNS_PATH / name)
+
+
+def test_history_step_naming():
+    name = "test_history_step_naming" + random_string()
+    history = History(name, df_mode="disk")
+    history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [], name="one")
+    history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [])
+    assert history.step_names[1] is None
+    history.name_step(1, "two")
+    assert history.step_names[0] == "one"
+    assert history.step_names[1] == "two"
+    with pytest.raises(Exception):
+        history.name_step(0, "try")
+    with pytest.raises(Exception):
+        history.name_step(1, "try2")
+    del history
+    history2 = History.from_disk(name, df_mode="disk")
+    assert history2.step_names[0] == "one"
+    assert history2.step_names[1] == "two"
     rmtree(RUNS_PATH / name)

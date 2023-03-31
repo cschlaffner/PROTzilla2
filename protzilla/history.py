@@ -33,6 +33,7 @@ class History:
                 df = pd.read_csv(df_path)
             else:
                 df = None
+            instance.step_names.append(step["name"])
             instance.steps.append(
                 ExecutedStep(
                     step["section"],
@@ -53,6 +54,7 @@ class History:
         self.df_mode = df_mode
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
+        self.step_names = []
         (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
     def add_step(
@@ -64,6 +66,7 @@ class History:
         dataframe: pd.DataFrame,
         outputs: dict,
         plots: list,
+        name: str | None = None,
     ):
         df_path = None
         df = None
@@ -78,9 +81,16 @@ class History:
             section, step, method, parameters, df, df_path, outputs, plots
         )
         self.steps.append(executed_step)
+        self.step_names.append(name)
+        self.save()
+
+    def name_step(self, index, name):
+        assert self.step_names[index] is None
+        self.step_names[index] = name
         self.save()
 
     def pop_step(self):
+        self.step_names.pop()
         step = self.steps.pop()
         df = step.dataframe
         if "disk" in self.df_mode and step.dataframe_path:
@@ -95,10 +105,11 @@ class History:
                 section=step.section,
                 step=step.step,
                 method=step.method,
+                name=name,
                 parameters=step.parameters,
                 outputs=step.outputs,
             )
-            for step in self.steps
+            for name, step in zip(self.step_names, self.steps)
         ]
         history_json = CustomJSONEncoder(self.run_name, indent=2).encode(to_save)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
