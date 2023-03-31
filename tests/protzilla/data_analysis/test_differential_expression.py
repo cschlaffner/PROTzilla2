@@ -5,6 +5,7 @@ from protzilla.data_analysis.differential_expression import (
     t_test,
     t_test_volcano_plot,
     anova,
+    anova_heatmap,
 )
 
 
@@ -157,11 +158,11 @@ def test_differential_expression_anova(show_figures):
 
     p_values_rounded = [round(x, 4) for x in p_values]
 
-    # fig = anova.get_visualisation(grouping="Group")
-
+    fig = anova_heatmap(
+        output_df, grouping="Group", alpha=output_dict["corrected_alpha"]
+    )
     if show_figures:
-        pass
-        # fig.show()
+        fig.show()
 
     assertion_p_values = [
         0.0036,

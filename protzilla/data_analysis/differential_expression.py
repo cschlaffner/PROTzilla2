@@ -5,6 +5,10 @@ def anova(*args, **kwargs):
     return differential_expression_anova.anova(*args, **kwargs)
 
 
+def anova_heatmap(*args, **kwargs):
+    return differential_expression_anova.anova_heatmap(*args, **kwargs)
+
+
 def t_test(*args, **kwargs):
     return differential_expression_t_test.t_test(*args, **kwargs)
 
