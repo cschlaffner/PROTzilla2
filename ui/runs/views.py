@@ -91,12 +91,14 @@ def detail(request, run_name):
             categories=run.workflow_meta[section][step].keys(),
         ),
     )
+    allow_next = run.result_df is not None
     name_field = render_to_string(
-        "runs/field_text.html", context=dict(disabled=False, key="name", name="Name: ")
+        "runs/field_text.html",
+        context=dict(disabled=not allow_next, key="name", name="Name:"),
     )
     plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
-    for history_step in run.history.steps:
+    for i, history_step in enumerate(run.history.steps):
         fields = []
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
@@ -116,9 +118,10 @@ def detail(request, run_name):
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
             dict(
-                name=name,
+                location=name,
                 fields=fields,
                 plots=[p.to_html() for p in history_step.plots],
+                name=run.history.step_names[i],
             )
         )
 
@@ -135,7 +138,7 @@ def detail(request, run_name):
             name_field=name_field,
             current_plots=[plot.to_html() for plot in run.plots],
             # TODO add not able to plot when no plot method
-            show_next=run.result_df is not None,
+            show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
         ),

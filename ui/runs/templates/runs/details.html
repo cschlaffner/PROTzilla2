@@ -51,7 +51,8 @@
 <b>history</b>
 <br>
 {% for step in displayed_history %}
-    {{ step.name }}<br>
+    {{ step.location }}<br>
+    Name: {{ step.name }}<br>
     {% for field in step.fields %}
         {{ field }}<br>
     {% endfor %}
