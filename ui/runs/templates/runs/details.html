@@ -32,6 +32,39 @@
             })
         });
     </script>
+    <script>
+        // script to deactivate plot button if calc_params change so a new plot cannot be generated with old data
+        let isFirstFormSubmitted = false;
+        let calc_params = null;
+
+        $(document).ready(function () {
+            const calc_form = document.querySelector('#calc_form');
+
+            calc_params = new FormData(calc_form);
+            calc_params.delete("csrfmiddlewaretoken")
+
+            calc_form.addEventListener('submit', function () {
+                isFirstFormSubmitted = true;
+                calc_params = new FormData(calc_form);
+                calc_params.delete("csrfmiddlewaretoken")
+                $('#plot_parameters_submit').prop('disabled', false);
+            });
+
+            calc_form.addEventListener('change', function () {
+                let current_params = new FormData(calc_form);
+                current_params.delete("csrfmiddlewaretoken")
+
+                let submitButton = $('#plot_parameters_submit');
+                for (let [key, value] of calc_params.entries()) {
+                    if (current_params.get(key) !== value){
+                        submitButton.prop('disabled', true);
+                        return
+                    }
+                }
+                submitButton.prop('disabled', false);
+            });
+        });
+    </script>
     <title>PROTzilla</title>
 </head>
 <body>
