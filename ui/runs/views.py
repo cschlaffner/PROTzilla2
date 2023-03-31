@@ -14,8 +14,6 @@ active_runs = {}
 
 
 def index(request):
-    available_workflows = []
-
     return render(
         request,
         "runs/index.html",
@@ -62,7 +60,6 @@ def get_current_fields(run, section, step, method):
             param_dict["default"] = run.current_parameters.get(
                 key, param_dict["default"]
             )
-
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -93,6 +90,9 @@ def detail(request, run_name):
             default=method,
             categories=run.workflow_meta[section][step].keys(),
         ),
+    )
+    name_field = render_to_string(
+        "runs/field_text.html", context=dict(disabled=False, key="name", name="Name: ")
     )
     plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
@@ -132,6 +132,7 @@ def detail(request, run_name):
             method_dropdown=method_dropdown,
             fields=current_fields,
             plot_fields=plot_fields,
+            name_field=name_field,
             current_plots=[plot.to_html() for plot in run.plots],
             # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
@@ -190,7 +191,10 @@ def continue_(request):
 
 def next_(request, run_name):
     run = active_runs[run_name]
-    run.next_step()
+    if name := request.POST["name"]:
+        run.next_step(name)
+    else:
+        run.next_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

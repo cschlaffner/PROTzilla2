@@ -107,7 +107,7 @@ class Run:
         )
         self.current_plot_parameters = parameters
 
-    def next_step(self):
+    def next_step(self, name=None):
         self.history.add_step(
             self.section,
             self.step,
@@ -116,6 +116,7 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
+            name=name,
         )
         self.df = self.result_df
         self.result_df = None

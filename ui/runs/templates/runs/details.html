@@ -91,6 +91,7 @@
 
 <form action="{% url 'runs:next' run_name %}" method="post">
     {% csrf_token %}
+    {{ name_field }}
     <button {% if not show_next %} disabled {% endif %}>Next</button>
 </form>
 
