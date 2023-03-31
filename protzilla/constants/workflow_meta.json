@@ -639,6 +639,17 @@
         "name": "T_Test",
         "description": "Statistical test assuming a t_distribution:",
         "parameters": {}
+      },
+      "test_named": {
+        "name": "this should have a named input",
+        "description": "",
+        "parameters": {
+          "my_named_param": {
+            "name": "this should be a named param:",
+            "type": "named",
+            "default": null
+          }
+        }
       }
     }
   },

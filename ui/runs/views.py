@@ -36,6 +36,9 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
+    elif param_dict["type"] == "named":
+        param_dict["categories"] = ["name1", "name2"]
+        template = "runs/field_select.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
