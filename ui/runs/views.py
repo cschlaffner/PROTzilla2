@@ -194,10 +194,7 @@ def continue_(request):
 
 def next_(request, run_name):
     run = active_runs[run_name]
-    if name := request.POST["name"]:
-        run.next_step(name)
-    else:
-        run.next_step()
+    run.next_step(request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

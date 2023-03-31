@@ -81,11 +81,15 @@ class History:
             section, step, method, parameters, df, df_path, outputs, plots
         )
         self.steps.append(executed_step)
-        self.step_names.append(name)
+        self.step_names.append(None)
+        self.name_step(-1, name)  # to have checkst only in name_step
         self.save()
 
     def name_step(self, index, name):
+        if not name:
+            return
         assert self.step_names[index] is None
+        assert name not in self.step_names
         self.step_names[index] = name
         self.save()
 
