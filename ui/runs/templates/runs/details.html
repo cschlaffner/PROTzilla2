@@ -50,53 +50,67 @@
 <br>
 <b>history</b>
 <br>
-{% for step in displayed_history %}
-    {{ step.name }}<br>
-    {% for field in step.fields %}
-        {{ field }}<br>
-    {% endfor %}
-    {% for plot in step.plots %}
-        <div style="width:600;height:500">
-            {{ plot|safe }}
+<div id="displayed_history">
+    {% for step in displayed_history %}
+        <div id="{{ step.name }}">
+            {{ step.name }}<br>
+            {% for field in step.fields %}
+                {{ field }}<br>
+            {% endfor %}
+            {% if step.plots %}
+                <div id="plots">
+                    {% for plot in step.plots %}
+                        <div style="width:600;height:500">
+                            {{ plot|safe }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+        <br>
     {% endfor %}
+</div>
 
+<div id="current_step">
     <br>
-{% endfor %}
+    {{ location }}
+    <br>
+    <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ method_dropdown }}
+        <div id="method_parameters">
+            {% include "runs/fields.html" with fields=fields %}
+        </div>
+        <input type="submit" id="calculate_parameters_submit" value="Calculate">
+    </form>
+    <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="plot_parameters">
+            {% include "runs/fields.html" with fields=plot_fields %}
+        </div>
+        <input type="submit" id="plot_parameters_submit" value="Plot" {% if not show_next %} disabled {% endif %} >
+    </form>
 
-<br>
-{{ location }}
-<br>
-<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ method_dropdown }}
-    <div id="method_parameters">
-        {% include "runs/fields.html" with fields=fields %}
-    </div>
-    <input type="submit" value="Calculate">
-</form>
-<form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div id="plot_parameters">
-        {% include "runs/fields.html" with fields=plot_fields %}
-    </div>
-    <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
-</form>
+    {% if current_plots %}
+        <div id="plots">
+            {% for plot in current_plots %}
+                <div style="width:600;height:500">
+                    {{ plot|safe }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+<div id="nav_buttons">
+    <form action="{% url 'runs:next' run_name %}" method="post">
+        {% csrf_token %}
+        <button {% if not show_next %} disabled {% endif %}>Next</button>
+    </form>
 
-{% for plot in current_plots %}
-    <div style="width:600;height:500">
-        {{ plot|safe }}
-    </div>
-{% endfor %}
-
-<form action="{% url 'runs:next' run_name %}" method="post">
-    {% csrf_token %}
-    <button {% if not show_next %} disabled {% endif %}>Next</button>
-</form>
-
-<form action="{% url 'runs:back' run_name %}" method="post">
-    {% csrf_token %}
-    <button {% if not show_back %} disabled {% endif %}>Back</button>
-</form>
+    <form action="{% url 'runs:back' run_name %}" method="post">
+        {% csrf_token %}
+        <button {% if not show_back %} disabled {% endif %}>Back</button>
+    </form>
+</div>
 </body>
 </html>
