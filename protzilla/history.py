@@ -93,6 +93,9 @@ class History:
         self.step_names[index] = name
         self.save()
 
+    def named_steps_outputs(self):
+        return [name for name in self.step_names if name is not None]
+
     def pop_step(self):
         self.step_names.pop()
         step = self.steps.pop()

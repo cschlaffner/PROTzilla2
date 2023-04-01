@@ -30,6 +30,11 @@
           "name": "differential_expression",
           "method": "test_named",
           "parameters": {}
+        },
+        {
+          "name": "differential_expression",
+          "method": "test_named",
+          "parameters": {}
         }
       ]
     },
