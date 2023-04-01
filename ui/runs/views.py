@@ -35,7 +35,7 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "named":
-        template = "runs/field_select.html"
+        template = "runs/field_named.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -61,7 +61,9 @@ def get_current_fields(run, section, step, method):
             )
         # move into make_parameter_input?
         if param_dict["type"] == "named":
-            param_dict["categories"] = run.history.named_steps_outputs()
+            param_dict["steps"] = run.history.named_steps_outputs()
+            # choose default
+            param_dict["outputs"] = ["hi"]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
