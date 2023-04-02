@@ -63,7 +63,7 @@ class History:
         step: str,
         method: str,
         parameters: dict,
-        dataframe: pd.DataFrame,
+        dataframe: pd.DataFrame | None,
         outputs: dict,
         plots: list,
         name: str | None = None,
@@ -71,7 +71,7 @@ class History:
         assert "dataframe" not in outputs
         df_path = None
         df = None
-        if "disk" in self.df_mode:
+        if "disk" in self.df_mode and dataframe is not None:
             index = len(self.steps)
             df_path = self.df_path(index)
             df_path.parent.mkdir(parents=True, exist_ok=True)

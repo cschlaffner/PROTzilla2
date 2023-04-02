@@ -105,8 +105,8 @@ def test_dataframe_in_json():
 def test_history_step_naming():
     name = "test_history_step_naming" + random_string()
     history = History(name, df_mode="disk")
-    history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [], name="one")
-    history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [])
+    history.add_step("a", "b", "c", {}, pd.DataFrame(), {"hello": 1}, [], name="one")
+    history.add_step("a", "b", "c", {}, None, {"other": 9}, [])
     assert history.step_names[1] is None
     history.name_step(1, "")
     assert history.step_names[1] is None
@@ -123,4 +123,7 @@ def test_history_step_naming():
     assert history2.step_names[1] == "two"
     with pytest.raises(Exception):
         history2.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [], name="one")
+    assert history2.output_keys_of_named_step("one") == ["dataframe", "hello"]
+    assert history2.output_keys_of_named_step("two") == ["other"]
+    assert history2.output_of_named_step("one", "hello") == 1
     rmtree(RUNS_PATH / name)
