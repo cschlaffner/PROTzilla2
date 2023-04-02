@@ -62,7 +62,7 @@ def get_current_fields(run, section, step, method):
         # move into make_parameter_input?
         if param_dict["type"] == "named":
             param_dict["steps"] = [name for name in run.history.step_names if name]
-            selected = param_dict["steps"][0] if param_dict["steps"] else None
+            selected = param_dict["steps"][-1] if param_dict["steps"] else None
             param_dict["outputs"] = run.history.outputs_of_named_step(selected)
             param_dict["default"] = [
                 selected,
@@ -215,7 +215,17 @@ def back(request, run_name):
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    parameters = parameters_from_post(request.POST)
+    d = dict(request.POST)
+    named_parameters = {}
+    for key, value in d.items():
+        param_dict = run.workflow_meta[section][step][method]["parameters"].get(key)
+        if param_dict and param_dict.get("type") == "named":
+            named_parameters[key] = value
+    print(named_parameters)
+
+    parameters = parameters_from_post(
+        {k: v for k, v in d.items() if k not in named_parameters}
+    )
     del parameters["chosen_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded

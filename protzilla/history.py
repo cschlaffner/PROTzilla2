@@ -98,7 +98,6 @@ class History:
         if not name:
             return []
         for saved_name, step in zip(self.step_names, self.steps):
-            print(saved_name, step.outputs)
             if saved_name == name:
                 options = list(step.outputs.keys())
                 if step.has_dataframe:
