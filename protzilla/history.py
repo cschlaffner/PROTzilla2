@@ -68,6 +68,7 @@ class History:
         plots: list,
         name: str | None = None,
     ):
+        assert "dataframe" not in outputs
         df_path = None
         df = None
         if "disk" in self.df_mode:
@@ -93,8 +94,17 @@ class History:
         self.step_names[index] = name
         self.save()
 
-    def named_steps_outputs(self):
-        return [name for name in self.step_names if name is not None]
+    def outputs_of_named_step(self, name):
+        if not name:
+            return []
+        for saved_name, step in zip(self.step_names, self.steps):
+            print(saved_name, step.outputs)
+            if saved_name == name:
+                options = list(step.outputs.keys())
+                if step.has_dataframe:
+                    options.insert(0, "dataframe")
+                return options
+        raise ValueError(f"no step named '{name}'")
 
     def pop_step(self):
         self.step_names.pop()
@@ -141,6 +151,10 @@ class ExecutedStep:
     dataframe_path: Path | None
     outputs: dict
     plots: list
+
+    @property
+    def has_dataframe(self) -> bool:
+        return self._dataframe is not None or self.dataframe_path is not None
 
     @property
     def dataframe(self) -> pd.DataFrame | None:
