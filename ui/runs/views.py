@@ -63,7 +63,7 @@ def get_current_fields(run, section, step, method):
         if param_dict["type"] == "named":
             param_dict["steps"] = [name for name in run.history.step_names if name]
             selected = param_dict["steps"][-1] if param_dict["steps"] else None
-            param_dict["outputs"] = run.history.outputs_of_named_step(selected)
+            param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
             param_dict["default"] = [
                 selected,
                 param_dict["outputs"][0] if param_dict["outputs"] else None,
@@ -220,8 +220,7 @@ def calculate(request, run_name):
     for key, value in d.items():
         param_dict = run.workflow_meta[section][step][method]["parameters"].get(key)
         if param_dict and param_dict.get("type") == "named":
-            named_parameters[key] = value
-    print(named_parameters)
+            named_parameters[key] = run.history.output_of_named_step(*value)
 
     parameters = parameters_from_post(
         {k: v for k, v in d.items() if k not in named_parameters}

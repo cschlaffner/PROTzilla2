@@ -94,7 +94,7 @@ class History:
         self.step_names[index] = name
         self.save()
 
-    def outputs_of_named_step(self, name):
+    def output_keys_of_named_step(self, name):
         if not name:
             return []
         for saved_name, step in zip(self.step_names, self.steps):
@@ -103,6 +103,14 @@ class History:
                 if step.has_dataframe:
                     options.insert(0, "dataframe")
                 return options
+        raise ValueError(f"no step named '{name}'")
+
+    def output_of_named_step(self, name, output):
+        for saved_name, step in zip(self.step_names, self.steps):
+            if saved_name == name:
+                if output == "dataframe":
+                    return step.dataframe
+                return step.outputs[output]
         raise ValueError(f"no step named '{name}'")
 
     def pop_step(self):
