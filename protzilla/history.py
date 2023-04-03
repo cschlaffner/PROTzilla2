@@ -39,12 +39,10 @@ class History:
                     step["step"],
                     step["method"],
                     step["parameters"],
-                    step["input_data_location"],
-                    df,
-                    df_path if df_path.exists() else None,
-                    step["outputs"],
-                    [],
-                    step["step_name"],
+                    _dataframe=df,
+                    dataframe_path=df_path if df_path.exists() else None,
+                    outputs=step["outputs"],
+                    plots=[],
                 )
             )
         return instance
@@ -63,11 +61,9 @@ class History:
         step: str,
         method: str,
         parameters: dict,
-        input_data_location: dict,
         dataframe: pd.DataFrame,
         outputs: dict,
         plots: list,
-        step_name: str,
     ):
         df_path = None
         df = None
@@ -83,20 +79,20 @@ class History:
             step,
             method,
             parameters,
-            input_data_location,
             df,
             df_path,
             outputs,
             plots,
-            step_name,
         )
         self.steps.append(executed_step)
         self.save()
 
-    def remove_step(self):
+    def pop_step(self):
         step = self.steps.pop()
-        if "disk" in self.df_mode:
+        df = step.dataframe
+        if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
+        return step, df
 
     def save(self):
         # this assumes that parameters and outpus are json serializable
@@ -106,10 +102,8 @@ class History:
                 section=step.section,
                 step=step.step,
                 method=step.method,
-                input_data_location=step.input_data_location,
                 parameters=step.parameters,
                 outputs=step.outputs,
-                step_name=step.step_name,
             )
             for step in self.steps
         ]
@@ -119,6 +113,9 @@ class History:
 
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
+
+    def number_of_steps_in_section(self, section):
+        return len(list(filter(lambda step: step.section == section, self.steps)))
 
 
 @dataclass(frozen=True)
@@ -132,12 +129,10 @@ class ExecutedStep:
     step: str
     method: str
     parameters: dict
-    input_data_location: dict
     _dataframe: pd.DataFrame | None
     dataframe_path: Path | None
     outputs: dict
     plots: list
-    step_name: str
 
     @property
     def dataframe(self) -> pd.DataFrame | None:
@@ -150,12 +145,6 @@ class ExecutedStep:
         if self.dataframe_path is not None:
             return pd.read_csv(self.dataframe_path)
         return None
-
-    def output_mapping(self, key) -> pd.DataFrame | list | None:
-        if key == "dataframe":
-            return self.dataframe
-        else:
-            return self.outputs[key]
 
 
 class CustomJSONEncoder(json.JSONEncoder):

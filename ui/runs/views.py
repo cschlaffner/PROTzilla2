@@ -1,14 +1,15 @@
 import sys
 
-from django.http import HttpResponseRedirect
+from django.contrib import messages
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla import workflow_helper
 from protzilla.run import Run
-from protzilla.utilities.dynamic_parameters_provider import input_data_name
 from protzilla.workflow_manager import WorkflowManager
 
 workflow_manager = WorkflowManager()
@@ -61,96 +62,138 @@ def make_add_step_dropdown(run, section):
             name="add step:\n",
             type="categorical",
             categories=steps,
-            key="add steps",
+            key="step_to_be_added",
         ),
     )
 
 
-def make_name_input(key, default, disabled):
-    template = "runs/field_name.html"
-    return render_to_string(
-        template,
-        context=dict(key=key, default=default, disabled=disabled),
-    )
+def get_current_fields(run, section, step, method):
+    parameters = run.workflow_meta[section][step][method]["parameters"]
+    current_fields = []
+
+    for key, param_dict in parameters.items():
+        # todo use workflow default
+        # todo 59 - restructure current_parameters
+        if run.current_parameters is not None:
+            param_dict["default"] = run.current_parameters.get(
+                key, param_dict["default"]
+            )
+
+        if "fill_from_metadata" in param_dict:
+            if param_dict["fill_from_metadata"] == "columns":
+                param_dict["categories"] = run.metadata.columns
+        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    return current_fields
 
 
-def make_input_data_dropdown(key, run, disabled):
-    categories = input_data_name(run)
-    template = "runs/field_select.html"
-    return render_to_string(
-        template,
-        context=dict(
-            key=key, categories=categories, name="Select input data", disabled=disabled
-        ),
-    )
+def make_plot_fields(run, section, step, method):
+    plots = run.workflow_meta[section][step][method].get("graphs", [])
+    plot_fields = []
+    for plot in plots:
+        for key, param_dict in plot.items():
+            if run.current_plot_parameters is not None:
+                param_dict["default"] = run.current_plot_parameters[key]
+            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+    return plot_fields
 
 
 def detail(request, run_name):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
-
-    parameters = run.workflow_meta[section][step][method]["parameters"]
-    current_fields = []
-    current_fields.append(
-        make_name_input(
-            "step_name",
-            run.workflow_meta[section][step][method]["name"],
+    section, step, method = run.current_run_location()
+    current_fields = get_current_fields(run, section, step, method)
+    method_dropdown = render_to_string(
+        "runs/field_select.html",
+        context=dict(
             disabled=False,
-        )
+            key="chosen_method",
+            name=f"{step.replace('_', ' ').title()} Method:",
+            default=method,
+            categories=run.workflow_meta[section][step].keys(),
+        ),
     )
-    if section == "data_analysis":
-        current_fields.append(
-            make_input_data_dropdown("input_data_name", run, disabled=False)
-        )
-    for key, param_dict in parameters.items():
-        # todo use workflow default
-        if run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
-
-        if "fill_from_metadata" in param_dict:
-            if param_dict["fill_from_metadata"] == "columns":
-                param_dict["categories"] = run.metadata.columns
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
-
+    plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
-    for step in run.history.steps:
+    for history_step in run.history.steps:
         fields = []
-        if step.section == "importing":
-            name = f"{step.section}/{step.step}/{step.method}: {step.parameters['file_path'].split('/')[-1]}"
+        parameters = run.workflow_meta[history_step.section][history_step.step][
+            history_step.method
+        ]["parameters"]
+        if history_step.section == "importing":
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file_path'].split('/')[-1]}"
             df_head = (
-                step.dataframe.head()
-                if step.step == "ms_data_import"
+                history_step.dataframe.head()
+                if history_step.step == "ms_data_import"
                 else run.metadata.head()
             )
             fields = [df_head.to_string()]
         else:
-            parameters = run.workflow_meta[step.section][step.step][step.method][
-                "parameters"
-            ]
-            fields.append(make_name_input("step_name", step.step_name, disabled=True))
-            if step.section == "data_analysis":
-                fields.append(
-                    make_input_data_dropdown("input_data_name", run, disabled=True)
-                )
             for key, param_dict in parameters.items():
-                param_dict["default"] = step.parameters[key]
+                param_dict["default"] = history_step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
-            name = f"{step.section}/{step.step}/{step.method}"
-        displayed_history.append(dict(name=name, fields=fields))
+            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
+        displayed_history.append(
+            dict(
+                name=name,
+                fields=fields,
+                plots=[p.to_html() for p in history_step.plots],
+            )
+        )
+
+    workflow_steps = workflow_helper.get_all_steps(run.workflow_config)
+    highlighted_workflow_steps = [
+        {"name": step, "highlighted": False} for step in workflow_steps
+    ]
+    highlighted_workflow_steps[run.step_index]["highlighted"] = True
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=str(run.current_workflow_location()),
+            location=f"{run.section}/{run.step}",
             displayed_history=displayed_history,
+            method_dropdown=method_dropdown,
             fields=current_fields,
+            plot_fields=plot_fields,
+            current_plots=[plot.to_html() for plot in run.plots],
+            # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
-            show_back=bool(len(run.history.steps) > 1),
+            show_back=bool(run.history.steps),
+            show_plot_button=run.result_df is not None,
             sidebar_dropdown=make_add_step_dropdown(run, section),
+            workflow_steps=highlighted_workflow_steps,
         ),
+    )
+
+
+def change_method(request, run_name):
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError as e:
+        print(str(e))
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+    run.method = request.POST["method"]
+    run.current_parameters = None
+    run.current_plot_parameters = None
+    current_fields = get_current_fields(run, run.section, run.step, run.method)
+    plot_fields = make_plot_fields(run, run.section, run.step, run.method)
+    return JsonResponse(
+        dict(
+            parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=current_fields),
+            ),
+            plot_parameters=render_to_string(
+                "runs/fields.html",
+                context=dict(fields=plot_fields),
+            ),
+        ),
+        safe=False,
     )
 
 
@@ -188,7 +231,7 @@ def add(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    step = post["add steps"][0]
+    step = post["step_to_be_added"][0]
 
     if step == "":
         return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -199,30 +242,47 @@ def add(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
-    post = dict(request.POST)
-    del post["csrfmiddlewaretoken"]
-
-    if section == "importing" or section == "data_preprocessing":
-        run.prepare_calculation(post["step_name"][0])
-    elif section == "data_analysis":
-        run.prepare_calculation(post["step_name"][0], post["input_data_name"][0])
-        del post["input_data_name"]
-    del post["step_name"]
-
-    parameters = {}
-    for k, v in post.items():
-        # assumption: only one value for parameter
-        param_dict = run.workflow_meta[section][step][method]["parameters"][k]
-        if param_dict["type"] == "numeric" and param_dict["step"] == 1:
-            parameters[k] = int(v[0])
-        elif param_dict["type"] == "numeric":
-            parameters[k] = float(v[0])
-        else:
-            parameters[k] = v[0]
+    section, step, method = run.current_run_location()
+    parameters = parameters_from_post(request.POST)
+    del parameters["chosen_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
     run.perform_calculation_from_location(section, step, method, parameters)
 
+    result = run.current_out
+    if "messages" in result:
+        for message in result["messages"]:
+            trace = f"<br> Trace: {message['trace']}" if "trace" in message else ""
+            messages.add_message(
+                request, message["level"], f"{message['msg']}{trace}", message["level"]
+            )
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def plot(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_workflow_location()
+    parameters = parameters_from_post(request.POST)
+    run.create_plot_from_location(section, step, method, parameters)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def parameters_from_post(post):
+    d = dict(post)
+    del d["csrfmiddlewaretoken"]
+    parameters = {}
+    for k, v in d.items():
+        if len(v) > 1:
+            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
+        parameters[k] = convert_str_if_possible(v[0])
+    return parameters
+
+
+def convert_str_if_possible(s):
+    try:
+        f = float(s)
+    except ValueError:
+        return s
+    return int(f) if int(f) == f else f

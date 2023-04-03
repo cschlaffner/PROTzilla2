@@ -60,7 +60,7 @@ method_map = {
         "data_preprocessing",
         "outlier_detection",
         "local_outlier_factor",
-    ): outlier_detection.with_local_outlier_factor,
+    ): outlier_detection.by_local_outlier_factor,
     (
         "data_preprocessing",
         "transformation",
@@ -137,6 +137,16 @@ plot_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    ): filter_samples.by_protein_intensity_sum_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_count_filter",
+    ): filter_samples.by_protein_count_plot,
     (
         "data_preprocessing",
         "normalisation",

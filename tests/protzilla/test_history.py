@@ -15,10 +15,8 @@ def sample_step_params():
         step="step1",
         method="method1",
         parameters={"param1": 3},
-        input_data_location={"step_index": 0, "key": "dataframe"},
         outputs={},
         plots=[],
-        step_name="Step 1",
     )
 
 
@@ -35,11 +33,9 @@ def test_history_memory_identity(sample_step_params):
         "step2",
         "method2",
         {"param1": 5},
-        None,
         df2,
         outputs={},
         plots=[],
-        step_name="Step 2",
     )
     assert history.steps[0].dataframe is df1
     assert history.steps[0].dataframe is not df2
@@ -68,7 +64,7 @@ def test_history_disk_delete(sample_step_params):
     history.add_step(**sample_step_params, dataframe=df1)
 
     assert history.df_path(0).exists()
-    history.remove_step()
+    history.pop_step()
     assert not history.df_path(0).exists()
     rmtree(RUNS_PATH / name)
 
@@ -85,11 +81,9 @@ def test_history_save(sample_step_params):
         "step2",
         "method2",
         {"param3": 3, "other": "no"},
-        None,
         df2,
         outputs={"out": 5},
         plots=[],
-        step_name="Step 1",
     )
     history.save()
     steps = history.steps
@@ -112,14 +106,33 @@ def test_dataframe_in_json(sample_step_params):
         "step1",
         "method1",
         {"param1": 3},
-        None,
         df1,
         outputs={"another_df": df2},
         plots=[],
-        step_name="Step 1",
     )
     assert (RUNS_PATH / name / "history.json").exists()
     del history
     history2 = History.from_disk(name, df_mode="disk")
     assert df2.equals((history2.steps[0].outputs["another_df"]))
     rmtree(RUNS_PATH / name)
+
+
+def test_number_of_steps_in_section(sample_step_params):
+    name = "test_history_df" + random_string()
+    history = History(name, df_mode="disk")
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+    history.add_step(
+        "section2",
+        "step2",
+        "method2",
+        {"param3": 3, "other": "no"},
+        pd.DataFrame(),
+        outputs={"out": 5},
+        plots=[],
+    )
+    history.add_step(**sample_step_params, dataframe=pd.DataFrame())
+
+    assert history.number_of_steps_in_section("section2") == 1
+    assert history.number_of_steps_in_section("section1") == 4

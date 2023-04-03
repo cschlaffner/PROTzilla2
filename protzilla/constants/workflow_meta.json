@@ -17,7 +17,8 @@
           },
           "file_path": {
             "name": "MaxQuant intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       },
@@ -37,7 +38,8 @@
           },
           "file_path": {
             "name": "MSFragger intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -58,7 +60,8 @@
           },
           "file_path": {
             "name": "Metadata file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -416,7 +419,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -464,7 +467,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -512,7 +515,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -534,7 +537,7 @@
             "categories": [
               "mean",
               "median",
-              "most frequent"
+              "most_frequent"
             ],
             "default": "median"
           }
@@ -562,7 +565,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -610,7 +613,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [

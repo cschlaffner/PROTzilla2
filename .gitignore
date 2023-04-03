@@ -1,6 +1,9 @@
 .DS_Store
 .idea/
 user_data/runs/*
+ui/static/admin/*
+.vscode/*
+.flake8
 
 # --- below: github python .gitignore template ---
 
@@ -133,3 +136,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# vscode settings
+.vscode/
