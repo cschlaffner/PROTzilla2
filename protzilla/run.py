@@ -119,7 +119,6 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
-
     def perform_calculation_from_location(self, section, step, method, parameters):
         method_callable = method_map[(section, step, method)]
         self.perform_calculation(method_callable, parameters)

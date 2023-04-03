@@ -67,8 +67,6 @@ def make_add_step_dropdown(run, section):
     )
 
 
-
-
 def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
@@ -224,6 +222,7 @@ def back(request, run_name):
     run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
+
 def add(request, run_name):
     run = active_runs[run_name]
 
@@ -236,7 +235,6 @@ def add(request, run_name):
 
     run.insert_as_next_step(step)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
-
 
 
 def calculate(request, run_name):

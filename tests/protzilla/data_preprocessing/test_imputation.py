@@ -1,20 +1,17 @@
 import pytest
 
-from protzilla.data_preprocessing.imputation import (
-    by_knn,
-    by_knn_plot,
-    by_min_per_dataset,
-    by_min_per_dataset_plot,
-    by_min_per_protein,
-    by_min_per_protein_plot,
-    by_min_per_sample,
-    by_min_per_sample_plot,
-    by_simple_imputer,
-    by_simple_imputer_plot,
-    np,
-    number_of_imputed_values,
-    pd,
-)
+from protzilla.data_preprocessing.imputation import (by_knn, by_knn_plot,
+                                                     by_min_per_dataset,
+                                                     by_min_per_dataset_plot,
+                                                     by_min_per_protein,
+                                                     by_min_per_protein_plot,
+                                                     by_min_per_sample,
+                                                     by_min_per_sample_plot,
+                                                     by_simple_imputer,
+                                                     by_simple_imputer_plot,
+                                                     np,
+                                                     number_of_imputed_values,
+                                                     pd)
 from tests.protzilla.data_preprocessing import test_plots
 
 

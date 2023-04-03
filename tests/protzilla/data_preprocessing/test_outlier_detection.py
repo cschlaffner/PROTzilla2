@@ -3,14 +3,8 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.outlier_detection import (
-    by_isolation_forest,
-    by_isolation_forest_plot,
-    by_local_outlier_factor,
-    by_local_outlier_factor_plot,
-    by_pca,
-    by_pca_plot,
-    by_local_outlier_factor,
-)
+    by_isolation_forest, by_isolation_forest_plot, by_local_outlier_factor,
+    by_local_outlier_factor_plot, by_pca, by_pca_plot)
 
 # TODO #21: implement actual tests for outlier detection
 

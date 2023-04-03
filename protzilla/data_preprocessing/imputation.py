@@ -3,12 +3,10 @@ import pandas as pd
 from plotly.graph_objs import Figure
 from sklearn.impute import KNNImputer, SimpleImputer
 
-from protzilla.data_preprocessing.plots import (
-    create_bar_plot,
-    create_box_plots,
-    create_histograms,
-    create_pie_plot,
-)
+from protzilla.data_preprocessing.plots import (create_bar_plot,
+                                                create_box_plots,
+                                                create_histograms,
+                                                create_pie_plot)
 from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 

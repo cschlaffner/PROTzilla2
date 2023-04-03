@@ -37,7 +37,7 @@ def test_run_back():
     run = Run.create(name)
     run.calculate_and_next(
         ms_data_import.max_quant_import,
-            # call with str to make json serializable
+        # call with str to make json serializable
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
