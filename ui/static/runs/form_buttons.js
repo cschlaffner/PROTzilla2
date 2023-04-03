@@ -1,7 +1,6 @@
 // script to deactivate plot button if calc_params change so a new plot cannot be generated with old data
 let isFirstFormSubmitted = false;
 let calc_params = null;
-let disabled_calc = false
 
 get_clean_form_data = function (form) {
     let params = new FormData(form);
@@ -10,13 +9,14 @@ get_clean_form_data = function (form) {
 }
 
 disable_calc = function (bool) {
-    disabled_calc = bool
+    sessionStorage.setItem("disabled_calc", bool)
     $('#calculate_parameters_submit').prop('disabled', bool);
 }
 
 $(document).ready(function () {
     const calc_form = document.querySelector('#calc_form');
     calc_params = get_clean_form_data(calc_form)
+    disable_calc(sessionStorage.getItem("disabled_calc"))
 
     calc_form.addEventListener('submit', function () {
         isFirstFormSubmitted = true;
