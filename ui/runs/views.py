@@ -215,16 +215,7 @@ def back(request, run_name):
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    d = dict(request.POST)
-    named_parameters = {}
-    for key, value in d.items():
-        param_dict = run.workflow_meta[section][step][method]["parameters"].get(key)
-        if param_dict and param_dict.get("type") == "named":
-            named_parameters[key] = run.history.output_of_named_step(*value)
-
-    parameters = parameters_from_post(
-        {k: v for k, v in d.items() if k not in named_parameters}
-    )
+    parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
@@ -255,9 +246,10 @@ def parameters_from_post(post):
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        if len(v) > 1:
-            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
-        parameters[k] = convert_str_if_possible(v[0])
+        if len(v) > 1:  # only used for named parameters
+            parameters[k] = tuple(v)
+        else:
+            parameters[k] = convert_str_if_possible(v[0])
     return parameters
 
 

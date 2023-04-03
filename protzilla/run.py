@@ -83,7 +83,16 @@ class Run:
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
-        self.result_df, self.current_out = method_callable(self.df, **parameters)
+        call_parameters = {}
+        for k, v in parameters.items():
+            param_dict = self.workflow_meta[self.section][self.step][self.method][
+                "parameters"
+            ].get(k)
+            if param_dict and param_dict.get("type") == "named":
+                call_parameters[k] = self.history.output_of_named_step(*v)
+            else:
+                call_parameters[k] = v
+        self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.current_parameters = parameters
         # error handling for CLI
         if "messages" in self.current_out:
