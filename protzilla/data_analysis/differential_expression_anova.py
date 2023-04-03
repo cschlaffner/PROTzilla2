@@ -1,14 +1,15 @@
-import pandas as pd
-import numpy as np
-from statsmodels.stats.multitest import multipletests
-from scipy import stats
 import dash_bio as dashbio
+import numpy as np
+import pandas as pd
+import plotly.express as px
+from plotly.graph_objects import Figure
+from scipy import stats
+from statsmodels.stats.multitest import multipletests
+
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.data_analysis.differential_expression_helper import (
     apply_multiple_testing_correction,
 )
-import plotly.express as px
-from plotly.graph_objects import Figure
 from protzilla.utilities.clustergram import Clustergram
 
 
