@@ -11,7 +11,6 @@ get_clean_form_data = function (form) {
 
 $(document).ready(function () {
     const calc_form = document.querySelector('#calc_form');
-
     calc_params = get_clean_form_data(calc_form)
 
     calc_form.addEventListener('submit', function () {
@@ -27,8 +26,7 @@ $(document).ready(function () {
 
     calc_form.addEventListener('change', function () {
         console.error("change")
-        let current_params = new FormData(calc_form);
-        current_params.delete("csrfmiddlewaretoken")
+        let current_params = get_clean_form_data(calc_form)
 
         let plot_submit = $('#plot_parameters_submit');
         let calc_submit = $('#calculate_parameters_submit')
