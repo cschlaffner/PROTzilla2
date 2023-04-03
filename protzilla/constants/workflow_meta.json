@@ -648,6 +648,11 @@
             "name": "this should be a named param:",
             "type": "named",
             "default": null
+          },
+          "second_named": {
+            "name": "another one:",
+            "type": "named",
+            "default": null
           }
         }
       }

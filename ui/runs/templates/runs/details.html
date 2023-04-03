@@ -29,7 +29,31 @@
                     console.log('Error:', e);
                     alert(e.responseJSON.error); // alert error message to user
                 })
-            })
+            });
+            $(".named").change(function () {
+                const id = $(this).attr("id");
+                const step_name = $(this).val();
+                console.log(id, step_name)
+                $.ajax({
+                    url: "{% url 'runs:outputs_of_step' run_name %}",
+                    type: "POST",
+                    data: {
+                        step_name: step_name,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        console.log(response)
+                        const outputs = $(`#${id}_outputs`);
+                        outputs.empty();
+                        $.each(response, function (index, value) {
+                            outputs.append($("<option></option>").attr("value", value).text(value))
+                        })
+                    }
+                }).fail(function (e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
+            });
         });
     </script>
     <title>PROTzilla</title>

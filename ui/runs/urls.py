@@ -12,5 +12,8 @@ urlpatterns = [
     path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/next", views.next_, name="next"),
     path("<str:run_name>/back", views.back, name="back"),
-    path("<str:run_name>/change_method/", views.change_method, name="change_method"),
+    path("<str:run_name>/change_method", views.change_method, name="change_method"),
+    path(
+        "<str:run_name>/outputs_of_step", views.outputs_of_step, name="outputs_of_step"
+    ),
 ]

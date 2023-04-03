@@ -267,3 +267,9 @@ def convert_str_if_possible(s):
     except ValueError:
         return s
     return int(f) if int(f) == f else f
+
+
+def outputs_of_step(request, run_name):
+    run = active_runs[run_name]
+    step_name = request.POST["step_name"]
+    return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
