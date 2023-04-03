@@ -3,17 +3,23 @@ let isFirstFormSubmitted = false;
 let calc_params = null;
 let disabled_calc = false
 
+get_clean_form_data = function (form) {
+    let params = new FormData(form);
+    params.delete("csrfmiddlewaretoken")
+    return params
+}
+
 $(document).ready(function () {
     const calc_form = document.querySelector('#calc_form');
 
-    calc_params = new FormData(calc_form);
-    calc_params.delete("csrfmiddlewaretoken")
+    calc_params = get_clean_form_data(calc_form)
 
     calc_form.addEventListener('submit', function () {
         isFirstFormSubmitted = true;
-        calc_params = new FormData(calc_form);
-        calc_params.delete("csrfmiddlewaretoken")
+        calc_params = get_clean_form_data(calc_form)
+
         $('#plot_parameters_submit').prop('disabled', false);
+
         disabled_calc = true
         $('#calculate_parameters_submit').prop('disabled', disabled_calc);
         alert("enable plot, disable calc")
