@@ -39,7 +39,6 @@ class History:
                     step["step"],
                     step["method"],
                     step["parameters"],
-                    step["input_data_location"],
                     _dataframe=df,
                     dataframe_path=df_path if df_path.exists() else None,
                     outputs=step["outputs"],
@@ -63,7 +62,6 @@ class History:
         step: str,
         method: str,
         parameters: dict,
-        input_data_location: dict,
         dataframe: pd.DataFrame,
         outputs: dict,
         plots: list,
@@ -83,7 +81,6 @@ class History:
             step,
             method,
             parameters,
-            input_data_location,
             df,
             df_path,
             outputs,
@@ -108,7 +105,6 @@ class History:
                 section=step.section,
                 step=step.step,
                 method=step.method,
-                input_data_location=step.input_data_location,
                 parameters=step.parameters,
                 outputs=step.outputs,
                 step_name=step.step_name,
@@ -137,7 +133,6 @@ class ExecutedStep:
     step: str
     method: str
     parameters: dict
-    input_data_location: dict
     _dataframe: pd.DataFrame | None
     dataframe_path: Path | None
     outputs: dict

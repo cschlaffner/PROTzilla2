@@ -7,7 +7,6 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .utilities.dynamic_parameters_provider import input_data_name_to_location
 from .workflow_helper import get_all_default_params_for_methods
 
 
@@ -17,7 +16,6 @@ class Run:
     :ivar run_path: the path to this runs' dir
     :ivar workflow_config
     :ivar run_name
-    :ivar input_data_location
     :ivar history
     :ivar step_index
     :ivar workflow_meta
@@ -30,7 +28,6 @@ class Run:
     :ivar current_parameters
     :ivar plots
     :ivar step_name
-    :ivar input_data
     """
 
     @classmethod
@@ -84,16 +81,8 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
-        self.input_data_location = (
-            self.history.steps[-1].input_data_location if self.history.steps else None
-        )
-        self.input_data = (
-            self.history.steps[self.input_data_location["step_index"]].output_mapping(
-                self.input_data_location["key"]
-            )
-            if self.input_data_location
-            else None
-        )
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.step_index = len(self.history.steps)
         self.run_path = run_path
 
         workflow_local_path = f"{self.run_path}/workflow.json"
@@ -130,24 +119,6 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
-    def prepare_calculation(self, step_name, input_data_name=None):
-        # data_analysis or data_integration
-        if input_data_name is not None:
-            self.input_data_location = input_data_name_to_location(self)[
-                input_data_name
-            ]
-            step_index = self.input_data_location["step_index"]
-            key = self.input_data_location["key"]
-
-            self.input_data = self.history.steps[step_index].output_mapping(key)
-        # importing or data_preprocessing
-        elif self.history.steps:
-            self.input_data_location = dict(
-                step_index=self.step_index - 1, key="dataframe"
-            )
-            self.input_data = self.history.steps[-1].dataframe
-
-        self.step_name = step_name
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         method_callable = method_map[(section, step, method)]
@@ -155,9 +126,7 @@ class Run:
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
-        self.result_df, self.current_out = method_callable(
-            self.input_data, **parameters
-        )
+        self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
         # error handling for CLI
         if "messages" in self.current_out:
@@ -177,7 +146,7 @@ class Run:
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
-            self.input_data, self.result_df, self.current_out, **parameters
+            self.df, self.result_df, self.current_out, **parameters
         )
         self.current_plot_parameters = parameters
 
@@ -211,14 +180,12 @@ class Run:
             self.step,
             self.method,
             self.current_parameters,
-            self.input_data_location,
             self.result_df,
             self.current_out,
             self.plots,
             self.step_name,
         )
-        self.input_data_location = None
-        self.input_data = None
+        self.df = self.result_df
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
@@ -231,27 +198,17 @@ class Run:
 
     def back_step(self):
         assert self.history.steps is not None
-        self.input_data_location = (
-            self.history.steps[-1].input_data_location if self.history.steps else None
-        )
-        self.input_data = (
-            self.history.steps[self.input_data_location["step_index"]].output_mapping(
-                self.input_data_location["key"]
-            )
-            if self.input_data_location
-            else None
-        )
         # popping from history.steps possible to get values again
         popped_step, result_df = self.history.pop_step()
         self.section = popped_step.section
         self.step = popped_step.step
         self.method = popped_step.method
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
         self.current_plot_parameters = None
         self.plots = popped_step.plots
-        self.input_data_location = popped_step.input_data_location
         self.step_index -= 1
 
     def current_workflow_location(self):

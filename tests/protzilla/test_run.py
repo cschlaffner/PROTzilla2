@@ -14,18 +14,15 @@ def test_run_create():
     # here the run should be used like in the CLI
     name = "test_run" + random_string()
     run = Run.create(name)
-    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
-    run.prepare_calculation("filter_proteins")
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    run.prepare_calculation("filter_samples")
     run.calculate_and_next(
         data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
     )
@@ -38,32 +35,22 @@ def test_run_create():
 def test_run_back():
     name = "test_run_back" + random_string()
     run = Run.create(name)
-
-    run.prepare_calculation("max_quant_import")
-    run.perform_calculation(
+    run.calculate_and_next(
         ms_data_import.max_quant_import,
-        parameters={
             # call with str to make json serializable
-            "file_path": str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-            "intensity_name": "Intensity",
-        },
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
     )
-    df1 = run.result_df
-    run.next_step()
-
-    run.prepare_calculation("filter_proteins")
-    assert run.input_data.equals(df1)
-    run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, parameters={"threshold": 1}
+    df1 = run.df
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    df2 = run.result_df
-    run.next_step()
-
+    df2 = run.df
     assert not df1.equals(df2)
     run.back_step()
-    assert run.input_data.equals(df1)
+    assert run.df.equals(df1)
     run.back_step()
-    assert run.input_data is None
+    assert run.df is None
     rmtree(RUNS_PATH / name)
 
 
@@ -77,25 +64,15 @@ def test_run_continue():
     run_name = "test_run_continue" + random_string()
     run = Run.create(run_name, df_mode="disk")
 
-    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
-
-    run.prepare_calculation("filter_proteins")
-    run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, parameters={"threshold": 1}
-    )
-    df = run.input_data
-    run.next_step()
-
+    df = run.df
     del run
-
-    # run will be continued from beginning of last step
     run2 = Run.continue_existing(run_name)
-    assert df.equals(run2.input_data)
+    assert df.equals(run2.df)
     rmtree(RUNS_PATH / run_name)
 
 
@@ -104,13 +81,11 @@ def test_current_run_location():
     run = Run.create(
         run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
     )
-    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    run.prepare_calculation("filter_proteins")
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
@@ -155,13 +130,11 @@ def test_set_current_run_location():
     run = Run.create(
         run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
     )
-    run.prepare_calculation("max_quant_import")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    run.prepare_calculation("filter_proteins")
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )

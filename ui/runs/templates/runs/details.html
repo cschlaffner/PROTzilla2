@@ -62,66 +62,64 @@
     <br>
 {% endif %}
 
-<header>
-    <h1>PROTzilla</h1>
-    <h2>{{ run_name }}</h2>
-</header>
-<div class="layout-container">
-    <main>
-        <h3>History</h3>
-        {% for step in displayed_history %}
-            <h4>{{ step.name }}</h4>
-            <ul>
-                {% for field in step.fields %}
-                    <li>{{ field }}</li>
-                {% endfor %}
-            {% for plot in step.plots %}
+{{ run_name }}
+<br>
+<b>history</b>
+<br>
+<main>
+    {% for step in displayed_history %}
+        {{ step.name }}<br>
+        {% for field in step.fields %}
+            {{ field }}<br>
+        {% endfor %}
+        {% for plot in step.plots %}
+            <div style="width:600;height:500">
+                {{ plot|safe }}
+            </div>
+        {% endfor %}
+
+        <br>
+    {% endfor %}
+
+    <br>
+    {{ location }}
+    <br>
+    <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ method_dropdown }}
+        <div id="method_parameters">
+            {% include "runs/fields.html" with fields=fields %}
+        </div>
+        <input type="submit" value="Calculate">
+    </form>
+    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="plot_parameters">
+            {% include "runs/fields.html" with fields=plot_fields %}
+        </div>
+        <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
+    </form>
+
+    {% for plot in current_plots %}
         <div style="width:600;height:500">
             {{ plot|safe }}
         </div>
     {% endfor %}
-            </ul>
-        {% endfor %}
-
-        <h3>Location</h3>
-        <p>{{ location }}</p>
-        <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ fields|first }}
-            <div id="method_parameters">
-                {% include "runs/fields.html" with fields=fields|slice:"1:" %}
-            </div>
-            <input type="submit" value="Calculate">
-        </form>
-    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div id="plot_parameters">
-        {% include "runs/fields.html" with fields=plot_fields %}
-    </div>
-    <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
-</form>
-
-{% for plot in current_plots %}
-    <div style="width:600;height:500">
-        {{ plot|safe }}
-    </div>
-{% endfor %}
-        {% if show_next %}
-            <form action="{% url 'runs:next' run_name %}" method="post">
-                {% csrf_token %}
-    <button {% if not show_next %} disabled {% endif %}>Next</button>
-            </form>
-        {% endif %}
-        {% if show_back %}
-            <form action="{% url 'runs:back' run_name %}" method="post">
-                {% csrf_token %}
-    <button {% if not show_back %} disabled {% endif %}>Back</button>
-            </form>
-        {% endif %}
+            {% if show_next %}
+                <form action="{% url 'runs:next' run_name %}" method="post">
+                    {% csrf_token %}
+        <button {% if not show_next %} disabled {% endif %}>Next</button>
+                </form>
+            {% endif %}
+            {% if show_back %}
+                <form action="{% url 'runs:back' run_name %}" method="post">
+                    {% csrf_token %}
+        <button {% if not show_back %} disabled {% endif %}>Back</button>
+                </form>
+            {% endif %}
     </main>
     <aside>
         {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
     </aside>
-</div>
 </body>
 </html>

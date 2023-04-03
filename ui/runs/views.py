@@ -10,7 +10,6 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
 from protzilla.run import Run
-from protzilla.utilities.dynamic_parameters_provider import input_data_name
 from protzilla.workflow_manager import WorkflowManager
 
 workflow_manager = WorkflowManager()
@@ -68,39 +67,12 @@ def make_add_step_dropdown(run, section):
     )
 
 
-def make_name_input(key, default, disabled):
-    template = "runs/field_name.html"
-    return render_to_string(
-        template,
-        context=dict(key=key, default=default, disabled=disabled),
-    )
-
-
-def make_input_data_dropdown(key, run, disabled):
-    categories = input_data_name(run)
-    template = "runs/field_select.html"
-    return render_to_string(
-        template,
-        context=dict(
-            key=key, categories=categories, name="Select input data", disabled=disabled
-        ),
-    )
 
 
 def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
-    current_fields.append(
-        make_name_input(
-            "step_name",
-            run.workflow_meta[section][step][method]["name"],
-            disabled=False,
-        )
-    )
-    if section == "data_analysis":
-        current_fields.append(
-            make_input_data_dropdown("input_data_name", run, disabled=False)
-        )
+
     for key, param_dict in parameters.items():
         # todo use workflow default
         # todo 59 - restructure current_parameters
@@ -156,13 +128,6 @@ def detail(request, run_name):
             )
             fields = [df_head.to_string()]
         else:
-            fields.append(
-                make_name_input("step_name", history_step.step_name, disabled=True)
-            )
-            if history_step.section == "data_analysis":
-                fields.append(
-                    make_input_data_dropdown("input_data_name", run, disabled=True)
-                )
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
@@ -279,14 +244,6 @@ def calculate(request, run_name):
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
-
-    if section == "importing" or section == "data_preprocessing":
-        run.prepare_calculation(parameters["step_name"][0])
-    elif section == "data_analysis":
-        run.prepare_calculation(
-            parameters["step_name"][0], parameters["input_data_name"][0]
-        )
-        del parameters["input_data_name"]
 
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
