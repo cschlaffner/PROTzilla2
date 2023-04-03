@@ -62,7 +62,7 @@ def make_add_step_dropdown(run, section):
             name="add step:\n",
             type="categorical",
             categories=steps,
-            key="add steps",
+            key="step_to_be_added",
         ),
     )
 
@@ -228,7 +228,7 @@ def add(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    step = post["add steps"][0]
+    step = post["step_to_be_added"][0]
 
     if step == "":
         return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

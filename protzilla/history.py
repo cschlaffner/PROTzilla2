@@ -43,7 +43,6 @@ class History:
                     dataframe_path=df_path if df_path.exists() else None,
                     outputs=step["outputs"],
                     plots=[],
-                    step_name=step["step_name"],
                 )
             )
         return instance
@@ -65,7 +64,6 @@ class History:
         dataframe: pd.DataFrame,
         outputs: dict,
         plots: list,
-        step_name: str,
     ):
         df_path = None
         df = None
@@ -85,7 +83,6 @@ class History:
             df_path,
             outputs,
             plots,
-            step_name,
         )
         self.steps.append(executed_step)
         self.save()
@@ -107,7 +104,6 @@ class History:
                 method=step.method,
                 parameters=step.parameters,
                 outputs=step.outputs,
-                step_name=step.step_name,
             )
             for step in self.steps
         ]
@@ -137,7 +133,6 @@ class ExecutedStep:
     dataframe_path: Path | None
     outputs: dict
     plots: list
-    step_name: str
 
     @property
     def dataframe(self) -> pd.DataFrame | None:
@@ -150,12 +145,6 @@ class ExecutedStep:
         if self.dataframe_path is not None:
             return pd.read_csv(self.dataframe_path)
         return None
-
-    def output_mapping(self, key) -> pd.DataFrame | list | None:
-        if key == "dataframe":
-            return self.dataframe
-        else:
-            return self.outputs[key]
 
 
 class CustomJSONEncoder(json.JSONEncoder):

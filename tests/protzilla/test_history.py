@@ -17,7 +17,6 @@ def sample_step_params():
         parameters={"param1": 3},
         outputs={},
         plots=[],
-        step_name="Step 1",
     )
 
 
@@ -37,7 +36,6 @@ def test_history_memory_identity(sample_step_params):
         df2,
         outputs={},
         plots=[],
-        step_name="Step 2",
     )
     assert history.steps[0].dataframe is df1
     assert history.steps[0].dataframe is not df2
@@ -86,7 +84,6 @@ def test_history_save(sample_step_params):
         df2,
         outputs={"out": 5},
         plots=[],
-        step_name="Step 1",
     )
     history.save()
     steps = history.steps
@@ -112,7 +109,6 @@ def test_dataframe_in_json(sample_step_params):
         df1,
         outputs={"another_df": df2},
         plots=[],
-        step_name="Step 1",
     )
     assert (RUNS_PATH / name / "history.json").exists()
     del history
@@ -135,7 +131,6 @@ def test_number_of_steps_in_section(sample_step_params):
         pd.DataFrame(),
         outputs={"out": 5},
         plots=[],
-        step_name="Step 1",
     )
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
 

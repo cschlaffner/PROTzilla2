@@ -27,7 +27,6 @@ class Run:
     :ivar current_out
     :ivar current_parameters
     :ivar plots
-    :ivar step_name
     """
 
     @classmethod
@@ -91,11 +90,7 @@ class Run:
             shutil.copy2(workflow_template_path, workflow_local_path)
 
         with open(workflow_local_path, "r") as f:
-            try:
-                self.workflow_config = json.load(f)
-            except Exception as e:
-                print("could not read json:", workflow_local_path)
-                raise e
+            self.workflow_config = json.load(f)
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
@@ -112,7 +107,6 @@ class Run:
         self.current_parameters = None
         self.current_plot_parameters = None
         self.plots = []
-        self.step_name = None
 
     def handle_all_steps_completed(self):
         # TODO 74 think about what should happen when all steps are completed
@@ -149,26 +143,26 @@ class Run:
         )
         self.current_plot_parameters = parameters
 
-    def insert_as_next_step(self, insert_step):
+    def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
 
         assert self.section is not None
 
-        workflow_meta_step = self.workflow_meta[self.section][insert_step]
+        workflow_meta_step = self.workflow_meta[self.section][step_to_be_inserted]
         first_method_name = list(workflow_meta_step.keys())[0]
 
         params_default = get_all_default_params_for_methods(
-            self.workflow_meta, self.section, insert_step, first_method_name
+            self.workflow_meta, self.section, step_to_be_inserted, first_method_name
         )
 
-        insert_step_dict = dict(
-            name=insert_step, method=first_method_name, parameters=params_default
+        step_dict = dict(
+            name=step_to_be_inserted, method=first_method_name, parameters=params_default
         )
 
         past_steps_of_section = self.history.number_of_steps_in_section(self.section)
 
         self.workflow_config["sections"][self.section]["steps"].insert(
-            past_steps_of_section + 1, insert_step_dict
+            past_steps_of_section + 1, step_dict
         )
 
         self.write_local_workflow()
@@ -182,7 +176,6 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
-            self.step_name,
         )
         self.df = self.result_df
         self.result_df = None
@@ -196,8 +189,7 @@ class Run:
             self.handle_all_steps_completed()
 
     def back_step(self):
-        assert self.history.steps is not None
-        # popping from history.steps possible to get values again
+        assert self.history.steps
         popped_step, result_df = self.history.pop_step()
         self.section = popped_step.section
         self.step = popped_step.step
