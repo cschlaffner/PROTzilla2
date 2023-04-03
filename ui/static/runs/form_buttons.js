@@ -9,6 +9,11 @@ get_clean_form_data = function (form) {
     return params
 }
 
+disable_calc = function (bool) {
+    disabled_calc = bool
+    $('#calculate_parameters_submit').prop('disabled', bool);
+}
+
 $(document).ready(function () {
     const calc_form = document.querySelector('#calc_form');
     calc_params = get_clean_form_data(calc_form)
@@ -19,8 +24,7 @@ $(document).ready(function () {
 
         $('#plot_parameters_submit').prop('disabled', false);
 
-        disabled_calc = true
-        $('#calculate_parameters_submit').prop('disabled', disabled_calc);
+        disable_calc(true)
         alert("enable plot, disable calc")
     });
 
@@ -29,19 +33,16 @@ $(document).ready(function () {
         let current_params = get_clean_form_data(calc_form)
 
         let plot_submit = $('#plot_parameters_submit');
-        let calc_submit = $('#calculate_parameters_submit')
         for (let [key, value] of calc_params.entries()) {
             if (current_params.get(key) !== value) {
                 plot_submit.prop('disabled', true);
-                disabled_calc = false
-                calc_submit.prop('disabled', disabled_calc)
+                disable_calc(false)
                 console.log("disable plot, enable calc")
                 return
             }
         }
         plot_submit.prop('disabled', false);
-        disabled_calc = true
-        calc_submit.prop('disabled', disabled_calc);
+        disable_calc(true)
         console.log("enable plot, disable calc")
     });
 });
