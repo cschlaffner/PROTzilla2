@@ -3,7 +3,9 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.filter_proteins import (
-    by_low_frequency, by_low_frequency_plot)
+    by_low_frequency,
+    by_low_frequency_plot,
+)
 
 
 @pytest.fixture

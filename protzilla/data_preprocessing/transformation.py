@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from protzilla.data_preprocessing.plots import (create_box_plots,
-                                                create_histograms)
+from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 
 
 def by_log(intensity_df: pd.DataFrame, log_base="log10"):

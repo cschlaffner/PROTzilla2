@@ -1,8 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-from protzilla.data_preprocessing.plots import (create_box_plots,
-                                                create_histograms)
+from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 
 
 def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:

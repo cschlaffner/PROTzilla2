@@ -1,7 +1,12 @@
 from ..data_analysis import differential_expression
-from ..data_preprocessing import (filter_proteins, filter_samples, imputation,
-                                  normalisation, outlier_detection,
-                                  transformation)
+from ..data_preprocessing import (
+    filter_proteins,
+    filter_samples,
+    imputation,
+    normalisation,
+    outlier_detection,
+    transformation,
+)
 from ..importing import metadata_import, ms_data_import
 
 """

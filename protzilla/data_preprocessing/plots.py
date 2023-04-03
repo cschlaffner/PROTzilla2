@@ -4,8 +4,10 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
-from ..constants.colors import (PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
-                                PROTZILLA_DISCRETE_COLOR_SEQUENCE)
+from ..constants.colors import (
+    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+    PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+)
 
 
 def create_pie_plot(

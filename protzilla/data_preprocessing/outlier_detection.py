@@ -4,9 +4,11 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 
-from protzilla.data_preprocessing.plots import (create_anomaly_score_bar_plot,
-                                                create_pca_2d_scatter_plot,
-                                                create_pca_3d_scatter_plot)
+from protzilla.data_preprocessing.plots import (
+    create_anomaly_score_bar_plot,
+    create_pca_2d_scatter_plot,
+    create_pca_3d_scatter_plot,
+)
 
 from ..utilities.transform_dfs import long_to_wide
 
