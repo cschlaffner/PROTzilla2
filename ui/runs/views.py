@@ -61,12 +61,11 @@ def get_current_fields(run, section, step, method):
         # move into make_parameter_input?
         if param_dict["type"] == "named":
             param_dict["steps"] = [name for name in run.history.step_names if name]
-            selected = param_dict["steps"][0] if param_dict["steps"] else None
+            if param_dict["default"]:
+                selected = param_dict["default"][0]
+            else:
+                selected = param_dict["steps"][0] if param_dict["steps"] else None
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
-            # param_dict["default"] = [
-            #     selected,
-            #     param_dict["outputs"][0] if param_dict["outputs"] else None,
-            # ]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
