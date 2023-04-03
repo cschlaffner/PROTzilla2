@@ -221,31 +221,51 @@ def by_min_per_dataset(
     return intensity_df_copy, dict()
 
 
-def by_knn_plot(df, result_df, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, graph_types, group_by)
+def by_knn_plot(df, result_df, current_out, graph_type, graph_type_quantites, group_by):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantites, group_by
+    )
 
 
-def by_simple_imputer_plot(df, result_df, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, graph_types, group_by)
+def by_simple_imputer_plot(
+    df, result_df, current_out, graph_type, graph_type_quantites, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantites, group_by
+    )
 
 
-def by_min_per_sample_plot(df, result_df, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, graph_types, group_by)
+def by_min_per_sample_plot(
+    df, result_df, current_out, graph_type, graph_type_quantites, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantites, group_by
+    )
 
 
-def by_min_per_protein_plot(df, result_df, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, graph_types, group_by)
+def by_min_per_protein_plot(
+    df, result_df, current_out, graph_type, graph_type_quantites, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantites, group_by
+    )
 
 
-def by_min_per_dataset_plot(df, result_df, graph_types, group_by):
-    return _build_box_hist_plot(df, result_df, graph_types, group_by)
+def by_min_per_dataset_plot(
+    df, result_df, current_out, graph_type, graph_type_quantites, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantites, group_by
+    )
 
 
 def number_of_imputed_values(input_df, result_df):
     return abs(result_df.isnull().sum().sum() - input_df.isnull().sum().sum())
 
 
-def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
+def _build_box_hist_plot(
+    df, result_df, graph_type, graph_type_quantites, group_by
+) -> list[Figure]:
     """
     This function creates two visualisations:
 
@@ -258,7 +278,7 @@ def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
     filtered proteins.
 
     """
-    if "Boxplot" in graph_types:
+    if graph_type == "Boxplot":
         fig1 = create_box_plots(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -267,7 +287,7 @@ def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
             heading="Distribution of Protein Intensities",
             group_by=group_by,
         )
-    if "Histogram" in graph_types:
+    elif graph_type == "Histogram":
         fig1 = create_histograms(
             dataframe_a=df,
             dataframe_b=result_df,
@@ -280,13 +300,13 @@ def _build_box_hist_plot(df, result_df, graph_types, group_by) -> list[Figure]:
         abs(len(df)),
         number_of_imputed_values(df, result_df),
     ]
-    if "Bar chart" in graph_types:
+    if graph_type_quantites == "Bar chart":
         fig2 = create_bar_plot(
             names_of_sectors=["Non-imputed values", "Imputed values"],
             values_of_sectors=values_of_sectors,
             heading="Number of Imputed Values",
         )
-    if "Pie chart" in graph_types:
+    elif graph_type_quantites == "Pie chart":
         fig2 = create_pie_plot(
             names_of_sectors=["Non-imputed values", "Imputed values"],
             values_of_sectors=values_of_sectors,

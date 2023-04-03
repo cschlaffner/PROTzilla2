@@ -11,7 +11,7 @@
         // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
 
         $(document).ready(function () {
-            $("#{{ method_dropdown_id}}").change(function () {
+            $("#chosen_method").change(function () {
                 const selected_method = $(this).val();
 
                 $.ajax({
@@ -22,7 +22,8 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        $("#method_parameters").html(response);
+                        $("#method_parameters").html(response.parameters);
+                        $("#plot_parameters").html(response.plot_parameters);
                     }
                 }).fail(function (e) {
                     console.log('Error:', e);
@@ -50,6 +51,17 @@
     </style>
 </head>
 <body>
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message | safe }}
+            </p>
+        {% endfor %}
+    </div>
+    <br>
+{% endif %}
+
 <header>
     <h1>PROTzilla</h1>
     <h2>{{ run_name }}</h2>
@@ -63,8 +75,14 @@
                 {% for field in step.fields %}
                     <li>{{ field }}</li>
                 {% endfor %}
+            {% for plot in step.plots %}
+        <div style="width:600;height:500">
+            {{ plot|safe }}
+        </div>
+    {% endfor %}
             </ul>
         {% endfor %}
+
         <h3>Location</h3>
         <p>{{ location }}</p>
         <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
@@ -75,16 +93,29 @@
             </div>
             <input type="submit" value="Calculate">
         </form>
+    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div id="plot_parameters">
+        {% include "runs/fields.html" with fields=plot_fields %}
+    </div>
+    <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
+</form>
+
+{% for plot in current_plots %}
+    <div style="width:600;height:500">
+        {{ plot|safe }}
+    </div>
+{% endfor %}
         {% if show_next %}
             <form action="{% url 'runs:next' run_name %}" method="post">
                 {% csrf_token %}
-                <button>Next</button>
+    <button {% if not show_next %} disabled {% endif %}>Next</button>
             </form>
         {% endif %}
         {% if show_back %}
             <form action="{% url 'runs:back' run_name %}" method="post">
                 {% csrf_token %}
-                <button>Back</button>
+    <button {% if not show_back %} disabled {% endif %}>Back</button>
             </form>
         {% endif %}
     </main>

@@ -4,6 +4,7 @@ from pathlib import Path
 from shutil import rmtree
 
 from .constants.location_mapping import location_map, method_map, plot_map
+from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities.dynamic_parameters_provider import input_data_name_to_location
@@ -120,7 +121,8 @@ class Run:
         self.result_df = None
         self.current_out = None
         self.current_parameters = None
-        self.plots = None
+        self.current_plot_parameters = None
+        self.plots = []
         self.step_name = None
 
     def handle_all_steps_completed(self):
@@ -157,6 +159,13 @@ class Run:
             self.input_data, **parameters
         )
         self.current_parameters = parameters
+        # error handling for CLI
+        if "messages" in self.current_out:
+            for message in self.current_out["messages"]:
+                log_function = MESSAGE_TO_LOGGING_FUNCTION.get(message["level"])
+                if log_function:
+                    trace = f"\nTrace: {message['trace']}" if "trace" in message else ""
+                    log_function(f"{message['msg']}{trace}")
 
     def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
@@ -170,6 +179,7 @@ class Run:
         self.plots = method_callable(
             self.input_data, self.result_df, self.current_out, **parameters
         )
+        self.current_plot_parameters = parameters
 
     def insert_as_next_step(self, insert_step):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -212,6 +222,8 @@ class Run:
         self.result_df = None
         self.step_index += 1
         self.current_parameters = None
+        self.current_plot_parameters = None
+        self.plots = []
         try:
             self.section, self.step, self.method = self.current_workflow_location()
         except IndexError:
@@ -237,6 +249,7 @@ class Run:
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
+        self.current_plot_parameters = None
         self.plots = popped_step.plots
         self.input_data_location = popped_step.input_data_location
         self.step_index -= 1
