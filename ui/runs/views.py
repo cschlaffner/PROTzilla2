@@ -158,8 +158,8 @@ def detail(request, run_name):
             current_plots=[plot.to_html() for plot in run.plots],
             # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
+            show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
-            show_back=bool(len(run.history.steps) > 1),
             sidebar_dropdown=make_add_step_dropdown(run, section),
             workflow_steps=highlighted_workflow_steps,
         ),
@@ -224,7 +224,6 @@ def back(request, run_name):
     run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-
 def add(request, run_name):
     run = active_runs[run_name]
 
@@ -239,12 +238,12 @@ def add(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
+
 def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
-
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()

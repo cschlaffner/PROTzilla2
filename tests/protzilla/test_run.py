@@ -125,24 +125,25 @@ def test_perform_calculation_logging(caplog):
     rmtree(RUNS_PATH / run_name)
 
 
-def test_set_current_run_location():
-    run_name = "test_set_run_current_location" + random_string()
-    run = Run.create(
-        run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
-    )
+def test_perform_calculation_logging(caplog):
+    run_name = "test_run_logging" + random_string()
+    run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
-    run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
-    )
-    assert run.current_run_location() == (
+
+    run.perform_calculation_from_location(
         "data_preprocessing",
-        "filter_samples",
-        "protein_intensity_sum_filter",
+        "outlier_detection",
+        "local_outlier_factor",
+        {"number_of_neighbors": 3},
     )
+
+    assert "ERROR" in caplog.text
+    assert "LocalOutlierFactor" in caplog.text
+    assert "NaN values" in caplog.text
     rmtree(RUNS_PATH / run_name)
 
 
