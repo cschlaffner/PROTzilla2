@@ -1,12 +1,13 @@
+{# params: key name disabled default steps outputs #}
 <label for="{{ key }}">{{ name }}</label>
 <select name="{{ key }}" id="{{ key }}" class="named" {% if disabled %} disabled {% endif %} >
     {% for option in steps %}
         <option value="{{ option }}" {% if option == default.0 %} selected {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>
-<select name="{{ key }}" id="{{ key }}_outputs" {% if disabled %} disabled {% endif %} >
+<select name="{{ key }}" {% if not disabled %} id="{{ key }}_outputs" {% endif %} {% if disabled %}
+        disabled {% endif %} >
     {% for option in outputs %}
-        <option value="{{ option }}" {% if option == default.1 %} selected="selected" {% endif %} >{{ option }}</option>
+        <option value="{{ option }}" {% if option == default.1 %} selected {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>
-{# https://stackoverflow.com/questions/1801499/how-to-change-options-of-select-with-jquery #}

@@ -55,19 +55,18 @@ def get_current_fields(run, section, step, method):
     for key, param_dict in parameters.items():
         # todo use workflow default
         # todo 59 - restructure current_parameters
+        param_dict = param_dict.copy()  # to not change workflow_meta
         if run.current_parameters is not None:
-            param_dict["default"] = run.current_parameters.get(
-                key, param_dict["default"]
-            )
+            param_dict["default"] = run.current_parameters[key]
         # move into make_parameter_input?
         if param_dict["type"] == "named":
             param_dict["steps"] = [name for name in run.history.step_names if name]
-            selected = param_dict["steps"][-1] if param_dict["steps"] else None
+            selected = param_dict["steps"][0] if param_dict["steps"] else None
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
-            param_dict["default"] = [
-                selected,
-                param_dict["outputs"][0] if param_dict["outputs"] else None,
-            ]
+            # param_dict["default"] = [
+            #     selected,
+            #     param_dict["outputs"][0] if param_dict["outputs"] else None,
+            # ]
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -122,6 +121,9 @@ def detail(request, run_name):
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
+                if param_dict["type"] == "named":
+                    param_dict["steps"] = [param_dict["default"][0]]
+                    param_dict["outputs"] = [param_dict["default"][1]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
