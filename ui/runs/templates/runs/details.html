@@ -30,7 +30,7 @@
                     alert(e.responseJSON.error); // alert error message to user
                 })
             });
-            $(".named").change(function () {
+            $("#method_parameters").on("change", ".named", function () {
                 const id = $(this).attr("id");
                 const step_name = $(this).val();
                 console.log(id, step_name)
