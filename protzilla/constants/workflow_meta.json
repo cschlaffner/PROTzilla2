@@ -633,20 +633,14 @@
         "name": "ANOVA",
         "description": "Analysis of Variance:",
         "parameters": {
-        }
-      },
-      "t_test": {
-        "name": "T_Test",
-        "description": "Statistical test assuming a t-distribution:",
-        "parameters": {
-          "multiple-testing-correction": {
+          "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
               "Bonferroni"
             ],
-            "default-value": "Benjamini-Hochberg"
+            "default": "Benjamini-Hochberg"
           },
           "alpha": {
             "name": "Error Rate (alpha)",
@@ -654,34 +648,77 @@
             "min": 0.0001,
             "max": 1,
             "step": 0.0001,
-            "default-value": 0.05
+            "default": 0.05
+          },
+          "grouping": {
+            "name": "Grouping:",
+            "type": "categorical",
+            "fill_from_metadata": "columns",
+            "categories": [],
+            "default": "None"
+          },
+          "selected_groups": {
+            "name": "Selected Groups:",
+            "type": "categorical",
+            "fill_from_metadata": "group",
+            "categories": [],
+            "default": "None",
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "metadata_df",
+            "name": "metadata_df",
+
+          }
+        }
+      },
+      "t_test": {
+        "name": "T_Test",
+        "description": "Statistical test assuming a t-distribution:",
+        "parameters": {
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0.0001,
+            "max": 1,
+            "step": 0.0001,
+            "default": 0.05
           },
           "fc_threshold": {
-              "name": "Fold change threshold",
-              "type": "numeric",
-              "min": 0,
-              "max": 20,
-              "step": "any",
-              "default": 0
+            "name": "Fold change threshold",
+            "type": "numeric",
+            "min": 0,
+            "max": 20,
+            "step": "any",
+            "default": 0
           },
           "t_test_grouping": {
             "name": "Grouping",
             "type": "categorical",
             "fill_from_metadata": "columns",
             "categories": [],
-            "default-value": "None"
+            "default": "None"
           },
           "group1": {
             "name": "Group 1",
             "type": "categorical",
             "categories": [],
-            "default-value": "None"
+            "default": "None"
           },
           "group2": {
             "name": "Group 2",
             "type": "categorical",
             "categories": [],
-            "default-value": "None"
+            "default": "None"
           }
         }
       }

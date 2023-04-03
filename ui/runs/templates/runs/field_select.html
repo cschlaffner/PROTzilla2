@@ -1,7 +1,8 @@
 <label for="{{ key }}">{{ name }}</label>
-<select name="{{ key }}" id="{{ key }}" {% if disabled %}
-        disabled
-{% endif %} >
+<select name="{{ key }}" id="{{ key }}"
+        {% if disabled %} disabled {% endif %}
+        {% if multiple %} multiple{% endif %}
+>
     {% for option in categories %}
         <option value="{{ option }}" {% if option == default %}
                 selected="selected"

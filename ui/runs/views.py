@@ -34,9 +34,12 @@ def make_parameter_input(key, param_dict, disabled):
         if "step" not in param_dict:
             param_dict["step"] = "any"
     elif param_dict["type"] == "categorical":
+        param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
+    elif param_dict["type"] == "metadata_df":
+        template = "runs/field_empty.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -82,6 +85,8 @@ def get_current_fields(run, section, step, method):
         if "fill_from_metadata" in param_dict:
             if param_dict["fill_from_metadata"] == "columns":
                 param_dict["categories"] = run.metadata.columns
+            elif param_dict["fill_from_metadata"] == "group":
+                param_dict["categories"] = run.metadata.loc[:, "Sample"].unique()
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -245,6 +250,10 @@ def calculate(request, run_name):
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
+
+    if "metadata_df" in parameters:
+        parameters["metadata_df"] = run.metadata
+
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -276,6 +285,7 @@ def parameters_from_post(post):
     for k, v in d.items():
         if len(v) > 1:
             raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
+            # why is this here? I get a list, so len is expected to be > 1
         parameters[k] = convert_str_if_possible(v[0])
     return parameters
 
