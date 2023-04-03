@@ -39,9 +39,9 @@ class History:
                     step["step"],
                     step["method"],
                     step["parameters"],
-                    df,
-                    df_path if df_path.exists() else None,
-                    step["outputs"],
+                    _dataframe=df,
+                    dataframe_path=df_path if df_path.exists() else None,
+                    outputs=step["outputs"],
                     plots=[],
                 )
             )
@@ -75,7 +75,14 @@ class History:
         if "memory" in self.df_mode:
             df = dataframe
         executed_step = ExecutedStep(
-            section, step, method, parameters, df, df_path, outputs, plots
+            section,
+            step,
+            method,
+            parameters,
+            df,
+            df_path,
+            outputs,
+            plots,
         )
         self.steps.append(executed_step)
         self.save()
@@ -106,6 +113,9 @@ class History:
 
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
+
+    def number_of_steps_in_section(self, section):
+        return len(list(filter(lambda step: step.section == section, self.steps)))
 
 
 @dataclass(frozen=True)

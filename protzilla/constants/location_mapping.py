@@ -1,3 +1,4 @@
+from ..data_analysis import differential_expression
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -110,6 +111,11 @@ method_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
+    (
+        "data_analysis",
+        "differential_expression",
+        "anova",
+    ): differential_expression.anova,
 }
 
 # reversed mapping of method callable and location

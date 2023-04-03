@@ -32,13 +32,29 @@
             })
         });
     </script>
-    <title>PROTzilla</title>
+    <title>PROTzilla {{ run_name }}</title>
+    <style>
+        .layout-container {
+            display: flex;
+        }
+
+        main {
+            flex: 3;
+            padding: 20px;
+        }
+
+        aside {
+            flex: 1;
+            background-color: #87A8B9;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
 {% if messages %}
     <div class="messages">
         {% for message in messages %}
-            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            <p>{% if message.tags %} class="{{ message.tags }}"{% endif %}>
                 {{ message | safe }}
             </p>
         {% endfor %}
@@ -50,6 +66,7 @@
 <br>
 <b>history</b>
 <br>
+<main>
 {% for step in displayed_history %}
     {{ step.name }}<br>
     {% for field in step.fields %}
@@ -98,5 +115,9 @@
     {% csrf_token %}
     <button {% if not show_back %} disabled {% endif %}>Back</button>
 </form>
+</main>
+    <aside>
+        {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
+    </aside>
 </body>
 </html>
