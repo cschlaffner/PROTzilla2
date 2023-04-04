@@ -24,7 +24,7 @@ method_map = {
         "importing",
         "ms_data_import",
         "ms_fragger_import",
-    ): lambda df, feature_orientation, file: print("warning: not implemented")
+    ): lambda df, **kwargs: print("warning: not implemented")
     or (df, {}),
     (
         "importing",
