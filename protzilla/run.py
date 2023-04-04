@@ -40,6 +40,16 @@ class Run:
         return available_runs
 
     @classmethod
+    def available_workflows(cls):
+        available_workflows = []
+        if WORKFLOWS_PATH.exists():
+            for p in WORKFLOWS_PATH.iterdir():
+                if p.name.startswith("."):
+                    continue
+                available_workflows.append(p.stem)
+        return available_workflows
+
+    @classmethod
     def create(cls, run_name, workflow_config_name="standard", df_mode="memory"):
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         if run_path.exists():
@@ -119,11 +129,18 @@ class Run:
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
-
-        if "metadata_df" in parameters:
-            parameters["metadata_df"] = self.metadata
-
-        self.result_df, self.current_out = method_callable(self.df, **parameters)
+        call_parameters = {}
+        for k, v in parameters.items():
+            param_dict = self.workflow_meta[self.section][self.step][self.method][
+                "parameters"
+            ].get(k)
+            if param_dict and param_dict.get("type") == "named_output":
+                call_parameters[k] = self.history.output_of_named_step(*v)
+            else:
+                call_parameters[k] = v
+        if "metadata_df" in call_parameters:
+            call_parameters["metadata_df"] = self.metadata
+        self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.current_parameters = parameters
         # error handling for CLI
         if "messages" in self.current_out:
@@ -149,7 +166,6 @@ class Run:
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
-
         assert self.section is not None
 
         workflow_meta_step = self.workflow_meta[self.section][step_to_be_inserted]
@@ -158,13 +174,11 @@ class Run:
         params_default = get_all_default_params_for_methods(
             self.workflow_meta, self.section, step_to_be_inserted, first_method_name
         )
-
         step_dict = dict(
             name=step_to_be_inserted,
             method=first_method_name,
             parameters=params_default,
         )
-
         past_steps_of_section = self.history.number_of_steps_in_section(self.section)
 
         self.workflow_config["sections"][self.section]["steps"].insert(
@@ -173,7 +187,7 @@ class Run:
 
         self.write_local_workflow()
 
-    def next_step(self):
+    def next_step(self, name=None):
         self.history.add_step(
             self.section,
             self.step,
@@ -182,6 +196,7 @@ class Run:
             self.result_df,
             self.current_out,
             self.plots,
+            name=name,
         )
         self.df = self.result_df
         self.result_df = None

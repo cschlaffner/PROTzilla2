@@ -136,3 +136,49 @@ def test_number_of_steps_in_section(sample_step_params):
 
     assert history.number_of_steps_in_section("section2") == 1
     assert history.number_of_steps_in_section("section1") == 4
+
+
+def test_history_step_naming():
+    name = "test_history_step_naming" + random_string()
+    history = History(name, df_mode="disk")
+    history.add_step("a", "b", "c", {}, pd.DataFrame(), {"hello": 1}, [], name="one")
+    history.add_step("a", "b", "c", {}, None, {"other": 9}, [])
+    assert history.step_names[1] is None
+    history.name_step(1, "")
+    assert history.step_names[1] is None
+    history.name_step(1, "two")
+    assert history.step_names[0] == "one"
+    assert history.step_names[1] == "two"
+    del history
+    history2 = History.from_disk(name, df_mode="disk")
+    assert history2.step_names[0] == "one"
+    assert history2.step_names[1] == "two"
+    rmtree(RUNS_PATH / name)
+
+
+def test_history_step_naming_failed():
+    name = "test_history_step_naming_failed" + random_string()
+    history = History(name, df_mode="disk")
+    history.add_step("a", "b", "c", {}, pd.DataFrame(), {"hello": 1}, [], name="one")
+    history.add_step("a", "b", "c", {}, None, {"other": 9}, [], name="two")
+    with pytest.raises(Exception):
+        history.name_step(0, "try")
+    with pytest.raises(Exception):
+        history.name_step(1, "try2")
+    with pytest.raises(Exception):
+        history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [], name="one")
+    rmtree(RUNS_PATH / name)
+
+
+def test_history_named_outputs():
+    name = "test_history_named_outputs" + random_string()
+    history = History(name, df_mode="disk")
+    df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
+    history.add_step("a", "b", "c", {}, df, {"hello": 1}, [], name="one")
+    history.add_step("a", "b", "c", {}, None, {"other": 9}, [], name="two")
+    assert history.output_keys_of_named_step("one") == ["dataframe", "hello"]
+    assert history.output_keys_of_named_step("two") == ["other"]
+    assert history.output_of_named_step("one", "hello") == 1
+    assert df.equals(history.output_of_named_step("one", "dataframe"))
+    assert history.output_of_named_step("two", "other") == 9
+    rmtree(RUNS_PATH / name)
