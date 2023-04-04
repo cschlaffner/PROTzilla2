@@ -13,20 +13,19 @@ from protzilla.data_analysis.differential_expression_helper import (
 def t_test(
     intensity_df,
     metadata_df,
-    grouping,
+    t_test_grouping,
     group1,
     group2,
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
 ):
-    # TODO think about how to get the grouping and group1, group2 from the user
     print("ttest")
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns.values.tolist()[3]
     intensity_df = pd.merge(
         left=intensity_df,
-        right=metadata_df[["Sample", grouping]],
+        right=metadata_df[["Sample", t_test_grouping]],
         on="Sample",
         copy=False,
     )
@@ -38,10 +37,10 @@ def t_test(
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
 
         group1_intensities = protein_df.loc[
-            protein_df.loc[:, grouping] == group1, intensity_name
+            protein_df.loc[:, t_test_grouping] == group1, intensity_name
         ].to_numpy()
         group2_intensities = protein_df.loc[
-            protein_df.loc[:, grouping] == group2, intensity_name
+            protein_df.loc[:, t_test_grouping] == group2, intensity_name
         ].to_numpy()
 
         # if a protein has a NaN value in a sample, user should remove it

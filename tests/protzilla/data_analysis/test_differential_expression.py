@@ -60,7 +60,7 @@ def test_differential_expression_t_test(show_figures):
     de_proteins_df, current_out = t_test(
         test_intensity_df,
         test_metadata_df,
-        grouping="Group",
+        t_test_grouping="Group",
         group1="Group1",
         group2="Group2",
         multiple_testing_correction_method="Benjamini-Hochberg",
@@ -159,7 +159,7 @@ def test_differential_expression_t_test_with_nan():
     _, current_out = t_test(
         test_intensity_df,
         test_metadata_df,
-        grouping="Group",
+        t_test_grouping="Group",
         group1="Group1",
         group2="Group2",
         multiple_testing_correction_method="Benjamini-Hochberg",
@@ -230,7 +230,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     de_proteins_df, current_out = t_test(
         test_intensity_df,
         test_metadata_df,
-        grouping="Group",
+        t_test_grouping="Group",
         group1="Group1",
         group2="Group2",
         multiple_testing_correction_method="Benjamini-Hochberg",
@@ -327,7 +327,7 @@ def test_differential_expression_anova(show_figures):
     output_df, output_dict = anova(
         intensity_df=test_intensity_df,
         metadata_df=test_metadata_df,
-        grouping="Group",
+        t_test_grouping="Group",
         selected_groups=test_metadata_df["Group"].unique().tolist(),
         multiple_testing_correction_method="Bonferroni",
         alpha=0.05,

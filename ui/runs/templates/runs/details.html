@@ -30,6 +30,26 @@
                     alert(e.responseJSON.error); // alert error message to user
                 })
             })
+
+            $("#t_test_grouping").change(function () {
+                const selected_grouping = $(this).val();
+
+                $.ajax({
+                    url: "{% url 'runs:change_t_test_grouping' run_name %}",
+                    type: "POST",
+                    data: {
+                        grouping: selected_grouping,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        $("#group1").html(response.group1_select);
+                        $("#group2").html(response.group2_select);
+                    }
+                }).fail(function (e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
+            })
         });
     </script>
     <title>PROTzilla {{ run_name }}</title>

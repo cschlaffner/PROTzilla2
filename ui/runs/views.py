@@ -87,6 +87,9 @@ def get_current_fields(run, section, step, method):
                 param_dict["categories"] = run.metadata.columns
             elif param_dict["fill_from_metadata"] == "group":
                 param_dict["categories"] = run.metadata.loc[:, "Sample"].unique()
+            elif param_dict["fill_from_metadata"] == "column_data":
+                # per default fill with first column data
+                param_dict["categories"] = run.metadata.iloc[:, 0].unique()
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -197,6 +200,36 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
+        ),
+        safe=False,
+    )
+
+
+def change_t_test_grouping(request, run_name):
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError as e:
+        print(str(e))
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+    grouping = request.POST["grouping"]
+
+    group1_dict = run.workflow_meta["data_analysis"]["differential_expression"][
+        "t_test"
+    ]["parameters"]["group1"]
+    group2_dict = run.workflow_meta["data_analysis"]["differential_expression"][
+        "t_test"
+    ]["parameters"]["group2"]
+    group1_dict["categories"] = run.metadata[grouping].unique()
+    group2_dict["categories"] = run.metadata[grouping].unique()
+
+    return JsonResponse(
+        dict(
+            group1_select=make_parameter_input("group1", group1_dict, disabled=False),
+            group2_select=make_parameter_input("group2", group1_dict, disabled=False),
         ),
         safe=False,
     )

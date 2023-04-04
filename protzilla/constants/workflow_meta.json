@@ -668,7 +668,6 @@
           "metadata_df": {
             "type": "metadata_df",
             "name": "metadata_df"
-
           }
         }
       },
@@ -706,19 +705,25 @@
             "type": "categorical",
             "fill_from_metadata": "columns",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "group1": {
             "name": "Group 1",
             "type": "categorical",
+            "fill_from_metadata": "column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "group2": {
             "name": "Group 2",
             "type": "categorical",
+            "fill_from_metadata": "column_data",
             "categories": [],
-            "default": "None"
+            "default": null
+          },
+          "metadata_df": {
+            "type": "metadata_df",
+            "name": "metadata_df"
           }
         }
       }

@@ -14,4 +14,9 @@ urlpatterns = [
     path("<str:run_name>/back", views.back, name="back"),
     path("<str:run_name>/add", views.add, name="add"),
     path("<str:run_name>/change_method/", views.change_method, name="change_method"),
+    path(
+        "<str:run_name>/change_t_test_grouping/",
+        views.change_t_test_grouping,
+        name="change_t_test_grouping",
+    ),
 ]
