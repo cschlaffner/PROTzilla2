@@ -21,7 +21,6 @@ def t_test(
     fc_threshold,
 ):
     # TODO think about how to get the grouping and group1, group2 from the user
-    # TODO: alpha does not work in frontend
     print("ttest")
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns.values.tolist()[3]
@@ -45,8 +44,7 @@ def t_test(
             protein_df.loc[:, grouping] == group2, intensity_name
         ].to_numpy()
 
-        # TODO: add new error handling
-        # if a protein is not present in the sample something should be filtered out
+        # if a protein has a NaN value in a sample, user should remove it
         group1_is_nan = np.isnan(group1_intensities)
         group2_is_nan = np.isnan(group2_intensities)
         if group1_is_nan.any() or group2_is_nan.any():
