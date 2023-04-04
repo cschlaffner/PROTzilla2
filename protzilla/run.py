@@ -121,6 +121,7 @@ class Run:
         self.section, self.step, self.method = location_map[method_callable]
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
+        self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
             for message in self.current_out["messages"]:
@@ -135,7 +136,8 @@ class Run:
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        self.create_plot(plot_map[location], parameters)
+        method_callable = plot_map.get(location, lambda *args, **kwargs: [])
+        self.create_plot(method_callable, parameters)
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(

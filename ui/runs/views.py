@@ -154,7 +154,6 @@ def detail(request, run_name):
             fields=current_fields,
             plot_fields=plot_fields,
             current_plots=[plot.to_html() for plot in run.plots],
-            # TODO add not able to plot when no plot method
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
