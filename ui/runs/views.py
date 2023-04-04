@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR
+from ui.main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
@@ -86,8 +86,7 @@ def get_current_fields(run, section, step, method):
             if param_dict["fill"] == "metadata_columns":
                 # Sample not needed for anova and t-test
                 param_dict["categories"] = run.metadata.columns[
-                    run.metadata.columns != "Sample"
-                ].unique()
+                    run.metadata.columns != "Sample"].unique()
             elif param_dict["fill"] == "metadata_column_data":
                 # per default fill with second column data since it is selected in dropdown
                 param_dict["categories"] = run.metadata.iloc[:, 1].unique()
