@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR
+from ui.main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
@@ -84,12 +84,12 @@ def get_current_fields(run, section, step, method):
 
         if "fill_from_metadata" in param_dict:
             if param_dict["fill_from_metadata"] == "columns":
-                param_dict["categories"] = run.metadata.columns
-            elif param_dict["fill_from_metadata"] == "group":
-                param_dict["categories"] = run.metadata.loc[:, "Sample"].unique()
+                # Sample doesn't work with anova and t-test
+                param_dict["categories"] = run.metadata.columns[
+                    run.metadata.columns != "Sample"].unique()
             elif param_dict["fill_from_metadata"] == "column_data":
-                # per default fill with first column data
-                param_dict["categories"] = run.metadata.iloc[:, 0].unique()
+                # per default fill with second column data
+                param_dict["categories"] = run.metadata.iloc[:, 1].unique()
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -284,9 +284,6 @@ def calculate(request, run_name):
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
 
-    if "metadata_df" in parameters:
-        parameters["metadata_df"] = run.metadata
-
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -317,8 +314,7 @@ def parameters_from_post(post):
     parameters = {}
     for k, v in d.items():
         if len(v) > 1:
-            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
-            # why is this here? I get a list, so len is expected to be > 1
+            parameters[k] = v
         parameters[k] = convert_str_if_possible(v[0])
     return parameters
 

@@ -660,7 +660,7 @@
           "selected_groups": {
             "name": "Selected Groups:",
             "type": "categorical",
-            "fill_from_metadata": "group",
+            "fill_from_metadata": "column_data",
             "categories": [],
             "default": "None",
             "multiple": true

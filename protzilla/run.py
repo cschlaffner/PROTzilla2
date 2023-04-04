@@ -119,6 +119,10 @@ class Run:
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
+
+        if "metadata_df" in parameters:
+            parameters["metadata_df"] = self.metadata
+
         self.result_df, self.current_out = method_callable(self.df, **parameters)
         self.current_parameters = parameters
         # error handling for CLI
