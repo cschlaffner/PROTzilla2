@@ -14,7 +14,7 @@ from ..utilities.transform_dfs import long_to_wide
 
 
 def by_isolation_forest(
-    intensity_df: pd.DataFrame, n_estimators: int = 50, n_jobs: int = -1
+    intensity_df: pd.DataFrame, n_estimators: int = 100, n_jobs: int = -1
 ) -> tuple[pd.DataFrame, dict]:
     """
     This function filters out outliers using a clustering
@@ -24,7 +24,7 @@ def by_isolation_forest(
     on which the outlier detection is performed
     :type intensity_df: pandas DataFrame
     :param n_estimators: the number of estimators used by the algorithm,
-    default: 50
+    default: 100
     :type n_estimators: integer
     :param n_jobs: Number kernels used by algorithm, default:
     all kernels (-1)
@@ -75,7 +75,7 @@ def by_isolation_forest(
 
 def by_local_outlier_factor(
     intensity_df: pd.DataFrame,
-    number_of_neighbors: int = 35,
+    number_of_neighbors: int = 20,
     n_jobs: int = -1,
 ) -> tuple[pd.DataFrame, dict]:
     """
@@ -88,7 +88,7 @@ def by_local_outlier_factor(
     on which the outlier detection is performed
     :type intensity_df: pandas DataFrame
     :param number_of_neighbors: number of neighbors used by the
-    algorithm, default: 35
+    algorithm, default: 20
     :type number_of_neighbors: int
     :param n_jobs: Number kernels used by algorithm, default:
     all kernels (-1)
