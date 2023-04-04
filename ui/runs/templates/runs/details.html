@@ -49,9 +49,6 @@
                             outputs.append($("<option></option>").attr("value", value).text(value))
                         })
                     }
-                }).fail(function (e) {
-                    console.log('Error:', e);
-                    alert(e.responseJSON.error); // alert error message to user
                 })
             });
         });
