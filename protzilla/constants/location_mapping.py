@@ -16,6 +16,12 @@ file that correspond to the method.
 """
 method_map = {
     (
+        "data_analysis",
+        "differential_expression",
+        "test_named",
+    ): lambda df, **kwargs: print("warning: not implemented")
+    or (df, {}),
+    (
         "importing",
         "ms_data_import",
         "max_quant_import",
