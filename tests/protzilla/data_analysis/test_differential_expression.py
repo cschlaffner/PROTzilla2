@@ -343,6 +343,4 @@ def test_differential_expression_anova(show_figures):
         1.0000,
     ]
 
-    assert False
-
     assert assertion_p_values == p_values_rounded
