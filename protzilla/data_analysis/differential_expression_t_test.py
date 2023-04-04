@@ -11,19 +11,48 @@ from protzilla.data_analysis.differential_expression_helper import (
 def t_test(
     intensity_df,
     metadata_df,
-    t_test_grouping,
+    grouping,
     group1,
     group2,
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
 ):
-    print("ttest")
+    """
+    A function to conduct a two sample t-test between groups defined in the
+    clinical data. The t-test is conducted on the level of each protein.
+    The p-values are corrected for multiple testing.
+     
+    :param intensity_df: the dataframe that should be tested in long
+        format
+    :type intensity_df: pandas DataFrame
+    :param metadata_df: the dataframe that contains the clinical data
+    :type grouping: pandas DataFrame
+    :param grouping: the column name of the grouping variable in the
+        metadata_df
+    :type grouping: str
+    :param group1: the name of the first group for the t-test
+    :type group1: str
+    :param group2: the name of the second group for the t-test
+    :type group2: str
+    :param multiple_testing_correction_method: the method for multiple
+        testing correction
+    :type multiple_testing_correction_method: str
+    :param alpha: the alpha value for the t-test
+    :type alpha: float
+
+    :return: a dataframe in typical protzilla long format
+    with the differentially expressed proteins and a dict, containing
+    the corrected p-values and the log2 fold change, the alpha used 
+    and the corrected alpha, as well as filtered out proteins.
+    :rtype: Tuple[pandas DataFrame, dict]
+    """
+
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns.values.tolist()[3]
     intensity_df = pd.merge(
         left=intensity_df,
-        right=metadata_df[["Sample", t_test_grouping]],
+        right=metadata_df[["Sample", grouping]],
         on="Sample",
         copy=False,
     )
@@ -35,10 +64,10 @@ def t_test(
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
 
         group1_intensities = protein_df.loc[
-            protein_df.loc[:, t_test_grouping] == group1, intensity_name
+            protein_df.loc[:, grouping] == group1, intensity_name
         ].to_numpy()
         group2_intensities = protein_df.loc[
-            protein_df.loc[:, t_test_grouping] == group2, intensity_name
+            protein_df.loc[:, grouping] == group2, intensity_name
         ].to_numpy()
 
         # if a protein has a NaN value in a sample, user should remove it

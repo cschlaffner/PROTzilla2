@@ -701,7 +701,7 @@
             "step": "any",
             "default": 0
           },
-          "t_test_grouping": {
+          "grouping": {
             "name": "Grouping",
             "type": "categorical",
             "fill": "metadata_columns",

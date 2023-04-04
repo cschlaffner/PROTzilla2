@@ -36,6 +36,11 @@ def anova(
     :return: a dataframe with the corrected p-values and the fold change
         between the two groups and an empty dict
     :rtype: pandas DataFrame, dict
+
+    :return: a dataframe in typical protzilla long format
+    with the differentially expressed proteins and a dict, containing
+    the corrected p-values and the log2 fold change, the alpha used 
+    and the corrected alpha, as well as filtered out proteins.
     """
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns[3]
