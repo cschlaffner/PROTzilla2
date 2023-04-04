@@ -68,7 +68,7 @@ class History:
         plots: list,
         name: str | None = None,
     ):
-        assert "dataframe" not in outputs
+        assert "dataframe" not in outputs, "output can not be named 'dataframe'"
         df_path = None
         df = None
         if "disk" in self.df_mode and dataframe is not None:
@@ -97,8 +97,10 @@ class History:
     def name_step(self, index, name):
         if not name:
             return
-        assert self.step_names[index] is None
-        assert name not in self.step_names
+        assert (
+            self.step_names[index] is None
+        ), f"step already has a name: {self.step_names[index]}"
+        assert name not in self.step_names, f"name {name} is already taken"
         self.step_names[index] = name
         self.save()
 

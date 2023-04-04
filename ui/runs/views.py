@@ -35,7 +35,7 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
-    elif param_dict["type"] == "named":
+    elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
@@ -78,7 +78,7 @@ def get_current_fields(run, section, step, method):
         if run.current_parameters is not None:
             param_dict["default"] = run.current_parameters[key]
         # move into make_parameter_input?
-        if param_dict["type"] == "named":
+        if param_dict["type"] == "named_output":
             param_dict["steps"] = [name for name in run.history.step_names if name]
             if param_dict["default"]:
                 selected = param_dict["default"][0]
@@ -139,7 +139,7 @@ def detail(request, run_name):
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
-                if param_dict["type"] == "named":
+                if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
@@ -294,7 +294,7 @@ def parameters_from_post(post):
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        if len(v) > 1:  # only used for named parameters
+        if len(v) > 1:  # only used for named_output parameters
             parameters[k] = tuple(v)
         else:
             parameters[k] = convert_str_if_possible(v[0])

@@ -134,7 +134,7 @@ class Run:
             param_dict = self.workflow_meta[self.section][self.step][self.method][
                 "parameters"
             ].get(k)
-            if param_dict and param_dict.get("type") == "named":
+            if param_dict and param_dict.get("type") == "named_output":
                 call_parameters[k] = self.history.output_of_named_step(*v)
             else:
                 call_parameters[k] = v
