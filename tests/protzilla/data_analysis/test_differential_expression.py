@@ -327,7 +327,7 @@ def test_differential_expression_anova(show_figures):
     output_df, output_dict = anova(
         intensity_df=test_intensity_df,
         metadata_df=test_metadata_df,
-        t_test_grouping="Group",
+        grouping="Group",
         selected_groups=test_metadata_df["Group"].unique().tolist(),
         multiple_testing_correction_method="Bonferroni",
         alpha=0.05,
