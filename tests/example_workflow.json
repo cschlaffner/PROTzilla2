@@ -30,6 +30,13 @@
           }
         },
         {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2
+          }
+        },
+        {
           "name": "filter_samples",
           "method": "protein_intensity_sum_filter",
           "parameters": {
@@ -45,6 +52,20 @@
             "graph_one_type": "Bar chart",
             "graph_one_group_by": "Sample",
             "graph_two_type": "Pie chart"
+          }
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.5
+          }
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.5
           }
         },
         {

@@ -8,6 +8,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla import workflow_helper
 from protzilla.run import Run
 
 active_runs = {}
@@ -49,9 +50,27 @@ def make_parameter_input(key, param_dict, disabled):
     )
 
 
+def make_add_step_dropdown(run, section):
+    template = "runs/field_select.html"
+
+    steps = list(run.workflow_meta[section].keys())
+    steps.insert(0, "")
+
+    return render_to_string(
+        template,
+        context=dict(
+            name="add step:\n",
+            type="categorical",
+            categories=steps,
+            key="step_to_be_added",
+        ),
+    )
+
+
 def get_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
+
     for key, param_dict in parameters.items():
         # todo use workflow default
         # todo 59 - restructure current_parameters
@@ -135,6 +154,11 @@ def detail(request, run_name):
             )
         )
 
+    workflow_steps = workflow_helper.get_all_steps(run.workflow_config)
+    highlighted_workflow_steps = [
+        {"name": step, "highlighted": False} for step in workflow_steps
+    ]
+    highlighted_workflow_steps[run.step_index]["highlighted"] = True
     return render(
         request,
         "runs/details.html",
@@ -151,6 +175,8 @@ def detail(request, run_name):
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
+            sidebar_dropdown=make_add_step_dropdown(run, section),
+            workflow_steps=highlighted_workflow_steps,
         ),
     )
 
@@ -211,6 +237,20 @@ def next_(request, run_name):
 def back(request, run_name):
     run = active_runs[run_name]
     run.back_step()
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def add(request, run_name):
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    step = post["step_to_be_added"][0]
+
+    if step == "":
+        return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+    run.insert_as_next_step(step)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
