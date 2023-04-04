@@ -653,14 +653,15 @@
           "grouping": {
             "name": "Grouping:",
             "type": "categorical",
-            "fill_from_metadata": "columns",
+            "fill": "metadata_columns",
+            "fill_dynamic": ["selected_groups"],
             "categories": [],
             "default": "None"
           },
           "selected_groups": {
             "name": "Selected Groups:",
             "type": "categorical",
-            "fill_from_metadata": "group",
+            "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
             "multiple": true
@@ -703,21 +704,22 @@
           "t_test_grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill_from_metadata": "columns",
+            "fill": "metadata_columns",
+            "fill_dynamic":  ["group1", "group2"],
             "categories": [],
             "default": null
           },
           "group1": {
             "name": "Group 1",
             "type": "categorical",
-            "fill_from_metadata": "column_data",
+            "fill": "metadata_column_data",
             "categories": [],
             "default": null
           },
           "group2": {
             "name": "Group 2",
             "type": "categorical",
-            "fill_from_metadata": "column_data",
+            "fill": "metadata_column_data",
             "categories": [],
             "default": null
           },

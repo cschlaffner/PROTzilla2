@@ -31,19 +31,23 @@
                 })
             })
 
-            $("#t_test_grouping").change(function () {
-                const selected_grouping = $(this).val();
+            $("#").change(function () {
+                const selected_choice = $(this).val();
+                const triggered_id = $(this).attr("id");
 
                 $.ajax({
-                    url: "{% url 'runs:change_t_test_grouping' run_name %}",
+                    url: "{% url 'runs:change_field' run_name %}",
                     type: "POST",
                     data: {
-                        grouping: selected_grouping,
+                        id: triggered_id,
+                        selected: selected_choice,
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        $("#group1").html(response.group1_select);
-                        $("#group2").html(response.group2_select);
+                        // for loop id
+                        for (let i = 0; i < response.ids.length; i++) {
+                            $(response.ids[i]).html(response.fields[i]);
+                        }
                     }
                 }).fail(function (e) {
                     console.log('Error:', e);

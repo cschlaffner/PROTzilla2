@@ -82,14 +82,18 @@ def get_current_fields(run, section, step, method):
                 key, param_dict["default"]
             )
 
-        if "fill_from_metadata" in param_dict:
-            if param_dict["fill_from_metadata"] == "columns":
-                param_dict["categories"] = run.metadata.columns
-            elif param_dict["fill_from_metadata"] == "group":
-                param_dict["categories"] = run.metadata.loc[:, "Sample"].unique()
-            elif param_dict["fill_from_metadata"] == "column_data":
-                # per default fill with first column data
-                param_dict["categories"] = run.metadata.iloc[:, 0].unique()
+        if "fill" in param_dict:
+            if param_dict["fill"] == "metadata_columns":
+                # Sample not needed for anova and t-test
+                param_dict["categories"] = run.metadata.columns[
+                    run.metadata.columns != "Sample"
+                ].unique()
+            elif param_dict["fill"] == "metadata_column_data":
+                # per default fill with second column data since it is selected in dropdown
+                param_dict["categories"] = run.metadata.iloc[:, 1].unique()
+
+        if "fill_dynamic" in param_dict:
+            param_dict["class"] = "dynamic_trigger"
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -205,7 +209,7 @@ def change_method(request, run_name):
     )
 
 
-def change_t_test_grouping(request, run_name):
+def change_field(request, run_name):
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -215,21 +219,23 @@ def change_t_test_grouping(request, run_name):
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
         return response
-    grouping = request.POST["grouping"]
 
-    group1_dict = run.workflow_meta["data_analysis"]["differential_expression"][
-        "t_test"
-    ]["parameters"]["group1"]
-    group2_dict = run.workflow_meta["data_analysis"]["differential_expression"][
-        "t_test"
-    ]["parameters"]["group2"]
-    group1_dict["categories"] = run.metadata[grouping].unique()
-    group2_dict["categories"] = run.metadata[grouping].unique()
+    id = request.POST["id"]
+    selected = request.POST["selected"]
+    parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
+    fields_to_fill = parameters[id]["fill_dynamic"]
+
+    fields = []
+    for key, param_dict in parameters.items():
+        if key in fields_to_fill:
+            if param_dict["fill"] == "metadata_column_data":
+                param_dict["categories"] = run.metadata[selected].unique()
+                fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     return JsonResponse(
         dict(
-            group1_select=make_parameter_input("group1", group1_dict, disabled=False),
-            group2_select=make_parameter_input("group2", group1_dict, disabled=False),
+            ids=fields_to_fill,
+            fields=fields,
         ),
         safe=False,
     )
@@ -284,9 +290,6 @@ def calculate(request, run_name):
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
 
-    if "metadata_df" in parameters:
-        parameters["metadata_df"] = run.metadata
-
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -317,8 +320,7 @@ def parameters_from_post(post):
     parameters = {}
     for k, v in d.items():
         if len(v) > 1:
-            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
-            # why is this here? I get a list, so len is expected to be > 1
+            parameters[k] = v
         parameters[k] = convert_str_if_possible(v[0])
     return parameters
 
