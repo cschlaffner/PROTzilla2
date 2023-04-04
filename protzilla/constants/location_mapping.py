@@ -197,9 +197,4 @@ plot_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
-    (
-        "data_analysis",
-        "differential_expression",
-        "t_test",
-    ): differential_expression.t_test_volcano_plot,
 }

@@ -1,12 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from protzilla.data_analysis.differential_expression import (
-    anova,
-    anova_heatmap,
-    t_test,
-    t_test_volcano_plot,
-)
+from protzilla.data_analysis.differential_expression import anova, t_test
 
 
 def test_differential_expression_t_test(show_figures):
@@ -68,9 +63,9 @@ def test_differential_expression_t_test(show_figures):
         fc_threshold=test_fc_threshold,
     )
 
-    fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
-    if show_figures:
-        fig.show()
+    # fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
+    # if show_figures:
+    #     fig.show()
 
     corrected_p_values = [0.0108, 0.4318, 1.000]
     log2_fc = [-1, -0.0995, 0]
@@ -336,11 +331,11 @@ def test_differential_expression_anova(show_figures):
 
     p_values_rounded = [round(x, 4) for x in p_values]
 
-    fig = anova_heatmap(
-        output_df, grouping="Group", alpha=output_dict["corrected_alpha"]
-    )
-    if show_figures:
-        fig.show()
+    # fig = anova_heatmap(
+    #     output_df, grouping="Group", alpha=output_dict["corrected_alpha"]
+    # )
+    # if show_figures:
+    #     fig.show()
 
     assertion_p_values = [
         0.0036,

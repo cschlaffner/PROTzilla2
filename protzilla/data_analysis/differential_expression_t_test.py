@@ -1,10 +1,8 @@
-import dash_bio as dashbio
 import numpy as np
 import pandas as pd
 from django.contrib import messages
 from scipy import stats
 
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.data_analysis.differential_expression_helper import (
     apply_multiple_testing_correction,
 )
@@ -114,79 +112,3 @@ def t_test(
             corrected_alpha=corrected_alpha,
         ),
     )
-
-
-def t_test_volcano_plot(df, result_df, current_out, proteins_of_interest):
-    # TODO: add proteins of interest to frontend
-    # TODO: write tests? -> think about proteins of interest
-
-    pvalues_log2fc_df = pd.DataFrame(
-        {
-            "protein": df.loc[:, "Protein ID"].unique().tolist(),
-            "corrected_p_values": current_out["corrected_p_values"],
-            "log2_fold_change": current_out["log2_fold_change"],
-        }
-    )
-
-    if current_out["corrected_alpha"] is None:
-        p_values_thresh = -np.log10(current_out["alpha"])
-    else:
-        p_values_thresh = -np.log10(current_out["corrected_alpha"])
-
-    fig = dashbio.VolcanoPlot(
-        dataframe=pvalues_log2fc_df,
-        effect_size="log2_fold_change",
-        p="corrected_p_values",
-        snp=None,
-        gene=None,
-        genomewideline_value=p_values_thresh,
-        effect_size_line=[
-            -current_out["fc_threshold"],
-            current_out["fc_threshold"],
-        ],
-        xlabel="log2(fc)",
-        ylabel="-log10(p)",
-        title="Volcano Plot",
-        annotation="protein",
-    )
-
-    proteins_of_interest = [] if proteins_of_interest is None else proteins_of_interest
-
-    # annotate the proteins of interest permanently in the plot
-    for protein in proteins_of_interest:
-        fig.add_annotation(
-            x=pvalues_log2fc_df.loc[
-                pvalues_log2fc_df["protein"] == protein,
-                "log2_fold_change",
-            ].values[0],
-            y=-np.log10(
-                pvalues_log2fc_df.loc[
-                    pvalues_log2fc_df["protein"] == protein,
-                    "corrected_p_values",
-                ].values[0]
-            ),
-            text=protein,
-            showarrow=True,
-            arrowhead=1,
-            font=dict(color="#ffffff"),
-            align="center",
-            arrowcolor=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
-            bgcolor=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
-            opacity=0.8,
-            ax=0,
-            ay=-20,
-        )
-
-    new_names = {
-        "Point(s) of interest": "Significant Proteins",
-        "Dataset": "Not Significant Proteins",
-    }
-
-    return [
-        fig.for_each_trace(
-            lambda t: t.update(
-                name=new_names[t.name],
-                legendgroup=new_names[t.name],
-            )
-        )
-    ]

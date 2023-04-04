@@ -1,16 +1,9 @@
-import dash_bio as dashbio
-import numpy as np
 import pandas as pd
-import plotly.express as px
-from plotly.graph_objects import Figure
 from scipy import stats
-from statsmodels.stats.multitest import multipletests
 
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.data_analysis.differential_expression_helper import (
     apply_multiple_testing_correction,
 )
-from protzilla.utilities.clustergram import Clustergram
 
 
 def anova(
@@ -87,74 +80,3 @@ def anova(
         corrected_alpha = alpha
 
     return tested_df, {"p_values": p_values, "corrected_alpha": corrected_alpha}
-
-
-def anova_heatmap(tested_df: pd.DataFrame, grouping: str, alpha: float) -> Figure:
-    """
-    A function to create a heatmap with an integrated dendrogram
-    (clustergram) from the ANOVA Test results. The clustergram shows in a
-    matrix form the intensities for a protein and a sample. Only the values
-    for the proteins with a significance level less than the corrected
-    alpha value are shown. The samples and proteins are ordered according
-    to the clustering resulting from the dendrogram. Regarding the
-    customisation of the graph, it is possible to invert the axes and
-    also colorbar representing the different groups present in the data
-    can be added.
-
-
-    :param tested_df: a dataframe with the corrected p-values and the fold change
-        between the two groups
-    :param grouping: the column name of the grouping variable in the
-        metadata_df
-    :param alpha: the corrected alpha value from anova
-
-    """
-    intensity_name = tested_df.columns[3]
-
-    df_filtered = tested_df.loc[tested_df["p_value"] < alpha]
-
-    matrix = df_filtered.pivot(
-        index="Sample", columns="Protein ID", values=intensity_name
-    )
-
-    sample_group_df = df_filtered[["Sample", grouping]].drop_duplicates()
-    sample_group_dict = dict(
-        zip(
-            sample_group_df["Sample"].tolist(),
-            sample_group_df[grouping].tolist(),
-        )
-    )
-
-    n_groups = len(set(sample_group_dict.values()))
-
-    group_colors = px.colors.sample_colorscale(
-        "Turbo",
-        0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
-    )
-    group_color_dict = dict(
-        zip(df_filtered[grouping].drop_duplicates().tolist(), group_colors)
-    )
-    color_label_dict = {v: k for k, v in group_color_dict.items()}
-    groups = [sample_group_dict[label] for label in matrix.index.values]
-    row_colors = [group_color_dict[g] for g in groups]
-
-    # TODO: logic for setting column_colors and column_colors_to_label_dict
-
-    clustergram = Clustergram(
-        flip_axes=False,
-        data=matrix.values,
-        row_labels=matrix.index.values.tolist(),
-        row_colors=row_colors,
-        row_colors_to_label_dict=color_label_dict,
-        column_labels=matrix.columns.values.tolist(),
-        color_threshold={"row": 250, "col": 700},
-        line_width=2,
-        color_map=px.colors.diverging.RdBu,
-        hidden_labels=["row", "col"],
-    )
-
-    clustergram.update_layout(
-        autosize=True,
-    )
-
-    return clustergram
