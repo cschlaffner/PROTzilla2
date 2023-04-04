@@ -31,7 +31,7 @@
                 })
             })
 
-            $("#").change(function () {
+            $(".dynamic_trigger").change(function () {
                 const selected_choice = $(this).val();
                 const triggered_id = $(this).attr("id");
 
@@ -44,9 +44,8 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        // for loop id
                         for (let i = 0; i < response.ids.length; i++) {
-                            $(response.ids[i]).html(response.fields[i]);
+                            $('#' + response.ids[i]).html(response.fields[i]);
                         }
                     }
                 }).fail(function (e) {

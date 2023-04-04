@@ -1,5 +1,6 @@
 <label for="{{ key }}">{{ name }}</label>
 <select name="{{ key }}" id="{{ key }}"
+        {% if class %} class="{{ class}}" {% endif %}
         {% if disabled %} disabled {% endif %}
         {% if multiple %} multiple{% endif %}
 >
