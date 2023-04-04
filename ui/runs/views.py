@@ -131,6 +131,7 @@ def detail(request, run_name):
                 fields=fields,
                 plots=[p.to_html() for p in history_step.plots],
                 name=run.history.step_names[i],
+                index=i,
             )
         )
 
@@ -239,6 +240,12 @@ def plot(request, run_name):
     section, step, method = run.current_workflow_location()
     parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def add_name(request, run_name):
+    run = active_runs[run_name]
+    run.history.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

@@ -76,10 +76,15 @@
 <br>
 {% for step in displayed_history %}
     {{ step.location }}<br>
-    Name: {{ step.name }}<br>
     {% for field in step.fields %}
         {{ field }}<br>
     {% endfor %}
+    {% if step.name %}
+        Name: {{ step.name }}<br>
+    {% else %}
+        {% include "runs/form_add_name.html" with index=step.index %}
+    {% endif %}
+
     {% for plot in step.plots %}
         <div style="width:600;height:500">
             {{ plot|safe }}
