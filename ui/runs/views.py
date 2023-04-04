@@ -259,7 +259,7 @@ def calculate(request, run_name):
 
 def plot(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
+    section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
