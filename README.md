@@ -20,16 +20,14 @@
 | protzilla/data\_preprocessing/outlier\_detection.py             |       70 |        4 |       16 |        6 |     86% |174, 179->188, 192-201, 205->221, 252, 253->exit |
 | protzilla/data\_preprocessing/plots.py                          |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                 |       20 |        2 |        8 |        3 |     82% |31, 43->52, 53 |
-| protzilla/history.py                                            |       85 |        3 |       28 |        3 |     95% |33, 147, 161 |
+| protzilla/history.py                                            |      119 |        6 |       46 |        6 |     93% |33, 109, 116, 124, 189, 203 |
 | protzilla/importing/metadata\_import.py                         |       27 |        7 |       12 |        1 |     64% |     19-26 |
 | protzilla/importing/ms\_data\_import.py                         |       16 |        0 |        2 |        0 |    100% |           |
-| protzilla/run.py                                                |      141 |       25 |       34 |        8 |     78% |34-40, 46, 71->70, 73, 102-103, 113-114, 128->126, 137-138, 141-144, 188-190, 204, 207, 212->213, 212->215, 213->212, 214, 217-218 |
-| protzilla/run\_manager.py                                       |       19 |       19 |        4 |        0 |      0% |      1-27 |
+| protzilla/run.py                                                |      156 |       27 |       44 |        5 |     78% |34-40, 44-50, 56, 81->80, 83, 112-113, 123-124, 138, 147->145, 156-157, 160-163, 207-208 |
 | protzilla/utilities/\_\_init\_\_.py                             |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                   |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                           |       11 |        0 |        0 |        0 |    100% |           |
 | protzilla/workflow\_helper.py                                   |        9 |        0 |        6 |        0 |    100% |           |
-| protzilla/workflow\_manager.py                                  |        7 |        7 |        2 |        0 |      0% |       1-9 |
 | tests/conftest.py                                               |        6 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py   |       16 |        1 |        2 |        1 |     89% |        48 |
 | tests/protzilla/data\_preprocessing/test\_filter\_samples.py    |       29 |        2 |        4 |        2 |     88% |    74, 99 |
@@ -39,11 +37,11 @@
 | tests/protzilla/data\_preprocessing/test\_plots.py              |       47 |        8 |       16 |        5 |     79% |20, 39, 56, 81, 117-120 |
 | tests/protzilla/data\_preprocessing/test\_transformation.py     |       35 |        2 |        4 |        2 |     90% |  119, 134 |
 | tests/protzilla/importing/test\_metadata\_import.py             |       23 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/test\_history.py                                |       75 |        0 |        0 |        0 |    100% |           |
+| tests/protzilla/test\_history.py                                |      115 |        0 |        6 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                    |       78 |        8 |        2 |        0 |     90% |   107-125 |
 | tests/protzilla/test\_transform\_dfs.py                         |       32 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                       |       30 |        0 |        4 |        0 |    100% |           |
-|                                                       **TOTAL** | **1283** |  **119** |  **229** |   **53** | **87%** |           |
+|                                                       **TOTAL** | **1346** |   **98** |  **257** |   **53** | **89%** |           |
 
 
 ## Setup coverage badge
