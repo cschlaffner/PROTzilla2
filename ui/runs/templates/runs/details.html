@@ -71,6 +71,8 @@
     </style>
 </head>
 <body>
+<div class="layout-container">
+<main>
 {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -86,7 +88,6 @@
 <br>
 <b>history</b>
 <br>
-<main>
 {% for step in displayed_history %}
     {{ step.name }}<br>
     {% for field in step.fields %}
@@ -139,5 +140,6 @@
     <aside>
         {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
     </aside>
+    </div>
 </body>
 </html>
