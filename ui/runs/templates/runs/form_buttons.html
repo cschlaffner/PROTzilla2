@@ -80,10 +80,6 @@
         $('#calculate_parameters_submit').prop('disabled', bool)
     }
 
-    function initial_trigger() {
-        $(document).trigger('initial_change')
-    }
-
     function isEmptyDict(obj) {
         return Object.keys(obj).length == 0
     }
@@ -110,39 +106,17 @@
         }
 
         let form_data = get_clean_form_data(form)
-        {#for (let key in current_parameters) {#}
-        {#    if (form_data.hasOwnProperty(key)) {#}
-        {#        let value = current_parameters[key]#}
-        {#        if (form_data[key] != value) {#}
-        {#            return false#}
-        {#        }#}
-        {#    } else {#}
-        {#        return false#}
-        {#    }#}
-        {# }#}
-        {#return true#}
         return Object.keys(current_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_parameters[key]
         );
     }
 
     equal_plot_parameters = function (form) {
-        let form_data = get_clean_form_data(form)
         if (isEmptyDict(current_plot_parameters)) {
             return false
         }
-        {#for (let key in current_plot_parameters) {#}
-        {#    if (form_data.hasOwnProperty(key)) {#}
-        {#        let value = current_plot_parameters[key]#}
-        {#        if (form_data[key] != value) {#}
-        {#            return false#}
-        {#        }#}
-        {#    } else {#}
-        {#        return false#}
-        {#    }#}
-        {# }#}
-        {#return true#}
 
+        let form_data = get_clean_form_data(form)
         return Object.keys(current_plot_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_plot_parameters[key]
         );
@@ -164,7 +138,7 @@
         })
 
         plot_form.addEventListener('change', function () {
-            if (plotted_current_match() === false) {
+            if (plotted_current_match() === false && results_exist) {
                 disable_plot(false)
                 return
             }
@@ -183,16 +157,11 @@
         get_current_parameters(function () {
             get_current_plot_parameters(function () {
                 get_plotted_for_parameters(function () {
-                    initial_trigger()
+                    calc_form.dispatchEvent(new Event('change'));
+                    trigger_plot_change()
                 })
             })
         })
 
-    })
-
-    $(document).on('initial_change', function () {
-        const calc_form = document.querySelector('#calc_form');
-        calc_form.dispatchEvent(new Event('change'));
-        trigger_plot_change()
     })
 </script>
