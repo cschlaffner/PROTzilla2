@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-{% load static %}
-<head>
-    <meta charset="UTF-8">
+{% extends 'base.html' %}
+
+{% block javascript %}
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>
@@ -54,7 +52,8 @@
             });
         });
     </script>
-    <title>PROTzilla {{ run_name }}</title>
+{% endblock %}
+{% block css %}
     <style>
         .layout-container {
             display: flex;
@@ -71,19 +70,11 @@
             padding: 20px;
         }
     </style>
-</head>
-<body>
-{% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                {{ message | safe }}
-            </p>
-        {% endfor %}
-    </div>
-    <br>
-{% endif %}
+{% endblock %}
 
+{% block content %}
+
+<div class="layout-container">
 {{ run_name }}
 <br>
 <b>history</b>
@@ -148,5 +139,5 @@
     <aside>
         {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
     </aside>
-</body>
-</html>
+</div>
+{% endblock %}
