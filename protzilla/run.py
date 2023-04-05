@@ -137,8 +137,13 @@ class Run:
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        method_callable = plot_map.get(location, lambda *args, **kwargs: [])
-        self.create_plot(method_callable, parameters)
+        if location in plot_map:
+            self.create_plot(plot_map[location], parameters)
+        else:
+            self.plots = []
+            self.current_plot_parameters = parameters
+            # notify user
+            print(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
@@ -187,6 +192,7 @@ class Run:
             # remove "broken" step from history again
             self.history.pop_step()
             traceback.print_exc()
+            # add message to user?
         else:  # continue normally when no error occurs
             self.df = self.result_df
             self.result_df = None
