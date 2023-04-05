@@ -75,7 +75,7 @@ def make_displayed_history(run):
     displayed_history = []
     for i, history_step in enumerate(run.history.steps):
         fields = []
-        #should parameters be copied, so workflow_meta won't change?
+        # should parameters be copied, so workflow_meta won't change?
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
         ]["parameters"]

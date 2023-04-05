@@ -16,10 +16,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
-from ui.runs.views_helper import (
-    get_current_fields,
-    parameters_from_post,
-)
+from ui.runs.views_helper import get_current_fields, parameters_from_post
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
@@ -69,6 +66,7 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -78,6 +76,7 @@ def change_method(request, run_name):
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
         return response
+
     run.method = request.POST["method"]
     run.current_parameters = None
     run.current_plot_parameters = None
@@ -99,6 +98,8 @@ def change_method(request, run_name):
 
 
 def change_field(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_method, detail)
+    # e.g. "try_reactivate_run"
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -109,10 +110,10 @@ def change_field(request, run_name):
         response.status_code = 404  # not found
         return response
 
-    id = request.POST["id"]
+    post_id = request.POST["id"]
     selected = request.POST["selected"]
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
-    fields_to_fill = parameters[id]["fill_dynamic"]
+    fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = []
     for key, param_dict in parameters.items():
