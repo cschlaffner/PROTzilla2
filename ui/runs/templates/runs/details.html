@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
+{% endblock %}
+
 {% block javascript %}
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
@@ -52,24 +57,6 @@
             });
         });
     </script>
-{% endblock %}
-{% block css %}
-    <style>
-        .layout-container {
-            display: flex;
-        }
-
-        main {
-            flex: 3;
-            padding: 20px;
-        }
-
-        aside {
-            flex: 1;
-            background-color: #87A8B9;
-            padding: 20px;
-        }
-    </style>
 {% endblock %}
 
 {% block content %}

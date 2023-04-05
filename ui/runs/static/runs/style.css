@@ -1,0 +1,14 @@
+.layout-container {
+    display: flex;
+}
+
+main {
+    flex: 3;
+    padding: 20px;
+}
+
+aside {
+    flex: 1;
+    background-color: #87A8B9;
+    padding: 20px;
+}
