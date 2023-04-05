@@ -148,7 +148,7 @@ def test_imputation_min_value_per_df(
     result_df = by_min_per_dataset(input_imputation_df, shrinking_value=0.1)[0]
 
     fig1, fig2 = by_min_per_dataset_plot(
-        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, result_df, {}, "Boxplot", "Bar chart", "Sample"
     )
     if show_figures:
         fig1.show()
@@ -173,7 +173,7 @@ def test_imputation_min_value_per_sample(
     result_df = by_min_per_sample(input_imputation_df, shrinking_value=0.2)[0]
 
     fig1, fig2 = by_min_per_sample_plot(
-        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, result_df, {}, "Boxplot", "Bar chart", "Sample"
     )
     if show_figures:
         fig1.show()
@@ -198,7 +198,7 @@ def test_imputation_min_value_per_protein(
     result_df = by_min_per_protein(input_imputation_df, shrinking_value=1.0)[0]
 
     fig1, fig2 = by_min_per_protein_plot(
-        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, result_df, {}, "Boxplot", "Bar chart", "Sample"
     )
     if show_figures:
         fig1.show()
@@ -226,7 +226,7 @@ def test_imputation_mean_per_protein(
     )[0]
 
     fig1, fig2 = by_simple_imputer_plot(
-        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, result_df, {}, "Boxplot", "Bar chart", "Sample"
     )
     if show_figures:
         fig1.show()
@@ -252,7 +252,7 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     )[0]
 
     fig1, fig2 = by_knn_plot(
-        input_imputation_df, result_df, ["Boxplot", "Bar chart"], "Sample"
+        input_imputation_df, result_df, {}, "Boxplot", "Bar chart", "Sample"
     )
     if show_figures:
         fig1.show()

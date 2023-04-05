@@ -33,15 +33,16 @@ class History:
                 df = pd.read_csv(df_path)
             else:
                 df = None
+            instance.step_names.append(step["name"])
             instance.steps.append(
                 ExecutedStep(
                     step["section"],
                     step["step"],
                     step["method"],
                     step["parameters"],
-                    df,
-                    df_path if df_path.exists() else None,
-                    step["outputs"],
+                    _dataframe=df,
+                    dataframe_path=df_path if df_path.exists() else None,
+                    outputs=step["outputs"],
                     plots=[],
                 )
             )
@@ -53,6 +54,7 @@ class History:
         self.df_mode = df_mode
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
+        self.step_names = []
         (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
     def add_step(
@@ -61,13 +63,15 @@ class History:
         step: str,
         method: str,
         parameters: dict,
-        dataframe: pd.DataFrame,
+        dataframe: pd.DataFrame | None,
         outputs: dict,
         plots: list,
+        name: str | None = None,
     ):
+        assert "dataframe" not in outputs, "output can not be named 'dataframe'"
         df_path = None
         df = None
-        if "disk" in self.df_mode:
+        if "disk" in self.df_mode and dataframe is not None:
             index = len(self.steps)
             df_path = self.df_path(index)
             df_path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,12 +79,52 @@ class History:
         if "memory" in self.df_mode:
             df = dataframe
         executed_step = ExecutedStep(
-            section, step, method, parameters, df, df_path, outputs, plots
+            section,
+            step,
+            method,
+            parameters,
+            df,
+            df_path,
+            outputs,
+            plots,
         )
         self.steps.append(executed_step)
+        self.step_names.append(None)
+        self.name_step(-1, name)  # to have checks only in name_step
+        if not name:  # not saved in name_step
+            self.save()
+
+    def name_step(self, index, name):
+        if not name:
+            return
+        assert (
+            self.step_names[index] is None
+        ), f"step already has a name: {self.step_names[index]}"
+        assert name not in self.step_names, f"name {name} is already taken"
+        self.step_names[index] = name
         self.save()
 
+    def output_keys_of_named_step(self, name):
+        if not name:
+            return []
+        for saved_name, step in zip(self.step_names, self.steps):
+            if saved_name == name:
+                options = list(step.outputs.keys())
+                if step.has_dataframe:
+                    options.insert(0, "dataframe")
+                return options
+        raise ValueError(f"no step named '{name}'")
+
+    def output_of_named_step(self, name, output):
+        for saved_name, step in zip(self.step_names, self.steps):
+            if saved_name == name:
+                if output == "dataframe":
+                    return step.dataframe
+                return step.outputs[output]
+        raise ValueError(f"no step named '{name}'")
+
     def pop_step(self):
+        self.step_names.pop()
         step = self.steps.pop()
         df = step.dataframe
         if "disk" in self.df_mode and step.dataframe_path:
@@ -95,10 +139,11 @@ class History:
                 section=step.section,
                 step=step.step,
                 method=step.method,
+                name=name,
                 parameters=step.parameters,
                 outputs=step.outputs,
             )
-            for step in self.steps
+            for name, step in zip(self.step_names, self.steps)
         ]
         history_json = CustomJSONEncoder(self.run_name, indent=2).encode(to_save)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
@@ -106,6 +151,9 @@ class History:
 
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
+
+    def number_of_steps_in_section(self, section):
+        return len(list(filter(lambda step: step.section == section, self.steps)))
 
 
 @dataclass(frozen=True)
@@ -123,6 +171,10 @@ class ExecutedStep:
     dataframe_path: Path | None
     outputs: dict
     plots: list
+
+    @property
+    def has_dataframe(self) -> bool:
+        return self._dataframe is not None or self.dataframe_path is not None
 
     @property
     def dataframe(self) -> pd.DataFrame | None:
