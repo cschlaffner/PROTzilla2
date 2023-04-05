@@ -10,9 +10,7 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
 from protzilla.run import Run
-from protzilla.workflow_manager import WorkflowManager
 
-workflow_manager = WorkflowManager()
 active_runs = {}
 
 
@@ -22,7 +20,7 @@ def index(request):
         "runs/index.html",
         context={
             "run_name_prefill": f"hello{123:03d}",
-            "available_workflows": workflow_manager.available_workflows,
+            "available_workflows": Run.available_workflows(),
             "available_runs": Run.available_runs(),
         },
     )
@@ -37,6 +35,8 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
+    elif param_dict["type"] == "named_output":
+        template = "runs/field_named.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -74,11 +74,17 @@ def get_current_fields(run, section, step, method):
     for key, param_dict in parameters.items():
         # todo use workflow default
         # todo 59 - restructure current_parameters
+        param_dict = param_dict.copy()  # to not change workflow_meta
         if run.current_parameters is not None:
-            param_dict["default"] = run.current_parameters.get(
-                key, param_dict["default"]
-            )
-
+            param_dict["default"] = run.current_parameters[key]
+        # move into make_parameter_input?
+        if param_dict["type"] == "named_output":
+            param_dict["steps"] = [name for name in run.history.step_names if name]
+            if param_dict["default"]:
+                selected = param_dict["default"][0]
+            else:
+                selected = param_dict["steps"][0] if param_dict["steps"] else None
+            param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -110,9 +116,14 @@ def detail(request, run_name):
             categories=run.workflow_meta[section][step].keys(),
         ),
     )
+    allow_next = run.result_df is not None
+    name_field = render_to_string(
+        "runs/field_text.html",
+        context=dict(disabled=not allow_next, key="name", name="Name:"),
+    )
     plot_fields = make_plot_fields(run, section, step, method)
     displayed_history = []
-    for history_step in run.history.steps:
+    for i, history_step in enumerate(run.history.steps):
         fields = []
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
@@ -128,13 +139,18 @@ def detail(request, run_name):
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
+                if param_dict["type"] == "named_output":
+                    param_dict["steps"] = [param_dict["default"][0]]
+                    param_dict["outputs"] = [param_dict["default"][1]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
             dict(
-                name=name,
+                location=name,
                 fields=fields,
                 plots=[p.to_html() for p in history_step.plots],
+                name=run.history.step_names[i],
+                index=i,
             )
         )
 
@@ -153,6 +169,7 @@ def detail(request, run_name):
             method_dropdown=method_dropdown,
             fields=current_fields,
             plot_fields=plot_fields,
+            name_field=name_field,
             current_plots=[plot.to_html() for plot in run.plots],
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
@@ -212,7 +229,7 @@ def continue_(request):
 
 def next_(request, run_name):
     run = active_runs[run_name]
-    run.next_step()
+    run.next_step(request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -265,14 +282,21 @@ def plot(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
+def add_name(request, run_name):
+    run = active_runs[run_name]
+    run.history.name_step(int(request.POST["index"]), request.POST["name"])
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
 def parameters_from_post(post):
     d = dict(post)
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        if len(v) > 1:
-            raise ValueError(f"parameter {k} was used as a form key twice, values: {v}")
-        parameters[k] = convert_str_if_possible(v[0])
+        if len(v) > 1:  # only used for named_output parameters
+            parameters[k] = tuple(v)
+        else:
+            parameters[k] = convert_str_if_possible(v[0])
     return parameters
 
 
@@ -282,3 +306,9 @@ def convert_str_if_possible(s):
     except ValueError:
         return s
     return int(f) if int(f) == f else f
+
+
+def outputs_of_step(request, run_name):
+    run = active_runs[run_name]
+    step_name = request.POST["step_name"]
+    return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)

@@ -29,7 +29,28 @@
                     console.log('Error:', e);
                     alert(e.responseJSON.error); // alert error message to user
                 })
-            })
+            });
+            $("#method_parameters").on("change", ".named", function () {
+                const id = $(this).attr("id");
+                const step_name = $(this).val();
+                console.log(id, step_name)
+                $.ajax({
+                    url: "{% url 'runs:outputs_of_step' run_name %}",
+                    type: "POST",
+                    data: {
+                        step_name: step_name,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        console.log(response)
+                        const outputs = $(`#${id}_outputs`);
+                        outputs.empty();
+                        $.each(response, function (index, value) {
+                            outputs.append($("<option></option>").attr("value", value).text(value))
+                        })
+                    }
+                })
+            });
         });
     </script>
     <title>PROTzilla {{ run_name }}</title>
@@ -68,10 +89,16 @@
 <br>
 <main>
 {% for step in displayed_history %}
-    {{ step.name }}<br>
+    {{ step.location }}<br>
     {% for field in step.fields %}
         {{ field }}<br>
     {% endfor %}
+    {% if step.name %}
+        Name: {{ step.name }}<br>
+    {% else %}
+        {% include "runs/form_add_name.html" with index=step.index %}
+    {% endif %}
+
     {% for plot in step.plots %}
         <div style="width:600;height:500">
             {{ plot|safe }}
@@ -108,6 +135,7 @@
 
 <form action="{% url 'runs:next' run_name %}" method="post">
     {% csrf_token %}
+    {{ name_field }}
     <button {% if not show_next %} disabled {% endif %}>Next</button>
 </form>
 
