@@ -76,7 +76,7 @@
 {% if messages %}
     <div class="messages">
         {% for message in messages %}
-            <p>{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>
                 {{ message | safe }}
             </p>
         {% endfor %}
