@@ -2,6 +2,7 @@ import json
 import shutil
 from pathlib import Path
 from shutil import rmtree
+import traceback
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
@@ -185,6 +186,7 @@ class Run:
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
+            traceback.print_exc()
         else:  # continue normally when no error occurs
             self.df = self.result_df
             self.result_df = None

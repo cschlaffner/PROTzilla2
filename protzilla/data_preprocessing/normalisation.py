@@ -1,3 +1,5 @@
+import traceback
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
@@ -91,8 +93,8 @@ def by_median(
                     \nadapting your filtering strategy or using a higher\
                     \nquantile for normalisation."
                 )
-            except ValueError as error:
-                print(error)
+            except ValueError:
+                traceback.print_exc()
                 df_sample[f"Normalised {intensity_name}"] = 0
                 zeroed_samples.append(sample)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
@@ -147,8 +149,8 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                     \nfiltering strategies such as filtering non- or low\
                     \nintensity samples."
                 )
-            except ValueError as error:
-                print(error)
+            except ValueError:
+                traceback.print_exc()
                 df_sample[f"Normalised {intensity_name}"] = 0
                 zeroed_samples_list.append(sample)
 
@@ -196,7 +198,7 @@ def by_reference_protein(
         try:
             raise ValueError("The protein was not found")
         except ValueError as error:
-            print(error)
+            traceback.print_exc()
         return scaled_df, pd.DataFrame(dropped_samples, columns=["Dropped Samples"])
 
     samples = intensity_df["Sample"].unique().tolist()
