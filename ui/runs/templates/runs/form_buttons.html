@@ -1,6 +1,7 @@
 <script>
     let current_parameters
     let current_plot_parameters
+    let calc_params_match
 
     function get_current_parameters(callback) {
         $.ajax({
@@ -100,11 +101,9 @@
 
     equal_plot_parameters = function (form) {
         let form_data = get_clean_form_data(form)
-
         if (isEmptyDict(current_plot_parameters)) {
             return false
         }
-
         for (let key in current_plot_parameters) {
             if (form_data.hasOwnProperty(key)) {
                 let value = current_plot_parameters[key]
@@ -125,14 +124,16 @@
         calc_form.addEventListener('change', function () {
             if (equal_calc_parameters($(this))) {
                 disable_calc(true)
+                calc_params_match = true
             } else {
                 disable_calc(false)
+                calc_params_match = false
                 trigger_plot_change()
             }
         })
 
         plot_form.addEventListener('change', function () {
-            if (results_exist !== true) {
+            if (results_exist !== true || calc_params_match !== true) {
                 disable_plot(true)
                 return
             }
