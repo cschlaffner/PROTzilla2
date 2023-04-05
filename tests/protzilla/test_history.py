@@ -136,6 +136,7 @@ def test_number_of_steps_in_section(sample_step_params):
 
     assert history.number_of_steps_in_section("section2") == 1
     assert history.number_of_steps_in_section("section1") == 4
+    rmtree(RUNS_PATH / name)
 
 
 def test_history_step_naming():

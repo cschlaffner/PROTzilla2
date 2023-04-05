@@ -150,9 +150,11 @@ class Run:
                     trace = f"\nTrace: {message['trace']}" if "trace" in message else ""
                     log_function(f"{message['msg']}{trace}")
 
-    def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
+    def calculate_and_next(
+        self, method_callable, name=None, **parameters
+    ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
-        self.next_step()
+        self.next_step(name=name)
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
@@ -193,7 +195,7 @@ class Run:
 
         self.write_local_workflow()
 
-    def next_step(self):
+    def next_step(self, name):
         try:
             self.history.add_step(
                 self.section,

@@ -31,7 +31,7 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_number.html"
         if "step" not in param_dict:
             param_dict["step"] = "any"
-    elif param_dict["type"] == "categorical":
+    elif param_dict["type"] in ["categorical", "protein_dropdown"]:
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
@@ -85,6 +85,8 @@ def get_current_fields(run, section, step, method):
             else:
                 selected = param_dict["steps"][0] if param_dict["steps"] else None
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        elif param_dict["type"] == "protein_dropdown":
+            param_dict["categories"] = run.df["Protein ID"].unique().tolist()
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
