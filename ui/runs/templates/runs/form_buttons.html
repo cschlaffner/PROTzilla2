@@ -86,17 +86,20 @@
         }
 
         let form_data = get_clean_form_data(form)
-        for (let key in current_parameters) {
-            if (form_data.hasOwnProperty(key)) {
-                let value = current_parameters[key]
-                if (form_data[key] != value) {
-                    return false
-                }
-            } else {
-                return false
-            }
-        }
-        return true
+        {#for (let key in current_parameters) {#}
+        {#    if (form_data.hasOwnProperty(key)) {#}
+        {#        let value = current_parameters[key]#}
+        {#        if (form_data[key] != value) {#}
+        {#            return false#}
+        {#        }#}
+        {#    } else {#}
+        {#        return false#}
+        {#    }#}
+        {# }#}
+        {#return true#}
+        return Object.keys(current_parameters).every(key =>
+            form_data.hasOwnProperty(key) && form_data[key] == current_parameters[key]
+        );
     }
 
     equal_plot_parameters = function (form) {
@@ -104,17 +107,21 @@
         if (isEmptyDict(current_plot_parameters)) {
             return false
         }
-        for (let key in current_plot_parameters) {
-            if (form_data.hasOwnProperty(key)) {
-                let value = current_plot_parameters[key]
-                if (form_data[key] != value) {
-                    return false
-                }
-            } else {
-                return false
-            }
-        }
-        return true
+        {#for (let key in current_plot_parameters) {#}
+        {#    if (form_data.hasOwnProperty(key)) {#}
+        {#        let value = current_plot_parameters[key]#}
+        {#        if (form_data[key] != value) {#}
+        {#            return false#}
+        {#        }#}
+        {#    } else {#}
+        {#        return false#}
+        {#    }#}
+        {# }#}
+        {#return true#}
+
+        return Object.keys(current_plot_parameters).every(key =>
+            form_data.hasOwnProperty(key) && form_data[key] == current_plot_parameters[key]
+        );
     }
 
     $(document).ready(function () {
