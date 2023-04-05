@@ -2,6 +2,7 @@
     let current_parameters
     let current_plot_parameters
     let calc_params_match
+    let plotted_for_parameters
 
     function get_current_parameters(callback) {
         $.ajax({
@@ -45,6 +46,20 @@
         })
     }
 
+    async function get_plotted_for_parameters(callback) {
+        $.ajax({
+            url: "{% url 'runs:plotted_for_parameters' run_name %}",
+            type: "GET",
+            success: function (response) {
+                plotted_for_parameters = response
+                callback()
+            }
+        }).fail(function (e) {
+            console.log('Error', e);
+            alert(e.responseJSON.error)
+        })
+    }
+
     get_clean_form_data = function (form) {
         let formDataArray = form.serializeArray()
         let formDataDict = {};
@@ -78,6 +93,15 @@
             const plot_form = document.querySelector('#plot_form');
             plot_form.dispatchEvent(new Event('change'));
         })
+    }
+
+    function plotted_current_match() {
+        if (isEmptyDict(plotted_for_parameters) === true) {
+            return false
+        }
+        return Object.keys(current_parameters).every(key =>
+            plotted_for_parameters.hasOwnProperty(key) && plotted_for_parameters[key] == current_parameters[key]
+        );
     }
 
     equal_calc_parameters = function (form) {
@@ -140,6 +164,11 @@
         })
 
         plot_form.addEventListener('change', function () {
+            if (plotted_current_match() === false) {
+                disable_plot(false)
+                return
+            }
+
             if (results_exist !== true || calc_params_match !== true) {
                 disable_plot(true)
                 return
@@ -153,7 +182,9 @@
 
         get_current_parameters(function () {
             get_current_plot_parameters(function () {
-                initial_trigger()
+                get_plotted_for_parameters(function () {
+                    initial_trigger()
+                })
             })
         })
 
