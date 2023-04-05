@@ -86,7 +86,8 @@ def get_current_fields(run, section, step, method):
             if param_dict["fill"] == "metadata_columns":
                 # Sample not needed for anova and t-test
                 param_dict["categories"] = run.metadata.columns[
-                    run.metadata.columns != "Sample"].unique()
+                    run.metadata.columns != "Sample"
+                ].unique()
             elif param_dict["fill"] == "metadata_column_data":
                 # per default fill with second column data since it is selected in dropdown
                 param_dict["categories"] = run.metadata.iloc[:, 1].unique()
