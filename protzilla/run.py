@@ -65,6 +65,7 @@ class Run:
         self.current_out = None
         self.current_parameters = None
         self.current_plot_parameters = None
+        self.plotted_for_parameters = None
         self.plots = []
 
     def perform_calculation_from_location(self, section, step, method, parameters):
@@ -96,6 +97,7 @@ class Run:
             self.df, self.result_df, self.current_out, **parameters
         )
         self.current_plot_parameters = parameters
+        self.plotted_for_parameters = self.current_parameters
 
     def next_step(self):
         self.history.add_step(
@@ -112,6 +114,7 @@ class Run:
         self.step_index += 1
         self.current_parameters = None
         self.current_plot_parameters = None
+        self.plotted_for_parameters = None
         self.plots = []
         self.section, self.step, self.method = self.current_workflow_location()
 
@@ -126,6 +129,9 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
         self.current_plot_parameters = None
+        self.plotted_for_parameters = (
+            None  # maybe current_parameters-> only if plots exist
+        )
         self.plots = popped_step.plots
         self.step_index -= 1
 

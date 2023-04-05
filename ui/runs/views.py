@@ -259,6 +259,13 @@ def results_exist(request, run_name):
     return JsonResponse(d)
 
 
+def plotted_for_parameters(request, run_name):
+    run = active_runs[run_name]
+    if run.plotted_for_parameters is None:
+        return JsonResponse(dict())
+    return JsonResponse(run.plotted_for_parameters)
+
+
 def convert_str_if_possible(s):
     try:
         f = float(s)

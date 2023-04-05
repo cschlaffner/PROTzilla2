@@ -24,4 +24,9 @@ urlpatterns = [
         name="current_plot_parameters",
     ),
     path("<str:run_name>/reults_exist/", views.results_exist, name="results_exist"),
+    path(
+        "<str:run_name>/plotted_for_params/",
+        views.plotted_for_parameters,
+        name="plotted_for_parameters",
+    ),
 ]
