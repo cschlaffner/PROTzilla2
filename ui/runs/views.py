@@ -144,6 +144,8 @@ def detail(request, run_name):
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
+                elif param_dict["type"] == "protein_dropdown":
+                    param_dict["categories"] = [param_dict["default"]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
             name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
