@@ -5,14 +5,21 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR
 
+from ui.main.settings import BASE_DIR
 from ui.runs.fields import (
     make_add_step_dropdown,
+    make_displayed_history,
+    make_highlighted_workflow_steps,
+    make_method_dropdown,
+    make_name_field,
     make_parameter_input,
     make_plot_fields,
 )
-from ui.runs.views_helper import get_current_fields, parameters_from_post
+from ui.runs.views_helper import (
+    get_current_fields,
+    parameters_from_post,
+)
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
@@ -38,78 +45,25 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    current_fields = get_current_fields(run, section, step, method)
-    method_dropdown = render_to_string(
-        "runs/field_select.html",
-        context=dict(
-            disabled=False,
-            key="chosen_method",
-            name=f"{step.replace('_', ' ').title()} Method:",
-            default=method,
-            categories=run.workflow_meta[section][step].keys(),
-        ),
-    )
     allow_next = run.result_df is not None
-    name_field = render_to_string(
-        "runs/field_text.html",
-        context=dict(disabled=not allow_next, key="name", name="Name:"),
-    )
-    plot_fields = make_plot_fields(run, section, step, method)
-    displayed_history = []
-    for i, history_step in enumerate(run.history.steps):
-        fields = []
-        parameters = run.workflow_meta[history_step.section][history_step.step][
-            history_step.method
-        ]["parameters"]
-        if history_step.section == "importing":
-            name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file_path'].split('/')[-1]}"
-            df_head = (
-                history_step.dataframe.head()
-                if history_step.step == "ms_data_import"
-                else run.metadata.head()
-            )
-            fields = [df_head.to_string()]
-        else:
-            for key, param_dict in parameters.items():
-                param_dict["default"] = history_step.parameters[key]
-                if param_dict["type"] == "named_output":
-                    param_dict["steps"] = [param_dict["default"][0]]
-                    param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
-            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
-        displayed_history.append(
-            dict(
-                location=name,
-                fields=fields,
-                plots=[p.to_html() for p in history_step.plots],
-                name=run.history.step_names[i],
-                index=i,
-            )
-        )
-
-    workflow_steps = workflow_helper.get_all_steps(run.workflow_config)
-    highlighted_workflow_steps = [
-        {"name": step, "highlighted": False} for step in workflow_steps
-    ]
-    highlighted_workflow_steps[run.step_index]["highlighted"] = True
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
             location=f"{run.section}/{run.step}",
-            displayed_history=displayed_history,
-            method_dropdown=method_dropdown,
-            fields=current_fields,
-            plot_fields=plot_fields,
-            name_field=name_field,
+            displayed_history=make_displayed_history(run),
+            method_dropdown=make_method_dropdown(run, section, step, method),
+            fields=get_current_fields(run, section, step, method),
+            plot_fields=make_plot_fields(run, section, step, method),
+            name_field=make_name_field(allow_next),
             current_plots=[plot.to_html() for plot in run.plots],
             # TODO add not able to plot when no plot method
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar_dropdown=make_add_step_dropdown(run, section),
-            workflow_steps=highlighted_workflow_steps,
+            workflow_steps=make_highlighted_workflow_steps(run),
         ),
     )
 
