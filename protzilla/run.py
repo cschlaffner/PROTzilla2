@@ -172,25 +172,30 @@ class Run:
         self.write_local_workflow()
 
     def next_step(self):
-        self.history.add_step(
-            self.section,
-            self.step,
-            self.method,
-            self.current_parameters,
-            self.result_df,
-            self.current_out,
-            self.plots,
-        )
-        self.df = self.result_df
-        self.result_df = None
-        self.step_index += 1
-        self.current_parameters = None
-        self.current_plot_parameters = None
-        self.plots = []
         try:
-            self.section, self.step, self.method = self.current_workflow_location()
-        except IndexError:
-            self.handle_all_steps_completed()
+            self.history.add_step(
+                self.section,
+                self.step,
+                self.method,
+                self.current_parameters,
+                self.result_df,
+                self.current_out,
+                self.plots,
+            )
+        except TypeError:  # catch error when serializing json
+            # remove "broken" step from history again
+            self.history.pop_step()
+        else:  # continue normally when no error occurs
+            self.df = self.result_df
+            self.result_df = None
+            self.step_index += 1
+            self.current_parameters = None
+            self.current_plot_parameters = None
+            self.plots = []
+            try:
+                self.section, self.step, self.method = self.current_workflow_location()
+            except IndexError:
+                self.handle_all_steps_completed()
 
     def back_step(self):
         assert self.history.steps
