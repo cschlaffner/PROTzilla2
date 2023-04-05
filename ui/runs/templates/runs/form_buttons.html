@@ -3,6 +3,7 @@
     let current_plot_parameters
     let calc_params_match
     let plotted_for_parameters
+    let calc_form_data
 
     function get_current_parameters(callback) {
         $.ajax({
@@ -64,13 +65,12 @@
         let formDataArray = form.serializeArray()
         let formDataDict = {};
         for (let i = 0; i < formDataArray.length; i++) {
-            let fieldName = formDataArray[i].name;
-            let fieldValue = formDataArray[i].value;
-            formDataDict[fieldName] = fieldValue;
+            formDataDict[formDataArray[i].name] = formDataArray[i].value;
         }
         delete formDataDict["csrfmiddlewaretoken"]
         return formDataDict
-    }
+     }
+
 
     disable_plot = function (bool) {
         $('#plot_parameters_submit').prop('disabled', bool)
@@ -92,7 +92,7 @@
     }
 
     function plotted_current_match() {
-        if (isEmptyDict(plotted_for_parameters) === true) {
+        if (isEmptyDict(plotted_for_parameters)) {
             return false
         }
         return Object.keys(current_parameters).every(key =>
@@ -106,6 +106,7 @@
         }
 
         let form_data = get_clean_form_data(form)
+        calc_form_data = form_data
         return Object.keys(current_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_parameters[key]
         );
@@ -138,16 +139,17 @@
         })
 
         plot_form.addEventListener('change', function () {
-            if (plotted_current_match() === false && results_exist) {
+            if (!calc_form_data || calc_form_data["chosen_method"] !== current_parameters["chosen_method"]) {
+                disable_plot(true)
+                return
+            }
+
+            if (!plotted_current_match() && results_exist) {
                 disable_plot(false)
                 return
             }
 
-            if (results_exist !== true || calc_params_match !== true) {
-                disable_plot(true)
-                return
-            }
-            if (equal_plot_parameters($(this))) {
+            if (equal_plot_parameters($(this)) || !calc_params_match) {
                 disable_plot(true)
             } else {
                 disable_plot(false)
