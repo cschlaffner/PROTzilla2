@@ -71,8 +71,12 @@ def test_differential_expression_t_test(show_figures):
     log2_fc = [-1, -0.0995, 0]
     de_proteins = ["Protein1"]
 
-    p_values_rounded = [round(x, 4) for x in current_out["corrected_p_values"]]
-    log2fc_rounded = [round(x, 4) for x in current_out["log2_fold_change"]]
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    log2fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
 
     assert (
         p_values_rounded == corrected_p_values
@@ -237,13 +241,16 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     # if show_figures:
     #     fig.show()
 
-    print(de_proteins_df)
     corrected_p_values = [0.0072, 1.000]
     log2_fc = [-1, 0]
     de_proteins = ["Protein1"]
 
-    p_values_rounded = [round(x, 4) for x in current_out["corrected_p_values"]]
-    log2fc_rounded = [round(x, 4) for x in current_out["log2_fold_change"]]
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    log2fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
 
     assert (
         p_values_rounded == corrected_p_values
@@ -324,10 +331,10 @@ def test_differential_expression_anova(show_figures):
         metadata_df=test_metadata_df,
         grouping="Group",
         selected_groups=test_metadata_df["Group"].unique().tolist(),
-        multiple_testing_correction_method="Bonferroni",
+        multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=0.05,
     )
-    p_values = output_dict["p_values"]
+    p_values = output_dict["corrected_p_values"]
 
     p_values_rounded = [round(x, 4) for x in p_values]
 
@@ -338,8 +345,8 @@ def test_differential_expression_anova(show_figures):
     #     fig.show()
 
     assertion_p_values = [
-        0.0036,
-        0.0004,
+        0.0054,
+        0.0013,
         1.0000,
     ]
 

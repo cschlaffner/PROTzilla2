@@ -39,7 +39,7 @@ def anova(
 
     :return: a dataframe in typical protzilla long format
     with the differentially expressed proteins and a dict, containing
-    the corrected p-values and the log2 fold change, the alpha used 
+    the corrected p-values and the log2 fold change, the alpha used
     and the corrected alpha, as well as filtered out proteins.
     """
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
@@ -84,4 +84,7 @@ def anova(
     if corrected_alpha is None:
         corrected_alpha = alpha
 
-    return tested_df, {"p_values": p_values, "corrected_alpha": corrected_alpha}
+    return tested_df, {
+        "corrected_p_values": corrected_p_values,
+        "corrected_alpha": corrected_alpha,
+    }

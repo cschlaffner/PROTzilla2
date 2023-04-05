@@ -22,7 +22,7 @@ def t_test(
     A function to conduct a two sample t-test between groups defined in the
     clinical data. The t-test is conducted on the level of each protein.
     The p-values are corrected for multiple testing.
-     
+
     :param intensity_df: the dataframe that should be tested in long
         format
     :type intensity_df: pandas DataFrame
@@ -43,7 +43,7 @@ def t_test(
 
     :return: a dataframe in typical protzilla long format
     with the differentially expressed proteins and a dict, containing
-    the corrected p-values and the log2 fold change, the alpha used 
+    the corrected p-values and the log2 fold change, the alpha used
     and the corrected alpha, as well as filtered out proteins.
     :rtype: Tuple[pandas DataFrame, dict]
     """
@@ -116,13 +116,23 @@ def t_test(
     ]
     de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
 
+    corrected_p_values_df = pd.DataFrame(
+        list(zip(proteins, corrected_p_values)),
+        columns=["Protein ID", "corrected_p_value"],
+    )
+
+    log2_fold_change_df = pd.DataFrame(
+        list(zip(proteins, log2_fold_change)),
+        columns=["Protein ID", "log2_fold_change"],
+    )
+
     if len(filtered_proteins) > 0:
         msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
         return (
             de_proteins_df,
             dict(
-                corrected_p_values=corrected_p_values,
-                log2_fold_change=log2_fold_change,
+                corrected_p_values_df=corrected_p_values_df,
+                log2_fold_change_df=log2_fold_change_df,
                 fc_threshold=fc_threshold,
                 alpha=alpha,
                 corrected_alpha=corrected_alpha,
@@ -134,8 +144,8 @@ def t_test(
     return (
         de_proteins_df,
         dict(
-            corrected_p_values=corrected_p_values,
-            log2_fold_change=log2_fold_change,
+            corrected_p_values_df=corrected_p_values_df,
+            log2_fold_change_df=log2_fold_change_df,
             fc_threshold=fc_threshold,
             alpha=alpha,
             corrected_alpha=corrected_alpha,
