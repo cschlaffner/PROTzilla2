@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script>let results_exist = '{{ show_next }}'</script>
     {% include 'runs/change_method.html' %}
-{#    <script src="{% static 'runs/change_method.html' %}"></script>#}
-    <script src="{% static 'runs/form_buttons.js' %}"></script>
+    {% include 'runs/form_buttons.html' %}
     <title>PROTzilla</title>
 </head>
 <body>
@@ -63,7 +63,7 @@
         <div id="plot_parameters">
             {% include "runs/fields.html" with fields=plot_fields %}
         </div>
-        <input type="submit" id="plot_parameters_submit" value="Plot" {% if not show_next %} disabled {% endif %} >
+        <input type="submit" id="plot_parameters_submit" value="Plot">
     </form>
 
     {% if current_plots %}
@@ -77,12 +77,12 @@
     {% endif %}
 </div>
 <div id="nav_buttons">
-    <form action="{% url 'runs:next' run_name %}" method="post">
+    <form action="{% url 'runs:next' run_name %}" id="next_form" method="post">
         {% csrf_token %}
         <button {% if not show_next %} disabled {% endif %}>Next</button>
     </form>
 
-    <form action="{% url 'runs:back' run_name %}" method="post">
+    <form action="{% url 'runs:back' run_name %}" id="back_form" method="post">
         {% csrf_token %}
         <button {% if not show_back %} disabled {% endif %}>Back</button>
     </form>

@@ -237,6 +237,28 @@ def parameters_from_post(post):
     return parameters
 
 
+def current_parameters(request, run_name):
+    run = active_runs[run_name]
+    if run.current_parameters is None or run.result_df is None:
+        return JsonResponse(dict())
+    d = run.current_parameters
+    d["chosen_method"] = run.method
+    return JsonResponse(d)
+
+
+def current_plot_parameters(request, run_name):
+    run = active_runs[run_name]
+    if run.current_plot_parameters is None:
+        return JsonResponse(dict())
+    return JsonResponse(run.current_plot_parameters)
+
+
+def results_exist(request, run_name):
+    run = active_runs[run_name]
+    d = dict(results_exist=run.result_df is not None)
+    return JsonResponse(d)
+
+
 def convert_str_if_possible(s):
     try:
         f = float(s)

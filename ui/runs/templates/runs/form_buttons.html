@@ -1,0 +1,194 @@
+<script>
+    let current_parameters
+    let current_plot_parameters
+
+    function get_current_parameters(callback) {
+        $.ajax({
+            url: "{% url 'runs:current_parameters' run_name %}",
+            type: "GET",
+            success: function (response) {
+                current_parameters = response
+                console.log("get calc:", current_parameters)
+                callback()
+            }
+        }).fail(function (e) {
+            console.log('Error', e);
+            alert(e.responseJSON.error)
+        })
+    }
+
+    async function get_current_plot_parameters(callback) {
+        $.ajax({
+            url: "{% url 'runs:current_plot_parameters' run_name %}",
+            type: "GET",
+            success: function (response) {
+                current_plot_parameters = response
+                console.log("get plot:", current_plot_parameters)
+                callback()
+            }
+        }).fail(function (e) {
+            console.log('Error', e);
+            alert(e.responseJSON.error)
+        })
+    }
+
+    async function get_results_exist(callback) {
+        $.ajax({
+            url: "{% url 'runs:results_exist' run_name %}",
+            type: "GET",
+            success: function (response) {
+                results_exist = response["results_exist"]
+                // console.log("from get: results exist", results_exist)
+                callback()
+            }
+        }).fail(function (e) {
+            console.log('Error', e);
+            alert(e.responseJSON.error)
+        })
+    }
+
+    get_clean_form_data = function (form) {
+        let formDataArray = form.serializeArray()
+        let formDataDict = {};
+        for (let i = 0; i < formDataArray.length; i++) {
+            let fieldName = formDataArray[i].name;
+            let fieldValue = formDataArray[i].value;
+            formDataDict[fieldName] = fieldValue;
+        }
+        delete formDataDict["csrfmiddlewaretoken"]
+        return formDataDict
+    }
+
+    disable_plot = function (bool) {
+        $('#plot_parameters_submit').prop('disabled', bool)
+    }
+
+    disable_calc = function (bool) {
+        $('#calculate_parameters_submit').prop('disabled', bool)
+    }
+
+
+    async function initial_exec() {
+        await get_current_parameters()
+        await get_current_plot_parameters()
+        $(document).trigger('initial_change')
+    }
+
+    function initial_trigger() {
+        $(document).trigger('initial_change')
+    }
+
+    function isEmptyDict (obj) {
+        return Object.keys(obj).length == 0
+    }
+
+    function trigger_plot_change(){
+        get_results_exist(function () {
+            const plot_form = document.querySelector('#plot_form');
+            plot_form.dispatchEvent(new Event('change'));
+        })
+    }
+
+    equal_calc_parameters = function (form) {
+        console.log("check if calc params equal")
+
+        if (isEmptyDict(current_parameters)){
+            return false
+        }
+
+        let form_data = get_clean_form_data(form)
+        console.log("calc form_data", form_data)
+        console.log("curr_params", current_parameters)
+        for (let key in current_parameters) {
+            console.log("k:", key)
+            if (form_data.hasOwnProperty(key)) {
+                let value = current_parameters[key]
+                console.log("k, v", key, value)
+                if (form_data[key] != value) {
+                    console.log(form_data[key], value)
+                    console.log("unequal calc args")
+                    return false
+                }
+            } else {
+                return false
+            }
+        }
+        return true
+    }
+
+    equal_plot_parameters = function (form) {
+        let form_data = get_clean_form_data(form)
+
+        if (isEmptyDict(current_plot_parameters)){
+            console.log("current_plot_params is empty")
+            return false
+        }
+
+        console.log("plot form_data", form_data)
+        console.log("curr_plot_params", current_plot_parameters)
+        for (let key in current_plot_parameters) {
+            if (form_data.hasOwnProperty(key)) {
+                let value = current_plot_parameters[key]
+                console.log("k, v", key, value)
+                if (form_data[key] != value) {
+                    console.log(form_data[key], value)
+                    console.log("unequal plot args")
+                    return false
+                }
+            } else {
+                return false
+            }
+        }
+        console.log("equal plot args")
+        return true
+    }
+
+    $(document).ready(function () {
+        console.log("bla")
+
+        const calc_form = document.querySelector('#calc_form');
+        const plot_form = document.querySelector('#plot_form');
+
+        calc_form.addEventListener('change', function () {
+            console.log("calc change")
+            if (equal_calc_parameters($(this))) {
+                console.log("calc args equal!")
+                disable_calc(true)
+            } else {
+                console.log("calc args NOT equal!")
+                disable_calc(false)
+                trigger_plot_change()
+                // plot_form.dispatchEvent(new Event('change'));
+            }
+        })
+
+        plot_form.addEventListener('change', function () {
+            console.log("plot change")
+            console.log("post get results", results_exist)
+            if (results_exist !== true) {
+                console.log("results dont exist -> disable plot")
+                disable_plot(true)
+                return
+            }
+            if (equal_plot_parameters($(this))) {
+                disable_plot(true)
+            } else {
+                disable_plot(false)
+            }
+        });
+
+        get_current_parameters(function () {
+            get_current_plot_parameters(function () {
+                initial_trigger()
+            })
+        })
+
+    })
+
+    $(document).on('initial_change', function () {
+        // alert('initial change')
+        const calc_form = document.querySelector('#calc_form');
+        calc_form.dispatchEvent(new Event('change'));
+        trigger_plot_change()
+    })
+</script>
