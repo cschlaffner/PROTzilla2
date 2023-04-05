@@ -165,9 +165,7 @@ def by_pca(
             Should be 2 or 3, but is {number_of_components}."
 
         transformed_df = long_to_wide(intensity_df)
-
         pca_model = PCA(n_components=number_of_components)
-
         pca_model.fit(transformed_df)
 
         if number_of_components == 2:
@@ -176,7 +174,7 @@ def by_pca(
                 index=transformed_df.index,
                 columns=["Component 1", "Component 2"],
             )
-        elif number_of_components == 3:
+        else:
             df_transformed_pca_data = pd.DataFrame(
                 pca_model.transform(transformed_df),
                 index=transformed_df.index,
@@ -184,7 +182,6 @@ def by_pca(
             )
 
         # Detect outliers in the transformed data.
-
         medians = df_transformed_pca_data.median()
         stdevs = df_transformed_pca_data.std()
 
@@ -198,11 +195,7 @@ def by_pca(
                     df_transformed_pca_data["Component 2"],
                 )
             ]
-            outlier_list = df_transformed_pca_data[
-                df_transformed_pca_data["Outlier"]
-            ].index.tolist()
-
-        elif number_of_components == 3:
+        else:
             df_transformed_pca_data["Outlier"] = [
                 (x - medians[0]) ** 2 / (threshold * stdevs[0]) ** 2
                 + (y - medians[1]) ** 2 / (threshold * stdevs[1]) ** 2
@@ -214,16 +207,15 @@ def by_pca(
                     df_transformed_pca_data["Component 3"],
                 )
             ]
-            outlier_list = df_transformed_pca_data[
-                df_transformed_pca_data["Outlier"]
-            ].index.tolist()
-
+        outlier_list = df_transformed_pca_data[
+            df_transformed_pca_data["Outlier"]
+        ].index.tolist()
         intensity_df = intensity_df[~(intensity_df["Sample"].isin(outlier_list))]
 
         return intensity_df, dict(
             outlier_list=outlier_list,
             pca_df=df_transformed_pca_data,
-            explained_variance_ratio=pca_model.explained_variance_ratio_,
+            explained_variance_ratio=list(pca_model.explained_variance_ratio_),
             number_of_components=number_of_components,
         )
     except ValueError as e:
