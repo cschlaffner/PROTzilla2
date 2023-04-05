@@ -198,7 +198,7 @@ def by_reference_protein(
         try:
             raise ValueError("The protein was not found")
         except ValueError as error:
-            traceback.print_exc()
+            print(str(error))
         return scaled_df, pd.DataFrame(dropped_samples, columns=["Dropped Samples"])
 
     samples = intensity_df["Sample"].unique().tolist()
