@@ -1,3 +1,4 @@
+from ..data_analysis import differential_expression
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -14,6 +15,12 @@ determined by the section, step, and method keys found in the workflow_meta
 file that correspond to the method.
 """
 method_map = {
+    (
+        "data_analysis",
+        "differential_expression",
+        "test_named",
+    ): lambda df, **kwargs: print("warning: not implemented")
+    or (df, {}),
     (
         "importing",
         "ms_data_import",
@@ -110,6 +117,11 @@ method_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
+    (
+        "data_analysis",
+        "differential_expression",
+        "anova",
+    ): differential_expression.anova,
 }
 
 # reversed mapping of method callable and location

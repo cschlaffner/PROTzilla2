@@ -12,21 +12,26 @@ urlpatterns = [
     path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/next", views.next_, name="next"),
     path("<str:run_name>/back", views.back, name="back"),
-    path("<str:run_name>/change_method/", views.change_method, name="change_method"),
+    path("<str:run_name>/change_method", views.change_method, name="change_method"),
     path(
-        "<str:run_name>/current_parameters/",
+        "<str:run_name>/current_parameters",
         views.current_parameters,
         name="current_parameters",
     ),
     path(
-        "<str:run_name>/current_plot_parameters/",
+        "<str:run_name>/current_plot_parameters",
         views.current_plot_parameters,
         name="current_plot_parameters",
     ),
-    path("<str:run_name>/reults_exist/", views.results_exist, name="results_exist"),
+    path("<str:run_name>/results_exist", views.results_exist, name="results_exist"),
     path(
-        "<str:run_name>/plotted_for_params/",
+        "<str:run_name>/plotted_for_params",
         views.plotted_for_parameters,
         name="plotted_for_parameters",
     ),
+    path("<str:run_name>/add_name", views.add_name, name="add_name"),
+    path(
+        "<str:run_name>/outputs_of_step", views.outputs_of_step, name="outputs_of_step"
+    ),
+    path("<str:run_name>/add", views.add, name="add"),
 ]

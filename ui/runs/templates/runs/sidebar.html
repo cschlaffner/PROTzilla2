@@ -1,0 +1,16 @@
+{# some text params: run_name workflow_steps sidebar_dropdown #}
+
+<h3>Side Panel</h3>
+<form action="{% url 'runs:add' run_name %}" method="post">
+    {% csrf_token %}
+    {{ sidebar_dropdown }}
+    <button>add</button>
+</form>
+
+{% for step in workflow_steps %}
+    <p>
+        {% if step.highlighted %} <b> {% endif %}
+        {{ step.name }}
+        {% if step.highlighted %} </b> {% endif %}
+    </p>
+{% endfor %}
