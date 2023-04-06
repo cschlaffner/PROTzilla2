@@ -9,13 +9,6 @@
           "parameters": {
             "intensity_param": "iBAQ"
           }
-        },
-        {
-          "name": "metadata_import",
-          "method": "metadata_import_method",
-          "parameters": {
-            "feature_orientation": "Rows (features in rows, samples in columns)"
-          }
         }
       ]
     },
@@ -79,11 +72,6 @@
         {
           "name": "differential_expression",
           "method": "anova",
-          "parameters": {}
-        },
-        {
-          "name": "differential_expression",
-          "method": "t_test",
           "parameters": {}
         }
       ]

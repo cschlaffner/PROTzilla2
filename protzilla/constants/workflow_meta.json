@@ -15,9 +15,10 @@
             ],
             "default": "Intensity"
           },
-          "file": {
+          "file_path": {
             "name": "MaxQuant intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       },
@@ -35,9 +36,10 @@
             ],
             "default": "Intensity"
           },
-          "file": {
+          "file_path": {
             "name": "MSFragger intensities file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -54,11 +56,12 @@
               "Rows (features in rows, samples in columns)",
               "Columns (samples in rows, features in columns)"
             ],
-            "default": "Rows (features in rows, samples in columns)"
+            "default": "Columns (samples in rows, features in columns)"
           },
-          "file": {
+          "file_path": {
             "name": "Metadata file:",
-            "type": "file"
+            "type": "file",
+            "default": null
           }
         }
       }
@@ -162,7 +165,7 @@
             "step": 1,
             "default": 2
           },
-          "no_components": {
+          "number_of_components": {
             "name": "Number of components:",
             "type": "numeric",
             "min": 2,
@@ -179,7 +182,7 @@
         "name": "Isolation forest",
         "description": "",
         "parameters": {
-          "no_estimators": {
+          "n_estimators": {
             "name": "Number of estimators:",
             "type": "numeric",
             "min": 1,
@@ -282,8 +285,7 @@
       "totalsum": {
         "name": "Sumtotal normalisation",
         "description": "",
-        "parameters": {
-        },
+        "parameters": {},
         "graphs": [
           {
             "graph_type": {
@@ -417,7 +419,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -465,7 +467,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -513,7 +515,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -535,7 +537,7 @@
             "categories": [
               "mean",
               "median",
-              "most frequent"
+              "most_frequent"
             ],
             "default": "median"
           }
@@ -563,7 +565,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -611,7 +613,7 @@
             }
           },
           {
-            "graph_type": {
+            "graph_type_quantites": {
               "name": "Graph type – Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -637,6 +639,22 @@
         "name": "T_Test",
         "description": "Statistical test assuming a t_distribution:",
         "parameters": {}
+      },
+      "test_named": {
+        "name": "this should have a named input",
+        "description": "",
+        "parameters": {
+          "my_named_param": {
+            "name": "this should be a named param:",
+            "type": "named_output",
+            "default": null
+          },
+          "second_named": {
+            "name": "another one:",
+            "type": "named_output",
+            "default": null
+          }
+        }
       }
     }
   },

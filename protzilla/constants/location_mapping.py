@@ -1,12 +1,13 @@
+from ..data_analysis import differential_expression
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
     imputation,
     normalisation,
-    transformation,
     outlier_detection,
+    transformation,
 )
-from ..importing import ms_data_import
+from ..importing import metadata_import, ms_data_import
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -14,6 +15,12 @@ determined by the section, step, and method keys found in the workflow_meta
 file that correspond to the method.
 """
 method_map = {
+    (
+        "data_analysis",
+        "differential_expression",
+        "test_named",
+    ): lambda df, **kwargs: print("warning: not implemented")
+    or (df, {}),
     (
         "importing",
         "ms_data_import",
@@ -29,8 +36,7 @@ method_map = {
         "importing",
         "metadata_import",
         "metadata_import_method",
-    ): lambda df, feature_orientation, file: print("warning: not implemented")
-    or (df, {}),
+    ): metadata_import.metadata_import_method,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -60,7 +66,7 @@ method_map = {
         "data_preprocessing",
         "outlier_detection",
         "local_outlier_factor",
-    ): outlier_detection.with_local_outlier_factor,
+    ): outlier_detection.by_local_outlier_factor,
     (
         "data_preprocessing",
         "transformation",
@@ -111,7 +117,15 @@ method_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
+    (
+        "data_analysis",
+        "differential_expression",
+        "anova",
+    ): differential_expression.anova,
 }
+
+# reversed mapping of method callable and location
+location_map = {v: k for k, v in method_map.items()}
 
 """
 In this data structure, a plot for a given method is associated with a 
@@ -124,6 +138,16 @@ plot_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+    ): filter_samples.by_protein_intensity_sum_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "protein_count_filter",
+    ): filter_samples.by_protein_count_plot,
     (
         "data_preprocessing",
         "normalisation",
