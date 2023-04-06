@@ -85,13 +85,12 @@ def t_test(
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
 
-        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
-
         # if the intensity of a group for a protein is 0, it should be filtered out
         if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
             filtered_proteins.append(protein)
             continue
 
+        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
         p_values.append(p)
         fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
 
