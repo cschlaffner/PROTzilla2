@@ -1,8 +1,8 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    {% load static %}
 
     {# Load the tag library #}
     {% load bootstrap5 %}
@@ -20,11 +20,11 @@
 
 
     <title>PROTzilla</title>
+    <link rel="shortcut icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}"/>
 <body>
   <nav class="navbar bg-primary sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand text-white" href="/">
-          {% load static %}
           <img src="{% static 'img/logo_white.svg' %}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
           <b>PROTzilla</b>
         </a>
