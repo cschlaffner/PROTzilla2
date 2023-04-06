@@ -21,6 +21,20 @@
 
     <title>PROTzilla</title>
 <body>
-    {% block content %}
-    {% endblock %}
+  <nav class="navbar bg-primary sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand text-white" href="/">
+          {% load static %}
+          <img src="{% static 'img/logo_white.svg' %}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+          <b>PROTzilla</b>
+        </a>
+        <a class="navbar-brand text-white" href="https://github.com/antonneubauer/PROTzilla2">
+          <img src="{% static 'img/github-mark-white.svg' %}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+        </a>
+      </div>
+  </nav>
+  {% block content %}
+  <br>
+  <p>You're at the main index.<br><a href='/runs'>Runs</a></p>
+  {% endblock %}
 </body>
