@@ -244,14 +244,14 @@ def change_field(request, run_name):
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
     fields_to_fill = parameters[id]["fill_dynamic"]
 
-    fields = []
+    fields = {}
     for key in fields_to_fill:
         param_dict = parameters[key]
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
-            fields.append(make_parameter_input(key, param_dict, disabled=False))
+            fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
-    return JsonResponse(dict(ids=fields_to_fill, fields=fields), safe=False)
+    return JsonResponse(fields, safe=False)
 
 
 def create(request):
