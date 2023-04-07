@@ -3,9 +3,7 @@ import pandas as pd
 from django.contrib import messages
 from scipy import stats
 
-from protzilla.data_analysis.differential_expression_helper import (
-    apply_multiple_testing_correction,
-)
+from .differential_expression_helper import apply_multiple_testing_correction
 
 
 def t_test(

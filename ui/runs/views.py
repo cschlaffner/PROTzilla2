@@ -9,6 +9,7 @@ from django.urls import reverse
 from ui.main.settings import BASE_DIR
 from ui.runs.fields import (
     make_add_step_dropdown,
+    make_current_fields,
     make_displayed_history,
     make_highlighted_workflow_steps,
     make_method_dropdown,
@@ -16,7 +17,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
-from ui.runs.views_helper import get_current_fields, parameters_from_post
+from ui.runs.views_helper import parameters_from_post
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla import workflow_helper
@@ -43,6 +44,7 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     allow_next = run.result_df is not None
+    fields_parameters = run.workflow_meta[section][step][method]["parameters"]
     return render(
         request,
         "runs/details.html",
@@ -51,7 +53,7 @@ def detail(request, run_name):
             location=f"{run.section}/{run.step}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
-            fields=get_current_fields(run, section, step, method),
+            fields=make_current_fields(run, fields_parameters),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next),
             current_plots=[plot.to_html() for plot in run.plots],
@@ -80,7 +82,8 @@ def change_method(request, run_name):
     run.method = request.POST["method"]
     run.current_parameters = None
     run.current_plot_parameters = None
-    current_fields = get_current_fields(run, run.section, run.step, run.method)
+    parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
+    current_fields = make_current_fields(run, parameters)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
         dict(

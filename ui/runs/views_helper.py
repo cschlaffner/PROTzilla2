@@ -1,8 +1,3 @@
-from django.http import JsonResponse
-
-from protzilla.run import Run
-from ui.runs.fields import make_parameter_input
-
 
 def parameters_from_post(post):
     d = dict(post)
@@ -25,23 +20,6 @@ def convert_str_if_possible(s):
     return int(f) if int(f) == f else f
 
 
-def get_current_fields(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
-    current_fields = []
-
-    for key, param_dict in parameters.items():
-        # todo use workflow default
-        # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # to not change workflow_meta
-        if run.current_parameters is not None:
-            param_dict["default"] = run.current_parameters[key]
-
-        insert_special_params(param_dict, run)
-
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
-    return current_fields
-
-
 def insert_special_params(param_dict, run):
     if param_dict["type"] == "named_output":
         param_dict["steps"] = [name for name in run.history.step_names if name]
@@ -60,8 +38,10 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
+        print("param_dict2")
+        print(param_dict)
 
     if "fill_dynamic" in param_dict:
+        print("param_dict")
+        print(param_dict)
         param_dict["class"] = "dynamic_trigger"
-
-    pass

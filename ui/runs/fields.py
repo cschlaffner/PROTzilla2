@@ -1,6 +1,21 @@
 from django.template.loader import render_to_string
 
 from protzilla.workflow_helper import get_all_steps
+from ui.runs.views_helper import insert_special_params
+
+
+def make_current_fields(run, parameters):
+    current_fields = []
+    for key, param_dict in parameters.items():
+        # todo use workflow default
+        # todo 59 - restructure current_parameters
+        param_dict = param_dict.copy()  # to not change workflow_meta
+        if run.current_parameters is not None:
+            param_dict["default"] = run.current_parameters[key]
+        insert_special_params(param_dict, run)
+        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+
+    return current_fields
 
 
 def make_parameter_input(key, param_dict, disabled):
