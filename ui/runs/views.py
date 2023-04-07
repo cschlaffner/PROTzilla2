@@ -251,13 +251,7 @@ def change_field(request, run_name):
             param_dict["categories"] = run.metadata[selected].unique()
             fields.append(make_parameter_input(key, param_dict, disabled=False))
 
-    return JsonResponse(
-        dict(
-            ids=fields_to_fill,
-            fields=fields,
-        ),
-        safe=False,
-    )
+    return JsonResponse(dict(ids=fields_to_fill, fields=fields), safe=False)
 
 
 def create(request):
