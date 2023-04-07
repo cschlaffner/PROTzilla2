@@ -18,7 +18,7 @@ urlpatterns = [
         "<str:run_name>/outputs_of_step", views.outputs_of_step, name="outputs_of_step"
     ),
     path(
-        "<str:run_name>/change_field/",
+        "<str:run_name>/change_field",
         views.change_field,
         name="change_field",
     ),

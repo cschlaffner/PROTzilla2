@@ -116,11 +116,11 @@ def change_field(request, run_name):
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = []
-    for key, param_dict in parameters.items():
-        if key in fields_to_fill:
-            if param_dict["fill"] == "metadata_column_data":
-                param_dict["categories"] = run.metadata[selected].unique()
-                fields.append(make_parameter_input(key, param_dict, disabled=False))
+    for key in fields_to_fill:
+        param_dict = parameters[key]
+        if param_dict["fill"] == "metadata_column_data":
+            param_dict["categories"] = run.metadata[selected].unique()
+            fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     return JsonResponse(
         dict(

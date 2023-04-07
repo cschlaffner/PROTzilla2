@@ -85,13 +85,12 @@ def t_test(
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
 
-        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
-
         # if the intensity of a group for a protein is 0, it should be filtered out
         if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
             filtered_proteins.append(protein)
             continue
 
+        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
         p_values.append(p)
         fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
 
@@ -126,21 +125,8 @@ def t_test(
         columns=["Protein ID", "log2_fold_change"],
     )
 
-    if len(filtered_proteins) > 0:
-        msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
-        return (
-            de_proteins_df,
-            dict(
-                corrected_p_values_df=corrected_p_values_df,
-                log2_fold_change_df=log2_fold_change_df,
-                fc_threshold=fc_threshold,
-                alpha=alpha,
-                corrected_alpha=corrected_alpha,
-                filtered_proteins=filtered_proteins,
-                messages=[dict(level=messages.WARNING, msg=msg)],
-            ),
-        )
-
+    proteins_filtered = len(filtered_proteins) > 0
+    proteins_filtered_warning_msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
     return (
         de_proteins_df,
         dict(
@@ -149,5 +135,9 @@ def t_test(
             fc_threshold=fc_threshold,
             alpha=alpha,
             corrected_alpha=corrected_alpha,
+            filtered_proteins=filtered_proteins,
+            messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
+            if proteins_filtered
+            else [],
         ),
     )

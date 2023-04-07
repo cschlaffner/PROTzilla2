@@ -31,10 +31,10 @@ def anova(
     :param multiple_testing_correction_method: the method for multiple
         testing correction
     :type multiple_testing_correction_method: str
-    :param alpha: the alpha value for the t-test
+    :param alpha: the alpha value for anova
     :type alpha: float
-    :return: a dataframe with the corrected p-values and the fold change
-        between the two groups and an empty dict
+    :return: a dataframe with the intensity_df and the corrected p-values
+        and a dict containing corrected_p_values and corrected_alphas
     :rtype: pandas DataFrame, dict
 
     :return: a dataframe in typical protzilla long format
