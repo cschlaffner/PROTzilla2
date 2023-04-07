@@ -145,10 +145,8 @@ def test_differential_expression_t_test_with_nan():
         fc_threshold=test_fc_threshold,
     )
 
-    test_keywords = "NaN values"
-
     assert "messages" in current_out
-    assert test_keywords in current_out["messages"][0]["msg"]
+    assert "NaN values" in current_out["messages"][0]["msg"]
 
 
 def test_differential_expression_t_test_with_zero_mean(show_figures):
@@ -238,9 +236,8 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     assert current_out["alpha"] == test_alpha
     assert current_out["corrected_alpha"] is None
 
-    test_keywords = "mean intensity of 0"
     assert "messages" in current_out
-    assert test_keywords in current_out["messages"][0]["msg"]
+    assert "mean intensity of 0" in current_out["messages"][0]["msg"]
 
 
 def test_differential_expression_anova(show_figures):
