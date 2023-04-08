@@ -32,11 +32,14 @@ def make_parameter_input(key, param_dict, disabled):
         if "step" not in param_dict:
             param_dict["step"] = "any"
     elif param_dict["type"] == "categorical":
+        param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_select.html"
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
+    elif param_dict["type"] == "metadata_df":
+        template = "runs/field_empty.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -85,6 +88,20 @@ def get_current_fields(run, section, step, method):
             else:
                 selected = param_dict["steps"][0] if param_dict["steps"] else None
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+
+        if "fill" in param_dict:
+            if param_dict["fill"] == "metadata_columns":
+                # Sample not needed for anova and t-test
+                param_dict["categories"] = run.metadata.columns[
+                    run.metadata.columns != "Sample"
+                ].unique()
+            elif param_dict["fill"] == "metadata_column_data":
+                # per default fill with second column data since it is selected in dropdown
+                param_dict["categories"] = run.metadata.iloc[:, 1].unique()
+
+        if "fill_dynamic" in param_dict:
+            param_dict["class"] = "dynamic_trigger"
+
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return current_fields
 
@@ -211,6 +228,32 @@ def change_method(request, run_name):
     )
 
 
+def change_field(request, run_name):
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError as e:
+        print(str(e))
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    id = request.POST["id"]
+    selected = request.POST["selected"]
+    parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
+    fields_to_fill = parameters[id]["fill_dynamic"]
+
+    fields = {}
+    for key in fields_to_fill:
+        param_dict = parameters[key]
+        if param_dict["fill"] == "metadata_column_data":
+            param_dict["categories"] = run.metadata[selected].unique()
+            fields[key] = make_parameter_input(key, param_dict, disabled=False)
+
+    return JsonResponse(fields, safe=False)
+
+
 def create(request):
     run_name = request.POST["run_name"]
     run = Run.create(
@@ -259,6 +302,7 @@ def calculate(request, run_name):
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
+
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
@@ -294,8 +338,9 @@ def parameters_from_post(post):
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
-        if len(v) > 1:  # only used for named_output parameters
-            parameters[k] = tuple(v)
+        if len(v) > 1:
+            # only used for named_output parameters and multiselect fields
+            parameters[k] = v
         else:
             parameters[k] = convert_str_if_possible(v[0])
     return parameters
