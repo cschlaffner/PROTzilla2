@@ -30,9 +30,15 @@
             "name": "intensity name",
             "type": "categorical",
             "categories": [
-              "LFQ intensity",
               "Intensity",
-              "iBAQ"
+              "MaxLFQ Total Intensity",
+              "MaxLFQ Intensity",
+              "Total Intensity",
+              "MaxLFQ Unique Intensity",
+              "Unique Spectral Count",
+              "Unique Intensity",
+              "Spectral Count",
+              "Total Spectral Count"
             ],
             "default": "Intensity"
           },
