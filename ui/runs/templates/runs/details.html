@@ -65,9 +65,9 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
-                        for (let i = 0; i < response.ids.length; i++) {
-                            $('#' + response.ids[i]).html(response.fields[i]);
-                        }
+                        $.each(response, function (key, value) {
+                            $('#' + key).html(value);
+                        })
                     }
                 }).fail(function (e) {
                     console.log('Error:', e);
