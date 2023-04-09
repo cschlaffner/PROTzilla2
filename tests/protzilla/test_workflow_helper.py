@@ -5,6 +5,7 @@ import pytest
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 @pytest.fixture
@@ -62,3 +63,27 @@ def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
         workflow_meta, "data_preprocessing", "imputation", "knn"
     )
     assert workflow_meta_copy == workflow_meta
+
+
+def test_get_workflow_default_param_value(example_workflow):
+    threshold_value = get_workflow_default_param_value(
+        example_workflow,
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        "threshold",
+    )
+
+    assert threshold_value == 0.2
+
+
+def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):
+    example_workflow_copy = example_workflow.copy()
+    get_workflow_default_param_value(
+        example_workflow,
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        "threshold",
+    )
+    assert example_workflow == example_workflow_copy
