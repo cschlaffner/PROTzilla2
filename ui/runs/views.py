@@ -78,8 +78,15 @@ def get_current_fields(run, section, step, method):
         # todo use workflow default
         # todo 59 - restructure current_parameters
         param_dict = param_dict.copy()  # to not change workflow_meta
-        if run.current_parameters is not None:
+
+        workflow_default = workflow_helper.get_workflow_default_param_value(
+            run.workflow_config, section, step, method, key
+        )
+        if workflow_default is not None:
+            param_dict["default"] = workflow_default
+        elif run.current_parameters is not None:
             param_dict["default"] = run.current_parameters[key]
+
         # move into make_parameter_input?
         if param_dict["type"] == "named_output":
             param_dict["steps"] = [name for name in run.history.step_names if name]
