@@ -12,7 +12,7 @@
 | protzilla/constants/logging.py                                   |        3 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/paths.py                                     |        5 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/differential\_expression.py             |        5 |        2 |        0 |        0 |     60% |       8-9 |
-| protzilla/data\_analysis/differential\_expression\_anova.py      |       22 |        0 |        6 |        1 |     96% |    84->87 |
+| protzilla/data\_analysis/differential\_expression\_anova.py      |       22 |        0 |        6 |        1 |     96% |    82->85 |
 | protzilla/data\_analysis/differential\_expression\_helper.py     |        7 |        1 |        2 |        1 |     78% |        22 |
 | protzilla/data\_analysis/differential\_expression\_t\_test.py    |       40 |        0 |       10 |        0 |    100% |           |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                    |        0 |        0 |        0 |        0 |    100% |           |
