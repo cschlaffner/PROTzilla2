@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block css %}
-    {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
 {% endblock %}
 
 {% block javascript %}
-    {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>
         // Sets up an event listener that sends a POST request with AJAX to the server to provide
