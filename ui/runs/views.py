@@ -20,7 +20,6 @@ from ui.runs.fields import (
 from ui.runs.views_helper import parameters_from_post
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla import workflow_helper
 from protzilla.run import Run
 
 active_runs = {}
@@ -44,7 +43,7 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     allow_next = run.result_df is not None
-    fields_parameters = run.workflow_meta[section][step][method]["parameters"]
+    run.workflow_meta[section][step][method]["parameters"]
     return render(
         request,
         "runs/details.html",
