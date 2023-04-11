@@ -11,7 +11,6 @@ from .workflow_helper import get_all_default_params_for_methods
 
 
 class Run:
-
     """
     :ivar run_path: the path to this runs' dir
     :ivar workflow_config
@@ -224,7 +223,7 @@ class Run:
         self.current_parameters = popped_step.parameters
         self.current_plot_parameters = None
         self.plotted_for_parameters = (
-            None  # maybe current_parameters-> only if plots exist
+            popped_step.parameters if popped_step.plots else None
         )
         self.plots = popped_step.plots
         self.step_index -= 1
