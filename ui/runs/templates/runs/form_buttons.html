@@ -24,34 +24,6 @@
         })
     }
 
-    {#function get_current_parameters(callback) {#}
-    {#    $.ajax({#}
-    {#        url: "{% url 'runs:current_parameters' run_name %}",#}
-    {#        type: "GET",#}
-    {#        success: function (response) {#}
-    {#            current_parameters = response#}
-    {#            callback()#}
-    {#        }#}
-    {#    }).fail(function (e) {#}
-    {#        console.log('Error', e);#}
-    {#        alert(e.responseJSON.error)#}
-    {#    })#}
-    {# }#}
-
-    {#async function get_current_plot_parameters(callback) {#}
-    {#    $.ajax({#}
-    {#        url: "{% url 'runs:current_plot_parameters' run_name %}",#}
-    {#        type: "GET",#}
-    {#        success: function (response) {#}
-    {#            current_plot_parameters = response#}
-    {#            callback()#}
-    {#        }#}
-    {#    }).fail(function (e) {#}
-    {#        console.log('Error', e);#}
-    {#        alert(e.responseJSON.error)#}
-    {#    })#}
-    {# }#}
-
     async function get_results_exist(callback) {
         $.ajax({
             url: "{% url 'runs:results_exist' run_name %}",
@@ -66,21 +38,7 @@
         })
     }
 
-    {#async function get_plotted_for_parameters(callback) {#}
-    {#    $.ajax({#}
-    {#        url: "{% url 'runs:plotted_for_parameters' run_name %}",#}
-    {#        type: "GET",#}
-    {#        success: function (response) {#}
-    {#            plotted_for_parameters = response#}
-    {#            callback()#}
-    {#        }#}
-    {#    }).fail(function (e) {#}
-    {#        console.log('Error', e);#}
-    {#        alert(e.responseJSON.error)#}
-    {#    })#}
-    {# }#}
-
-    get_clean_form_data = function (form) {
+    function get_clean_form_data (form) {
         let formDataArray = form.serializeArray()
         let formDataDict = {};
         for (let i = 0; i < formDataArray.length; i++) {
@@ -91,11 +49,11 @@
     }
 
 
-    disable_plot = function (bool) {
+    function disable_plot(bool) {
         $('#plot_parameters_submit').prop('disabled', bool)
     }
 
-    disable_calc = function (bool) {
+    function disable_calc (bool) {
         $('#calculate_parameters_submit').prop('disabled', bool)
     }
 
@@ -118,7 +76,7 @@
         );
     }
 
-    equal_calc_parameters = function (form) {
+    function equal_calc_parameters(form) {
         if (isEmptyDict(current_parameters)) {
             return false
         }
@@ -130,7 +88,7 @@
         );
     }
 
-    equal_plot_parameters = function (form) {
+    function equal_plot_parameters(form) {
         if (isEmptyDict(current_plot_parameters)) {
             return false
         }
@@ -142,11 +100,7 @@
     }
 
     $(document).ready(function () {
-        const calc_form = document.querySelector('#calc_form');
-        const plot_form = document.querySelector('#plot_form');
-
         $('#calc_form').on('change', function () {
-            console.log("calc change")
             if (equal_calc_parameters($(this))) {
                 disable_calc(true)
                 calc_params_match = true
@@ -158,7 +112,6 @@
         })
 
         $('#plot_form').on('change', function () {
-            console.log("plot change")
             if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
                 disable_plot(true)
                 return
@@ -180,14 +133,5 @@
             $('#calc_form').trigger('change');
             trigger_plot_change()
         })
-        {#get_current_parameters(function () {#}
-        {#    get_current_plot_parameters(function () {#}
-        {#        get_plotted_for_parameters(function () {#}
-        {#            $('#calc_form').trigger('change');#}
-        {#            trigger_plot_change()#}
-        {#        })#}
-        {#    })#}
-        {# })#}
-
     })
 </script>

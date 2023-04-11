@@ -73,14 +73,14 @@
                 <div id="method_parameters">
                     {% include "runs/fields.html" with fields=fields %}
                 </div>
-                <input type="submit" value="Calculate">
+                <input type="submit" id="calculate_parameters_submit" value="Calculate">
             </form>
             <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div id="plot_parameters">
                     {% include "runs/fields.html" with fields=plot_fields %}
                 </div>
-                <input type="submit" value="Plot">
+                <input type="submit" id="plot_parameters_submit" value="Plot">
             </form>
 
             {% if current_plots %}
