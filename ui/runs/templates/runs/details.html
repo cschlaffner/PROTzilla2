@@ -63,26 +63,24 @@
 <div class="wrapper">
 
     <div id="content">
-        {{ run_name }}
+        <h3>{{ run_name }}</h3>
         <br>
-        <b>history</b>
-        <br>
+        <h6>History</h6>
+        {% for step in displayed_history %}
+            {{ step.location }}<br>
+            {% for field in step.fields %}
+                {{ field }}<br>
+            {% endfor %}
+            {% if step.name %}
+                Name: {{ step.name }}<br>
+            {% else %}
+                {% include "runs/form_add_name.html" with index=step.index %}
+            {% endif %}
 
-    {% for step in displayed_history %}
-        {{ step.location }}<br>
-        {% for field in step.fields %}
-            {{ field }}<br>
-        {% endfor %}
-        {% if step.name %}
-            Name: {{ step.name }}<br>
-        {% else %}
-            {% include "runs/form_add_name.html" with index=step.index %}
-        {% endif %}
-
-        {% for plot in step.plots %}
-            <div style="width:600;height:500">
-                {{ plot|safe }}
-            </div>
+            {% for plot in step.plots %}
+                <div style="display:inline-block;">
+                    {{ plot|safe }}
+                </div>
         {% endfor %}
 
         <br>
@@ -108,7 +106,7 @@
     </form>
 
     {% for plot in current_plots %}
-        <div style="width:600;height:500">
+        <div style="display:inline-block;">
             {{ plot|safe }}
         </div>
     {% endfor %}

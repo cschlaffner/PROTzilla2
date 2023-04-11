@@ -1,10 +1,10 @@
-html, body, .wrapper {
+html, body{
     height: 100%;
   }
 
 .wrapper {
     display: flex;
-    height: 100%;
+    min-height: 100vh;
 }
 
 #content {
@@ -15,5 +15,4 @@ html, body, .wrapper {
 #sidebar {
     flex: 1;
     padding: 20px;
-    height: 100%;
 }
