@@ -53,7 +53,7 @@ def detail(request, run_name):
             location=f"{run.section}/{run.step}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
-            fields=make_current_fields(run, fields_parameters),
+            fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next),
             current_plots=[plot.to_html() for plot in run.plots],
