@@ -1,7 +1,8 @@
 import sys
 
 from django.template.loader import render_to_string
-from main.settings import BASE_DIR
+
+from ..main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.workflow_helper import get_all_steps

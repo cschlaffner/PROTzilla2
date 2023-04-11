@@ -5,9 +5,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from main.settings import BASE_DIR
+
+from ..main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+
 from protzilla.run import Run
 from ui.runs.fields import (
     make_add_step_dropdown,
@@ -20,7 +22,6 @@ from ui.runs.fields import (
     make_plot_fields,
 )
 from ui.runs.views_helper import parameters_from_post
-
 
 active_runs = {}
 
