@@ -206,18 +206,6 @@ def add_name(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
-def parameters_from_post(post):
-    d = dict(post)
-    del d["csrfmiddlewaretoken"]
-    parameters = {}
-    for k, v in d.items():
-        if len(v) > 1:  # only used for named_output parameters
-            parameters[k] = tuple(v)
-        else:
-            parameters[k] = convert_str_if_possible(v[0])
-    return parameters
-
-
 def results_exist(request, run_name):
     run = active_runs[run_name]
     d = dict(results_exist=run.result_df is not None)
@@ -242,9 +230,6 @@ def all_button_parameters(request, run_name):
     else:
         d["current_parameters"] = run.current_parameters
         d["chosen_method"] = run.method
-
-    for key in d:
-        print(key, ":", d[key])
 
     return JsonResponse(d)
 
