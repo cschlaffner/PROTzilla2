@@ -16,3 +16,9 @@ html, body{
     flex: 1;
     padding: 20px;
 }
+
+.plots {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
