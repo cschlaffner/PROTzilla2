@@ -59,7 +59,7 @@ def make_add_step_dropdown(run, section):
     return render_to_string(
         template,
         context=dict(
-            name="add step:\n",
+            name="add step:",
             type="categorical",
             categories=steps,
             key="step_to_be_added",
