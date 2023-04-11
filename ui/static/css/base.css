@@ -719,145 +719,146 @@ a.text-orange:hover, a.text-orange:focus {
 }
 
 
+
 /*------------------------------------
 - COLOR grey
 ------------------------------------*/
 .alert-grey {
-    color: #b0bbc6;
-    background-color: #F8F9FA;
-    border-color: #7b7b7b;
+    color: #aaaaaa;
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
 }
 
 .alert-grey hr {
-    border-top-color: #7b7b7b;
+    border-top-color: #E8E8E8;
 }
 
 .alert-grey .alert-link {
-    color: #92a2b1;
+    color: #919191;
 }
 
 .badge-grey {
     color: #212529;
-    background-color: #F8F9FA;
+    background-color: #E8E8E8;
 }
 
 .badge-grey[href]:hover, .badge-grey[href]:focus {
     color: #212529;
-    background-color: #dadfe4;
+    background-color: #cecece;
 }
 
 .bg-grey {
-    background-color: #F8F9FA !important;
+    background-color: #E8E8E8 !important;
 }
 
 a.bg-grey:hover, a.bg-grey:focus,
 button.bg-grey:hover,
 button.bg-grey:focus {
-    background-color: #dadfe4 !important;
+    background-color: #cecece !important;
 }
 
 .border-grey {
-    border-color: #F8F9FA !important;
+    border-color: #E8E8E8 !important;
 }
 
 .btn-grey {
     color: #212529;
-    background-color: #F8F9FA;
-    border-color: #F8F9FA;
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
 }
 
 .btn-grey:hover {
     color: #212529;
-    background-color: #e3e7eb;
-    border-color: #dadfe4;
+    background-color: #d6d6d6;
+    border-color: #cecece;
 }
 
 .btn-grey:focus, .btn-grey.focus {
-    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(232, 232, 232, 0.5);
 }
 
 .btn-grey.disabled, .btn-grey:disabled {
     color: #212529;
-    background-color: #F8F9FA;
-    border-color: #F8F9FA;
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
 }
 
 .btn-grey:not(:disabled):not(.disabled):active, .btn-grey:not(:disabled):not(.disabled).active, .show > .btn-grey.dropdown-toggle {
     color: #212529;
-    background-color: #dadfe4;
-    border-color: #d1d7de;
+    background-color: #cecece;
+    border-color: #c6c6c6;
 }
 
 .btn-grey:not(:disabled):not(.disabled):active:focus, .btn-grey:not(:disabled):not(.disabled).active:focus, .show > .btn-grey.dropdown-toggle:focus {
-    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(232, 232, 232, 0.5);
 }
 
 .btn-outline-grey {
-    color: #F8F9FA;
+    color: #E8E8E8;
     background-color: transparent;
-    border-color: #F8F9FA;
+    border-color: #E8E8E8;
 }
 
 .btn-outline-grey:hover {
     color: #212529;
-    background-color: #F8F9FA;
-    border-color: #F8F9FA;
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
 }
 
 .btn-outline-grey:focus, .btn-outline-grey.focus {
-    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(232, 232, 232, 0.5);
 }
 
 .btn-outline-grey.disabled, .btn-outline-grey:disabled {
-    color: #F8F9FA;
+    color: #E8E8E8;
     background-color: transparent;
 }
 
 .btn-outline-grey:not(:disabled):not(.disabled):active, .btn-outline-grey:not(:disabled):not(.disabled).active, .show > .btn-outline-grey.dropdown-toggle {
     color: #212529;
-    background-color: #F8F9FA;
-    border-color: #F8F9FA;
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
 }
 
 .btn-outline-grey:not(:disabled):not(.disabled):active:focus, .btn-outline-grey:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-grey.dropdown-toggle:focus {
-    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(232, 232, 232, 0.5);
 }
 
 .list-group-item-grey {
-    color: #b0bbc6;
-    background-color: #F8F9FA;
+    color: #aaaaaa;
+    background-color: #E8E8E8;
 }
 
 .list-group-item-grey.list-group-item-action:hover, .list-group-item-grey.list-group-item-action:focus {
-    color: #b0bbc6;
-    background-color: #F8F9FA;
+    color: #aaaaaa;
+    background-color: #E8E8E8;
 }
 
 .list-group-item-grey.list-group-item-action.active {
     color: #212529;
-    background-color: #b0bbc6;
-    border-color: #b0bbc6;
+    background-color: #aaaaaa;
+    border-color: #aaaaaa;
 }
 
 .table-grey,
 .table-grey > th,
 .table-grey > td {
-    background-color: #F8F9FA;
+    background-color: #E8E8E8;
 }
 
 .table-hover .table-grey:hover {
-    background-color: #F8F9FA;
+    background-color: #E8E8E8;
 }
 
 .table-hover .table-grey:hover > td,
 .table-hover .table-grey:hover > th {
-    background-color: #F8F9FA;
+    background-color: #E8E8E8;
 }
 
 .text-grey {
-    color: #F8F9FA !important;
+    color: #E8E8E8 !important;
 }
 
 a.text-grey:hover, a.text-grey:focus {
-    color: #dadfe4 !important;
+    color: #cecece !important;
 }
