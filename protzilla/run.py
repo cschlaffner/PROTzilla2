@@ -222,9 +222,8 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
         self.current_plot_parameters = None
-        self.plotted_for_parameters = (
-            popped_step.parameters if popped_step.plots else None
-        )
+        # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
+        self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
 
