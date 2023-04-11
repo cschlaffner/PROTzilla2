@@ -8,7 +8,6 @@ def make_current_fields(run, section, step, method):
     parameters = run.workflow_meta[section][step][method]["parameters"]
     current_fields = []
     for key, param_dict in parameters.items():
-        # todo use workflow default
         # todo 59 - restructure current_parameters
         param_dict = param_dict.copy()  # to not change workflow_meta
         workflow_default = get_workflow_default_param_value(
