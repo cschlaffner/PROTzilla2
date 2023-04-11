@@ -51,8 +51,15 @@ def ms_fragger_import(_, file_path, intensity_name):
         na_values=["", 0],
         keep_default_na=True,
     )
-    id_df = read[selected_columns]
-    intensity_df = read.filter(regex=f"{intensity_name}$", axis=1)
+    df = read.drop(
+        columns=[
+            "Combined Spectral Count",
+            "Combined Unique Spectral Count",
+            "Combined Total Spectral Count",
+        ]
+    )
+    id_df = df[selected_columns]
+    intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
     intensity_df.columns = [
         c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
     ]
