@@ -23,6 +23,11 @@ urlpatterns = [
         views.current_plot_parameters,
         name="current_plot_parameters",
     ),
+    path(
+        "<str:run_name>/all_parameters",
+        views.all_button_parameters,
+        name="all_parameters",
+    ),
     path("<str:run_name>/results_exist", views.results_exist, name="results_exist"),
     path(
         "<str:run_name>/plotted_for_params",

@@ -330,6 +330,31 @@ def plotted_for_parameters(request, run_name):
     return JsonResponse(run.plotted_for_parameters)
 
 
+def all_button_parameters(request, run_name):
+    run = active_runs[run_name]
+    d = dict()
+    d["current_plot_parameters"] = (
+        run.current_plot_parameters
+        if run.current_plot_parameters is not None
+        else dict()
+    )
+    d["plotted_for_parameters"] = (
+        run.plotted_for_parameters if run.plotted_for_parameters is not None else dict()
+    )
+
+    if run.current_parameters is None or run.result_df is None:
+        d["current_parameters"] = dict()
+        d["chosen_method"] = dict()
+    else:
+        d["current_parameters"] = run.current_parameters
+        d["chosen_method"] = run.method
+
+    for key in d:
+        print(key, ":", d[key])
+
+    return JsonResponse(d)
+
+
 def convert_str_if_possible(s):
     try:
         f = float(s)

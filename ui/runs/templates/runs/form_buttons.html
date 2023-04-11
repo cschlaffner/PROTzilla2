@@ -4,13 +4,18 @@
     let calc_params_match
     let plotted_for_parameters
     let calc_form_data
+    let calculated_method
 
-    function get_current_parameters(callback) {
+    function get_all_parameters(callback) {
         $.ajax({
-            url: "{% url 'runs:current_parameters' run_name %}",
+            url: "{% url 'runs:all_parameters' run_name %}",
             type: "GET",
             success: function (response) {
-                current_parameters = response
+                current_parameters = response["current_parameters"]
+                current_plot_parameters = response["current_plot_parameters"]
+                plotted_for_parameters = response["plotted_for_parameters"]
+                calculated_method = response["chosen_method"]
+                console.log("now callback")
                 callback()
             }
         }).fail(function (e) {
@@ -19,19 +24,33 @@
         })
     }
 
-    async function get_current_plot_parameters(callback) {
-        $.ajax({
-            url: "{% url 'runs:current_plot_parameters' run_name %}",
-            type: "GET",
-            success: function (response) {
-                current_plot_parameters = response
-                callback()
-            }
-        }).fail(function (e) {
-            console.log('Error', e);
-            alert(e.responseJSON.error)
-        })
-    }
+    {#function get_current_parameters(callback) {#}
+    {#    $.ajax({#}
+    {#        url: "{% url 'runs:current_parameters' run_name %}",#}
+    {#        type: "GET",#}
+    {#        success: function (response) {#}
+    {#            current_parameters = response#}
+    {#            callback()#}
+    {#        }#}
+    {#    }).fail(function (e) {#}
+    {#        console.log('Error', e);#}
+    {#        alert(e.responseJSON.error)#}
+    {#    })#}
+    {# }#}
+
+    {#async function get_current_plot_parameters(callback) {#}
+    {#    $.ajax({#}
+    {#        url: "{% url 'runs:current_plot_parameters' run_name %}",#}
+    {#        type: "GET",#}
+    {#        success: function (response) {#}
+    {#            current_plot_parameters = response#}
+    {#            callback()#}
+    {#        }#}
+    {#    }).fail(function (e) {#}
+    {#        console.log('Error', e);#}
+    {#        alert(e.responseJSON.error)#}
+    {#    })#}
+    {# }#}
 
     async function get_results_exist(callback) {
         $.ajax({
@@ -47,19 +66,19 @@
         })
     }
 
-    async function get_plotted_for_parameters(callback) {
-        $.ajax({
-            url: "{% url 'runs:plotted_for_parameters' run_name %}",
-            type: "GET",
-            success: function (response) {
-                plotted_for_parameters = response
-                callback()
-            }
-        }).fail(function (e) {
-            console.log('Error', e);
-            alert(e.responseJSON.error)
-        })
-    }
+    {#async function get_plotted_for_parameters(callback) {#}
+    {#    $.ajax({#}
+    {#        url: "{% url 'runs:plotted_for_parameters' run_name %}",#}
+    {#        type: "GET",#}
+    {#        success: function (response) {#}
+    {#            plotted_for_parameters = response#}
+    {#            callback()#}
+    {#        }#}
+    {#    }).fail(function (e) {#}
+    {#        console.log('Error', e);#}
+    {#        alert(e.responseJSON.error)#}
+    {#    })#}
+    {# }#}
 
     get_clean_form_data = function (form) {
         let formDataArray = form.serializeArray()
@@ -127,6 +146,7 @@
         const plot_form = document.querySelector('#plot_form');
 
         $('#calc_form').on('change', function () {
+            console.log("calc change")
             if (equal_calc_parameters($(this))) {
                 disable_calc(true)
                 calc_params_match = true
@@ -138,7 +158,8 @@
         })
 
         $('#plot_form').on('change', function () {
-            if (!calc_form_data || calc_form_data["chosen_method"] !== current_parameters["chosen_method"]) {
+            console.log("plot change")
+            if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
                 disable_plot(true)
                 return
             }
@@ -155,14 +176,18 @@
             }
         });
 
-        get_current_parameters(function () {
-            get_current_plot_parameters(function () {
-                get_plotted_for_parameters(function () {
-                    $('#calc_form').trigger('change');
-                    trigger_plot_change()
-                })
-            })
+        get_all_parameters(function () {
+            $('#calc_form').trigger('change');
+            trigger_plot_change()
         })
+        {#get_current_parameters(function () {#}
+        {#    get_current_plot_parameters(function () {#}
+        {#        get_plotted_for_parameters(function () {#}
+        {#            $('#calc_form').trigger('change');#}
+        {#            trigger_plot_change()#}
+        {#        })#}
+        {#    })#}
+        {# })#}
 
     })
 </script>
