@@ -67,7 +67,9 @@
 <div class="wrapper">
 
     <div id="content">
-        <h6>History</h6>
+        {% if displayed_history%}
+            <h6>History</h6>
+        {% endif %}
         {% for step in displayed_history %}
             {{ step.location }}<br>
             {% for field in step.fields %}
