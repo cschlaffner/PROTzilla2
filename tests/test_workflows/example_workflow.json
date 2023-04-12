@@ -51,15 +51,15 @@
           "parameters": {
             "number_of_neighbours": 10
           },
-            "graphs": [
-                {
-                "graph_type": "Bar chart",
-                "group_by": "Sample"
-                },
-                {
-                "graph_type_quantites": "Pie chart"
-                }
-            ]
+          "graphs": [
+            {
+              "graph_type": "Bar chart",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ]
         },
         {
           "name": "outlier_detection",
@@ -74,12 +74,12 @@
           "parameters": {
             "log_base": "log2"
           },
-            "graphs": [
-                {
-                "graph_type": "Boxplot",
-                "group_by": "Sample"
-                }
-            ]
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
         },
         {
           "name": "normalisation",
@@ -87,12 +87,12 @@
           "parameters": {
             "percentile": 0.4
           },
-            "graphs": [
-                {
-                "graph_type": "Boxplot",
-                "group_by": "Sample"
-                }
-            ]
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
         }
       ]
     },
