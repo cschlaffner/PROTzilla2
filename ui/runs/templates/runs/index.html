@@ -1,37 +1,42 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="col">
-        <form action="{% url 'runs:create' %}" method="post">
-            {% csrf_token %}
-            <label for="run_name">Work on a new run:</label>
-            <br>
-            <input name="run_name" id="run_name" placeholder="add run name">
-            <br>
-            <label for="workflow_config_name">with workflow:</label>
-            <select name="workflow_config_name" id="workflow_config_name" class="form-select">
-                {% for name in available_workflows %}
-                    <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <input type="submit" value="Create" class="btn btn-red">
-        </form>
+<div class="container d-flex align-items-center justify-content-center" style="height:100vh;margin-top:-3.6rem;">
+  <div class="row" style="width:80%;">
+    <div class="col mx-4">
+      <form action="{% url 'runs:create' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Work on a new run:</h3>
+          <input name="run_name" id="run_name" placeholder="add run name" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label for="workflow_config_name">with workflow:</label>
+          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
+            {% for name in available_workflows %}
+            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Create" class="btn btn-red">
+      </form>
     </div>
-<div class="col">
-<form action="{% url 'runs:continue' %}" method="post"> {# should this be get? #}
-    {% csrf_token %}
-    <label for="run_name_option">Continue an existing run:</label>
-    <br>
-    <select name="run_name" id="run_name_option" class="form-select">
-        {% for name in available_runs %}
+
+    <div class="col mx-4">
+      <form action="{% url 'runs:continue' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Continue an existing run:</h3>
+          <select name="run_name" id="run_name_option" class="form-select">
+            {% for name in available_runs %}
             <option value="{{ name }}">{{ name }}</option>
-        {% endfor %}
-    </select>
-    <br>
-    <input type="submit" value="Continue" class="btn btn-red">
-</form>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Continue" class="btn btn-red">
+      </form>
+    </div>
+  </div>
 </div>
-</div>
+
 {% endblock %}
