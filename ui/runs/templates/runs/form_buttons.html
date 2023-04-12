@@ -117,41 +117,54 @@
                 if (equal_calc_parameters($(this))) {
                     console.log("1")
                     disable_calc(true)
+                    results_exist = true
                     calc_params_match = true
+                    $('#plot_form').trigger("change")
                 } else {
                     console.log("2")
                     disable_calc(false)
                     calc_params_match = false
-                    trigger_plot_change()
+                    results_exist = false
+                    console.log("results exist", results_exist)
+                    $('#plot_form').trigger("change")
+                    //trigger_plot_change()
                 }
             } else if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
                 console.log("3")
                 disable_calc(true)
+                results_exist = true
                 calc_params_match = true
+                $('#plot_form').trigger("change")
             } else {
                 console.log("4")
                 disable_calc(false)
                 calc_params_match = false
-                trigger_plot_change()
+                results_exist = false
+                $('#plot_form').trigger("change")
             }
             console.log("after change calc form data", $(this).serializeArray())
         })
 
         $('#plot_form').on('change', function () {
+            console.log("plot change")
             console.log("calc form data", calc_form_data)
             if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
+                console.log("p1")
                 disable_plot(true)
                 return
             }
 
             if (!plotted_current_match() && results_exist) {
+                console.log("p2")
                 disable_plot(false)
                 return
             }
 
             if (equal_plot_parameters($(this)) || !calc_params_match) {
+                console.log("p3")
                 disable_plot(true)
             } else {
+                console.log("p4")
                 disable_plot(false)
             }
         });
