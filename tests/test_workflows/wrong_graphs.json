@@ -1,0 +1,33 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": {}
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "wrong_param": ""
+            },
+            {
+              "wrong_param": ""
+            }
+          ]
+        }
+      ],
+      "data_analysis": {
+        "steps": {}
+      },
+      "data_integration": {
+        "steps": {}
+      }
+    }
+  }
+}
