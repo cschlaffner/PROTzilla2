@@ -8,7 +8,7 @@ def k_means(
     intensity_df: pd.DataFrame,
     n_clusters: int = 8,
     random_state: int = None,
-    init_centroid_strategy: str | pd.DataFrame = "k-means++",
+    init_centroid_strategy: str | list = "k-means++",
     n_init: int | str = "auto",
     max_iter: int = 300,
     tolerance: float = 1e-4,
@@ -16,6 +16,13 @@ def k_means(
     # think about n_init (initializasion strategies, how to choose centroids) and error handling?
     transformed_df = long_to_wide(intensity_df)
     try:
+        if type(init_centroid_strategy) is list:
+            init_centroid_strategy = transformed_df.loc[init_centroid_strategy]
+            # The sklearn methods fails to set n_init=1 when the user enters
+            # n_init="auto" and the centroid seeds (init_centroid_strategy) manually as
+            # a pd.Dataframe
+            if n_init == "auto":
+                n_init = 1
         kmeans = KMeans(
             n_clusters=n_clusters,
             random_state=random_state,
@@ -50,6 +57,8 @@ def k_means(
                 labels=None,
                 messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
             )
+        # implement error handling n_clusters and init_centroid_strategyshould be
+        # the same or fill dinamically?
 
     # Think about what should be returned as intensity_df.
     # Does it make sense to return an intensity_df?
