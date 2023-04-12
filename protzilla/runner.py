@@ -19,4 +19,9 @@ class Runner:
             df_mode=df_mode,
         )
 
-        print(run.workflow_config)
+        print(run.workflow_config.items())
+        print()
+        for section, steps in run.workflow_config["sections"].items():
+            for step in steps["steps"]:
+                for param in step["parameters"]:
+                    print(section, step, param)
