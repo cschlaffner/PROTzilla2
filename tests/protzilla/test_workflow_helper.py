@@ -5,8 +5,11 @@ import pytest
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.workflow_helper import get_workflow_default_param_value, validate_workflow_graphs, \
-    validate_workflow_parameters
+from protzilla.workflow_helper import (
+    get_workflow_default_param_value,
+    validate_workflow_graphs,
+    validate_workflow_parameters,
+)
 
 
 @pytest.fixture
@@ -14,15 +17,18 @@ def example_workflow():
     with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
         return json.load(f)
 
+
 @pytest.fixture
 def workflow_wrong_graphs():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_graphs.json", "r") as f:
         return json.load(f)
 
+
 @pytest.fixture
 def workflow_wrong_parameters():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_parameters.json", "r") as f:
         return json.load(f)
+
 
 @pytest.fixture
 def workflow_meta():
@@ -100,10 +106,19 @@ def test_validate_workflow(example_workflow, workflow_meta):
     assert validate_workflow_parameters(example_workflow, workflow_meta)
     assert validate_workflow_graphs(example_workflow, workflow_meta)
 
+
 def test_validate_workflow_wrong_graphs(workflow_wrong_graphs, workflow_meta):
-    pytest.raises(ValueError, validate_workflow_graphs, workflow_wrong_graphs, workflow_meta)
+    pytest.raises(
+        ValueError, validate_workflow_graphs, workflow_wrong_graphs, workflow_meta
+    )
     assert validate_workflow_parameters(workflow_wrong_graphs, workflow_meta)
+
 
 def test_validate_workflow_wrong_parameters(workflow_wrong_parameters, workflow_meta):
     assert validate_workflow_graphs(workflow_wrong_parameters, workflow_meta)
-    pytest.raises(ValueError, validate_workflow_parameters, workflow_wrong_parameters, workflow_meta)
+    pytest.raises(
+        ValueError,
+        validate_workflow_parameters,
+        workflow_wrong_parameters,
+        workflow_meta,
+    )
