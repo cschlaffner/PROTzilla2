@@ -1,4 +1,3 @@
-
 def parameters_from_post(post):
     d = dict(post)
     del d["csrfmiddlewaretoken"]
