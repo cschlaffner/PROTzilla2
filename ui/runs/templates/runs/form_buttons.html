@@ -15,7 +15,6 @@
                 current_plot_parameters = response["current_plot_parameters"]
                 plotted_for_parameters = response["plotted_for_parameters"]
                 calculated_method = response["chosen_method"]
-                console.log("now callback")
                 callback()
             }
         }).fail(function (e) {
@@ -40,7 +39,6 @@
 
     function get_clean_form_data(form) {
         let formDataArray = form.serializeArray()
-        console.log("form data array", formDataArray)
         let formDataDict = {};
         for (let i = 0; i < formDataArray.length; i++) {
             formDataDict[formDataArray[i].name] = formDataArray[i].value;
@@ -56,6 +54,8 @@
 
     function disable_calc(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool)
+        results_exist = bool
+        calc_params_match = bool
     }
 
     function isEmptyDict(obj) {
@@ -103,51 +103,25 @@
     $(document).ready(function () {
         $('#calc_form').on('change', function () {
             calc_form_data = get_clean_form_data($(this))
-            console.log("calc change")
-            console.log("calc method", calculated_method)
-            console.log("selected method", selected_method)
-            console.log("!selected method", !selected_method)
-            console.log("1", equal_calc_parameters($(this)))
-            console.log("2", !equal_calc_parameters($(this)))
-            console.log("3", equal_calc_parameters($(this)) && (calculated_method === selected_method))
-            console.log("3.1", equal_calc_parameters($(this)))
-            console.log("3.2", calculated_method === selected_method)
-            console.log("4")
             if (!selected_method) {
                 if (equal_calc_parameters($(this))) {
                     console.log("1")
                     disable_calc(true)
-                    results_exist = true
-                    calc_params_match = true
-                    $('#plot_form').trigger("change")
                 } else {
                     console.log("2")
                     disable_calc(false)
-                    calc_params_match = false
-                    results_exist = false
-                    console.log("results exist", results_exist)
-                    $('#plot_form').trigger("change")
-                    //trigger_plot_change()
                 }
             } else if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
                 console.log("3")
                 disable_calc(true)
-                results_exist = true
-                calc_params_match = true
-                $('#plot_form').trigger("change")
             } else {
                 console.log("4")
                 disable_calc(false)
-                calc_params_match = false
-                results_exist = false
-                $('#plot_form').trigger("change")
             }
-            console.log("after change calc form data", $(this).serializeArray())
+            $('#plot_form').trigger("change")
         })
 
         $('#plot_form').on('change', function () {
-            console.log("plot change")
-            console.log("calc form data", calc_form_data)
             if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
                 console.log("p1")
                 disable_plot(true)
