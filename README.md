@@ -30,7 +30,7 @@
 | protzilla/utilities/\_\_init\_\_.py                              |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                    |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                            |       11 |        0 |        0 |        0 |    100% |           |
-| protzilla/workflow\_helper.py                                    |       15 |        1 |       10 |        2 |     88% |17->16, 23 |
+| protzilla/workflow\_helper.py                                    |       33 |        3 |       30 |       10 |     79% |20->19, 26, 36->42, 46, 52->51, 53->52, 55->52, 58->55, 59->60, 63 |
 | tests/conftest.py                                                |        6 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_analysis/test\_differential\_expression.py |       63 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py    |       16 |        1 |        2 |        1 |     89% |        48 |
@@ -44,8 +44,8 @@
 | tests/protzilla/test\_history.py                                 |      115 |        0 |        6 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                     |       78 |        8 |        2 |        0 |     90% |   107-125 |
 | tests/protzilla/test\_transform\_dfs.py                          |       32 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/test\_workflow\_helper.py                        |       38 |        0 |        4 |        0 |    100% |           |
-|                                                        **TOTAL** | **1493** |  **101** |  **291** |   **58** | **90%** |           |
+| tests/protzilla/test\_workflow\_helper.py                        |       55 |        0 |        8 |        0 |    100% |           |
+|                                                        **TOTAL** | **1528** |  **103** |  **315** |   **66** | **90%** |           |
 
 
 ## Setup coverage badge
