@@ -1,8 +1,8 @@
+import pandas as pd
 import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.importing import ms_data_import
-import pandas as pd
 
 
 def ms_fragger_import_intensity_df(intensity_name):
