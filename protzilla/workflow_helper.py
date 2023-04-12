@@ -32,18 +32,15 @@ def validate_workflow_parameters(workflow_config, workflow_meta):
     # checks if all parameters in workflow_config exist in workflow_meta
     for section, steps in workflow_config["sections"].items():
         for step in steps["steps"]:
-            method = step["method"]
             for param in step["parameters"]:
                 if (
                     param
-                    not in workflow_meta[section][step["name"]][method]["parameters"]
+                    not in workflow_meta[section][step["name"]][step["method"]]["parameters"]
                 ):
                     raise ValueError(
                         f"Parameter {param} in step {step['name']} does not exist in workflow_meta"
                     )
-
                 # TODO 96 test if value is in options when type catergorical or numeric
-
     return True
 
 
