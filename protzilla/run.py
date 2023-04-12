@@ -235,12 +235,3 @@ class Run:
 
     def current_run_location(self):
         return self.section, self.step, self.method
-
-
-def main():
-    print("main")
-    print(Run.available_runs())
-
-
-if __name__ == "__main__":
-    main()
