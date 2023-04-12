@@ -633,12 +633,97 @@
         "name": "ANOVA",
         "description": "Analysis of Variance:",
         "parameters": {
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "grouping": {
+            "name": "Grouping:",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": ["selected_groups"],
+            "categories": [],
+            "default": "None"
+          },
+          "selected_groups": {
+            "name": "Selected Groups:",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": "None",
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "metadata_df",
+            "name": "metadata_df"
+          }
         }
       },
       "t_test": {
         "name": "T_Test",
-        "description": "Statistical test assuming a t_distribution:",
-        "parameters": {}
+        "description": "Statistical test assuming a t-distribution:",
+        "parameters": {
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "fc_threshold": {
+            "name": "Fold change threshold",
+            "type": "numeric",
+            "min": 0,
+            "default": 0
+          },
+          "grouping": {
+            "name": "Grouping",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic":  ["group1", "group2"],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "metadata_df": {
+            "type": "metadata_df",
+            "name": "metadata_df"
+          }
+        }
       },
       "test_named": {
         "name": "this should have a named input",
