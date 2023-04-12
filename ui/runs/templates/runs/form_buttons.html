@@ -139,7 +139,7 @@
 
         $('#plot_form').on('change', function () {
             console.log("calc form data", calc_form_data)
-            if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method)) {
+            if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
                 disable_plot(true)
                 return
             }
