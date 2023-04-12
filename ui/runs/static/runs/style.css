@@ -22,3 +22,7 @@ html, body{
     justify-content: center;
     margin-bottom: 20px;
 }
+
+.reduce_width {
+    width: 50%;
+}
