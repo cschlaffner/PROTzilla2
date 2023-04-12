@@ -149,7 +149,7 @@ def test_perform_calculation_logging(caplog):
 
 @pytest.fixture
 def example_workflow_short():
-    with open(f"{PROJECT_PATH}/tests/example_workflow_short.json", "r") as f:
+    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r") as f:
         return json.load(f)
 
 
