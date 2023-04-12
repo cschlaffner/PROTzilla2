@@ -174,6 +174,7 @@ def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
+    print("calc with params", parameters)
     del parameters["chosen_method"]
 
     for k, v in dict(request.FILES).items():
