@@ -5,8 +5,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-
-from ..main.settings import BASE_DIR
+from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 

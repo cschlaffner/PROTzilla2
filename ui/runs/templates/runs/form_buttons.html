@@ -38,8 +38,9 @@
         })
     }
 
-    function get_clean_form_data (form) {
+    function get_clean_form_data(form) {
         let formDataArray = form.serializeArray()
+        console.log("form data array", formDataArray)
         let formDataDict = {};
         for (let i = 0; i < formDataArray.length; i++) {
             formDataDict[formDataArray[i].name] = formDataArray[i].value;
@@ -53,7 +54,7 @@
         $('#plot_parameters_submit').prop('disabled', bool)
     }
 
-    function disable_calc (bool) {
+    function disable_calc(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool)
     }
 
@@ -101,10 +102,34 @@
 
     $(document).ready(function () {
         $('#calc_form').on('change', function () {
-            if (equal_calc_parameters($(this))) {
+            calc_form_data = get_clean_form_data($(this))
+            console.log("calc change")
+            console.log("calc method", calculated_method)
+            console.log("selected method", selected_method)
+            console.log("!selected method", !selected_method)
+            console.log("1", equal_calc_parameters($(this)))
+            console.log("2", !equal_calc_parameters($(this)))
+            console.log("3", equal_calc_parameters($(this)) && (calculated_method === selected_method))
+            console.log("3.1", equal_calc_parameters($(this)))
+            console.log("3.2", calculated_method === selected_method)
+            console.log("4")
+            if (!selected_method) {
+                if (equal_calc_parameters($(this))) {
+                    console.log("1")
+                    disable_calc(true)
+                    calc_params_match = true
+                } else {
+                    console.log("2")
+                    disable_calc(false)
+                    calc_params_match = false
+                    trigger_plot_change()
+                }
+            } else if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
+                console.log("3")
                 disable_calc(true)
                 calc_params_match = true
             } else {
+                console.log("4")
                 disable_calc(false)
                 calc_params_match = false
                 trigger_plot_change()
@@ -112,6 +137,7 @@
         })
 
         $('#plot_form').on('change', function () {
+            console.log("calc form data", calc_form_data)
             if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
                 disable_plot(true)
                 return
