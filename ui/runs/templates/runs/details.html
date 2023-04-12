@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load bootstrap5 %}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
@@ -85,6 +86,8 @@
     {% include "navbar.html" with run_name=run_name%}
 {% endblock %}
 
+
+
 {% block content %}
 
 <div class="wrapper">
@@ -108,12 +111,11 @@
                 <div class="plots">
                     {{ plot|safe }}
                 </div>
+            {% endfor %}
+            <br>
         {% endfor %}
 
-        <br>
-    {% endfor %}
-
-    <br>
+    {% bootstrap_messages %}
     {{ location }}
     <br>
     <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
