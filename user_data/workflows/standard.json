@@ -25,27 +25,41 @@
           "name": "filter_proteins",
           "method": "low_frequency_filter",
           "parameters": {
-            "threshold": 0.2,
-            "graph_one_type": "Pie chart"
-          }
+            "threshold": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
         },
         {
           "name": "filter_samples",
           "method": "protein_intensity_sum_filter",
           "parameters": {
-            "threshold": 2,
-            "graph_one_type": "Bar chart"
-          }
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ]
         },
         {
           "name": "imputation",
           "method": "knn",
           "parameters": {
-            "number_of_neighbours": 10,
-            "graph_one_type": "Bar chart",
-            "graph_one_group_by": "Sample",
-            "graph_two_type": "Pie chart"
-          }
+            "number_of_neighbours": 10
+          },
+            "graphs": [
+                {
+                "graph_type": "Bar chart",
+                "group_by": "Sample"
+                },
+                {
+                "graph_type_quantites": "Pie chart"
+                }
+            ]
         },
         {
           "name": "outlier_detection",
@@ -58,19 +72,27 @@
           "name": "transformation",
           "method": "log_transformation",
           "parameters": {
-            "log_base": "log2",
-            "graph_one_type": "Boxplot",
-            "graph_one_group_by": "Sample"
-          }
+            "log_base": "log2"
+          },
+            "graphs": [
+                {
+                "graph_type": "Boxplot",
+                "group_by": "Sample"
+                }
+            ]
         },
         {
           "name": "normalisation",
           "method": "median",
           "parameters": {
-            "percentile": 0.4,
-            "graph_one_type": "Boxplot",
-            "graph_one_group_by": "Sample"
-          }
+            "percentile": 0.4
+          },
+            "graphs": [
+                {
+                "graph_type": "Boxplot",
+                "group_by": "Sample"
+                }
+            ]
         }
       ]
     },
