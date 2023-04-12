@@ -1,8 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center" style="height:100vh;margin-top:-3.6rem;">
-  <div class="row" style="width:80%;">
+<div class="container d-flex align-items-center justify-content-center" id="contain">
+  <div class="row" id="row">
     <div class="col mx-4">
       <form action="{% url 'runs:create' %}" method="post">
         {% csrf_token %}
