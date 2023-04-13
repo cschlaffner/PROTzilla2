@@ -19,18 +19,18 @@
 | protzilla/data\_preprocessing/filter\_proteins.py                |       15 |        2 |        4 |        1 |     74% |     55-56 |
 | protzilla/data\_preprocessing/filter\_samples.py                 |       26 |        1 |        4 |        2 |     90% |56->65, 66 |
 | protzilla/data\_preprocessing/imputation.py                      |       74 |        1 |       14 |        3 |     95% |140, 290->299, 309->315 |
-| protzilla/data\_preprocessing/normalisation.py                   |       98 |        1 |       22 |        2 |     98% |244->255, 256 |
-| protzilla/data\_preprocessing/outlier\_detection.py              |       70 |        4 |       16 |        6 |     86% |174, 179->188, 192-201, 205->221, 252, 253->exit |
+| protzilla/data\_preprocessing/normalisation.py                   |       99 |        1 |       22 |        2 |     98% |243->254, 255 |
+| protzilla/data\_preprocessing/outlier\_detection.py              |       67 |        3 |       12 |        4 |     89% |172, 189, 244, 245->exit |
 | protzilla/data\_preprocessing/plots.py                           |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
-| protzilla/data\_preprocessing/transformation.py                  |       20 |        2 |        8 |        3 |     82% |31, 43->52, 53 |
+| protzilla/data\_preprocessing/transformation.py                  |       20 |        2 |        8 |        3 |     82% |31, 40->49, 50 |
 | protzilla/history.py                                             |      119 |        6 |       46 |        6 |     93% |33, 109, 116, 124, 189, 203 |
 | protzilla/importing/metadata\_import.py                          |       27 |        7 |       12 |        1 |     64% |     19-26 |
 | protzilla/importing/ms\_data\_import.py                          |       16 |        0 |        2 |        0 |    100% |           |
-| protzilla/run.py                                                 |      158 |       28 |       46 |        6 |     77% |34-40, 44-50, 56, 81->80, 83, 112-113, 123-124, 138, 142, 149->147, 158-159, 162-165, 209-210 |
+| protzilla/run.py                                                 |      171 |       37 |       50 |        7 |     74% |35-41, 45-51, 57, 82->81, 84, 113-114, 124-125, 132-133, 143, 147, 155->153, 166-173, 176-179, 216-219, 230-231 |
 | protzilla/utilities/\_\_init\_\_.py                              |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                    |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                            |       11 |        0 |        0 |        0 |    100% |           |
-| protzilla/workflow\_helper.py                                    |       33 |        3 |       30 |       10 |     79% |20->19, 26, 36->42, 46, 52->51, 53->52, 55->52, 58->55, 59->60, 63 |
+| protzilla/workflow\_helper.py                                    |       33 |        1 |       30 |        2 |     95% |20->19, 26 |
 | tests/conftest.py                                                |        6 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_analysis/test\_differential\_expression.py |       63 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py    |       16 |        1 |        2 |        1 |     89% |        48 |
@@ -39,13 +39,13 @@
 | tests/protzilla/data\_preprocessing/test\_normalisation.py       |       67 |        4 |       12 |        4 |     90% |309, 325, 351, 377 |
 | tests/protzilla/data\_preprocessing/test\_outlier\_detection.py  |       41 |        3 |        6 |        3 |     87% |65, 79, 95 |
 | tests/protzilla/data\_preprocessing/test\_plots.py               |       47 |        8 |       16 |        5 |     79% |20, 39, 56, 81, 117-120 |
-| tests/protzilla/data\_preprocessing/test\_transformation.py      |       35 |        2 |        4 |        2 |     90% |  119, 134 |
+| tests/protzilla/data\_preprocessing/test\_transformation.py      |       35 |        2 |        4 |        2 |     90% |  119, 140 |
 | tests/protzilla/importing/test\_metadata\_import.py              |       23 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/test\_history.py                                 |      115 |        0 |        6 |        0 |    100% |           |
+| tests/protzilla/test\_history.py                                 |      116 |        0 |        6 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                     |       78 |        8 |        2 |        0 |     90% |   107-125 |
 | tests/protzilla/test\_transform\_dfs.py                          |       32 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                        |       55 |        0 |        8 |        0 |    100% |           |
-|                                                        **TOTAL** | **1528** |  **103** |  **315** |   **66** | **90%** |           |
+|                                                        **TOTAL** | **1540** |  **109** |  **315** |   **57** | **90%** |           |
 
 
 ## Setup coverage badge
