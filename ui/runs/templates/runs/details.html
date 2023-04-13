@@ -148,7 +148,8 @@
     <div id="plot_parameters">
         {% include "runs/fields.html" with fields=plot_fields %}
     </div>
-    <input type="submit" value="Plot" {% if not show_next %} disabled {% endif %} >
+    
+    <input type="submit" value="Plot" > <!-- {% if not show_next and "plot" in location %} disabled {% endif %} -->
 </form>
 
 {% for plot in current_plots %}

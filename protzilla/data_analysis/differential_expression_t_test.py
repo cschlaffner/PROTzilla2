@@ -126,8 +126,9 @@ def t_test(
     proteins_filtered = len(filtered_proteins) > 0
     proteins_filtered_warning_msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
     return (
-        de_proteins_df,
+        intensity_df,
         dict(
+            de_proteins_df=de_proteins_df,
             corrected_p_values_df=corrected_p_values_df,
             log2_fold_change_df=log2_fold_change_df,
             fc_threshold=fc_threshold,

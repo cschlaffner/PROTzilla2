@@ -741,6 +741,35 @@
           }
         }
       }
+    },
+    "plot": {
+      "volcano": {
+        "name": "Volcano Plot",
+        "description": "",
+        "parameters": {
+          "p_values": {
+            "name": "p-values",
+            "type": "named_output",
+            "default": null
+          },
+          "fc": {
+            "name": "log2 fold change",
+            "type": "named_output",
+            "default": null
+          },
+          "alpha": {
+            "name": "alpha/corrected alpha",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      },
+      "heatmap": {
+        "name": "Heatmap",
+        "description": "",
+        "parameters": {
+        }
+      }
     }
   },
   "data_integration": {}

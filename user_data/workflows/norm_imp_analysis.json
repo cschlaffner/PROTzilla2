@@ -21,22 +21,7 @@
     },
     "data_preprocessing": {
       "steps": [
-        {
-          "name": "filter_proteins",
-          "method": "low_frequency_filter",
-          "parameters": {
-            "threshold": 0.2,
-            "graph_one_type": "Pie chart"
-          }
-        },
-        {
-          "name": "filter_samples",
-          "method": "protein_intensity_sum_filter",
-          "parameters": {
-            "threshold": 2,
-            "graph_one_type": "Bar chart"
-          }
-        },
+        
         {
           "name": "imputation",
           "method": "knn",
@@ -45,22 +30,6 @@
             "graph_one_type": "Bar chart",
             "graph_one_group_by": "Sample",
             "graph_two_type": "Pie chart"
-          }
-        },
-        {
-          "name": "outlier_detection",
-          "method": "local_outlier_factor",
-          "parameters": {
-            "number_of_neighbors": 3
-          }
-        },
-        {
-          "name": "transformation",
-          "method": "log_transformation",
-          "parameters": {
-            "log_base": "log2",
-            "graph_one_type": "Boxplot",
-            "graph_one_group_by": "Sample"
           }
         },
         {
@@ -78,12 +47,12 @@
       "steps": [
         {
           "name": "differential_expression",
-          "method": "anova",
+          "method": "t_test",
           "parameters": {}
         },
         {
-          "name": "differential_expression",
-          "method": "t_test",
+          "name": "plot",
+          "method": "volcano",
           "parameters": {}
         }
       ]

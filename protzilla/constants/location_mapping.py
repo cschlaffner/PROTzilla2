@@ -1,4 +1,4 @@
-from ..data_analysis import differential_expression
+from ..data_analysis import differential_expression, plots
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -203,4 +203,9 @@ plot_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
+    (
+        "data_analysis",
+        "plot",
+        "volcano",
+    ): plots.create_volcano_plot,
 }
