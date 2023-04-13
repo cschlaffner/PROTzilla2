@@ -35,7 +35,9 @@ def validate_workflow_parameters(workflow_config, workflow_meta):
             for param in step["parameters"]:
                 if (
                     param
-                    not in workflow_meta[section][step["name"]][step["method"]]["parameters"]
+                    not in workflow_meta[section][step["name"]][step["method"]][
+                        "parameters"
+                    ]
                 ):
                     raise ValueError(
                         f"Parameter {param} in step {step['name']} does not exist in workflow_meta"

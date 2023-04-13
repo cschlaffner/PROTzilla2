@@ -28,14 +28,11 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     elif log_base == "log10":
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
     else:
-        raise ValueError(
-            """Unknown log method. Known log methods are
-                         "log2" and "log10"."""
-        )
+        raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
     return transformed_df, dict()
 
 
-def by_log_plot(df, result_df, graph_type, group_by):
+def by_log_plot(df, result_df, out, graph_type, group_by):
     return _build_box_hist_plot(df, result_df, graph_type, group_by)
 
 
