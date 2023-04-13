@@ -1,4 +1,4 @@
-from ..data_analysis import differential_expression
+from ..data_analysis import differential_expression, clustering
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -127,6 +127,11 @@ method_map = {
         "differential_expression",
         "t_test",
     ): differential_expression.t_test,
+    (
+        "data_analysis",
+        "clustering",
+        "k_means",
+    ): clustering.k_means,
 }
 
 # reversed mapping of method callable and location

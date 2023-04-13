@@ -7,9 +7,9 @@ from django.contrib import messages
 def k_means(
     intensity_df: pd.DataFrame,
     n_clusters: int = 8,
-    random_state: int = None,
-    init_centroid_strategy: str | list = "k-means++",
-    n_init: int | str = "auto",
+    random_state: int = 6,
+    init_centroid_strategy: str | list = "random",
+    n_init: int = 10,
     max_iter: int = 300,
     tolerance: float = 1e-4,
 ):
