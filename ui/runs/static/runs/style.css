@@ -10,6 +10,8 @@ html, body{
 #content {
     flex: 3;
     padding: 20px;
+    padding-left: 8%;
+    padding-right: 8%;
 }
 
 #sidebar {
@@ -17,12 +19,8 @@ html, body{
     padding: 20px;
 }
 
-.plots {
+.plot-container {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
-}
-
-.reduce_width {
-    width: 50%;
 }
