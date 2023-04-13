@@ -1,8 +1,8 @@
 import json
 import shutil
+import traceback
 from pathlib import Path
 from shutil import rmtree
-import traceback
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
@@ -125,8 +125,12 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        method_callable = method_map[(section, step, method)]
-        self.perform_calculation(method_callable, parameters)
+        location = (section, step, method)
+        if location in method_map:
+            self.perform_calculation(method_map[location], parameters)
+        else:
+            self.result_df = None
+            raise ValueError(f"No calculation method found for {location}")
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
