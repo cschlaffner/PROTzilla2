@@ -1,7 +1,12 @@
+import logging
+import sys
+
 from .run import Run
 from .utilities.random import random_string
 
 # from .constants.paths import PROJECT_PATH
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class Runner:
@@ -19,11 +24,11 @@ class Runner:
         )
 
         # print(self.run.workflow_config.items())
-        print()
-        for section, steps in self.run.workflow_config["sections"].items():
-            for step in steps["steps"]:
-                for param in step["parameters"]:
-                    print(section, step, param)
+        # print()
+        # for section, steps in self.run.workflow_config["sections"].items():
+        #     for step in steps["steps"]:
+        #         for param in step["parameters"]:
+        #             print(section, step, param)
 
         self.compute_workflow()
 
@@ -31,17 +36,22 @@ class Runner:
         print("\n\n------ compute workflow\n")
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
-                print("current step:", step)
+                logging.info(
+                    f"performing step: {section, step['name'], step['method']}"
+                )
                 if section == "importing":
                     self._importing(section, step)
                     self.run.next_step(f"{self.run.current_workflow_location()}")
                 elif section == "data_analysis":
-                    assert False
+                    logging.warning("data_analysis not implemented yet")
+                    exit(0)
                 else:
+                    logging.log(
+                        0, f"performing step: {section, step['name'], step['method']}"
+                    )
                     self.run.perform_calculation_from_location(
                         section, step["name"], step["method"], step["parameters"]
                     )
-                    print(f"performed step: {section, step['name'], step['method']}")
 
                     if self.args.allPlots:
                         self.run.create_plot_from_location(
@@ -55,13 +65,12 @@ class Runner:
 
     def _importing(self, section, step):
         if step["name"] == "ms_data_import":
-            print("ms_data_import")
             params = step["parameters"]
             params["file_path"] = self.args.msDataPath
             self._perform_step(section, step, params)
+            logging.log(0, "imported MS Data")
 
         elif step["name"] == "metadata_import":
-            print("metadata_import")
             if self.args.metaDataPath is None:
                 raise ValueError(
                     f"MetadataPath (--metaDataPath) is not specified, "
@@ -70,11 +79,10 @@ class Runner:
             params = step["parameters"]
             params["file_path"] = self.args.metaDataPath
             self._perform_step(section, step, params)
+            logging.log(0, "imported Meta Data")
 
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
-
-        print("imported, df:", self.run.df)
 
     def _perform_step(self, section, step, params):
         self.run.perform_calculation_from_location(
