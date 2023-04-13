@@ -209,6 +209,7 @@ class Run:
                 self.result_df,
                 self.current_out,
                 self.plots,
+                name=name,
             )
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
