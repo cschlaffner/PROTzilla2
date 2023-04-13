@@ -215,7 +215,7 @@ class Run:
             # remove "broken" step from history again
             self.history.pop_step()
             traceback.print_exc()
-            # add message to user?
+            # TODO 100 add message to user?
         else:  # continue normally when no error occurs
             self.df = self.result_df
             self.result_df = None
