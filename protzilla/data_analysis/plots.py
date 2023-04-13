@@ -1,7 +1,7 @@
 from protzilla.data_preprocessing.plots import create_pie_plot
 
 
-def create_volcano_plot(intensity_df, a, b, c):
+def create_volcano_plot(intensity_df, a, b, **p):
     fig = create_pie_plot(
         values_of_sectors=[
             400,
@@ -12,9 +12,9 @@ def create_volcano_plot(intensity_df, a, b, c):
     )
     print(intensity_df.head())
     print("------------------")
-    print(c)
+    print(a)
     print("------------------")
-    print(b)
+    print(p)
 
     return [fig]
 

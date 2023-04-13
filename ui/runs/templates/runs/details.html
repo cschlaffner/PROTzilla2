@@ -146,7 +146,11 @@
 <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div id="plot_parameters">
-        {% include "runs/fields.html" with fields=plot_fields %}
+        {% if "plot" not in location %}
+            {% include "runs/fields.html" with fields=plot_fields %}
+        {% else %}
+            {% include "runs/fields.html" with fields=fields %}
+        {% endif %}
     </div>
     
     <input type="submit" value="Plot" > <!-- {% if not show_next and "plot" in location %} disabled {% endif %} -->
