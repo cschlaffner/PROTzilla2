@@ -53,7 +53,7 @@
           },
           "graphs": [
             {
-              "graph_type": "Bar chart",
+              "graph_type": "Boxplot",
               "group_by": "Sample"
             },
             {

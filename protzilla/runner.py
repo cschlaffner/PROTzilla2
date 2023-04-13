@@ -54,9 +54,13 @@ class Runner:
                     )
 
                     if self.args.allPlots:
+                        params = None
+                        if "graphs" in step:
+                            print(step["graphs"])
+                            params = self._serialize_graphs(step["graphs"])
                         self.run.create_plot_from_location(
                             *self.run.current_workflow_location(),
-                            parameters=step["graphs"],
+                            parameters=params,
                         )
                         for plot in self.run.plots:
                             plot.show()
@@ -88,3 +92,6 @@ class Runner:
         self.run.perform_calculation_from_location(
             section, step["name"], step["method"], params
         )
+
+    def _serialize_graphs(self, graphs):
+        return {k: v for graph in graphs for k, v in graph.items()}
