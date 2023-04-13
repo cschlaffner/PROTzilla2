@@ -734,6 +734,68 @@
           }
         }
       }
+    },
+    "clustering": {
+      "k_means": {
+        "name": "K-Means",
+        "description": "",
+        "parameters": {
+          "n_clusters": {
+            "name": "Number of clusters to form",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 8
+          },
+          "random_state": {
+            "name": "Seed for centroid initialisation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "init_centroid_strategy": {
+            "name": "Method for initialisation of centroids",
+            "type":"categorical",
+            "enable_dynamic": {"manual":"init_centroid_samples"},
+            "categories": [
+              "k-means++",
+              "random",
+              "manual"
+            ],
+            "default": "random"
+          },
+          "init_centroid_samples": {
+            "name": "Choose samples to be initial centroids",
+            "type":"categorical",
+            "fill": "samples",
+            "categories": [],
+            "default": "None",
+            "multiple": true
+          },
+          "n_init": {
+            "name": "Number of times the k-means algorithm is run with different centroid seeds",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 10
+          },
+          "max_iter": {
+            "name": "Maximum number of iterations of the k-means algorithm for a single run.",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 300
+          },
+          "tolerance": {
+            "name": "Relative tolerance with regards to Frobenius norm",
+            "type": "numeric",
+            "min": 0,
+            "default": 1e-4
+          }
+        }
+      }
     }
   },
   "data_integration": {}
