@@ -13,7 +13,6 @@ def k_means(
     max_iter: int = 300,
     tolerance: float = 1e-4,
 ):
-    # think about n_init (initializasion strategies, how to choose centroids) and error handling?
     transformed_df = long_to_wide(intensity_df)
     try:
         if type(init_centroid_strategy) is list:
@@ -36,32 +35,29 @@ def k_means(
         return intensity_df, dict(centroids=centroids, labels=labels)
 
     except ValueError as e:
-        # is there a better way to implement this if?
-        if "Input X contains NaN." in str(e):
-            msg = "KMeans does not accept missing values encoded as NaN. Consider \
-                preprocessing your data to remove NaN values."
-            return intensity_df, dict(
-                centroids=None,
-                labels=None,
-                messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+        if transformed_df.isnull().sum().any():
+            msg = (
+                "KMeans does not accept missing values encoded as NaN. Consider"
+                "preprocessing your data to remove NaN values."
             )
-        if (
-            f"n_samples={transformed_df.shape[0]} should be >= n_clusters={n_clusters}."
-            in str(e)
-        ):
-            msg = f"The number of clusters should be less or equal than the number of \
-                samples. In the selected dataframe there is {transformed_df.shape[0]} \
-                samples"
-            return intensity_df, dict(
-                centroids=None,
-                labels=None,
-                messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+        elif transformed_df.shape[0] < n_clusters:
+            msg = (
+                f"The number of clusters should be less or equal than the number of "
+                f"samples. In the selected dataframe there is {transformed_df.shape[0]}"
+                f"samples"
             )
-        # implement error handling n_clusters and init_centroid_strategyshould be
-        # the same or fill dinamically?
-
-    # Think about what should be returned as intensity_df.
-    # Does it make sense to return an intensity_df?
+        elif init_centroid_strategy.shape[0] != n_clusters:
+            msg = (
+                f"The number of clusters {n_clusters} should match the number of "
+                f"chosen centroids {init_centroid_strategy.shape[0]}"
+            )
+        else:
+            msg = ""
+        return intensity_df, dict(
+            centroids=None,
+            labels=None,
+            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+        )
 
 
 # Note that when we are applying k-means to real-world data using a Euclidean distance
