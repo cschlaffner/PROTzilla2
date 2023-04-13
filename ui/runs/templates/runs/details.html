@@ -136,14 +136,15 @@
                     {{ plot|safe }}
                 </div>
             {% endfor %}
-            <form action="{% url 'runs:next' run_name %}" method="post" class="d-inline">
+            <form action="{% url 'runs:next' run_name %}" method="post">
                 {% csrf_token %}
-                {{ name_field }}
-                <button class="btn btn-grey mr-3" {% if not show_next %} disabled {% endif %}>Next</button>
-            </form>
-            <form action="{% url 'runs:back' run_name %}" method="post" class="d-inline">
-                {% csrf_token %}
-                <button class="btn btn-grey" {% if not show_back %} disabled {% endif %}>Back</button>
+                <div class="form-group">
+                    {{ name_field }}
+                </div>
+                <div class="form-group">
+                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %} disabled {% endif %}>Back</a>
+                    <button class="btn btn-grey" {% if not show_next %} disabled {% endif %}>Next</button>
+                </div>
             </form>
         </div>
     </div>
