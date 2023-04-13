@@ -1,12 +1,26 @@
 from itertools import zip_longest
 
 
-def get_all_steps(workflow_config_dict):
+def get_all_steps(workflow_config_dict) -> list[dict[str, list[str]]]:
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
-        workflow_steps.extend(steps["steps"])
-    return [step["name"] for step in workflow_steps]
+        workflow_steps.append(
+            {"section": section, "steps": [step["name"] for step in steps["steps"]]}
+        )
+    return workflow_steps
 
+
+def get_all_possible_steps(workflow_meta) -> list[dict[str, list[str]]]:
+    workflow_steps = []
+    for section, steps in workflow_meta.items():
+        workflow_steps.append({"section": section, "steps": list(steps.keys())})
+    return workflow_steps
+
+def get_all_possible_and_workflow_steps(workflow_config_dict, workflow_meta):
+    workflow_steps = get_all_steps(workflow_config_dict)
+    possible_steps = get_all_possible_steps(workflow_meta)
+    # return dict with "section", "steps" and "possible_steps"
+    return 
 
 def get_all_default_params_for_methods(workflow_meta, section, step, method):
     workflow_meta_step = workflow_meta[section][step]
@@ -35,7 +49,9 @@ def validate_workflow_parameters(workflow_config, workflow_meta):
             for param in step["parameters"]:
                 if (
                     param
-                    not in workflow_meta[section][step["name"]][step["method"]]["parameters"]
+                    not in workflow_meta[section][step["name"]][step["method"]][
+                        "parameters"
+                    ]
                 ):
                     raise ValueError(
                         f"Parameter {param} in step {step['name']} does not exist in workflow_meta"

@@ -1,16 +1,10 @@
-{# some text params: run_name workflow_steps sidebar_dropdown #}
+{# some text params: workflow_steps possible_steps add_step_key run_name#}
 
 <h3>Side Panel</h3>
-<form action="{% url 'runs:add' run_name %}" method="post">
-    {% csrf_token %}
-    {{ sidebar_dropdown }}
-    <button>add</button>
-</form>
 
-{% for step in workflow_steps %}
+{% for section in workflow_steps %}
     <p>
-        {% if step.highlighted %} <b> {% endif %}
-        {{ step.name }}
-        {% if step.highlighted %} </b> {% endif %}
+        {% csrf_token %}
+        {% include "runs/sidebar_section.html" with section_name=section.section steps=section.steps key=add_step_key run_name=run_name%}
     </p>
 {% endfor %}

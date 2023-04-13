@@ -37,18 +37,37 @@ def workflow_meta():
 
 
 @pytest.fixture
-def example_workflow_all_steps():
+def example_workflow_all_steps() -> list[dict[str, list[str]]]:
     return [
-        "ms_data_import",
-        "metadata_import",
-        "filter_proteins",
-        "filter_samples",
-        "imputation",
-        "outlier_detection",
-        "transformation",
-        "normalisation",
-        "differential_expression",
-        "differential_expression",
+        {
+            "section": "importing",
+            "steps": [
+                "ms_data_import",
+                "metadata_import",
+            ],
+        },
+        {
+            "section": "data_preprocessing",
+            "steps": [
+                "filter_proteins",
+                "filter_samples",
+                "imputation",
+                "outlier_detection",
+                "transformation",
+                "normalisation",
+            ],
+        },
+        {
+            "section": "data_analysis",
+            "steps": [
+                "differential_expression",
+                "differential_expression",
+            ],
+        },
+        {
+            "section": "data_integration",
+            "steps": [],
+        },
     ]
 
 

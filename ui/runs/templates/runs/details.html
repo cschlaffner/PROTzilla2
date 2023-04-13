@@ -169,7 +169,9 @@
 </form>
 </main>
     <aside>
-        {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
+        {{ csrf_token }}
+
+        {{ sidebar }}
     </aside>
     </div>
 </body>

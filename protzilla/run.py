@@ -164,24 +164,21 @@ class Run:
         )
         self.current_plot_parameters = parameters
 
-    def insert_as_next_step(self, step_to_be_inserted):
-        self.section, self.step, self.method = self.current_workflow_location()
-        assert self.section is not None
-
-        workflow_meta_step = self.workflow_meta[self.section][step_to_be_inserted]
+    def insert_as_next_step(self, step_to_be_inserted, section):
+        workflow_meta_step = self.workflow_meta[section][step_to_be_inserted]
         first_method_name = list(workflow_meta_step.keys())[0]
 
         params_default = get_all_default_params_for_methods(
-            self.workflow_meta, self.section, step_to_be_inserted, first_method_name
+            self.workflow_meta, section, step_to_be_inserted, first_method_name
         )
         step_dict = dict(
             name=step_to_be_inserted,
             method=first_method_name,
             parameters=params_default,
         )
-        past_steps_of_section = self.history.number_of_steps_in_section(self.section)
+        past_steps_of_section = self.history.number_of_steps_in_section(section)
 
-        self.workflow_config["sections"][self.section]["steps"].insert(
+        self.workflow_config["sections"][section]["steps"].insert(
             past_steps_of_section + 1, step_dict
         )
 

@@ -7,17 +7,18 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
+from protzilla.workflow_helper import get_all_steps
+
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
 from ui.runs.fields import (
-    make_add_step_dropdown,
     make_current_fields,
     make_displayed_history,
-    make_highlighted_workflow_steps,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
     make_plot_fields,
+    make_sidebar,
 )
 from ui.runs.views_helper import parameters_from_post
 
@@ -59,8 +60,7 @@ def detail(request, run_name):
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
-            sidebar_dropdown=make_add_step_dropdown(run, section),
-            workflow_steps=make_highlighted_workflow_steps(run),
+            sidebar=make_sidebar(request, run, run_name),
         ),
     )
 
@@ -160,12 +160,14 @@ def add(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
+    print(post)
     step = post["step_to_be_added"][0]
+    section = post["section_name"][0]
 
     if step == "":
         return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-    run.insert_as_next_step(step)
+    run.insert_as_next_step(step, section)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

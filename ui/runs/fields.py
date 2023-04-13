@@ -4,7 +4,11 @@ from django.template.loader import render_to_string
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.workflow_helper import get_all_steps, get_workflow_default_param_value
+from protzilla.workflow_helper import (
+    get_all_possible_steps,
+    get_all_steps,
+    get_workflow_default_param_value,
+)
 from ui.runs.views_helper import insert_special_params
 
 
@@ -68,6 +72,21 @@ def make_add_step_dropdown(run, section):
             type="categorical",
             categories=steps,
             key="step_to_be_added",
+        ),
+    )
+
+
+def make_sidebar(request, run, run_name):
+    csrf_token = request.META["CSRF_COOKIE"]
+    template = "runs/sidebar.html"
+    return render_to_string(
+        template,
+        context=dict(
+            csrf_token=csrf_token,
+            workflow_steps=get_all_steps(run.workflow_config),
+            possible_steps=get_all_possible_steps(run.workflow_meta),
+            add_step_key="step_to_be_added",
+            run_name=run_name,
         ),
     )
 
@@ -137,12 +156,3 @@ def make_name_field(allow_next):
         "runs/field_text.html",
         context=dict(disabled=not allow_next, key="name", name="Name:"),
     )
-
-
-def make_highlighted_workflow_steps(run):
-    workflow_steps = get_all_steps(run.workflow_config)
-    highlighted_workflow_steps = [
-        {"name": step, "highlighted": False} for step in workflow_steps
-    ]
-    highlighted_workflow_steps[run.step_index]["highlighted"] = True
-    return highlighted_workflow_steps

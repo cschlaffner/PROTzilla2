@@ -1,0 +1,18 @@
+{# params: section_name steps run_name key #}
+<h4>{{ section_name }}</h4>
+
+<form action="{% url 'runs:add' run_name %}" method="post">
+    {% csrf_token %}
+    {% include "runs/field_select.html" with categories=steps key=key %}
+    {% comment %}return the section_name as post request with key{% endcomment %}
+    <input type="hidden" name="section_name" value="{{ section_name }}">
+
+
+    <button>add</button>
+</form>
+
+{% for step in steps %}
+    <p>
+        {{ step }}
+    </p>
+{% endfor %}
