@@ -16,15 +16,27 @@ parser.add_argument(
 parser.add_argument(
     "--metaDataPath", action="store", help="path to the metadata for your dataset"
 )
-parser.add_argument("-n", "--name", action="store", help="Name of the run")
+parser.add_argument(
+    "-n",
+    "--name",
+    action="store",
+    help="Name of the run. If not provided a random name will be assigned",
+)
 parser.add_argument("--dfMode", action="store", help="Disk or memory")
 parser.add_argument(
     "-p",
     "--allPlots",
     action="store_true",
-    help="create all plots and export them, default: false",
+    help="create all plots and save them to /name/plots, default: false",
+)
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action="store_true",
+    help="when provided, all Parsed Arguments will be shown",
 )
 
 args = parser.parse_args()
 
 runner = Runner(args)
+runner.compute_workflow()

@@ -12,7 +12,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class Runner:
     def __init__(self, args):
-        print("args:", args)
+        if args.verbose:
+            logging.info(f"Parsed arguments: {args}")
         self.args = args
         self.run_name = (
             args.name if args.name is not None else f"runner_{random_string()}"
@@ -27,12 +28,14 @@ class Runner:
             workflow_config_name=self.args.workflow,
             df_mode=self.df_mode,
         )
+        logging.info(
+            f"A run with name {self.run_name} has been created at {self.run.run_path}"
+        )
 
         if self.args.allPlots:
             self.plots_path = Path(f"{self.run.run_path}/plots")
             self.plots_path.mkdir()
-
-        self.compute_workflow()
+            logging.info(f"Plots will be saved at {self.run.run_path}/plots")
 
     def compute_workflow(self):
         print("\n\n------ compute workflow\n")
@@ -95,7 +98,7 @@ class Runner:
 
     def _overwrite_run_prompt(self):
         answer = input(
-            "a run with the this name already exists. "
+            "A run with the this name already exists. "
             "Do you want to overwrite it? [y/n]: "
         )
         if answer in ["n", "no"]:
@@ -104,7 +107,7 @@ class Runner:
         elif answer in ["y", "yes"]:
             return
         else:
-            print("\n## Please answer with one of the given options ##")
+            print("\n\n----- Please answer with one of the given options")
             self._overwrite_run_prompt()
 
     def _serialize_graphs(self, graphs):
