@@ -51,6 +51,29 @@
                     }
                 })
             });
+
+            $(".dynamic_trigger").change(function () {
+                const selected_choice = $(this).val();
+                const triggered_id = $(this).attr("id");
+
+                $.ajax({
+                    url: "{% url 'runs:change_field' run_name %}",
+                    type: "POST",
+                    data: {
+                        id: triggered_id,
+                        selected: selected_choice,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (response) {
+                        $.each(response, function (key, value) {
+                            $('#' + key).html(value);
+                        })
+                    }
+                }).fail(function (e) {
+                    console.log('Error:', e);
+                    alert(e.responseJSON.error); // alert error message to user
+                })
+            })
         });
     </script>
     <title>PROTzilla {{ run_name }}</title>
@@ -72,6 +95,8 @@
     </style>
 </head>
 <body>
+<div class="layout-container">
+<main>
 {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -87,7 +112,6 @@
 <br>
 <b>history</b>
 <br>
-<main>
 {% for step in displayed_history %}
     {{ step.location }}<br>
     {% for field in step.fields %}
@@ -147,5 +171,6 @@
     <aside>
         {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
     </aside>
+    </div>
 </body>
 </html>

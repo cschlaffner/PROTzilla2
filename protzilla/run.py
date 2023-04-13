@@ -143,6 +143,8 @@ class Run:
                 call_parameters[k] = self.history.output_of_named_step(*v)
             else:
                 call_parameters[k] = v
+        if "metadata_df" in call_parameters:
+            call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.current_parameters = parameters
         self.plots = []  # reset as not up to date anymore

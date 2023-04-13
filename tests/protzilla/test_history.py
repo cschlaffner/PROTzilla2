@@ -119,7 +119,7 @@ def test_dataframe_in_json(sample_step_params):
 
 def test_number_of_steps_in_section(sample_step_params):
     name = "test_history_df" + random_string()
-    history = History(name, df_mode="disk")
+    history = History(name, df_mode="memory")
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
     history.add_step(**sample_step_params, dataframe=pd.DataFrame())
