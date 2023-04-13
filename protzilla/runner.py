@@ -22,20 +22,19 @@ class Runner:
 
         if os.path.exists(RUNS_PATH / self.run_name):
             self._overwrite_run_prompt()
+            print("\n\n")
 
         self.run = Run.create(
             run_name=self.run_name,
             workflow_config_name=self.args.workflow,
             df_mode=self.df_mode,
         )
-        logging.info(
-            f"A run with name {self.run_name} has been created at {self.run.run_path}"
-        )
+        logging.info(f"Run {self.run_name} created at {self.run.run_path}")
 
         if self.args.allPlots:
             self.plots_path = Path(f"{self.run.run_path}/plots")
             self.plots_path.mkdir()
-            logging.info(f"Plots will be saved at {self.run.run_path}/plots")
+            logging.info(f"Saving plots at {self.plots_path}")
 
     def compute_workflow(self):
         print("\n\n------ compute workflow\n")
@@ -62,7 +61,7 @@ class Runner:
             params = step["parameters"]
             params["file_path"] = self.args.msDataPath
             self._perform_current_step(params)
-            logging.info(0, "imported MS Data")
+            logging.info("imported MS Data")
 
         elif step["name"] == "metadata_import":
             if self.args.metaDataPath is None:
@@ -73,7 +72,7 @@ class Runner:
             params = step["parameters"]
             params["file_path"] = self.args.metaDataPath
             self._perform_current_step(params)
-            logging.info(0, "imported Meta Data")
+            logging.info("imported Meta Data")
 
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
@@ -92,8 +91,8 @@ class Runner:
             *self.run.current_workflow_location(),
             parameters=params,
         )
-        for plot in self.run.plots:
-            plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}.html"
+        for i, plot in enumerate(self.run.plots):
+            plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
             plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
