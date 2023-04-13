@@ -54,10 +54,14 @@ class Runner:
                     )
 
                     if self.args.allPlots:
-                        params = None
+                        params = dict()
                         if "graphs" in step:
                             print(step["graphs"])
                             params = self._serialize_graphs(step["graphs"])
+
+                        print(params)
+                        if "transformation" in step["name"]:
+                            pass
                         self.run.create_plot_from_location(
                             *self.run.current_workflow_location(),
                             parameters=params,
