@@ -11,7 +11,6 @@ from .workflow_helper import get_all_default_params_for_methods
 
 
 class Run:
-
     """
     :ivar run_path: the path to this runs' dir
     :ivar workflow_config
@@ -159,6 +158,14 @@ class Run:
         self.create_plot(plot_map[location], parameters)
 
     def create_plot(self, method_callable, parameters):
+        print("plot params:", parameters)
+        print()
+        if "log_transformation" in self.method:
+            print("log transform")
+            parameters = {
+                # "graph_type": "Boxplot",
+                "group_by": "Sample"
+            }
         self.plots = method_callable(
             self.df, self.result_df, self.current_out, **parameters
         )
