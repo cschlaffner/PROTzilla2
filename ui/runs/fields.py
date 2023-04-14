@@ -105,8 +105,13 @@ def make_displayed_history(run):
             history_step.method
         ]["parameters"]
         name = f"{history_step.step.replace('_', ' ').title()}: {history_step.method.replace('_', ' ').title()}"
+        section_heading = (
+            history_step.section.replace("_", " ").title()
+            if run.history.steps[i - 1].section != history_step.section
+            else None
+        )
         if history_step.section == "importing":
-            fields = ['']
+            fields = [""]
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
@@ -119,6 +124,7 @@ def make_displayed_history(run):
                 display_name=name,
                 fields=fields,
                 plots=[p.to_html() for p in history_step.plots],
+                section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
             )

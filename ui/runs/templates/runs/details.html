@@ -96,6 +96,10 @@
 
                 <div class="col-7">
                     {% for step in displayed_history %}
+                        {% if step.section_heading %}
+                            <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{step.section_heading}}</h4>
+                        {% endif %}
+
                         <b>{{ step.display_name }}</b><br>
                         {% if step.name %}
                             Name: {{ step.name }}<br>
