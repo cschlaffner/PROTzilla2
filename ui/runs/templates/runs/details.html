@@ -139,20 +139,21 @@
                     </form>
                 </div>
             {% else %}
-                <div class="col-7">
-                    <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ method_dropdown }}
-                        <div id="method_parameters" class="mb-2">
-                            {% include "runs/fields.html" with fields=fields %}
-                        </div>
-                        <input type="submit" value="Calculate" class="btn btn-grey">
-                    </form>
-                    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="submit" value="Plot" class="btn btn-grey" {% if not show_next %} disabled {% endif %}>
-                    </form>
-                </div>
+            <div class="col-7">
+                <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ method_dropdown }}
+                  <div id="method_parameters" class="mb-2">
+                    {% include "runs/fields.html" with fields=fields %}
+                  </div>
+                  <div class="form-group">
+                    <input type="submit" value="Calculate" class="btn btn-grey mr-auto">
+                    <input type="submit" value="Plot" class="btn btn-grey" {% if not show_next %} disabled {% endif %}>
+                  </div>
+                </form>
+              </div>
+              
+            
             {% endif %}
         </div>
 
