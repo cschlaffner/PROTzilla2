@@ -1,1 +1,1 @@
-{"workflow_config_name": "only_import_and_filter_proteins", "df_mode": "disk_memory"}
+{"workflow_config_name": "standard", "df_mode": "disk_memory"}

@@ -1,5 +1,6 @@
 import json
 import shutil
+import traceback
 from pathlib import Path
 from shutil import rmtree
 
@@ -124,8 +125,12 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        method_callable = method_map[(section, step, method)]
-        self.perform_calculation(method_callable, parameters)
+        location = (section, step, method)
+        if location in method_map:
+            self.perform_calculation(method_map[location], parameters)
+        else:
+            self.result_df = None
+            raise ValueError(f"No calculation method found for {location}")
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
@@ -142,6 +147,7 @@ class Run:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.current_parameters = parameters
+        self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
             for message in self.current_out["messages"]:
@@ -150,13 +156,21 @@ class Run:
                     trace = f"\nTrace: {message['trace']}" if "trace" in message else ""
                     log_function(f"{message['msg']}{trace}")
 
-    def calculate_and_next(self, method_callable, **parameters):  # to be used for CLI
+    def calculate_and_next(
+        self, method_callable, name=None, **parameters
+    ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
-        self.next_step()
+        self.next_step(name=name)
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        self.create_plot(plot_map[location], parameters)
+        if location in plot_map:
+            self.create_plot(plot_map[location], parameters)
+        else:
+            self.plots = []
+            self.current_plot_parameters = parameters
+            # notify user
+            print(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
@@ -184,27 +198,34 @@ class Run:
 
         self.write_local_workflow()
 
-    def next_step(self, name=None):
-        self.history.add_step(
-            self.section,
-            self.step,
-            self.method,
-            self.current_parameters,
-            self.result_df,
-            self.current_out,
-            self.plots,
-            name=name,
-        )
-        self.df = self.result_df
-        self.result_df = None
-        self.step_index += 1
-        self.current_parameters = None
-        self.current_plot_parameters = None
-        self.plots = []
+    def next_step(self, name):
         try:
-            self.section, self.step, self.method = self.current_workflow_location()
-        except IndexError:
-            self.handle_all_steps_completed()
+            self.history.add_step(
+                self.section,
+                self.step,
+                self.method,
+                self.current_parameters,
+                self.result_df,
+                self.current_out,
+                self.plots,
+                name=name,
+            )
+        except TypeError:  # catch error when serializing json
+            # remove "broken" step from history again
+            self.history.pop_step()
+            traceback.print_exc()
+            # TODO 100 add message to user?
+        else:  # continue normally when no error occurs
+            self.df = self.result_df
+            self.result_df = None
+            self.step_index += 1
+            self.current_parameters = None
+            self.current_plot_parameters = None
+            self.plots = []
+            try:
+                self.section, self.step, self.method = self.current_workflow_location()
+            except IndexError:
+                self.handle_all_steps_completed()
 
     def back_step(self):
         assert self.history.steps
