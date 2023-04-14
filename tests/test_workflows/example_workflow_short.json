@@ -13,13 +13,13 @@
       ]
     },
     "data_preprocessing": {
-      "steps": {}
+      "steps": []
     },
     "data_analysis": {
-      "steps": {}
+      "steps": []
     },
     "data_integration": {
-      "steps": {}
+      "steps": []
     }
   }
 }

@@ -640,7 +640,9 @@
             "name": "Grouping:",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": ["selected_groups"],
+            "fill_dynamic": [
+              "selected_groups"
+            ],
             "categories": [],
             "default": "None"
           },
@@ -654,7 +656,8 @@
           },
           "metadata_df": {
             "type": "metadata_df",
-            "name": "metadata_df"
+            "name": "metadata_df",
+            "default": null
           }
         }
       },
@@ -688,7 +691,10 @@
             "name": "Grouping",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic":  ["group1", "group2"],
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
             "categories": [],
             "default": null
           },
@@ -708,7 +714,8 @@
           },
           "metadata_df": {
             "type": "metadata_df",
-            "name": "metadata_df"
+            "name": "metadata_df",
+            "default": null
           }
         }
       },
