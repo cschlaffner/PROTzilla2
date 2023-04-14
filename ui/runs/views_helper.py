@@ -1,4 +1,3 @@
-
 def parameters_from_post(post):
     d = dict(post)
     del d["csrfmiddlewaretoken"]
@@ -10,6 +9,24 @@ def parameters_from_post(post):
         else:
             parameters[k] = convert_str_if_possible(v[0])
     return parameters
+
+
+def get_data_for_named_outputs(parameters, run):
+    new_parameters = {}
+    for k, v in parameters.items():
+        print(k, "||||", v, type(v))
+        if type(v) is list:
+            for step, step_name in zip(run.history.steps, run.history.step_names):
+                print(v[0], "|||", step_name)
+                if v[0] == step_name:
+                    try:
+                        new_parameters[k] = step.outputs[v[1]]
+                    except KeyError:
+                        print("current key-value pair is not a named_output: ", k, v)
+                        new_parameters[k] = parameters[k]
+        else:
+            new_parameters[k] = parameters[k]
+    return new_parameters
 
 
 def convert_str_if_possible(s):
