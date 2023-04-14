@@ -2,6 +2,7 @@ import copy
 import json
 
 import pytest
+from test_run import example_workflow_short
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
@@ -88,6 +89,18 @@ def test_get_workflow_default_param_value(example_workflow):
     )
 
     assert threshold_value == 0.2
+
+
+def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
+    threshold_value = get_workflow_default_param_value(
+        example_workflow_short,
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+        "threshold",
+    )
+
+    assert threshold_value == None
 
 
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):

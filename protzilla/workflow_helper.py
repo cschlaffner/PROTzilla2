@@ -23,9 +23,7 @@ def get_workflow_default_param_value(workflow_config, section, step, method, par
                 if param in step_dict["parameters"]
                 else None
             )
-    raise ValueError(
-        f"Could not find method {method} in step {step} in section {section}"
-    )
+    return None
 
 
 def validate_workflow_parameters(workflow_config, workflow_meta):
