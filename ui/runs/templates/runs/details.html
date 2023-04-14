@@ -90,6 +90,7 @@
 
 <div class="wrapper">
     <div id="content" class="">
+        {# show history #}
         {% if displayed_history%}
             <div class="row justify-content-center d-flex">
                 <h3>History</h3>
@@ -125,10 +126,14 @@
             <hr class="my-4">
         {% endif %}
 
+        {# include bootstrap messages for alerting user #}
         {% bootstrap_messages %}
+
+        {# show current step #}
         <div class="row justify-content-center d-flex">
             <h3>{{ display_name }}</h3>
 
+            {# if there are plot parameters, display method and plot parameters next to each other #}
             {% if plot_fields %}
                 <div class="col">
                     <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
@@ -168,6 +173,7 @@
             {% endif %}
         </div>
 
+        {# show current plots #}
         <div class="mt-4">
             {% for plot in current_plots %}
                 <div class="plot-container">
@@ -175,6 +181,8 @@
                 </div>
             {% endfor %}
         </div>
+
+        {# navigation between steps #}
         <form action="{% url 'runs:next' run_name %}" method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -188,8 +196,9 @@
 
     </div>
 
-        <nav id="sidebar" class="bg-grey">
-            {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
-        </nav>
+    {# include sidebar #}
+    <nav id="sidebar" class="bg-grey">
+        {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
+    </nav>
 </div>
 {% endblock %}
