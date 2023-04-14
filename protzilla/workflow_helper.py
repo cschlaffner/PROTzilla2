@@ -13,14 +13,34 @@ def get_all_steps(workflow_config_dict) -> list[dict[str, list[str]]]:
 def get_all_possible_steps(workflow_meta) -> list[dict[str, list[str]]]:
     workflow_steps = []
     for section, steps in workflow_meta.items():
-        workflow_steps.append({"section": section, "steps": list(steps.keys())})
+        workflow_steps.append(
+            {"section": section, "possible_steps": list(steps.keys())}
+        )
     return workflow_steps
 
-def get_all_possible_and_workflow_steps(workflow_config_dict, workflow_meta):
+
+def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
     workflow_steps = get_all_steps(workflow_config_dict)
     possible_steps = get_all_possible_steps(workflow_meta)
-    # return dict with "section", "steps" and "possible_steps"
-    return 
+    displayed_steps = []
+    index = 0
+    for workflow_section, possible_section in zip(workflow_steps, possible_steps):
+        assert workflow_section["section"] == possible_section["section"]
+        workflow_steps = []
+        section_finished = index <= step_index
+        for step in workflow_section["steps"]:
+            workflow_steps.append({"name":step, "selected": index == step_index})
+            index += 1
+        displayed_steps.append(
+            {
+                "section": possible_section["section"],
+                "finished": section_finished,
+                "possible_steps": possible_section["possible_steps"],
+                "steps": workflow_steps,
+            }
+        )
+    return displayed_steps
+
 
 def get_all_default_params_for_methods(workflow_meta, section, step, method):
     workflow_meta_step = workflow_meta[section][step]

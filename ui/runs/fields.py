@@ -7,7 +7,7 @@ sys.path.append(f"{BASE_DIR}/..")
 from protzilla.workflow_helper import (
     get_all_possible_steps,
     get_all_steps,
-    get_workflow_default_param_value,
+    get_workflow_default_param_value, get_displayed_steps,
 )
 from ui.runs.views_helper import insert_special_params
 
@@ -83,8 +83,7 @@ def make_sidebar(request, run, run_name):
         template,
         context=dict(
             csrf_token=csrf_token,
-            workflow_steps=get_all_steps(run.workflow_config),
-            possible_steps=get_all_possible_steps(run.workflow_meta),
+            workflow_steps=get_displayed_steps(run.workflow_config, run.workflow_meta, run.step_index),
             add_step_key="step_to_be_added",
             run_name=run_name,
         ),

@@ -1,10 +1,10 @@
-{# some text params: workflow_steps possible_steps add_step_key run_name#}
+{# params: workflow_steps add_step_key run_name#}
 
 <h3>Side Panel</h3>
 
 {% for section in workflow_steps %}
     <p>
         {% csrf_token %}
-        {% include "runs/sidebar_section.html" with section_name=section.section steps=section.steps key=add_step_key run_name=run_name%}
+        {% include "runs/sidebar_section.html" with finished=section.finished section_name=section.section steps=section.steps key=add_step_key possible_steps=section.possible_steps run_name=run_name %}
     </p>
 {% endfor %}

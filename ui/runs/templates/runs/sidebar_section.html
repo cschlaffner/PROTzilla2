@@ -1,18 +1,20 @@
-{# params: section_name steps run_name key #}
+{# params: section_name possible_steps steps run_name key finished #}
 <h4>{{ section_name }}</h4>
 
 <form action="{% url 'runs:add' run_name %}" method="post">
     {% csrf_token %}
-    {% include "runs/field_select.html" with categories=steps key=key %}
-    {% comment %}return the section_name as post request with key{% endcomment %}
+    {% include "runs/field_select.html" with categories=possible_steps key=key disabled=finished%}
     <input type="hidden" name="section_name" value="{{ section_name }}">
 
 
     <button>add</button>
 </form>
-
-{% for step in steps %}
-    <p>
-        {{ step }}
-    </p>
-{% endfor %}
+<div style="text-indent:30px;">
+    {% for step in steps %}
+        {% if step.selected %}
+            <p style="color:red">{{ step.name }} </p>
+        {% else %}
+            <p>{{ step.name }} </p>
+        {% endif %}
+    {% endfor %}
+</div>
