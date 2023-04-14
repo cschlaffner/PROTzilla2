@@ -106,12 +106,7 @@ def make_displayed_history(run):
         ]["parameters"]
         name = f"{history_step.step.replace('_', ' ').title()}: {history_step.method.replace('_', ' ').title()}"
         if history_step.section == "importing":
-            df_head = (
-                history_step.dataframe.head()
-                if history_step.step == "ms_data_import"
-                else run.metadata.head()
-            )
-            fields = [df_head.to_string()]
+            fields = ['']
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
