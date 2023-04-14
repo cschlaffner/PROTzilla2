@@ -79,7 +79,7 @@ def change_method(request, run_name):
     run.current_parameters = None
     run.current_plot_parameters = None
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
-    current_fields = make_current_fields(run, parameters)
+    current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
         dict(
