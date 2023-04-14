@@ -48,7 +48,7 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=f"{run.section}/{run.step}",
+            display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
