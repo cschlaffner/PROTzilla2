@@ -2,7 +2,6 @@ import copy
 import json
 
 import pytest
-from test_run import example_workflow_short
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
@@ -11,6 +10,14 @@ from protzilla.workflow_helper import (
     validate_workflow_graphs,
     validate_workflow_parameters,
 )
+
+
+@pytest.fixture
+def example_workflow_short():
+    with open(
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
+    ) as f:
+        return json.load(f)
 
 
 @pytest.fixture
