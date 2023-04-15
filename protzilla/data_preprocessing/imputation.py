@@ -102,7 +102,7 @@ def by_simple_imputer(
 
 def by_min_per_sample(
     intensity_df: pd.DataFrame,
-    shrinking_value=0.5,
+    shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A class to perform  minimal value imputation on the level
@@ -123,7 +123,7 @@ def by_min_per_sample(
     :param shrinking_value: a factor to alter the minimum value\
     used for imputation. With a shrinking factor of 0.1 for\
     example, a tenth of the minimum value found will be used for\
-    imputation. Default: 0.5 (half of the minimum value)
+    imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
     :return: returns an imputed dataframe in typical protzilla long format\
     and an empty dict
@@ -146,7 +146,7 @@ def by_min_per_sample(
 
 def by_min_per_protein(
     intensity_df: pd.DataFrame,
-    shrinking_value=0.5,
+    shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
@@ -162,7 +162,7 @@ def by_min_per_protein(
     :param shrinking_value: a factor to alter the minimum value\
     used for imputation. With a shrinking factor of 0.1 for\
     example, a tenth of the minimum value found will be used for\
-    imputation. Default: 0.5 (half of the minimum value)
+    imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
     :return: returns an imputed dataframe in typical protzilla long format\
     and an empty dict
@@ -191,7 +191,7 @@ def by_min_per_protein(
 
 def by_min_per_dataset(
     intensity_df: pd.DataFrame,
-    shrinking_value=0.5,
+    shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
@@ -206,7 +206,7 @@ def by_min_per_dataset(
     :param shrinking_value: a factor to alter the minimum value\
     used for imputation. With a shrinking factor of 0.1 for\
     example, a tenth of the minimum value found will be used for\
-    imputation. Default: 0.5 (half of the minimum value)
+    imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
     :return: returns an imputed dataframe in typical protzilla long format\
     and an empty dict

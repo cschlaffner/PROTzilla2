@@ -30,7 +30,7 @@ method_map = {
         "importing",
         "ms_data_import",
         "ms_fragger_import",
-    ): lambda df, feature_orientation, file: print("warning: not implemented")
+    ): lambda df, **kwargs: print("warning: not implemented")
     or (df, {}),
     (
         "importing",
@@ -203,4 +203,19 @@ plot_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "pca",
+    ): outlier_detection.by_pca_plot,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "local_outlier_factor",
+    ): outlier_detection.by_local_outlier_factor_plot,
+    (
+        "data_preprocessing",
+        "outlier_detection",
+        "isolation_forest",
+    ): outlier_detection.by_isolation_forest_plot,
 }

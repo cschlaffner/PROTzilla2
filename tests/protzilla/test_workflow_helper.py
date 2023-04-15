@@ -13,6 +13,14 @@ from protzilla.workflow_helper import (
 
 
 @pytest.fixture
+def example_workflow_short():
+    with open(
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
+    ) as f:
+        return json.load(f)
+
+
+@pytest.fixture
 def example_workflow():
     with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
         return json.load(f)
@@ -88,6 +96,18 @@ def test_get_workflow_default_param_value(example_workflow):
     )
 
     assert threshold_value == 0.2
+
+
+def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
+    threshold_value = get_workflow_default_param_value(
+        example_workflow_short,
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+        "threshold",
+    )
+
+    assert threshold_value == None
 
 
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):
