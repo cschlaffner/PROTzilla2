@@ -181,9 +181,9 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = f"<br> Trace: {message['trace']}" if "trace" in message else ""
+            trace = f"Trace: {message['trace']}" if "trace" in message else ""
             messages.add_message(
-                request, message["level"], f"{message['msg']}{trace}", message["level"]
+                request, message["level"], f"{message['msg']} {trace}", message["level"]
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
