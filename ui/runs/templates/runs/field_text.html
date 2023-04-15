@@ -1,3 +1,4 @@
-<label for="{{ key }}">{{ name }}</label>
 <input name="{{ key }}" type="text" id="{{ key }}" value="{{ default }}" 
-    class="form-control" {% if disabled %} disabled {% endif %}>
+    class="form-control" {% if disabled %} disabled {% endif %}
+    {%if form %} form="{{form}}" {% endif %}
+    placeholder="name the ouput of this step">

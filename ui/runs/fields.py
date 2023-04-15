@@ -132,10 +132,10 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next):
+def make_name_field(allow_next, form):
     return render_to_string(
         "runs/field_text.html",
-        context=dict(disabled=not allow_next, key="name", name="Name:"),
+        context=dict(disabled=not allow_next, key="name", name="Name:", form=form),
     )
 
 
