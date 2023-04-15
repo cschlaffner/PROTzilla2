@@ -156,7 +156,7 @@
                         <div id="method_parameters" class="mb-2">
                             {% include "runs/fields.html" with fields=fields %}
                         </div>
-                        <input type="submit" value="Calculate" class="btn btn-grey">
+                        <input type="submit" value="Calculate" class="btn btn-red">
                     </form>
                 </div>
                 <div class="col">
@@ -195,13 +195,15 @@
         </div>
 
         {# navigation between steps #}
-        <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
-            {% csrf_token %}
-            <div class="form-group">
-                <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %} disabled {% endif %}>Back</a>
-                <button class="btn btn-grey" {% if not show_next %} disabled {% endif %}>Next</button>
-            </div>
-        </form>
+        <div class="justify-content-end d-flex">
+            <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                {% csrf_token %}
+                <div class="form-group">
+                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %} disabled {% endif %}>Back</a>
+                    <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next</button>
+                </div>
+            </form>
+        </div>
 
     </div>
 
