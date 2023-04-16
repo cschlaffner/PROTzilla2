@@ -1,7 +1,8 @@
-import pandas as pd
-from protzilla.data_analysis.dimension_reduction import t_sne
-import pytest
 import numpy as np
+import pandas as pd
+import pytest
+
+from protzilla.data_analysis.dimension_reduction import t_sne, umap
 
 
 @pytest.fixture
@@ -119,10 +120,47 @@ def test_tsne_nan_handling(dimension_reduction_df_with_nan):
     assert "NaN values" in current_out["messages"][0]["msg"]
 
 
-def test_tsne_perplexity_less_than_n_samples(dimension_reduction_df):
+def test_tsne_perplexity(dimension_reduction_df):
     _, current_out = t_sne(dimension_reduction_df, n_components=2, perplexity=30)
     assert "messages" in current_out
     assert (
         "Perplexity must be less than the number of samples"
         in current_out["messages"][0]["msg"]
     )
+
+
+def test_tsne_n_components(dimension_reduction_df):
+    _, current_out = t_sne(
+        dimension_reduction_df,
+        n_components=8,
+        perplexity=4,
+        random_state=42,
+        method="exact",
+    )
+    assert "messages" in current_out
+    assert (
+        "n_components=8 must be between 1 and min(n_samples, n_features)"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+def test_tsne_n_components_barnes_hut(dimension_reduction_df):
+    _, current_out = t_sne(
+        dimension_reduction_df, n_components=8, perplexity=4, random_state=42
+    )
+    assert "messages" in current_out
+    assert (
+        "'n_components' should be inferior to 4 for the barnes_hut algorithm "
+        "as it relies on quad-tree or oct-tree." in current_out["messages"][0]["msg"]
+    )
+
+
+def test_umap_reproducibility(dimension_reduction_df, tsne_assertion_df):
+    _, current_out = umap(dimension_reduction_df, n_components=6)
+    # fails
+
+
+def test_umap_nan_handling(dimension_reduction_df_with_nan):
+    _, current_out = umap(dimension_reduction_df_with_nan)
+    assert "messages" in current_out
+    assert "NaN values" in current_out["messages"][0]["msg"]
