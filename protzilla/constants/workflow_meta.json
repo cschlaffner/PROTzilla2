@@ -803,6 +803,50 @@
           }
         }
       }
+    },
+    "dimension_reduction": {
+      "t_sne": {
+        "name": "t-SNE",
+        "description": "",
+        "parameters": {
+          "n_components": {
+            "name": "Dimension of the embedded space",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 2
+          },
+          "perplexity": {
+            "name": "Perplexity",
+            "type": "numeric",
+            "min": 5.0,
+            "max": 50.0,
+            "default": 30.0
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "n_iter": {
+            "name": "Maximum number of iterations for the optimization",
+            "type": "numeric",
+            "min": 250,
+            "step": 1,
+            "default": 1000
+          },
+          "n_iter_without_progress": {
+            "name": "Maximum number of iterations without progress before aborting the optimization ",
+            "type": "numeric",
+            "min": 250,
+            "step": 1,
+            "default": 300
+          }
+        }
+      }
     }
   },
   "data_integration": {}
