@@ -1,7 +1,8 @@
-import pandas as pd
-from protzilla.data_analysis.clustering import k_means
-import pytest
 import numpy as np
+import pandas as pd
+import pytest
+
+from protzilla.data_analysis.clustering import k_means
 
 
 @pytest.fixture
@@ -75,8 +76,12 @@ def clustering_df_with_nan():
 def test_k_means(clustering_df):
     _, current_out = k_means(
         clustering_df,
-        n_clusters=4,
-        init_centroid_strategy="k-means++",
+        n_clusters=2,
+        random_state=6,
+        init_centroid_strategy="random",
+        n_init=10,
+        max_iter=300,
+        tolerance=1e-4,
     )
 
 
