@@ -1,4 +1,4 @@
-from ..data_analysis import differential_expression, clustering
+from ..data_analysis import clustering, differential_expression, dimension_reduction
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -131,6 +131,16 @@ method_map = {
         "clustering",
         "k_means",
     ): clustering.k_means,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "t_sne",
+    ): dimension_reduction.t_sne,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "t_sne",
+    ): dimension_reduction.umap,
 }
 
 # reversed mapping of method callable and location
