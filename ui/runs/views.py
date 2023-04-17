@@ -164,7 +164,7 @@ def add(request, run_name):
     if step == "":
         return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-    run.insert_as_next_step(step, section)
+    run.insert_at_next_position(step, section)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

@@ -7,7 +7,7 @@
     <input type="hidden" name="section_name" value="{{ section_name }}">
 
 
-    <button>add</button>
+    <button {% if finished %} disabled {% endif %} >add</button>
 </form>
 <div style="text-indent:30px;">
     {% for step in steps %}

@@ -13,7 +13,19 @@
       ]
     },
     "data_preprocessing": {
-      "steps": []
+      "steps": [{
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        }
+      ]
     },
     "data_analysis": {
       "steps": []

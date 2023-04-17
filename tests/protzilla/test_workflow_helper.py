@@ -45,6 +45,31 @@ def workflow_meta():
 
 
 @pytest.fixture
+def example_displayed_steps_importing_and_data_preprocessing():
+    return [
+        {
+            "finished": True,
+            "possible_steps": ["ms_data_import", "metadata_import"],
+            "section": "importing",
+            "steps": [{"name": "ms_data_import", "selected": False}],
+        },
+        {
+            "finished": False,
+            "possible_steps": [
+                "filter_proteins",
+                "filter_samples",
+                "outlier_detection",
+                "transformation",
+                "normalisation",
+                "imputation",
+            ],
+            "section": "data_preprocessing",
+            "steps": [{"name": "filter_proteins", "selected": True}],
+        },
+    ]
+
+
+@pytest.fixture
 def example_workflow_all_steps() -> list[dict[str, list[str]]]:
     return [
         {
@@ -83,10 +108,29 @@ def test_get_all_steps(example_workflow, example_workflow_all_steps):
     assert workflow_helper.get_all_steps(example_workflow) == example_workflow_all_steps
 
 
-def test_get_all_steps_no_side_effects(example_workflow, example_workflow_all_steps):
+def test_get_all_steps_no_side_effects(example_workflow):
     example_workflow_copy = copy.deepcopy(example_workflow)
     workflow_helper.get_all_steps(example_workflow)
     assert example_workflow == example_workflow_copy
+
+
+def test_get_displayed_steps(
+    workflow_meta,
+    example_workflow_short,
+    example_displayed_steps_importing_and_data_preprocessing,
+):
+    result = workflow_helper.get_displayed_steps(
+        example_workflow_short, workflow_meta, 1
+    )[:2]
+    assert result == example_displayed_steps_importing_and_data_preprocessing
+
+
+def test_get_displayed_steps_no_side_effects(workflow_meta, example_workflow_short):
+    example_workflow_copy = copy.deepcopy(example_workflow_short)
+    workflow_meta_copy = copy.deepcopy(workflow_meta)
+    workflow_helper.get_displayed_steps(example_workflow_short, workflow_meta, 0)
+    assert example_workflow_short == example_workflow_copy
+    assert workflow_meta == workflow_meta_copy
 
 
 def test_get_all_default_params_for_methods(workflow_meta):
