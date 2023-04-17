@@ -70,18 +70,18 @@ def umap(
     random_state: int = 42,
 ):
     intensity_df_wide = long_to_wide(intensity_df)
-    # try:
-    embedded_data = UMAP(
-        n_neighbors=n_neighbors,
-        n_components=n_components,
-        min_dist=min_dist,
-        random_state=random_state,
-    ).fit_transform(intensity_df_wide)
+    try:
+        embedded_data = UMAP(
+            n_neighbors=n_neighbors,
+            n_components=n_components,
+            min_dist=min_dist,
+            random_state=random_state,
+        ).fit_transform(intensity_df_wide)
 
-    embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-    return intensity_df, dict(embedded_data_df=embedded_data_df)
+        embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
+        return intensity_df, dict(embedded_data_df=embedded_data_df)
 
-    """except ValueError as e:
+    except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
             msg = (
                 "T-SNE does not accept missing values encoded as NaN. Consider"
@@ -93,4 +93,3 @@ def umap(
             embedded_data_df=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
-"""
