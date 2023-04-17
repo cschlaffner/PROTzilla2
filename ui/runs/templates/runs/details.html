@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
-    <script>let results_exist = '{{ show_next }}'</script>
     {% include 'runs/dynamic_methods.html' %}
-    {% include 'runs/form_buttons.html' %}
+    {% include 'runs/form_buttons.html' with results_exist=show_next %}
 
     <title>PROTzilla {{ run_name }}</title>
     <style>

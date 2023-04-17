@@ -19,7 +19,6 @@
             }
         }).fail(function (e) {
             console.log('Error', e);
-            alert(e.responseJSON.error)
         })
     }
 
@@ -33,26 +32,25 @@
             }
         }).fail(function (e) {
             console.log('Error', e);
-            alert(e.responseJSON.error)
         })
     }
 
     function get_clean_form_data(form) {
         let formDataArray = form.serializeArray()
         let formDataDict = {};
-        for (let i = 0; i < formDataArray.length; i++) {
-            formDataDict[formDataArray[i].name] = formDataArray[i].value;
+        for (let formField of formDataArray) {
+            formDataDict[formField.name] = formField.value;
         }
         delete formDataDict["csrfmiddlewaretoken"]
         return formDataDict
     }
 
 
-    function disable_plot(bool) {
+    function disable_plot_button(bool) {
         $('#plot_parameters_submit').prop('disabled', bool)
     }
 
-    function disable_calc(bool) {
+    function disable_calc_button(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool)
         results_exist = bool
         calc_params_match = bool
@@ -101,37 +99,36 @@
     }
 
     $(document).ready(function () {
-        $('#calc_form').on('change', function () {
+        disable_plot_button(true)
+
+        $('#calc_form').change(function () {
+            const selected_method = $('#chosen_method').val()
             calc_form_data = get_clean_form_data($(this))
-            if (!selected_method) {
-                if (equal_calc_parameters($(this))) {
-                    disable_calc(true)
-                } else {
-                    disable_calc(false)
-                }
-            } else if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
-                disable_calc(true)
+            if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
+                disable_calc_button(true)
             } else {
-                disable_calc(false)
+                disable_calc_button(false)
             }
             $('#plot_form').trigger("change")
         })
 
-        $('#plot_form').on('change', function () {
-            if (!calc_form_data || calc_form_data["chosen_method"] !== calculated_method) {
-                disable_plot(true)
+        $('#plot_form').change(function () {
+            const selected_method = $('#chosen_method').val()
+
+            if (!calc_form_data || selected_method !== calculated_method) {
+                disable_plot_button(true)
                 return
             }
 
             if (!plotted_current_match() && results_exist) {
-                disable_plot(false)
+                disable_plot_button(false)
                 return
             }
 
             if (equal_plot_parameters($(this)) || !calc_params_match) {
-                disable_plot(true)
+                disable_plot_button(true)
             } else {
-                disable_plot(false)
+                disable_plot_button(false)
             }
         });
 

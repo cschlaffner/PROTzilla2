@@ -3,11 +3,10 @@
     // the correct parameter dropdowns as HTML when the selected method changes.
     // It updates the page with the new dropdowns or displays an error message if something goes wrong.
     // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
-    let selected_method
+
     $(document).ready(function () {
         $("#chosen_method").change(function () {
-            selected_method = $(this).val();
-
+            const selected_method = $(this).val();
             $.ajax({
                 url: "{% url 'runs:change_method' run_name %}",
                 type: "POST",
