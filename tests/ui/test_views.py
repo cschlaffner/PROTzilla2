@@ -1,5 +1,10 @@
 import json
+import sys
 from shutil import rmtree
+
+from protzilla.constants.paths import UI_PATH
+
+sys.path.append(f"{UI_PATH}")
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH

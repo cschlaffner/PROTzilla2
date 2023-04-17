@@ -204,7 +204,7 @@ class Run:
 
         self.write_local_workflow()
 
-    def next_step(self, name):
+    def next_step(self, name=None):
         try:
             self.history.add_step(
                 self.section,
