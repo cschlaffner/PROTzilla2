@@ -28,10 +28,7 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     elif log_base == "log10":
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
     else:
-        raise ValueError(
-            """Unknown log method. Known log methods are
-                         "log2" and "log10"."""
-        )
+        raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
     return transformed_df, dict()
 
 

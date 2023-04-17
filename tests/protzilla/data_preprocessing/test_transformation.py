@@ -112,11 +112,9 @@ def log10_transformation_expected_df():
 def test_log2_transformation(
     show_figures, log2_transformation_df, log2_transformation_expected_df
 ):
-    result_df, out = by_log(log2_transformation_df, log_base="log2")
+    result_df = by_log(log2_transformation_df, log_base="log2")[0]
 
-    fig = by_log_plot(log2_transformation_df, result_df, out, "Boxplot", "Protein ID")[
-        0
-    ]
+    fig = by_log_plot(log2_transformation_df, result_df, {}, "Boxplot", "Protein ID")[0]
     if show_figures:
         fig.show()
 
@@ -129,11 +127,15 @@ def test_log2_transformation(
 def test_log10_transformation(
     show_figures, log10_transformation_df, log10_transformation_expected_df
 ):
-    result_df, out = by_log(log10_transformation_df, log_base="log10")
+    result_df = by_log(log10_transformation_df, log_base="log10")[0]
 
-    fig = by_log_plot(log10_transformation_df, result_df, out, "Boxplot", "Protein ID")[
-        0
-    ]
+    fig = by_log_plot(
+        log10_transformation_df,
+        result_df,
+        {},
+        "Boxplot",
+        "Protein ID",
+    )[0]
     if show_figures:
         fig.show()
 
