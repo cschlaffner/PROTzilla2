@@ -24,8 +24,10 @@ class Run:
     :ivar method
     :ivar result_df
     :ivar current_out
-    :ivar current_parameters
+    :ivar current_parameters: calculation parameters that were last used to calculate
+    :ivar current_plot_parameters: plot parameters that were used to generate plots
     :ivar plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     """
 
     @classmethod
