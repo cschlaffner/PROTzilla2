@@ -43,7 +43,6 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     allow_next = run.result_df is not None
-    fields_parameters = run.workflow_meta[section][step][method]["parameters"]
     return render(
         request,
         "runs/details.html",
@@ -52,12 +51,11 @@ def detail(request, run_name):
             location=f"{run.section}/{run.step}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
-            fields=make_current_fields(run, fields_parameters),
+            fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next),
             current_plots=[plot.to_html() for plot in run.plots],
-            # TODO add not able to plot when no plot method
-            show_next=allow_next,
+            show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar_dropdown=make_add_step_dropdown(run, section),
@@ -72,8 +70,8 @@ def change_method(request, run_name):
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
         run = active_runs[run_name]
-    except FileNotFoundError as e:
-        print(str(e))
+    except FileNotFoundError:
+        traceback.print_exc()
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
         return response
@@ -81,8 +79,7 @@ def change_method(request, run_name):
     run.method = request.POST["method"]
     run.current_parameters = None
     run.current_plot_parameters = None
-    parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
-    current_fields = make_current_fields(run, parameters)
+    current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
         dict(
@@ -194,7 +191,7 @@ def calculate(request, run_name):
 
 def plot(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_workflow_location()
+    section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
