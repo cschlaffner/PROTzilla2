@@ -1,0 +1,72 @@
+<script>
+    // Sets up an event listener that sends a POST request with AJAX to the server to provide
+    // the correct parameter dropdowns as HTML when the selected method changes.
+    // It updates the page with the new dropdowns or displays an error message if something goes wrong.
+    // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
+
+    $(document).ready(function () {
+        $("#chosen_method").change(function () {
+            const selected_method = $(this).val();
+            $.ajax({
+                url: "{% url 'runs:change_method' run_name %}",
+                type: "POST",
+                data: {
+                    method: selected_method,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    $("#method_parameters").html(response.parameters);
+                    $("#plot_parameters").html(response.plot_parameters);
+                    $('#calc_form').trigger('change');
+                    $('#plot_form').trigger('change');
+                }
+            }).fail(function (e) {
+                console.log('Error:', e);
+                alert(e.responseJSON.error); // alert error message to user
+            })
+        });
+        $("#method_parameters").on("change", ".named", function () {
+            const id = $(this).attr("id");
+            const step_name = $(this).val();
+
+            $.ajax({
+                url: "{% url 'runs:outputs_of_step' run_name %}",
+                type: "POST",
+                data: {
+                    step_name: step_name,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    const outputs = $(`#${id}_outputs`);
+                    outputs.empty();
+                    $.each(response, function (index, value) {
+                        outputs.append($("<option></option>").attr("value", value).text(value))
+                    })
+                }
+            })
+        });
+
+        $(".dynamic_trigger").change(function () {
+            const selected_choice = $(this).val();
+            const triggered_id = $(this).attr("id");
+
+            $.ajax({
+                url: "{% url 'runs:change_field' run_name %}",
+                type: "POST",
+                data: {
+                    id: triggered_id,
+                    selected: selected_choice,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    $.each(response, function (key, value) {
+                        $('#' + key).html(value);
+                    })
+                }
+            }).fail(function (e) {
+                console.log('Error:', e);
+                alert(e.responseJSON.error); // alert error message to user
+            })
+        })
+    });
+</script>

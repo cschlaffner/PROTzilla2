@@ -12,7 +12,6 @@ from .workflow_helper import get_all_default_params_for_methods
 
 
 class Run:
-
     """
     :ivar run_path: the path to this runs' dir
     :ivar workflow_config
@@ -26,8 +25,10 @@ class Run:
     :ivar method
     :ivar result_df
     :ivar current_out
-    :ivar current_parameters
+    :ivar current_parameters: calculation parameters that were last used to calculate
+    :ivar current_plot_parameters: plot parameters that were used to generate plots
     :ivar plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     """
 
     @classmethod
@@ -117,6 +118,7 @@ class Run:
         self.current_out = None
         self.current_parameters = None
         self.current_plot_parameters = None
+        self.plotted_for_parameters = None
         self.plots = []
 
     def handle_all_steps_completed(self):
@@ -177,6 +179,7 @@ class Run:
             self.df, self.result_df, self.current_out, **parameters
         )
         self.current_plot_parameters = parameters
+        self.plotted_for_parameters = self.current_parameters
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -201,7 +204,7 @@ class Run:
 
         self.write_local_workflow()
 
-    def next_step(self, name):
+    def next_step(self, name=None):
         try:
             self.history.add_step(
                 self.section,
@@ -224,6 +227,7 @@ class Run:
             self.step_index += 1
             self.current_parameters = None
             self.current_plot_parameters = None
+            self.plotted_for_parameters = None
             self.plots = []
             try:
                 self.section, self.step, self.method = self.current_workflow_location()
@@ -241,6 +245,8 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = popped_step.parameters
         self.current_plot_parameters = None
+        # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
+        self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
 

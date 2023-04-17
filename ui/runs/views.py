@@ -8,6 +8,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+
 from protzilla.run import Run
 from ui.runs.fields import (
     make_add_step_dropdown,
@@ -200,6 +201,33 @@ def add_name(request, run_name):
     run = active_runs[run_name]
     run.history.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def results_exist(request, run_name):
+    run = active_runs[run_name]
+    return JsonResponse(dict(results_exist=run.result_df is not None))
+
+
+def all_button_parameters(request, run_name):
+    run = active_runs[run_name]
+    d = dict()
+    d["current_plot_parameters"] = (
+        run.current_plot_parameters
+        if run.current_plot_parameters is not None
+        else dict()
+    )
+    d["plotted_for_parameters"] = (
+        run.plotted_for_parameters if run.plotted_for_parameters is not None else dict()
+    )
+
+    if run.current_parameters is None or run.result_df is None:
+        d["current_parameters"] = dict()
+        d["chosen_method"] = dict()
+    else:
+        d["current_parameters"] = run.current_parameters
+        d["chosen_method"] = run.method
+
+    return JsonResponse(d)
 
 
 def outputs_of_step(request, run_name):
