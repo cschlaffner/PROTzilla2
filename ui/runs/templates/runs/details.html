@@ -25,6 +25,8 @@
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                     },
                     success: function (response) {
+                        $("#method_parameters").empty();
+                        $("#plot_parameters").empty();
                         $("#method_parameters").html(response.parameters);
                         $("#plot_parameters").html(response.plot_parameters);
                     }
@@ -55,7 +57,7 @@
                 })
             });
 
-            $(".dynamic_trigger").change(function () {
+            $("#method_parameters").on("change", ".dynamic_trigger", function () {
                 const selected_choice = $(this).val();
                 const triggered_id = $(this).attr("id");
 
@@ -69,6 +71,7 @@
                     },
                     success: function (response) {
                         $.each(response, function (key, value) {
+                            $('#' + key).empty();
                             $('#' + key).html(value);
                         })
                     }
