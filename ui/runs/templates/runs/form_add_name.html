@@ -1,7 +1,9 @@
 {# params: run_name index #}
 <form action="{% url 'runs:add_name' run_name %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="index" value="{{ index }}">
-    <input type="text" name="name">
-    <input type="submit" value="add name">
+    <div class="input-group">
+        <input type="hidden" name="index" value="{{ index }}">
+        <input type="text" name="name" class="form-control">
+        <input type="submit" value="add name" class="btn btn-grey">
+    </div>
 </form>

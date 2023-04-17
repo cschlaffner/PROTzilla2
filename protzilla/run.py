@@ -203,6 +203,7 @@ class Run:
         else:
             self.insert_step(step_to_be_inserted, section, 0)
 
+
     def next_step(self, name):
         try:
             self.history.add_step(

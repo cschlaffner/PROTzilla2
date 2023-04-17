@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  {# Load the tag library #}
+  {% load bootstrap5 %}
+
+  {# Load CSS and JavaScript #}
+  {% bootstrap_css %}
+  {% bootstrap_javascript %}
+  
+  <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+  {% block css %}
+  {% endblock %}
+
+  {% block js %}
+  {% endblock %}
+
+
+  <title>PROTzilla</title>
+  <link rel="shortcut icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}"/>
+</head>
+<body>
+  {% block navbar %}
+    {% include "navbar.html"%}
+  {% endblock %}
+  {% block content %}
+  <br>
+  <p>You're at the main index.<br><a href='/runs'>Runs</a></p>
+  {% endblock %}
+</body>

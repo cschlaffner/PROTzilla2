@@ -1,4 +1,5 @@
 import sys
+import traceback
 
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
@@ -48,12 +49,12 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=f"{run.section}/{run.step}",
+            display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next),
+            name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
@@ -182,9 +183,9 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = f"<br> Trace: {message['trace']}" if "trace" in message else ""
+            trace = f"Trace: {message['trace']}" if "trace" in message else ""
             messages.add_message(
-                request, message["level"], f"{message['msg']}{trace}", message["level"]
+                request, message["level"], f"{message['msg']} {trace}", message["level"]
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

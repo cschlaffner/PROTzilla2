@@ -67,7 +67,7 @@ def make_add_step_dropdown(run, section):
     return render_to_string(
         template,
         context=dict(
-            name="add step:\n",
+            name="add step:",
             type="categorical",
             categories=steps,
             key="step_to_be_added",
@@ -123,14 +123,14 @@ def make_displayed_history(run):
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
         ]["parameters"]
+        name = f"{history_step.step.replace('_', ' ').title()}: {history_step.method.replace('_', ' ').title()}"
+        section_heading = (
+            history_step.section.replace("_", " ").title()
+            if run.history.steps[i - 1].section != history_step.section
+            else None
+        )
         if history_step.section == "importing":
-            name = f"{history_step.section}/{history_step.step}/{history_step.method}: {history_step.parameters['file_path'].split('/')[-1]}"
-            df_head = (
-                history_step.dataframe.head()
-                if history_step.step == "ms_data_import"
-                else run.metadata.head()
-            )
-            fields = [df_head.to_string()]
+            fields = [""]
         else:
             for key, param_dict in parameters.items():
                 param_dict["default"] = history_step.parameters[key]
@@ -138,12 +138,12 @@ def make_displayed_history(run):
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
-            name = f"{history_step.section}/{history_step.step}/{history_step.method}"
         displayed_history.append(
             dict(
-                location=name,
+                display_name=name,
                 fields=fields,
                 plots=[p.to_html() for p in history_step.plots],
+                section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
             )
@@ -151,8 +151,8 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next):
+def make_name_field(allow_next, form):
     return render_to_string(
         "runs/field_text.html",
-        context=dict(disabled=not allow_next, key="name", name="Name:"),
+        context=dict(disabled=not allow_next, key="name", name="Name:", form=form),
     )
