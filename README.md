@@ -10,7 +10,7 @@
 | protzilla/constants/colors.py                                    |        2 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/location\_mapping.py                         |        8 |        0 |        4 |        1 |     92% |  17->exit |
 | protzilla/constants/logging.py                                   |        3 |        0 |        0 |        0 |    100% |           |
-| protzilla/constants/paths.py                                     |        5 |        0 |        0 |        0 |    100% |           |
+| protzilla/constants/paths.py                                     |        6 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/differential\_expression.py             |        5 |        2 |        0 |        0 |     60% |       8-9 |
 | protzilla/data\_analysis/differential\_expression\_anova.py      |       22 |        0 |        6 |        1 |     96% |    82->85 |
 | protzilla/data\_analysis/differential\_expression\_helper.py     |        7 |        1 |        2 |        1 |     78% |        22 |
@@ -26,12 +26,14 @@
 | protzilla/history.py                                             |      119 |        6 |       46 |        6 |     93% |33, 109, 116, 124, 189, 203 |
 | protzilla/importing/metadata\_import.py                          |       27 |        7 |       12 |        1 |     64% |     19-26 |
 | protzilla/importing/ms\_data\_import.py                          |       16 |        0 |        2 |        0 |    100% |           |
-| protzilla/run.py                                                 |      171 |       37 |       50 |        7 |     74% |35-41, 45-51, 57, 82->81, 84, 113-114, 124-125, 132-133, 143, 147, 155->153, 166-173, 176-179, 216-219, 230-231 |
+| protzilla/run.py                                                 |      175 |       38 |       50 |        7 |     74% |36-42, 46-52, 58, 83->82, 85, 114-115, 126-127, 134-135, 145, 149, 157->155, 168-175, 178-182, 219-222, 234-235 |
 | protzilla/utilities/\_\_init\_\_.py                              |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                    |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                            |       11 |        0 |        0 |        0 |    100% |           |
 | protzilla/workflow\_helper.py                                    |       33 |        0 |       30 |        1 |     98% |    20->19 |
+| tests/\_\_init\_\_.py                                            |        0 |        0 |        0 |        0 |    100% |           |
 | tests/conftest.py                                                |        6 |        0 |        0 |        0 |    100% |           |
+| tests/protzilla/\_\_init\_\_.py                                  |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_analysis/test\_differential\_expression.py |       63 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py    |       16 |        1 |        2 |        1 |     89% |        48 |
 | tests/protzilla/data\_preprocessing/test\_filter\_samples.py     |       29 |        2 |        4 |        2 |     88% |    74, 99 |
@@ -45,7 +47,8 @@
 | tests/protzilla/test\_run.py                                     |       78 |        8 |        2 |        0 |     90% |   107-125 |
 | tests/protzilla/test\_transform\_dfs.py                          |       32 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                        |       62 |        0 |       10 |        0 |    100% |           |
-|                                                        **TOTAL** | **1547** |  **108** |  **317** |   **56** | **90%** |           |
+| ui/main/\_\_init\_\_.py                                          |        0 |        0 |        0 |        0 |    100% |           |
+|                                                        **TOTAL** | **1552** |  **109** |  **317** |   **56** | **90%** |           |
 
 
 ## Setup coverage badge
