@@ -74,6 +74,54 @@ def dimension_reduction_df_with_nan():
 
 
 @pytest.fixture
+def dimension_reduction_four_proteins_df():
+    dimension_reduction_list = (
+        ["Sample1", "Protein1", "Gene1", 18],
+        ["Sample1", "Protein2", "Gene1", 16],
+        ["Sample1", "Protein3", "Gene1", 1],
+        ["Sample1", "Protein4", "Gene1", 13],
+        ["Sample1", "Protein5", "Gene1", 13],
+        ["Sample2", "Protein1", "Gene1", 20],
+        ["Sample2", "Protein2", "Gene1", 18],
+        ["Sample2", "Protein3", "Gene1", 2],
+        ["Sample2", "Protein4", "Gene1", 4],
+        ["Sample2", "Protein5", "Gene1", 13],
+        ["Sample3", "Protein1", "Gene1", 22],
+        ["Sample3", "Protein2", "Gene1", 19],
+        ["Sample3", "Protein3", "Gene1", 3],
+        ["Sample3", "Protein4", "Gene1", 7],
+        ["Sample3", "Protein5", "Gene1", 13],
+        ["Sample4", "Protein1", "Gene1", 8],
+        ["Sample4", "Protein2", "Gene1", 15],
+        ["Sample4", "Protein3", "Gene1", 1],
+        ["Sample4", "Protein4", "Gene1", 7],
+        ["Sample4", "Protein5", "Gene1", 13],
+        ["Sample5", "Protein1", "Gene1", 10],
+        ["Sample5", "Protein2", "Gene1", 14],
+        ["Sample5", "Protein3", "Gene1", 2],
+        ["Sample5", "Protein4", "Gene1", 8],
+        ["Sample5", "Protein5", "Gene1", 13],
+        ["Sample6", "Protein1", "Gene1", 12],
+        ["Sample6", "Protein2", "Gene1", 13],
+        ["Sample6", "Protein3", "Gene1", 3],
+        ["Sample6", "Protein4", "Gene1", 3],
+        ["Sample6", "Protein5", "Gene1", 13],
+        ["Sample7", "Protein1", "Gene1", 12],
+        ["Sample7", "Protein2", "Gene1", 13],
+        ["Sample7", "Protein3", "Gene1", 3],
+        ["Sample7", "Protein4", "Gene1", 10],
+        ["Sample7", "Protein5", "Gene1", 13],
+    )
+
+    dimension_reduction_df = pd.DataFrame(
+        data=dimension_reduction_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+
+    return dimension_reduction_df
+
+
+@pytest.fixture
 def tsne_assertion_df():
     assertion_tsne_list = (
         [815.3974, 669.66266],
@@ -173,9 +221,12 @@ def test_tsne_n_components(dimension_reduction_df):
     )
 
 
-def test_tsne_n_components_barnes_hut(dimension_reduction_df):
+def test_tsne_n_components_barnes_hut(dimension_reduction_four_proteins_df):
     _, current_out = t_sne(
-        dimension_reduction_df, n_components=8, perplexity=4, random_state=42
+        dimension_reduction_four_proteins_df,
+        n_components=4,
+        perplexity=4,
+        random_state=42,
     )
     assert "messages" in current_out
     assert (
