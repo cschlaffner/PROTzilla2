@@ -174,7 +174,6 @@ def calculate(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
-    print("calc with params", parameters)
     del parameters["chosen_method"]
 
     for k, v in dict(request.FILES).items():
@@ -209,8 +208,7 @@ def add_name(request, run_name):
 
 def results_exist(request, run_name):
     run = active_runs[run_name]
-    d = dict(results_exist=run.result_df is not None)
-    return JsonResponse(d)
+    return JsonResponse(dict(results_exist=run.result_df is not None))
 
 
 def all_button_parameters(request, run_name):
@@ -233,14 +231,6 @@ def all_button_parameters(request, run_name):
         d["chosen_method"] = run.method
 
     return JsonResponse(d)
-
-
-def convert_str_if_possible(s):
-    try:
-        f = float(s)
-    except ValueError:
-        return s
-    return int(f) if int(f) == f else f
 
 
 def outputs_of_step(request, run_name):

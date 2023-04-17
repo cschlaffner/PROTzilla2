@@ -6,7 +6,7 @@
     {% load static %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>let results_exist = '{{ show_next }}'</script>
-    {% include 'runs/change_method.html' %}
+    {% include 'runs/dynamic_methods.html' %}
     {% include 'runs/form_buttons.html' %}
 
     <title>PROTzilla {{ run_name }}</title>

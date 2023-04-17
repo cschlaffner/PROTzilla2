@@ -8,7 +8,7 @@
 
     function get_all_parameters(callback) {
         $.ajax({
-            url: "{% url 'runs:all_parameters' run_name %}",
+            url: "{% url 'runs:all_button_parameters' run_name %}",
             type: "GET",
             success: function (response) {
                 current_parameters = response["current_parameters"]
