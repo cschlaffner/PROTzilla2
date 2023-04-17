@@ -6,14 +6,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
 {% endblock %}
 
-{% block javascript %}
+{% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script>
         // Sets up an event listener that sends a POST request with AJAX to the server to provide
         // the correct parameter dropdowns as HTML when the selected method changes.
         // It updates the page with the new dropdowns or displays an error message if something goes wrong.
         // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
-
         $(document).ready(function () {
             $("#chosen_method").change(function () {
                 const selected_method = $(this).val();
@@ -37,7 +36,7 @@
             $("#method_parameters").on("change", ".named", function () {
                 const id = $(this).attr("id");
                 const step_name = $(this).val();
-                console.log(id, step_name)
+                console.log(id, step_name);
                 $.ajax({
                     url: "{% url 'runs:outputs_of_step' run_name %}",
                     type: "POST",
@@ -50,8 +49,8 @@
                         const outputs = $(`#${id}_outputs`);
                         outputs.empty();
                         $.each(response, function (index, value) {
-                            outputs.append($("<option></option>").attr("value", value).text(value))
-                        })
+                            outputs.append($("<option></option>").attr("value", value).text(value));
+                        });
                     }
                 })
             });
@@ -77,7 +76,7 @@
                     console.log('Error:', e);
                     alert(e.responseJSON.error); // alert error message to user
                 })
-            })
+            });
         });
     </script>
 {% endblock %}
