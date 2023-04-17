@@ -1,5 +1,5 @@
 {# params: section_name possible_steps steps run_name key finished #}
-<h3>{{ section_name }}</h3>
+
 
 <style>
     p {
@@ -50,9 +50,7 @@
     <button class="btn btn-white" {% if finished %} disabled {% endif %} >add</button>
 </form>
 
-<div style="border: 2px solid #4A536A;
-            border-radius: 25px;
-            ">
+<div>
     <table>
         {% for step in possible_steps %}
             <tr>
