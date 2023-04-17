@@ -101,6 +101,35 @@ def tsne_assertion_df():
     return tsne_assertion_df
 
 
+@pytest.fixture
+def umap_assertion_df():
+    assertion_umap_list = (
+        [22.050823, 5.450951],
+        [22.405716, 5.8017206],
+        [21.766651, 5.1627417],
+        [4.2950587, 3.7172985],
+        [4.787037, 3.20218],
+        [5.1595345, 4.0933995],
+        [5.458093, 3.3993974],
+    )
+
+    umap_assertion_df = pd.DataFrame(
+        data=assertion_umap_list,
+        index=[
+            "Sample1",
+            "Sample2",
+            "Sample3",
+            "Sample4",
+            "Sample5",
+            "Sample6",
+            "Sample7",
+        ],
+    )
+    umap_assertion_df.index.name = "Sample"
+
+    return umap_assertion_df
+
+
 def test_tsne_reproducibility(dimension_reduction_df, tsne_assertion_df):
     _, current_out = t_sne(
         dimension_reduction_df, n_components=2, perplexity=4, random_state=42
@@ -155,9 +184,11 @@ def test_tsne_n_components_barnes_hut(dimension_reduction_df):
     )
 
 
-def test_umap_reproducibility(dimension_reduction_df, tsne_assertion_df):
-    _, current_out = umap(dimension_reduction_df, n_components=6)
-    # fails
+def test_umap_reproducibility(dimension_reduction_df, umap_assertion_df):
+    _, current_out = umap(dimension_reduction_df, n_components=2, n_neighbors=3)
+    pd.testing.assert_frame_equal(
+        current_out["embedded_data_df"], umap_assertion_df, check_dtype=False
+    )
 
 
 def test_umap_nan_handling(dimension_reduction_df_with_nan):
