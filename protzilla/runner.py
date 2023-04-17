@@ -16,7 +16,9 @@ class Runner:
             logging.info(f"Parsed arguments: {args}")
         self.args = args
         self.run_name = (
-            args.name if args.name is not None else f"runner_{random_string()}"
+            args.name.strip()
+            if args.name.strip() is not None
+            else f"runner_{random_string()}"
         )
         self.df_mode = args.dfMode if args.dfMode is not None else "disk"
 
@@ -37,7 +39,7 @@ class Runner:
             logging.info(f"Saving plots at {self.plots_path}")
 
     def compute_workflow(self):
-        print("\n\n------ compute workflow\n")
+        logging.info("\n\n------ computing workflow\n")
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
                 if section == "importing":
@@ -85,7 +87,7 @@ class Runner:
     def _create_plots_for_step(self, section, step):
         params = dict()
         if "graphs" in step:
-            params = self._serialize_graphs(step["graphs"])
+            params = _serialize_graphs(step["graphs"])
 
         self.run.create_plot_from_location(
             *self.run.current_workflow_location(),
@@ -109,5 +111,6 @@ class Runner:
             print("\n\n----- Please answer with one of the given options")
             self._overwrite_run_prompt()
 
-    def _serialize_graphs(self, graphs):
-        return {k: v for graph in graphs for k, v in graph.items()}
+
+def _serialize_graphs(graphs):
+    return {k: v for graph in graphs for k, v in graph.items()}
