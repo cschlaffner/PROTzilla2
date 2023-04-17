@@ -1,4 +1,11 @@
 <script>
+    // This method takes care of the plot and calculation buttons. The goal is to prevent users from calculating twice
+    // for the same calculation parameters and also prevent them from plotting when the selected calculation parameters
+    // don't match the ones that results are present for so there is no confusion about what calculation results was
+    // plotted for
+
+    // Controlflow:
+
     let current_parameters
     let current_plot_parameters
     let calc_params_match
