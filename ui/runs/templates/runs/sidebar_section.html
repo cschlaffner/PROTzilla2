@@ -1,20 +1,78 @@
 {# params: section_name possible_steps steps run_name key finished #}
-<h4>{{ section_name }}</h4>
+<h3>{{ section_name }}</h3>
+
+<style>
+    p {
+        margin: 5px;
+    }
+
+    .selected {
+        background-color: #4A536A;
+        color: white;
+        border-radius: 15px;
+    }
+
+    button {
+        background-color: white;
+        color: black;
+        border-radius: 15px;
+        border: 2px solid #4A536A;
+        padding: 5px;
+    }
+
+    table {
+        background-color: white;
+        color: black;
+        border-radius: 15px;
+        border: 2px solid #4A536A;
+        padding: 5px;
+    }
+
+    table td {
+        padding: 1rem;
+    }
+
+    table td + td {
+        border-left: 2px solid black;
+    }
+
+    table tr + tr td {
+        border-top: 2px solid black;
+    }
+</style>
 
 <form action="{% url 'runs:add' run_name %}" method="post">
     {% csrf_token %}
-    {% include "runs/field_select.html" with categories=possible_steps key=key disabled=finished%}
+    {% include "runs/field_select.html" with categories=possible_steps.name key=key disabled=finished %}
     <input type="hidden" name="section_name" value="{{ section_name }}">
 
 
     <button {% if finished %} disabled {% endif %} >add</button>
 </form>
+
+<div style="border: 2px solid #4A536A;
+            border-radius: 25px;
+            ">
+    <table>
+        {% for step in possible_steps %}
+            <tr>
+                <td>{{ step.name }}</td>
+                <td>
+                    {% for method in step.methods %}
+                        <button>{{ method }}</button>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
 <div style="text-indent:30px;">
     {% for step in steps %}
-        {% if step.selected %}
-            <p style="color:red">{{ step.name }} </p>
-        {% else %}
+        <div {% if step.selected %}class="selected"{% endif %}>
             <p>{{ step.name }} </p>
-        {% endif %}
+        </div>
+
+
+
     {% endfor %}
 </div>
