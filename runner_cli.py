@@ -19,23 +19,23 @@ def args_parser():
         help="name of a workflow, saved in /user_data/workflows",
     )
     parser.add_argument(
-        "ms_data_path",
+        "msDataPath",
         action="store",
         help='path to the dataset you want to compute, provide like "<path>"',
     )
     parser.add_argument(
-        "--meta_data_path", action="store", help="path to the metadata for your dataset"
+        "--metaDataPath", action="store", help="path to the metadata for your dataset"
     )
     parser.add_argument(
         "-n",
-        "--run_name",
+        "--name",
         action="store",
         help="Name of the run. If not provided a random name will be assigned",
     )
-    parser.add_argument("-d", "--df_mode", action="store", help="disk or memory")
+    parser.add_argument("-d", "--dfMode", action="store", help="disk or memory")
     parser.add_argument(
         "-p",
-        "--all_plots",
+        "--allPlots",
         action="store_true",
         help="create all plots and save them to user_data/runs/<runName>/plots, default: false",
     )
@@ -50,8 +50,8 @@ def args_parser():
 
 def main(raw_args):
     parser = args_parser()
-    kwargs = parser.parse_args(raw_args).__dict__
-    runner = Runner(**kwargs)
+    args = parser.parse_args(raw_args)
+    runner = Runner(args)
     runner.compute_workflow()
 
 
