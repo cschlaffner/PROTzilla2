@@ -1,4 +1,9 @@
-from ..data_analysis import clustering, differential_expression, dimension_reduction
+from ..data_analysis import (
+    clustering,
+    differential_expression,
+    dimension_reduction,
+    plots,
+)
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -232,4 +237,9 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_analysis",
+        "plots",
+        "scatter_plot_2d",
+    ): plots.scatter_plot_2d,
 }
