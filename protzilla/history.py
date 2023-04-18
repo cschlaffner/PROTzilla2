@@ -55,7 +55,9 @@ class History:
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
         self.step_names = []
+        print("path", RUNS_PATH / run_name)
         Path(f"{RUNS_PATH}/{run_name}").mkdir(exist_ok=True)
+        # (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
     def add_step(
         self,
@@ -105,8 +107,8 @@ class History:
         self.save()
 
     def output_keys_of_named_step(self, name):
-        if not name or name == "None":
-            return ["---"]
+        if not name:
+            return []
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:
                 options = list(step.outputs.keys())
@@ -116,8 +118,6 @@ class History:
         raise ValueError(f"no step named '{name}'")
 
     def output_of_named_step(self, name, output):
-        if name == "None":
-            return ""
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:
                 if output == "dataframe":
@@ -131,7 +131,6 @@ class History:
         df = step.dataframe
         if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
-        self.save()
         return step, df
 
     def save(self):
@@ -199,7 +198,6 @@ class CustomJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, pd.DataFrame):
-            # TODO 124 dont write history_df when not in disk mode
             path = RUNS_PATH / self.run_name / f"history_dfs/{random_string()}.csv"
             path.parent.mkdir(exist_ok=True)
             obj.to_csv(path, index=False)
