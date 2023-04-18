@@ -10,6 +10,7 @@ def t_sne(
     intensity_df: pd.DataFrame,
     n_components: int = 2,
     perplexity: float = 30.0,
+    metric: str = "euclidean",
     random_state: int = 42,
     n_iter: int = 1000,
     n_iter_without_progress: int = 300,
@@ -24,6 +25,7 @@ def t_sne(
             n_iter=n_iter,
             n_iter_without_progress=n_iter_without_progress,
             method=method,
+            metric=metric,
         ).fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
@@ -67,6 +69,7 @@ def umap(
     n_neighbors: float = 15,
     n_components: int = 2,
     min_dist: float = 0.1,
+    metric: str = "euclidean",
     random_state: int = 42,
 ):
     intensity_df_wide = long_to_wide(intensity_df)
@@ -75,6 +78,7 @@ def umap(
             n_neighbors=n_neighbors,
             n_components=n_components,
             min_dist=min_dist,
+            metric=metric,
             random_state=random_state,
         ).fit_transform(intensity_df_wide)
 
