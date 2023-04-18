@@ -1,11 +1,11 @@
 from itertools import zip_longest
 
 
-def get_all_steps(workflow_config_dict) -> list[dict[str, list[str]]]:
+def get_all_steps(workflow_config_dict) -> list[dict[str, list[str|dict[str, str]]]]:
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
         workflow_steps.append(
-            {"section": section, "steps": [step["name"] for step in steps["steps"]]}
+            {"section": section, "steps": [{"name":step["name"], "method":step["method"]} for step in steps["steps"]]}
         )
     return workflow_steps
 
@@ -34,9 +34,10 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 section_selected = True
             workflow_steps.append(
                 {
-                    "name": step,
+                    "name": step["name"],
+                    "method": step["method"],
                     "selected": index == step_index,
-                    "display_name": step.replace("_", " ").title(),
+                    "display_name": step["name"].replace("_", " ").title(),
                     "finished": index < step_index,
                 }
             )

@@ -106,10 +106,10 @@
 </html>
 {% endcomment %}
 
-<div style="text-indent:30px;" id="dropzone">
+<div style="text-indent:30px;">
     {% for step in steps %}
-        <div class="drag {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
-            <p>{{ step.display_name }} </p>
+        <div class="{% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
+            <p>{{ step.display_name }}:   {{ step.method }} </p>
         </div>
     {% endfor %}
 </div>
