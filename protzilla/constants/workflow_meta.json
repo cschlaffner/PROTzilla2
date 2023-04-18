@@ -2,8 +2,8 @@
   "importing": {
     "ms_data_import": {
       "max_quant_import": {
-        "name": "Max Quant Data Import",
-        "description": "",
+        "name": "Max Quant",
+        "description": "Max Quant Data Import",
         "parameters": {
           "intensity_name": {
             "name": "intensity parameter",
@@ -23,8 +23,8 @@
         }
       },
       "ms_fragger_import": {
-        "name": "MS Fragger Data Import",
-        "description": "",
+        "name": "MS Fragger",
+        "description": "MS Fragger Data Import",
         "parameters": {
           "intensity_name": {
             "name": "intensity name",
@@ -47,7 +47,7 @@
     "metadata_import": {
       "metadata_import_method": {
         "name": "Metadata Import",
-        "description": "Import metadata",
+        "description": "Import Metadata",
         "parameters": {
           "feature_orientation": {
             "name": "feature orientation",
@@ -70,8 +70,8 @@
   "data_preprocessing": {
     "filter_proteins": {
       "low_frequency_filter": {
-        "name": "Filter by low frequency",
-        "description": "Sample filter method:",
+        "name": "Low Frequency",
+        "description": "This function filters proteins with a low frequency of occurrence from\n    a protein dataframe based on a set threshold. The threshold is defined\n    by the relative amount of samples a protein is detected in.",
         "parameters": {
           "threshold": {
             "name": "Threshold for the relative amount of samples a protein is detected in:",
@@ -98,8 +98,8 @@
     },
     "filter_samples": {
       "protein_count_filter": {
-        "name": "Filter by protein count per sample",
-        "description": "",
+        "name": "Protein Count",
+        "description": "Filter by protein count per sample",
         "parameters": {
           "threshold": {
             "name": "Number of standard deviations from the median:",
@@ -123,8 +123,8 @@
         ]
       },
       "protein_intensity_sum_filter": {
-        "name": "Filter by sum of protein intensities per sample",
-        "description": "",
+        "name": "Sum of Intensities",
+        "description": "Filter by sum of protein intensities per sample",
         "parameters": {
           "threshold": {
             "name": "Number of standard deviations from the median:",
@@ -150,8 +150,8 @@
     },
     "outlier_detection": {
       "pca": {
-        "name": "PCA (Principal component analysis)",
-        "description": "",
+        "name": "PCA",
+        "description": "This function filters out outliers using a PCA\n    based approach based geometrical distance to the median\n    and returns a list of samples that are inliers.\n    Allows 2D (using an ellipse) or 3D (using an ellipsoid)\n    analysis.",
         "parameters": {
           "threshold": {
             "name": "Threshold for number of standard deviations from the median:",
@@ -173,8 +173,8 @@
         ]
       },
       "isolation_forest": {
-        "name": "Isolation forest",
-        "description": "",
+        "name": "Isolation Forest",
+        "description": "This function filters out outliers using a clustering\n    isolation forest approach.",
         "parameters": {
           "n_estimators": {
             "name": "Number of estimators:",
@@ -189,8 +189,8 @@
         ]
       },
       "local_outlier_factor": {
-        "name": "Local outlier factor",
-        "description": "",
+        "name": "Local Outlier Factor",
+        "description": "This function filters out outliers using a clustering Local Outlier Factor approach based on k nearest neighbors clustering.",
         "parameters": {
           "number_of_neighbors": {
             "name": "Number of neighbours:",
@@ -207,8 +207,8 @@
     },
     "transformation": {
       "log_transformation": {
-        "name": "Log transformation",
-        "description": "",
+        "name": "Log Transformation",
+        "description": "This function log-transforms intensity\n    DataFrames. Supports log-transformation to the base\n    of 2 or 10.",
         "parameters": {
           "log_base": {
             "name": "Log transformation base:",
@@ -247,8 +247,8 @@
     },
     "normalisation": {
       "z_score": {
-        "name": "Z_score normalisation",
-        "description": "",
+        "name": "Z-Score",
+        "description": "A function to run the sklearn StandardScaler class on your dataframe.\n    Normalises the data on the level of each sample.\n    Scales the data to zero mean and unit variance. This is often also\n    called z-score normalisation/transformation.",
         "parameters": {},
         "graphs": [
           {
@@ -275,8 +275,8 @@
         ]
       },
       "totalsum": {
-        "name": "Sumtotal normalisation",
-        "description": "",
+        "name": "Total Sum",
+        "description": "A function to perform normalisation using the total sum\n    of sample intensities on your dataframe.\n    Normalises the data on the level of each sample.\n    Divides each intensity by the total sum of sample intensities.",
         "parameters": {},
         "graphs": [
           {
@@ -303,8 +303,8 @@
         ]
       },
       "median": {
-        "name": "Median normalisation",
-        "description": "",
+        "name": "Median",
+        "description": "A function to perform a quartile/percentile normalisation on your\n    dataframe. Normalises the data on the level of each sample.\n    Divides each intensity by the chosen intensity quartile of the\n    respective sample. By default, the median (50%-quartile) is used.",
         "parameters": {
           "percentile": {
             "name": "Percentile for normalisation:",
@@ -339,8 +339,8 @@
         ]
       },
       "ref_protein": {
-        "name": "Reference Protein Normalisation",
-        "description": "",
+        "name": "Protein Reference",
+        "description": "A function to perform protein-intensity normalisation in reference\n    to a selected protein on your dataframe.\n    Normalises the data on the level of each sample.\n    Divides each intensity by the intensity of the chosen reference\n    protein in each sample. Samples where this value is zero will be\n    removed and returned separately.",
         "parameters": {
           "reference_protein": {
             "name": "Reference Protein:",
@@ -375,8 +375,8 @@
     },
     "imputation": {
       "min_value_per_dataset": {
-        "name": "Minimum value per dataset",
-        "description": "",
+        "name": "Minimum per Dataset",
+        "description": "A function to impute missing values for each protein\n    by taking into account data from the entire dataframe.\n    Sets missing value to the smallest measured value in\n    the dataframe. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -422,8 +422,8 @@
         ]
       },
       "min_value_per_protein": {
-        "name": "Minimum value per protein",
-        "description": "",
+        "name": "Minimum per Protein",
+        "description": "A function to impute missing values for each protein\n    by taking into account data from each protein.\n    Sets missing value to the smallest measured value for each\n    protein column. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.\n    CAVE: All proteins without any values will be filtered out.",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -469,8 +469,8 @@
         ]
       },
       "min_value_per_sample": {
-        "name": "Minimum value per sample",
-        "description": "",
+        "name": "Minimum per Sample",
+        "description": "Sets missing intensity values to the smallest measured value\n    for each sample",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -516,8 +516,8 @@
         ]
       },
       "simple_imputation_per_protein": {
-        "name": "Mean/ median/ mode per protein",
-        "description": "",
+        "name": "Mean, Median or Mode per Protein",
+        "description": "Imputation methods include imputation by mean, median and\n    mode. Implements the sklearn.SimpleImputer class",
         "parameters": {
           "strategy": {
             "name": "Strategy:",
@@ -566,8 +566,8 @@
         ]
       },
       "knn": {
-        "name": "k_nearest neighbours (kNN)",
-        "description": "",
+        "name": "kNN",
+        "description": "A function to perform value imputation based on KNN\n    (k-nearest neighbors). Imputes missing values for each\n    sample based on intensity-wise similar samples.\n    Two samples are close if the features that neither is\n    missing are close.",
         "parameters": {
           "number_of_neighbours": {
             "name": "Number of neighbours:",
@@ -618,7 +618,7 @@
     "differential_expression": {
       "anova": {
         "name": "ANOVA",
-        "description": "Analysis of Variance:",
+        "description": "A function that uses ANOVA to test the difference between two or more\n    groups defined in the clinical data. The ANOVA test is conducted on\n    the level of each protein. The p-values are corrected for multiple\n    testing.",
         "parameters": {
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -662,8 +662,8 @@
         }
       },
       "t_test": {
-        "name": "T_Test",
-        "description": "Statistical test assuming a t-distribution:",
+        "name": "T-Test",
+        "description": "A function to conduct a two sample t-test between groups defined in the\n    clinical data. The t-test is conducted on the level of each protein.\n    The p-values are corrected for multiple testing.",
         "parameters": {
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",

@@ -6,7 +6,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 
 def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     """
-    A class of a transformer to log-transform intensity
+    This function log-transforms intensity
     DataFrames. Supports log-transformation to the base
     of 2 or 10.
 

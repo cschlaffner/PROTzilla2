@@ -63,7 +63,7 @@ def by_simple_imputer(
     strategy="mean",
 ) -> tuple[pd.DataFrame, dict]:
     """
-    A class to perform protein-wise imputations
+    A function to perform protein-wise imputations
     on your dataframe. Imputes missing values for each protein
     taking into account data from each protein.
 
@@ -105,7 +105,7 @@ def by_min_per_sample(
     shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
-    A class to perform  minimal value imputation on the level
+    A function to perform  minimal value imputation on the level
     of samples of your dataframe. Imputes missing values for each
     protein taking into account data from each sample.
 

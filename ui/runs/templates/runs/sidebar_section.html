@@ -4,8 +4,15 @@
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/sidebar.css' %}">
 {% endblock %}
-{% comment %}
+
 {% block js %}
+<script>
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+{% endblock %}
+    {% comment %}
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
       <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -123,7 +130,7 @@
                                 <input type="hidden" name="section_name" value="{{ section_name }}">
                                 <input type="hidden" name="{{ key }}" value="{{ step.name }}">
                                 <input type="hidden" name="method_name" value="{{ method.name }}">
-                                <button>{{ method.name }}</button>
+                                <button data-toggle="tooltip" data-placement="left" title="{{ method.description }}">{{ method.name }}</button>
                             </form>
                         {% endfor %}
                     </td>
