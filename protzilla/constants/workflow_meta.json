@@ -816,6 +816,14 @@
             "max": 50.0,
             "default": 30.0
           },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean","manhattan","cosine", "haversine"
+            ],
+            "default": "euclidean"
+          },
           "random_state": {
             "name": "Seed for random number generation",
             "type": "numeric",
@@ -865,6 +873,14 @@
             "type": "numeric",
             "min": 0.1,
             "default": 0.1
+          },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean","manhattan","cosine", "haversine"
+            ],
+            "default": "euclidean"
           },
           "random_state": {
             "name": "Seed for random number generation",
