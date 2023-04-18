@@ -42,10 +42,46 @@ table tr + tr td {
     border-top: 1px solid #adadad;
 }
 
- button{
-     display: inline-block;
- }
 
- .add_steps_dropdown_button{
-     width: 100%;
- }
+.grid-container {
+    display: inline;
+    grid-template-columns: repeat(2, auto);
+    grid-gap: 5px; /* add some gap between the grid items */
+    align-items: start; /* align grid items at the top of their cells */
+}
+
+.grid-container button {
+    white-space: nowrap; /* ensure that the button text does not wrap to multiple lines */
+}
+
+.full_width {
+    width: 100%;
+}
+
+.simple-tags {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.simple-tags > ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap
+}
+
+.simple-tags ul li {
+    padding: 3px;
+}
+

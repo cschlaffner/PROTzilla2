@@ -375,7 +375,7 @@
     },
     "imputation": {
       "min_value_per_dataset": {
-        "name": "Minimum per Dataset",
+        "name": "Min per Dataset",
         "description": "A function to impute missing values for each protein\n    by taking into account data from the entire dataframe.\n    Sets missing value to the smallest measured value in\n    the dataframe. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.",
         "parameters": {
           "shrinking_value": {
@@ -422,7 +422,7 @@
         ]
       },
       "min_value_per_protein": {
-        "name": "Minimum per Protein",
+        "name": "Min per Protein",
         "description": "A function to impute missing values for each protein\n    by taking into account data from each protein.\n    Sets missing value to the smallest measured value for each\n    protein column. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.\n    CAVE: All proteins without any values will be filtered out.",
         "parameters": {
           "shrinking_value": {
@@ -469,7 +469,7 @@
         ]
       },
       "min_value_per_sample": {
-        "name": "Minimum per Sample",
+        "name": "Min per Sample",
         "description": "Sets missing intensity values to the smallest measured value\n    for each sample",
         "parameters": {
           "shrinking_value": {

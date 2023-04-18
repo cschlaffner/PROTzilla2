@@ -15,8 +15,8 @@ html, body{
 }
 
 #sidebar {
-    flex: 1;
-    padding: 20px;
+    flex: 1.2;
+    padding: 10px;
 }
 
 .plot-container {

@@ -6,13 +6,13 @@
 {% endblock %}
 
 {% block js %}
-<script>
-    $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     </script>
 {% endblock %}
-    {% comment %}
+{% comment %}
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
       <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -116,23 +116,32 @@
 {% if section.finished %}
     <p>Go back to this section to add more steps</p>
 {% else %}
-    <button class="add_steps_dropdown_button" type="button"  data-bs-toggle="collapse" data-bs-target="#add_steps_div">+ add steps</button>
+    <button class="btn btn-blue full_width" type="button" data-bs-toggle="collapse" data-bs-target="#add_steps_div">
+        + add steps
+    </button>
     <div id="add_steps_div" class="collapse">
         <p>Click on a step to add it to your run</p>
         <table>
             {% for step in possible_steps %}
                 <tr>
-                    <td>{{ step.display_name }}</td>
+                    <td class="small">{{ step.display_name }}</td>
                     <td>
-                        {% for method in step.methods %}
-                            <form action="{% url 'runs:add' run_name %}" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="section_name" value="{{ section_name }}">
-                                <input type="hidden" name="{{ key }}" value="{{ step.name }}">
-                                <input type="hidden" name="method_name" value="{{ method.name }}">
-                                <button data-toggle="tooltip" data-placement="left" title="{{ method.description }}">{{ method.name }}</button>
-                            </form>
-                        {% endfor %}
+                        <div class="simple-tags">
+                        <ul>
+                            {% for method in step.methods %}
+                                <li>
+                                <form action="{% url 'runs:add' run_name %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="section_name" value="{{ section_name }}">
+                                    <input type="hidden" name="{{ key }}" value="{{ step.name }}">
+                                    <input type="hidden" name="method_name" value="{{ method.name }}">
+                                    <button class="btn btn-sm btn-grey" data-toggle="tooltip" data-placement="right"
+                                            title="{{ method.description }}">{{ method.name }}</button>
+                                </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}
