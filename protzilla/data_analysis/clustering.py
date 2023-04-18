@@ -1,11 +1,11 @@
 import pandas as pd
 from sklearn.cluster import KMeans
-from protzilla.utilities.transform_dfs import long_to_wide
+from protzilla.utilities.transform_dfs import long_to_wide, is_long_format
 from django.contrib import messages
 
 
 def k_means(
-    intensity_df: pd.DataFrame,
+    input_df: pd.DataFrame,
     n_clusters: int = 8,
     random_state: int = 6,
     init_centroid_strategy: str | list = "random",
@@ -13,10 +13,10 @@ def k_means(
     max_iter: int = 300,
     tolerance: float = 1e-4,
 ):
-    transformed_df = long_to_wide(intensity_df)
+    intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         if type(init_centroid_strategy) is list:
-            init_centroid_strategy = transformed_df.loc[init_centroid_strategy]
+            init_centroid_strategy = intensity_df_wide.loc[init_centroid_strategy]
             # The sklearn methods fails to set n_init=1 when the user enters
             # n_init="auto" and the centroid seeds (init_centroid_strategy) manually as
             # a pd.Dataframe
@@ -30,20 +30,21 @@ def k_means(
             max_iter=max_iter,
             tol=tolerance,
         )
-        labels = kmeans.fit_predict(transformed_df)
+        labels = kmeans.fit_predict(intensity_df_wide)
+        labels_df = pd.DataFrame(labels, index=intensity_df_wide.index)
         centroids = kmeans.cluster_centers_
-        return intensity_df, dict(centroids=centroids, labels=labels)
+        return input_df, dict(centroids=centroids, labels_df=labels_df)
 
     except ValueError as e:
-        if transformed_df.isnull().sum().any():
+        if intensity_df_wide.isnull().sum().any():
             msg = (
                 "KMeans does not accept missing values encoded as NaN. Consider"
                 "preprocessing your data to remove NaN values."
             )
-        elif transformed_df.shape[0] < n_clusters:
+        elif intensity_df_wide.shape[0] < n_clusters:
             msg = (
                 f"The number of clusters should be less or equal than the number of "
-                f"samples. In the selected dataframe there is {transformed_df.shape[0]}"
+                f"samples. In the selected dataframe there is {intensity_df_wide.shape[0]}"
                 f"samples"
             )
         elif init_centroid_strategy.shape[0] != n_clusters:
@@ -53,7 +54,7 @@ def k_means(
             )
         else:
             msg = ""
-        return intensity_df, dict(
+        return input_df, dict(
             centroids=None,
             labels=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
