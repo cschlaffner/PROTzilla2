@@ -20,7 +20,7 @@ class Runner:
         )
         self.df_mode = args.dfMode if args.dfMode is not None else "disk"
 
-        if os.path.exists(RUNS_PATH / self.run_name):
+        if os.path.exists(Path(f"{RUNS_PATH}/{self.run_name}")):
             self._overwrite_run_prompt()
             print("\n\n")
 

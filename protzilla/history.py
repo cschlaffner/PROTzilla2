@@ -55,9 +55,7 @@ class History:
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
         self.step_names = []
-        print("path", RUNS_PATH / run_name)
         Path(f"{RUNS_PATH}/{run_name}").mkdir(exist_ok=True)
-        # (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
     def add_step(
         self,

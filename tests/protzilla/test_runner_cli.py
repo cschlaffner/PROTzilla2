@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from unittest import mock
 
 import pytest
 
@@ -89,3 +90,15 @@ def test_parse_verbose(caplog, tests_folder_name):
     parsed_args = args_parser().parse_args(test_args)
     assert Runner(parsed_args).args.verbose
     assert "Parsed arguments" in caplog.text
+
+
+def test_run_already_exists(monkeypatch, capsys, tests_folder_name):
+    mock_input = mock.Mock(return_value="y")
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    run_name = f"{tests_folder_name}/test_run_already_exists_{random_string()}"
+    test_args = ["standard", "ms_data", f"--name={run_name}"]
+
+    Runner(args_parser().parse_args(test_args))
+    Runner(args_parser().parse_args(test_args))
+    assert mock_input.call_count == 1
