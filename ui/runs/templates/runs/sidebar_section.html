@@ -106,13 +106,12 @@
         </div>
     {% endfor %}
 </div>
-<hr>
 {% if section.finished %}
     <p>Go back to this section to add more steps</p>
 {% else %}
-    <h5>add steps:</h5>
-    <p>Click on a step to add it to your run</p>
-    <div>
+    <button class="add_steps_dropdown_button" type="button"  data-bs-toggle="collapse" data-bs-target="#add_steps_div">+ add steps</button>
+    <div id="add_steps_div" class="collapse">
+        <p>Click on a step to add it to your run</p>
         <table>
             {% for step in possible_steps %}
                 <tr>

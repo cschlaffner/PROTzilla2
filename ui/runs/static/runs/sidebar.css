@@ -26,7 +26,6 @@ table {
 
 table td {
     padding: 5px;
-    width: 100%;
 }
 
 .finished {
@@ -45,4 +44,8 @@ table tr + tr td {
 
  button{
      display: inline-block;
+ }
+
+ .add_steps_dropdown_button{
+     width: 100%;
  }

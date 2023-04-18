@@ -45,7 +45,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
         possible_steps = []
         for step in possible_section["possible_steps"]:
-            methods = [dict(method=method, name=method.replace("_", " ").title()) for method in list(workflow_meta[section][step].keys())]
+            methods = [dict(method=method, name=method_params["name"]) for method, method_params in list(workflow_meta[section][step].items())]
             possible_steps.append(
                 {
                     "name": step,
