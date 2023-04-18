@@ -1,23 +1,21 @@
 import logging
 import os
-import sys
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
 from .run import Run
 from .utilities.random import random_string
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-
 
 class Runner:
     def __init__(self, args):
+        logging.basicConfig(level=logging.INFO)
         if args.verbose:
             logging.info(f"Parsed arguments: {args}")
         self.args = args
         self.run_name = (
             args.name.strip()
-            if args.name.strip() is not None
+            if args.name is not None and args.name.strip() is not None
             else f"runner_{random_string()}"
         )
         self.df_mode = args.dfMode if args.dfMode is not None else "disk"
@@ -39,7 +37,7 @@ class Runner:
             logging.info(f"Saving plots at {self.plots_path}")
 
     def compute_workflow(self):
-        logging.info("\n\n------ computing workflow\n")
+        logging.info("------ computing workflow\n")
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
                 if section == "importing":
