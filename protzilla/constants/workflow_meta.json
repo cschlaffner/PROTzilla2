@@ -839,6 +839,42 @@
             "default": 300
           }
         }
+      },
+      "umap": {
+        "name": "UMAP",
+        "description":"",
+        "parameters": {
+          "n_neighbors": {
+            "name": "Number of neighbors (the size of local neighborhood)",
+            "type": "numeric",
+            "min": 2,
+            "max": 100,
+            "step": 1,
+            "default": 15
+          },
+          "n_components": {
+            "name": "Number of components (dimension of the embedded space)",
+            "type": "numeric",
+            "min": 2,
+            "max": 100,
+            "step": 1,
+            "default": 2
+          },
+          "min_dist": {
+            "name": "The effective minimum distance between embedded points.",
+            "type": "numeric",
+            "min": 0.1,
+            "default": 0.1
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42
+          }
+        }
       }
     }
   },
