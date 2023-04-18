@@ -748,12 +748,17 @@
         "description": "",
         "parameters": {
           "p_values": {
-            "name": "p-values",
+            "name": "p-value df",
             "type": "named_output",
             "default": null
           },
-          "fc": {
-            "name": "log2 fold change",
+          "log2_fc": {
+            "name": "log2 fold change df",
+            "type": "named_output",
+            "default": null
+          },
+          "fc_threshold": {
+            "name": "log2 fold change threshold",
             "type": "named_output",
             "default": null
           },

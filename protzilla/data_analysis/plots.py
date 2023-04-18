@@ -1,20 +1,21 @@
-from protzilla.data_preprocessing.plots import create_pie_plot
+import dash_bio as dashbio
 
 
-def create_volcano_plot(intensity_df, a, b, **p):
-    fig = create_pie_plot(
-        values_of_sectors=[
-            400,
-            42,
-        ],
-        names_of_sectors=["Huiiiiiiii", "Flump"],
-        heading="Wummmmmms",
+def create_volcano_plot(intensity_df, a, b, p_values, log2_fc, fc_threshold, alpha):
+    plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
+    fig = dashbio.VolcanoPlot(
+        dataframe=plot_df,
+        effect_size="log2_fold_change",
+        p="corrected_p_value",
+        snp=None,
+        gene=None,
+        genomewideline_value=alpha,
+        effect_size_line=[-fc_threshold, fc_threshold],
+        xlabel="log2(fc)",
+        ylabel="-log10(p)",
+        title="Volcano Plot",
+        # annotation="protein",
     )
-    print(intensity_df.head())
-    print("------------------")
-    print(a)
-    print("------------------")
-    print(p)
 
     return [fig]
 
