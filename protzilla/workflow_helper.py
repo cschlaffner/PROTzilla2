@@ -27,20 +27,30 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
     for workflow_section, possible_section in zip(workflow_steps, possible_steps):
         assert workflow_section["section"] == possible_section["section"]
         section = possible_section["section"]
+        section_selected = False
         workflow_steps = []
         for step in workflow_section["steps"]:
-            workflow_steps.append({"name": step, "selected": index == step_index})
+            if index == step_index:
+                section_selected = True
+            workflow_steps.append(
+                {
+                    "name": step,
+                    "selected": index == step_index,
+                    "display_name": step.replace("_", " ").title(),
+                    "finished": index < step_index,
+                }
+            )
             index += 1
         section_finished = index <= step_index
 
         possible_steps = []
         for step in possible_section["possible_steps"]:
+            methods = [dict(method=method, name=method.replace("_", " ").title()) for method in list(workflow_meta[section][step].keys())]
             possible_steps.append(
                 {
                     "name": step,
-                    "methods": list(
-                        workflow_meta[section][step].keys()
-                    ),
+                    "methods": methods,
+                    "display_name": step.replace("_", " ").title(),
                 }
             )
 
@@ -50,6 +60,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 "finished": section_finished,
                 "possible_steps": possible_steps,
                 "steps": workflow_steps,
+                "selected": section_selected
             }
         )
     print("displayed_steps")

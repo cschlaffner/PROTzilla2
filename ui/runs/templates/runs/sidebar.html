@@ -1,8 +1,21 @@
 {# params: workflow_steps add_step_key run_name#}
-
-{% for section in workflow_steps %}
-    <p>
-        <h3>{{ section.section }}</h3>
-        {% include "runs/sidebar_section.html" with finished=section.finished section_name=section.section steps=section.steps key=add_step_key possible_steps=section.possible_steps run_name=run_name %}
-    </p>
-{% endfor %}
+<div class="container mt-3">
+    <div id="accordion">
+        {% for section in workflow_steps %}
+            <div class="card">
+                <div class="card-header">
+                    <a class="btn" data-bs-toggle="collapse" href="#collapse_{{ section.section }}">
+                        {{ section.section }}
+                    </a>
+                </div>
+                <div id="collapse_{{ section.section }}"
+                     class="collapse {% if section.selected %} show {% endif %}"
+                     data-bs-parent="#accordion">
+                    <div class="card-body">
+                        {% include "runs/sidebar_section.html" with finished=section.finished section_name=section.section steps=section.steps key=add_step_key possible_steps=section.possible_steps run_name=run_name %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>

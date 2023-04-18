@@ -1,0 +1,48 @@
+p {
+    margin: 5px;
+}
+
+.selected {
+    background-color: #4A536A;
+    color: white;
+    border-radius: 15px;
+}
+
+button {
+    color: black;
+    border-radius: 10px;
+    border: 2px solid white;
+    padding: 5px;
+}
+
+table {
+    background-color: white;
+    color: black;
+    border-radius: 15px;
+    padding: 5px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+table td {
+    padding: 5px;
+    width: 100%;
+}
+
+.finished {
+    color: #adadad;
+    border-radius: 15px;
+}
+
+
+/*table td + td {
+    border-left: 2px solid black;
+}*/
+
+table tr + tr td {
+    border-top: 1px solid #adadad;
+}
+
+ button{
+     display: inline-block;
+ }
