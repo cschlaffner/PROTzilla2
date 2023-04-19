@@ -8,17 +8,32 @@ from .utilities.random import random_string
 
 
 class Runner:
+
+    """
+    Intended for use with runner_cli.py-Script (at PROTzilla2/runner_cli.py).
+    runner_cli provides properly structured arguments
+
+    :ivar args: dict with the following contents:
+        workflow: str, name of workflow in user_data/workflows
+        msDataPath: str, path to MS-Data
+        metaDataPath: str, path to Meta-Data
+        name: str, name of run to be created
+        allPlots: bool, if set all plots will be generated and save in the run-folder,
+            default: false
+        verbose: bool, logs this input dict (args), default: false
+    """
+
     def __init__(self, args):
         logging.basicConfig(level=logging.INFO)
-        if args.verbose:
+        if args["verbose"]:
             logging.info(f"Parsed arguments: {args}")
         self.args = args
         self.run_name = (
-            args.name.strip()
-            if args.name is not None and args.name.strip() is not None
+            args["name"].strip()
+            if args["name"] is not None and args["name"].strip() is not None
             else f"runner_{random_string()}"
         )
-        self.df_mode = args.dfMode if args.dfMode is not None else "disk"
+        self.df_mode = args["dfMode"] if args["dfMode"] is not None else "disk"
 
         if os.path.exists(Path(f"{RUNS_PATH}/{self.run_name}")):
             self._overwrite_run_prompt()
@@ -26,12 +41,12 @@ class Runner:
 
         self.run = Run.create(
             run_name=self.run_name,
-            workflow_config_name=self.args.workflow,
+            workflow_config_name=self.args["workflow"],
             df_mode=self.df_mode,
         )
         logging.info(f"Run {self.run_name} created at {self.run.run_path}")
 
-        if self.args.allPlots:
+        if self.args["allPlots"]:
             self.plots_path = Path(f"{self.run.run_path}/plots")
             self.plots_path.mkdir()
             logging.info(f"Saving plots at {self.plots_path}")
@@ -50,25 +65,25 @@ class Runner:
                         f"performing step: {*self.run.current_workflow_location(),}"
                     )
                     self._perform_current_step(step["parameters"])
-                    if self.args.allPlots:
+                    if self.args["allPlots"]:
                         self._create_plots_for_step(section, step)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
             params = step["parameters"]
-            params["file_path"] = self.args.msDataPath
+            params["file_path"] = self.args["msDataPath"]
             self._perform_current_step(params)
             logging.info("imported MS Data")
 
         elif step["name"] == "metadata_import":
-            if self.args.metaDataPath is None:
+            if self.args["metaDataPath"] is None:
                 raise ValueError(
                     f"MetadataPath (--metaDataPath) is not specified, "
                     f"but is required for {step['name']}"
                 )
             params = step["parameters"]
-            params["file_path"] = self.args.metaDataPath
+            params["file_path"] = self.args["metaDataPath"]
             self._perform_current_step(params)
             logging.info("imported Meta Data")
 

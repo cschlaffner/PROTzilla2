@@ -64,7 +64,7 @@ def plot_args(tests_folder_name, metadata_path, ms_data_path):
 
 
 def prep_run_and_compute(monkeypatch, args):
-    runner = Runner(args_parser().parse_args(args))
+    runner = Runner(args_parser().parse_args(args).__dict__)
 
     mock_perform = mock.MagicMock()
     mock_add_step = mock.MagicMock()

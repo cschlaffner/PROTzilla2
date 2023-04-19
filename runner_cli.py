@@ -50,8 +50,7 @@ def args_parser():
 
 def main(raw_args):
     parser = args_parser()
-    args = parser.parse_args(raw_args)
-    print("raw:", raw_args)
+    args = parser.parse_args(raw_args).__dict__
     runner = Runner(args)
     runner.compute_workflow()
 
