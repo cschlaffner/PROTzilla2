@@ -8,7 +8,6 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 # Test if input handling works in frontend
 # handle color_df parameter optional!!
 def scatter_plot(
-    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     color_df: pd.DataFrame,
 ):
