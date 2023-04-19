@@ -163,6 +163,7 @@ class Run:
             self.df, self.result_df, self.current_out, **parameters
         )
         self.current_plot_parameters = parameters
+        print("Create Plot End")
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()

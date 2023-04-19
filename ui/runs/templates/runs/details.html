@@ -135,6 +135,7 @@
 <br>
 {{ location }}
 <br>
+{% if "plot" not in location %}
 <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ method_dropdown }}
@@ -143,6 +144,7 @@
     </div>
     <input type="submit" value="Calculate">
 </form>
+{% endif %}
 <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div id="plot_parameters">
