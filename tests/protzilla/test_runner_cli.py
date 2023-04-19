@@ -93,12 +93,15 @@ def test_parse_verbose(caplog, tests_folder_name):
 
 
 def test_run_already_exists(monkeypatch, capsys, tests_folder_name):
-    mock_input = mock.Mock(return_value="y")
-    monkeypatch.setattr("builtins.input", mock_input)
-
     run_name = f"{tests_folder_name}/test_run_already_exists_{random_string()}"
     test_args = ["standard", "ms_data", f"--name={run_name}"]
+    Runner(args_parser().parse_args(test_args))
 
+    mock_input_no = mock.Mock(return_value="n")
+    monkeypatch.setattr("builtins.input", mock_input_no)
+    pytest.raises(SystemExit, Runner, args_parser().parse_args(test_args))
+
+    mock_input_yes = mock.Mock(return_value="y")
+    monkeypatch.setattr("builtins.input", mock_input_yes)
     Runner(args_parser().parse_args(test_args))
-    Runner(args_parser().parse_args(test_args))
-    assert mock_input.call_count == 1
+    assert mock_input_yes.call_count == 1
