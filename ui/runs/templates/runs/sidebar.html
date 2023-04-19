@@ -1,12 +1,14 @@
+{% load static %}
 {# params: workflow_steps run_name#}
-<div class="container mt-3">
-    <div id="accordion">
+<div class="container">
+    <div id="accordion" class="">
         {% for section in workflow_steps %}
-            <div class="card">
-                <div class="card-header">
-                    <a class="btn" data-bs-toggle="collapse" href="#collapse_{{ section.id }}">
+            <div class="border-top">
+                <div class="card-header d-flex btn p-3 align-items-center bg-white" data-bs-toggle="collapse" href="#collapse_{{ section.id }}">
+                    <img src="{% static 'img/download-file-icon.svg' %}" alt="toggle sidebar" width="20" height="20" class="me-2">
+                    <div class="ms-2">
                         {{ section.name }}
-                    </a>
+                    </div>
                 </div>
                 <div id="collapse_{{ section.id }}"
                      class="collapse {% if section.selected %} show {% endif %}">
