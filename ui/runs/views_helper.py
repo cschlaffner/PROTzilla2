@@ -38,8 +38,6 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
-        elif param_dict["fill"] == "samples":
-            param_dict["categories"] = run.df["Sample"].unique().tolist()
         print("param_dict2")
         print(param_dict)
 
