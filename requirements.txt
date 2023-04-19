@@ -70,3 +70,8 @@ urllib3==1.26.15
 virtualenv==20.19.0
 Werkzeug==2.2.3
 wheel==0.37.1
+scikit-learn==1.2.2
+pytest-dependency==0.5.1
+pytest-order==1.1.0
+umap-learn==0.5.3
+numba==0.57.0rc1
