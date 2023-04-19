@@ -4,12 +4,12 @@ import sys
 import pandas as pd
 
 
-def get_all_active_dfs():
+def get_all_active_dfs(t):
     # Get all active objects tracked by the garbage collector
     objects = gc.get_objects()
 
     # Filter the list to only include objects of type 'DataFrame'
-    lists = [obj for obj in objects if isinstance(obj, pd.DataFrame)]
+    lists = [obj for obj in objects if isinstance(obj, t)]
 
     # Calculate the total memory usage of all active lists
     total_memory = sum(sys.getsizeof(lst) for lst in lists)
@@ -24,5 +24,9 @@ def get_all_active_dfs():
     print(
         f"Total memory usage of active dataframes: {total_memory / (1024 ** 2):.2f} MB"
     )
+    return lists, total_memory
 
-    return f"Active dataframes: {len(lists)} memory: {total_memory / (1024**2):.2f} MB"
+def get_debugging_info():
+    lists, memory = get_all_active_dfs(pd.DataFrame)
+    _, total_memory = get_all_active_dfs(object)
+    return f"Active dataframes: {len(lists)} memory: {memory / (1024 ** 2):.2f} MB, total: {total_memory / (1024 ** 2):.2f} MB"

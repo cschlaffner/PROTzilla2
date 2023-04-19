@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.active_dfs import get_all_active_dfs
+from protzilla.active_dfs import get_all_active_dfs, get_debugging_info
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
@@ -61,7 +61,7 @@ def detail(request, run_name):
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
-            debug_info=get_all_active_dfs(),
+            debug_info=get_debugging_info()
         ),
     )
 
