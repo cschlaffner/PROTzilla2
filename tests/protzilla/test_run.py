@@ -153,14 +153,6 @@ def test_perform_calculation_logging(caplog):
     rmtree(RUNS_PATH / run_name)
 
 
-@pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
 def test_insert_step(example_workflow_short):
     run_name = "test_insert_as_next_step" + random_string()
     run = Run.create(run_name)
@@ -168,7 +160,7 @@ def test_insert_step(example_workflow_short):
     run.workflow_config = example_workflow_short
     importing_steps = run.workflow_config["sections"]["importing"]
     assert len(importing_steps["steps"]) == 1
-    run.insert_step("metadata_import", "importing", "max_quant_import", 1)
+    run.insert_step("metadata_import", "importing", "metadata_import_method", 1)
     assert len(importing_steps["steps"]) == 2
 
     assert importing_steps["steps"][1] == {
@@ -191,7 +183,7 @@ def test_insert_at_next_position_correct_location(example_workflow):
 
     # test correct inserting section
     step_count = len(preprocessing_steps["steps"])
-    run.insert_at_next_position("metadata_import", "importing", "max_quant_import")
+    run.insert_at_next_position("metadata_import", "importing", "metadata_import_method")
     assert len(preprocessing_steps["steps"]) == step_count
     run.insert_at_next_position("outlier_detection", "data_preprocessing", "pca")
     assert len(preprocessing_steps["steps"]) == step_count + 1
@@ -199,4 +191,16 @@ def test_insert_at_next_position_correct_location(example_workflow):
     # test added step is in first position
     assert preprocessing_steps["steps"][0]["name"] == "outlier_detection"
 
+    rmtree(RUNS_PATH / run_name)
+
+
+def test_delete_step(example_workflow_short):
+    run_name = "test_delete_step" + random_string()
+    run = Run.create(run_name)
+
+    run.workflow_config = example_workflow_short
+    importing_steps = run.workflow_config["sections"]["importing"]
+    assert len(importing_steps["steps"]) == 1
+    run.delete_step("importing", 0)
+    assert len(importing_steps["steps"]) == 0
     rmtree(RUNS_PATH / run_name)

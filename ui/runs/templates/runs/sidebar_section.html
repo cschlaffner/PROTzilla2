@@ -1,4 +1,4 @@
-{# params: section steps run_name key #}
+{# params: section steps run_name #}
 {% load static %}
 
 {% block css %}
@@ -15,8 +15,16 @@
 
 <div>
     {% for step in section.steps %}
-        <div class="{% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
+        <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
             <p>{{ step.name }}: <i>{{ step.method_name }}</i></p>
+            {% if not step.selected and not step.finished %}
+                <form action="{% url 'runs:delete_step' run_name %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_name" value="{{ section.id }}">
+                    <input type="hidden" name="index" value="{{ step.index }}">
+                    <button class="btn btn-sm btn-outline-red">x</button>
+                </form>
+            {% endif %}
         </div>
     {% endfor %}
 </div>
@@ -41,7 +49,7 @@
                                         <form action="{% url 'runs:add' run_name %}" method="post">
                                             {% csrf_token %}
                                             <input type="hidden" name="section_name" value="{{ section.id }}">
-                                            <input type="hidden" name="{{ key }}" value="{{ possible_step.id }}">
+                                            <input type="hidden" name="step" value="{{ possible_step.id }}">
                                             <input type="hidden" name="method" value="{{ method.id }}">
                                             <button class="btn btn-sm btn-grey" data-toggle="tooltip"
                                                     data-placement="right"

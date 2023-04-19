@@ -12,19 +12,6 @@ from protzilla.workflow_helper import (
 )
 
 
-@pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
-        return json.load(f)
-
 
 @pytest.fixture
 def workflow_wrong_graphs():
@@ -38,35 +25,7 @@ def workflow_wrong_parameters():
         return json.load(f)
 
 
-@pytest.fixture
-def workflow_meta():
-    with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
-        return json.load(f)
 
-
-@pytest.fixture
-def example_displayed_steps_importing_and_data_preprocessing():
-    return [
-        {
-            "finished": True,
-            "possible_steps": ["ms_data_import", "metadata_import"],
-            "section": "importing",
-            "steps": [{"name": "ms_data_import", "selected": False}],
-        },
-        {
-            "finished": False,
-            "possible_steps": [
-                "filter_proteins",
-                "filter_samples",
-                "outlier_detection",
-                "transformation",
-                "normalisation",
-                "imputation",
-            ],
-            "section": "data_preprocessing",
-            "steps": [{"name": "filter_proteins", "selected": True}],
-        },
-    ]
 
 
 @pytest.fixture
@@ -75,32 +34,29 @@ def example_workflow_all_steps() -> list[dict[str, list[str]]]:
         {
             "section": "importing",
             "steps": [
-                "ms_data_import",
-                "metadata_import",
+                {"method": "max_quant_import", "name": "ms_data_import"},
+                {"method": "metadata_import_method", "name": "metadata_import"},
             ],
         },
         {
             "section": "data_preprocessing",
             "steps": [
-                "filter_proteins",
-                "filter_samples",
-                "imputation",
-                "outlier_detection",
-                "transformation",
-                "normalisation",
+                {"method": "low_frequency_filter", "name": "filter_proteins"},
+                {"method": "protein_intensity_sum_filter", "name": "filter_samples"},
+                {"method": "knn", "name": "imputation"},
+                {"method": "local_outlier_factor", "name": "outlier_detection"},
+                {"method": "log_transformation", "name": "transformation"},
+                {"method": "median", "name": "normalisation"},
             ],
         },
         {
             "section": "data_analysis",
             "steps": [
-                "differential_expression",
-                "differential_expression",
+                {"method": "anova", "name": "differential_expression"},
+                {"method": "t_test", "name": "differential_expression"},
             ],
         },
-        {
-            "section": "data_integration",
-            "steps": [],
-        },
+        {"section": "data_integration", "steps": []},
     ]
 
 
@@ -112,25 +68,6 @@ def test_get_all_steps_no_side_effects(example_workflow):
     example_workflow_copy = copy.deepcopy(example_workflow)
     workflow_helper.get_all_steps(example_workflow)
     assert example_workflow == example_workflow_copy
-
-
-def test_get_displayed_steps(
-    workflow_meta,
-    example_workflow_short,
-    example_displayed_steps_importing_and_data_preprocessing,
-):
-    result = workflow_helper.get_displayed_steps(
-        example_workflow_short, workflow_meta, 1
-    )[:2]
-    assert result == example_displayed_steps_importing_and_data_preprocessing
-
-
-def test_get_displayed_steps_no_side_effects(workflow_meta, example_workflow_short):
-    example_workflow_copy = copy.deepcopy(example_workflow_short)
-    workflow_meta_copy = copy.deepcopy(workflow_meta)
-    workflow_helper.get_displayed_steps(example_workflow_short, workflow_meta, 0)
-    assert example_workflow_short == example_workflow_copy
-    assert workflow_meta == workflow_meta_copy
 
 
 def test_get_all_default_params_for_methods(workflow_meta):

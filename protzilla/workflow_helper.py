@@ -37,61 +37,6 @@ def get_method_name(workflow_meta, section, step, method):
     return workflow_meta[section][step][method]["name"]
 
 
-def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
-    workflow_steps = get_all_steps(workflow_config_dict)
-    possible_steps = get_all_possible_steps(workflow_meta)
-    displayed_steps = []
-    index = 0
-    for workflow_section, possible_section in zip(workflow_steps, possible_steps):
-        assert workflow_section["section"] == possible_section["section"]
-        section = possible_section["section"]
-        section_selected = False
-        workflow_steps = []
-        for step in workflow_section["steps"]:
-            if index == step_index:
-                section_selected = True
-            workflow_steps.append(
-                {
-                    "id": step["name"],
-                    "name": get_step_name(step["name"]),
-                    "method_name": get_method_name(
-                        workflow_meta, section, step["name"], step["method"]
-                    ),
-                    "selected": index == step_index,
-                    "finished": index < step_index,
-                }
-            )
-            index += 1
-        section_finished = index <= step_index
-
-        possible_steps = []
-        for step in possible_section["possible_steps"]:
-            methods = [
-                {
-                    "id": method,
-                    "name": method_params["name"],
-                    "description": method_params["description"],
-                }
-                for method, method_params in list(workflow_meta[section][step].items())
-            ]
-            possible_steps.append(
-                {"id": step, "methods": methods, "name": get_step_name(step)}
-            )
-
-        displayed_steps.append(
-            {
-                "id": section,
-                "name": get_section_name(section),
-                "possible_steps": possible_steps,
-                "steps": workflow_steps,
-                "selected": section_selected,
-                "finished": section_finished,
-            }
-        )
-    print("displayed_steps")
-    print(displayed_steps)
-    return displayed_steps
-
 
 def get_all_default_params_for_methods(workflow_meta, section, step, method):
     workflow_meta_step = workflow_meta[section][step]

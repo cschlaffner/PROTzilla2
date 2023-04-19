@@ -1,4 +1,4 @@
-{# params: workflow_steps add_step_key run_name#}
+{# params: workflow_steps run_name#}
 <div class="container mt-3">
     <div id="accordion">
         {% for section in workflow_steps %}
@@ -11,10 +11,15 @@
                 <div id="collapse_{{ section.id }}"
                      class="collapse {% if section.selected %} show {% endif %}">
                     <div class="card-body">
-                        {% include "runs/sidebar_section.html" with section=section key=add_step_key run_name=run_name %}
+                        {% include "runs/sidebar_section.html" with section=section run_name=run_name %}
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+<div style="height: 50px"></div>
+<button class="btn btn-outline-red">Export Workflow</button>
+
 </div>
+
+{# params: section run_name#}

@@ -157,15 +157,27 @@ def add(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    print(post)
-    step = post["step_to_be_added"][0]
+    step = post["step"][0]
     section = post["section_name"][0]
     method = post["method"][0]
 
     if step == "":
-        return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+        assert False
 
     run.insert_at_next_position(step, section, method)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def delete_step(request, run_name):
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    print("post")
+    print(post)
+    index = int(post["index"][0])
+    section = post["section_name"][0]
+    run.delete_step(section, index)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

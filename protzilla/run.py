@@ -202,6 +202,10 @@ class Run:
         else:
             self.insert_step(step_to_be_inserted, section, method, 0)
 
+    def delete_step(self, section, index):
+        del self.workflow_config["sections"][section]["steps"][index]
+        self.write_local_workflow()
+
     def next_step(self, name):
         try:
             self.history.add_step(

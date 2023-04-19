@@ -5,10 +5,9 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.workflow_helper import (
-    get_displayed_steps,
     get_workflow_default_param_value,
 )
-from ui.runs.views_helper import insert_special_params
+from ui.runs.views_helper import insert_special_params, get_displayed_steps
 
 
 def make_current_fields(run, section, step, method):
@@ -58,23 +57,6 @@ def make_parameter_input(key, param_dict, disabled):
     )
 
 
-def make_add_step_dropdown(run, section):
-    template = "runs/field_select.html"
-
-    steps = list(run.workflow_meta[section].keys())
-    steps.insert(0, "")
-
-    return render_to_string(
-        template,
-        context=dict(
-            name="add step:",
-            type="categorical",
-            categories=steps,
-            key="step_to_be_added",
-        ),
-    )
-
-
 def make_sidebar(request, run, run_name):
     csrf_token = request.META["CSRF_COOKIE"]
     template = "runs/sidebar.html"
@@ -85,7 +67,6 @@ def make_sidebar(request, run, run_name):
             workflow_steps=get_displayed_steps(
                 run.workflow_config, run.workflow_meta, run.step_index
             ),
-            add_step_key="step_to_be_added",
             run_name=run_name,
         ),
     )
