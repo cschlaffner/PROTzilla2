@@ -889,6 +889,19 @@
           }
         }
       }
+    },
+    "plot": {
+      "scatter_plot": {
+        "name": "Scatter plot",
+        "description":"",
+        "parameters": {
+          "color_df": {
+            "name": "Choose a dataframe to assign color to marks",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      }
     }
   },
   "data_integration": {}
