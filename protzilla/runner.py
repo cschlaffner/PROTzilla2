@@ -49,9 +49,7 @@ class Runner:
                     logging.info(
                         f"performing step: {*self.run.current_workflow_location(),}"
                     )
-                    self.run.perform_calculation_from_location(
-                        *self.run.current_workflow_location(), step["parameters"]
-                    )
+                    self._perform_current_step(step["parameters"])
                     if self.args.allPlots:
                         self._create_plots_for_step(section, step)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
