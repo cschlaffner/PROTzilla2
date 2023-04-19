@@ -895,6 +895,11 @@
         "name": "Scatter plot",
         "description":"",
         "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": null
+          },
           "color_df": {
             "name": "Choose a dataframe to assign color to marks",
             "type": "named_output",
