@@ -20,12 +20,7 @@ def get_data_for_named_outputs(parameters, run):
         if type(v) is list:
             for step, step_name in zip(run.history.steps, run.history.step_names):
                 if v[0] == step_name:
-                    # try:
                     new_parameters[k] = step.outputs[v[1]]
-                    # except KeyError:
-                    #     # might happen for multiselects
-                    #     print("current key-value pair is not a named_output: ", k, v)
-                    #     pass
     return new_parameters
 
 
@@ -56,14 +51,7 @@ def insert_special_params(param_dict, run):
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
         elif param_dict["fill"] == "proteins":
-            pass
-            # for protein_group in run.df["Protein ID"]:
-            #    proteins += protein_group.split(";")
             param_dict["categories"] = run.df["Protein ID"].unique()
-        # print("param_dict2")
-        # print(param_dict)
 
     if "fill_dynamic" in param_dict:
-        # print("param_dict")
-        # print(param_dict)
         param_dict["class"] = "dynamic_trigger"
