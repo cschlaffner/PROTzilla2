@@ -136,27 +136,37 @@
 {{ location }}
 <br>
 {% if "plot" not in location %}
-<form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ method_dropdown }}
-    <div id="method_parameters">
-        {% include "runs/fields.html" with fields=fields %}
-    </div>
-    <input type="submit" value="Calculate">
-</form>
-{% endif %}
-<form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div id="plot_parameters">
-        {% if "plot" not in location %}
-            {% include "runs/fields.html" with fields=plot_fields %}
-        {% else %}
+    <form action="{% url 'runs:calculate' run_name %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ method_dropdown }}
+        <div id="method_parameters">
             {% include "runs/fields.html" with fields=fields %}
-        {% endif %}
-    </div>
-    
-    <input type="submit" value="Plot" > <!-- {% if not show_next and "plot" in location %} disabled {% endif %} -->
-</form>
+        </div>
+        <input type="submit" value="Calculate">
+    </form>
+
+    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="plot_parameters">
+            {% if "plot" not in location %}
+                {% include "runs/fields.html" with fields=plot_fields %}
+            {% else %}
+                {% include "runs/fields.html" with fields=fields %}
+            {% endif %}
+        </div>
+        
+        <input type="submit" value="Plot" {% if not show_next or "analysis" in location %} disabled {% endif %}>
+    </form>
+{% else %}
+    <form action="{% url 'runs:plot' run_name %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="plot_parameters">
+            {% include "runs/fields.html" with fields=fields %}
+        </div>
+        
+        <input type="submit" value="Plot">
+    </form>
+{% endif %}
 
 {% for plot in current_plots %}
     <div style="width:600;height:500">
