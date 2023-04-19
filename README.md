@@ -25,7 +25,7 @@
 | protzilla/data\_preprocessing/transformation.py                  |       20 |        2 |        8 |        3 |     82% |31, 40->49, 50 |
 | protzilla/history.py                                             |      119 |        6 |       46 |        6 |     93% |33, 109, 116, 124, 189, 203 |
 | protzilla/importing/metadata\_import.py                          |       27 |        7 |       12 |        1 |     64% |     19-26 |
-| protzilla/importing/ms\_data\_import.py                          |       16 |        0 |        2 |        0 |    100% |           |
+| protzilla/importing/ms\_data\_import.py                          |       30 |        0 |        4 |        0 |    100% |           |
 | protzilla/run.py                                                 |      175 |       38 |       50 |        7 |     74% |36-42, 46-52, 58, 83->82, 85, 114-115, 126-127, 134-135, 145, 149, 157->155, 168-175, 178-182, 219-222, 234-235 |
 | protzilla/utilities/\_\_init\_\_.py                              |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                    |        4 |        0 |        0 |        0 |    100% |           |
@@ -43,12 +43,13 @@
 | tests/protzilla/data\_preprocessing/test\_plots.py               |       47 |        8 |       16 |        5 |     79% |20, 39, 56, 81, 117-120 |
 | tests/protzilla/data\_preprocessing/test\_transformation.py      |       35 |        2 |        4 |        2 |     90% |  119, 140 |
 | tests/protzilla/importing/test\_metadata\_import.py              |       23 |        0 |        0 |        0 |    100% |           |
+| tests/protzilla/importing/test\_ms\_data\_import.py              |       16 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_history.py                                 |      116 |        0 |        6 |        0 |    100% |           |
 | tests/protzilla/test\_run.py                                     |       78 |        8 |        2 |        0 |     90% |   107-125 |
 | tests/protzilla/test\_transform\_dfs.py                          |       32 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                        |       62 |        0 |       10 |        0 |    100% |           |
 | ui/main/\_\_init\_\_.py                                          |        0 |        0 |        0 |        0 |    100% |           |
-|                                                        **TOTAL** | **1552** |  **109** |  **317** |   **56** | **90%** |           |
+|                                                        **TOTAL** | **1582** |  **109** |  **319** |   **56** | **90%** |           |
 
 
 ## Setup coverage badge
