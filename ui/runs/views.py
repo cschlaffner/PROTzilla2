@@ -8,9 +8,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.workflow_helper import get_all_steps
-
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla.workflow_helper import get_all_steps
 from protzilla.run import Run
 from ui.runs.fields import (
     make_current_fields,
