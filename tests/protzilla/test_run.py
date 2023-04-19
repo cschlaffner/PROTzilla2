@@ -168,7 +168,7 @@ def test_insert_step(example_workflow_short):
     run.workflow_config = example_workflow_short
     importing_steps = run.workflow_config["sections"]["importing"]
     assert len(importing_steps["steps"]) == 1
-    run.insert_step("metadata_import", "importing", 1)
+    run.insert_step("metadata_import", "importing", "max_quant_import", 1)
     assert len(importing_steps["steps"]) == 2
 
     assert importing_steps["steps"][1] == {
@@ -191,9 +191,9 @@ def test_insert_at_next_position_correct_location(example_workflow):
 
     # test correct inserting section
     step_count = len(preprocessing_steps["steps"])
-    run.insert_at_next_position("metadata_import", "importing")
+    run.insert_at_next_position("metadata_import", "importing", "max_quant_import")
     assert len(preprocessing_steps["steps"]) == step_count
-    run.insert_at_next_position("outlier_detection", "data_preprocessing")
+    run.insert_at_next_position("outlier_detection", "data_preprocessing", "pca")
     assert len(preprocessing_steps["steps"]) == step_count + 1
 
     # test added step is in first position

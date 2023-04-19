@@ -109,7 +109,7 @@
 <div style="text-indent:30px;">
     {% for step in steps %}
         <div class="{% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
-            <p>{{ step.display_name }}:   {{ step.method }} </p>
+            <p>{{ step.name }}:   {{ step.method_name }} </p>
         </div>
     {% endfor %}
 </div>
@@ -122,19 +122,19 @@
     <div id="add_steps_div" class="collapse">
         <p>Click on a step to add it to your run</p>
         <table>
-            {% for step in possible_steps %}
+            {% for possible_step in possible_steps %}
                 <tr>
-                    <td class="small">{{ step.display_name }}</td>
+                    <td class="small">{{ possible_step.name }}</td>
                     <td>
                         <div class="simple-tags">
                         <ul>
-                            {% for method in step.methods %}
+                            {% for method in possible_step.methods %}
                                 <li>
                                 <form action="{% url 'runs:add' run_name %}" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="section_name" value="{{ section_name }}">
-                                    <input type="hidden" name="{{ key }}" value="{{ step.name }}">
-                                    <input type="hidden" name="method_name" value="{{ method.name }}">
+                                    <input type="hidden" name="{{ key }}" value="{{ possible_step.id }}">
+                                    <input type="hidden" name="method" value="{{ method.id }}">
                                     <button class="btn btn-sm btn-grey" data-toggle="tooltip" data-placement="right"
                                             title="{{ method.description }}">{{ method.name }}</button>
                                 </form>

@@ -1,22 +1,34 @@
 from itertools import zip_longest
 
 
-def get_all_steps(workflow_config_dict) -> list[dict[str, list[str|dict[str, str]]]]:
+def get_all_steps(workflow_config_dict) -> list[dict[str, list[str | dict[str, str]]]]:
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
         workflow_steps.append(
-            {"section": section, "steps": [{"name":step["name"], "method":step["method"]} for step in steps["steps"]]}
+            {"section": section, "steps": [{"name": step["name"], "method": step["method"]} for step in steps["steps"]]}
         )
     return workflow_steps
 
 
-def get_all_possible_steps(workflow_meta) -> list[dict[str, list[str]]]:
+def get_all_possible_steps(workflow_meta) -> list[dict[str, str | list[str]]]:
     workflow_steps = []
     for section, steps in workflow_meta.items():
         workflow_steps.append(
             {"section": section, "possible_steps": list(steps.keys())}
         )
     return workflow_steps
+
+
+def get_step_name(step):
+    return step.replace("_", " ").title()
+
+
+def get_section_name(section):
+    return section.replace("_", " ").title()
+
+
+def get_method_name(workflow_meta, section, step, method):
+    return workflow_meta[section][step][method]["name"]
 
 
 def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
@@ -34,10 +46,10 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 section_selected = True
             workflow_steps.append(
                 {
-                    "name": step["name"],
-                    "method": step["method"],
+                    "id": step["name"],
+                    "name": get_step_name(step["name"]),
+                    "method_name": get_method_name(workflow_meta, section, step["name"], step["method"]),
                     "selected": index == step_index,
-                    "display_name": step["name"].replace("_", " ").title(),
                     "finished": index < step_index,
                 }
             )
@@ -48,7 +60,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
         for step in possible_section["possible_steps"]:
             methods = [
                 {
-                    "method": method,
+                    "id": method,
                     "name": method_params["name"],
                     "description": method_params["description"],
                 }
@@ -56,19 +68,19 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             ]
             possible_steps.append(
                 {
-                    "name": step,
+                    "id": step,
                     "methods": methods,
-                    "display_name": step.replace("_", " ").title(),
+                    "name": get_step_name(step)
                 }
             )
 
         displayed_steps.append(
             {
-                "section": section,
-                "finished": section_finished,
+                "section": get_section_name(section),
                 "possible_steps": possible_steps,
                 "steps": workflow_steps,
                 "selected": section_selected,
+                "finished": section_finished,
             }
         )
     print("displayed_steps")
@@ -100,10 +112,10 @@ def validate_workflow_parameters(workflow_config, workflow_meta):
         for step in steps["steps"]:
             for param in step["parameters"]:
                 if (
-                    param
-                    not in workflow_meta[section][step["name"]][step["method"]][
-                        "parameters"
-                    ]
+                        param
+                        not in workflow_meta[section][step["name"]][step["method"]][
+                    "parameters"
+                ]
                 ):
                     raise ValueError(
                         f"Parameter {param} in step {step['name']} does not exist in workflow_meta"
@@ -119,7 +131,7 @@ def validate_workflow_graphs(workflow_config, workflow_meta):
             if "graphs" in step:
                 step_meta = workflow_meta[section][step["name"]][step["method"]]
                 for i, (graph_config, graph_meta) in enumerate(
-                    zip_longest(step["graphs"], step_meta["graphs"], fillvalue={})
+                        zip_longest(step["graphs"], step_meta["graphs"], fillvalue={})
                 ):
                     for param in graph_config:
                         if param not in graph_meta:

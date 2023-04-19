@@ -161,11 +161,12 @@ def add(request, run_name):
     print(post)
     step = post["step_to_be_added"][0]
     section = post["section_name"][0]
+    method = post["method"][0]
 
     if step == "":
         return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-    run.insert_at_next_position(step, section)
+    run.insert_at_next_position(step, section, method)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
