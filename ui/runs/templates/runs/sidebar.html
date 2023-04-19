@@ -9,8 +9,7 @@
                     </a>
                 </div>
                 <div id="collapse_{{ section.id }}"
-                     class="collapse {% if section.selected %} show {% endif %}"
-                     data-bs-parent="#accordion">
+                     class="collapse {% if section.selected %} show {% endif %}">
                     <div class="card-body">
                         {% include "runs/sidebar_section.html" with section=section key=add_step_key run_name=run_name %}
                     </div>
