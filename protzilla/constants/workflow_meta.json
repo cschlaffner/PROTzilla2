@@ -765,21 +765,11 @@
           "init_centroid_strategy": {
             "name": "Method for initialisation of centroids",
             "type":"categorical",
-            "enable_dynamic": {"manual":"init_centroid_samples"},
             "categories": [
               "k-means++",
-              "random",
-              "manual"
+              "random"
             ],
             "default": "random"
-          },
-          "init_centroid_samples": {
-            "name": "Choose samples to be initial centroids",
-            "type":"categorical",
-            "fill": "samples",
-            "categories": [],
-            "default": "None",
-            "multiple": true
           },
           "n_init": {
             "name": "Number of times the k-means algorithm is run with different centroid seeds",

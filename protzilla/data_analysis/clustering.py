@@ -1,27 +1,21 @@
 import pandas as pd
-from sklearn.cluster import KMeans
-from protzilla.utilities.transform_dfs import long_to_wide, is_long_format
 from django.contrib import messages
+from sklearn.cluster import KMeans
+
+from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def k_means(
     input_df: pd.DataFrame,
     n_clusters: int = 8,
     random_state: int = 6,
-    init_centroid_strategy: str | list = "random",
+    init_centroid_strategy: str = "random",
     n_init: int = 10,
     max_iter: int = 300,
     tolerance: float = 1e-4,
 ):
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
-        if type(init_centroid_strategy) is list:
-            init_centroid_strategy = intensity_df_wide.loc[init_centroid_strategy]
-            # The sklearn methods fails to set n_init=1 when the user enters
-            # n_init="auto" and the centroid seeds (init_centroid_strategy) manually as
-            # a pd.Dataframe
-            if n_init == "auto":
-                n_init = 1
         kmeans = KMeans(
             n_clusters=n_clusters,
             random_state=random_state,
