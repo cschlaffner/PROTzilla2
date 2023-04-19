@@ -42,8 +42,12 @@ html, body {
 }
 
 #sidebarCollapse {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
+}
+
+#header_toggle {
+    margin-top:-0.25rem
 }
 
 .plot-container {
