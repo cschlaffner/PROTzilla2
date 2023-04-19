@@ -200,7 +200,7 @@ def test_delete_step(example_workflow_short):
 
     run.workflow_config = example_workflow_short
     importing_steps = run.workflow_config["sections"]["importing"]
-    assert len(importing_steps["steps"]) == 1
+    count = len(importing_steps["steps"])
     run.delete_step("importing", 0)
-    assert len(importing_steps["steps"]) == 0
+    assert len(importing_steps["steps"]) == count - 1
     rmtree(RUNS_PATH / run_name)
