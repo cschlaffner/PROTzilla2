@@ -52,7 +52,7 @@ def test_differential_expression_t_test(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    _, current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -77,6 +77,7 @@ def test_differential_expression_t_test(show_figures):
     log2fc_rounded = [
         round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
     ]
+    de_proteins_df = current_out["de_proteins_df"]
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
@@ -203,7 +204,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    _, current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -228,6 +229,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     log2fc_rounded = [
         round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
     ]
+    de_proteins_df = current_out["de_proteins_df"]
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
