@@ -196,10 +196,11 @@ class Run:
         if self.section == section:
             past_steps_of_section = self.history.number_of_steps_in_section(section)
 
-            self.insert_step(step_to_be_inserted, section, method, past_steps_of_section + 1)
+            self.insert_step(
+                step_to_be_inserted, section, method, past_steps_of_section + 1
+            )
         else:
             self.insert_step(step_to_be_inserted, section, method, 0)
-
 
     def next_step(self, name):
         try:

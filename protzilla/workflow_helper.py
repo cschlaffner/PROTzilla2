@@ -5,7 +5,13 @@ def get_all_steps(workflow_config_dict) -> list[dict[str, list[str | dict[str, s
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
         workflow_steps.append(
-            {"section": section, "steps": [{"name": step["name"], "method": step["method"]} for step in steps["steps"]]}
+            {
+                "section": section,
+                "steps": [
+                    {"name": step["name"], "method": step["method"]}
+                    for step in steps["steps"]
+                ],
+            }
         )
     return workflow_steps
 
@@ -48,7 +54,9 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 {
                     "id": step["name"],
                     "name": get_step_name(step["name"]),
-                    "method_name": get_method_name(workflow_meta, section, step["name"], step["method"]),
+                    "method_name": get_method_name(
+                        workflow_meta, section, step["name"], step["method"]
+                    ),
                     "selected": index == step_index,
                     "finished": index < step_index,
                 }
@@ -67,11 +75,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 for method, method_params in list(workflow_meta[section][step].items())
             ]
             possible_steps.append(
-                {
-                    "id": step,
-                    "methods": methods,
-                    "name": get_step_name(step)
-                }
+                {"id": step, "methods": methods, "name": get_step_name(step)}
             )
 
         displayed_steps.append(
@@ -113,10 +117,10 @@ def validate_workflow_parameters(workflow_config, workflow_meta):
         for step in steps["steps"]:
             for param in step["parameters"]:
                 if (
-                        param
-                        not in workflow_meta[section][step["name"]][step["method"]][
-                    "parameters"
-                ]
+                    param
+                    not in workflow_meta[section][step["name"]][step["method"]][
+                        "parameters"
+                    ]
                 ):
                     raise ValueError(
                         f"Parameter {param} in step {step['name']} does not exist in workflow_meta"
@@ -132,7 +136,7 @@ def validate_workflow_graphs(workflow_config, workflow_meta):
             if "graphs" in step:
                 step_meta = workflow_meta[section][step["name"]][step["method"]]
                 for i, (graph_config, graph_meta) in enumerate(
-                        zip_longest(step["graphs"], step_meta["graphs"], fillvalue={})
+                    zip_longest(step["graphs"], step_meta["graphs"], fillvalue={})
                 ):
                     for param in graph_config:
                         if param not in graph_meta:

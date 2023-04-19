@@ -9,8 +9,8 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.workflow_helper import get_all_steps
 from protzilla.run import Run
+from protzilla.workflow_helper import get_all_steps
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,

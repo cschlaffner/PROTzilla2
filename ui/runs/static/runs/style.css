@@ -1,6 +1,6 @@
-html, body{
+html, body {
     height: 100%;
-  }
+}
 
 .wrapper {
     display: flex;
@@ -26,6 +26,7 @@ html, body{
     max-width: 400px;
     min-height: 100vh;
     flex-grow: 1;
+    transition: 100ms;
 }
 
 #sidebar.active {
