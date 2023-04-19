@@ -21,7 +21,6 @@ html, body {
 
 #sidebar {
     order: 2;
-    padding: 20px;
     flex-basis: 300px;
     max-width: 400px;
     min-height: 100vh;

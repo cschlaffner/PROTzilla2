@@ -88,8 +88,6 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 "finished": section_finished,
             }
         )
-    print("displayed_steps")
-    print(displayed_steps)
     return displayed_steps
 
 
