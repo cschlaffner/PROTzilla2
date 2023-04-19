@@ -76,7 +76,8 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
         displayed_steps.append(
             {
-                "section": get_section_name(section),
+                "id": section,
+                "name": get_section_name(section),
                 "possible_steps": possible_steps,
                 "steps": workflow_steps,
                 "selected": section_selected,

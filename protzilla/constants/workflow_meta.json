@@ -207,7 +207,7 @@
     },
     "transformation": {
       "log_transformation": {
-        "name": "Log Transformation",
+        "name": "Log",
         "description": "This function log-transforms intensity\n    DataFrames. Supports log-transformation to the base\n    of 2 or 10.",
         "parameters": {
           "log_base": {
@@ -516,7 +516,7 @@
         ]
       },
       "simple_imputation_per_protein": {
-        "name": "Mean, Median or Mode per Protein",
+        "name": "SimpleImputer",
         "description": "Imputation methods include imputation by mean, median and\n    mode. Implements the sklearn.SimpleImputer class",
         "parameters": {
           "strategy": {

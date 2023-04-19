@@ -1,4 +1,4 @@
-{# params: section_name possible_steps steps run_name key finished #}
+{# params: section steps run_name key #}
 {% load static %}
 
 {% block css %}
@@ -12,135 +12,44 @@
         })
     </script>
 {% endblock %}
-{% comment %}
-     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
-      <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <script>
-           jQuery(function($) {
-        var panelList = $('#draggablePanelList');
 
-        panelList.sortable({
-            // Only make the .panel-heading child elements support dragging.
-            // Omit this to make then entire <li>...</li> draggable.
-            handle: '.panel-heading',
-            update: function() {
-                $('.panel', panelList).each(function(index, elem) {
-                     var $listItem = $(elem),
-                         newIndex = $listItem.index();
-
-                     // Persist the new indices.
-                });
-            }
-        });
-    });
-
-    jQuery(function($) {
-        var panelList2 = $('#draggablePanelList2');
-
-        panelList2.sortable({
-            // Only make the .panel-heading child elements support dragging.
-            // Omit this to make then entire <li>...</li> draggable.
-            handle: '.panel-heading',
-            update: function() {
-                $('.panel', panelList2).each(function(index, elem) {
-                     var $listItem = $(elem),
-                         newIndex = $listItem.index();
-
-                     // Persist the new indices.
-                });
-            }
-        });
-    });
-    </script>
-{% endblock %}{% endcomment %}
-{% comment %}
-<form action="{% url 'runs:add' run_name %}" method="post">
-    {% csrf_token %}
-    {% include "runs/field_select.html" with categories=possible_steps.name key=key disabled=finished %}
-    <input type="hidden" name="section_name" value="{{ section_name }}">
- //////input name="{{ key }}" type="text" id="{{ key }}" value="{{ default }}
-
-    <button class="btn btn-white" {% if finished %} disabled {% endif %} >add</button>
-</form>
-
-
-<html>
-
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
-
-<div class="container">
-  <ul id="draggablePanelList" class="list-unstyled">
-      <li class="panel panel-info">
-          <div class="panel-heading">You can drag this panel.</div>
-          <div class="panel-body">Content here ...</div>
-      </li>
-      <li class="panel panel-info">
-          <div class="panel-heading">You can drag this panel too.</div>
-          <div class="panel-body">More content here...</div>
-      </li>
-      <li class="panel panel-info">
-          <div class="panel-heading">You can drag this panel too.</div>
-          <div class="panel-body">More blah content here...</div>
-      </li>
-      <li class="panel panel-info">
-          <div class="panel-heading">You can drag this panel too.</div>
-          <div class="panel-body">Another content panel here...</div>
-      </li>
-  </ul>
-<div class="row">
-  <div class="col-xs-2">
-  <div id="draggablePanelList2" class="">
-      <div class="panel panel-default">
-          <div class="panel-heading">You cand drag this panel.</div>
-          <div class="panel-body">Content hedfsre ...</div>
-      </div>
-      <div class="panel panel-danger">
-          <div class="panel-heading">You canfd drag this panel.</div>
-          <div class="panel-body">Content hdsfere ...</div>
-      </div>
-  </div>
-    </div><!--end col-->
-  </div><!--end row-->
-</div>
-</html>
-{% endcomment %}
-
-<div style="text-indent:30px;">
-    {% for step in steps %}
+<div>
+    {% for step in section.steps %}
         <div class="{% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %}">
-            <p>{{ step.name }}:   {{ step.method_name }} </p>
+            <p>{{ step.name }}: <i>{{ step.method_name }}</i></p>
         </div>
     {% endfor %}
 </div>
 {% if section.finished %}
     <p>Go back to this section to add more steps</p>
 {% else %}
-    <button class="btn btn-blue full_width" type="button" data-bs-toggle="collapse" data-bs-target="#add_steps_div">
+    <button class="btn btn-blue full_width" type="button" data-bs-toggle="collapse"
+            data-bs-target="#add_steps_div_{{ section.id }}">
         + add steps
     </button>
-    <div id="add_steps_div" class="collapse">
+    <div id="add_steps_div_{{ section.id }}" class="collapse">
         <p>Click on a step to add it to your run</p>
-        <table>
-            {% for possible_step in possible_steps %}
+        <table class="table">
+            {% for possible_step in section.possible_steps %}
                 <tr>
                     <td class="small">{{ possible_step.name }}</td>
                     <td>
                         <div class="simple-tags">
-                        <ul>
-                            {% for method in possible_step.methods %}
-                                <li>
-                                <form action="{% url 'runs:add' run_name %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="section_name" value="{{ section_name }}">
-                                    <input type="hidden" name="{{ key }}" value="{{ possible_step.id }}">
-                                    <input type="hidden" name="method" value="{{ method.id }}">
-                                    <button class="btn btn-sm btn-grey" data-toggle="tooltip" data-placement="right"
-                                            title="{{ method.description }}">{{ method.name }}</button>
-                                </form>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                            <ul>
+                                {% for method in possible_step.methods %}
+                                    <li>
+                                        <form action="{% url 'runs:add' run_name %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="section_name" value="{{ section.name }}">
+                                            <input type="hidden" name="{{ key }}" value="{{ possible_step.id }}">
+                                            <input type="hidden" name="method" value="{{ method.id }}">
+                                            <button class="btn btn-sm btn-grey" data-toggle="tooltip"
+                                                    data-placement="right"
+                                                    title="{{ method.description }}">{{ method.name }}</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
                     </td>
                 </tr>
