@@ -14,6 +14,28 @@ def k_means(
     max_iter: int = 300,
     tolerance: float = 1e-4,
 ):
+    """
+    k-means blabla
+    :param input_df: the dataframe that should be clustered in wide or long format
+    :type input_df: pd.DataFrame
+    :param n_clusters: the number of clusters to form as well as the number of \
+    centroids to generate.
+    :type n_clusters: int
+    :param random_state: Determines random number generation for centroid initialization
+    :type random_state: int
+    :param init_centroid_strategy: method for centroid initialization
+    :type init_centroid_strategy: str
+    :param n_init: Number of times the k-means algorithm is run with different centroid\
+     seeds.
+    :type n_init: int
+    :param max_iter: Maximum number of iterations of the k-means algorithm for a single\
+     run.
+    :type max_iter: int
+    :param tolerance: Relative tolerance with regards to Frobenius norm of the \
+    difference in the cluster centers of two consecutive iterations to declare\
+     convergence.
+    :type tolerance: float
+    """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         kmeans = KMeans(
