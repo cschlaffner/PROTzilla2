@@ -23,15 +23,18 @@
 {% if section.finished %}
     <p>Go back to this section to add more steps</p>
 {% else %}
-    <button class="btn btn-blue full_width" type="button" data-bs-toggle="collapse"
+    <button class="btn btn-blue full_width mt-2" type="button" data-bs-toggle="collapse"
             data-bs-target="#add_steps_div_{{ section.id }}">
         + add steps
     </button>
     <div id="add_steps_div_{{ section.id }}" class="collapse">
-        <p>Click on a step to add it to your run</p>
-        <table class="table">
+        <div class="d-flex justify-content-center mb-2">
+            <i id="explainAddStep" class="text-muted">Click on a step to add it to your run</i>
+        </div>
+
+        <table class="table mytable">
             {% for possible_step in section.possible_steps %}
-                <tr>
+                <tr class="">
                     <td class="small">{{ possible_step.name }}</td>
                     <td>
                         <div class="simple-tags">

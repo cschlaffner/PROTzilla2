@@ -3,9 +3,8 @@ p {
 }
 
 .selected {
-    background-color: #4A536A;
-    color: white;
-    border-radius: 15px;
+    background-color: #E8EDF3;
+    border-radius: 3px;
 }
 
 .finished {
@@ -53,4 +52,20 @@ p {
 
 .simple-tags ul li {
     padding: 3px;
+}
+
+#explainAddStep {
+    font-size: small;
+}
+
+.card-body {
+    margin-top: -0.5rem;
+}
+
+.table tr:last-child td{
+    border:none;
+}
+
+.table {
+    margin-bottom: -0.5rem;
 }
