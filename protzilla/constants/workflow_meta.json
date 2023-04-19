@@ -30,9 +30,15 @@
             "name": "intensity name",
             "type": "categorical",
             "categories": [
-              "LFQ intensity",
               "Intensity",
-              "iBAQ"
+              "MaxLFQ Total Intensity",
+              "MaxLFQ Intensity",
+              "Total Intensity",
+              "MaxLFQ Unique Intensity",
+              "Unique Spectral Count",
+              "Unique Intensity",
+              "Spectral Count",
+              "Total Spectral Count"
             ],
             "default": "Intensity"
           },
@@ -105,9 +111,7 @@
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
-            "max": 100,
-            "step": 1,
-            "default": 3
+            "default": 2
           }
         },
         "graphs": [
@@ -132,9 +136,7 @@
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
-            "max": 100,
-            "step": 1,
-            "default": 4
+            "default": 2
           }
         },
         "graphs": [
@@ -160,9 +162,7 @@
           "threshold": {
             "name": "Threshold for number of standard deviations from the median:",
             "type": "numeric",
-            "min": 1,
-            "max": 5,
-            "step": 1,
+            "min": 0,
             "default": 2
           },
           "number_of_components": {
@@ -186,9 +186,8 @@
             "name": "Number of estimators:",
             "type": "numeric",
             "min": 1,
-            "max": 100,
             "step": 1,
-            "default": 50
+            "default": 100
           }
         },
         "graphs": [
@@ -203,9 +202,8 @@
             "name": "Number of neighbours:",
             "type": "numeric",
             "min": 1,
-            "max": 100,
             "step": 1,
-            "default": 35
+            "default": 20
           }
         },
         "graphs": [
@@ -319,7 +317,6 @@
             "type": "numeric",
             "min": 0,
             "max": 1,
-            "step": 0.05,
             "default": 0.5
           }
         },
@@ -392,8 +389,7 @@
             "type": "numeric",
             "min": 0,
             "max": 1,
-            "step": 0.01,
-            "default": 0.1
+            "default": 1
           }
         },
         "graphs": [
@@ -440,8 +436,7 @@
             "type": "numeric",
             "min": 0,
             "max": 1,
-            "step": 0.01,
-            "default": 0.1
+            "default": 1
           }
         },
         "graphs": [
@@ -488,8 +483,7 @@
             "type": "numeric",
             "min": 0,
             "max": 1,
-            "step": 0.01,
-            "default": 0.1
+            "default": 1
           }
         },
         "graphs": [
@@ -539,7 +533,7 @@
               "median",
               "most_frequent"
             ],
-            "default": "median"
+            "default": "mean"
           }
         },
         "graphs": [
@@ -585,7 +579,6 @@
             "name": "Number of neighbours:",
             "type": "numeric",
             "min": 1,
-            "max": 100,
             "step": 1,
             "default": 5
           }
