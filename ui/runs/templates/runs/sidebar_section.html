@@ -40,7 +40,7 @@
                                     <li>
                                         <form action="{% url 'runs:add' run_name %}" method="post">
                                             {% csrf_token %}
-                                            <input type="hidden" name="section_name" value="{{ section.name }}">
+                                            <input type="hidden" name="section_name" value="{{ section.id }}">
                                             <input type="hidden" name="{{ key }}" value="{{ possible_step.id }}">
                                             <input type="hidden" name="method" value="{{ method.id }}">
                                             <button class="btn btn-sm btn-grey" data-toggle="tooltip"
