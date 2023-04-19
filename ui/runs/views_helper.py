@@ -14,20 +14,18 @@ def parameters_from_post(post):
 def get_data_for_named_outputs(parameters, run):
     new_parameters = {}
     for k, v in parameters.items():
-        # print(k, "||||", v, type(v))
+        # assume the current parameter is not a named output
+        new_parameters[k] = parameters[k]
+        # check if the current parameter is a named output and get the data in case it is
         if type(v) is list:
             for step, step_name in zip(run.history.steps, run.history.step_names):
-                # print(v[0], "|||", step_name)
                 if v[0] == step_name:
-                    try:
-                        new_parameters[k] = step.outputs[v[1]]
-                    except KeyError:
-                        print("current key-value pair is not a named_output: ", k, v)
-                        new_parameters[k] = parameters[k]
-                else:
-                    new_parameters[k] = parameters[k]
-        else:
-            new_parameters[k] = parameters[k]
+                    # try:
+                    new_parameters[k] = step.outputs[v[1]]
+                    # except KeyError:
+                    #     # might happen for multiselects
+                    #     print("current key-value pair is not a named_output: ", k, v)
+                    #     pass
     return new_parameters
 
 

@@ -159,11 +159,13 @@ class Run:
         self.create_plot(plot_map[location], parameters)
 
     def create_plot(self, method_callable, parameters):
-        self.plots = method_callable(
-            self.df, self.result_df, self.current_out, **parameters
-        )
+        if self.step == "plot":
+            self.plots = method_callable(**parameters)
+        else:
+            self.plots = method_callable(
+                self.df, self.result_df, self.current_out, **parameters
+            )
         self.current_plot_parameters = parameters
-        print("Create Plot End")
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
