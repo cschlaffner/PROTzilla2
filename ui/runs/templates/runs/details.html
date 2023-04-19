@@ -80,6 +80,10 @@
                     alert(e.responseJSON.error); // alert error message to user
                 })
             });
+
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
         });
     </script>
 {% endblock %}
@@ -89,9 +93,17 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="wrapper">
     <div id="content" class="">
+        <div class="header justify-content-end d-flex" id="header-content">
+            <button type="button" id="sidebarCollapse" class="btn btn-blue p-1">
+                <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="25" height="25"
+                id="header_toggle">
+            </button>
+        </div>
+
+        <div id="main-content">
+
         {# show history #}
         {% if displayed_history%}
             <div class="row justify-content-center d-flex">
@@ -206,7 +218,7 @@
                 </div>
             </form>
         </div>
-
+        </div>
     </div>
 
     {# include sidebar #}
