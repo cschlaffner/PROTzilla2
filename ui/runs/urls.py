@@ -13,9 +13,20 @@ urlpatterns = [
     path("<str:run_name>/next", views.next_, name="next"),
     path("<str:run_name>/back", views.back, name="back"),
     path("<str:run_name>/change_method", views.change_method, name="change_method"),
+    path(
+        "<str:run_name>/all_button_parameters",
+        views.all_button_parameters,
+        name="all_button_parameters",
+    ),
+    path("<str:run_name>/results_exist", views.results_exist, name="results_exist"),
     path("<str:run_name>/add_name", views.add_name, name="add_name"),
     path(
         "<str:run_name>/outputs_of_step", views.outputs_of_step, name="outputs_of_step"
+    ),
+    path(
+        "<str:run_name>/change_field",
+        views.change_field,
+        name="change_field",
     ),
     path("<str:run_name>/add", views.add, name="add"),
 ]

@@ -318,7 +318,7 @@ def create_anomaly_score_bar_plot(
         },
         labels={
             "Sample": "Sample ",
-            "Anomaly Score": "Local Outlier Factor Anomaly Score ",
+            "Anomaly Score": "Anomaly Score ",
             "Outlier": "Outlier ",
         },
     )
@@ -402,7 +402,7 @@ def create_pca_3d_scatter_plot(
     This function creates a graph visualising the outlier
     and non-outlier points by showing the principal components. It
     returns a ploty Figure object.
-    
+
     :param pca_df: a DataFrame that contains the projection of\
     the intensity_df on first principal components
     :type pca_df: pd.DataFrame
