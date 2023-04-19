@@ -183,7 +183,9 @@ def test_insert_at_next_position_correct_location(example_workflow):
 
     # test correct inserting section
     step_count = len(preprocessing_steps["steps"])
-    run.insert_at_next_position("metadata_import", "importing", "metadata_import_method")
+    run.insert_at_next_position(
+        "metadata_import", "importing", "metadata_import_method"
+    )
     assert len(preprocessing_steps["steps"]) == step_count
     run.insert_at_next_position("outlier_detection", "data_preprocessing", "pca")
     assert len(preprocessing_steps["steps"]) == step_count + 1

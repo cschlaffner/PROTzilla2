@@ -30,6 +30,7 @@ def workflow_meta():
     with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
         return json.load(f)
 
+
 @pytest.fixture(scope="session")
 def example_workflow_short():
     with open(

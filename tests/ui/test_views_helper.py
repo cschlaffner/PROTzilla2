@@ -10,9 +10,12 @@ from django.test.client import RequestFactory
 from protzilla.constants.paths import PROJECT_PATH
 from ui.runs.views_helper import (
     convert_str_if_possible,
+    get_displayed_steps,
     insert_special_params,
-    parameters_from_post, get_displayed_steps,
+    parameters_from_post,
 )
+
+
 @pytest.fixture
 def example_displayed_steps_importing_and_data_preprocessing():
     return [
@@ -36,6 +39,7 @@ def example_displayed_steps_importing_and_data_preprocessing():
             "steps": [{"name": "filter_proteins", "selected": True}],
         },
     ]
+
 
 @pytest.fixture
 def mock_metadata_df():
@@ -128,6 +132,7 @@ def test_insert_special_params_fill_metadata_columns(mock_metadata_df):
     param_dict["categories"] = list(param_dict["categories"])
     assert param_dict == expected
 
+
 def test_get_displayed_steps_structure(
     workflow_meta,
     example_workflow_short,
@@ -135,15 +140,24 @@ def test_get_displayed_steps_structure(
     section_keys = ["finished", "id", "name", "possible_steps", "steps", "selected"]
     possible_steps_keys = ["id", "methods", "name"]
     possible_steps_keys_methods = ["id", "name", "description"]
-    steps_keys = ["id", "name", "selected", "index", "method_name", "name", "selected", "finished"]
+    steps_keys = [
+        "id",
+        "name",
+        "selected",
+        "index",
+        "method_name",
+        "name",
+        "selected",
+        "finished",
+    ]
 
-    result = get_displayed_steps(
-        example_workflow_short, workflow_meta, 1
-    )
+    result = get_displayed_steps(example_workflow_short, workflow_meta, 1)
 
     assert all(section.keys() == set(section_keys) for section in result)
     assert result[0]["possible_steps"][0].keys() == set(possible_steps_keys)
-    assert result[0]["possible_steps"][0]["methods"][0].keys() == set(possible_steps_keys_methods)
+    assert result[0]["possible_steps"][0]["methods"][0].keys() == set(
+        possible_steps_keys_methods
+    )
     assert result[0]["steps"][0].keys() == set(steps_keys)
 
 
