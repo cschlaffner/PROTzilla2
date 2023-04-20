@@ -62,7 +62,6 @@
             <div class="row justify-content-between align-items-center mb-2">
                 <h3 class="col">{{ display_name }}</h3>
 
-                {# TODO: decide whether to show always or just when calculated #}
                 {% if show_next %}
                     <div class="col-6">
                         <div class="form-group mb-0">
@@ -97,8 +96,7 @@
                             <div id="plot_parameters" class="mb-2">
                                 {% include "runs/fields.html" with fields=plot_fields %}
                             </div>
-                            <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey"
-                                    {% if not show_next %} disabled {% endif %}>
+                            <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
                         </form>
                     </div>
                 {% else %}
@@ -113,8 +111,7 @@
                             <div class="form-group">
                                 <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                        class="btn btn-red mr-auto">
-                                <input type="submit" value="Plot" id="plot_parameters_submit" class="btn btn-grey"
-                                        {% if not show_next %} disabled {% endif %}>
+                                <input type="submit" value="Plot" id="plot_parameters_submit" class="btn btn-grey">
                             </div>
                         </form>
                     </div>
