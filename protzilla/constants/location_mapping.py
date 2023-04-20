@@ -145,7 +145,7 @@ method_map = {
     (
         "data_analysis",
         "dimension_reduction",
-        "t_sne",
+        "umap",
     ): dimension_reduction.umap,
 }
 
@@ -227,5 +227,5 @@ plot_map = {
         "data_analysis",
         "plots",
         "scatter_plot_2d",
-    ): plots.scatter_plot_2d,
+    ): plots.scatter_plot,
 }

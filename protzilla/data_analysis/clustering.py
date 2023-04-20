@@ -6,6 +6,7 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def k_means(
+    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     n_clusters: int = 8,
     random_state: int = 6,
@@ -49,7 +50,9 @@ def k_means(
         labels = kmeans.fit_predict(intensity_df_wide)
         labels_df = pd.DataFrame(labels, index=intensity_df_wide.index)
         centroids = kmeans.cluster_centers_
-        return input_df, dict(centroids=centroids, labels_df=labels_df)
+        return intensity_df, dict(
+            input_df=input_df, centroids=centroids, labels_df=labels_df
+        )
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
@@ -63,14 +66,9 @@ def k_means(
                 f"samples. In the selected dataframe there is {intensity_df_wide.shape[0]}"
                 f"samples"
             )
-        elif init_centroid_strategy.shape[0] != n_clusters:
-            msg = (
-                f"The number of clusters {n_clusters} should match the number of "
-                f"chosen centroids {init_centroid_strategy.shape[0]}"
-            )
         else:
             msg = ""
-        return input_df, dict(
+        return intensity_df, dict(
             centroids=None,
             labels=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
