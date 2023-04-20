@@ -1,14 +1,9 @@
-import copy
-
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
     if param_dict["type"] == "named_output":
         param_dict["steps"] = [name for name in run.history.step_names if name]
-        if param_dict.get("optional", False):
-            param_dict["steps"].append("None")
-
         if param_dict["default"]:
             selected = param_dict["default"][0]
         else:
@@ -24,24 +19,26 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
+        print("param_dict2")
+        print(param_dict)
 
     if "fill_dynamic" in param_dict:
+        print("param_dict")
+        print(param_dict)
         param_dict["class"] = "dynamic_trigger"
 
 
 def get_parameters(run, section, step, method):
-    """constructs a dict with all parameters, inserts the correct defaults
-    and handles special parameter types"""
-    # deepcopy to not change run.workflow_meta
-    parameters = copy.deepcopy(run.workflow_meta[section][step][method]["parameters"])
+    parameters = run.workflow_meta[section][step][method]["parameters"]
     output = {}
-
     for key, param_dict in parameters.items():
+        # todo 59 - restructure current_parameters
+        param_dict = param_dict.copy()  # to not change workflow_meta
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
         )
-        if method in run.current_parameters and key in run.current_parameters[method]:
-            param_dict["default"] = run.current_parameters[method][key]
+        if run.current_parameters is not None and key in run.current_parameters:
+            param_dict["default"] = run.current_parameters[key]
         elif workflow_default is not None:
             param_dict["default"] = workflow_default
 

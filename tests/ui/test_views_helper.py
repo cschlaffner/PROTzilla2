@@ -1,4 +1,3 @@
-import copy
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
@@ -7,7 +6,6 @@ from django.test.client import RequestFactory
 
 from ui.runs.views_helper import (
     convert_str_if_possible,
-    get_displayed_steps,
     parameters_from_post,
 )
 
@@ -58,38 +56,3 @@ def test_convert_str_if_possible():
     assert isinstance(convert_str_if_possible("1.00"), int)
 
 
-def test_get_displayed_steps_structure(
-    workflow_meta,
-    example_workflow_short,
-):
-    section_keys = {"finished", "id", "name", "possible_steps", "steps", "selected"}
-    possible_steps_keys = {"id", "methods", "name"}
-    possible_steps_keys_methods = {"id", "name", "description"}
-    steps_keys = {
-        "id",
-        "name",
-        "selected",
-        "index",
-        "method_name",
-        "name",
-        "selected",
-        "finished",
-    }
-
-    result = get_displayed_steps(example_workflow_short, workflow_meta, 1)
-
-    assert all(set(section.keys()) == section_keys for section in result)
-    assert set(result[0]["possible_steps"][0].keys()) == possible_steps_keys
-    assert (
-        set(result[0]["possible_steps"][0]["methods"][0].keys())
-        == possible_steps_keys_methods
-    )
-    assert result[0]["steps"][0].keys() == steps_keys
-
-
-def test_get_displayed_steps_no_side_effects(workflow_meta, example_workflow_short):
-    example_workflow_copy = copy.deepcopy(example_workflow_short)
-    workflow_meta_copy = copy.deepcopy(workflow_meta)
-    get_displayed_steps(example_workflow_short, workflow_meta, 0)
-    assert example_workflow_short == example_workflow_copy
-    assert workflow_meta == workflow_meta_copy

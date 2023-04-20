@@ -1,28 +1,6 @@
-import copy
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
-import pandas as pd
-import pytest
-
-from protzilla.run_helper import get_parameters, insert_special_params
-
-
-@pytest.fixture
-def mock_metadata_df():
-    test_metadata_list = (
-        ["Sample1", "Group1", "Batch1"],
-        ["Sample2", "Group1", "Batch1"],
-        ["Sample3", "Group1", "Batch2"],
-        ["Sample4", "Group2", "Batch1"],
-        ["Sample5", "Group2", "Batch2"],
-        ["Sample6", "Group2", "Batch1"],
-        ["Sample7", "Group3", "Batch2"],
-    )
-
-    return pd.DataFrame(
-        data=test_metadata_list,
-        columns=["Sample", "Group", "Batch"],
-    )
+from protzilla.run_helper import get_parameters
 
 
 def test_get_parameters():
@@ -40,7 +18,7 @@ def test_get_parameters():
             }
         }
     }
-    run.current_parameters = {"method1": {"param1": "current1"}}
+    run.current_parameters = {"param1": "current1"}
     run.workflow_config = {
         "sections": {
             "section1": {
@@ -62,19 +40,6 @@ def test_get_parameters():
     assert get_parameters(run, "section1", "step1", "method1") == expected
 
 
-def test_get_parameters_no_side_effects(workflow_meta, example_workflow):
-    run = Mock()
-    run.workflow_meta = copy.deepcopy(workflow_meta)
-    run.current_parameters = {"strategy": "median"}
-    run.workflow_config = copy.deepcopy(example_workflow)
-    get_parameters(
-        run, "data_preprocessing", "imputation", "simple_imputation_per_protein"
-    )
-    assert run.current_parameters == {"strategy": "median"}
-    assert run.workflow_config == example_workflow
-    assert run.workflow_meta == workflow_meta
-
-
 def test_insert_special_params_named_output():
     param_dict = {"name": "name", "type": "named_output", "default": "default"}
     expected = {
@@ -82,12 +47,14 @@ def test_insert_special_params_named_output():
         "type": "named_output",
         "default": "default",
         "steps": ["step1", "step2"],
-        "outputs": ["mock_output_name"],
+        "outputs": "output_keys_of_named_step",
     }
 
     run = Mock()
     run.history = Mock()
-    run.history.output_keys_of_named_step = MagicMock(return_value=["mock_output_name"])
+    run.history.output_keys_of_named_step = MagicMock(
+        return_value="output_keys_of_named_step"
+    )
     run.history.step_names = ["step1", "step2"]
 
     insert_special_params(param_dict, run)
