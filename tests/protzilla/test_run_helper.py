@@ -1,6 +1,6 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
-from protzilla.run_helper import get_parameters
+from protzilla.run_helper import get_parameters, insert_special_params
 
 
 def test_get_parameters():

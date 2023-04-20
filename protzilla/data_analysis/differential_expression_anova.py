@@ -40,6 +40,9 @@ def anova(
     the corrected p-values and the log2 fold change, the alpha used
     and the corrected alpha, as well as filtered out proteins.
     """
+    assert grouping in metadata_df.columns
+    assert selected_groups is not None
+
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns[3]
     intensity_df = pd.merge(
