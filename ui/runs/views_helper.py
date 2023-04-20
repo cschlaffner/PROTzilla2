@@ -1,5 +1,10 @@
-from protzilla.workflow_helper import get_all_steps, get_step_name, get_method_name, get_all_possible_steps, \
-    get_section_name
+from protzilla.workflow_helper import (
+    get_all_possible_steps,
+    get_all_steps,
+    get_method_name,
+    get_section_name,
+    get_step_name,
+)
 
 
 def parameters_from_post(post):
@@ -37,7 +42,7 @@ def insert_special_params(param_dict, run):
             # Sample not needed for anova and t-test
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
-                ].unique()
+            ].unique()
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
@@ -102,6 +107,4 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 "finished": section_finished,
             }
         )
-    print("displayed_steps")
-    print(displayed_steps)
     return displayed_steps

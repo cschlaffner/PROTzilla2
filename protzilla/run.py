@@ -124,6 +124,12 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
+    def update_workflow_config(self, section, index, parameters):
+        self.workflow_config["sections"][section]["steps"][index][
+            "parameters"
+        ] = parameters
+        self.write_local_workflow()
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         if location in method_map:
@@ -132,7 +138,7 @@ class Run:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
 
-    def perform_calculation(self, method_callable, parameters):
+    def perform_calculation(self, method_callable, parameters: dict):
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = {}
         for k, v in parameters.items():
@@ -147,6 +153,9 @@ class Run:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.current_parameters = parameters
+        self.update_workflow_config(
+            self.section, self.step_index_in_current_section(), self.current_parameters
+        )
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
@@ -202,6 +211,10 @@ class Run:
         else:
             self.insert_step(step_to_be_inserted, section, method, 0)
 
+    def export_workflow(self, name):
+        with open(f"{WORKFLOWS_PATH}/{name}.json", "w") as f:
+            json.dump(self.workflow_config, f, indent=2)
+
     def delete_step(self, section, index):
         del self.workflow_config["sections"][section]["steps"][index]
         self.write_local_workflow()
@@ -251,6 +264,14 @@ class Run:
 
     def current_workflow_location(self):
         return self.all_steps()[self.step_index]
+
+    def step_index_in_current_section(self):
+        index = 0
+        for section, step, method in self.all_steps():
+            if section == self.section:
+                if step == self.step:
+                    return index
+                index += 1
 
     def all_steps(self):
         steps = []

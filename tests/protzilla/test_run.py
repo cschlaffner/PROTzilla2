@@ -5,7 +5,7 @@ import pytest
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import ms_data_import
+from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
 
@@ -14,6 +14,43 @@ from protzilla.utilities.random import random_string
 def example_workflow():
     with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
         return json.load(f)
+
+
+def test_updated_params_in_workflow_config(example_workflow_short):
+    run_name = "test_export_workflow" + random_string()
+    run = Run.create(run_name, df_mode="memory")
+
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        {"threshold": 0.5},
+    )
+    assert (
+        run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
+            "threshold"
+        ]
+        == 0.5
+    )
+
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        {"threshold": 1},
+    )
+    assert (
+        run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
+            "threshold"
+        ]
+        == 1
+    )
+    rmtree(RUNS_PATH / run_name)
 
 
 def test_run_create():
@@ -183,7 +220,9 @@ def test_insert_at_next_position_correct_location(example_workflow):
 
     # test correct inserting section
     step_count = len(preprocessing_steps["steps"])
-    run.insert_at_next_position("metadata_import", "importing", "metadata_import_method")
+    run.insert_at_next_position(
+        "metadata_import", "importing", "metadata_import_method"
+    )
     assert len(preprocessing_steps["steps"]) == step_count
     run.insert_at_next_position("outlier_detection", "data_preprocessing", "pca")
     assert len(preprocessing_steps["steps"]) == step_count + 1

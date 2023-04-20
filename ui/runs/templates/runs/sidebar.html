@@ -1,11 +1,17 @@
 {% load static %}
 {# params: workflow_steps run_name#}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/sidebar.css' %}">
+{% endblock %}
+
 <div class="container">
     <div id="accordion" class="">
         {% for section in workflow_steps %}
             <div class="border-top">
-                <div class="card-header d-flex btn p-3 align-items-center bg-white" data-bs-toggle="collapse" href="#collapse_{{ section.id }}">
-                    <img src="{% static 'img/download-file-icon.svg' %}" alt="toggle sidebar" width="20" height="20" class="me-2">
+                <div class="card-header d-flex btn p-3 align-items-center bg-white" data-bs-toggle="collapse"
+                     href="#collapse_{{ section.id }}">
+                    <img src="{% static 'img/download-file-icon.svg' %}" alt="toggle sidebar" width="20" height="20"
+                         class="me-2">
                     <div class="ms-2">
                         {{ section.name }}
                     </div>
@@ -19,8 +25,9 @@
             </div>
         {% endfor %}
     </div>
-<div style="height: 50px"></div>
-<button class="btn btn-outline-red">Export Workflow</button>
+    <div style="height: 50px"></div>
+
+    {% include "runs/form_export_workflow.html" with run_name=run_name default="workflow_"|add:run_name %}
 
 </div>
 

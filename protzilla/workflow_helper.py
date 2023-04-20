@@ -37,7 +37,6 @@ def get_method_name(workflow_meta, section, step, method):
     return workflow_meta[section][step][method]["name"]
 
 
-
 def get_all_default_params_for_methods(workflow_meta, section, step, method):
     workflow_meta_step = workflow_meta[section][step]
     method_params = workflow_meta_step[method]["parameters"]

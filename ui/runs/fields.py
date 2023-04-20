@@ -4,10 +4,8 @@ from django.template.loader import render_to_string
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.workflow_helper import (
-    get_workflow_default_param_value,
-)
-from ui.runs.views_helper import insert_special_params, get_displayed_steps
+from protzilla.workflow_helper import get_workflow_default_param_value
+from ui.runs.views_helper import get_displayed_steps, insert_special_params
 
 
 def make_current_fields(run, section, step, method):

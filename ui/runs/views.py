@@ -173,11 +173,21 @@ def delete_step(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    print("post")
-    print(post)
     index = int(post["index"][0])
     section = post["section_name"][0]
     run.delete_step(section, index)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def export_workflow(request, run_name):
+    run = active_runs[run_name]
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    print("run_name")
+    print(run_name)
+    name = post["name"][0]
+    run.export_workflow(name)
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
