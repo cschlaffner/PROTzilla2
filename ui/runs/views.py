@@ -196,6 +196,7 @@ def plot(request, run_name):
     section, step, method = run.current_workflow_location()
     parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
+    # TODO: show error message if present
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
