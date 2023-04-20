@@ -8,6 +8,7 @@ from protzilla.utilities.transform_dfs import long_to_wide
 
 def t_sne(
     intensity_df: pd.DataFrame,
+    input_df: pd.DataFrame,
     n_components: int = 2,
     perplexity: float = 30.0,
     metric: str = "euclidean",
@@ -18,8 +19,8 @@ def t_sne(
 ):
     """
     t-sne bblablabla
-    :param intensity_df: the dataframe, whose dimensions should be reduced.
-    :type intensity_df: pd.DataFrame
+    :param input_df: the dataframe, whose dimensions should be reduced.
+    :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.
     :type n_components: int
     :param perplexity: the perplexity is related to the number of nearest neighbors
@@ -41,7 +42,7 @@ def t_sne(
     Barnes-Hut approximation will run faster, but not exact, in O(NlogN) time.
     :type method: str
     """
-    intensity_df_wide = long_to_wide(intensity_df)
+    intensity_df_wide = long_to_wide(input_df)
     try:
         embedded_data = TSNE(
             n_components=n_components,
@@ -91,6 +92,7 @@ def t_sne(
 
 def umap(
     intensity_df: pd.DataFrame,
+    input_df: pd.DataFrame,
     n_neighbors: float = 15,
     n_components: int = 2,
     min_dist: float = 0.1,
@@ -100,8 +102,8 @@ def umap(
     """
     umap blablabalba
 
-    :param intensity_df: the dataframe, whose dimensions should be reduced.
-    :type intensity_df: pd.DataFrame
+    :param input_df: the dataframe, whose dimensions should be reduced.
+    :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.
     :type n_components: int
     :param n_neighbors: The size of local neighborhood in terms of number of \
@@ -118,7 +120,7 @@ def umap(
     :param random_state: determines the random number generator.
     :type random_state: int
     """
-    intensity_df_wide = long_to_wide(intensity_df)
+    intensity_df_wide = long_to_wide(input_df)
     try:
         embedded_data = UMAP(
             n_neighbors=n_neighbors,

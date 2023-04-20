@@ -740,6 +740,11 @@
         "name": "K-Means",
         "description": "",
         "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "n_clusters": {
             "name": "Number of clusters to form",
             "type": "numeric",
@@ -792,6 +797,11 @@
         "name": "t-SNE",
         "description": "",
         "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "n_components": {
             "name": "Dimension of the embedded space",
             "type": "numeric",
@@ -842,8 +852,13 @@
         "name": "UMAP",
         "description":"",
         "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "n_neighbors": {
-            "name": "Number of neighbors (the size of local neighborhood)",
+            "name": "Number of neighbors",
             "type": "numeric",
             "min": 2,
             "max": 100,
@@ -851,7 +866,7 @@
             "default": 15
           },
           "n_components": {
-            "name": "Number of components (dimension of the embedded space)",
+            "name": "Number of components",
             "type": "numeric",
             "min": 2,
             "max": 100,
@@ -883,7 +898,7 @@
         }
       }
     },
-    "plot": {
+    "plots": {
       "scatter_plot": {
         "name": "Scatter plot",
         "description":"",
