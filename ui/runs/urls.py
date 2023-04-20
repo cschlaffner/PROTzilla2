@@ -29,4 +29,6 @@ urlpatterns = [
         name="change_field",
     ),
     path("<str:run_name>/add", views.add, name="add"),
+    path("<str:run_name>/speedy_calc", views.speedy_calc, name="speedy_calc"),
+    path("<str:run_name>/speedy_plots", views.speedy_plots, name="speedy_plots"),
 ]

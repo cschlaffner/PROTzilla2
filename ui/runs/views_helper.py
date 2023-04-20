@@ -1,5 +1,6 @@
 def parameters_from_post(post):
     d = dict(post)
+    print("post dict", d)
     del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
@@ -9,6 +10,26 @@ def parameters_from_post(post):
         else:
             parameters[k] = convert_str_if_possible(v[0])
     return parameters
+
+
+def new_params_from_post(post):
+    flat_dict = {}
+    for key, value in post.items():
+        if key == "csrfmiddlewaretoken":
+            continue
+        else:
+            if type(value) is list:
+                if len(value) > 1:
+                    # only used for named_output parameters and multiselect fields
+                    flat_dict[key.split("[")[1][:-1]] = value
+                else:
+                    flat_dict[key.split("[")[1][:-1]] = convert_str_if_possible(
+                        value[0]
+                    )
+            else:
+                flat_dict[key.split("[")[1][:-1]] = convert_str_if_possible(value)
+
+    return flat_dict
 
 
 def convert_str_if_possible(s):

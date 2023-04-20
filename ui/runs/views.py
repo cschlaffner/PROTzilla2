@@ -20,7 +20,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import new_params_from_post, parameters_from_post
 
 active_runs = {}
 
@@ -189,12 +189,48 @@ def calculate(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
+def speedy_calc(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_run_location()
+    parameters = new_params_from_post(request.POST)
+    print("params:", parameters)
+    del parameters["chosen_method"]
+
+    for k, v in dict(request.FILES).items():
+        # assumption: only one file uploaded
+        parameters[k] = v[0].temporary_file_path()
+    run.perform_calculation_from_location(section, step, method, parameters)
+
+    result = run.current_out
+    if "messages" in result:
+        for message in result["messages"]:
+            trace = f"<br> Trace: {message['trace']}" if "trace" in message else ""
+            messages.add_message(
+                request, message["level"], f"{message['msg']}{trace}", message["level"]
+            )
+
+    return JsonResponse(
+        dict(
+            show_next=run.result_df is not None,
+            show_plot_button=run.result_df is not None,
+        )
+    )
+
+
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def speedy_plots(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_run_location()
+    parameters = new_params_from_post(request.POST)
+    run.create_plot_from_location(section, step, method, parameters)
+    return JsonResponse(dict(current_plots=[plot.to_html() for plot in run.plots]))
 
 
 def add_name(request, run_name):

@@ -1,0 +1,64 @@
+<script>
+    $(document).ready(function () {
+        $("#calc_form").submit(function (event) {
+            event.preventDefault();
+            const calc_form_data = $(this).serializeArray()
+            let calc_params = {};
+            for (let formField of calc_form_data) {
+                calc_params[formField.name] = formField.value;
+            }
+            let token = calc_params["csrfmiddlewaretoken"]
+            delete calc_params["csrfmiddlewaretoken"]
+
+            console.log("calc_params: ", calc_params)
+
+            $.ajax({
+                url: "{% url 'runs:speedy_calc' run_name %}",
+                type: "POST",
+                data: {
+                    parameters: calc_params,
+                    csrfmiddlewaretoken: token
+                },
+                success: function (response) {
+                    $('#next_button').prop('disabled', false)
+                    get_all_parameters(function () {
+                        $('#calc_form').trigger('change')
+                    })
+                }
+            })
+        })
+
+        $("#plot_form").submit(function (event) {
+            event.preventDefault();
+            const plot_form_data = $(this).serializeArray()
+            let plot_params = {};
+            for (let formField of plot_form_data) {
+                plot_params[formField.name] = formField.value;
+            }
+            let token = plot_params["csrfmiddlewaretoken"]
+            delete plot_params["csrfmiddlewaretoken"]
+
+            console.log("plot_params: ", plot_params)
+            $("#plots").empty()
+
+            $("#plots").prop('class', "placeholder");
+
+            $.ajax({
+                url: "{% url 'runs:speedy_plots' run_name %}",
+                type: "POST",
+                data: {
+                    parameters: plot_params,
+                    csrfmiddlewaretoken: token
+                },
+                success: function (response) {
+                    $("#plots").prop('class', "");
+                    $("#plots").html(response.current_plots);
+                    get_all_parameters(function () {
+                        $('#calc_form').trigger('change')
+                    })
+                }
+            })
+        })
+
+    })
+</script>
