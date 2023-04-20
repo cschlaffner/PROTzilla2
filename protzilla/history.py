@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from .constants.paths import RUNS_PATH
+from .debug_info import Debug_info
 from .utilities.random import random_string
 
 
@@ -71,6 +72,7 @@ class History:
         assert "dataframe" not in outputs, "output can not be named 'dataframe'"
         df_path = None
         df = None
+        Debug_info.debug_elements["df_mode"] = (f"df_mode: {self.df_mode}")
         if "disk" in self.df_mode and dataframe is not None:
             index = len(self.steps)
             df_path = self.df_path(index)
