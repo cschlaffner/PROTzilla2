@@ -18,7 +18,13 @@ def t_sne(
     method: str = "barnes_hut",
 ):
     """
-    t-sne bblablabla
+    A function that uses t-SNE to reduce the dimension of a dataframe and returns a \
+    dataframe in wide format with the entered number of components.
+    Please note that this function is a simplified version of t-SNE, and it only \
+    enables you to adjust the most significant parameters that affect the output. \
+    You can find the default values for the non-adjustable parameters here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
+    
     :param input_df: the dataframe, whose dimensions should be reduced.
     :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.
@@ -100,8 +106,15 @@ def umap(
     random_state: int = 42,
 ):
     """
-    umap blablabalba
-
+    A function that uses UMAP to reduce the dimension of a dataframe and returns a \
+    dataframe in wide format with the entered number of components.
+    Please note that this function is a simplified version of UMAP, and it only \
+    enables you to adjust the most significant parameters that affect the output. \
+    You can find the default values for the non-adjustable parameters here:
+    https://umap-learn.readthedocs.io/en/latest/api.html
+    Please note that the umap-learn package uses the numba version 0.57.0rc1, which is \
+    a beta version, so some bugs might arise
+    
     :param input_df: the dataframe, whose dimensions should be reduced.
     :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.
@@ -136,7 +149,7 @@ def umap(
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
             msg = (
-                "T-SNE does not accept missing values encoded as NaN. Consider"
+                "UMAP does not accept missing values encoded as NaN. Consider"
                 "preprocessing your data to remove NaN values."
             )
         else:
