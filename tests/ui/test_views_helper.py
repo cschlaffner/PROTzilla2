@@ -10,22 +10,6 @@ from ui.runs.views_helper import (
 )
 
 
-@pytest.fixture
-def mock_metadata_df():
-    test_metadata_list = (
-        ["Sample1", "Group1", "Batch1"],
-        ["Sample2", "Group1", "Batch1"],
-        ["Sample3", "Group1", "Batch2"],
-        ["Sample4", "Group2", "Batch1"],
-        ["Sample5", "Group2", "Batch2"],
-        ["Sample6", "Group2", "Batch1"],
-        ["Sample7", "Group3", "Batch2"],
-    )
-
-    return pd.DataFrame(
-        data=test_metadata_list,
-        columns=["Sample", "Group", "Batch"],
-    )
 
 
 @pytest.fixture
