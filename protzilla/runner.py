@@ -8,32 +8,45 @@ from .utilities.random import random_string
 
 
 class Runner:
-
     """
     Intended for use with runner_cli.py-Script (at PROTzilla2/runner_cli.py).
     runner_cli provides properly structured arguments
 
-    :ivar args: dict with the following contents:
-        workflow: str, name of workflow in user_data/workflows
-        msDataPath: str, path to MS-Data
-        metaDataPath: str, path to Meta-Data
-        name: str, name of run to be created
-        allPlots: bool, if set all plots will be generated and save in the run-folder,
-            default: false
-        verbose: bool, logs this input dict (args), default: false
+    :ivar workflow: str, name of workflow in user_data/workflows
+    :ivar ms_data_path: str, path to MS-Data
+    :ivar meta_data_path: str, path to Meta-Data
+    :ivar run_name: str, name of run to be created
+    :ivar df_mode: str, keep DFs in memory or write on disk, default: disk
+    :ivar all_plots: bool, if set all plots will be generated and save in the
+    :ivar verbose: bool, logs this input dict (args), default: false
     """
 
-    def __init__(self, args):
+    def __init__(
+        self,
+        workflow,
+        ms_data_path,
+        meta_data_path,
+        run_name,
+        df_mode,
+        all_plots,
+        verbose,
+    ):
         logging.basicConfig(level=logging.INFO)
-        if args["verbose"]:
-            logging.info(f"Parsed arguments: {args}")
-        self.args = args
+
+        self.verbose = verbose
+        if self.verbose:
+            logging.info(f"Parsed arguments: {locals()}")
+
+        self.ms_data_path = ms_data_path
+        self.meta_data_path = meta_data_path
+        self.df_mode = df_mode if df_mode is not None else "disk"
+        self.workflow = workflow
+
         self.run_name = (
-            args["name"].strip()
-            if args["name"] is not None and args["name"].strip() is not None
+            run_name.strip()
+            if run_name is not None and run_name.strip() is not None
             else f"runner_{random_string()}"
         )
-        self.df_mode = args["dfMode"] if args["dfMode"] is not None else "disk"
 
         if os.path.exists(Path(f"{RUNS_PATH}/{self.run_name}")):
             self._overwrite_run_prompt()
@@ -41,12 +54,13 @@ class Runner:
 
         self.run = Run.create(
             run_name=self.run_name,
-            workflow_config_name=self.args["workflow"],
+            workflow_config_name=self.workflow,
             df_mode=self.df_mode,
         )
         logging.info(f"Run {self.run_name} created at {self.run.run_path}")
 
-        if self.args["allPlots"]:
+        self.all_plots = all_plots
+        if self.all_plots:
             self.plots_path = Path(f"{self.run.run_path}/plots")
             self.plots_path.mkdir()
             logging.info(f"Saving plots at {self.plots_path}")
@@ -65,25 +79,25 @@ class Runner:
                         f"performing step: {*self.run.current_workflow_location(),}"
                     )
                     self._perform_current_step(step["parameters"])
-                    if self.args["allPlots"]:
+                    if self.all_plots:
                         self._create_plots_for_step(section, step)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
             params = step["parameters"]
-            params["file_path"] = self.args["msDataPath"]
+            params["file_path"] = self.ms_data_path
             self._perform_current_step(params)
             logging.info("imported MS Data")
 
         elif step["name"] == "metadata_import":
-            if self.args["metaDataPath"] is None:
+            if self.meta_data_path is None:
                 raise ValueError(
                     f"MetadataPath (--metaDataPath) is not specified, "
                     f"but is required for {step['name']}"
                 )
             params = step["parameters"]
-            params["file_path"] = self.args["metaDataPath"]
+            params["file_path"] = self.meta_data_path
             self._perform_current_step(params)
             logging.info("imported Meta Data")
 

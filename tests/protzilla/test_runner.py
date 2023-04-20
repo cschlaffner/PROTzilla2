@@ -28,8 +28,8 @@ def importing_args(tests_folder_name, metadata_path, ms_data_path):
     return [
         "only_import",  # expects max-quant import, metadata import
         ms_data_path,
-        f"--name={tests_folder_name}/test_runner_{random_string()}",
-        f"--metaDataPath={metadata_path}",
+        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+        f"--meta_data_path={metadata_path}",
     ]
 
 
@@ -38,7 +38,7 @@ def no_metadata_args(tests_folder_name, ms_data_path):
     return [
         "only_import",  # expects max-quant import, metadata import
         ms_data_path,
-        f"--name={tests_folder_name}/test_runner_{random_string()}",
+        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
     ]
 
 
@@ -48,7 +48,7 @@ def calculating_args(tests_folder_name, ms_data_path):
         # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
-        f"--name={tests_folder_name}/test_runner_{random_string()}",
+        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
     ]
 
 
@@ -58,13 +58,14 @@ def plot_args(tests_folder_name, metadata_path, ms_data_path):
         # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
-        f"--name={tests_folder_name}/test_runner_{random_string()}",
-        "--allPlots",
+        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+        "--all_plots",
     ]
 
 
 def prep_run_and_compute(monkeypatch, args):
-    runner = Runner(args_parser().parse_args(args).__dict__)
+    kwargs = args_parser().parse_args(args).__dict__
+    runner = Runner(**kwargs)
 
     mock_perform = mock.MagicMock()
     mock_add_step = mock.MagicMock()
