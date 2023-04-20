@@ -10,7 +10,9 @@ from .utilities.random import random_string
 class Runner:
     """
     Intended for use with runner_cli.py-Script (at PROTzilla2/runner_cli.py).
-    runner_cli provides properly structured arguments
+    Then .compute_workflow() is called, the workflow, with all it's steps will be
+    executed. If specified, the Plots will be saved to <run_name>/plots.
+    Results can be viewed after completion in the PROTzilla UI via `Continue Run`.
 
     :ivar workflow: str, name of workflow in user_data/workflows
     :ivar ms_data_path: str, path to MS-Data
@@ -93,7 +95,7 @@ class Runner:
         elif step["name"] == "metadata_import":
             if self.meta_data_path is None:
                 raise ValueError(
-                    f"MetadataPath (--metaDataPath) is not specified, "
+                    f"MetadataPath (--meta_data_path) is not specified, "
                     f"but is required for {step['name']}"
                 )
             params = step["parameters"]
