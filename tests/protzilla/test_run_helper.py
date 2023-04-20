@@ -1,6 +1,26 @@
 from unittest.mock import Mock, MagicMock
 
+import pandas as pd
+import pytest
+
 from protzilla.run_helper import get_parameters, insert_special_params
+
+@pytest.fixture
+def mock_metadata_df():
+    test_metadata_list = (
+        ["Sample1", "Group1", "Batch1"],
+        ["Sample2", "Group1", "Batch1"],
+        ["Sample3", "Group1", "Batch2"],
+        ["Sample4", "Group2", "Batch1"],
+        ["Sample5", "Group2", "Batch2"],
+        ["Sample6", "Group2", "Batch1"],
+        ["Sample7", "Group3", "Batch2"],
+    )
+
+    return pd.DataFrame(
+        data=test_metadata_list,
+        columns=["Sample", "Group", "Batch"],
+    )
 
 
 def test_get_parameters():
