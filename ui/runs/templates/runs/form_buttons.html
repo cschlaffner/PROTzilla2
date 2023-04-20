@@ -113,7 +113,10 @@
     }
 
     $(document).ready(function () {
-        disable_plot_button(true)
+        // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
+        if($('#plot_form').find('input').length) {
+            disable_plot_button(true)
+        }
 
         $('#calc_form').change(function () {
             const selected_method = $('#chosen_method').val()
