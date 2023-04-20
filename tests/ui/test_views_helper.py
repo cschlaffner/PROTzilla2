@@ -6,7 +6,6 @@ from django.test.client import RequestFactory
 
 from ui.runs.views_helper import (
     convert_str_if_possible,
-    insert_special_params,
     parameters_from_post,
 )
 
@@ -57,45 +56,3 @@ def test_convert_str_if_possible():
     assert isinstance(convert_str_if_possible("1.00"), int)
 
 
-def test_insert_special_params_named_output():
-    param_dict = {"name": "name", "type": "named_output", "default": "default"}
-    expected = {
-        "name": "name",
-        "type": "named_output",
-        "default": "default",
-        "steps": ["step1", "step2"],
-        "outputs": "output_keys_of_named_step",
-    }
-
-    run = Mock()
-    run.history = Mock()
-    run.history.output_keys_of_named_step = MagicMock(
-        return_value="output_keys_of_named_step"
-    )
-    run.history.step_names = ["step1", "step2"]
-
-    insert_special_params(param_dict, run)
-    assert param_dict == expected
-
-
-def test_insert_special_params_fill_metadata_columns(mock_metadata_df):
-    param_dict = {
-        "name": "Group 2",
-        "type": "categorical",
-        "fill": "metadata_column_data",
-        "categories": [],
-        "default": None,
-    }
-    expected = {
-        "name": "Group 2",
-        "type": "categorical",
-        "fill": "metadata_column_data",
-        "categories": ["Group1", "Group2", "Group3"],
-        "default": None,
-    }
-
-    run = Mock()
-    run.metadata = mock_metadata_df
-    insert_special_params(param_dict, run)
-    param_dict["categories"] = list(param_dict["categories"])
-    assert param_dict == expected
