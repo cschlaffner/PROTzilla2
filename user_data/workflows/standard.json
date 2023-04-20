@@ -14,7 +14,7 @@
           "name": "metadata_import",
           "method": "metadata_import_method",
           "parameters": {
-            "feature_orientation": "Columns (samples in rows, features in columns)"
+            "feature_orientation": "Rows (features in rows, samples in columns)"
           }
         }
       ]
@@ -105,7 +105,10 @@
             "multiple_testing_correction_method": "Benjamini-Hochberg",
             "alpha": 0.05,
             "grouping": "Group",
-            "selected_groups": [],
+            "selected_groups": [
+              "AD",
+              "CTR"
+            ],
             "metadata_df": ""
           }
         },
@@ -117,7 +120,7 @@
       ]
     },
     "data_integration": {
-      "steps": []
+      "steps": {}
     }
   }
 }
