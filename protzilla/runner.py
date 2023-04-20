@@ -6,6 +6,7 @@ from .constants.paths import RUNS_PATH
 from .run import Run
 from .run_helper import get_parameters
 from .utilities.random import random_string
+from .workflow_helper import get_defaults
 
 
 class Runner:
@@ -74,16 +75,12 @@ class Runner:
             for step in steps["steps"]:
                 if section == "importing":
                     self._importing(step)
-                elif section == "data_analysis":
-                    logging.warning("data_analysis not implemented yet")
-                    exit(0)
                 else:
                     logging.info(
                         f"performing step: {*self.run.current_workflow_location(),}"
                     )
                     params = get_parameters(self.run, *self.run.current_workflow_location())
-                    params_default = {k: v["default"] for k, v in params.items()}
-                    self._perform_current_step(params_default)
+                    self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
