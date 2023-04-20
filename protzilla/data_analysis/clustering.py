@@ -16,7 +16,10 @@ def k_means(
     tolerance: float = 1e-4,
 ):
     """
-    k-means blabla
+    A method that uses k-means to partition a number of samples in k clusters. The \
+    function returns a dataframe with the corresponding cluster of each point and \
+    another dataframe with the coordinates of the cluster centers.
+
     :param input_df: the dataframe that should be clustered in wide or long format
     :type input_df: pd.DataFrame
     :param n_clusters: the number of clusters to form as well as the number of \
@@ -50,9 +53,7 @@ def k_means(
         labels = kmeans.fit_predict(intensity_df_wide)
         labels_df = pd.DataFrame(labels, index=intensity_df_wide.index)
         centroids = kmeans.cluster_centers_
-        return intensity_df, dict(
-            input_df=input_df, centroids=centroids, labels_df=labels_df
-        )
+        return intensity_df, dict(centroids=centroids, labels_df=labels_df)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
