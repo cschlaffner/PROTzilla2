@@ -101,7 +101,16 @@
         {
           "name": "differential_expression",
           "method": "anova",
-          "parameters": {}
+          "parameters": {
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "grouping": "Group",
+            "selected_groups": [
+              "AD",
+              "CTR"
+            ],
+            "metadata_df": ""
+          }
         },
         {
           "name": "differential_expression",
