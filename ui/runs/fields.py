@@ -9,8 +9,16 @@ from ui.runs.views_helper import insert_special_params
 
 
 def make_current_fields(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
+    parameters = get_parameters(run, section, step, method)
     current_fields = []
+    for key, param_dict in parameters.items():
+        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+
+    return current_fields
+
+def get_parameters(run, section, step, method):
+    parameters = run.workflow_meta[section][step][method]["parameters"]
+    output = {}
     for key, param_dict in parameters.items():
         # todo 59 - restructure current_parameters
         param_dict = param_dict.copy()  # to not change workflow_meta
@@ -23,10 +31,8 @@ def make_current_fields(run, section, step, method):
             param_dict["default"] = workflow_default
 
         insert_special_params(param_dict, run)
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
-
-    return current_fields
-
+        output[key] = param_dict
+    return output
 
 def make_parameter_input(key, param_dict, disabled):
     if param_dict["type"] == "numeric":
