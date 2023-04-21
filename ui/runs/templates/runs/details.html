@@ -100,7 +100,7 @@
                             <div class="form-group">
                                 <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                        class="btn btn-red mr-auto">
-                                <input type="submit" value="Plot" id="plot_parameters_submit" class="btn btn-grey">
+                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
                             </div>
                         </form>
                     </div>
