@@ -111,11 +111,6 @@
             ],
             "metadata_df": ""
           }
-        },
-        {
-          "name": "differential_expression",
-          "method": "t_test",
-          "parameters": {}
         }
       ]
     },

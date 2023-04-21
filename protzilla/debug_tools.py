@@ -23,7 +23,6 @@ class Debug_info:
 
         # Calculate the total memory usage of all active elements
         total_memory = sum(sys.getsizeof(element) for element in elements)
-
         # Print the number of active elements and their memory addresses
         # print(f"Number of active {t}: {len(elements)}")
         # if len(elements) > 0:
@@ -38,4 +37,6 @@ class Debug_info:
     def __str__(self):
         lists, memory = self.get_all_active_dfs(pd.DataFrame)
         _, total_memory = self.get_all_active_dfs(object)
+        self.debug_elements["dataframes"] = str([f"{sys.getsizeof(element)/ (1024 ** 2):.2f} MB" for element in lists])
+
         return f"Active dataframes: {len(lists)} memory: {memory / (1024 ** 2):.2f} MB, total: {total_memory / (1024 ** 2):.2f} MB {' '.join(self.debug_elements.values())}"
