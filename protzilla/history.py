@@ -200,7 +200,10 @@ class CustomJSONEncoder(json.JSONEncoder):
             path.parent.mkdir(exist_ok=True)
             obj.to_csv(path, index=False)
             return {"__dataframe__": True, "path": str(path)}
-        return json.JSONEncoder.default(self, obj)
+        try:
+            return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return {"__type__": str(type(obj)), "value": str(obj)}
 
 
 def load_dataframes(dct):

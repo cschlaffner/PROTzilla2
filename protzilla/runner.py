@@ -1,8 +1,10 @@
 import logging
 import os
+import time
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
+from .debug_tools import Debug_info
 from .run import Run
 from .run_helper import get_parameters
 from .utilities.random import random_string
@@ -71,6 +73,7 @@ class Runner:
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
+
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
                 if section == "importing":
@@ -84,6 +87,9 @@ class Runner:
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
+                start_time = time.time()
+                logging.info(f"debug: {Debug_info()}")
+                print(f"Elapsed time: {(time.time() - start_time)*1000:.1f} ms")
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
