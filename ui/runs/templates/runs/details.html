@@ -60,21 +60,9 @@
             {# include bootstrap messages for alerting user #}
             {% bootstrap_messages %}
 
-            <div class="row justify-content-between align-items-center mb-2">
-                <h3 class="col">{{ display_name }}</h3>
-
-                {% if show_next %}
-                    <div class="col-6">
-                        <div class="form-group mb-0">
-                            {{ name_field }}
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-
             {# show current step #}
             <div class="row justify-content-center d-flex">
-
+                <h3>{{ display_name }}</h3>
                 {# if there are plot parameters, display method and plot parameters next to each other #}
                 {% if plot_fields %}
                     <div class="col">
@@ -132,7 +120,16 @@
 
             {# navigation between steps #}
             <div class="justify-content-end d-flex">
-                <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                {% if show_next %}
+                    <div class="col-3 mb-2">
+                        <div class="form-group mb-0">
+                            {{ name_field }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="justify-content-end d-flex">
+                   <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
                     {% csrf_token %}
                     <div class="form-group">
                         <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
