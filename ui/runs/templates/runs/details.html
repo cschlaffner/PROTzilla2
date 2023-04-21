@@ -47,7 +47,7 @@
 
 
                             {% for plot in step.plots %}
-                                <div class="plot-container">
+                                <div class="plot-wrapper">
                                     {{ plot|safe }}
                                 </div>
                             {% endfor %}
@@ -111,7 +111,7 @@
             {% if current_plots %}
                 <div class="mt-4" id="plots">
                     {% for plot in current_plots %}
-                        <div class="plot-container">
+                        <div class="plot-wrapper">
                             {{ plot|safe }}
                         </div>
                     {% endfor %}

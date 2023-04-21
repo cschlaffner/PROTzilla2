@@ -19,8 +19,12 @@ html, body{
     padding: 20px;
 }
 
-.plot-container {
+.plot-wrapper {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
+}
+
+.plot-wrapper div:nth-child(2) {
+    width: 100%;
 }
