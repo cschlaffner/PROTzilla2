@@ -52,7 +52,7 @@ def k_means(
         )
         labels = kmeans.fit_predict(intensity_df_wide)
         labels_df = pd.DataFrame(labels, index=intensity_df_wide.index)
-        centroids = kmeans.cluster_centers_
+        centroids = kmeans.cluster_centers_.tolist()
         return intensity_df, dict(centroids=centroids, labels_df=labels_df)
 
     except ValueError as e:
