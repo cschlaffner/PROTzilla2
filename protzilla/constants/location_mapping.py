@@ -147,6 +147,11 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "plots",
+        "scatter_plot",
+    ): plots.scatter_plot,
 }
 
 # reversed mapping of method callable and location
@@ -223,9 +228,4 @@ plot_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
-    (
-        "data_analysis",
-        "plots",
-        "scatter_plot_2d",
-    ): plots.scatter_plot,
 }
