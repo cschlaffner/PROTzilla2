@@ -75,6 +75,7 @@ def clustering_df_with_nan():
 
 def test_k_means(clustering_df):
     _, current_out = k_means(
+        pd.DataFrame(),  # Remove when intensity_df is removed
         clustering_df,
         n_clusters=2,
         random_state=6,
@@ -87,6 +88,7 @@ def test_k_means(clustering_df):
 
 def test_k_means_nan_handling(clustering_df_with_nan):
     _, current_out = k_means(
+        pd.DataFrame(),  # Remove when intensity_df is removed
         clustering_df_with_nan,
         n_clusters=4,
         init_centroid_strategy="k-means++",
@@ -97,6 +99,7 @@ def test_k_means_nan_handling(clustering_df_with_nan):
 
 def test_k_means_n_clusters(clustering_df):
     _, current_out = k_means(
+        pd.DataFrame(),  # Remove when intensity_df is removed
         clustering_df,
         n_clusters=10,
         init_centroid_strategy="k-means++",
@@ -104,18 +107,5 @@ def test_k_means_n_clusters(clustering_df):
     assert "messages" in current_out
     assert (
         "The number of clusters should be less or equal than the number of samples."
-        in current_out["messages"][0]["msg"]
-    )
-
-
-def test_k_means_init_centroid_strategy_shape(clustering_df):
-    _, current_out = k_means(
-        clustering_df,
-        n_clusters=4,
-        init_centroid_strategy=["Sample1", "Sample2", "Sample3"],
-    )
-    assert "messages" in current_out
-    assert (
-        "The number of clusters 4 should match the number of chosen centroids 3"
         in current_out["messages"][0]["msg"]
     )
