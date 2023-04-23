@@ -105,8 +105,8 @@ class History:
         self.save()
 
     def output_keys_of_named_step(self, name):
-        if not name:
-            return []
+        if not name or name == "None":
+            return [""]
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:
                 options = list(step.outputs.keys())
@@ -116,6 +116,8 @@ class History:
         raise ValueError(f"no step named '{name}'")
 
     def output_of_named_step(self, name, output):
+        if name == "None":
+            return ""
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:
                 if output == "dataframe":

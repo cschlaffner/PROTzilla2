@@ -916,9 +916,10 @@
             "default": null
           },
           "color_df": {
-            "name": "Choose a dataframe to assign color to marks",
+            "name": "Choose a dataframe to assign color to marks (optional)",
             "type": "named_output",
-            "default": null
+            "default": null,
+            "optional": true
           }
         }
       }

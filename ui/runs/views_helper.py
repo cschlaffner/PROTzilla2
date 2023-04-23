@@ -22,6 +22,9 @@ def convert_str_if_possible(s):
 def insert_special_params(param_dict, run):
     if param_dict["type"] == "named_output":
         param_dict["steps"] = [name for name in run.history.step_names if name]
+        if param_dict.get("optional", False):
+            param_dict["steps"].append("None")
+
         if param_dict["default"]:
             selected = param_dict["default"][0]
         else:
