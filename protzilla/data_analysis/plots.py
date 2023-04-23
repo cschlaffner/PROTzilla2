@@ -5,9 +5,9 @@ from django.contrib import messages
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
-# Test if input handling works in frontend
-# handle color_df parameter optional!!
+# TODO: remove intensity_df parameter when plots as steps is already implemented
 def scatter_plot(
+    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     color_df: pd.DataFrame,
 ):
