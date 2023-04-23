@@ -9,15 +9,16 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 def scatter_plot(
     intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
-    color_df: pd.DataFrame,
+    color_df: pd.DataFrame | None = None,
 ):
     """
-    scatterplot blablabla
+    Function to create a scatter plot from data. 
+    
     :param input_df: the dataframe that should be plotted. It should have either 2 \
     or 3 dimension
     :type input_df: pd.Dataframe
     :param color_df: the Dataframe with one column according to which the marks should \
-    be colored
+    be colored. This is an optional parameter
     :type color_df: pd.Dataframe
     """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
