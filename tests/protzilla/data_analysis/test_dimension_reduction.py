@@ -180,7 +180,11 @@ def umap_assertion_df():
 
 def test_tsne_reproducibility(dimension_reduction_df, tsne_assertion_df):
     _, current_out = t_sne(
-        dimension_reduction_df, n_components=2, perplexity=4, random_state=42
+        pd.DataFrame(),  # Remove when intensity_df is removed
+        dimension_reduction_df,
+        n_components=2,
+        perplexity=4,
+        random_state=42,
     )
 
     pd.testing.assert_frame_equal(
@@ -190,7 +194,10 @@ def test_tsne_reproducibility(dimension_reduction_df, tsne_assertion_df):
 
 def test_tsne_nan_handling(dimension_reduction_df_with_nan):
     _, current_out = t_sne(
-        dimension_reduction_df_with_nan, n_components=2, perplexity=4
+        pd.DataFrame(),  # Remove when intensity_df is removed
+        dimension_reduction_df_with_nan,
+        n_components=2,
+        perplexity=4,
     )
 
     assert "messages" in current_out
@@ -198,7 +205,12 @@ def test_tsne_nan_handling(dimension_reduction_df_with_nan):
 
 
 def test_tsne_perplexity(dimension_reduction_df):
-    _, current_out = t_sne(dimension_reduction_df, n_components=2, perplexity=30)
+    _, current_out = t_sne(
+        pd.DataFrame(),  # Remove when intensity_df is removed
+        dimension_reduction_df,
+        n_components=2,
+        perplexity=30,
+    )
     assert "messages" in current_out
     assert (
         "Perplexity must be less than the number of samples"
@@ -208,6 +220,7 @@ def test_tsne_perplexity(dimension_reduction_df):
 
 def test_tsne_n_components(dimension_reduction_df):
     _, current_out = t_sne(
+        pd.DataFrame(),  # Remove when intensity_df is removed
         dimension_reduction_df,
         n_components=8,
         perplexity=4,
@@ -223,6 +236,7 @@ def test_tsne_n_components(dimension_reduction_df):
 
 def test_tsne_n_components_barnes_hut(dimension_reduction_four_proteins_df):
     _, current_out = t_sne(
+        pd.DataFrame(),  # Remove when intensity_df is removed
         dimension_reduction_four_proteins_df,
         n_components=4,
         perplexity=4,
@@ -236,13 +250,21 @@ def test_tsne_n_components_barnes_hut(dimension_reduction_four_proteins_df):
 
 
 def test_umap_reproducibility(dimension_reduction_df, umap_assertion_df):
-    _, current_out = umap(dimension_reduction_df, n_components=2, n_neighbors=3)
+    _, current_out = umap(
+        pd.DataFrame(),  # Remove when intensity_df is removed
+        dimension_reduction_df,
+        n_components=2,
+        n_neighbors=3,
+    )
     pd.testing.assert_frame_equal(
         current_out["embedded_data_df"], umap_assertion_df, check_dtype=False
     )
 
 
 def test_umap_nan_handling(dimension_reduction_df_with_nan):
-    _, current_out = umap(dimension_reduction_df_with_nan)
+    _, current_out = umap(
+        pd.DataFrame(),  # Remove when intensity_df is removed
+        dimension_reduction_df_with_nan,
+    )
     assert "messages" in current_out
     assert "NaN values" in current_out["messages"][0]["msg"]
