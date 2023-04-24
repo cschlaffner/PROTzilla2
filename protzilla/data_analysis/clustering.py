@@ -51,9 +51,16 @@ def k_means(
             tol=tolerance,
         )
         labels = kmeans.fit_predict(intensity_df_wide)
-        labels_df = pd.DataFrame(labels, index=intensity_df_wide.index)
+        cluster_labels_df = pd.DataFrame(
+            labels, index=intensity_df_wide.index, columns=["Cluster Labels"]
+        )
+        cluster_labels_df["Cluster Labels"] = cluster_labels_df["Cluster Labels"].apply(
+            lambda x: f"Cluster {x}"
+        )
         centroids = kmeans.cluster_centers_.tolist()
-        return intensity_df, dict(centroids=centroids, labels_df=labels_df)
+        return intensity_df, dict(
+            centroids=centroids, cluster_labels_df=cluster_labels_df
+        )
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
