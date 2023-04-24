@@ -84,6 +84,9 @@ def make_plot_fields(run, section, step, method):
 
 
 def make_method_dropdown(run, section, step, method):
+    methods = run.workflow_meta[section][step].keys()
+    method_names = [run.workflow_meta[section][step][key]["name"] for key in methods]
+
     return render_to_string(
         "runs/field_select.html",
         context=dict(
@@ -91,7 +94,7 @@ def make_method_dropdown(run, section, step, method):
             key="chosen_method",
             name=f"{step.replace('_', ' ').title()} Method:",
             default=method,
-            categories=run.workflow_meta[section][step].keys(),
+            categories=method_names,
         ),
     )
 
