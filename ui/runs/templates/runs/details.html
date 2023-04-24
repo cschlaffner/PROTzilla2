@@ -25,9 +25,11 @@
             {% if displayed_history %}
                 <div class="row justify-content-center d-flex">
                     <h3>History</h3>
+                </div>
 
-                    <div class="col-7">
-                        {% for step in displayed_history %}
+                {% for step in displayed_history %}
+                    <div class="row justify-content-center d-flex">
+                        <div class="col-7">
                             {% if step.section_heading %}
                                 <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
                             {% endif %}
@@ -44,16 +46,16 @@
                                     {% include "runs/form_add_name.html" with index=step.index %}
                                 {% endif %}
                             </div>
-
-
-                            {% for plot in step.plots %}
-                                <div class="plot-wrapper">
-                                    {{ plot|safe }}
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
+                        </div>
                     </div>
-                </div>
+
+                    {# display history plots #}
+                    {% for plot in step.plots %}
+                        <div class="plot-wrapper">
+                            {{ plot|safe }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
                 <hr class="my-4">
             {% endif %}
 
