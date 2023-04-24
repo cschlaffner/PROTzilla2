@@ -97,7 +97,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "threshold",
     )
 
-    assert threshold_value == None
+    assert threshold_value is None
 
 
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):
