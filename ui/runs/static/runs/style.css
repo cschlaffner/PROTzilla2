@@ -49,9 +49,3 @@ html, body {
 #header_toggle {
     margin-top:-0.25rem
 }
-
-.plot-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}

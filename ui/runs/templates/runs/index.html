@@ -12,11 +12,11 @@
       <form action="{% url 'runs:create' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
-          <h3>Work on a new run:</h3>
+          <h3>Work on a new Run:</h3>
           <input name="run_name" id="run_name" placeholder="add run name" class="form-control">
         </div>
         <div class="mb-2">
-          <label for="workflow_config_name">with workflow:</label>
+          <label for="workflow_config_name">with Workflow:</label>
           <select name="workflow_config_name" id="workflow_config_name" class="form-select">
             {% for name in available_workflows %}
             <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
@@ -31,7 +31,7 @@
       <form action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
-          <h3>Continue an existing run:</h3>
+          <h3>Continue an existing Run:</h3>
           <select name="run_name" id="run_name_option" class="form-select">
             {% for name in available_runs %}
             <option value="{{ name }}">{{ name }}</option>

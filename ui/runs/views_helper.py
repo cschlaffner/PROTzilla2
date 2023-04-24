@@ -9,7 +9,8 @@ from protzilla.workflow_helper import (
 
 def parameters_from_post(post):
     d = dict(post)
-    del d["csrfmiddlewaretoken"]
+    if "csrfmiddlewaretoken" in d:
+        del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
         if len(v) > 1:
@@ -46,12 +47,8 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
-        print("param_dict2")
-        print(param_dict)
 
     if "fill_dynamic" in param_dict:
-        print("param_dict")
-        print(param_dict)
         param_dict["class"] = "dynamic_trigger"
 
 

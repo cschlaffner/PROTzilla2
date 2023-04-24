@@ -9,8 +9,8 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+
 from protzilla.run import Run
-from protzilla.workflow_helper import get_all_steps
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -20,6 +20,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
+from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
@@ -49,12 +50,15 @@ def detail(request, run_name):
         context=dict(
             run_name=run_name,
             display_name=f"{run.step.replace('_', ' ').title()}",
+            display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
+            name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
+            show_next=run.result_df is not None,
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
@@ -71,6 +75,8 @@ def change_method(request, run_name):
         run = active_runs[run_name]
     except FileNotFoundError:
         traceback.print_exc()
+    except FileNotFoundError:
+        traceback.print_exc()
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
         return response
@@ -78,6 +84,7 @@ def change_method(request, run_name):
     run.method = request.POST["method"]
     run.current_parameters = None
     run.current_plot_parameters = None
+    current_fields = make_current_fields(run, run.section, run.step, run.method)
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
@@ -205,9 +212,19 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = f"Trace: {message['trace']}" if "trace" in message else ""
+            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+
+            # map error level to bootstrap css class
+            lvl_to_css_class = {
+                40: "alert-danger",
+                30: "alert-warning",
+                20: "alert-info",
+            }
             messages.add_message(
-                request, message["level"], f"{message['msg']} {trace}", message["level"]
+                request,
+                message["level"],
+                f"{message['msg']} {trace}",
+                lvl_to_css_class[message["level"]],
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -225,6 +242,33 @@ def add_name(request, run_name):
     run = active_runs[run_name]
     run.history.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def results_exist(request, run_name):
+    run = active_runs[run_name]
+    return JsonResponse(dict(results_exist=run.result_df is not None))
+
+
+def all_button_parameters(request, run_name):
+    run = active_runs[run_name]
+    d = dict()
+    d["current_plot_parameters"] = (
+        run.current_plot_parameters
+        if run.current_plot_parameters is not None
+        else dict()
+    )
+    d["plotted_for_parameters"] = (
+        run.plotted_for_parameters if run.plotted_for_parameters is not None else dict()
+    )
+
+    if run.current_parameters is None or run.result_df is None:
+        d["current_parameters"] = dict()
+        d["chosen_method"] = dict()
+    else:
+        d["current_parameters"] = run.current_parameters
+        d["chosen_method"] = run.method
+
+    return JsonResponse(d)
 
 
 def outputs_of_step(request, run_name):

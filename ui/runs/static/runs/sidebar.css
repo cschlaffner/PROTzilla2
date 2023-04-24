@@ -69,3 +69,9 @@ p {
 .table {
     margin-bottom: -0.5rem;
 }
+
+#removeBtn {
+    margin-left: -0.125rem;
+    width: 16px;
+    height: 16px;
+}

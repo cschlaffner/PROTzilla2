@@ -5,6 +5,11 @@
         "name": "Max Quant",
         "description": "Max Quant Data Import",
         "parameters": {
+          "file_path": {
+            "name": "MaxQuant intensities file:",
+            "type": "file",
+            "default": null
+          },
           "intensity_name": {
             "name": "intensity parameter",
             "type": "categorical",
@@ -14,11 +19,6 @@
               "iBAQ"
             ],
             "default": "Intensity"
-          },
-          "file_path": {
-            "name": "MaxQuant intensities file:",
-            "type": "file",
-            "default": null
           }
         }
       },
@@ -26,20 +26,26 @@
         "name": "MS Fragger",
         "description": "MS Fragger Data Import",
         "parameters": {
-          "intensity_name": {
-            "name": "intensity name",
-            "type": "categorical",
-            "categories": [
-              "LFQ intensity",
-              "Intensity",
-              "iBAQ"
-            ],
-            "default": "Intensity"
-          },
           "file_path": {
             "name": "MSFragger intensities file:",
             "type": "file",
             "default": null
+          },
+          "intensity_name": {
+            "name": "intensity name",
+            "type": "categorical",
+            "categories": [
+              "Intensity",
+              "MaxLFQ Total Intensity",
+              "MaxLFQ Intensity",
+              "Total Intensity",
+              "MaxLFQ Unique Intensity",
+              "Unique Spectral Count",
+              "Unique Intensity",
+              "Spectral Count",
+              "Total Spectral Count"
+            ],
+            "default": "Intensity"
           }
         }
       }
@@ -49,6 +55,11 @@
         "name": "Metadata Import",
         "description": "Import Metadata",
         "parameters": {
+          "file_path": {
+            "name": "Metadata file:",
+            "type": "file",
+            "default": null
+          },
           "feature_orientation": {
             "name": "feature orientation",
             "type": "categorical",
@@ -57,11 +68,6 @@
               "Columns (samples in rows, features in columns)"
             ],
             "default": "Columns (samples in rows, features in columns)"
-          },
-          "file_path": {
-            "name": "Metadata file:",
-            "type": "file",
-            "default": null
           }
         }
       }

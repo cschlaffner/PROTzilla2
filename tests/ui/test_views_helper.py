@@ -1,13 +1,10 @@
 import copy
-import json
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
-from django.conf import settings
 from django.test.client import RequestFactory
 
-from protzilla.constants.paths import PROJECT_PATH
 from ui.runs.views_helper import (
     convert_str_if_possible,
     get_displayed_steps,
@@ -61,8 +58,6 @@ def mock_metadata_df():
 
 @pytest.fixture
 def mock_post():
-    settings.configure()
-
     rf = RequestFactory()
     post_request = rf.post(
         "/calculate/",

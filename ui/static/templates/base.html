@@ -3,21 +3,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  {# Load the tag library #}
-  {% load bootstrap5 %}
-
-  {# Load CSS and JavaScript #}
-  {% bootstrap_css %}
-  {% bootstrap_javascript %}
-  
+  <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+
   {% block css %}
   {% endblock %}
 
   {% block js %}
   {% endblock %}
-
 
   <title>PROTzilla</title>
   <link rel="shortcut icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}"/>
@@ -30,4 +25,6 @@
   <br>
   <p>You're at the main index.<br><a href='/runs'>Runs</a></p>
   {% endblock %}
+
+  <script type="text/javascript" src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
 </body>

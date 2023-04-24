@@ -30,8 +30,7 @@ method_map = {
         "importing",
         "ms_data_import",
         "ms_fragger_import",
-    ): lambda df, **kwargs: print("warning: not implemented")
-    or (df, {}),
+    ): ms_data_import.ms_fragger_import,
     (
         "importing",
         "metadata_import",
