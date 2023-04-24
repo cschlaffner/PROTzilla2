@@ -1,3 +1,4 @@
+import json
 import sys
 from unittest import mock
 
@@ -9,7 +10,7 @@ from protzilla.utilities.random import random_string
 sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")
 
-from protzilla.runner import Runner
+from protzilla.runner import Runner, _serialize_graphs
 from runner_cli import args_parser
 
 
@@ -124,3 +125,38 @@ def test_runner_plots(monkeypatch, plot_args):
         "low_frequency_filter",
         parameters={"graph_type": "Pie chart"},
     )
+
+
+def test_serialize_graphs():
+    pre_graphs = [  # this is what the "graphs" section of a step should look like
+        {"graph_type": "Bar chart", "group_by": "Sample"},
+        {"graph_type_quantities": "Pie chart"},
+    ]
+    expected = {
+        "graph_type": "Bar chart",
+        "group_by": "Sample",
+        "graph_type_quantities": "Pie chart",
+    }
+    assert _serialize_graphs(pre_graphs) == expected
+
+
+def test_serialize_workflow_graphs():
+    with open(
+        PROJECT_PATH / "tests" / "test_workflows" / "example_workflow.json", "r"
+    ) as f:
+        workflow_config = json.load(f)
+
+    serial_imputation_graphs = {
+        "graph_type": "Bar chart",
+        "group_by": "Sample",
+        "graph_type_quantites": "Pie chart",
+    }
+
+    serial_filter_graphs = {"graph_type": "Pie chart"}
+
+    steps = workflow_config["sections"]["data_preprocessing"]["steps"]
+    for step in steps:
+        if step["name"] == "imputation":
+            assert _serialize_graphs(step["graphs"]) == serial_imputation_graphs
+        elif step["name"] == "filter_proteins":
+            assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
