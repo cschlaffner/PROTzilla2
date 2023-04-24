@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 from scipy import stats
 
@@ -26,6 +28,8 @@ def anova(
     :param grouping: the column name of the grouping variable in the
         metadata_df
     :type grouping: str
+    :param selected_groups: groups to test against each other
+    :type selected_groups: list, if None or empty: first two groups will be selected
     :param multiple_testing_correction_method: the method for multiple
         testing correction
     :type multiple_testing_correction_method: str
@@ -40,8 +44,15 @@ def anova(
     the corrected p-values and the log2 fold change, the alpha used
     and the corrected alpha, as well as filtered out proteins.
     """
+    assert grouping in metadata_df.columns
+
+    if selected_groups is None or selected_groups == []:
+        selected_groups = metadata_df["Group"].unique()[:2]
+        logging.warning("auto-selected first two groups in anova")
+
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns[3]
+    print(metadata_df)
     intensity_df = pd.merge(
         left=intensity_df,
         right=metadata_df[["Sample", grouping]],
