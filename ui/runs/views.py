@@ -21,6 +21,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
+from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
@@ -182,9 +183,19 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = f"Trace: {message['trace']}" if "trace" in message else ""
+            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+
+            # map error level to bootstrap css class
+            lvl_to_css_class = {
+                40: "alert-danger",
+                30: "alert-warning",
+                20: "alert-info",
+            }
             messages.add_message(
-                request, message["level"], f"{message['msg']} {trace}", message["level"]
+                request,
+                message["level"],
+                f"{message['msg']} {trace}",
+                lvl_to_css_class[message["level"]],
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
