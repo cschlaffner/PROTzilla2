@@ -99,7 +99,7 @@
             </div>
         </div>
         <div id="nav_buttons">
-            <form action="{% url 'runs:next' run_name %}" method="post">
+            <form action="{% url 'runs:next' run_name %}" id="next_form" method="post">
                 {% csrf_token %}
                 {{ name_field }}<br>
                 <button id="next_button" {% if not show_next %} disabled {% endif %}>Next</button>

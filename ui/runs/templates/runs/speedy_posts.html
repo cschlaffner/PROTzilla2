@@ -2,30 +2,26 @@
     $(document).ready(function () {
         $("#calc_form").submit(function (event) {
             event.preventDefault();
-            const calc_form_data = $(this).serializeArray()
-            let calc_params = {};
-            for (let formField of calc_form_data) {
-                calc_params[formField.name] = formField.value;
-            }
-            let token = calc_params["csrfmiddlewaretoken"]
-            delete calc_params["csrfmiddlewaretoken"]
-
-            console.log("calc_params: ", calc_params)
+            let formData = new FormData(this);
+            let token = formData.get("csrfmiddlewaretoken");
+            formData.delete("csrfmiddlewaretoken");
 
             $.ajax({
                 url: "{% url 'runs:speedy_calc' run_name %}",
                 type: "POST",
-                data: {
-                    parameters: calc_params,
-                    csrfmiddlewaretoken: token
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    "X-CSRFToken": token
                 },
                 success: function (response) {
-                    $('#next_button').prop('disabled', false)
+                    //$('#next_button').prop('disabled', false)
                     get_all_parameters(function () {
                         $('#calc_form').trigger('change')
                     })
                 }
-            })
+            });
         })
 
         $("#plot_form").submit(function (event) {

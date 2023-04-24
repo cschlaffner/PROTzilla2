@@ -142,6 +142,7 @@ def continue_(request):
 
 
 def next_(request, run_name):
+    print("request", request.POST)
     run = active_runs[run_name]
     run.next_step(request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -168,6 +169,8 @@ def add(request, run_name):
 
 
 def calculate(request, run_name):
+    print(request.FILES)
+    print(request.POST)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
@@ -190,11 +193,16 @@ def calculate(request, run_name):
 
 
 def speedy_calc(request, run_name):
+    print(request.POST)
+    print(request.FILES)
+
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    parameters = new_params_from_post(request.POST)
+    parameters = parameters_from_post(request.POST)
     print("params:", parameters)
     del parameters["chosen_method"]
+
+    print(request.FILES)
 
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded

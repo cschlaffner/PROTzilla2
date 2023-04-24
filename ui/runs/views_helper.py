@@ -1,7 +1,8 @@
 def parameters_from_post(post):
     d = dict(post)
     print("post dict", d)
-    del d["csrfmiddlewaretoken"]
+    if "csrfmiddlewaretoken" in d:
+        del d["csrfmiddlewaretoken"]
     parameters = {}
     for k, v in d.items():
         if len(v) > 1:
