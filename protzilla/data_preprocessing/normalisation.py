@@ -1,3 +1,5 @@
+import traceback
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
@@ -91,8 +93,8 @@ def by_median(
                     \nadapting your filtering strategy or using a higher\
                     \nquantile for normalisation."
                 )
-            except ValueError as error:
-                print(error)
+            except ValueError:
+                traceback.print_exc()
                 df_sample[f"Normalised {intensity_name}"] = 0
                 zeroed_samples.append(sample)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
@@ -147,8 +149,8 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                     \nfiltering strategies such as filtering non- or low\
                     \nintensity samples."
                 )
-            except ValueError as error:
-                print(error)
+            except ValueError:
+                traceback.print_exc()
                 df_sample[f"Normalised {intensity_name}"] = 0
                 zeroed_samples_list.append(sample)
 
@@ -165,7 +167,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
 def by_reference_protein(
     intensity_df: pd.DataFrame,
-    reference_protein_id: str = None,
+    reference_protein: str = None,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-intensity normalisation in reference
@@ -178,7 +180,7 @@ def by_reference_protein(
     :param intensity_df: the dataframe that should be filtered in\
     long format
     :type intensity_df: pandas DataFrame
-    :param reference_protein_id: Protein ID of the protein to normalise by
+    :param reference_protein: Protein ID of the protein to normalise by
     type reference_protein_id: str
     :return: returns a scaled dataframe in typical protzilla long format \
     and dict with a list of the indices of the dropped samples
@@ -189,14 +191,14 @@ def by_reference_protein(
     intensity_name = intensity_df.columns[3]
     protein_groups = intensity_df["Protein ID"].unique().tolist()
     for group in protein_groups:
-        if reference_protein_id in group.split(";"):
+        if reference_protein in group.split(";"):
             reference_protein_group = group
             break
     else:
         try:
             raise ValueError("The protein was not found")
         except ValueError as error:
-            print(error)
+            print(str(error))
         return scaled_df, pd.DataFrame(dropped_samples, columns=["Dropped Samples"])
 
     samples = intensity_df["Sample"].unique().tolist()
@@ -218,10 +220,7 @@ def by_reference_protein(
 
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
-    return (
-        scaled_df,
-        dict(dropped_samples=dropped_samples),
-    )
+    return scaled_df, dict(dropped_samples=dropped_samples)
 
 
 def by_z_score_plot(df, result_df, current_out, graph_type, group_by):

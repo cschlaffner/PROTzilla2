@@ -5,12 +5,36 @@ import pytest
 
 from protzilla import workflow_helper
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.workflow_helper import get_workflow_default_param_value
+from protzilla.workflow_helper import (
+    get_workflow_default_param_value,
+    validate_workflow_graphs,
+    validate_workflow_parameters,
+)
+
+
+@pytest.fixture
+def example_workflow_short():
+    with open(
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
+    ) as f:
+        return json.load(f)
 
 
 @pytest.fixture
 def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/example_workflow.json", "r") as f:
+    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def workflow_wrong_graphs():
+    with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_graphs.json", "r") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def workflow_wrong_parameters():
+    with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_parameters.json", "r") as f:
         return json.load(f)
 
 
@@ -26,11 +50,8 @@ def example_workflow_all_steps():
         "ms_data_import",
         "metadata_import",
         "filter_proteins",
-        "filter_proteins",
         "filter_samples",
         "imputation",
-        "filter_proteins",
-        "filter_proteins",
         "outlier_detection",
         "transformation",
         "normalisation",
@@ -77,6 +98,18 @@ def test_get_workflow_default_param_value(example_workflow):
     assert threshold_value == 0.2
 
 
+def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
+    threshold_value = get_workflow_default_param_value(
+        example_workflow_short,
+        "data_preprocessing",
+        "filter_samples",
+        "protein_intensity_sum_filter",
+        "threshold",
+    )
+
+    assert threshold_value == None
+
+
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):
     example_workflow_copy = example_workflow.copy()
     get_workflow_default_param_value(
@@ -87,3 +120,25 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
         "threshold",
     )
     assert example_workflow == example_workflow_copy
+
+
+def test_validate_workflow(example_workflow, workflow_meta):
+    assert validate_workflow_parameters(example_workflow, workflow_meta)
+    assert validate_workflow_graphs(example_workflow, workflow_meta)
+
+
+def test_validate_workflow_wrong_graphs(workflow_wrong_graphs, workflow_meta):
+    pytest.raises(
+        ValueError, validate_workflow_graphs, workflow_wrong_graphs, workflow_meta
+    )
+    assert validate_workflow_parameters(workflow_wrong_graphs, workflow_meta)
+
+
+def test_validate_workflow_wrong_parameters(workflow_wrong_parameters, workflow_meta):
+    assert validate_workflow_graphs(workflow_wrong_parameters, workflow_meta)
+    pytest.raises(
+        ValueError,
+        validate_workflow_parameters,
+        workflow_wrong_parameters,
+        workflow_meta,
+    )
