@@ -70,7 +70,7 @@ class DebugInfo:
             [f"{sys.getsizeof(element) / (1024 ** 2):.2f} MB" for element in get_all_objects(pd.DataFrame)])
 
     def save_print_elements(self):
-        path = Path(f"{PROJECT_PATH}/user_data/debug{self.run.run_name}.txt")
+        path = Path(f"{PROJECT_PATH}/user_data/debug/{self.run_name}.txt")
         with open(path, "w") as f:
             f.write(str(self))
 

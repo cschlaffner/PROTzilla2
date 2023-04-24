@@ -74,7 +74,7 @@ class Runner:
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
         # set run to DebugInfo instance
-        DebugInfo().run = self.run
+        DebugInfo().run_name = self.run.run_name
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
                 DebugInfo().measure_start(f"{step['name']}")
@@ -118,7 +118,6 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
-        logging.info(str(params))
         self.run.perform_calculation_from_location(
             *self.run.current_workflow_location(), params
         )
