@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load bootstrap5 %}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
@@ -60,7 +59,7 @@
             {% endif %}
 
             {# include bootstrap messages for alerting user #}
-            {% bootstrap_messages %}
+            {# TODO: add messages again here #}
 
             {# show current step #}
             <div class="row justify-content-center d-flex">
