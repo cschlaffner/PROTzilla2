@@ -50,15 +50,12 @@ def detail(request, run_name):
         context=dict(
             run_name=run_name,
             display_name=f"{run.step.replace('_', ' ').title()}",
-            display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
-            name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
-            show_next=run.result_df is not None,
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
@@ -84,7 +81,6 @@ def change_method(request, run_name):
     run.method = request.POST["method"]
     run.current_parameters = None
     run.current_plot_parameters = None
-    current_fields = make_current_fields(run, run.section, run.step, run.method)
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(

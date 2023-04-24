@@ -176,9 +176,6 @@ class Run:
     def calculate_and_next(
         self, method_callable, name=None, **parameters
     ):  # to be used for CLI
-    def calculate_and_next(
-        self, method_callable, name=None, **parameters
-    ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
 
@@ -238,7 +235,7 @@ class Run:
         del self.workflow_config["sections"][section]["steps"][index]
         self.write_local_workflow()
 
-    def next_step(self, name):
+    def next_step(self, name=None):
         try:
             self.history.add_step(
                 self.section,
