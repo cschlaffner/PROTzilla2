@@ -29,7 +29,7 @@ def get_parameters(run, section, step, method):
     output = {}
     for key, param_dict in parameters.items():
         # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # to not change workflow_meta
+        param_dict = param_dict.copy()  # please refer to @brokkoli71 for questions
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
         )
