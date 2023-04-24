@@ -13,20 +13,6 @@ from protzilla.workflow_helper import (
 
 
 @pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture
 def workflow_wrong_graphs():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_graphs.json", "r") as f:
         return json.load(f)
@@ -35,12 +21,6 @@ def workflow_wrong_graphs():
 @pytest.fixture
 def workflow_wrong_parameters():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_parameters.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def workflow_meta():
-    with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
         return json.load(f)
 
 

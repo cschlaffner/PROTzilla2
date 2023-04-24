@@ -1,3 +1,4 @@
+import copy
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
@@ -59,6 +60,19 @@ def test_get_parameters():
         "param3": {"default": "default3", "type": ""},
     }
     assert get_parameters(run, "section1", "step1", "method1") == expected
+
+
+def test_get_parameters_no_side_effects(workflow_meta, example_workflow):
+    run = Mock()
+    run.workflow_meta = copy.deepcopy(workflow_meta)
+    run.current_parameters = {"strategy": "median"}
+    run.workflow_config = copy.deepcopy(example_workflow)
+    get_parameters(
+        run, "data_preprocessing", "imputation", "simple_imputation_per_protein"
+    )
+    assert run.current_parameters == {"strategy": "median"}
+    assert run.workflow_config == example_workflow
+    assert run.workflow_meta == workflow_meta
 
 
 def test_insert_special_params_named_output():

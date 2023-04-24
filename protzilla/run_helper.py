@@ -1,3 +1,5 @@
+import copy
+
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -25,11 +27,12 @@ def insert_special_params(param_dict, run):
 
 
 def get_parameters(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
+    # copy to not change workflow_meta
+    parameters = copy.deepcopy(run.workflow_meta[section][step][method]["parameters"])
     output = {}
+
     for key, param_dict in parameters.items():
         # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # please refer to @brokkoli71 for questions
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
         )
@@ -40,4 +43,5 @@ def get_parameters(run, section, step, method):
 
         insert_special_params(param_dict, run)
         output[key] = param_dict
+
     return output
