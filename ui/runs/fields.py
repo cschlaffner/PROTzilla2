@@ -4,25 +4,14 @@ from django.template.loader import render_to_string
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.workflow_helper import get_all_steps, get_workflow_default_param_value
-from ui.runs.views_helper import insert_special_params
+from protzilla.run_helper import get_parameters
+from protzilla.workflow_helper import get_all_steps
 
 
 def make_current_fields(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
+    parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
-        # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # to not change workflow_meta
-        workflow_default = get_workflow_default_param_value(
-            run.workflow_config, section, step, method, key
-        )
-        if run.current_parameters is not None:
-            param_dict["default"] = run.current_parameters[key]
-        elif workflow_default is not None:
-            param_dict["default"] = workflow_default
-
-        insert_special_params(param_dict, run)
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     return current_fields
