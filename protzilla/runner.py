@@ -77,7 +77,7 @@ class Runner:
         DebugInfo().run = self.run
         for section, steps in self.run.workflow_config["sections"].items():
             for step in steps["steps"]:
-                DebugInfo().measure_start(f"{section} {step['name']}")
+                DebugInfo().measure_start(f"{step['name']}")
                 if section == "importing":
                     self._importing(step)
                 else:
@@ -88,13 +88,13 @@ class Runner:
                     self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
-                DebugInfo().measure_memory(f"{section} {step['name']}")
-                DebugInfo().measure_end(f"{section} {step['name']}")
+                DebugInfo().measure_end(f"{step['name']}")
+                DebugInfo().measure_memory(f"{step['name']}")
                 DebugInfo().measure_continue("total next step overhead", index=1000)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
                 DebugInfo().measure_end("total next step overhead")
-
-    logging.info(DebugInfo())
+        logging.info(str(DebugInfo()))
+        DebugInfo().save_print_elements()
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
@@ -118,6 +118,7 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
+        logging.info(str(params))
         self.run.perform_calculation_from_location(
             *self.run.current_workflow_location(), params
         )

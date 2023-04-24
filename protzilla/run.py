@@ -137,6 +137,8 @@ class Run:
             raise ValueError(f"No calculation method found for {location}")
 
     def perform_calculation(self, method_callable, parameters):
+        printable_parameters = ", ".join(f"{k}={v}" for k,v in parameters.items())
+        print(f"{method_callable.__name__()}({parameters}")
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = {}
         for k, v in parameters.items():
