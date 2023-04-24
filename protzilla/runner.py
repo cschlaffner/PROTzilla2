@@ -27,13 +27,13 @@ class Runner:
 
     def __init__(
         self,
-        workflow,
-        ms_data_path,
-        meta_data_path,
-        run_name,
-        df_mode,
-        all_plots,
-        verbose,
+        workflow: str,
+        ms_data_path: str,
+        meta_data_path: str | None,
+        run_name: str | None,
+        df_mode: str | None = "disk",
+        all_plots: bool = False,
+        verbose: bool = False,
     ):
         logging.basicConfig(level=logging.INFO)
 
@@ -43,7 +43,7 @@ class Runner:
 
         self.ms_data_path = ms_data_path
         self.meta_data_path = meta_data_path
-        self.df_mode = df_mode if df_mode is not None else "disk"
+        self.df_mode = df_mode
         self.workflow = workflow
 
         self.run_name = (
@@ -79,7 +79,9 @@ class Runner:
                     logging.info(
                         f"performing step: {*self.run.current_workflow_location(),}"
                     )
-                    params = get_parameters(self.run, *self.run.current_workflow_location())
+                    params = get_parameters(
+                        self.run, *self.run.current_workflow_location()
+                    )
                     self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
