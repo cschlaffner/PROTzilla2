@@ -43,7 +43,7 @@ class Runner:
 
         self.ms_data_path = ms_data_path
         self.meta_data_path = meta_data_path
-        self.df_mode = df_mode
+        self.df_mode = df_mode if df_mode is not None else "disk"
         self.workflow = workflow
 
         self.run_name = (
