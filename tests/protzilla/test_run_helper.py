@@ -1,9 +1,10 @@
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
 
 from protzilla.run_helper import get_parameters, insert_special_params
+
 
 @pytest.fixture
 def mock_metadata_df():

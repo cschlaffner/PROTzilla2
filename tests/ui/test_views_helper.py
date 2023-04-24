@@ -1,15 +1,7 @@
-from unittest.mock import MagicMock, Mock
-
-import pandas as pd
 import pytest
 from django.test.client import RequestFactory
 
-from ui.runs.views_helper import (
-    convert_str_if_possible,
-    parameters_from_post,
-)
-
-
+from ui.runs.views_helper import convert_str_if_possible, parameters_from_post
 
 
 @pytest.fixture
@@ -38,5 +30,3 @@ def test_convert_str_if_possible():
     assert convert_str_if_possible("0.5") == 0.5
     assert convert_str_if_possible("test") == "test"
     assert isinstance(convert_str_if_possible("1.00"), int)
-
-

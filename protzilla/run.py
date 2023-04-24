@@ -128,7 +128,7 @@ class Run:
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if(section=="data_analysis"):
+        if section == "data_analysis":
             pass
         if location in method_map:
             self.perform_calculation(method_map[location], parameters)

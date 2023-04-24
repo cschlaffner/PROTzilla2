@@ -1,4 +1,3 @@
-
 def parameters_from_post(post):
     d = dict(post)
     del d["csrfmiddlewaretoken"]
@@ -18,4 +17,3 @@ def convert_str_if_possible(s):
     except ValueError:
         return s
     return int(f) if int(f) == f else f
-
