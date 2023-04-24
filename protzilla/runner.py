@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
-from .debug_tools import Debug_info
+from .debug_info import DebugInfo
 from .run import Run
 from .run_helper import get_parameters
 from .utilities.random import random_string
@@ -73,11 +73,11 @@ class Runner:
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
-
+        # set run to DebugInfo instance
+        DebugInfo().run = self.run
         for section, steps in self.run.workflow_config["sections"].items():
-            total_next_step_time = total_calc_time = 0
             for step in steps["steps"]:
-                start_time = time.time()
+                DebugInfo().measure_start(f"{section} {step['name']}")
                 if section == "importing":
                     self._importing(step)
                 else:
@@ -88,15 +88,13 @@ class Runner:
                     self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
-                calc_time = (time.time() - start_time) * 1000
-                start_time = time.time()
+                DebugInfo().measure_memory(f"{section} {step['name']}")
+                DebugInfo().measure_end(f"{section} {step['name']}")
+                DebugInfo().measure_continue("total next step overhead", index=1000)
                 self.run.next_step(f"{self.run.current_workflow_location()}")
-                next_step_time = (time.time() - start_time) * 1000
-                total_calc_time += calc_time
-                total_next_step_time += next_step_time
-                logging.info(f"Elapsed time: \ncalc: {calc_time:.0f} ms \nnext_step: {next_step_time:.0f} ms")
-                logging.info(f"debug: {Debug_info()}\n")
-            logging.info(f"Total duration of section {section}: \ncalc: {total_calc_time:.0f} ms \nnext_step: {total_next_step_time:.0f} ms\n")
+                DebugInfo().measure_end("total next step overhead")
+
+    logging.info(DebugInfo())
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
