@@ -8,7 +8,7 @@
     <div id="accordion" class="">
         {% for section in workflow_steps %}
             <div class="border-top">
-                <div class="card-header d-flex btn p-3 align-items-center bg-white" data-bs-toggle="collapse"
+                <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom" data-bs-toggle="collapse"
                      href="#collapse_{{ section.id }}">
                     <img src="{% static 'img/download-file-icon.svg' %}" alt="toggle sidebar" width="20" height="20"
                          class="me-2">
@@ -17,8 +17,8 @@
                     </div>
                 </div>
                 <div id="collapse_{{ section.id }}"
-                     class="collapse {% if section.selected %} show {% endif %}">
-                    <div class="card-body">
+                     class="collapse{% if section.selected %} show {% endif %}">
+                    <div class="card-body my-2">
                         {% include "runs/sidebar_section.html" with section=section run_name=run_name %}
                     </div>
                 </div>
