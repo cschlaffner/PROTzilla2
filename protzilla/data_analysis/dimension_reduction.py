@@ -54,7 +54,7 @@ def t_sne(
         embedded_data = TSNE(
             n_components=n_components,
             perplexity=perplexity,
-            random_state=np.random.RandomState(random_state),
+            random_state=np.random.seed(random_state),
             n_iter=n_iter,
             n_iter_without_progress=n_iter_without_progress,
             method=method,
@@ -105,6 +105,7 @@ def umap(
     min_dist: float = 0.1,
     metric: str = "euclidean",
     random_state: int = 42,
+    transform_seed: int = 42,
 ):
     """
     A function that uses UMAP to reduce the dimension of a dataframe and returns a \
@@ -141,7 +142,8 @@ def umap(
             n_components=n_components,
             min_dist=min_dist,
             metric=metric,
-            random_state=np.random.RandomState(random_state),
+            random_state=random_state,
+            transform_seed=transform_seed,
         ).fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)

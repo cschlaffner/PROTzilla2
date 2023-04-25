@@ -256,6 +256,7 @@ def test_umap_reproducibility(dimension_reduction_df, umap_assertion_df):
         n_components=2,
         n_neighbors=3,
         random_state=42,
+        transform_seed=42,
     )
     pd.testing.assert_frame_equal(
         current_out["embedded_data_df"], umap_assertion_df, check_dtype=False
