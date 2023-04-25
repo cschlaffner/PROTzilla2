@@ -26,8 +26,9 @@ class Run:
     :ivar method
     :ivar result_df
     :ivar current_out
-    :ivar current_parameters: calculation parameters that were last used to calculate
-    :ivar current_plot_parameters: plot parameters that were used to generate plots
+    :ivar current_parameters: calculation parameters that were used to calculate for each method
+    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method
+    :ivar calculated_method: method that was last used to calculate
     :ivar plots
     :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     """
@@ -78,18 +79,6 @@ class Run:
             run_path,
         )
 
-    @property
-    def metadata(self):
-        for step in self.history.steps:
-            if step.step == "metadata_import":
-                return step.outputs["metadata"]
-        raise AttributeError("Metadata was not yet imported.")
-
-    def write_local_workflow(self):
-        workflow_local_path = f"{self.run_path}/workflow.json"
-        with open(workflow_local_path, "w") as f:
-            json.dump(self.workflow_config, f, indent=2)
-
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
@@ -117,8 +106,9 @@ class Run:
 
         self.result_df = None
         self.current_out = None
-        self.current_parameters = None
-        self.current_plot_parameters = None
+        self.calculated_method = None
+        self.current_parameters = {}
+        self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
 
@@ -138,10 +128,11 @@ class Run:
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = self.exchange_named_outputs_with_data(parameters)
+        self.calculated_method = self.method
+        self.current_parameters[self.method] = parameters
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
-        self.current_parameters = parameters
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
@@ -160,25 +151,28 @@ class Run:
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         if location in plot_map:
-            self.create_plot(plot_map[location], parameters)
+            if step == "plot":
+                self.create_plot_step(plot_map[location], parameters)
+            else:
+                self.create_plot(plot_map[location], parameters)
+                self.plotted_for_parameters = self.current_parameters[method]
+                self.current_plot_parameters[method] = parameters
         else:
             self.plots = []
-            self.current_plot_parameters = parameters
             logging.info(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
-        call_parameters = self.exchange_named_outputs_with_data(parameters)
-        if self.step == "plot":
-            self.plots = method_callable(**call_parameters)
-            self.current_parameters = parameters
-            self.result_df = self.df
+        self.plots = method_callable(
+            self.df, self.result_df, self.current_out, **parameters
+        )
 
-        else:
-            self.plots = method_callable(
-                self.df, self.result_df, self.current_out, **parameters
-            )
-            self.current_plot_parameters = parameters
-            self.plotted_for_parameters = self.current_parameters
+    def create_plot_step(self, method_callable, parameters):
+        call_parameters = self.exchange_named_outputs_with_data(parameters)
+        self.calculated_method = self.method
+        self.current_parameters[self.method] = parameters
+        self.plots = method_callable(**call_parameters)
+        self.result_df = self.df
+        self.current_out = {}
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -203,13 +197,18 @@ class Run:
 
         self.write_local_workflow()
 
+    def write_local_workflow(self):
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        with open(workflow_local_path, "w") as f:
+            json.dump(self.workflow_config, f, indent=2)
+
     def next_step(self, name=None):
         try:
             self.history.add_step(
                 self.section,
                 self.step,
-                self.method,
-                self.current_parameters,
+                self.calculated_method,
+                self.current_parameters[self.calculated_method],
                 self.result_df,
                 self.current_out,
                 self.plots,
@@ -224,8 +223,9 @@ class Run:
             self.df = self.result_df
             self.result_df = None
             self.step_index += 1
-            self.current_parameters = None
-            self.current_plot_parameters = None
+            self.calculated_method = None
+            self.current_parameters = {}
+            self.current_plot_parameters = {}
             self.plotted_for_parameters = None
             self.plots = []
             try:
@@ -239,11 +239,12 @@ class Run:
         self.section = popped_step.section
         self.step = popped_step.step
         self.method = popped_step.method
+        self.calculated_method = self.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
-        self.current_parameters = popped_step.parameters
-        self.current_plot_parameters = None
+        self.current_parameters = {self.method: popped_step.parameters}
+        self.current_plot_parameters = {}
         # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
@@ -273,3 +274,10 @@ class Run:
             else:
                 call_parameters[k] = v
         return call_parameters
+
+    @property
+    def metadata(self):
+        for step in self.history.steps:
+            if step.step == "metadata_import":
+                return step.outputs["metadata"]
+        raise AttributeError("Metadata was not yet imported.")
