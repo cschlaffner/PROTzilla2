@@ -1,32 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form action="{% url 'runs:create' %}" method="post">
-    {% csrf_token %}
-    <label for="run_name">run name:</label>
-    <input name="run_name" id="run_name" value="{{ run_name_prefill }}">
-    <label for="workflow_config_name">workflow:</label>
-    <select name="workflow_config_name" id="workflow_config_name">
-        {% for name in available_workflows %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" id="contain">
+  <div class="row" id="row">
+    <div class="col mx-4">
+      <form action="{% url 'runs:create' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Work on a new Run:</h3>
+          <input name="run_name" id="run_name" placeholder="add run name" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label for="workflow_config_name">with Workflow:</label>
+          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
+            {% for name in available_workflows %}
+            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Create" class="btn btn-red">
+      </form>
+    </div>
+
+    <div class="col mx-4">
+      <form action="{% url 'runs:continue' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Continue an existing Run:</h3>
+          <select name="run_name" id="run_name_option" class="form-select">
+            {% for name in available_runs %}
             <option value="{{ name }}">{{ name }}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="Create">
-</form>
-<br>
-<form action="{% url 'runs:continue' %}" method="post"> {# should this be get? #}
-    {% csrf_token %}
-    <label for="run_name_option">choose existing run:</label>
-    <select name="run_name" id="run_name_option">
-        {% for name in available_runs %}
-            <option value="{{ name }}">{{ name }}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="continue">
-</form>
-</body>
-</html>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Continue" class="btn btn-red">
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
