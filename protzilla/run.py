@@ -26,8 +26,9 @@ class Run:
     :ivar method
     :ivar result_df
     :ivar current_out
-    :ivar current_parameters: calculation parameters that were last used to calculate
+    :ivar current_parameters: calculation parameters that were used to calculate for each method
     :ivar current_plot_parameters: plot parameters that were used to generate plots
+    :ivar calculated_method: method that was last used to calculate
     :ivar plots
     :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     """
@@ -78,18 +79,6 @@ class Run:
             run_path,
         )
 
-    @property
-    def metadata(self):
-        for step in self.history.steps:
-            if step.step == "metadata_import":
-                return step.outputs["metadata"]
-        raise AttributeError("Metadata was not yet imported.")
-
-    def write_local_workflow(self):
-        workflow_local_path = f"{self.run_path}/workflow.json"
-        with open(workflow_local_path, "w") as f:
-            json.dump(self.workflow_config, f, indent=2)
-
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
@@ -117,6 +106,7 @@ class Run:
 
         self.result_df = None
         self.current_out = None
+        self.calculated_method = None
         self.current_parameters = {}
         self.current_plot_parameters = None
         self.plotted_for_parameters = None
@@ -132,6 +122,7 @@ class Run:
         if location in method_map:
             self.perform_calculation(method_map[location], parameters)
             self.current_parameters[method] = parameters
+            self.calculated_method = method
         else:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
@@ -203,13 +194,18 @@ class Run:
 
         self.write_local_workflow()
 
+    def write_local_workflow(self):
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        with open(workflow_local_path, "w") as f:
+            json.dump(self.workflow_config, f, indent=2)
+
     def next_step(self, name=None):
         try:
             self.history.add_step(
                 self.section,
                 self.step,
-                self.method,
-                self.current_parameters[self.method],
+                self.calculated_method,
+                self.current_parameters[self.calculated_method],
                 self.result_df,
                 self.current_out,
                 self.plots,
@@ -224,6 +220,7 @@ class Run:
             self.df = self.result_df
             self.result_df = None
             self.step_index += 1
+            self.calculated_method = None
             self.current_parameters = {}
             self.current_plot_parameters = None
             self.plotted_for_parameters = None
@@ -239,6 +236,7 @@ class Run:
         self.section = popped_step.section
         self.step = popped_step.step
         self.method = popped_step.method
+        self.calculated_method = self.method
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
@@ -261,3 +259,10 @@ class Run:
 
     def current_run_location(self):
         return self.section, self.step, self.method
+
+    @property
+    def metadata(self):
+        for step in self.history.steps:
+            if step.step == "metadata_import":
+                return step.outputs["metadata"]
+        raise AttributeError("Metadata was not yet imported.")

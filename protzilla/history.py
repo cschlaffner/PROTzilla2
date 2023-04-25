@@ -129,6 +129,7 @@ class History:
         df = step.dataframe
         if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
+        self.save()
         return step, df
 
     def save(self):
