@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 import traceback
 from pathlib import Path
@@ -27,7 +28,10 @@ class Run:
     :ivar current_out
     :ivar current_parameters: calculation parameters that were last used to calculate
     :ivar current_plot_parameters: plot parameters that were used to generate plots
+    :ivar current_parameters: calculation parameters that were last used to calculate
+    :ivar current_plot_parameters: plot parameters that were used to generate plots
     :ivar plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
     """
 
@@ -119,6 +123,7 @@ class Run:
         self.current_parameters = None
         self.current_plot_parameters = None
         self.plotted_for_parameters = None
+        self.plotted_for_parameters = None
         self.plots = []
 
     def handle_all_steps_completed(self):
@@ -133,12 +138,6 @@ class Run:
         self.write_local_workflow()
 
     def perform_calculation_from_location(self, section, step, method, parameters):
-        location = (section, step, method)
-        if location in method_map:
-            self.perform_calculation(method_map[location], parameters)
-        else:
-            self.result_df = None
-            raise ValueError(f"No calculation method found for {location}")
         location = (section, step, method)
         if location in method_map:
             self.perform_calculation(method_map[location], parameters)
@@ -178,6 +177,7 @@ class Run:
     ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
+        self.next_step(name=name)
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
@@ -186,15 +186,7 @@ class Run:
         else:
             self.plots = []
             self.current_plot_parameters = parameters
-            # notify user
-            print(f"No plot method found for location {location}")
-        if location in plot_map:
-            self.create_plot(plot_map[location], parameters)
-        else:
-            self.plots = []
-            self.current_plot_parameters = parameters
-            # notify user
-            print(f"No plot method found for location {location}")
+            logging.info(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
@@ -258,6 +250,7 @@ class Run:
             self.step_index += 1
             self.current_parameters = None
             self.current_plot_parameters = None
+            self.plotted_for_parameters = None
             self.plots = []
             try:
                 self.section, self.step, self.method = self.current_workflow_location()

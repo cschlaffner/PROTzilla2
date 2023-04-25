@@ -66,6 +66,16 @@ def test_get_all_steps_no_side_effects(example_workflow):
     assert example_workflow == example_workflow_copy
 
 
+def test_get_defaults():
+    method_params = {
+        "test1": {"default": 1},
+        "test2": {"something": 2},
+    }
+    expected = {"test1": 1, "test2": {"something": 2}}
+    result = workflow_helper.get_defaults(method_params)
+    assert result == expected
+
+
 def test_get_all_default_params_for_methods(workflow_meta):
     result = workflow_helper.get_all_default_params_for_methods(
         workflow_meta, "data_preprocessing", "imputation", "knn"
@@ -103,7 +113,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "threshold",
     )
 
-    assert threshold_value == None
+    assert threshold_value is None
 
 
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):

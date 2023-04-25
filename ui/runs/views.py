@@ -10,6 +10,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
+
 from protzilla.run import Run
 from ui.runs.fields import (
     make_current_fields,
@@ -70,8 +71,6 @@ def change_method(request, run_name):
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
         run = active_runs[run_name]
-    except FileNotFoundError:
-        traceback.print_exc()
     except FileNotFoundError:
         traceback.print_exc()
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})

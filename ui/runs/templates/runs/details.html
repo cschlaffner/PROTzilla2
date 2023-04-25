@@ -14,6 +14,10 @@
 
 {% endblock %}
 
+{% block title %}
+    <title>PROTZILLA – {{ run_name }}</title>
+{% endblock %}
+
 {% block navbar %}
     {% include "navbar.html" with run_name=run_name %}
 {% endblock %}
@@ -73,18 +77,19 @@
                     <hr class="my-4">
                 {% endif %}
 
-                {# include django messages for alerting user #}
-                {% if messages %}
-                    <div class="messages">
-                        {% for message in messages %}
-                            <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}" role="alert">
-                                {{ message | safe }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <br>
-                {% endif %}
+            {# include django messages for alerting user #}
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                             role="alert">
+                            {{ message | safe }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <br>
+            {% endif %}
 
                 {# show current step #}
                 <div class="row justify-content-center d-flex">

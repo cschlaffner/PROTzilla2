@@ -38,9 +38,15 @@ def get_method_name(workflow_meta, section, step, method):
 
 
 def get_all_default_params_for_methods(workflow_meta, section, step, method):
-    workflow_meta_step = workflow_meta[section][step]
-    method_params = workflow_meta_step[method]["parameters"]
-    return {k: v["default"] for k, v in method_params.items()}
+    method_params = workflow_meta[section][step][method]["parameters"]
+    return get_defaults(method_params)
+
+
+def get_defaults(method_params):
+    return {
+        k: v["default"] if "default" in v.keys() else v
+        for k, v in method_params.items()
+    }
 
 
 def get_workflow_default_param_value(workflow_config, section, step, method, param):

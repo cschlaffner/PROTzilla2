@@ -49,3 +49,7 @@ html, body {
 #header_toggle {
     margin-top:-0.25rem
 }
+
+.plot-wrapper div:nth-child(2) {
+    width: 100%;
+}

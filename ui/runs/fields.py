@@ -4,12 +4,13 @@ from django.template.loader import render_to_string
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla.run_helper import get_parameters
 from protzilla.workflow_helper import get_workflow_default_param_value
 from ui.runs.views_helper import get_displayed_steps, insert_special_params
 
 
 def make_current_fields(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
+    parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
         # todo 59 - restructure current_parameters
@@ -82,14 +83,17 @@ def make_plot_fields(run, section, step, method):
 
 
 def make_method_dropdown(run, section, step, method):
+    methods = run.workflow_meta[section][step].keys()
+    method_names = [run.workflow_meta[section][step][key]["name"] for key in methods]
+
     return render_to_string(
-        "runs/field_select.html",
+        "runs/field_select_with_label.html",
         context=dict(
             disabled=False,
             key="chosen_method",
             name=f"{step.replace('_', ' ').title()} Method:",
             default=method,
-            categories=run.workflow_meta[section][step].keys(),
+            categories=list(zip(methods, method_names)),
         ),
     )
 

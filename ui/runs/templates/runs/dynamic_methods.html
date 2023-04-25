@@ -23,7 +23,7 @@
             }).fail(function (e) {
                 console.log('Error:', e);
                 alert(e.responseJSON.error); // alert error message to user
-            })
+            });
         });
         $("#method_parameters").on("change", ".named", function () {
             const id = $(this).attr("id");
@@ -40,13 +40,13 @@
                     const outputs = $(`#${id}_outputs`);
                     outputs.empty();
                     $.each(response, function (index, value) {
-                        outputs.append($("<option></option>").attr("value", value).text(value))
+                        outputs.append($("<option></option>").attr("value", value).text(value));
                     })
                 }
             })
         });
 
-        $("#method_parameters").on("change", ".dynamic_trigger",function () {
+        $("#method_parameters").on("change", ".dynamic_trigger", function () {
             const selected_choice = $(this).val();
             const triggered_id = $(this).attr("id");
 
