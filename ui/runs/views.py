@@ -52,6 +52,8 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
+            section=section,
+            step=step,
             display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
@@ -208,6 +210,10 @@ def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
+    try:
+        del parameters["chosen_method"]
+    except:
+        pass
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

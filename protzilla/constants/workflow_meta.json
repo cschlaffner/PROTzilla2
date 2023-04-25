@@ -765,7 +765,7 @@
             "type": "categorical",
             "fill": "proteins",
             "categories": [],
-            "default": null,
+            "default": [],
             "multiple": true
           }
         }
