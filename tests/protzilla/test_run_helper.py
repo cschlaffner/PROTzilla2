@@ -40,7 +40,7 @@ def test_get_parameters():
             }
         }
     }
-    run.current_parameters = {"param1": "current1"}
+    run.current_parameters = {"method1": {"param1": "current1"}}
     run.workflow_config = {
         "sections": {
             "section1": {

@@ -121,14 +121,14 @@ class Run:
         location = (section, step, method)
         if location in method_map:
             self.perform_calculation(method_map[location], parameters)
-            self.current_parameters[method] = parameters
-            self.calculated_method = method
         else:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
+        self.calculated_method = self.method
+        self.current_parameters[self.method] = parameters
         call_parameters = {}
         for k, v in parameters.items():
             param_dict = self.workflow_meta[self.section][self.step][self.method][
