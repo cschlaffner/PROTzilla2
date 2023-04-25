@@ -2,6 +2,7 @@ import pandas as pd
 from django.contrib import messages
 from sklearn.manifold import TSNE
 from umap import UMAP
+import numpy as np
 
 from protzilla.utilities.transform_dfs import long_to_wide
 
@@ -53,7 +54,7 @@ def t_sne(
         embedded_data = TSNE(
             n_components=n_components,
             perplexity=perplexity,
-            random_state=random_state,
+            random_state=np.random.RandomState(random_state),
             n_iter=n_iter,
             n_iter_without_progress=n_iter_without_progress,
             method=method,
@@ -140,7 +141,7 @@ def umap(
             n_components=n_components,
             min_dist=min_dist,
             metric=metric,
-            random_state=random_state,
+            random_state=np.random.RandomState(random_state),
         ).fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
