@@ -27,7 +27,7 @@ class Run:
     :ivar result_df
     :ivar current_out
     :ivar current_parameters: calculation parameters that were used to calculate for each method
-    :ivar current_plot_parameters: plot parameters that were used to generate plots
+    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method
     :ivar calculated_method: method that was last used to calculate
     :ivar plots
     :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
@@ -108,7 +108,7 @@ class Run:
         self.current_out = None
         self.calculated_method = None
         self.current_parameters = {}
-        self.current_plot_parameters = None
+        self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
 
@@ -161,7 +161,7 @@ class Run:
         if location in plot_map:
             self.create_plot(plot_map[location], parameters)
             self.plotted_for_parameters = self.current_parameters[method]
-            self.current_plot_parameters = parameters
+            self.current_plot_parameters[method] = parameters
         else:
             self.plots = []
             logging.info(f"No plot method found for location {location}")
@@ -222,7 +222,7 @@ class Run:
             self.step_index += 1
             self.calculated_method = None
             self.current_parameters = {}
-            self.current_plot_parameters = None
+            self.current_plot_parameters = {}
             self.plotted_for_parameters = None
             self.plots = []
             try:
@@ -241,7 +241,7 @@ class Run:
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}
-        self.current_plot_parameters = None
+        self.current_plot_parameters = {}
         # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
