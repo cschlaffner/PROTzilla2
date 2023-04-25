@@ -83,10 +83,17 @@ def anova(
         columns=["Protein ID", "p_value"],
     )
 
+    tested_df = pd.merge(
+        left=intensity_df,
+        right=p_values_df,
+        on="Protein ID",
+        copy=False,
+    )
+
     if corrected_alpha is None:
         corrected_alpha = alpha
 
-    return intensity_df, {
-        "corrected_p_values": p_values_df,
+    return tested_df, {
+        "corrected_p_values": corrected_p_values,
         "corrected_alpha": corrected_alpha,
     }

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_analysis.differential_expression import anova, t_test
+from protzilla.data_analysis.plots import create_volcano_plot
 
 
 def test_differential_expression_t_test(show_figures):
@@ -63,9 +64,14 @@ def test_differential_expression_t_test(show_figures):
         fc_threshold=test_fc_threshold,
     )
 
-    # fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
-    # if show_figures:
-    #     fig.show()
+    fig = create_volcano_plot(
+        current_out["corrected_p_values_df"],
+        current_out["log2_fold_change_df"],
+        current_out["fc_threshold"],
+        current_out["alpha"],
+    )
+    if show_figures:
+        fig.show()
 
     corrected_p_values = [0.0108, 0.4318, 1.000]
     log2_fc = [-1, -0.0995, 0]
@@ -215,9 +221,14 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
         fc_threshold=test_fc_threshold,
     )
 
-    # fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
-    # if show_figures:
-    #     fig.show()
+    fig = create_volcano_plot(
+        current_out["corrected_p_values_df"],
+        current_out["log2_fold_change_df"],
+        current_out["fc_threshold"],
+        current_out["alpha"],
+    )
+    if show_figures:
+        fig.show()
 
     corrected_p_values = [0.0072, 1.000]
     log2_fc = [-1, 0]
