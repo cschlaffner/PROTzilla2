@@ -1,23 +1,6 @@
-def parameters_from_post(post):
-    d = dict(post)
-    if "csrfmiddlewaretoken" in d:
-        del d["csrfmiddlewaretoken"]
-    parameters = {}
-    for k, v in d.items():
-        if len(v) > 1:
-            # only used for named_output parameters and multiselect fields
-            parameters[k] = v
-        else:
-            parameters[k] = convert_str_if_possible(v[0])
-    return parameters
+import copy
 
-
-def convert_str_if_possible(s):
-    try:
-        f = float(s)
-    except ValueError:
-        return s
-    return int(f) if int(f) == f else f
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
@@ -38,8 +21,27 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
-        elif param_dict["fill"] == "proteins":
-            param_dict["categories"] = run.df["Protein ID"].unique()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
+
+
+def get_parameters(run, section, step, method):
+    # copy to not change workflow_meta
+    parameters = copy.deepcopy(run.workflow_meta[section][step][method]["parameters"])
+    output = {}
+
+    for key, param_dict in parameters.items():
+        # todo 59 - restructure current_parameters
+        workflow_default = get_workflow_default_param_value(
+            run.workflow_config, section, step, method, key
+        )
+        if run.current_parameters is not None and key in run.current_parameters:
+            param_dict["default"] = run.current_parameters[key]
+        elif workflow_default is not None:
+            param_dict["default"] = workflow_default
+
+        insert_special_params(param_dict, run)
+        output[key] = param_dict
+
+    return output

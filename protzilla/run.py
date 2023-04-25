@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 import traceback
 from pathlib import Path
@@ -163,8 +164,7 @@ class Run:
         else:
             self.plots = []
             self.current_plot_parameters = parameters
-            # notify user
-            print(f"No plot method found for location {location}")
+            logging.info(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
         call_parameters = self.exchange_named_outputs_with_data(parameters)

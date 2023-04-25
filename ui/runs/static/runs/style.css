@@ -1,0 +1,30 @@
+html, body{
+    height: 100%;
+  }
+
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+#content {
+    flex: 3;
+    padding: 20px;
+    padding-left: 8%;
+    padding-right: 8%;
+}
+
+#sidebar {
+    flex: 1;
+    padding: 20px;
+}
+
+.plot-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.plot-wrapper div:nth-child(2) {
+    width: 100%;
+}
