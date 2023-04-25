@@ -134,18 +134,6 @@ class Run:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
 
-    def exchange_named_outputs_with_data(self, parameters):
-        call_parameters = {}
-        for k, v in parameters.items():
-            param_dict = self.workflow_meta[self.section][self.step][self.method][
-                "parameters"
-            ].get(k)
-            if param_dict and param_dict.get("type") == "named_output":
-                call_parameters[k] = self.history.output_of_named_step(*v)
-            else:
-                call_parameters[k] = v
-        return call_parameters
-
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = self.exchange_named_outputs_with_data(parameters)
@@ -183,6 +171,8 @@ class Run:
         if self.step == "plot":
             self.plots = method_callable(**call_parameters)
             self.current_parameters = parameters
+            self.result_df = self.df
+
         else:
             self.plots = method_callable(
                 self.df, self.result_df, self.current_out, **parameters
@@ -271,3 +261,15 @@ class Run:
 
     def current_run_location(self):
         return self.section, self.step, self.method
+
+    def exchange_named_outputs_with_data(self, parameters):
+        call_parameters = {}
+        for k, v in parameters.items():
+            param_dict = self.workflow_meta[self.section][self.step][self.method][
+                "parameters"
+            ].get(k)
+            if param_dict and param_dict.get("type") == "named_output":
+                call_parameters[k] = self.history.output_of_named_step(*v)
+            else:
+                call_parameters[k] = v
+        return call_parameters
