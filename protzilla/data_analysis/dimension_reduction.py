@@ -64,7 +64,7 @@ def t_sne(
         embedded_data = tsne.fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return intensity_df, dict(embedded_data_df=embedded_data_df, tsne=tsne)
+        return intensity_df, dict(embedded_data_df=embedded_data_df)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
