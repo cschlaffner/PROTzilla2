@@ -66,8 +66,8 @@ def make_plot_fields(run, section, step, method):
     plot_fields = []
     for plot in plots:
         for key, param_dict in plot.items():
-            if run.current_plot_parameters is not None:
-                param_dict["default"] = run.current_plot_parameters[key]
+            if method in run.current_plot_parameters:
+                param_dict["default"] = run.current_plot_parameters[method][key]
             plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
     return plot_fields
 

@@ -37,6 +37,11 @@ def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_p
 
     mock_perform = mock.MagicMock()
     mock_add_step = mock.MagicMock()
+
+    def mock_current_parameters(*args, **kwargs):
+        runner.run.current_parameters = {None: {}}
+
+    mock_perform.side_effect = mock_current_parameters
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock_add_step)
 
@@ -67,8 +72,14 @@ def test_runner_raises_error_for_missing_metadata_arg(
     with pytest.raises(ValueError) as e:
         kwargs = args_parser().parse_args(no_metadata_args).__dict__
         runner = Runner(**kwargs)
+        mock_perform = mock.MagicMock()
 
-        monkeypatch.setattr(runner, "_perform_current_step", mock.MagicMock())
+        def mock_current_parameters(*args, **kwargs):
+            runner.run.current_parameters = {None: {}}
+
+        mock_perform.side_effect = mock_current_parameters
+
+        monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
         monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
         monkeypatch.setattr(runner.run, "create_plot_from_location", mock.MagicMock())
 
@@ -86,6 +97,11 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
     runner = Runner(**kwargs)
 
     mock_perform = mock.MagicMock()
+
+    def mock_current_parameters(*args, **kwargs):
+        runner.run.current_parameters = {None: {}}
+
+    mock_perform.side_effect = mock_current_parameters
     mock_plot = mock.MagicMock()
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
@@ -112,8 +128,14 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
     runner = Runner(**kwargs)
 
     mock_plot = mock.MagicMock()
+    mock_perform = mock.MagicMock()
 
-    monkeypatch.setattr(runner, "_perform_current_step", mock.MagicMock())
+    def mock_current_parameters(*args, **kwargs):
+        runner.run.current_parameters = {None: {}}
+
+    mock_perform.side_effect = mock_current_parameters
+
+    monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
     monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
 
