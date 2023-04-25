@@ -9,7 +9,11 @@
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     {% include 'runs/dynamic_methods.html' %}
     {% include 'runs/form_buttons.html' with results_exist=show_next %}
-    {% include 'runs/file_upload.html'%}
+    {% include 'runs/file_upload.html' %}
+{% endblock %}
+
+{% block title %}
+    <title>PROTZILLA – {{ run_name }}</title>
 {% endblock %}
 
 {% block navbar %}
@@ -62,7 +66,8 @@
             {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
-                        <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}" role="alert">
+                        <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                             role="alert">
                             {{ message | safe }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
@@ -140,7 +145,7 @@
                 {% endif %}
             </div>
             <div class="justify-content-end d-flex">
-                   <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
                     {% csrf_token %}
                     <div class="form-group">
                         <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
