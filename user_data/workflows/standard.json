@@ -14,7 +14,7 @@
           "name": "metadata_import",
           "method": "metadata_import_method",
           "parameters": {
-            "feature_orientation": "Rows (features in rows, samples in columns)"
+            "feature_orientation": "Columns (samples in rows, features in columns)"
           }
         }
       ]
@@ -53,7 +53,7 @@
           },
           "graphs": [
             {
-              "graph_type": "Bar chart",
+              "graph_type": "Boxplot",
               "group_by": "Sample"
             },
             {
@@ -101,7 +101,13 @@
         {
           "name": "differential_expression",
           "method": "anova",
-          "parameters": {}
+          "parameters": {
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "grouping": "Group",
+            "selected_groups": [],
+            "metadata_df": ""
+          }
         },
         {
           "name": "differential_expression",
