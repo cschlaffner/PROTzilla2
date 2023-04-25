@@ -117,7 +117,7 @@ class Run:
 
         self.result_df = None
         self.current_out = None
-        self.current_parameters = None
+        self.current_parameters = {}
         self.current_plot_parameters = None
         self.plotted_for_parameters = None
         self.plots = []
@@ -131,6 +131,7 @@ class Run:
         location = (section, step, method)
         if location in method_map:
             self.perform_calculation(method_map[location], parameters)
+            self.current_parameters[method] = parameters
         else:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
@@ -149,7 +150,6 @@ class Run:
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
-        self.current_parameters = parameters
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
@@ -169,17 +169,16 @@ class Run:
         location = (section, step, method)
         if location in plot_map:
             self.create_plot(plot_map[location], parameters)
+            self.plotted_for_parameters = self.current_parameters[method]
+            self.current_plot_parameters = parameters
         else:
             self.plots = []
-            self.current_plot_parameters = parameters
             logging.info(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
             self.df, self.result_df, self.current_out, **parameters
         )
-        self.current_plot_parameters = parameters
-        self.plotted_for_parameters = self.current_parameters
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -210,7 +209,7 @@ class Run:
                 self.section,
                 self.step,
                 self.method,
-                self.current_parameters,
+                self.current_parameters[self.method],
                 self.result_df,
                 self.current_out,
                 self.plots,
@@ -225,7 +224,7 @@ class Run:
             self.df = self.result_df
             self.result_df = None
             self.step_index += 1
-            self.current_parameters = None
+            self.current_parameters = {}
             self.current_plot_parameters = None
             self.plotted_for_parameters = None
             self.plots = []
@@ -243,7 +242,7 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
-        self.current_parameters = popped_step.parameters
+        self.current_parameters = {self.method: popped_step.parameters}
         self.current_plot_parameters = None
         # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
         self.plotted_for_parameters = None

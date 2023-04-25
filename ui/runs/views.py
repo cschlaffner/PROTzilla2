@@ -79,7 +79,6 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
-    run.current_parameters = None
     run.current_plot_parameters = None
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
@@ -236,7 +235,7 @@ def all_button_parameters(request, run_name):
         d["current_parameters"] = dict()
         d["chosen_method"] = dict()
     else:
-        d["current_parameters"] = run.current_parameters
+        d["current_parameters"] = run.current_parameters[run.method]
         d["chosen_method"] = run.method
 
     return JsonResponse(d)
