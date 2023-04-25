@@ -13,27 +13,27 @@
     // Admittedly, this is not the most robust construct, and it took way longer to figure out all the edge cases than
     // I would like to admit. git blame can be quite useful ;)
 
-    let current_parameters
-    let current_plot_parameters
-    let calc_params_match
-    let plotted_for_parameters
-    let calc_form_data
-    let calculated_method
+    let current_parameters;
+    let current_plot_parameters;
+    let calc_params_match;
+    let plotted_for_parameters;
+    let calc_form_data;
+    let calculated_method;
 
     function get_all_parameters(callback) {
         $.ajax({
             url: "{% url 'runs:all_button_parameters' run_name %}",
             type: "GET",
             success: function (response) {
-                current_parameters = response["current_parameters"]
-                current_plot_parameters = response["current_plot_parameters"]
-                plotted_for_parameters = response["plotted_for_parameters"]
-                calculated_method = response["chosen_method"]
-                callback()
+                current_parameters = response["current_parameters"];
+                current_plot_parameters = response["current_plot_parameters"];
+                plotted_for_parameters = response["plotted_for_parameters"];
+                calculated_method = response["chosen_method"];
+                callback();
             }
         }).fail(function (e) {
             console.log('Error', e);
-        })
+        });
     }
 
     async function get_results_exist(callback) {
@@ -41,37 +41,37 @@
             url: "{% url 'runs:results_exist' run_name %}",
             type: "GET",
             success: function (response) {
-                results_exist = response["results_exist"]
-                callback()
+                results_exist = response["results_exist"];
+                callback();
             }
         }).fail(function (e) {
             console.log('Error', e);
-        })
+        });
     }
 
     function get_clean_form_data(form) {
-        let formDataArray = form.serializeArray()
+        let formDataArray = form.serializeArray();
         let formDataDict = {};
         for (let formField of formDataArray) {
             formDataDict[formField.name] = formField.value;
         }
-        delete formDataDict["csrfmiddlewaretoken"]
-        return formDataDict
+        delete formDataDict["csrfmiddlewaretoken"];
+        return formDataDict;
     }
 
 
     function disable_plot_button(bool) {
-        $('#plot_parameters_submit').prop('disabled', bool)
+        $('#plot_parameters_submit').prop('disabled', bool);
     }
 
     function disable_calc_button(bool) {
-        $('#calculate_parameters_submit').prop('disabled', bool)
-        results_exist = bool
-        calc_params_match = bool
+        $('#calculate_parameters_submit').prop('disabled', bool);
+        results_exist = bool;
+        calc_params_match = bool;
     }
 
     function isEmptyDict(obj) {
-        return Object.keys(obj).length == 0
+        return Object.keys(obj).length == 0;
     }
 
     function trigger_plot_change() {
@@ -82,7 +82,7 @@
 
     function plotted_current_match() {
         if (isEmptyDict(plotted_for_parameters)) {
-            return false
+            return false;
         }
         return Object.keys(current_parameters).every(key =>
             plotted_for_parameters.hasOwnProperty(key) && plotted_for_parameters[key] == current_parameters[key]
@@ -91,11 +91,11 @@
 
     function equal_calc_parameters(form) {
         if (isEmptyDict(current_parameters)) {
-            return false
+            return false;
         }
 
-        let form_data = get_clean_form_data(form)
-        calc_form_data = form_data
+        let form_data = get_clean_form_data(form);
+        calc_form_data = form_data;
         return Object.keys(current_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_parameters[key]
         );
@@ -103,10 +103,10 @@
 
     function equal_plot_parameters(form) {
         if (isEmptyDict(current_plot_parameters)) {
-            return false
+            return false;
         }
 
-        let form_data = get_clean_form_data(form)
+        let form_data = get_clean_form_data(form);
         return Object.keys(current_plot_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_plot_parameters[key]
         );
@@ -115,42 +115,42 @@
     $(document).ready(function () {
         // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
         if($('#plot_form').find('input').length) {
-            disable_plot_button(true)
+            disable_plot_button(true);
         }
 
         $('#calc_form').change(function () {
-            const selected_method = $('#chosen_method').val()
-            calc_form_data = get_clean_form_data($(this))
+            const selected_method = $('#chosen_method').val();
+            calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
-                disable_calc_button(true)
+                disable_calc_button(true);
             } else {
-                disable_calc_button(false)
+                disable_calc_button(false);
             }
-            $('#plot_form').trigger("change")
-        })
+            $('#plot_form').trigger("change");
+        });
 
         $('#plot_form').change(function () {
-            const selected_method = $('#chosen_method').val()
+            const selected_method = $('#chosen_method').val();
             if (!calc_form_data || selected_method !== calculated_method) {
-                disable_plot_button(true)
-                return
+                disable_plot_button(true);
+                return;
             }
 
             if (!plotted_current_match() && results_exist) {
-                disable_plot_button(false)
-                return
+                disable_plot_button(false);
+                return;
             }
 
             if (equal_plot_parameters($(this)) || !calc_params_match) {
-                disable_plot_button(true)
+                disable_plot_button(true);
             } else {
-                disable_plot_button(false)
+                disable_plot_button(false);
             }
         });
 
         get_all_parameters(function () {
             $('#calc_form').trigger('change');
-            trigger_plot_change()
-        })
-    })
+            trigger_plot_change();
+        });
+    });
 </script>

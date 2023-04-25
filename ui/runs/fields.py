@@ -77,13 +77,13 @@ def make_method_dropdown(run, section, step, method):
     method_names = [run.workflow_meta[section][step][key]["name"] for key in methods]
 
     return render_to_string(
-        "runs/field_select.html",
+        "runs/field_select_with_label.html",
         context=dict(
             disabled=False,
             key="chosen_method",
             name=f"{step.replace('_', ' ').title()} Method:",
             default=method,
-            categories=method_names,
+            categories=list(zip(methods, method_names)),
         ),
     )
 
