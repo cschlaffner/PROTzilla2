@@ -177,7 +177,6 @@ class Run:
     ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
-        self.next_step(name=name)
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
