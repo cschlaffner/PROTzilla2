@@ -51,18 +51,20 @@ def t_sne(
     """
     intensity_df_wide = long_to_wide(input_df)
     try:
-        embedded_data = TSNE(
+        tsne = TSNE(
             n_components=n_components,
             perplexity=perplexity,
-            random_state=np.random.seed(random_state),
+            random_state=random_state,
             n_iter=n_iter,
             n_iter_without_progress=n_iter_without_progress,
             method=method,
             metric=metric,
-        ).fit_transform(intensity_df_wide)
+        )
+
+        embedded_data = tsne.fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return intensity_df, dict(embedded_data_df=embedded_data_df)
+        return intensity_df, dict(embedded_data_df=embedded_data_df, tsne=tsne)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():

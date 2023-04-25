@@ -186,6 +186,7 @@ def test_tsne_reproducibility(dimension_reduction_df, tsne_assertion_df):
         perplexity=4,
         random_state=42,
     )
+    assert current_out["tsne"].get_params()["random_state"] == 42
 
     pd.testing.assert_frame_equal(
         current_out["embedded_data_df"], tsne_assertion_df, check_dtype=False
