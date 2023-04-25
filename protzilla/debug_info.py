@@ -69,7 +69,9 @@ class DebugInfo:
         self.print_element(name)["dfs"] = str(
             [f"{sys.getsizeof(element) / (1024 ** 2):.2f} MB" for element in get_all_objects(pd.DataFrame)])
 
-    def save_print_elements(self):
+    def save(self, run_name=None):
+        if run_name is not None:
+            self.run_name = run_name
         path = Path(f"{PROJECT_PATH}/user_data/debug/{self.run_name}.txt")
         with open(path, "w") as f:
             f.write(str(self))
