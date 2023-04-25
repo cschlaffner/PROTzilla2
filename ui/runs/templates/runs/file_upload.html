@@ -1,0 +1,7 @@
+<script>
+    $(document).ready(function () {     
+        $('#file_path').on('change', function(){
+            $('#file-chosen').text(this.files[0].name);
+        })
+    });
+</script>
