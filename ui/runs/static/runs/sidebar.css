@@ -67,7 +67,5 @@ p {
 }
 
 .removeBtn {
-    margin-left: -0.125rem;
-    width: 16px;
-    height: 16px;
+    padding: 0px;
 }
