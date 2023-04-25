@@ -44,7 +44,6 @@ def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_p
     mock_perform.side_effect = mock_current_parameters
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock_add_step)
-    # monkeypatch.setattr(runner.run, "calculated_method", "a")
 
     runner.compute_workflow()
 
