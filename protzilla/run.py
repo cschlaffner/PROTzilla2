@@ -134,8 +134,7 @@ class Run:
             self.result_df = None
             raise ValueError(f"No calculation method found for {location}")
 
-    def perform_calculation(self, method_callable, parameters):
-        self.section, self.step, self.method = location_map[method_callable]
+    def exchange_named_outputs_with_data(self, parameters):
         call_parameters = {}
         for k, v in parameters.items():
             param_dict = self.workflow_meta[self.section][self.step][self.method][
@@ -145,6 +144,11 @@ class Run:
                 call_parameters[k] = self.history.output_of_named_step(*v)
             else:
                 call_parameters[k] = v
+        return call_parameters
+
+    def perform_calculation(self, method_callable, parameters):
+        self.section, self.step, self.method = location_map[method_callable]
+        call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
@@ -175,14 +179,16 @@ class Run:
             print(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
+        call_parameters = self.exchange_named_outputs_with_data(parameters)
         if self.step == "plot":
-            self.plots = method_callable(**parameters)
+            self.plots = method_callable(**call_parameters)
+            self.current_parameters = parameters
         else:
             self.plots = method_callable(
                 self.df, self.result_df, self.current_out, **parameters
             )
-        self.current_plot_parameters = parameters
-        self.plotted_for_parameters = self.current_parameters
+            self.current_plot_parameters = parameters
+            self.plotted_for_parameters = self.current_parameters
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()

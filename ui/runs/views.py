@@ -20,7 +20,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
-from ui.runs.views_helper import get_data_for_named_outputs, parameters_from_post
+from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
 
@@ -196,7 +196,6 @@ def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
-    parameters = get_data_for_named_outputs(parameters, run)
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

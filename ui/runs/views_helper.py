@@ -11,19 +11,6 @@ def parameters_from_post(post):
     return parameters
 
 
-def get_data_for_named_outputs(parameters, run):
-    new_parameters = {}
-    for k, v in parameters.items():
-        # assume the current parameter is not a named output
-        new_parameters[k] = parameters[k]
-        # check if the current parameter is a named output and get the data in case it is
-        if type(v) is list:
-            for step, step_name in zip(run.history.steps, run.history.step_names):
-                if v[0] == step_name:
-                    new_parameters[k] = step.outputs[v[1]]
-    return new_parameters
-
-
 def convert_str_if_possible(s):
     try:
         f = float(s)
