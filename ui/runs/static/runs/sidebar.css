@@ -69,3 +69,7 @@ p {
 .removeBtn {
     padding: 0px;
 }
+
+.removeIcon:hover {
+    fill: #444445;
+}
