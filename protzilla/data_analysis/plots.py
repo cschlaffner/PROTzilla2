@@ -3,8 +3,6 @@ import dash_bio as dashbio
 
 def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
-    print("p_values")
-    print(p_values.to_string())
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
         effect_size="log2_fold_change",
