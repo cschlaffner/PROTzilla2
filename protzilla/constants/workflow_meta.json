@@ -626,6 +626,11 @@
         "name": "ANOVA",
         "description": "Analysis of Variance:",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
@@ -668,6 +673,11 @@
         "name": "T_Test",
         "description": "Statistical test assuming a t-distribution:",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
