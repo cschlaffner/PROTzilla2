@@ -1,9 +1,4 @@
 {# params: run_name section{id, name, finished, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, method_name}} #}
-{% load static %}
-
-{% block css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'runs/sidebar.css' %}">
-{% endblock %}
 
 {% block js %}
     <script>
@@ -19,6 +14,8 @@
     {% for step in section.steps %}
         <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %} d-flex align-items-center">
             <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
+
+            {# button to remove step from workflow #}
             {% if not step.selected and not step.finished %}
                 <form action="{% url 'runs:delete_step' run_name %}" method="post">
                     {% csrf_token %}
@@ -30,9 +27,11 @@
                     </svg></button>
                 </form>
             {% endif %}
+
         </div>
     {% endfor %}
 </div>
+
 {% if section.finished %}
     <p class="pb-2"><i class="text-muted">Go back to this section to add more steps</i></p>
 {% else %}
@@ -40,14 +39,15 @@
             data-bs-target="#add_steps_div_{{ section.id }}">
         + add steps
     </button>
+
     <div id="add_steps_div_{{ section.id }}" class="collapse">
         <div class="d-flex justify-content-center mb-2">
             <i id="explainAddStep" class="text-muted">Click on a method to add it to your run</i>
         </div>
 
-        <table class="table mytable">
+        <table class="table">
             {% for possible_step in section.possible_steps %}
-                <tr class="">
+                <tr>
                     <td class="small">{{ possible_step.name }}</td>
                     <td>
                         <div class="simple-tags">

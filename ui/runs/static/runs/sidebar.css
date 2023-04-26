@@ -12,29 +12,8 @@ p {
     border-radius: 15px;
 }
 
-.grid-container {
-    display: inline;
-    grid-template-columns: repeat(2, auto);
-    grid-gap: 5px; /* add some gap between the grid items */
-    align-items: start; /* align grid items at the top of their cells */
-}
-
-.grid-container button {
-    white-space: nowrap; /* ensure that the button text does not wrap to multiple lines */
-}
-
 .full_width {
     width: 100%;
-}
-
-.simple-tags {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
 }
 
 .simple-tags > ul {
