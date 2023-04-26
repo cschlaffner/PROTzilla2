@@ -147,10 +147,8 @@ class Run:
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
-        self.calculated_method = self.method
-        self.current_parameters[self.method] = parameters
         self.update_workflow_config(
-            self.section, self.step_index_in_current_section(), self.current_parameters
+            self.section, self.step_index_in_current_section(), parameters
         )
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
