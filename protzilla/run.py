@@ -168,7 +168,7 @@ class Run:
             self.current_plot_parameters[method] = parameters
         else:  # not used in data analysis
             self.plotted_for_parameters = None
-            self.current_plot_parameters = {}
+            self.current_plot_parameters = {}  # expected dict for all_button_parameters
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
