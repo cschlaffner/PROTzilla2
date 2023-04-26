@@ -1,5 +1,4 @@
 import json
-import logging
 import shutil
 import traceback
 from pathlib import Path
@@ -24,13 +23,14 @@ class Run:
     :ivar section
     :ivar step
     :ivar method
+    :ivar df: dataframe that will be used as input for the next data preprocessing step, not used in data analysis
     :ivar result_df
     :ivar current_out
     :ivar current_parameters: calculation parameters that were used to calculate for each method
-    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method
+    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method, not used in data analysis
     :ivar calculated_method: method that was last used to calculate
     :ivar plots
-    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots, not used in data analysis
     """
 
     @classmethod
@@ -97,7 +97,6 @@ class Run:
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
 
-        self.step_index = len(self.history.steps)
         # make these a result of the step to be compatible with CLI?
         try:
             self.section, self.step, self.method = self.current_workflow_location()
@@ -119,11 +118,7 @@ class Run:
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in method_map:
-            self.perform_calculation(method_map[location], parameters)
-        else:
-            self.result_df = None
-            raise ValueError(f"No calculation method found for {location}")
+        self.perform_calculation(method_map[location], parameters)
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
@@ -132,7 +127,15 @@ class Run:
         self.current_parameters[self.method] = parameters
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
-        self.result_df, self.current_out = method_callable(self.df, **call_parameters)
+
+        if self.section in ["importing", "data_preprocessing"]:
+            self.result_df, self.current_out = method_callable(
+                self.df, **call_parameters
+            )
+        else:
+            self.result_df = None
+            self.current_out = method_callable(**call_parameters)
+
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
@@ -150,16 +153,17 @@ class Run:
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in plot_map:
-            if step == "plot":
-                self.create_plot_step(plot_map[location], parameters)
-            else:
-                self.create_plot(plot_map[location], parameters)
-                self.plotted_for_parameters = self.current_parameters[method]
-                self.current_plot_parameters[method] = parameters
+        if step == "plot":
+            self.create_plot_step(plot_map[location], parameters)
         else:
-            self.plots = []
-            logging.info(f"No plot method found for location {location}")
+            self.create_plot(plot_map[location], parameters)
+
+        if section in ["importing", "data_preprocessing"]:
+            self.plotted_for_parameters = self.current_parameters[method]
+            self.current_plot_parameters[method] = parameters
+        else:  # not used in data analysis
+            self.plotted_for_parameters = None
+            self.current_plot_parameters = {}  # expected dict for all_button_parameters
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(

@@ -93,7 +93,8 @@ def anova(
     if corrected_alpha is None:
         corrected_alpha = alpha
 
-    return tested_df, {
+    return {
+        "p_values_df": tested_df,
         "corrected_p_values": corrected_p_values,
         "corrected_alpha": corrected_alpha,
     }
