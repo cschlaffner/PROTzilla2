@@ -27,10 +27,10 @@ class Run:
     :ivar result_df
     :ivar current_out
     :ivar current_parameters: calculation parameters that were used to calculate for each method
-    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method
+    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method, not used in data analysis
     :ivar calculated_method: method that was last used to calculate
     :ivar plots
-    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots, not used in data analysis
     """
 
     @classmethod
@@ -102,12 +102,12 @@ class Run:
         except IndexError:
             self.handle_all_steps_completed()
 
-        self.result_df = None  # pre, but necessary
+        self.result_df = None
         self.current_out = None
         self.calculated_method = None
         self.current_parameters = {}
-        self.current_plot_parameters = {}  # pre?
-        self.plotted_for_parameters = None  # pre?
+        self.current_plot_parameters = {}
+        self.plotted_for_parameters = None
         self.plots = []  # pre? lilly
 
     def handle_all_steps_completed(self):
@@ -117,13 +117,7 @@ class Run:
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in method_map:
-            self.perform_calculation(method_map[location], parameters)
-        else:
-            self.result_df = None
-            self.calculated_method = None
-            raise ValueError(f"No calculation method found for {location}")
-            # remove?
+        self.perform_calculation(method_map[location], parameters)
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
@@ -165,13 +159,13 @@ class Run:
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in plot_map:
-            self.create_plot(plot_map[location], parameters)
+        self.create_plot(plot_map[location], parameters)
+        if section in ["importing", "data_preprocessing"]:
             self.plotted_for_parameters = self.current_parameters[method]
             self.current_plot_parameters[method] = parameters
-        else:
-            self.plots = []
-            logging.info(f"No plot method found for location {location}")
+        else:  # not used in data analysis
+            self.plotted_for_parameters = None
+            self.current_plot_parameters = {}
 
     def create_plot(self, method_callable, parameters):
         df = self.history.steps[-1].dataframe if self.history.steps else None
