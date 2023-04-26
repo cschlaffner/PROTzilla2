@@ -52,7 +52,7 @@ def test_differential_expression_t_test(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -80,7 +80,7 @@ def test_differential_expression_t_test(show_figures):
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert de_proteins_df["Protein ID"].unique() == de_proteins
+    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["alpha"] == test_alpha
     assert current_out["corrected_alpha"] is None
@@ -134,7 +134,7 @@ def test_differential_expression_t_test_with_nan():
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    _, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -203,7 +203,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -231,7 +231,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert de_proteins_df["Protein ID"].unique() == de_proteins
+    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["alpha"] == test_alpha
     assert current_out["corrected_alpha"] is None
@@ -281,7 +281,7 @@ def test_differential_expression_anova(show_figures):
         columns=["Sample", "Group"],
     )
 
-    output_df, output_dict = anova(
+    output_dict = anova(
         intensity_df=test_intensity_df,
         metadata_df=test_metadata_df,
         grouping="Group",

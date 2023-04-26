@@ -140,8 +140,14 @@ class Run:
                 call_parameters[k] = v
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
-        df = self.history.steps[-1].dataframe if self.history.steps else None
-        self.result_df, self.current_out = method_callable(df, **call_parameters)
+
+        if self.section in ["importing", "data_preprocessing"]:
+            df = self.history.steps[-1].dataframe if self.history.steps else None
+            self.result_df, self.current_out = method_callable(df, **call_parameters)
+        else:
+            self.result_df = None
+            self.current_out = method_callable(**call_parameters)
+
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
