@@ -42,10 +42,9 @@
             </div>
         {% endfor %}
     </div>
-    <div style="height: 50px"></div>
-
-    {% include "runs/form_export_workflow.html" with run_name=run_name default="workflow_"|add:run_name %}
-
+    <div class="mt-4">
+        {% include "runs/form_export_workflow.html" with run_name=run_name default="workflow_"|add:run_name %}
+    </div>
 </div>
 
 {# params: section run_name#}
