@@ -67,12 +67,16 @@
                             </div>
                         </div>
 
-                        {# display history plots #}
-                        {% for plot in step.plots %}
-                            <div class="plot-wrapper">
-                                {{ plot|safe }}
+                        {% if step.plots %}
+                            <div class="mb-4">
+                                {# display history plots #}
+                                {% for plot in step.plots %}
+                                    <div class="plot-wrapper">
+                                        {{ plot|safe }}
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                        {% endif %}
                     {% endfor %}
                     <hr class="my-4">
                 {% endif %}
