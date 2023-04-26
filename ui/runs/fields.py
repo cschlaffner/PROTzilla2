@@ -18,7 +18,7 @@ def make_current_fields(run, section, step, method):
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
         )
-        if run.current_parameters is not None:
+        if key in run.current_parameters:
             param_dict["default"] = run.current_parameters[key]
         elif workflow_default is not None:
             param_dict["default"] = workflow_default

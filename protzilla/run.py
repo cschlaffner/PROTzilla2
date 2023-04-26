@@ -147,7 +147,8 @@ class Run:
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
-        self.current_parameters = parameters
+        self.calculated_method = self.method
+        self.current_parameters[self.method] = parameters
         self.update_workflow_config(
             self.section, self.step_index_in_current_section(), self.current_parameters
         )
@@ -261,7 +262,7 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}
         self.current_plot_parameters = {}
-        # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
+        # TODO: add plotted_for_parameter to History?
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
