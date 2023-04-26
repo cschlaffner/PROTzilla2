@@ -55,7 +55,7 @@ class History:
         self.run_name = run_name
         self.steps: list[ExecutedStep] = []
         self.step_names = []
-        (RUNS_PATH / run_name).mkdir(exist_ok=True)
+        Path(f"{RUNS_PATH}/{run_name}").mkdir(exist_ok=True)
 
     def add_step(
         self,
@@ -129,6 +129,7 @@ class History:
         df = step.dataframe
         if "disk" in self.df_mode and step.dataframe_path:
             step.dataframe_path.unlink()
+        self.save()
         return step, df
 
     def save(self):

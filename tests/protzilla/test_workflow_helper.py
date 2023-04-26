@@ -13,20 +13,6 @@ from protzilla.workflow_helper import (
 
 
 @pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture
 def workflow_wrong_graphs():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_graphs.json", "r") as f:
         return json.load(f)
@@ -35,12 +21,6 @@ def workflow_wrong_graphs():
 @pytest.fixture
 def workflow_wrong_parameters():
     with open(f"{PROJECT_PATH}/tests/test_workflows/wrong_parameters.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def workflow_meta():
-    with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
         return json.load(f)
 
 
@@ -68,6 +48,16 @@ def test_get_all_steps_no_side_effects(example_workflow, example_workflow_all_st
     example_workflow_copy = copy.deepcopy(example_workflow)
     workflow_helper.get_all_steps(example_workflow)
     assert example_workflow == example_workflow_copy
+
+
+def test_get_defaults():
+    method_params = {
+        "test1": {"default": 1},
+        "test2": {"something": 2},
+    }
+    expected = {"test1": 1, "test2": {"something": 2}}
+    result = workflow_helper.get_defaults(method_params)
+    assert result == expected
 
 
 def test_get_all_default_params_for_methods(workflow_meta):
@@ -107,7 +97,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "threshold",
     )
 
-    assert threshold_value == None
+    assert threshold_value is None
 
 
 def test_test_get_workflow_default_param_value_no_side_effects(example_workflow):

@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 user_data/runs/*
+user_data/debug/*
 ui/static/admin/*
 .vscode/*
 .flake8
@@ -139,3 +140,4 @@ dmypy.json
 
 # vscode settings
 .vscode/
+

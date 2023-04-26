@@ -39,7 +39,6 @@ def metadata_import_method(df, file_path, feature_orientation):
         meta_df.index = meta_df.index - 1
 
         file_path = f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_{random_string()}.csv"
-        print(file_path)
         meta_df.to_csv(file_path, index=False)
         return metadata_import_method(df, file_path, "Columns")
 

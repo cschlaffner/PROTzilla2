@@ -1,4 +1,5 @@
 import sys
+import traceback
 
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
@@ -20,6 +21,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
 )
+from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import new_params_from_post, parameters_from_post
 
 active_runs = {}
@@ -48,12 +50,12 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            location=f"{run.section}/{run.step}",
+            display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next),
+            name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
             show_next=run.result_df is not None,
             show_back=bool(run.history.steps),
@@ -77,8 +79,6 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
-    run.current_parameters = None
-    run.current_plot_parameters = None
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
@@ -184,9 +184,19 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = f"<br> Trace: {message['trace']}" if "trace" in message else ""
+            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+
+            # map error level to bootstrap css class
+            lvl_to_css_class = {
+                40: "alert-danger",
+                30: "alert-warning",
+                20: "alert-info",
+            }
             messages.add_message(
-                request, message["level"], f"{message['msg']}{trace}", message["level"]
+                request,
+                message["level"],
+                f"{message['msg']} {trace}",
+                lvl_to_css_class[message["level"]],
             )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -255,11 +265,7 @@ def results_exist(request, run_name):
 def all_button_parameters(request, run_name):
     run = active_runs[run_name]
     d = dict()
-    d["current_plot_parameters"] = (
-        run.current_plot_parameters
-        if run.current_plot_parameters is not None
-        else dict()
-    )
+    d["current_plot_parameters"] = run.current_plot_parameters.get(run.method, {})
     d["plotted_for_parameters"] = (
         run.plotted_for_parameters if run.plotted_for_parameters is not None else dict()
     )
@@ -268,7 +274,7 @@ def all_button_parameters(request, run_name):
         d["current_parameters"] = dict()
         d["chosen_method"] = dict()
     else:
-        d["current_parameters"] = run.current_parameters
+        d["current_parameters"] = run.current_parameters[run.method]
         d["chosen_method"] = run.method
 
     return JsonResponse(d)
