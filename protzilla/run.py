@@ -82,9 +82,6 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
-        self.df = (
-            self.history.steps[-1].dataframe if self.history.steps else None
-        )  # pre
         self.step_index = len(self.history.steps)
         self.run_path = run_path
 
@@ -105,7 +102,7 @@ class Run:
         except IndexError:
             self.handle_all_steps_completed()
 
-        self.result_df = None  # pre
+        self.result_df = None  # pre, but necessary
         self.current_out = None
         self.calculated_method = None
         self.current_parameters = {}
@@ -124,7 +121,9 @@ class Run:
             self.perform_calculation(method_map[location], parameters)
         else:
             self.result_df = None
+            self.calculated_method = None
             raise ValueError(f"No calculation method found for {location}")
+            # remove?
 
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
@@ -141,7 +140,8 @@ class Run:
                 call_parameters[k] = v
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
-        self.result_df, self.current_out = method_callable(self.df, **call_parameters)
+        df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.result_df, self.current_out = method_callable(df, **call_parameters)
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
         if "messages" in self.current_out:
@@ -168,9 +168,8 @@ class Run:
             logging.info(f"No plot method found for location {location}")
 
     def create_plot(self, method_callable, parameters):
-        self.plots = method_callable(
-            self.df, self.result_df, self.current_out, **parameters
-        )
+        df = self.history.steps[-1].dataframe if self.history.steps else None
+        self.plots = method_callable(df, self.result_df, self.current_out, **parameters)
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -218,7 +217,6 @@ class Run:
             traceback.print_exc()
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
-            self.df = self.result_df
             self.result_df = None
             self.step_index += 1
             self.calculated_method = None
@@ -238,7 +236,6 @@ class Run:
         self.step = popped_step.step
         self.method = popped_step.method
         self.calculated_method = self.method
-        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}

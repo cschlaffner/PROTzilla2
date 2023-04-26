@@ -41,23 +41,18 @@ def test_run_back():
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
-    df1 = run.df
+    df1 = run.history.steps[-1].dataframe
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
-    df2 = run.df
+    df2 = run.history.steps[-1].dataframe
     assert not df1.equals(df2)
     run.back_step()
-    assert run.df.equals(df1)
+    df3 = run.history.steps[-1].dataframe
+    assert df3.equals(df1)
     run.back_step()
-    assert run.df is None
+    assert not run.history.steps
     rmtree(RUNS_PATH / name)
-
-
-# think more about different run interfaces
-# CLI: steps, complete workflow
-# UI: location, back+next, workflow defaults
-# different classes?
 
 
 def test_run_continue():
@@ -69,10 +64,10 @@ def test_run_continue():
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
-    df = run.df
+    df = run.history.steps[-1].dataframe
     del run
     run2 = Run.continue_existing(run_name)
-    assert df.equals(run2.df)
+    assert df.equals(run2.history.steps[-1].dataframe)
     rmtree(RUNS_PATH / run_name)
 
 
