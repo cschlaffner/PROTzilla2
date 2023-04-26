@@ -24,6 +24,7 @@ class Run:
     :ivar section
     :ivar step
     :ivar method
+    :ivar df: dataframe that will be used as input for the next data preprocessing step, not used in data analysis
     :ivar result_df
     :ivar current_out
     :ivar current_parameters: calculation parameters that were used to calculate for each method
@@ -82,6 +83,7 @@ class Run:
     def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
         self.run_path = run_path
 
@@ -108,7 +110,7 @@ class Run:
         self.current_parameters = {}
         self.current_plot_parameters = {}
         self.plotted_for_parameters = None
-        self.plots = []  # pre? lilly
+        self.plots = []
 
     def handle_all_steps_completed(self):
         # TODO 74 think about what should happen when all steps are completed
@@ -136,8 +138,9 @@ class Run:
             call_parameters["metadata_df"] = self.metadata
 
         if self.section in ["importing", "data_preprocessing"]:
-            df = self.history.steps[-1].dataframe if self.history.steps else None
-            self.result_df, self.current_out = method_callable(df, **call_parameters)
+            self.result_df, self.current_out = method_callable(
+                self.df, **call_parameters
+            )
         else:
             self.result_df = None
             self.current_out = method_callable(**call_parameters)
@@ -168,8 +171,9 @@ class Run:
             self.current_plot_parameters = {}
 
     def create_plot(self, method_callable, parameters):
-        df = self.history.steps[-1].dataframe if self.history.steps else None
-        self.plots = method_callable(df, self.result_df, self.current_out, **parameters)
+        self.plots = method_callable(
+            self.df, self.result_df, self.current_out, **parameters
+        )
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
@@ -217,6 +221,7 @@ class Run:
             traceback.print_exc()
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
+            self.df = self.result_df
             self.result_df = None
             self.step_index += 1
             self.calculated_method = None
@@ -236,6 +241,7 @@ class Run:
         self.step = popped_step.step
         self.method = popped_step.method
         self.calculated_method = self.method
+        self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}
