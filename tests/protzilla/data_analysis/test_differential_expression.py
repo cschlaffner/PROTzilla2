@@ -140,7 +140,7 @@ def test_differential_expression_t_test_with_nan():
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    _, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
