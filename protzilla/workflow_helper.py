@@ -1,11 +1,42 @@
 from itertools import zip_longest
 
 
-def get_all_steps(workflow_config_dict):
+def get_steps_of_workflow(
+    workflow_config_dict,
+) -> list[dict[str, str | list[dict[str, str]]]]:
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
-        workflow_steps.extend(steps["steps"])
-    return [step["name"] for step in workflow_steps]
+        workflow_steps.append(
+            {
+                "section": section,
+                "steps": [
+                    {"name": step["name"], "method": step["method"]}
+                    for step in steps["steps"]
+                ],
+            }
+        )
+    return workflow_steps
+
+
+def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]]:
+    workflow_steps = []
+    for section, steps in workflow_meta.items():
+        workflow_steps.append(
+            {"section": section, "possible_steps": list(steps.keys())}
+        )
+    return workflow_steps
+
+
+def step_name(step):
+    return step.replace("_", " ").title()
+
+
+def section_name(section):
+    return section.replace("_", " ").title()
+
+
+def method_name(workflow_meta, section, step, method):
+    return workflow_meta[section][step][method]["name"]
 
 
 def get_all_default_params_for_methods(workflow_meta, section, step, method):

@@ -10,16 +10,16 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
+
 from protzilla.run import Run
 from ui.runs.fields import (
-    make_add_step_dropdown,
     make_current_fields,
     make_displayed_history,
-    make_highlighted_workflow_steps,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
     make_plot_fields,
+    make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_from_post
@@ -44,12 +44,16 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.result_df is not None
+    allow_next = run.calculated_method is not None or (
+        run.step == "plot" and len(run.plots) > 0
+    )
     return render(
         request,
         "runs/details.html",
         context=dict(
             run_name=run_name,
+            section=section,
+            step=step,
             display_name=f"{run.step.replace('_', ' ').title()}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
@@ -57,11 +61,11 @@ def detail(request, run_name):
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
-            show_next=run.result_df is not None,
+            show_next=run.calculated_method is not None
+            or (run.step == "plot" and len(run.plots) > 0),
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
-            sidebar_dropdown=make_add_step_dropdown(run, section),
-            workflow_steps=make_highlighted_workflow_steps(run),
+            sidebar=make_sidebar(request, run, run_name),
         ),
     )
 
@@ -158,12 +162,34 @@ def add(request, run_name):
 
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
-    step = post["step_to_be_added"][0]
+    step = post["step"][0]
+    section = post["section_name"][0]
+    method = post["method"][0]
 
-    if step == "":
-        return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+    run.insert_at_next_position(step, section, method)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-    run.insert_as_next_step(step)
+
+def delete_step(request, run_name):
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    index = int(post["index"][0])
+    section = post["section_name"][0]
+    run.delete_step(section, index)
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def export_workflow(request, run_name):
+    run = active_runs[run_name]
+    post = dict(request.POST)
+    del post["csrfmiddlewaretoken"]
+    print("run_name")
+    print(run_name)
+    name = post["name"][0]
+    run.export_workflow(name)
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -203,6 +229,8 @@ def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
+    if run.step == "plot":
+        del parameters["chosen_method"]
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

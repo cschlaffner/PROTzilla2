@@ -2,7 +2,7 @@
   "analysis_level": "protein",
   "sections": {
     "importing": {
-      "steps": {}
+      "steps": []
     },
     "data_preprocessing": {
       "steps": [
@@ -23,10 +23,10 @@
         }
       ],
       "data_analysis": {
-        "steps": {}
+        "steps": []
       },
       "data_integration": {
-        "steps": {}
+        "steps": []
       }
     }
   }

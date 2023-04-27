@@ -4,14 +4,26 @@ from django.template.loader import render_to_string
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.run_helper import get_parameters
-from protzilla.workflow_helper import get_all_steps
+from protzilla.run_helper import get_parameters, insert_special_params
+from protzilla.workflow_helper import get_workflow_default_param_value
+from ui.runs.views_helper import get_displayed_steps
 
 
 def make_current_fields(run, section, step, method):
     parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
+        # todo 59 - restructure current_parameters
+        param_dict = param_dict.copy()  # to not change workflow_meta
+        workflow_default = get_workflow_default_param_value(
+            run.workflow_config, section, step, method, key
+        )
+        if key in run.current_parameters:
+            param_dict["default"] = run.current_parameters[key]
+        elif workflow_default is not None:
+            param_dict["default"] = workflow_default
+
+        insert_special_params(param_dict, run)
         current_fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     return current_fields
@@ -44,19 +56,17 @@ def make_parameter_input(key, param_dict, disabled):
     )
 
 
-def make_add_step_dropdown(run, section):
-    template = "runs/field_select.html"
-
-    steps = list(run.workflow_meta[section].keys())
-    steps.insert(0, "")
-
+def make_sidebar(request, run, run_name):
+    csrf_token = request.META["CSRF_COOKIE"]
+    template = "runs/sidebar.html"
     return render_to_string(
         template,
         context=dict(
-            name="add step:",
-            type="categorical",
-            categories=steps,
-            key="step_to_be_added",
+            csrf_token=csrf_token,
+            workflow_steps=get_displayed_steps(
+                run.workflow_config, run.workflow_meta, run.step_index
+            ),
+            run_name=run_name,
         ),
     )
 
@@ -129,12 +139,3 @@ def make_name_field(allow_next, form):
         "runs/field_text.html",
         context=dict(disabled=not allow_next, key="name", name="Name:", form=form),
     )
-
-
-def make_highlighted_workflow_steps(run):
-    workflow_steps = get_all_steps(run.workflow_config)
-    highlighted_workflow_steps = [
-        {"name": step, "highlighted": False} for step in workflow_steps
-    ]
-    highlighted_workflow_steps[run.step_index]["highlighted"] = True
-    return highlighted_workflow_steps

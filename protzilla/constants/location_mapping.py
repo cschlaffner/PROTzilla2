@@ -1,4 +1,4 @@
-from ..data_analysis import differential_expression
+from ..data_analysis import differential_expression, plots
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -224,4 +224,9 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_analysis",
+        "plot",
+        "volcano",
+    ): plots.create_volcano_plot,
 }
