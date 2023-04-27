@@ -1,7 +1,7 @@
+import dash_bio as dashbio
 import pandas as pd
 import plotly.express as px
 from django.contrib import messages
-import dash_bio as dashbio
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 

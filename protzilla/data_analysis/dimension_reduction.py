@@ -1,8 +1,8 @@
+import numpy as np
 import pandas as pd
 from django.contrib import messages
 from sklearn.manifold import TSNE
 from umap import UMAP
-import numpy as np
 
 from protzilla.utilities.transform_dfs import long_to_wide
 

@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 from shutil import rmtree
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities.random import random_string
