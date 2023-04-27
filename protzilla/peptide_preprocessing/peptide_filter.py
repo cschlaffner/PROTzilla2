@@ -1,10 +1,14 @@
 import pandas as pd
 
 
-def by_pep_value(peptide_df: pd.DataFrame, threshold: float):
+def by_pep_value(
+    intensity_df: pd.DataFrame, peptide_df: pd.DataFrame, threshold: float
+):
     """
     This function filters out peptides with a PEP value below a certain threshold.
 
+    :param intensity_df: ms-dataframe, piped through so next methods get proper input
+    :type intensity_df: pd.Dataframe
     :param peptide_df: the pandas dataframe containing the peptide information
     :type peptide_df: pd.Dataframe
     :param threshold: peptides with a PEP-value below this threshold will be filtered\
@@ -21,4 +25,7 @@ def by_pep_value(peptide_df: pd.DataFrame, threshold: float):
     peptide_df.reset_index(drop=True, inplace=True)
     filtered_peptides.reset_index(drop=True, inplace=True)
 
-    return peptide_df, {"filtered_peptides": filtered_peptides}
+    return intensity_df, {
+        "peptide_df": peptide_df,
+        "filtered_peptides": filtered_peptides,
+    }

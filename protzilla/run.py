@@ -140,6 +140,8 @@ class Run:
                 call_parameters[k] = v
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
+        if "peptide_df" in call_parameters:
+            call_parameters["peptide_df"] = self.peptide_data
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.plots = []  # reset as not up to date anymore
         # error handling for CLI
@@ -266,3 +268,10 @@ class Run:
             if step.step == "metadata_import":
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
+
+    @property
+    def peptide_data(self):
+        for step in self.history.steps:
+            if step.step == "peptide_import":
+                return step.outputs["peptide_df"]
+        raise AttributeError("Peptides were not yet imported.")

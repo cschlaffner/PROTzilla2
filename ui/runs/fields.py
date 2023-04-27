@@ -29,7 +29,7 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
-    elif param_dict["type"] == "metadata_df":
+    elif param_dict["type"] == "metadata_df" or param_dict["type"] == "peptide_df":
         template = "runs/field_empty.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")

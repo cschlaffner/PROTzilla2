@@ -71,6 +71,29 @@
           }
         }
       }
+    },
+    "peptide_import": {
+      "peptide_import": {
+        "name": "Peptide Import",
+        "description": "Import Peptide-Data",
+        "parameters": {
+          "file_path": {
+            "name": "Peptide File",
+            "type": "file",
+            "default": null
+          },
+          "intensity_name": {
+            "name": "Intensity Parameter (same as MS-Data)",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default": "Intensity"
+          }
+        }
+      }
     }
   },
   "data_preprocessing": {
@@ -622,7 +645,7 @@
   },
   "peptide_preprocessing": {
     "filter_peptides": {
-      "pep_filter" : {
+      "pep_filter": {
         "name": "PEP Threshold",
         "description": "Filter by PEP-Threshold",
         "parameters": {
@@ -631,6 +654,10 @@
             "type": "numeric",
             "min": 0,
             "default": 0
+          },
+          "peptide_df": {
+            "type": "peptide_df",
+            "name": "peptide_df"
           }
         }
       }
@@ -662,7 +689,9 @@
             "name": "Grouping:",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": ["selected_groups"],
+            "fill_dynamic": [
+              "selected_groups"
+            ],
             "categories": [],
             "default": "None"
           },
@@ -710,7 +739,10 @@
             "name": "Grouping",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic":  ["group1", "group2"],
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
             "categories": [],
             "default": null
           },

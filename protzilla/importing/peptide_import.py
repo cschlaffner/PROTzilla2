@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def peptide_import(_, file_path, intensity_name):
+def peptide_import(ms_df, file_path, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
     # Intensity -> Intensity, iBAQ -> LFQ, LFQ -> LFQ
@@ -37,4 +37,4 @@ def peptide_import(_, file_path, intensity_name):
     ]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    return ordered, {}
+    return ms_df, {"peptide_df": ordered}
