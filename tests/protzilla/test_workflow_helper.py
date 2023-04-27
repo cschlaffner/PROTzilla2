@@ -25,7 +25,7 @@ def workflow_wrong_parameters():
 
 
 @pytest.fixture
-def example_workflow_all_steps() -> list[dict[str, list[str]]]:
+def example_workflow_all_steps() -> list[dict[str, str | list[dict[str, str]]]]:
     return [
         {
             "section": "importing",
