@@ -18,6 +18,3 @@ def convert_str_if_possible(s):
     except ValueError:
         return s
     return int(f) if int(f) == f else f
-
-
-
