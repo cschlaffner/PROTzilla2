@@ -73,7 +73,7 @@ def test_runner_raises_error_for_missing_metadata_arg(
     monkeypatch, tests_folder_name, ms_data_path
 ):
     no_metadata_args = [
-        "only_import",  # expects max-quant import, metadata import
+        "only_import",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
     ]
@@ -96,7 +96,6 @@ def test_runner_raises_error_for_missing_metadata_arg(
 
 def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
     calculating_args = [
-        # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
@@ -126,7 +125,6 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
 def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
     plot_args = [
-        # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
