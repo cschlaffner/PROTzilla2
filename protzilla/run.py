@@ -187,7 +187,6 @@ class Run:
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
 
-
     def insert_step(self, step_to_be_inserted, section, method, index):
         params_default = get_all_default_params_for_methods(
             self.workflow_meta, section, step_to_be_inserted, method
