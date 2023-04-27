@@ -110,7 +110,7 @@
                     <div class="col-7">
                         {% if step != "plot" %}
                             <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
-                                    enctype="multipart/form-data">
+                                  enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {{ method_dropdown }}
                                 <div id="method_parameters" class="mb-2">
@@ -118,7 +118,7 @@
                                 </div>
                                 <div class="form-group">
                                     <input type="submit" value="Calculate" id="calculate_parameters_submit"
-                                        class="btn btn-red mr-auto">
+                                           class="btn btn-red mr-auto">
                                     {% if section == "data_preprocessing" %}
                                         <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
                                     {% endif %}
@@ -126,7 +126,7 @@
                             </form>
                         {% else %}
                             <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                enctype="multipart/form-data">
+                                  enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {{ method_dropdown }}
                                 <div id="method_parameters" class="mb-2">

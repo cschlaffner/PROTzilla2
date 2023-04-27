@@ -44,7 +44,7 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.result_df is not None or (
+    allow_next = run.calculated_method is not None or (
         run.step == "plot" and len(run.plots) > 0
     )
     return render(
@@ -61,7 +61,7 @@ def detail(request, run_name):
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[plot.to_html() for plot in run.plots],
-            show_next=run.result_df is not None
+            show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,

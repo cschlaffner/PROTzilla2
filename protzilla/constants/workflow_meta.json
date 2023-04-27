@@ -626,6 +626,11 @@
         "name": "ANOVA",
         "description": "Analysis of Variance:",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
@@ -646,7 +651,9 @@
             "name": "Grouping:",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": ["selected_groups"],
+            "fill_dynamic": [
+              "selected_groups"
+            ],
             "categories": [],
             "default": "None"
           },
@@ -665,9 +672,14 @@
         }
       },
       "t_test": {
-        "name": "T_Test",
+        "name": "t-Test",
         "description": "Statistical test assuming a t-distribution:",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
@@ -694,7 +706,10 @@
             "name": "Grouping",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic":  ["group1", "group2"],
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
             "categories": [],
             "default": null
           },
