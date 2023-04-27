@@ -1,28 +1,53 @@
-html, body{
+html, body {
     height: 100%;
-  }
+}
 
 .wrapper {
     display: flex;
-    min-height: 100vh;
+    width: 100%;
+    align-items: stretch;
 }
 
 #content {
-    flex: 3;
+    order: 1;
     padding: 20px;
+    flex-grow: 1;
+}
+
+#main-content {
     padding-left: 8%;
     padding-right: 8%;
 }
 
 #sidebar {
-    flex: 1;
-    padding: 20px;
+    order: 2;
+    flex-basis: 300px;
+    max-width: 400px;
+    min-height: 100vh;
+    flex-grow: 1;
+    transition: 100ms;
 }
 
-.plot-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+#sidebar.active {
+    margin-right: -400px;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-right: -400px;
+    }
+    #sidebar.active {
+        margin-right: 0;
+    }
+}
+
+#sidebarCollapse {
+    width: 35px;
+    height: 35px;
+}
+
+#header_toggle {
+    margin-top:-0.25rem
 }
 
 .plot-wrapper div:nth-child(2) {

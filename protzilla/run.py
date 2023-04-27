@@ -1,5 +1,4 @@
 import json
-import logging
 import shutil
 import traceback
 from pathlib import Path
@@ -24,13 +23,14 @@ class Run:
     :ivar section
     :ivar step
     :ivar method
+    :ivar df: dataframe that will be used as input for the next data preprocessing step, not used in data analysis
     :ivar result_df
     :ivar current_out
     :ivar current_parameters: calculation parameters that were used to calculate for each method
-    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method
+    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method, not used in data analysis
     :ivar calculated_method: method that was last used to calculate
     :ivar plots
-    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots
+    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots, not used in data analysis
     """
 
     @classmethod
@@ -97,7 +97,6 @@ class Run:
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
 
-        self.step_index = len(self.history.steps)
         # make these a result of the step to be compatible with CLI?
         try:
             self.section, self.step, self.method = self.current_workflow_location()
@@ -117,31 +116,36 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
+    def update_workflow_config(self, section, index, parameters):
+        self.workflow_config["sections"][section]["steps"][index][
+            "parameters"
+        ] = parameters
+        self.write_local_workflow()
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in method_map:
-            self.perform_calculation(method_map[location], parameters)
-        else:
-            self.result_df = None
-            raise ValueError(f"No calculation method found for {location}")
+        self.perform_calculation(method_map[location], parameters)
 
-    def perform_calculation(self, method_callable, parameters):
+    def perform_calculation(self, method_callable, parameters: dict):
         self.section, self.step, self.method = location_map[method_callable]
-        self.calculated_method = self.method
-        self.current_parameters[self.method] = parameters
-        call_parameters = {}
-        for k, v in parameters.items():
-            param_dict = self.workflow_meta[self.section][self.step][self.method][
-                "parameters"
-            ].get(k)
-            if param_dict and param_dict.get("type") == "named_output":
-                call_parameters[k] = self.history.output_of_named_step(*v)
-            else:
-                call_parameters[k] = v
+        call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
-        self.result_df, self.current_out = method_callable(self.df, **call_parameters)
+
+        if self.section in ["importing", "data_preprocessing"]:
+            self.result_df, self.current_out = method_callable(
+                self.df, **call_parameters
+            )
+        else:
+            self.result_df = None
+            self.current_out = method_callable(**call_parameters)
+
+        self.update_workflow_config(
+            self.section, self.step_index_in_current_section(), parameters
+        )
         self.plots = []  # reset as not up to date anymore
+        self.current_parameters[self.method] = parameters
+        self.calculated_method = self.method
         # error handling for CLI
         if "messages" in self.current_out:
             for message in self.current_out["messages"]:
@@ -158,39 +162,42 @@ class Run:
 
     def create_plot_from_location(self, section, step, method, parameters):
         location = (section, step, method)
-        if location in plot_map:
+        if step == "plot":
+            self.create_step_plot(plot_map[location], parameters)
+        else:
             self.create_plot(plot_map[location], parameters)
+
+        if section in ["importing", "data_preprocessing"]:
             self.plotted_for_parameters = self.current_parameters[method]
             self.current_plot_parameters[method] = parameters
-        else:
-            self.plots = []
-            logging.info(f"No plot method found for location {location}")
+        else:  # not used in data analysis
+            self.plotted_for_parameters = None
+            self.current_plot_parameters = {}  # expected dict for all_button_parameters
 
     def create_plot(self, method_callable, parameters):
         self.plots = method_callable(
             self.df, self.result_df, self.current_out, **parameters
         )
 
-    def insert_as_next_step(self, step_to_be_inserted):
-        self.section, self.step, self.method = self.current_workflow_location()
-        assert self.section is not None
+    def create_step_plot(self, method_callable, parameters):
+        call_parameters = self.exchange_named_outputs_with_data(parameters)
+        self.plots = method_callable(**call_parameters)
+        self.result_df = self.df
+        self.current_out = {}
+        self.current_parameters[self.method] = parameters
+        self.calculated_method = self.method
 
-        workflow_meta_step = self.workflow_meta[self.section][step_to_be_inserted]
-        first_method_name = list(workflow_meta_step.keys())[0]
-
+    def insert_step(self, step_to_be_inserted, section, method, index):
         params_default = get_all_default_params_for_methods(
-            self.workflow_meta, self.section, step_to_be_inserted, first_method_name
+            self.workflow_meta, section, step_to_be_inserted, method
         )
         step_dict = dict(
             name=step_to_be_inserted,
-            method=first_method_name,
+            method=method,
             parameters=params_default,
         )
-        past_steps_of_section = self.history.number_of_steps_in_section(self.section)
 
-        self.workflow_config["sections"][self.section]["steps"].insert(
-            past_steps_of_section + 1, step_dict
-        )
+        self.workflow_config["sections"][section]["steps"].insert(index, step_dict)
 
         self.write_local_workflow()
 
@@ -198,6 +205,24 @@ class Run:
         workflow_local_path = f"{self.run_path}/workflow.json"
         with open(workflow_local_path, "w") as f:
             json.dump(self.workflow_config, f, indent=2)
+
+    def insert_at_next_position(self, step_to_be_inserted, section, method):
+        if self.section == section:
+            past_steps_of_section = self.history.number_of_steps_in_section(section)
+
+            self.insert_step(
+                step_to_be_inserted, section, method, past_steps_of_section + 1
+            )
+        else:
+            self.insert_step(step_to_be_inserted, section, method, 0)
+
+    def export_workflow(self, name):
+        with open(f"{WORKFLOWS_PATH}/{name}.json", "w") as f:
+            json.dump(self.workflow_config, f, indent=2)
+
+    def delete_step(self, section, index):
+        del self.workflow_config["sections"][section]["steps"][index]
+        self.write_local_workflow()
 
     def next_step(self, name=None):
         try:
@@ -242,13 +267,21 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}
         self.current_plot_parameters = {}
-        # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
+        # TODO: add plotted_for_parameter to History?
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
 
     def current_workflow_location(self):
         return self.all_steps()[self.step_index]
+
+    def step_index_in_current_section(self):
+        index = 0
+        for section, step, method in self.all_steps():
+            if section == self.section:
+                if step == self.step:
+                    return index
+                index += 1
 
     def all_steps(self):
         steps = []
@@ -259,6 +292,18 @@ class Run:
 
     def current_run_location(self):
         return self.section, self.step, self.method
+
+    def exchange_named_outputs_with_data(self, parameters):
+        call_parameters = {}
+        for k, v in parameters.items():
+            param_dict = self.workflow_meta[self.section][self.step][self.method][
+                "parameters"
+            ].get(k)
+            if param_dict and param_dict.get("type") == "named_output":
+                call_parameters[k] = self.history.output_of_named_step(*v)
+            else:
+                call_parameters[k] = v
+        return call_parameters
 
     @property
     def metadata(self):

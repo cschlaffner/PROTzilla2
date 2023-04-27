@@ -29,4 +29,8 @@ urlpatterns = [
         name="change_field",
     ),
     path("<str:run_name>/add", views.add, name="add"),
+    path("<str:run_name>/delete_step", views.delete_step, name="delete_step"),
+    path(
+        "<str:run_name>/export_workflow", views.export_workflow, name="export_workflow"
+    ),
 ]

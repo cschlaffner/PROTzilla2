@@ -25,28 +25,47 @@ def workflow_wrong_parameters():
 
 
 @pytest.fixture
-def example_workflow_all_steps():
+def example_workflow_all_steps() -> list[dict[str, str | list[dict[str, str]]]]:
     return [
-        "ms_data_import",
-        "metadata_import",
-        "filter_proteins",
-        "filter_samples",
-        "imputation",
-        "outlier_detection",
-        "transformation",
-        "normalisation",
-        "differential_expression",
-        "differential_expression",
+        {
+            "section": "importing",
+            "steps": [
+                {"method": "max_quant_import", "name": "ms_data_import"},
+                {"method": "metadata_import_method", "name": "metadata_import"},
+            ],
+        },
+        {
+            "section": "data_preprocessing",
+            "steps": [
+                {"method": "low_frequency_filter", "name": "filter_proteins"},
+                {"method": "protein_intensity_sum_filter", "name": "filter_samples"},
+                {"method": "knn", "name": "imputation"},
+                {"method": "local_outlier_factor", "name": "outlier_detection"},
+                {"method": "log_transformation", "name": "transformation"},
+                {"method": "median", "name": "normalisation"},
+            ],
+        },
+        {
+            "section": "data_analysis",
+            "steps": [
+                {"method": "anova", "name": "differential_expression"},
+                {"method": "t_test", "name": "differential_expression"},
+            ],
+        },
+        {"section": "data_integration", "steps": []},
     ]
 
 
-def test_get_all_steps(example_workflow, example_workflow_all_steps):
-    assert workflow_helper.get_all_steps(example_workflow) == example_workflow_all_steps
+def test_get_steps_of_workflow(example_workflow, example_workflow_all_steps):
+    assert (
+        workflow_helper.get_steps_of_workflow(example_workflow)
+        == example_workflow_all_steps
+    )
 
 
-def test_get_all_steps_no_side_effects(example_workflow, example_workflow_all_steps):
+def test_get_steps_of_workflow_no_side_effects(example_workflow):
     example_workflow_copy = copy.deepcopy(example_workflow)
-    workflow_helper.get_all_steps(example_workflow)
+    workflow_helper.get_steps_of_workflow(example_workflow)
     assert example_workflow == example_workflow_copy
 
 

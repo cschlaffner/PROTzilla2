@@ -245,6 +245,11 @@ plot_map = {
     (
         "data_analysis",
         "plots",
-        "scatter_plot_2d",
+        "scatter_plot",
     ): plots.scatter_plot,
+    (
+        "data_analysis",
+        "plot",
+        "volcano",
+    ): plots.create_volcano_plot,
 }

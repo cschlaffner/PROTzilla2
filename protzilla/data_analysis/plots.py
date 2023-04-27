@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 from django.contrib import messages
+import dash_bio as dashbio
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -66,3 +67,21 @@ def scatter_plot(
             dict(),
             dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]),
         ]
+
+
+def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
+    plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
+    fig = dashbio.VolcanoPlot(
+        dataframe=plot_df,
+        effect_size="log2_fold_change",
+        p="corrected_p_value",
+        snp=None,
+        gene=None,
+        genomewideline_value=alpha,
+        effect_size_line=[-fc_threshold, fc_threshold],
+        xlabel="log2(fc)",
+        ylabel="-log10(p)",
+        title="Volcano Plot",
+        annotation="Protein ID",
+    )
+    return [fig]

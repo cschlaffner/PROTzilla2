@@ -199,6 +199,7 @@ class CustomJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, pd.DataFrame):
+            # TODO 124 dont write history_df when not in disk mode
             path = RUNS_PATH / self.run_name / f"history_dfs/{random_string()}.csv"
             path.parent.mkdir(exist_ok=True)
             obj.to_csv(path, index=False)

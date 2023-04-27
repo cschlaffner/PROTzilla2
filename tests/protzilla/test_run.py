@@ -5,9 +5,52 @@ import pytest
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import ms_data_import
+from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
+
+
+@pytest.fixture
+def example_workflow():
+    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
+        return json.load(f)
+
+
+def test_updated_params_in_workflow_config(example_workflow_short):
+    run_name = "test_export_workflow" + random_string()
+    run = Run.create(run_name, df_mode="memory")
+
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        {"threshold": 0.5},
+    )
+    assert (
+        run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
+            "threshold"
+        ]
+        == 0.5
+    )
+
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+        {"threshold": 1},
+    )
+    assert (
+        run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
+            "threshold"
+        ]
+        == 1
+    )
+    rmtree(RUNS_PATH / run_name)
 
 
 def test_run_create():
@@ -52,12 +95,6 @@ def test_run_back():
     run.back_step()
     assert run.df is None
     rmtree(RUNS_PATH / name)
-
-
-# think more about different run interfaces
-# CLI: steps, complete workflow
-# UI: location, back+next, workflow defaults
-# different classes?
 
 
 def test_run_continue():
@@ -147,22 +184,14 @@ def test_perform_calculation_logging(caplog):
     rmtree(RUNS_PATH / run_name)
 
 
-@pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-def test_insert_as_next_step(example_workflow_short):
+def test_insert_step(example_workflow_short):
     run_name = "test_insert_as_next_step" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
     importing_steps = run.workflow_config["sections"]["importing"]
     assert len(importing_steps["steps"]) == 1
-    run.insert_as_next_step("metadata_import")
+    run.insert_step("metadata_import", "importing", "metadata_import_method", 1)
     assert len(importing_steps["steps"]) == 2
 
     assert importing_steps["steps"][1] == {
@@ -173,4 +202,38 @@ def test_insert_as_next_step(example_workflow_short):
             "file_path": None,
         },
     }
+    rmtree(RUNS_PATH / run_name)
+
+
+def test_insert_at_next_position_correct_location(example_workflow):
+    run_name = "test_insert_as_next_step_correct_location" + random_string()
+    run = Run.create(run_name)
+
+    run.workflow_config = example_workflow
+    preprocessing_steps = run.workflow_config["sections"]["data_preprocessing"]
+
+    # test correct inserting section
+    step_count = len(preprocessing_steps["steps"])
+    run.insert_at_next_position(
+        "metadata_import", "importing", "metadata_import_method"
+    )
+    assert len(preprocessing_steps["steps"]) == step_count
+    run.insert_at_next_position("outlier_detection", "data_preprocessing", "pca")
+    assert len(preprocessing_steps["steps"]) == step_count + 1
+
+    # test added step is in first position
+    assert preprocessing_steps["steps"][0]["name"] == "outlier_detection"
+
+    rmtree(RUNS_PATH / run_name)
+
+
+def test_delete_step(example_workflow_short):
+    run_name = "test_delete_step" + random_string()
+    run = Run.create(run_name)
+
+    run.workflow_config = example_workflow_short
+    importing_steps = run.workflow_config["sections"]["importing"]
+    count = len(importing_steps["steps"])
+    run.delete_step("importing", 0)
+    assert len(importing_steps["steps"]) == count - 1
     rmtree(RUNS_PATH / run_name)
