@@ -27,13 +27,13 @@
 | protzilla/history.py                                             |      120 |        6 |       46 |        6 |     93% |33, 109, 116, 124, 190, 205 |
 | protzilla/importing/metadata\_import.py                          |       26 |        7 |       12 |        1 |     63% |     19-26 |
 | protzilla/importing/ms\_data\_import.py                          |       30 |        0 |        4 |        0 |    100% |           |
-| protzilla/run.py                                                 |      189 |       40 |       52 |        6 |     74% |38-44, 48-54, 103-104, 127, 134-135, 144->142, 155-166, 169, 174-179, 221-224, 277, 285->284, 287 |
+| protzilla/run.py                                                 |      206 |       42 |       62 |        7 |     75% |38-44, 48-54, 103-104, 133, 140-141, 153->151, 164-175, 178, 183-188, 220-221, 239-242, 280->exit, 303, 311->310, 313 |
 | protzilla/run\_helper.py                                         |       28 |        3 |       20 |        4 |     85% |12, 18, 21->25, 26 |
 | protzilla/runner.py                                              |       76 |        6 |       30 |        4 |     91% |109, 112, 118->121, 126-127, 140-141 |
 | protzilla/utilities/\_\_init\_\_.py                              |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/random.py                                    |        4 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/transform\_dfs.py                            |       11 |        0 |        0 |        0 |    100% |           |
-| protzilla/workflow\_helper.py                                    |       34 |        0 |       30 |        0 |    100% |           |
+| protzilla/workflow\_helper.py                                    |       45 |        7 |       32 |        0 |     88% |22-27, 31, 35, 39 |
 | runner\_cli.py                                                   |       20 |        5 |        2 |        1 |     73% | 52-55, 59 |
 | tests/\_\_init\_\_.py                                            |        0 |        0 |        0 |        0 |    100% |           |
 | tests/conftest.py                                                |       31 |        0 |        6 |        0 |    100% |           |
@@ -49,14 +49,14 @@
 | tests/protzilla/importing/test\_metadata\_import.py              |       23 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/importing/test\_ms\_data\_import.py              |       16 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_history.py                                 |      116 |        0 |        6 |        0 |    100% |           |
-| tests/protzilla/test\_run.py                                     |       78 |        8 |        2 |        0 |     90% |   101-119 |
+| tests/protzilla/test\_run.py                                     |      108 |        8 |        2 |        0 |     93% |   144-162 |
 | tests/protzilla/test\_run\_helper.py                             |       42 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_runner.py                                  |       89 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/test\_runner\_cli.py                             |       66 |        0 |        4 |        0 |    100% |           |
 | tests/protzilla/test\_transform\_dfs.py                          |       32 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                        |       55 |        0 |        4 |        0 |    100% |           |
 | ui/main/\_\_init\_\_.py                                          |        0 |        0 |        0 |        0 |    100% |           |
-|                                                        **TOTAL** | **1954** |  **129** |  **393** |   **66** | **91%** |           |
+|                                                        **TOTAL** | **2012** |  **138** |  **405** |   **67** | **90%** |           |
 
 
 ## Setup coverage badge
