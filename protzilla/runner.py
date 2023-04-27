@@ -104,7 +104,13 @@ class Runner:
             params["file_path"] = self.meta_data_path
             self._perform_current_step(params)
             logging.info("imported Meta Data")
-
+        elif step["name"] == "peptide_import":
+            # this only exists to deal with the tests and is to be updated when the
+            # runner gets "peptide"-functionality
+            logging.warning("peptide-import is not yet implemented for the runner")
+            params = step["parameters"]
+            params["file_path"] = "dummy_path"  # not yet properly implemented
+            self._perform_current_step(params)
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 

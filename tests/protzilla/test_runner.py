@@ -58,7 +58,7 @@ def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_p
     ]
 
     mock_perform.assert_has_calls(calls)
-    assert mock_perform.call_count == 2
+    assert mock_perform.call_count == 3
 
 
 def test_runner_raises_error_for_missing_metadata_arg(

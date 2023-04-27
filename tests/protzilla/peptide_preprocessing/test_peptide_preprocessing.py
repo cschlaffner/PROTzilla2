@@ -46,13 +46,15 @@ def filtered_peptides_df():
 
 
 def test_pep_filter(leftover_peptide_df, filtered_peptides_df):
-    peptide_df, _ = peptide_import.peptide_import(
-        _=None,
+    _, import_out = peptide_import.peptide_import(
+        ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
         intensity_name="Intensity",
     )
     threshold = 0.0014
-    df, out = by_pep_value(peptide_df, threshold)
+    _, out = by_pep_value(
+        intensity_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
+    )
 
-    pd.testing.assert_frame_equal(df, leftover_peptide_df)
+    pd.testing.assert_frame_equal(out["peptide_df"], leftover_peptide_df)
     pd.testing.assert_frame_equal(out["filtered_peptides"], filtered_peptides_df)
