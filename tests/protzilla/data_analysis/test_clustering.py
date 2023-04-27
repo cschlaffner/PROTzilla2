@@ -39,40 +39,6 @@ def clustering_df():
     return clustering_df
 
 
-@pytest.fixture
-def clustering_df_with_nan():
-    clustering_list = (
-        ["Sample1", "Protein1", "Gene1", 18],
-        ["Sample1", "Protein2", "Gene1", 16],
-        ["Sample1", "Protein3", "Gene1", 1],
-        ["Sample2", "Protein1", "Gene1", np.nan],
-        ["Sample2", "Protein2", "Gene1", 18],
-        ["Sample2", "Protein3", "Gene1", 2],
-        ["Sample3", "Protein1", "Gene1", 22],
-        ["Sample3", "Protein2", "Gene1", 19],
-        ["Sample3", "Protein3", "Gene1", 3],
-        ["Sample4", "Protein1", "Gene1", 8],
-        ["Sample4", "Protein2", "Gene1", np.nan],
-        ["Sample4", "Protein3", "Gene1", 1],
-        ["Sample5", "Protein1", "Gene1", 10],
-        ["Sample5", "Protein2", "Gene1", 14],
-        ["Sample5", "Protein3", "Gene1", 2],
-        ["Sample6", "Protein1", "Gene1", 12],
-        ["Sample6", "Protein2", "Gene1", 13],
-        ["Sample6", "Protein3", "Gene1", 3],
-        ["Sample7", "Protein1", "Gene1", 12],
-        ["Sample7", "Protein2", "Gene1", 13],
-        ["Sample7", "Protein3", "Gene1", 3],
-    )
-
-    clustering_df = pd.DataFrame(
-        data=clustering_list,
-        columns=["Sample", "Protein ID", "Gene", "Intensity"],
-    )
-
-    return clustering_df
-
-
 def test_k_means(clustering_df):
     centroids_assertion = [[10.5, 13.75, 2.25], [20.0, 17.666666666666668, 2.0]]
     cluster_labels_df_assertion = pd.DataFrame(
@@ -113,10 +79,10 @@ def test_k_means(clustering_df):
     assert centroids_assertion == current_out["centroids"]
 
 
-def test_k_means_nan_handling(clustering_df_with_nan):
+def test_k_means_nan_handling(df_with_nan):
     _, current_out = k_means(
         pd.DataFrame(),  # Remove when intensity_df is removed
-        clustering_df_with_nan,
+        df_with_nan,
         n_clusters=4,
         init_centroid_strategy="k-means++",
     )
