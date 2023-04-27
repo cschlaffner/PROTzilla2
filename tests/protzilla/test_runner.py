@@ -24,12 +24,20 @@ def metadata_path():
     return "tests/metadata_cut_columns.csv"
 
 
-def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
+@pytest.fixture
+def peptide_path():
+    return "tests/test_data/peptides_vsmall.txt"
+
+
+def test_runner_imports(
+    monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
+):
     importing_args = [
         "only_import",  # expects max-quant import, metadata import
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
+        f"--peptides_path={peptide_path}",
     ]
 
     kwargs = args_parser().parse_args(importing_args).__dict__
