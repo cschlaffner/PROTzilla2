@@ -1,10 +1,9 @@
 <label for="{{ key }}">{{ name }}</label>
 <select name="{{ key }}" id="{{ key }}"
-        {% if class %} class="{{ class}}" {% endif %}
+        class="form-select"
         {% if disabled %} disabled {% endif %}
-        {% if multiple %} multiple {% endif %}
->
+        {% if multiple %} multiple {% endif %}>
     {% for option in categories %}
-        <option value="{{ option }}" {% if option == default %} selected="selected" {% endif %} >{{ option }}</option>
+        <option value="{{ option }}" {% if option == default or multiple%} selected="selected" {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>

@@ -17,7 +17,6 @@ dash-html-components==2.0.0
 dash-table==5.0.0
 distlib==0.3.6
 Django==4.1.7
-django-bootstrap-v5==1.0.11
 django-jquery==3.1.0
 filelock==3.9.0
 Flask==2.2.3
@@ -76,3 +75,8 @@ umap-learn==0.5.3
 numba==0.57.0rc1
 Werkzeug==2.2.3
 wheel==0.37.1
+scikit-learn==1.2.2
+pytest-dependency==0.5.1
+pytest-order==1.1.0
+umap-learn==0.5.3
+numba==0.57.0rc1

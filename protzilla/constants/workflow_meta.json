@@ -5,6 +5,11 @@
         "name": "Max Quant Data Import",
         "description": "",
         "parameters": {
+          "file_path": {
+            "name": "MaxQuant intensities file:",
+            "type": "file",
+            "default": null
+          },
           "intensity_name": {
             "name": "intensity parameter",
             "type": "categorical",
@@ -14,11 +19,6 @@
               "iBAQ"
             ],
             "default": "Intensity"
-          },
-          "file_path": {
-            "name": "MaxQuant intensities file:",
-            "type": "file",
-            "default": null
           }
         }
       },
@@ -26,6 +26,11 @@
         "name": "MS Fragger Data Import",
         "description": "",
         "parameters": {
+          "file_path": {
+            "name": "MSFragger intensities file:",
+            "type": "file",
+            "default": null
+          },
           "intensity_name": {
             "name": "intensity name",
             "type": "categorical",
@@ -41,11 +46,6 @@
               "Total Spectral Count"
             ],
             "default": "Intensity"
-          },
-          "file_path": {
-            "name": "MSFragger intensities file:",
-            "type": "file",
-            "default": null
           }
         }
       }
@@ -55,6 +55,11 @@
         "name": "Metadata Import",
         "description": "Import metadata",
         "parameters": {
+          "file_path": {
+            "name": "Metadata file:",
+            "type": "file",
+            "default": null
+          },
           "feature_orientation": {
             "name": "feature orientation",
             "type": "categorical",
@@ -63,11 +68,6 @@
               "Columns (samples in rows, features in columns)"
             ],
             "default": "Columns (samples in rows, features in columns)"
-          },
-          "file_path": {
-            "name": "Metadata file:",
-            "type": "file",
-            "default": null
           }
         }
       }

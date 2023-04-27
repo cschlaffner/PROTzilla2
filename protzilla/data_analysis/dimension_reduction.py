@@ -154,7 +154,7 @@ def umap(
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
             msg = (
-                "UMAP does not accept missing values encoded as NaN. Consider"
+                "UMAP does not accept missing values encoded as NaN. Consider "
                 "preprocessing your data to remove NaN values."
             )
         else:

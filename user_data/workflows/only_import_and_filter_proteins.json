@@ -9,13 +9,6 @@
           "parameters": {
             "intensity_name": "iBAQ"
           }
-        },
-        {
-          "name": "metadata_import",
-          "method": "metadata_import_method",
-          "parameters": {
-            "feature_orientation": "Rows (features in rows, samples in columns)"
-          }
         }
       ]
     },
@@ -25,9 +18,13 @@
           "name": "filter_proteins",
           "method": "low_frequency_filter",
           "parameters": {
-            "threshold": 0.2,
-            "graph_one_type": "Pie chart"
-          }
+            "threshold": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
         }
       ]
     },

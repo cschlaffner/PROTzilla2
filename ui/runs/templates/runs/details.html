@@ -1,119 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    {% load static %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
+{% endblock %}
+
+{% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     {% include 'runs/dynamic_methods.html' %}
     {% include 'runs/form_buttons.html' with results_exist=show_next %}
+    {% include 'runs/file_upload.html' %}
+{% endblock %}
 
-    <title>PROTzilla {{ run_name }}</title>
-    <style>
-        .layout-container {
-            display: flex;
-        }
+{% block title %}
+    <title>PROTZILLA – {{ run_name }}</title>
+{% endblock %}
 
-        main {
-            flex: 3;
-            padding: 20px;
-        }
+{% block navbar %}
+    {% include "navbar.html" with run_name=run_name %}
+{% endblock %}
 
-        aside {
-            flex: 1;
-            background-color: #87A8B9;
-            padding: 20px;
-        }
-    </style>
-</head>
+{% block content %}
 
-<body>
-    <div class="layout-container">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <p>{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                {{ message | safe }}
-            </p>
-            {% endfor %}
-        </div>
-        <br>
-        {% endif %}
+    <div class="wrapper">
+        <div id="content">
+            {# show history #}
+            {% if displayed_history %}
+                <div class="row justify-content-center d-flex">
+                    <h3>History</h3>
+                </div>
 
-        {{ run_name }}
-        <br>
-        <b>history</b>
-        <br>
+                {% for step in displayed_history %}
+                    <div class="row justify-content-center d-flex">
+                        <div class="col-7">
+                            {% if step.section_heading %}
+                                <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
+                            {% endif %}
 
-        <main>
-            {% for step in displayed_history %}
-            {{ step.location }}<br>
-            {% for field in step.fields %}
-            {{ field }}<br>
-            {% endfor %}
-            {% if step.name %}
-            Name: {{ step.name }}<br>
-            {% else %}
-            {% include "runs/form_add_name.html" with index=step.index %}<br>
+                            <b>{{ step.display_name }}</b><br>
+                            {% if step.name %}
+                                Name: {{ step.name }}<br>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                {% include "runs/fields.html" with fields=step.fields %}
+
+                                {% if not step.name %}
+                                    {% include "runs/form_add_name.html" with index=step.index %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# display history plots #}
+                    {% for plot in step.plots %}
+                        <div class="plot-wrapper">
+                            {{ plot|safe }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                <hr class="my-4">
             {% endif %}
 
-            {% for plot in step.plots %}
-            <div style="width:600;height:500">
-                {{ plot|safe }}
-            </div>
-            <br>
-            {% endfor %}
-            {% endfor %}
-
-            <div id="current_step">
-                <br>
-                {{ location }}
-                <br>
-                <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
-                    enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ method_dropdown }}
-                    <div id="method_parameters">
-                        {% include "runs/fields.html" with fields=fields %}
-                    </div>
-                    <input type="submit" id="calculate_parameters_submit" value="Calculate">
-                </form>
-                <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                    enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div id="plot_parameters">
-                        {% include "runs/fields.html" with fields=plot_fields %}
-                    </div>
-                    <input type="submit" id="plot_parameters_submit" value="Plot">
-                </form>
-
-                {% if current_plots %}
-                <div id="plots">
-                    {% for plot in current_plots %}
-                    <div style="width:600;height:500">
-                        {{ plot|safe }}
-                    </div>
+            {# include django messages for alerting user #}
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                             role="alert">
+                            {{ message | safe }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     {% endfor %}
                 </div>
+                <br>
+            {% endif %}
+
+            {# show current step #}
+            <div class="row justify-content-center d-flex">
+                <h3>{{ display_name }}</h3>
+                {# if there are plot parameters, display method and plot parameters next to each other #}
+                {% if plot_fields %}
+                    <div class="col">
+                        <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
+                              enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-1">
+                                {{ method_dropdown }}
+                            </div>
+                            <div id="method_parameters" class="mb-2">
+                                {% include "runs/fields.html" with fields=fields %}
+                            </div>
+                            <input type="submit" id="calculate_parameters_submit" value="Calculate" class="btn btn-red">
+                        </form>
+                    </div>
+                    <div class="col">
+                        <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
+                              enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div id="plot_parameters" class="mb-2">
+                                {% include "runs/fields.html" with fields=plot_fields %}
+                            </div>
+                            <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="col-7">
+                        <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
+                              enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ method_dropdown }}
+                            <div id="method_parameters" class="mb-2">
+                                {% include "runs/fields.html" with fields=fields %}
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Calculate" id="calculate_parameters_submit"
+                                       class="btn btn-red mr-auto">
+                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
+                            </div>
+                        </form>
+                    </div>
                 {% endif %}
             </div>
-            <div id="nav_buttons">
-                <form action="{% url 'runs:next' run_name %}" method="post">
-                    {% csrf_token %}
-                    {{ name_field }}<br>
-                    <button {% if not show_next %} disabled {% endif %}>Next</button>
-                </form>
 
-                <form action="{% url 'runs:back' run_name %}" method="post">
+            {# show current plots #}
+            {% if current_plots %}
+                <div class="mt-4" id="plots">
+                    {% for plot in current_plots %}
+                        <div class="plot-wrapper">
+                            {{ plot|safe }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# navigation between steps #}
+            <div class="justify-content-end d-flex">
+                {% if show_next %}
+                    <div class="col-3 mb-2">
+                        <div class="form-group mb-0">
+                            {{ name_field }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="justify-content-end d-flex">
+                <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
                     {% csrf_token %}
-                    <button {% if not show_back %} disabled {% endif %}>Back</button>
+                    <div class="form-group">
+                        <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
+                           disabled {% endif %}>Back</a>
+                        <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next</button>
+                    </div>
                 </form>
             </div>
-        </main>
-        <aside>
-            {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
-        </aside>
-    </div>
-</body>
 
-</html>
+        </div>
+
+        {# include sidebar #}
+        <nav id="sidebar" class="bg-grey">
+            {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
+        </nav>
+    </div>
+{% endblock %}

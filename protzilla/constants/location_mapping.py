@@ -242,4 +242,9 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_analysis",
+        "plots",
+        "scatter_plot_2d",
+    ): plots.scatter_plot,
 }
