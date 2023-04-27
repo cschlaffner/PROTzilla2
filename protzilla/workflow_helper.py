@@ -1,7 +1,9 @@
 from itertools import zip_longest
 
 
-def get_all_steps(workflow_config_dict) -> list[dict[str, str | list[dict[str, str]]]]:
+def get_steps_of_workflow(
+    workflow_config_dict,
+) -> list[dict[str, str | list[dict[str, str]]]]:
     workflow_steps = []
     for section, steps in workflow_config_dict["sections"].items():
         workflow_steps.append(
@@ -16,7 +18,7 @@ def get_all_steps(workflow_config_dict) -> list[dict[str, str | list[dict[str, s
     return workflow_steps
 
 
-def get_all_possible_steps(workflow_meta) -> list[dict[str, str | list[str]]]:
+def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]]:
     workflow_steps = []
     for section, steps in workflow_meta.items():
         workflow_steps.append(

@@ -1,6 +1,6 @@
 from protzilla.workflow_helper import (
-    get_all_possible_steps,
-    get_all_steps,
+    get_steps_of_workflow,
+    get_steps_of_workflow_meta,
     method_name,
     section_name,
     step_name,
@@ -30,8 +30,8 @@ def convert_str_if_possible(s):
 
 
 def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
-    workflow_steps = get_all_steps(workflow_config_dict)
-    possible_steps = get_all_possible_steps(workflow_meta)
+    workflow_steps = get_steps_of_workflow(workflow_config_dict)
+    possible_steps = get_steps_of_workflow_meta(workflow_meta)
     displayed_steps = []
     global_index = 0
     for workflow_section, possible_section in zip(workflow_steps, possible_steps):

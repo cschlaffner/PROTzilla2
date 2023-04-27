@@ -56,13 +56,16 @@ def example_workflow_all_steps() -> list[dict[str, str | list[dict[str, str]]]]:
     ]
 
 
-def test_get_all_steps(example_workflow, example_workflow_all_steps):
-    assert workflow_helper.get_all_steps(example_workflow) == example_workflow_all_steps
+def test_get_steps_of_workflow(example_workflow, example_workflow_all_steps):
+    assert (
+        workflow_helper.get_steps_of_workflow(example_workflow)
+        == example_workflow_all_steps
+    )
 
 
-def test_get_all_steps_no_side_effects(example_workflow):
+def test_get_steps_of_workflow_no_side_effects(example_workflow):
     example_workflow_copy = copy.deepcopy(example_workflow)
-    workflow_helper.get_all_steps(example_workflow)
+    workflow_helper.get_steps_of_workflow(example_workflow)
     assert example_workflow == example_workflow_copy
 
 
