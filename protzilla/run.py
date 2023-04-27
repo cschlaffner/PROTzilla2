@@ -128,12 +128,12 @@ class Run:
     def perform_calculation(self, method_callable, parameters):
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = self.exchange_named_outputs_with_data(parameters)
-        self.calculated_method = self.method
-        self.current_parameters[self.method] = parameters
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
         self.result_df, self.current_out = method_callable(self.df, **call_parameters)
         self.plots = []  # reset as not up to date anymore
+        self.current_parameters[self.method] = parameters
+        self.calculated_method = self.method
         # error handling for CLI
         if "messages" in self.current_out:
             for message in self.current_out["messages"]:
@@ -152,7 +152,7 @@ class Run:
         location = (section, step, method)
         if location in plot_map:
             if step == "plot":
-                self.create_plot_step(plot_map[location], parameters)
+                self.create_step_plot(plot_map[location], parameters)
             else:
                 self.create_plot(plot_map[location], parameters)
                 self.plotted_for_parameters = self.current_parameters[method]
@@ -166,13 +166,13 @@ class Run:
             self.df, self.result_df, self.current_out, **parameters
         )
 
-    def create_plot_step(self, method_callable, parameters):
+    def create_step_plot(self, method_callable, parameters):
         call_parameters = self.exchange_named_outputs_with_data(parameters)
-        self.calculated_method = self.method
-        self.current_parameters[self.method] = parameters
         self.plots = method_callable(**call_parameters)
         self.result_df = self.df
         self.current_out = {}
+        self.current_parameters[self.method] = parameters
+        self.calculated_method = self.method
 
     def insert_as_next_step(self, step_to_be_inserted):
         self.section, self.step, self.method = self.current_workflow_location()
