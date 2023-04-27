@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
+import plotly.graph_objs as go
 
 sys.path.append(f"{BASE_DIR}/..")
 
@@ -232,7 +233,26 @@ def plot(request, run_name):
     if run.step == "plot":
         del parameters["chosen_method"]
     run.create_plot_from_location(section, step, method, parameters)
-    # TODO 114: show error message if present
+
+    # if run.plots.get("messages", False):
+    if "messages" in run.plots:
+        for message in run.plots["messages"]:
+            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+
+            # map error level to bootstrap css class
+            lvl_to_css_class = {
+                40: "alert-danger",
+                30: "alert-warning",
+                20: "alert-info",
+            }
+            messages.add_message(
+                request,
+                message["level"],
+                f"{message['msg']} {trace}",
+                lvl_to_css_class[message["level"]],
+            )
+        run.plots = []
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

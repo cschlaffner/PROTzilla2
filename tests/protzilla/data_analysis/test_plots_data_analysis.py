@@ -69,28 +69,28 @@ def color_df():
 
 
 def test_scatter_plot_2d(show_figures, wide_2d_df, color_df):
-    fig = scatter_plot(wide_2d_df, wide_2d_df, color_df)[0]
+    fig = scatter_plot(wide_2d_df, color_df)[0]
     if show_figures:
         fig.show()
     return
 
 
 def test_scatter_plot_no_color_df(show_figures, wide_2d_df):
-    fig = scatter_plot(wide_2d_df, wide_2d_df)[0]
+    fig = scatter_plot(wide_2d_df)[0]
     if show_figures:
         fig.show()
     return
 
 
 def test_scatter_plot_3d(show_figures, wide_3d_df, color_df):
-    fig = scatter_plot(wide_3d_df, wide_3d_df, color_df)[0]
+    fig = scatter_plot(wide_3d_df, color_df)[0]
     if show_figures:
         fig.show()
     return
 
 
 def test_scatter_plot_4d_df(wide_4d_df, color_df):
-    result = scatter_plot(wide_4d_df, wide_4d_df, color_df)
+    result = scatter_plot(wide_4d_df, color_df)
 
     assert "messages" in result[-1]
     assert "Consider reducing the dimensionality" in result[-1]["messages"][0]["msg"]
