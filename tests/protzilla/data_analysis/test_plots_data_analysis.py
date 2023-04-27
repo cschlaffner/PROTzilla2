@@ -92,5 +92,5 @@ def test_scatter_plot_3d(show_figures, wide_3d_df, color_df):
 def test_scatter_plot_4d_df(wide_4d_df, color_df):
     result = scatter_plot(wide_4d_df, color_df)
 
-    assert "messages" in result[-1]
-    assert "Consider reducing the dimensionality" in result[-1]["messages"][0]["msg"]
+    assert "messages" in result
+    assert "Consider reducing the dimensionality" in result["messages"][0]["msg"]
