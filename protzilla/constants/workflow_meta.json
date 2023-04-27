@@ -651,7 +651,9 @@
             "name": "Grouping:",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": ["selected_groups"],
+            "fill_dynamic": [
+              "selected_groups"
+            ],
             "categories": [],
             "default": "None"
           },
@@ -704,7 +706,10 @@
             "name": "Grouping",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic":  ["group1", "group2"],
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
             "categories": [],
             "default": null
           },
