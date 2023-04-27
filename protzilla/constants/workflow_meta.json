@@ -670,7 +670,7 @@
         }
       },
       "t_test": {
-        "name": "T_Test",
+        "name": "t-Test",
         "description": "Statistical test assuming a t-distribution:",
         "parameters": {
           "intensity_df": {
