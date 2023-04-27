@@ -33,7 +33,7 @@ def t_sne(
     :param perplexity: the perplexity is related to the number of nearest neighbors
     :type perplexity: float
     :param metric: The metric to use when calculating distance between instances in a \
-    feature array.
+    feature array. Possible metrics are: euclidean, manhattan, cosine and haversine
     :type metric: str
     :param random_state: determines the random number generator.
     :type random_state: int

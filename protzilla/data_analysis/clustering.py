@@ -27,7 +27,8 @@ def k_means(
     :type n_clusters: int
     :param random_state: Determines random number generation for centroid initialization
     :type random_state: int
-    :param init_centroid_strategy: method for centroid initialization
+    :param init_centroid_strategy: method for centroid initialization. Possible methods\
+     are: k-means++ and random
     :type init_centroid_strategy: str
     :param n_init: Number of times the k-means algorithm is run with different centroid\
      seeds.
