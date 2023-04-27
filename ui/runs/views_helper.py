@@ -1,9 +1,9 @@
 from protzilla.workflow_helper import (
     get_all_possible_steps,
     get_all_steps,
-    get_method_name,
-    get_section_name,
-    get_step_name,
+    method_name,
+    section_name,
+    step_name,
 )
 
 
@@ -68,9 +68,9 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             workflow_steps.append(
                 {
                     "id": step["name"],
-                    "name": get_step_name(step["name"]),
+                    "name": step_name(step["name"]),
                     "index": i,
-                    "method_name": get_method_name(
+                    "method_name": method_name(
                         workflow_meta, section, step["name"], step["method"]
                     ),
                     "selected": global_index == step_index,
@@ -91,13 +91,13 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 for method, method_params in list(workflow_meta[section][step].items())
             ]
             possible_steps.append(
-                {"id": step, "methods": methods, "name": get_step_name(step)}
+                {"id": step, "methods": methods, "name": step_name(step)}
             )
 
         displayed_steps.append(
             {
                 "id": section,
-                "name": get_section_name(section),
+                "name": section_name(section),
                 "possible_steps": possible_steps,
                 "steps": workflow_steps,
                 "selected": section_selected,

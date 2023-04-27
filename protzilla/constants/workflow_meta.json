@@ -77,7 +77,7 @@
     "filter_proteins": {
       "low_frequency_filter": {
         "name": "Low Frequency",
-        "description": "This function filters proteins with a low frequency of occurrence from\n    a protein dataframe based on a set threshold. The threshold is defined\n    by the relative amount of samples a protein is detected in.",
+        "description": "This function filters proteins with a low frequency of occurrence from a protein dataframe based on a set threshold. The threshold is defined by the relative amount of samples a protein is detected in.",
         "parameters": {
           "threshold": {
             "name": "Threshold for the relative amount of samples a protein is detected in:",
@@ -157,7 +157,7 @@
     "outlier_detection": {
       "pca": {
         "name": "PCA",
-        "description": "This function filters out outliers using a PCA\n    based approach based geometrical distance to the median\n    and returns a list of samples that are inliers.\n    Allows 2D (using an ellipse) or 3D (using an ellipsoid)\n    analysis.",
+        "description": "This function filters out outliers using a PCA based approach based geometrical distance to the median and returns a list of samples that are inliers. Allows 2D (using an ellipse) or 3D (using an ellipsoid) analysis.",
         "parameters": {
           "threshold": {
             "name": "Threshold for number of standard deviations from the median:",
@@ -180,7 +180,7 @@
       },
       "isolation_forest": {
         "name": "Isolation Forest",
-        "description": "This function filters out outliers using a clustering\n    isolation forest approach.",
+        "description": "This function filters out outliers using a clustering isolation forest approach.",
         "parameters": {
           "n_estimators": {
             "name": "Number of estimators:",
@@ -214,7 +214,7 @@
     "transformation": {
       "log_transformation": {
         "name": "Log",
-        "description": "This function log-transforms intensity\n    DataFrames. Supports log-transformation to the base\n    of 2 or 10.",
+        "description": "This function log-transforms intensity DataFrames. Supports log-transformation to the base of 2 or 10.",
         "parameters": {
           "log_base": {
             "name": "Log transformation base:",
@@ -254,7 +254,7 @@
     "normalisation": {
       "z_score": {
         "name": "Z-Score",
-        "description": "A function to run the sklearn StandardScaler class on your dataframe.\n    Normalises the data on the level of each sample.\n    Scales the data to zero mean and unit variance. This is often also\n    called z-score normalisation/transformation.",
+        "description": "A function to run the sklearn StandardScaler class on your dataframe. Normalises the data on the level of each sample. Scales the data to zero mean and unit variance. This is often also called z-score normalisation/ transformation.",
         "parameters": {},
         "graphs": [
           {
@@ -282,7 +282,7 @@
       },
       "totalsum": {
         "name": "Total Sum",
-        "description": "A function to perform normalisation using the total sum\n    of sample intensities on your dataframe.\n    Normalises the data on the level of each sample.\n    Divides each intensity by the total sum of sample intensities.",
+        "description": "A function to perform normalisation using the total sum of sample intensities on your dataframe. Normalises the data on the level of each sample. Divides each intensity by the total sum of sample intensities.",
         "parameters": {},
         "graphs": [
           {
@@ -310,7 +310,7 @@
       },
       "median": {
         "name": "Median",
-        "description": "A function to perform a quartile/percentile normalisation on your\n    dataframe. Normalises the data on the level of each sample.\n    Divides each intensity by the chosen intensity quartile of the\n    respective sample. By default, the median (50%-quartile) is used.",
+        "description": "A function to perform a quartile/percentile normalisation on your dataframe. Normalises the data on the level of each sample. Divides each intensity by the chosen intensity quartile of the respective sample. By default, the median (50%-quartile) is used.",
         "parameters": {
           "percentile": {
             "name": "Percentile for normalisation:",
@@ -346,7 +346,7 @@
       },
       "ref_protein": {
         "name": "Protein Reference",
-        "description": "A function to perform protein-intensity normalisation in reference\n    to a selected protein on your dataframe.\n    Normalises the data on the level of each sample.\n    Divides each intensity by the intensity of the chosen reference\n    protein in each sample. Samples where this value is zero will be\n    removed and returned separately.",
+        "description": "A function to perform protein-intensity normalisation in reference to a selected protein on your dataframe. Normalises the data on the level of each sample. Divides each intensity by the intensity of the chosen reference protein in each sample. Samples where this value is zero will be removed and returned separately.",
         "parameters": {
           "reference_protein": {
             "name": "Reference Protein:",
@@ -382,7 +382,7 @@
     "imputation": {
       "min_value_per_dataset": {
         "name": "Min per Dataset",
-        "description": "A function to impute missing values for each protein\n    by taking into account data from the entire dataframe.\n    Sets missing value to the smallest measured value in\n    the dataframe. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.",
+        "description": "A function to impute missing values for each protein by taking into account data from the entire dataframe. Sets missing value to the smallest measured value in the dataframe. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation.",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -429,7 +429,7 @@
       },
       "min_value_per_protein": {
         "name": "Min per Protein",
-        "description": "A function to impute missing values for each protein\n    by taking into account data from each protein.\n    Sets missing value to the smallest measured value for each\n    protein column. The user can also assign a shrinking factor to\n    take a fraction of that minimum value for imputation.\n    CAVE: All proteins without any values will be filtered out.",
+        "description": "A function to impute missing values for each protein by taking into account data from each protein. Sets missing value to the smallest measured value for each protein column. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without any values will be filtered out.",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -476,7 +476,7 @@
       },
       "min_value_per_sample": {
         "name": "Min per Sample",
-        "description": "Sets missing intensity values to the smallest measured value\n    for each sample",
+        "description": "Sets missing intensity values to the smallest measured value for each sample",
         "parameters": {
           "shrinking_value": {
             "name": "Shrinking Value:",
@@ -523,7 +523,7 @@
       },
       "simple_imputation_per_protein": {
         "name": "SimpleImputer",
-        "description": "Imputation methods include imputation by mean, median and\n    mode. Implements the sklearn.SimpleImputer class",
+        "description": "Imputation methods include imputation by mean, median and mode. Implements the sklearn.SimpleImputer class",
         "parameters": {
           "strategy": {
             "name": "Strategy:",
@@ -573,7 +573,7 @@
       },
       "knn": {
         "name": "kNN",
-        "description": "A function to perform value imputation based on KNN\n    (k-nearest neighbors). Imputes missing values for each\n    sample based on intensity-wise similar samples.\n    Two samples are close if the features that neither is\n    missing are close.",
+        "description": "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing values for each sample based on intensity-wise similar samples. Two samples are close if the features that neither is missing are close.",
         "parameters": {
           "number_of_neighbours": {
             "name": "Number of neighbours:",
@@ -624,7 +624,7 @@
     "differential_expression": {
       "anova": {
         "name": "ANOVA",
-        "description": "A function that uses ANOVA to test the difference between two or more\n    groups defined in the clinical data. The ANOVA test is conducted on\n    the level of each protein. The p-values are corrected for multiple\n    testing.",
+        "description": "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -669,7 +669,7 @@
       },
       "t_test": {
         "name": "T-Test",
-        "description": "A function to conduct a two sample t-test between groups defined in the\n    clinical data. The t-test is conducted on the level of each protein.\n    The p-values are corrected for multiple testing.",
+        "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",

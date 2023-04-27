@@ -25,15 +25,15 @@ def get_all_possible_steps(workflow_meta) -> list[dict[str, str | list[str]]]:
     return workflow_steps
 
 
-def get_step_name(step):
+def step_name(step):
     return step.replace("_", " ").title()
 
 
-def get_section_name(section):
+def section_name(section):
     return section.replace("_", " ").title()
 
 
-def get_method_name(workflow_meta, section, step, method):
+def method_name(workflow_meta, section, step, method):
     return workflow_meta[section][step][method]["name"]
 
 
