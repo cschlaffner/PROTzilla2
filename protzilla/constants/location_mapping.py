@@ -146,11 +146,6 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
-    (
-        "data_analysis",
-        "plots",
-        "scatter_plot",
-    ): plots.scatter_plot,
 }
 
 # reversed mapping of method callable and location
@@ -244,7 +239,7 @@ plot_map = {
     ): outlier_detection.by_isolation_forest_plot,
     (
         "data_analysis",
-        "plots",
+        "plot",
         "scatter_plot",
     ): plots.scatter_plot,
     (

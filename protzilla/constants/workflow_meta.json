@@ -784,6 +784,23 @@
         "description": "",
         "parameters": {
         }
+      },
+      "scatter_plot": {
+        "name": "Scatter plot",
+        "description":"Creates a scatter plot from data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": null
+          },
+          "color_df": {
+            "name": "Choose a dataframe to assign color to marks (optional)",
+            "type": "named_output",
+            "default": null,
+            "optional": true
+          }
+        }
       }
     },
     "clustering": {
@@ -945,25 +962,6 @@
             "max": 4294967295,
             "step": 1,
             "default": 42
-          }
-        }
-      }
-    },
-    "plots": {
-      "scatter_plot": {
-        "name": "Scatter plot",
-        "description":"Creates a scatter plot from data",
-        "parameters": {
-          "input_df": {
-            "name": "Choose dataframe to be plotted",
-            "type": "named_output",
-            "default": null
-          },
-          "color_df": {
-            "name": "Choose a dataframe to assign color to marks (optional)",
-            "type": "named_output",
-            "default": null,
-            "optional": true
           }
         }
       }
