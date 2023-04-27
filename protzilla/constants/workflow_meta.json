@@ -626,6 +626,11 @@
         "name": "ANOVA",
         "description": "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
@@ -668,9 +673,14 @@
         }
       },
       "t_test": {
-        "name": "T-Test",
+        "name": "t-Test",
         "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": null
+          },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
             "type": "categorical",
@@ -739,6 +749,40 @@
             "type": "named_output",
             "default": null
           }
+        }
+      }
+    },
+    "plot": {
+      "volcano": {
+        "name": "Volcano Plot",
+        "description": "",
+        "parameters": {
+          "p_values": {
+            "name": "p-value df",
+            "type": "named_output",
+            "default": null
+          },
+          "log2_fc": {
+            "name": "log2 fold change df",
+            "type": "named_output",
+            "default": null
+          },
+          "fc_threshold": {
+            "name": "log2 fold change threshold",
+            "type": "named_output",
+            "default": null
+          },
+          "alpha": {
+            "name": "alpha/corrected alpha",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      },
+      "heatmap": {
+        "name": "Heatmap",
+        "description": "",
+        "parameters": {
         }
       }
     }

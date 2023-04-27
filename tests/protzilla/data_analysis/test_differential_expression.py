@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_analysis.differential_expression import anova, t_test
+from protzilla.data_analysis.plots import create_volcano_plot
 
 
 def test_differential_expression_t_test(show_figures):
@@ -52,7 +53,7 @@ def test_differential_expression_t_test(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -63,9 +64,14 @@ def test_differential_expression_t_test(show_figures):
         fc_threshold=test_fc_threshold,
     )
 
-    # fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
-    # if show_figures:
-    #     fig.show()
+    fig = create_volcano_plot(
+        current_out["corrected_p_values_df"],
+        current_out["log2_fold_change_df"],
+        current_out["fc_threshold"],
+        current_out["alpha"],
+    )
+    if show_figures:
+        fig.show()
 
     corrected_p_values = [0.0108, 0.4318, 1.000]
     log2_fc = [-1, -0.0995, 0]
@@ -80,7 +86,7 @@ def test_differential_expression_t_test(show_figures):
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert de_proteins_df["Protein ID"].unique() == de_proteins
+    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["alpha"] == test_alpha
     assert current_out["corrected_alpha"] is None
@@ -134,7 +140,7 @@ def test_differential_expression_t_test_with_nan():
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    _, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -203,7 +209,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    de_proteins_df, current_out = t_test(
+    current_out = t_test(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
@@ -214,9 +220,14 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
         fc_threshold=test_fc_threshold,
     )
 
-    # fig = t_test_volcano_plot(test_intensity_df, de_proteins_df, current_out, [])[0]
-    # if show_figures:
-    #     fig.show()
+    fig = create_volcano_plot(
+        current_out["corrected_p_values_df"],
+        current_out["log2_fold_change_df"],
+        current_out["fc_threshold"],
+        current_out["alpha"],
+    )
+    if show_figures:
+        fig.show()
 
     corrected_p_values = [0.0072, 1.000]
     log2_fc = [-1, 0]
@@ -231,7 +242,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert de_proteins_df["Protein ID"].unique() == de_proteins
+    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["alpha"] == test_alpha
     assert current_out["corrected_alpha"] is None
@@ -281,7 +292,7 @@ def test_differential_expression_anova(show_figures):
         columns=["Sample", "Group"],
     )
 
-    output_df, output_dict = anova(
+    output_dict = anova(
         intensity_df=test_intensity_df,
         metadata_df=test_metadata_df,
         grouping="Group",

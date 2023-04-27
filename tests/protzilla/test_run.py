@@ -97,12 +97,6 @@ def test_run_back():
     rmtree(RUNS_PATH / name)
 
 
-# think more about different run interfaces
-# CLI: steps, complete workflow
-# UI: location, back+next, workflow defaults
-# different classes?
-
-
 def test_run_continue():
     run_name = "test_run_continue" + random_string()
     run = Run.create(run_name, df_mode="disk")
