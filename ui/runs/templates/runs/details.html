@@ -12,11 +12,13 @@
     {% if section == "data_preprocessing" %}
         {% include 'runs/form_buttons.html' with results_exist=show_next %}
     {% endif %}
-    {% include 'runs/file_upload.html' %}
+    {% include 'runs/file_upload.html'%}
+    {% include 'runs/sidebar_toggle.html' %}
+
 {% endblock %}
 
 {% block title %}
-    <title>PROTZILLA – {{ run_name }}</title>
+    <title>PROTzilla - {{ run_name }}</title>
 {% endblock %}
 
 {% block navbar %}
@@ -26,44 +28,61 @@
 {% block content %}
 
     <div class="wrapper">
+        {# include sidebar #}
+        <nav id="sidebar" class="border border-end-0 border-top-0 border-bottom-0">
+            {{ sidebar }}
+        </nav>
+
         <div id="content">
-            {# show history #}
-            {% if displayed_history %}
-                <div class="row justify-content-center d-flex">
-                    <h3>History</h3>
-                </div>
+            <div class="header justify-content-end d-flex" id="header-content">
+                <button type="button" id="sidebarCollapse" class="btn btn-blue p-1 d-inline">
+                    <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="22" height="22"
+                    id="header_toggle">
+                </button>
+            </div>
 
-                {% for step in displayed_history %}
+            <div id="main-content">
+                {# show history #}
+                {% if displayed_history %}
                     <div class="row justify-content-center d-flex">
-                        <div class="col-7">
-                            {% if step.section_heading %}
-                                <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
-                            {% endif %}
-
-                            <b>{{ step.display_name }}</b><br>
-                            {% if step.name %}
-                                Name: {{ step.name }}<br>
-                            {% endif %}
-
-                            <div class="mb-3">
-                                {% include "runs/fields.html" with fields=step.fields %}
-
-                                {% if not step.name %}
-                                    {% include "runs/form_add_name.html" with index=step.index %}
-                                {% endif %}
-                            </div>
-                        </div>
+                        <h3>History</h3>
                     </div>
 
-                    {# display history plots #}
-                    {% for plot in step.plots %}
-                        <div class="plot-wrapper">
-                            {{ plot|safe }}
+                    {% for step in displayed_history %}
+                        <div class="row justify-content-center d-flex">
+                            <div class="col-7">
+                                {% if step.section_heading %}
+                                    <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
+                                {% endif %}
+
+                                <b>{{ step.display_name }}</b><br>
+                                {% if step.name %}
+                                    Name: {{ step.name }}<br>
+                                {% endif %}
+
+                                <div class="mb-3">
+                                    {% include "runs/fields.html" with fields=step.fields %}
+
+                                    {% if not step.name %}
+                                        {% include "runs/form_add_name.html" with index=step.index %}
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
+
+                        {% if step.plots %}
+                            <div class="mb-4">
+                                {# display history plots #}
+                                {% for plot in step.plots %}
+                                    <div class="plot-wrapper">
+                                        {{ plot|safe }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                {% endfor %}
-                <hr class="my-4">
-            {% endif %}
+                    <hr class="my-4">
+                {% endif %}
 
             {# include django messages for alerting user #}
             {% if messages %}
@@ -142,43 +161,39 @@
                 {% endif %}
             </div>
 
-            {# show current plots #}
-            {% if current_plots %}
-                <div class="mt-4" id="plots">
-                    {% for plot in current_plots %}
-                        <div class="plot-wrapper">
-                            {{ plot|safe }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {# navigation between steps #}
-            <div class="justify-content-end d-flex">
-                {% if show_next %}
-                    <div class="col-3 mb-2">
-                        <div class="form-group mb-0">
-                            {{ name_field }}
-                        </div>
+                {# show current plots #}
+                {% if current_plots %}
+                    <div class="mt-4" id="plots">
+                        {% for plot in current_plots %}
+                            <div class="plot-wrapper">
+                                {{ plot|safe }}
+                            </div>
+                        {% endfor %}
                     </div>
                 {% endif %}
-            </div>
-            <div class="justify-content-end d-flex">
-                <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
-                           disabled {% endif %}>Back</a>
-                        <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next</button>
-                    </div>
-                </form>
-            </div>
 
+                {# navigation between steps #}
+                <div class="justify-content-end d-flex">
+                    {% if show_next %}
+                        <div class="col-3 mb-2">
+                            <div class="form-group mb-0">
+                                {{ name_field }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="justify-content-end d-flex">
+                    <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
+                            disabled {% endif %}>Back</a>
+                            <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
         </div>
-
-        {# include sidebar #}
-        <nav id="sidebar" class="bg-grey">
-            {% include "runs/sidebar.html" with run_name=run_name workflow_steps=workflow_steps sidebar_dropdown=sidebar_dropdown %}
-        </nav>
     </div>
 {% endblock %}

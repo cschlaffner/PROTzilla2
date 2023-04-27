@@ -116,11 +116,17 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
+    def update_workflow_config(self, section, index, parameters):
+        self.workflow_config["sections"][section]["steps"][index][
+            "parameters"
+        ] = parameters
+        self.write_local_workflow()
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         self.perform_calculation(method_map[location], parameters)
 
-    def perform_calculation(self, method_callable, parameters):
+    def perform_calculation(self, method_callable, parameters: dict):
         self.section, self.step, self.method = location_map[method_callable]
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
@@ -134,6 +140,9 @@ class Run:
             self.result_df = None
             self.current_out = method_callable(**call_parameters)
 
+        self.update_workflow_config(
+            self.section, self.step_index_in_current_section(), parameters
+        )
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
@@ -178,26 +187,17 @@ class Run:
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
 
-    def insert_as_next_step(self, step_to_be_inserted):
-        self.section, self.step, self.method = self.current_workflow_location()
-        assert self.section is not None
-
-        workflow_meta_step = self.workflow_meta[self.section][step_to_be_inserted]
-        first_method_name = list(workflow_meta_step.keys())[0]
-
+    def insert_step(self, step_to_be_inserted, section, method, index):
         params_default = get_all_default_params_for_methods(
-            self.workflow_meta, self.section, step_to_be_inserted, first_method_name
+            self.workflow_meta, section, step_to_be_inserted, method
         )
         step_dict = dict(
             name=step_to_be_inserted,
-            method=first_method_name,
+            method=method,
             parameters=params_default,
         )
-        past_steps_of_section = self.history.number_of_steps_in_section(self.section)
 
-        self.workflow_config["sections"][self.section]["steps"].insert(
-            past_steps_of_section + 1, step_dict
-        )
+        self.workflow_config["sections"][section]["steps"].insert(index, step_dict)
 
         self.write_local_workflow()
 
@@ -205,6 +205,24 @@ class Run:
         workflow_local_path = f"{self.run_path}/workflow.json"
         with open(workflow_local_path, "w") as f:
             json.dump(self.workflow_config, f, indent=2)
+
+    def insert_at_next_position(self, step_to_be_inserted, section, method):
+        if self.section == section:
+            past_steps_of_section = self.history.number_of_steps_in_section(section)
+
+            self.insert_step(
+                step_to_be_inserted, section, method, past_steps_of_section + 1
+            )
+        else:
+            self.insert_step(step_to_be_inserted, section, method, 0)
+
+    def export_workflow(self, name):
+        with open(f"{WORKFLOWS_PATH}/{name}.json", "w") as f:
+            json.dump(self.workflow_config, f, indent=2)
+
+    def delete_step(self, section, index):
+        del self.workflow_config["sections"][section]["steps"][index]
+        self.write_local_workflow()
 
     def next_step(self, name=None):
         try:
@@ -249,13 +267,21 @@ class Run:
         self.current_out = popped_step.outputs
         self.current_parameters = {self.method: popped_step.parameters}
         self.current_plot_parameters = {}
-        # TODO: add plotted_for_parameter to History? @reviewer: lets talk!
+        # TODO: add plotted_for_parameter to History?
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
 
     def current_workflow_location(self):
         return self.all_steps()[self.step_index]
+
+    def step_index_in_current_section(self):
+        index = 0
+        for section, step, method in self.all_steps():
+            if section == self.section:
+                if step == self.step:
+                    return index
+                index += 1
 
     def all_steps(self):
         steps = []
