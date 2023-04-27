@@ -1,0 +1,84 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {}
+        },
+        {
+          "name": "plot",
+          "method": "volcano",
+          "parameters": {}
+        },
+        {
+          "name": "differential_expression",
+          "method": "anova",
+          "parameters": {
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "grouping": "Group",
+            "selected_groups": [],
+            "metadata_df": ""
+          }
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": {}
+    }
+  }
+}

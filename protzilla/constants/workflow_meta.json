@@ -776,6 +776,14 @@
             "name": "alpha/corrected alpha",
             "type": "named_output",
             "default": null
+          },
+          "proteins_of_interest": {
+            "name": "Proteins of Interest",
+            "type": "named_output",
+            "fill": "proteins",
+            "categories": [],
+            "default": null,
+            "multiple": true
           }
         }
       },
