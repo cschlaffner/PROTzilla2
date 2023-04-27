@@ -55,7 +55,4 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
 
 
 def is_long_format(df: pd.DataFrame):
-    if list(df.columns)[:3] == ["Sample", "Protein ID", "Gene"]:
-        return True
-    else:
-        return False
+    return set(df.columns[:3]) == {"Sample", "Protein ID", "Gene"}

@@ -106,7 +106,7 @@ class History:
 
     def output_keys_of_named_step(self, name):
         if not name or name == "None":
-            return [""]
+            return ["---"]
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:
                 options = list(step.outputs.keys())
