@@ -30,6 +30,7 @@ class Runner:
         workflow: str,
         ms_data_path: str,
         meta_data_path: str | None,
+        peptides_path: str | None,
         run_name: str | None,
         df_mode: str | None = "disk",
         all_plots: bool = False,
@@ -43,6 +44,7 @@ class Runner:
 
         self.ms_data_path = ms_data_path
         self.meta_data_path = meta_data_path
+        self.peptides_path = peptides_path
         self.df_mode = df_mode if df_mode is not None else "disk"
         self.workflow = workflow
 
@@ -97,20 +99,23 @@ class Runner:
         elif step["name"] == "metadata_import":
             if self.meta_data_path is None:
                 raise ValueError(
-                    f"MetadataPath (--meta_data_path) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
+                    f" but is required for {step['name']}"
                 )
             params = step["parameters"]
             params["file_path"] = self.meta_data_path
             self._perform_current_step(params)
             logging.info("imported Meta Data")
         elif step["name"] == "peptide_import":
-            # this only exists to deal with the tests and is to be updated when the
-            # runner gets "peptide"-functionality
-            logging.warning("peptide-import is not yet implemented for the runner")
+            if self.peptides_path is None:
+                raise ValueError(
+                    f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
+                    f"but is required for {step['name']}"
+                )
             params = step["parameters"]
-            params["file_path"] = "dummy_path"  # not yet properly implemented
+            params["file_path"] = self.peptides_path
             self._perform_current_step(params)
+            logging.info("imported Peptide Data")
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 

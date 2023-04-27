@@ -27,6 +27,9 @@ def args_parser():
         "--meta_data_path", action="store", help="path to the metadata for your dataset"
     )
     parser.add_argument(
+        "--peptides_path", action="store", help="path to the peptides-dataset"
+    )
+    parser.add_argument(
         "-n",
         "--run_name",
         action="store",
