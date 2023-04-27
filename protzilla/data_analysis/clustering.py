@@ -6,7 +6,6 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def k_means(
-    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     n_clusters: int = 8,
     random_state: int = 6,
@@ -41,7 +40,7 @@ def k_means(
      convergence.
     :type tolerance: float
     """
-    intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         kmeans = KMeans(
             n_clusters=n_clusters,
@@ -51,39 +50,32 @@ def k_means(
             max_iter=max_iter,
             tol=tolerance,
         )
-        labels = kmeans.fit_predict(intensity_df_wide)
+        labels = kmeans.fit_predict(input_df_wide)
         cluster_labels_df = pd.DataFrame(
-            labels, index=intensity_df_wide.index, columns=["Cluster Labels"]
+            labels, index=input_df_wide.index, columns=["Cluster Labels"]
         )
         cluster_labels_df["Cluster Labels"] = cluster_labels_df["Cluster Labels"].apply(
             lambda x: f"Cluster {x}"
         )
         centroids = kmeans.cluster_centers_.tolist()
-        return intensity_df, dict(
-            centroids=centroids, cluster_labels_df=cluster_labels_df
-        )
+        return dict(centroids=centroids, cluster_labels_df=cluster_labels_df)
 
     except ValueError as e:
-        if intensity_df_wide.isnull().sum().any():
+        if input_df_wide.isnull().sum().any():
             msg = (
                 "KMeans does not accept missing values encoded as NaN. Consider"
                 "preprocessing your data to remove NaN values."
             )
-        elif intensity_df_wide.shape[0] < n_clusters:
+        elif input_df_wide.shape[0] < n_clusters:
             msg = (
                 f"The number of clusters should be less or equal than the number of "
-                f"samples. In the selected dataframe there is {intensity_df_wide.shape[0]}"
+                f"samples. In the selected dataframe there is {input_df_wide.shape[0]}"
                 f"samples"
             )
         else:
             msg = ""
-        return intensity_df, dict(
+        return dict(
             centroids=None,
             labels=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
-
-
-# Note that when we are applying k-means to real-world data using a Euclidean distance
-# metric, we want to make sure that the features are measured on the same scale and
-# apply z-score standardization or min-max scaling if necessary.

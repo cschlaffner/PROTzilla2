@@ -8,7 +8,6 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 # TODO: remove intensity_df parameter when plots as steps is already implemented
 def scatter_plot(
-    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     color_df: pd.DataFrame | None = None,
 ):

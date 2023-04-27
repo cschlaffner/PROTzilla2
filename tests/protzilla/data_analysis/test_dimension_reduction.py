@@ -160,8 +160,7 @@ def umap_assertion_df():
 
 
 def test_tsne_nan_handling(df_with_nan):
-    _, current_out = t_sne(
-        pd.DataFrame(),  # Remove when intensity_df is removed
+    current_out = t_sne(
         df_with_nan,
         n_components=2,
         perplexity=4,
@@ -172,8 +171,7 @@ def test_tsne_nan_handling(df_with_nan):
 
 
 def test_tsne_perplexity(dimension_reduction_df):
-    _, current_out = t_sne(
-        pd.DataFrame(),  # Remove when intensity_df is removed
+    current_out = t_sne(
         dimension_reduction_df,
         n_components=2,
         perplexity=30,
@@ -186,8 +184,7 @@ def test_tsne_perplexity(dimension_reduction_df):
 
 
 def test_tsne_n_components(dimension_reduction_df):
-    _, current_out = t_sne(
-        pd.DataFrame(),  # Remove when intensity_df is removed
+    current_out = t_sne(
         dimension_reduction_df,
         n_components=8,
         perplexity=4,
@@ -202,8 +199,7 @@ def test_tsne_n_components(dimension_reduction_df):
 
 
 def test_tsne_n_components_barnes_hut(dimension_reduction_four_proteins_df):
-    _, current_out = t_sne(
-        pd.DataFrame(),  # Remove when intensity_df is removed
+    current_out = t_sne(
         dimension_reduction_four_proteins_df,
         n_components=4,
         perplexity=4,
@@ -232,8 +228,7 @@ def test_tsne_n_components_barnes_hut(dimension_reduction_four_proteins_df):
 
 
 def test_umap_nan_handling(df_with_nan):
-    _, current_out = umap(
-        pd.DataFrame(),  # Remove when intensity_df is removed
+    current_out = umap(
         df_with_nan,
     )
     assert "messages" in current_out

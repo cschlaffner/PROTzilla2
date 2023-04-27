@@ -4,11 +4,10 @@ from django.contrib import messages
 from sklearn.manifold import TSNE
 from umap import UMAP
 
-from protzilla.utilities.transform_dfs import long_to_wide
+from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def t_sne(
-    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     n_components: int = 2,
     perplexity: float = 30.0,
@@ -49,7 +48,7 @@ def t_sne(
     Barnes-Hut approximation will run faster, but not exact, in O(NlogN) time.
     :type method: str
     """
-    intensity_df_wide = long_to_wide(input_df)
+    intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         tsne = TSNE(
             n_components=n_components,
@@ -64,7 +63,7 @@ def t_sne(
         embedded_data = tsne.fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return intensity_df, dict(embedded_data_df=embedded_data_df)
+        return dict(embedded_data_df=embedded_data_df)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
@@ -93,14 +92,13 @@ def t_sne(
             )
         else:
             msg = ""
-        return intensity_df, dict(
+        return dict(
             embedded_data_df=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
 
 
 def umap(
-    intensity_df: pd.DataFrame,
     input_df: pd.DataFrame,
     n_neighbors: float = 15,
     n_components: int = 2,
@@ -149,7 +147,7 @@ def umap(
         ).fit_transform(intensity_df_wide)
 
         embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return intensity_df, dict(embedded_data_df=embedded_data_df)
+        return dict(embedded_data_df=embedded_data_df)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
@@ -159,7 +157,7 @@ def umap(
             )
         else:
             msg = ""
-        return intensity_df, dict(
+        return dict(
             embedded_data_df=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
