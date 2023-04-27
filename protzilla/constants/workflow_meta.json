@@ -738,7 +738,7 @@
     "clustering": {
       "k_means": {
         "name": "K-Means",
-        "description": "",
+        "description": "Partitions a number of samples in k clusters using k-means",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
@@ -795,7 +795,7 @@
     "dimension_reduction": {
       "t_sne": {
         "name": "t-SNE",
-        "description": "",
+        "description": "Dimension reduction of a dataframe using t-SNE",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
@@ -850,7 +850,7 @@
       },
       "umap": {
         "name": "UMAP",
-        "description":"",
+        "description":"Dimension reduction of a dataframe using UMAP",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
@@ -901,7 +901,7 @@
     "plots": {
       "scatter_plot": {
         "name": "Scatter plot",
-        "description":"",
+        "description":"Creates a scatter plot from data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
