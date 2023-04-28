@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_analysis.differential_expression import anova, t_test
-from protzilla.data_analysis.plots import create_volcano_plot
+from protzilla.data_analysis.plots import create_volcano_plot, clustergram_plot
 
 
 def test_differential_expression_t_test(show_figures):
@@ -251,7 +251,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     assert "mean intensity of 0" in current_out["messages"][0]["msg"]
 
 
-def test_differential_expression_anova(show_figures):
+def test_differential_expression_anova(show_figures=True):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -300,15 +300,18 @@ def test_differential_expression_anova(show_figures):
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=0.05,
     )
-    p_values = output_dict["corrected_p_values"]
+    corrected_p_values_df = output_dict["corrected_p_values_df"]
 
-    p_values_rounded = [round(x, 4) for x in p_values]
+    p_values_rounded = [
+        round(x, 4) for x in corrected_p_values_df["corrected_p_values"]
+    ]
 
-    # fig = anova_heatmap(
-    #     output_df, grouping="Group", alpha=output_dict["corrected_alpha"]
-    # )
-    # if show_figures:
-    #     fig.show()
+    fig = clustergram_plot(
+        output_dict["filtered_df"],
+        output_dict["sample_group_df"],
+    )[0]
+    if show_figures:
+        fig.show()
 
     assertion_p_values = [
         0.0054,

@@ -247,4 +247,9 @@ plot_map = {
         "plot",
         "volcano",
     ): plots.create_volcano_plot,
+    (
+        "data_analysis",
+        "plot",
+        "clustergram",
+    ): plots.clustergram_plot,
 }

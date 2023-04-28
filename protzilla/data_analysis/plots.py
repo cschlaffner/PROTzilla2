@@ -1,9 +1,7 @@
 import dash_bio as dashbio
 import pandas as pd
-from scipy import stats
 import numpy as np
 import plotly.express as px
-from plotly.graph_objects import Figure
 from protzilla.utilities.clustergram import Clustergram
 from django.contrib import messages
 
@@ -86,7 +84,7 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
     return [fig]
 
 
-def heatmap(tested_df, grouping: str, alpha, corrected_alpha):
+def clustergram_plot(input_df: pd.DataFrame, sample_group_df: pd.DataFrame):
     """
     A function to create a heatmap with an integrated dendrogram
     (clustergram) from the ANOVA Test results. The clustergram shows in a
@@ -102,41 +100,31 @@ def heatmap(tested_df, grouping: str, alpha, corrected_alpha):
         metadata_df
     :type grouping: str
     """
-    intensity_name = tested_df.columns[3]
+    intensity_name = input_df.columns[3]
 
-    if corrected_alpha is None:
-        alpha = alpha
-    else:
-        alpha = corrected_alpha
+    matrix = input_df.pivot(index="Sample", columns="Protein ID", values=intensity_name)
 
-    df_filtered = tested_df.loc[tested_df["p_value"] < alpha]
-
-    matrix = df_filtered.pivot(
-        index="Sample", columns="Protein ID", values=intensity_name
-    )
-
-    sample_group_df = df_filtered[["Sample", grouping]].drop_duplicates()
+    # In the clustergram each row represents a sample that can pertain to a group.
+    # In the following code the necessary data structures are created to assign each
+    # group to a unique color.
     sample_group_dict = dict(
-        zip(
-            sample_group_df["Sample"].tolist(),
-            sample_group_df[grouping].tolist(),
-        )
+        zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
     )
-
     n_groups = len(set(sample_group_dict.values()))
-
     group_colors = px.colors.sample_colorscale(
         "Turbo",
         0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
     )
-    group_color_dict = dict(
-        zip(df_filtered[grouping].drop_duplicates().tolist(), group_colors)
+    group_to_color_dict = dict(
+        zip(sample_group_df[sample_group_df.columns[0]].drop_duplicates(), group_colors)
     )
-    color_label_dict = {v: k for k, v in group_color_dict.items()}
+    # dictionary that maps each color to a group for the colorbar (legend)
+    color_label_dict = {v: k for k, v in group_to_color_dict.items()}
     groups = [sample_group_dict[label] for label in matrix.index.values]
-    row_colors = [group_color_dict[g] for g in groups]
+    # maps each row (sample) to the corresponding color
+    row_colors = [group_to_color_dict[g] for g in groups]
 
-    # TODO: logic for seting column_colors and column_colors_to_label_dict
+    # TODO: logic for setting column_colors and column_colors_to_label_dict
 
     clustergram = Clustergram(
         flip_axes=False,

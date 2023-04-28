@@ -801,6 +801,23 @@
             "optional": true
           }
         }
+      },
+      "clustergram": {
+        "name": "Clustergram",
+        "description":"Creates a clustergram from data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": null
+          },
+          "sample_group_df": {
+            "name": "Choose a dataframe to assign a unique color to each group (optional)",
+            "type": "named_output",
+            "default": null,
+            "optional": true
+          }
+        }
       }
     },
     "clustering": {
