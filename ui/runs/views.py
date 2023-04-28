@@ -60,7 +60,10 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
-            current_plots=[plot.to_html() for plot in run.plots],
+            current_plots=[
+                plot.to_html(include_plotlyjs=False, full_html=False)
+                for plot in run.plots
+            ],
             show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
             show_back=bool(run.history.steps),

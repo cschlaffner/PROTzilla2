@@ -121,11 +121,15 @@ def make_displayed_history(run):
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
+        plots = [
+            plot.to_html(include_plotlyjs=False, full_html=False)
+            for plot in history_step.plots
+        ]
         displayed_history.append(
             dict(
                 display_name=name,
                 fields=fields,
-                plots=[p.to_html() for p in history_step.plots],
+                plots=plots,
                 section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
