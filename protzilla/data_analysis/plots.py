@@ -2,12 +2,10 @@ import dash_bio as dashbio
 import pandas as pd
 import plotly.express as px
 from django.contrib import messages
-import plotly.graph_objs as go
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
-# TODO: remove intensity_df parameter when plots as steps is already implemented
 def scatter_plot(
     input_df: pd.DataFrame,
     color_df: pd.DataFrame | None = None,

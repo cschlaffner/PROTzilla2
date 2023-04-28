@@ -125,7 +125,10 @@ def make_displayed_history(run):
             dict(
                 display_name=name,
                 fields=fields,
-                plots=[p.to_html() for p in history_step.plots],
+                plots=[
+                    plot.to_html() if not isinstance(plot, dict) else ""
+                    for plot in run.plots
+                ],
                 section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
