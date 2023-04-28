@@ -2,6 +2,7 @@ import pytest
 
 from protzilla.data_analysis.plots import *
 from tests.protzilla.data_analysis.test_clustering import *
+import numpy as np
 
 
 @pytest.fixture
