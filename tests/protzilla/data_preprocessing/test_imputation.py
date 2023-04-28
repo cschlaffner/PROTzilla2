@@ -15,7 +15,7 @@ from protzilla.data_preprocessing.imputation import (
     number_of_imputed_values,
     pd,
 )
-from tests.protzilla.data_preprocessing import test_plots
+from tests.protzilla.data_preprocessing import test_plots_data_preprocessing
 
 
 @pytest.fixture
@@ -279,7 +279,7 @@ def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
 def test_build_box_hist_plot(
     show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
 ):
-    test_plots.test_build_box_hist_plot(
+    test_plots_data_preprocessing.test_build_box_hist_plot(
         show_figures,
         input_imputation_df,
         assertion_df_knn,
