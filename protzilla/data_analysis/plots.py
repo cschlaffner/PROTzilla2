@@ -63,7 +63,7 @@ def scatter_plot(
             )
         elif color_df.shape[1] != 1:
             msg = "The color dataframe should have 1 dimension only"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
 
 def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):

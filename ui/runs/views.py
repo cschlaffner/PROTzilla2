@@ -61,7 +61,10 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
-            current_plots=[plot.to_html() for plot in run.plots],
+            current_plots=[
+                plot.to_html() if not isinstance(plot, dict) else ""
+                for plot in run.plots
+            ],
             show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
             show_back=bool(run.history.steps),
@@ -234,24 +237,25 @@ def plot(request, run_name):
         del parameters["chosen_method"]
     run.create_plot_from_location(section, step, method, parameters)
 
-    # if run.plots.get("messages", False):
-    if "messages" in run.plots:
-        for message in run.plots["messages"]:
-            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+    for index, p in enumerate(run.plots):
+        if isinstance(p, dict):
+            for message in run.plots[index]["messages"]:
+                trace = (
+                    build_trace_alert(message["trace"]) if "trace" in message else ""
+                )
 
-            # map error level to bootstrap css class
-            lvl_to_css_class = {
-                40: "alert-danger",
-                30: "alert-warning",
-                20: "alert-info",
-            }
-            messages.add_message(
-                request,
-                message["level"],
-                f"{message['msg']} {trace}",
-                lvl_to_css_class[message["level"]],
-            )
-        run.plots = []
+                # map error level to bootstrap css class
+                lvl_to_css_class = {
+                    40: "alert-danger",
+                    30: "alert-warning",
+                    20: "alert-info",
+                }
+                messages.add_message(
+                    request,
+                    message["level"],
+                    f"{message['msg']} {trace}",
+                    lvl_to_css_class[message["level"]],
+                )
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

@@ -93,5 +93,14 @@ def test_scatter_plot_3d(show_figures, wide_3d_df, color_df):
 def test_scatter_plot_4d_df(wide_4d_df, color_df):
     result = scatter_plot(wide_4d_df, color_df)
 
-    assert "messages" in result
-    assert "Consider reducing the dimensionality" in result["messages"][0]["msg"]
+    assert any(isinstance(p, dict) for p in result)
+    assert "Consider reducing the dimensionality" in result[0]["messages"][0]["msg"]
+
+
+def test_scatter_plot_color_df_2d(show_figures, wide_2d_df):
+    result = scatter_plot(wide_2d_df, wide_2d_df)
+    assert any(isinstance(p, dict) for p in result)
+    assert (
+        "The color dataframe should have 1 dimension only"
+        in result[0]["messages"][0]["msg"]
+    )
