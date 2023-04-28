@@ -63,7 +63,12 @@
           "parameters": {
             "threshold": 0,
             "peptide_df": ""
-          }
+          },
+          "graphs": [
+            {
+              "graph_type ": "Pie chart"
+            }
+          ]
         }
       ]
     },

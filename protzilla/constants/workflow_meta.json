@@ -657,7 +657,20 @@
             "type": "peptide_df",
             "name": "peptide_df"
           }
-        }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Bar chart"
+            }
+          }
+        ]
       }
     }
   },

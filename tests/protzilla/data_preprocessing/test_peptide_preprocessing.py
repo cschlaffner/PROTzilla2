@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from protzilla.constants.paths import TEST_DATA_PATH
-from protzilla.data_preprocessing.peptide_filter import by_pep_value
+from protzilla.data_preprocessing.peptide_filter import by_pep_value, by_pep_value_plot
 from protzilla.importing import peptide_import
 
 
@@ -45,7 +45,7 @@ def filtered_peptides_df():
     return filtered_peptides_df
 
 
-def test_pep_filter(leftover_peptide_df, filtered_peptides_df):
+def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_df):
     _, import_out = peptide_import.peptide_import(
         ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
@@ -55,6 +55,10 @@ def test_pep_filter(leftover_peptide_df, filtered_peptides_df):
     _, out = by_pep_value(
         intensity_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
     )
+
+    fig = by_pep_value_plot(_, _, out, "Pie chart")[0]
+    if show_figures:
+        fig.show()
 
     pd.testing.assert_frame_equal(out["peptide_df"], leftover_peptide_df)
     pd.testing.assert_frame_equal(out["filtered_peptides"], filtered_peptides_df)

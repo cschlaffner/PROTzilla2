@@ -225,6 +225,11 @@ plot_map = {
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
     (
+        "data_preprocessing",
+        "filter_peptides",
+        "pep_filter",
+    ): peptide_filter.by_pep_value_plot,
+    (
         "data_analysis",
         "plot",
         "volcano",

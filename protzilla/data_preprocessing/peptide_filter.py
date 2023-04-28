@@ -1,5 +1,7 @@
 import pandas as pd
 
+from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
+
 
 def by_pep_value(
     intensity_df: pd.DataFrame, peptide_df: pd.DataFrame, threshold: float
@@ -29,3 +31,20 @@ def by_pep_value(
         "peptide_df": peptide_df,
         "filtered_peptides": filtered_peptides,
     }
+
+
+def by_pep_value_plot(df, results_df, current_out, graph_type):
+    value_dict = dict(
+        values_of_sectors=[
+            len(current_out["peptide_df"]),
+            len(current_out["filtered_peptides"]),
+        ],
+        names_of_sectors=["Samples kept", "Samples filtered"],
+        heading="Number of Filtered Samples",
+    )
+
+    if graph_type == "Pie chart":
+        fig = create_pie_plot(**value_dict)
+    elif graph_type == "Bar chart":
+        fig = create_bar_plot(**value_dict)
+    return [fig]
