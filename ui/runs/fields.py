@@ -127,7 +127,7 @@ def make_displayed_history(run):
                 fields=fields,
                 plots=[
                     plot.to_html() if not isinstance(plot, dict) else ""
-                    for plot in run.plots
+                    for plot in history_step.plots
                 ],
                 section_heading=section_heading,
                 name=run.history.step_names[i],
