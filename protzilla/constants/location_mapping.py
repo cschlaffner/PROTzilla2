@@ -5,10 +5,10 @@ from ..data_preprocessing import (
     imputation,
     normalisation,
     outlier_detection,
+    peptide_filter,
     transformation,
 )
 from ..importing import metadata_import, ms_data_import, peptide_import
-from ..peptide_preprocessing import peptide_filter
 
 """
 In this data structure, a method is associated with a location. The location is

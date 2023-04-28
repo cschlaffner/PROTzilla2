@@ -3,8 +3,8 @@ import pandas as pd
 import pytest
 
 from protzilla.constants.paths import TEST_DATA_PATH
+from protzilla.data_preprocessing.peptide_filter import by_pep_value
 from protzilla.importing import peptide_import
-from protzilla.peptide_preprocessing.peptide_filter import by_pep_value
 
 
 @pytest.fixture
