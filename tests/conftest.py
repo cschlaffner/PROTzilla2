@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from shutil import rmtree
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
@@ -52,3 +54,22 @@ def example_workflow_short():
 def example_workflow():
     with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
         return json.load(f)
+
+
+@pytest.fixture
+def df_with_nan():
+    list_nan = (
+        ["Sample1", "Protein1", "Gene1", 18],
+        ["Sample1", "Protein2", "Gene1", 16],
+        ["Sample1", "Protein3", "Gene1", 1],
+        ["Sample2", "Protein1", "Gene1", np.nan],
+        ["Sample2", "Protein2", "Gene1", 18],
+        ["Sample2", "Protein3", "Gene1", 2],
+    )
+
+    df_with_nan = pd.DataFrame(
+        data=list_nan,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+
+    return df_with_nan
