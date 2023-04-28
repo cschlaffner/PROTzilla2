@@ -52,7 +52,6 @@ def anova(
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns[3]
-    print(metadata_df)
     intensity_df = pd.merge(
         left=intensity_df,
         right=metadata_df[["Sample", grouping]],
