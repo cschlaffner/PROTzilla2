@@ -641,9 +641,7 @@
           }
         ]
       }
-    }
-  },
-  "peptide_preprocessing": {
+    },
     "filter_peptides": {
       "pep_filter": {
         "name": "PEP Threshold",

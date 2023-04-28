@@ -119,7 +119,7 @@ method_map = {
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
     (
-        "peptide_preprocessing",
+        "data_preprocessing",
         "filter_peptides",
         "pep_filter",
     ): peptide_filter.by_pep_value,
