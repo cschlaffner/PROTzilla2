@@ -50,7 +50,7 @@ def t_sne(
     """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
-        tsne = TSNE(
+        embedded_data_model = TSNE(
             n_components=n_components,
             perplexity=perplexity,
             random_state=random_state,
@@ -58,12 +58,14 @@ def t_sne(
             n_iter_without_progress=n_iter_without_progress,
             method=method,
             metric=metric,
+        ).fit_transform(intensity_df_wide)
+
+        embedded_data = pd.DataFrame(
+            embedded_data_model,
+            index=intensity_df_wide.index,
+            columns=["Component1", "Component2"],
         )
-
-        embedded_data = tsne.fit_transform(intensity_df_wide)
-
-        embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return dict(embedded_data_df=embedded_data_df)
+        return dict(embedded_data=embedded_data)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
@@ -93,7 +95,7 @@ def t_sne(
         else:
             msg = ""
         return dict(
-            embedded_data_df=None,
+            embedded_data=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
 
@@ -137,7 +139,7 @@ def umap(
     """
     intensity_df_wide = long_to_wide(input_df)
     try:
-        embedded_data = UMAP(
+        embedded_data_model = UMAP(
             n_neighbors=n_neighbors,
             n_components=n_components,
             min_dist=min_dist,
@@ -146,8 +148,12 @@ def umap(
             transform_seed=transform_seed,
         ).fit_transform(intensity_df_wide)
 
-        embedded_data_df = pd.DataFrame(embedded_data, index=intensity_df_wide.index)
-        return dict(embedded_data_df=embedded_data_df)
+        embedded_data = pd.DataFrame(
+            embedded_data_model,
+            index=intensity_df_wide.index,
+            columns=["Component1", "Component2"],
+        )
+        return dict(embedded_data=embedded_data)
 
     except ValueError as e:
         if intensity_df_wide.isnull().sum().any():
@@ -158,6 +164,6 @@ def umap(
         else:
             msg = ""
         return dict(
-            embedded_data_df=None,
+            embedded_data=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
