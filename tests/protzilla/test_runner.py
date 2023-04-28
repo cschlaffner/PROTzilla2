@@ -63,6 +63,7 @@ def test_runner_imports(
                 "file_path": metadata_path,
             }
         ),
+        mock.call({"intensity_name": "iBAQ", "file_path": peptide_path}),
     ]
 
     mock_perform.assert_has_calls(calls)
