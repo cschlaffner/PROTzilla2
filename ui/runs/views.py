@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
+import plotly.graph_objs as go
 
 sys.path.append(f"{BASE_DIR}/..")
 
@@ -62,7 +63,7 @@ def detail(request, run_name):
             name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[
                 plot.to_html(include_plotlyjs=False, full_html=False)
-                for plot in run.plots
+                for plot in run.plots if not isinstance(plot, dict)
             ],
             show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
@@ -235,6 +236,27 @@ def plot(request, run_name):
     if run.step == "plot":
         del parameters["chosen_method"]
     run.create_plot_from_location(section, step, method, parameters)
+
+    for index, p in enumerate(run.plots):
+        if isinstance(p, dict):
+            for message in run.plots[index]["messages"]:
+                trace = (
+                    build_trace_alert(message["trace"]) if "trace" in message else ""
+                )
+
+                # map error level to bootstrap css class
+                lvl_to_css_class = {
+                    40: "alert-danger",
+                    30: "alert-warning",
+                    20: "alert-info",
+                }
+                messages.add_message(
+                    request,
+                    message["level"],
+                    f"{message['msg']} {trace}",
+                    lvl_to_css_class[message["level"]],
+                )
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

@@ -1,4 +1,9 @@
-from ..data_analysis import differential_expression, plots
+from ..data_analysis import (
+    clustering,
+    differential_expression,
+    dimension_reduction,
+    plots,
+)
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -126,6 +131,21 @@ method_map = {
         "differential_expression",
         "t_test",
     ): differential_expression.t_test,
+    (
+        "data_analysis",
+        "clustering",
+        "k_means",
+    ): clustering.k_means,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "t_sne",
+    ): dimension_reduction.t_sne,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "umap",
+    ): dimension_reduction.umap,
 }
 
 # reversed mapping of method callable and location
@@ -217,6 +237,11 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_analysis",
+        "plot",
+        "scatter_plot",
+    ): plots.scatter_plot,
     (
         "data_analysis",
         "plot",
