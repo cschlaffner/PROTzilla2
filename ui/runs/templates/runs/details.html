@@ -171,6 +171,9 @@
                             </div>
                         {% endfor %}
                     </div>
+                    <form action="{% url 'runs:download_plots' run_name %}">
+                        <button class="btn btn-grey">Download plots</button>
+                    </form>
                 {% endif %}
 
                 {# navigation between steps #}

@@ -316,6 +316,6 @@ class Run:
     def export_plots(self, format):
         exports = []
         for plot in self.plots:
-            if isinstance(plot, plotly.graph_objs.Figure):
+            if isinstance(plot, plotly.graph_objs.Figure):  # to catch dicts
                 exports.append(plotly.io.to_image(plot, format=format))
         return exports

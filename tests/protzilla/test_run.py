@@ -236,3 +236,4 @@ def test_export_plot():
     )
     for plot in run.export_plots("png"):
         Image.open(BytesIO(plot)).verify()
+    rmtree(RUNS_PATH / run_name)

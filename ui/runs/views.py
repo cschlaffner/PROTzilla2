@@ -1,8 +1,9 @@
 import sys
 import traceback
+from io import BytesIO
 
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -294,3 +295,9 @@ def outputs_of_step(request, run_name):
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
+
+
+def download_plots(request, run_name):
+    run = active_runs[run_name]
+    exported = run.export_plots(format="png")
+    return FileResponse(BytesIO(exported[0]))
