@@ -3,6 +3,7 @@ import shutil
 import traceback
 from pathlib import Path
 from shutil import rmtree
+import plotly
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
@@ -311,3 +312,10 @@ class Run:
             if step.step == "metadata_import":
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
+
+    def export_plots(self, format):
+        exports = []
+        for plot in self.plots:
+            if isinstance(plot, plotly.graph_objs.Figure):
+                exports.append(plotly.io.to_image(plot, format=format))
+        return exports

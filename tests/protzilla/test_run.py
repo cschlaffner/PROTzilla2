@@ -1,6 +1,7 @@
 import json
 from shutil import rmtree
-
+from PIL import Image
+from io import BytesIO
 import pytest
 
 from protzilla import data_preprocessing
@@ -162,28 +163,6 @@ def test_perform_calculation_logging(caplog):
     rmtree(RUNS_PATH / run_name)
 
 
-def test_perform_calculation_logging(caplog):
-    run_name = "test_run_logging" + random_string()
-    run = Run.create(run_name, df_mode="disk")
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
-    )
-
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "outlier_detection",
-        "local_outlier_factor",
-        {"number_of_neighbors": 3},
-    )
-
-    assert "ERROR" in caplog.text
-    assert "LocalOutlierFactor" in caplog.text
-    assert "NaN values" in caplog.text
-    rmtree(RUNS_PATH / run_name)
-
-
 def test_insert_step(example_workflow_short):
     run_name = "test_insert_as_next_step" + random_string()
     run = Run.create(run_name)
@@ -237,3 +216,23 @@ def test_delete_step(example_workflow_short):
     run.delete_step("importing", 0)
     assert len(importing_steps["steps"]) == count - 1
     rmtree(RUNS_PATH / run_name)
+
+
+def test_export_plot():
+    run_name = "test_export_plot" + random_string()
+    run = Run.create(run_name)
+
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.perform_calculation(
+        data_preprocessing.filter_proteins.by_low_frequency, dict(threshold=1)
+    )
+    run.create_plot(
+        data_preprocessing.filter_proteins.by_low_frequency_plot,
+        dict(graph_type="Pie chart"),
+    )
+    for plot in run.export_plots("png"):
+        Image.open(BytesIO(plot)).verify()
