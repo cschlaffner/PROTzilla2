@@ -13,7 +13,7 @@
 | protzilla/constants/paths.py                                            |        6 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/clustering.py                                  |       20 |        1 |        6 |        1 |     92% |        76 |
 | protzilla/data\_analysis/differential\_expression.py                    |        5 |        2 |        0 |        0 |     60% |       8-9 |
-| protzilla/data\_analysis/differential\_expression\_anova.py             |       28 |        2 |        8 |        2 |     89% |50-51, 93->96 |
+| protzilla/data\_analysis/differential\_expression\_anova.py             |       27 |        2 |        8 |        2 |     89% |50-51, 92->95 |
 | protzilla/data\_analysis/differential\_expression\_helper.py            |        7 |        1 |        2 |        1 |     78% |        22 |
 | protzilla/data\_analysis/differential\_expression\_t\_test.py           |       40 |        0 |       10 |        0 |    100% |           |
 | protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        6 |       10 |        2 |     81% |62-67, 95, 150-155, 164 |
@@ -61,7 +61,7 @@
 | tests/protzilla/test\_transform\_dfs.py                                 |       35 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_workflow\_helper.py                               |       55 |        0 |        4 |        0 |    100% |           |
 | ui/main/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
-|                                                               **TOTAL** | **2218** |  **159** |  **447** |   **79** | **90%** |           |
+|                                                               **TOTAL** | **2217** |  **159** |  **447** |   **79** | **90%** |           |
 
 
 ## Setup coverage badge
