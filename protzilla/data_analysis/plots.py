@@ -107,23 +107,29 @@ def clustergram_plot(input_df: pd.DataFrame, sample_group_df: pd.DataFrame):
     # In the clustergram each row represents a sample that can pertain to a group.
     # In the following code the necessary data structures are created to assign each
     # group to a unique color.
-    sample_group_dict = dict(
-        zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
-    )
-    n_groups = len(set(sample_group_dict.values()))
-    group_colors = px.colors.sample_colorscale(
-        "Turbo",
-        0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
-    )
-    group_to_color_dict = dict(
-        zip(sample_group_df[sample_group_df.columns[0]].drop_duplicates(), group_colors)
-    )
-    # dictionary that maps each color to a group for the colorbar (legend)
-    color_label_dict = {v: k for k, v in group_to_color_dict.items()}
-    groups = [sample_group_dict[label] for label in matrix.index.values]
-    # maps each row (sample) to the corresponding color
-    row_colors = [group_to_color_dict[g] for g in groups]
-
+    if isinstance(sample_group_df, pd.DataFrame):
+        sample_group_dict = dict(
+            zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
+        )
+        n_groups = len(set(sample_group_dict.values()))
+        group_colors = px.colors.sample_colorscale(
+            "Turbo",
+            0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
+        )
+        group_to_color_dict = dict(
+            zip(
+                sample_group_df[sample_group_df.columns[0]].drop_duplicates(),
+                group_colors,
+            )
+        )
+        # dictionary that maps each color to a group for the colorbar (legend)
+        color_label_dict = {v: k for k, v in group_to_color_dict.items()}
+        groups = [sample_group_dict[label] for label in matrix.index.values]
+        # maps each row (sample) to the corresponding color
+        row_colors = [group_to_color_dict[g] for g in groups]
+    else:
+        row_colors = None
+        color_label_dict = None
     # TODO: logic for setting column_colors and column_colors_to_label_dict
 
     clustergram = Clustergram(
