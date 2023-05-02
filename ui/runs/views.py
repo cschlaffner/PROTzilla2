@@ -62,8 +62,9 @@ def detail(request, run_name):
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[
-                plot.to_html() if not isinstance(plot, dict) else ""
+                plot.to_html(include_plotlyjs=False, full_html=False)
                 for plot in run.plots
+                if not isinstance(plot, dict)
             ],
             show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
