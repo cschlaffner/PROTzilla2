@@ -123,7 +123,8 @@ def make_displayed_history(run):
                 fields.append(make_parameter_input(key, param_dict, disabled=True))
         plots = [
             plot.to_html(include_plotlyjs=False, full_html=False)
-            for plot in history_step.plots if not isinstance(plot, dict)
+            for plot in history_step.plots
+            if not isinstance(plot, dict)
         ]
         displayed_history.append(
             dict(
