@@ -313,9 +313,9 @@ class Run:
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
 
-    def export_plots(self, format):
+    def export_plots(self, format_):
         exports = []
         for plot in self.plots:
             if isinstance(plot, plotly.graph_objs.Figure):  # to catch dicts
-                exports.append(plotly.io.to_image(plot, format=format))
+                exports.append(plotly.io.to_image(plot, format=format_, scale=4))
         return exports

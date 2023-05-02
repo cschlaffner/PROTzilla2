@@ -172,6 +172,12 @@
                         {% endfor %}
                     </div>
                     <form action="{% url 'runs:download_plots' run_name %}">
+                        <select class="form-select" name="format">
+                            <option value="png" selected="selected">png</option>
+                            <option value="jpg">jpg</option>
+                            <option value="svg">svg</option>
+                            <option value="pdf">pdf</option>
+                        </select>
                         <button class="btn btn-grey">Download plots</button>
                     </form>
                 {% endif %}

@@ -299,5 +299,8 @@ def outputs_of_step(request, run_name):
 
 def download_plots(request, run_name):
     run = active_runs[run_name]
-    exported = run.export_plots(format="png")
-    return FileResponse(BytesIO(exported[0]))
+    format_ = request.GET["format"]
+    exported = run.export_plots(format=format_)
+    return FileResponse(
+        BytesIO(exported[0]), filename=f"plot.{format_}", as_attachment=True
+    )
