@@ -7,6 +7,7 @@
 
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plotly.js' %}"></script>
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
