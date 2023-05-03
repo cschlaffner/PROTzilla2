@@ -1,6 +1,6 @@
 {#  params: name, type, categories, key,  class, disabled, multiple, default#}
 
-<label for="{{ key }}">{{ name }}</label>
+{%if name %}<label for="{{ key }}">{{ name }}</label>{% endif %}
 <select name="{{ key }}" id="{{ key }}"
         class="form-select"
         {% if disabled %} disabled {% endif %}
