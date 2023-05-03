@@ -99,5 +99,3 @@ def anova(
         "filtered_df": filtered_df,
         "corrected_p_values_df": corrected_p_values_df,
         "corrected_alpha": corrected_alpha,
-        "sample_group_df": sample_group_df,
-    }
