@@ -85,22 +85,32 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
 
 
 def clustergram_plot(
-    input_df: pd.DataFrame, sample_group_df: pd.DataFrame, flip_axes: str
+    input_df: pd.DataFrame, sample_group_df: pd.DataFrame | None, flip_axes: str
 ):
     """
-    A function to create a heatmap with an integrated dendrogram
-    (clustergram) from the ANOVA Test results. The clustergram shows in a
-    matrix form the intensities for a protein and a sample. Only the values
-    for the proteins with a significance level less than the corrected
-    alpha value are shown. The samples and proteins are ordered according
-    to the clustering resulting from the dendrogram. Regarding the
-    customisation of the graph, it is possible to invert the axes and
-    also colorbar representing the different groups present in the data
-    can be added.
 
     :param grouping: the column name of the grouping variable in the
         metadata_df
     :type grouping: str
+
+    Creates a clustergram plot from a dataframe in protzilla wide format. The rows or
+    columns of the clustergram are ordered according to the clustering resulting from
+    the dendrogram. Optionally, a colorbar representing the different groups present
+    in the data can be added and the axes of the heatmap can be inverted
+
+    :param input_df: A dataframe in protzilla wide format, where each row
+        represents a sample and each column represents a feature.
+    :type input_df: pd.DataFrame
+    :param sample_group_df: A dataframe with a column that specifies the group of each
+        sample in `input_df`. Each group will be assigned a color, which will be shown
+        in the final plot as a colorbar next to the heatmap. This is an optional
+        parameter
+    :type sample_group_df: pd.DataFrame
+    :param flip_axes: If "yes", the rows and columns of the clustergram will be
+        swapped. If "no", the default orientation is used.
+    :type flip_axes: str
+    :return: returns a list with a figure or a list with a dictionary if an error occurs
+    :rtype: [go.Figure]
     """
     try:
         assert isinstance(input_df, pd.DataFrame)
