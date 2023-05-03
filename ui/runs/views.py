@@ -1,5 +1,6 @@
 import sys
 import traceback
+import pandas as pd
 
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
@@ -113,17 +114,40 @@ def change_field(request, run_name):
         response.status_code = 404  # not found
         return response
 
+    selected = request.POST.getlist('selected[]')
     post_id = request.POST["id"]
-    selected = request.POST["selected"]
+    if len(selected) > 1:
+        # remove last 4 characters from post_id to get the original parameter name
+        # wrapper div
+        post_id = post_id[:-4]
+   
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
+
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = {}
     for key in fields_to_fill:
-        param_dict = parameters[key]
+        if len(selected) == 1:
+            param_dict = parameters[key]
+        else: 
+            param_dict = parameters[post_id]["fields"][key]
+            
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
-            fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        elif param_dict["fill"] == "protein_ids":
+            named_output = selected[0]
+            output_item = selected[1]
+            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            if isinstance(protein_itr, pd.DataFrame):
+                param_dict["categories"] = protein_itr["Protein ID"].unique()
+            elif isinstance(protein_itr, pd.Series):
+                param_dict["categories"] = protein_itr.unique()
+            elif isinstance(protein_itr, list):
+                param_dict["categories"] = protein_itr
+            else:
+                param_dict["categories"] = []
+
+        fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
@@ -231,6 +255,11 @@ def plot(request, run_name):
     parameters = parameters_from_post(request.POST)
     if run.step == "plot":
         del parameters["chosen_method"]
+    parameters_copy = parameters.copy()
+    for param in parameters:
+        if "wrapper" in param:
+            del parameters_copy[param]
+    parameters = parameters_copy
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

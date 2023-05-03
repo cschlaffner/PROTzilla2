@@ -68,5 +68,36 @@
                 alert(e.responseJSON.error); // alert error message to user
             })
         })
+
+        $("#method_parameters").on("change", ".dynamic_trigger_multiple", function () {
+            const triggered_id = $(this).attr("id");
+
+            selected_choices = [];
+            $(this).children().each(function() {
+                let currentValue = $(this).val();
+                if (currentValue !== "") {
+                    selected_choices.push(currentValue);
+                }
+              });
+            console.log(selected_choices);
+
+            $.ajax({
+                url: "{% url 'runs:change_field' run_name %}",
+                type: "POST",
+                data: {
+                    id: triggered_id,
+                    selected: selected_choices,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    $.each(response, function (key, value) {
+                        $('#' + key).html(value);
+                    })
+                }
+            }).fail(function (e) {
+                console.log('Error:', e);
+                alert(e.responseJSON.error); // alert error message to user
+            })
+        })
     });
 </script>

@@ -44,9 +44,9 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "named_output_with_fields":
         template = "runs/field_named_with_fields.html"
         additional_fields = []
-        for key, field_dict in param_dict["fields"].items():
+        for field_key, field_dict in param_dict["fields"].items():
             additional_fields.append(make_parameter_input(
-                key, field_dict, disabled
+                field_key, field_dict, disabled
             ))
         param_dict["additional_fields"] = additional_fields 
     elif param_dict["type"] == "metadata_df":

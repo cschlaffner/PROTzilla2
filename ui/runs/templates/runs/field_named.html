@@ -1,5 +1,5 @@
 {# params: key name disabled default steps outputs #}
-{%if class%} <div class="{{class}}"> {%endif%}
+{%if class%} <div class="{{class}}" id="{{ key }}_div"> {%endif%}
 <label for="{{ key }}">{{ name }}</label>
 <select name="{{ key }}" id="{{ key }}" class="named form-select" {% if disabled %} disabled {% endif %} >
     {% for option in steps %}
@@ -12,4 +12,4 @@
         <option value="{{ option }}" {% if option == default.1 %} selected {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>
-{%if class%}</div> {%endif%}
+{%if class%}</div>{%endif%}
