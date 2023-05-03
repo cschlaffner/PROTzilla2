@@ -18,10 +18,6 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha, proteins_of_inte
         annotation="Protein ID",
     ) 
 
-    # proteins_of_interest are first 5 unique values from column Protein ID for now
-    # because frontend needs update
-    proteins_of_interest = proteins_of_interest["Protein ID"].unique()[:5]
-
     if proteins_of_interest is None:
             proteins_of_interest = []
 
