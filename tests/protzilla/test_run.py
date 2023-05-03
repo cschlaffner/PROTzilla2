@@ -1,7 +1,6 @@
 import json
 from shutil import rmtree
 from PIL import Image
-from io import BytesIO
 import pytest
 
 from protzilla import data_preprocessing
@@ -235,5 +234,14 @@ def test_export_plot():
         dict(graph_type="Pie chart"),
     )
     for plot in run.export_plots("png"):
-        Image.open(BytesIO(plot)).verify()
+        Image.open(plot).verify()
+    run.next_step()
+    run.perform_calculation(data_preprocessing.imputation.by_min_per_sample, {})
+    run.create_plot(
+        data_preprocessing.imputation.by_min_per_sample_plot,
+        dict(graph_type="Boxplot", graph_type_quantites="Bar chart", group_by="Sample"),
+    )
+    assert len(run.plots) > 1
+    for plot in run.export_plots("png"):
+        Image.open(plot).verify()
     rmtree(RUNS_PATH / run_name)

@@ -177,15 +177,17 @@
                 {% endif %}
                 <div class="row">
                     <div class="d-flex col">
-                        <form action="{% url 'runs:download_plots' run_name %}">
-                            <select class="form-select mb-2" name="format">
-                                <option value="png" selected="selected">png</option>
-                                <option value="jpg">jpg</option>
-                                <option value="svg">svg</option>
-                                <option value="pdf">pdf</option>
-                            </select>
-                            <button class="btn btn-grey">Download plots</button>
-                        </form>
+                        {% if current_plots %}
+                            <form action="{% url 'runs:download_plots' run_name %}">
+                                <select class="form-select mb-2" name="format">
+                                    <option value="png" selected="selected">png</option>
+                                    <option value="jpg">jpg</option>
+                                    <option value="svg">svg</option>
+                                    <option value="pdf">pdf</option>
+                                </select>
+                                <button class="btn btn-grey">Download plots</button>
+                            </form>
+                        {% endif %}
                     </div>
                     <div class="col">
                         {# navigation between steps #}

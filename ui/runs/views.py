@@ -1,7 +1,7 @@
 import sys
 import traceback
-from io import BytesIO
-
+import zipfile
+import tempfile
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import render
@@ -300,7 +300,13 @@ def outputs_of_step(request, run_name):
 def download_plots(request, run_name):
     run = active_runs[run_name]
     format_ = request.GET["format"]
-    exported = run.export_plots(format=format_)
+    exported = run.export_plots(format_=format_)
+    if len(exported) == 1:
+        return FileResponse(exported[0], filename=f"plot.{format_}", as_attachment=True)
+    f = tempfile.NamedTemporaryFile()
+    with zipfile.ZipFile(f, "w") as zf:
+        for i, plot in enumerate(exported):
+            zf.writestr(f"{i}.{format_}", plot.getvalue())
     return FileResponse(
-        BytesIO(exported[0]), filename=f"plot.{format_}", as_attachment=True
+        open(f.name, "rb"), filename=f"plot.{format_}.zip", as_attachment=True
     )

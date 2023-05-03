@@ -4,6 +4,7 @@ import traceback
 from pathlib import Path
 from shutil import rmtree
 import plotly
+from io import BytesIO
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
@@ -317,5 +318,7 @@ class Run:
         exports = []
         for plot in self.plots:
             if isinstance(plot, plotly.graph_objs.Figure):  # to catch dicts
-                exports.append(plotly.io.to_image(plot, format=format_, scale=4))
+                exports.append(
+                    BytesIO(plotly.io.to_image(plot, format=format_, scale=4))
+                )
         return exports
