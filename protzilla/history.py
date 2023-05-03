@@ -202,12 +202,12 @@ class CustomJSONEncoder(json.JSONEncoder):
             # TODO 124 dont write history_df when not in disk mode
             path = RUNS_PATH / self.run_name / f"history_dfs/{random_string()}.csv"
             path.parent.mkdir(exist_ok=True)
-            obj.to_csv(path, index=False)
+            obj.to_csv(path)
             return {"__dataframe__": True, "path": str(path)}
         return json.JSONEncoder.default(self, obj)
 
 
 def load_dataframes(dct):
     if dct.get("__dataframe__", False):
-        return pd.read_csv(dct["path"])
+        return pd.read_csv(dct["path"], index_col=0)
     return dct
