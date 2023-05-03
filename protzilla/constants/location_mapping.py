@@ -1,3 +1,6 @@
+from ..data_integration import (
+    enrichment_analysis,
+)
 from ..data_analysis import (
     clustering,
     differential_expression,
@@ -146,6 +149,21 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_STRING",
+    ):  enrichment_analysis.go_analysis_with_STRING,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_enrichr",
+    ):  enrichment_analysis.go_analysis_with_enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_offline",
+    ):  enrichment_analysis.go_analysis_offline,
 }
 
 # reversed mapping of method callable and location

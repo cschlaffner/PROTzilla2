@@ -967,5 +967,41 @@
       }
     }
   },
-  "data_integration": {}
+  "data_integration": {  
+    "enrichment_analysis": {
+      "go_analysis_offline": {
+        "name": "GO Analysis offline",
+        "description": "Offline GO Analysis using a hypergeometric test",
+        "parameters": {
+          "input_df": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      },
+      "go_analysis_with_STRING": {
+        "name": "GO Analysis with STRING",
+        "description": "Online GO Analysis using STRING API",
+        "parameters": {
+          "input_df": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      },
+      "go_analysis_with_enrichr": {
+        "name": "GO Analysis with enrichr",
+        "description": "Online GO Analysis using Enrichr API",
+        "parameters": {
+          "input_df": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": null
+          }
+        }
+      }
+    }
+  }
 }

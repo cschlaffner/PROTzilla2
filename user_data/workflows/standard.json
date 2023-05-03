@@ -108,16 +108,22 @@
             "selected_groups": [],
             "metadata_df": ""
           }
-        },
-        {
-          "name": "differential_expression",
-          "method": "t_test",
-          "parameters": {}
         }
       ]
     },
     "data_integration": {
-      "steps": []
+      "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_offline",
+          "parameters": {}
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_offline",
+          "parameters": {}
+        }
+      ]
     }
   }
 }
