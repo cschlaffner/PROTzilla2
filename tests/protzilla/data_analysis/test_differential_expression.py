@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_analysis.differential_expression import anova, t_test
-from protzilla.data_analysis.plots import create_volcano_plot, clustergram_plot
+from protzilla.data_analysis.plots import create_volcano_plot
 
 
 def test_differential_expression_t_test(show_figures):
@@ -305,14 +305,6 @@ def test_differential_expression_anova(show_figures=True):
     p_values_rounded = [
         round(x, 4) for x in corrected_p_values_df["corrected_p_values"]
     ]
-
-    fig = clustergram_plot(
-        output_dict["filtered_df"],
-        output_dict["sample_group_df"],
-    )[0]
-    if show_figures:
-        fig.show()
-
     assertion_p_values = [
         0.0054,
         0.0013,
