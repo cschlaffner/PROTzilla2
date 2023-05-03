@@ -302,11 +302,18 @@ def download_plots(request, run_name):
     format_ = request.GET["format"]
     exported = run.export_plots(format_=format_)
     if len(exported) == 1:
-        return FileResponse(exported[0], filename=f"plot.{format_}", as_attachment=True)
+        filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
+        return FileResponse(exported[0], filename=filename, as_attachment=True)
+
     f = tempfile.NamedTemporaryFile()
     with zipfile.ZipFile(f, "w") as zf:
         for i, plot in enumerate(exported):
-            zf.writestr(f"{i}.{format_}", plot.getvalue())
+            filename = (
+                f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
+            )
+            zf.writestr(filename, plot.getvalue())
     return FileResponse(
-        open(f.name, "rb"), filename=f"plot.{format_}.zip", as_attachment=True
+        open(f.name, "rb"),
+        filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
+        as_attachment=True,
     )
