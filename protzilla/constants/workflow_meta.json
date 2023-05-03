@@ -779,12 +779,6 @@
           }
         }
       },
-      "heatmap": {
-        "name": "Heatmap",
-        "description": "",
-        "parameters": {
-        }
-      },
       "scatter_plot": {
         "name": "Scatter plot",
         "description":"Creates a scatter plot from data",
@@ -807,15 +801,21 @@
         "description":"Creates a clustergram from data",
         "parameters": {
           "input_df": {
-            "name": "Choose dataframe to be plotted",
+            "name": "Input dataframe: choose dataframe to be plotted",
             "type": "named_output",
             "default": null
           },
           "sample_group_df": {
-            "name": "Choose a dataframe to assign a unique color to each group (optional)",
+            "name": "Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
             "type": "named_output",
             "default": null,
             "optional": true
+          },
+          "flip_axes": {
+            "name": "Do you want to flip the orientation of the heatmap's axes?",
+            "type": "categorical",
+            "categories": ["yes", "no"],
+            "default": "no"
           }
         }
       }

@@ -84,7 +84,9 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
     return [fig]
 
 
-def clustergram_plot(input_df: pd.DataFrame, sample_group_df: pd.DataFrame):
+def clustergram_plot(
+    input_df: pd.DataFrame, sample_group_df: pd.DataFrame, flip_axes: str
+):
     """
     A function to create a heatmap with an integrated dendrogram
     (clustergram) from the ANOVA Test results. The clustergram shows in a
@@ -100,53 +102,84 @@ def clustergram_plot(input_df: pd.DataFrame, sample_group_df: pd.DataFrame):
         metadata_df
     :type grouping: str
     """
-    intensity_name = input_df.columns[3]
+    try:
+        assert isinstance(input_df, pd.DataFrame)
+        assert isinstance(sample_group_df, pd.DataFrame) or not sample_group_df
 
-    matrix = input_df.pivot(index="Sample", columns="Protein ID", values=intensity_name)
+        input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    # In the clustergram each row represents a sample that can pertain to a group.
-    # In the following code the necessary data structures are created to assign each
-    # group to a unique color.
-    if isinstance(sample_group_df, pd.DataFrame):
-        sample_group_dict = dict(
-            zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
-        )
-        n_groups = len(set(sample_group_dict.values()))
-        group_colors = px.colors.sample_colorscale(
-            "Turbo",
-            0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
-        )
-        group_to_color_dict = dict(
-            zip(
-                sample_group_df[sample_group_df.columns[0]].drop_duplicates(),
-                group_colors,
+        if isinstance(sample_group_df, pd.DataFrame):
+            assert len(input_df_wide.index.values.tolist()) == len(
+                sample_group_df.index.values.tolist()
             )
+            assert sorted(input_df_wide.index.values.tolist()) == sorted(
+                sample_group_df.index.values.tolist()
+            )
+            # In the clustergram each row represents a sample that can pertain to a
+            # group. In the following code the necessary data structures are created
+            # to assign eachgroup to a unique color.
+            sample_group_dict = dict(
+                zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
+            )
+            n_groups = len(set(sample_group_dict.values()))
+            group_colors = px.colors.sample_colorscale(
+                "Turbo",
+                0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
+            )
+            group_to_color_dict = dict(
+                zip(
+                    sample_group_df[sample_group_df.columns[0]].drop_duplicates(),
+                    group_colors,
+                )
+            )
+            # dictionary that maps each color to a group for the colorbar (legend)
+            color_label_dict = {v: k for k, v in group_to_color_dict.items()}
+            groups = [sample_group_dict[label] for label in input_df_wide.index.values]
+            # maps each row (sample) to the corresponding color
+            row_colors = [group_to_color_dict[g] for g in groups]
+        else:
+            row_colors = None
+            color_label_dict = None
+
+        clustergram = Clustergram(
+            flip_axes=False if flip_axes == "no" else True,
+            data=input_df_wide.values,
+            row_labels=input_df_wide.index.values.tolist(),
+            row_colors=row_colors,
+            row_colors_to_label_dict=color_label_dict,
+            column_labels=input_df_wide.columns.values.tolist(),
+            color_threshold={"row": 250, "col": 700},
+            line_width=2,
+            color_map=px.colors.diverging.RdBu,
+            hidden_labels=["row", "col"],
         )
-        # dictionary that maps each color to a group for the colorbar (legend)
-        color_label_dict = {v: k for k, v in group_to_color_dict.items()}
-        groups = [sample_group_dict[label] for label in matrix.index.values]
-        # maps each row (sample) to the corresponding color
-        row_colors = [group_to_color_dict[g] for g in groups]
-    else:
-        row_colors = None
-        color_label_dict = None
-    # TODO: logic for setting column_colors and column_colors_to_label_dict
 
-    clustergram = Clustergram(
-        flip_axes=False,
-        data=matrix.values,
-        row_labels=matrix.index.values.tolist(),
-        row_colors=row_colors,
-        row_colors_to_label_dict=color_label_dict,
-        column_labels=matrix.columns.values.tolist(),
-        color_threshold={"row": 250, "col": 700},
-        line_width=2,
-        color_map=px.colors.diverging.RdBu,
-        hidden_labels=["row", "col"],
-    )
-
-    clustergram.update_layout(
-        autosize=True,
-    )
-
-    return [clustergram]
+        clustergram.update_layout(
+            autosize=True,
+        )
+        return [clustergram]
+    except AssertionError as e:
+        if not isinstance(input_df, pd.DataFrame):
+            msg = (
+                'The selected input for "input dataframe" is not a dataframe, '
+                'dataframes have the suffix "df"'
+            )
+        elif not isinstance(sample_group_df, pd.DataFrame):
+            msg = (
+                'The selected input for "grouping dataframe" is not a dataframe, '
+                'dataframes have the suffix "df"'
+            )
+        elif isinstance(sample_group_df, pd.DataFrame) and len(
+            input_df_wide.index.values.tolist()
+        ) != len(sample_group_df.index.values.tolist()):
+            msg = (
+                "There is a dimension mismatch between the input dataframe and the "
+                "grouping dataframe, both should have the same number of samples (rows)"
+            )
+        elif isinstance(sample_group_df, pd.DataFrame) and sorted(
+            input_df_wide.index.values.tolist()
+        ) != sorted(sample_group_df.index.values.tolist()):
+            msg = "The input dataframe and the grouping contain different samples"
+        else:
+            msg = ""
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
