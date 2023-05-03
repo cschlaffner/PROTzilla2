@@ -4,9 +4,9 @@ from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
-    if param_dict["type"] == "named_output":
+    if param_dict["type"] == "named_output" or param_dict["type"] == "named_output_with_fields":
         param_dict["steps"] = [name for name in run.history.step_names if name]
-        if param_dict["default"]:
+        if "default" in param_dict and param_dict["default"]:
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
@@ -21,8 +21,6 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
-        elif param_dict["fill"] == "proteins":
-            param_dict["categories"] = run.df["Protein ID"].unique()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"

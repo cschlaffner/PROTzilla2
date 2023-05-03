@@ -779,11 +779,17 @@
           },
           "proteins_of_interest": {
             "name": "Proteins of Interest",
-            "type": "named_output",
-            "fill": "proteins",
-            "categories": [],
-            "default": null,
-            "multiple": true
+            "type": "named_output_with_fields",
+            "fill_dynamic": ["select_proteins"],
+            "fields": {
+              "select_proteins": {
+                "type": "categorical",
+                "fill": "protein_ids",
+                "categories": [],
+                "default": null,
+                "multiple": true
+              }
+            }
           }
         }
       },
