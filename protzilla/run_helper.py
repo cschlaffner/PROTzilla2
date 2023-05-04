@@ -23,7 +23,7 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
 
     if "fill_dynamic" in param_dict:
-        param_dict["class"] = "dynamic_trigger_multiple" if "fields" in param_dict else "dynamic_trigger"
+        param_dict["class"] = "dynamic_trigger"
 
 
 def get_parameters(run, section, step, method):

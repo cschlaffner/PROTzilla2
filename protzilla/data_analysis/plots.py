@@ -19,7 +19,7 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha, proteins_of_inte
     ) 
 
     if proteins_of_interest is None:
-            proteins_of_interest = []
+        proteins_of_interest = []
 
     # annotate the proteins of interest permanently in the plot
     for protein in proteins_of_interest:
