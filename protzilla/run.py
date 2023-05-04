@@ -131,6 +131,8 @@ class Run:
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
+        if "run_name" in call_parameters:
+            call_parameters["run_name"] = self.run_name
 
         if self.section in ["importing", "data_preprocessing"]:
             self.result_df, self.current_out = method_callable(
