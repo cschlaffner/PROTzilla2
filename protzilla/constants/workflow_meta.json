@@ -977,17 +977,14 @@
             "name": "Choose Proteins to run GO Analysis on",
             "type": "named_output",
             "default": null
-          }
-        }
-      },
-      "go_analysis_with_STRING": {
-        "name": "GO Analysis with STRING",
-        "description": "Online GO Analysis using STRING API",
-        "parameters": {
-          "input_df": {
-            "name": "Choose Proteins to run GO Analysis on",
-            "type": "named_output",
-            "default": null
+          },
+          "cutoff": {
+            "name": "Cutoff for p-values",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.05
           }
         }
       },
@@ -999,6 +996,40 @@
             "name": "Choose Proteins to run GO Analysis on",
             "type": "named_output",
             "default": null
+          },
+          "cutoff": {
+            "name": "Cutoff for p-values",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.05
+          }
+        }
+      },
+      "go_analysis_with_STRING": {
+        "name": "GO Analysis with STRING",
+        "description": "Online GO Analysis using STRING API",
+        "parameters": {
+          "input_df": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": null
+          },
+          "protein_set_dbs": {
+            "name": "Protein Set Libraries",
+            "type": "categorical",
+            "fill": "dbs_restring",
+            "categories": [],
+            "default": null
+          },
+          "directions": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
           }
         }
       }
