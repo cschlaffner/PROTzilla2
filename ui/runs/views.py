@@ -117,12 +117,11 @@ def change_field(request, run_name):
     selected = request.POST.getlist('selected[]')
     post_id = request.POST["id"]
     if len(selected) > 1:
-        # remove last 4 characters from post_id to get the original parameter name
-        # wrapper div
+        # remove last 4 characters from post_id to get the original id
+        # because multiple selected items are in id_div
         post_id = post_id[:-4]
    
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
-
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = {}
