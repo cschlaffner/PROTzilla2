@@ -80,3 +80,5 @@ pytest-dependency==0.5.1
 pytest-order==1.1.0
 umap-learn==0.5.3
 numba==0.57.0rc1
+Pillow
+kaleido
