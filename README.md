@@ -29,7 +29,7 @@
 | protzilla/history.py                                                    |      122 |        7 |       48 |        7 |     92% |33, 109, 116, 120, 126, 192, 207 |
 | protzilla/importing/metadata\_import.py                                 |       26 |        7 |       12 |        1 |     63% |     19-26 |
 | protzilla/importing/ms\_data\_import.py                                 |       30 |        0 |        4 |        0 |    100% |           |
-| protzilla/run.py                                                        |      206 |       35 |       62 |        9 |     78% |38-44, 48-54, 103-104, 133, 140-141, 153->151, 166, 174-175, 183-188, 220-221, 239-242, 280->exit, 303, 311->310, 313 |
+| protzilla/run.py                                                        |      224 |       35 |       70 |       10 |     80% |41-47, 51-57, 106-107, 136, 143-144, 156->154, 169, 177-178, 186-191, 223-224, 242-245, 283->exit, 306, 314->313, 316, 321->320 |
 | protzilla/run\_helper.py                                                |       30 |        4 |       22 |        5 |     83% |10, 15, 21, 24->28, 29 |
 | protzilla/runner.py                                                     |       76 |        6 |       30 |        4 |     91% |109, 112, 118->121, 126-127, 140-141 |
 | protzilla/utilities/\_\_init\_\_.py                                     |        0 |        0 |        0 |        0 |    100% |           |
@@ -54,7 +54,7 @@
 | tests/protzilla/importing/test\_metadata\_import.py                     |       23 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/importing/test\_ms\_data\_import.py                     |       16 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_history.py                                        |      116 |        0 |        6 |        0 |    100% |           |
-| tests/protzilla/test\_run.py                                            |      108 |        8 |        2 |        0 |     93% |   144-162 |
+| tests/protzilla/test\_run.py                                            |      117 |        0 |        8 |        0 |    100% |           |
 | tests/protzilla/test\_run\_helper.py                                    |       42 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/test\_runner.py                                         |       89 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/test\_runner\_cli.py                                    |       66 |        0 |        4 |        0 |    100% |           |
@@ -67,9 +67,9 @@
 | ui/runs/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/fields.py                                                       |       73 |       59 |       36 |        0 |     13% |13-29, 33-49, 60-62, 75-82, 86-89, 102-139, 143 |
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
-| ui/runs/views.py                                                        |      152 |      111 |       28 |        0 |     24% |31, 43-50, 79-92, 110-132, 136-143, 147-149, 153-155, 159-161, 165-174, 178-185, 189-197, 201-229, 233-260, 264-266, 270-271, 293-295 |
+| ui/runs/views.py                                                        |      167 |      123 |       34 |        0 |     23% |32, 44-51, 80-93, 111-133, 137-144, 148-150, 154-156, 160-162, 166-175, 179-186, 190-198, 202-230, 234-261, 265-267, 271-272, 294-296, 300-314 |
 | ui/runs/views\_helper.py                                                |       39 |        1 |       16 |        2 |     95% |12->14, 18 |
-|                                                               **TOTAL** | **2583** |  **319** |  **531** |   **84** | **84%** |           |
+|                                                               **TOTAL** | **2625** |  **323** |  **551** |   **85** | **84%** |           |
 
 
 ## Setup coverage badge
