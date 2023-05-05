@@ -2,13 +2,16 @@ import sys
 import traceback
 import zipfile
 import tempfile
+
+import plotly.graph_objs as go
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
-import plotly.graph_objs as go
+
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 sys.path.append(f"{BASE_DIR}/..")
 
@@ -49,6 +52,13 @@ def detail(request, run_name):
     allow_next = run.calculated_method is not None or (
         run.step == "plot" and len(run.plots) > 0
     )
+    default_output_name =  get_workflow_default_param_value(
+            run.workflow_config, *(run.current_run_location()), "output_name"
+        )
+
+    if not default_output_name:
+        default_output_name = ""
+    name_field = make_name_field(allow_next, "runs_next", default=default_output_name)
     return render(
         request,
         "runs/details.html",
@@ -61,7 +71,7 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next"),
+            name_field=name_field,
             current_plots=[
                 plot.to_html(include_plotlyjs=False, full_html=False)
                 for plot in run.plots

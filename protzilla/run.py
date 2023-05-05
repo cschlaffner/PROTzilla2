@@ -11,7 +11,7 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import get_all_default_params_for_methods
+from .workflow_helper import get_all_default_params_for_methods, get_workflow_default_param_value
 
 
 class Run:
@@ -158,7 +158,7 @@ class Run:
                     log_function(f"{message['msg']}{trace}")
 
     def calculate_and_next(
-        self, method_callable, name=None, **parameters
+            self, method_callable, name=None, **parameters
     ):  # to be used for CLI
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
@@ -228,6 +228,10 @@ class Run:
         self.write_local_workflow()
 
     def next_step(self, name=None):
+        if not name:
+            name = get_workflow_default_param_value(
+                self.workflow_config, *(self.current_run_location()), "output_name"
+            )
         try:
             self.history.add_step(
                 self.section,
