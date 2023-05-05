@@ -103,7 +103,10 @@
           "name": "differential_expression",
           "method": "anova",
           "parameters": {
-            "intensity_df": ["preprocessed_data", "dataframe"],
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
             "multiple_testing_correction_method": "Benjamini-Hochberg",
             "alpha": 0.05,
             "grouping": "Group",
@@ -114,7 +117,12 @@
         {
           "name": "differential_expression",
           "method": "t_test",
-          "parameters": {}
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ]
+          }
         }
       ]
     },
