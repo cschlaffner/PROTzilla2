@@ -323,7 +323,10 @@ class Run:
                     png_binary = plotly.io.to_image(plot, format="png", scale=4)
                     img = Image.open(BytesIO(png_binary)).convert("RGB")
                     binary = BytesIO()
-                    img.save(binary, format=format_)
+                    if format_ == "tiff":
+                        img.save(binary, format="tiff", compression="tiff_lzw")
+                    else:
+                        img.save(binary, format=format_)
                     exports.append(binary)
                 else:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)

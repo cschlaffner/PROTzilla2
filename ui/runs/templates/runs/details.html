@@ -181,9 +181,11 @@
                             <form action="{% url 'runs:download_plots' run_name %}">
                                 <select class="form-select mb-2" name="format">
                                     <option value="png" selected="selected">png</option>
-                                    <option value="jpg">jpg</option>
+                                    <option value="tiff">tiff</option>
                                     <option value="svg">svg</option>
                                     <option value="pdf">pdf</option>
+                                    <option value="eps">eps</option>
+                                    <option value="jpg">jpg</option>
                                 </select>
                                 <button class="btn btn-grey">Download plots</button>
                             </form>
