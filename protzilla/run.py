@@ -1,11 +1,12 @@
 import json
 import shutil
 import traceback
+from io import BytesIO
 from pathlib import Path
 from shutil import rmtree
+
 import plotly
 from PIL import Image
-from io import BytesIO
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
