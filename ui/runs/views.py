@@ -52,9 +52,9 @@ def detail(request, run_name):
     allow_next = run.calculated_method is not None or (
         run.step == "plot" and len(run.plots) > 0
     )
-    default_output_name =  get_workflow_default_param_value(
-            run.workflow_config, *(run.current_run_location()), "output_name"
-        )
+    default_output_name = get_workflow_default_param_value(
+        run.workflow_config, *(run.current_run_location()), "output_name"
+    )
 
     if not default_output_name:
         default_output_name = ""
