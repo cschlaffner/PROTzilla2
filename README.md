@@ -16,7 +16,7 @@
 | protzilla/data\_analysis/differential\_expression\_anova.py             |       27 |        2 |        8 |        2 |     89% |50-51, 92->95 |
 | protzilla/data\_analysis/differential\_expression\_helper.py            |        7 |        1 |        2 |        1 |     78% |        22 |
 | protzilla/data\_analysis/differential\_expression\_t\_test.py           |       40 |        0 |       10 |        0 |    100% |           |
-| protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        6 |       10 |        2 |     81% |62-67, 95, 150-155, 164 |
+| protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        6 |       10 |        2 |     81% |62-67, 95, 148-153, 162 |
 | protzilla/data\_analysis/plots.py                                       |       36 |        1 |       12 |        2 |     94% |53, 62->64 |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                           |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                       |       15 |        2 |        4 |        1 |     74% |     55-56 |
