@@ -242,6 +242,8 @@ def test_export_plot():
         dict(graph_type="Boxplot", graph_type_quantites="Bar chart", group_by="Sample"),
     )
     assert len(run.plots) > 1
-    for plot in run.export_plots("png"):
+    for plot in run.export_plots("tiff"):
+        Image.open(plot).verify()
+    for plot in run.export_plots("eps"):
         Image.open(plot).verify()
     rmtree(RUNS_PATH / run_name)
