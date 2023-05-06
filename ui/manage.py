@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -W ignore
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import warnings
 
 
 def main():
     """Run administrative tasks."""
+    warnings.simplefilter("ignore")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings")
     try:
         from django.core.management import execute_from_command_line
