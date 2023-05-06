@@ -106,14 +106,14 @@ def test_scatter_plot_color_df_2d(show_figures, wide_2d_df):
     )
 
 
-def test_clustergram(wide_4d_df, color_df, show_figures):
+def test_clustergram(show_figures, wide_4d_df, color_df):
     fig = clustergram_plot(wide_4d_df, color_df, "no")[0]
     if show_figures:
         fig.show()
     return
 
 
-def test_clustergram_no_sample_group_df(wide_4d_df, show_figures):
+def test_clustergram_no_sample_group_df(show_figures, wide_4d_df):
     fig = clustergram_plot(wide_4d_df, "", "no")[0]
     if show_figures:
         fig.show()

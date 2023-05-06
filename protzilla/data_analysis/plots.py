@@ -191,5 +191,5 @@ def clustergram_plot(
         ) != sorted(sample_group_df.index.values.tolist()):
             msg = "The input dataframe and the grouping contain different samples"
         else:
-            msg = ""
+            msg = f"An unknown error occurred: {e}"
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
