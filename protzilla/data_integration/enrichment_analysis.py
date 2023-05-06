@@ -1,4 +1,5 @@
 import os
+import logging
 from time import sleep, time
 import pandas as pd
 import numpy as np
@@ -7,6 +8,7 @@ import gseapy as gp
 from django.contrib import messages
 
 from ..constants.paths import RUNS_PATH
+from protzilla.utilities.random import random_string
 
 def go_analysis_with_STRING(
     proteins, protein_set_dbs, organism, background, directions, run_name=None
@@ -46,28 +48,37 @@ def go_analysis_with_STRING(
         os.mkdir("tmp_enrichment_results")
         os.chdir("tmp_enrichment_results")
 
-    # maybe add mapping to string API for identifiers
+    # make folder for details
+    details_folder_name = f"enrichment_details_{random_string()}"
+    os.mkdir(details_folder_name)
+    os.chdir(details_folder_name)
 
-    up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
-    restring.write_functional_enrichment_tables(up_df, prefix="UP_")
+    # maybe add mapping to string API for identifiers before this
+
+    if "up" in directions or "both" in directions:
+        logging.info("Starting analysis for up-regulated proteins")
+        up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
+        restring.write_functional_enrichment_tables(up_df, prefix="UP_")
+        # only wait 1 sec overall?
+        logging.info("Finished analysis for up-regulated proteins")
+        sleep(1)
     
-    # only wait 1 sec overall?
-    sleep(1)
+    if "down" in directions or "both" in directions:
+        logging.info("Starting analysis for down-regulated proteins")
+        down_df = restring.get_functional_enrichment(down_protein_list, **string_params) 
+        restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
+        logging.info("Finished analysis for down-regulated proteins")
 
-    down_df = restring.get_functional_enrichment(down_protein_list, **string_params) 
-    restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
+    # change working directory back to enrichment_results folder
+    os.chdir("..")
 
-
-    dirs = ["test_wd/pg_norm_dep_with_just_t"]
-
-    # this has to be for loop per type
-    # has PATH attribute
-    db = restring.aggregate_results(directories=dirs, kind="Component")
-
-    df = restring.tableize_aggregated(db)
-    df.to_csv("results.csv")
-    res = restring.summary(db)
-    res.to_csv("summary.csv")
+    logging.info("Summarizing enrichment results")
+    for term in protein_set_dbs:
+        db = restring.aggregate_results(directories=[details_folder_name], kind=term)
+        df = restring.tableize_aggregated(db)
+        df.to_csv(f"{term}_results.csv")
+        res = restring.summary(db)
+        res.to_csv(f"{term}_summary.csv")
 
     if run_name is None: 
         # delete tmp folder
