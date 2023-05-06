@@ -251,7 +251,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
     assert "mean intensity of 0" in current_out["messages"][0]["msg"]
 
 
-def test_differential_expression_anova(show_figures=True):
+def test_differential_expression_anova(show_figures):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
