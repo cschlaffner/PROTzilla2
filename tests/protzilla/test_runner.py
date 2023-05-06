@@ -182,3 +182,18 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_imputation_graphs
         elif step["name"] == "filter_proteins":
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
+
+
+def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+    runner = Runner(
+        **{
+            "workflow": "standard",
+            "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+            "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "run_name": f"{tests_folder_name}/test_runner_{random_string()}",
+            "df_mode": "disk",
+            "all_plots": False,
+            "verbose": False,
+        }
+    )
+    runner.compute_workflow()

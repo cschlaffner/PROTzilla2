@@ -121,7 +121,8 @@
             "intensity_df": [
               "preprocessed_data",
               "dataframe"
-            ]
+            ],
+            "grouping": "Group"
           }
         }
       ]
