@@ -1,8 +1,9 @@
 import sys
 import traceback
-
+import zipfile
+import tempfile
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -294,3 +295,25 @@ def outputs_of_step(request, run_name):
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
+
+
+def download_plots(request, run_name):
+    run = active_runs[run_name]
+    format_ = request.GET["format"]
+    exported = run.export_plots(format_=format_)
+    if len(exported) == 1:
+        filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
+        return FileResponse(exported[0], filename=filename, as_attachment=True)
+
+    f = tempfile.NamedTemporaryFile()
+    with zipfile.ZipFile(f, "w") as zf:
+        for i, plot in enumerate(exported):
+            filename = (
+                f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
+            )
+            zf.writestr(filename, plot.getvalue())
+    return FileResponse(
+        open(f.name, "rb"),
+        filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
+        as_attachment=True,
+    )
