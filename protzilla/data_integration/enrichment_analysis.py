@@ -14,9 +14,8 @@ def go_analysis_with_STRING(
     proteins, protein_set_dbs, organism, background, directions, run_name=None
 ):
     '''dev notes
-
     organism can be any taxon id, could add a mapping here (name to id)
-    
+    think about output format and plots
     '''
 
     # proteins should be df with two columns: Protein ID and numeric ranking column
@@ -28,6 +27,20 @@ def go_analysis_with_STRING(
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+    
+    # set statistical_background variable because get_functional_enrichmentGUI() function needs it
+    # empty string means no background provided via upload
+    if background == "":
+        statistical_background = None
+    else:
+        # assuming headerless one column file, tab separated
+        read = pd.read_csv(
+            background,
+            sep="\t",
+            low_memory=False,
+            header=None,
+        )
+        statistical_background = read.iloc[:, 0].tolist()
     
     expression_change_col = proteins.loc[:, proteins.columns != "Protein ID"][0]
     proteins.set_index("Protein ID", inplace=True)
@@ -53,11 +66,12 @@ def go_analysis_with_STRING(
     os.mkdir(details_folder_name)
     os.chdir(details_folder_name)
 
-    # maybe add mapping to string API for identifiers before this
+    # maybe add mapping to string API for identifiers before this (dont forget background)
 
     if "up" in directions or "both" in directions:
         logging.info("Starting analysis for up-regulated proteins")
-        up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
+        # use gui function because it includes background
+        up_df = restring.get_functional_enrichmentGUI(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
         # only wait 1 sec overall?
         logging.info("Finished analysis for up-regulated proteins")
@@ -65,7 +79,8 @@ def go_analysis_with_STRING(
     
     if "down" in directions or "both" in directions:
         logging.info("Starting analysis for down-regulated proteins")
-        down_df = restring.get_functional_enrichment(down_protein_list, **string_params) 
+        # use gui function because it includes background
+        down_df = restring.get_functional_enrichmentGUI(down_protein_list, **string_params) 
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -73,19 +88,23 @@ def go_analysis_with_STRING(
     os.chdir("..")
 
     logging.info("Summarizing enrichment results")
+    results = []
+    summaries = []
     for term in protein_set_dbs:
         db = restring.aggregate_results(directories=[details_folder_name], kind=term)
-        df = restring.tableize_aggregated(db)
-        df.to_csv(f"{term}_results.csv")
-        res = restring.summary(db)
-        res.to_csv(f"{term}_summary.csv")
+        result = restring.tableize_aggregated(db)
+        result.to_csv(f"{term}_results.csv")
+        results.append(result)
+        summary = restring.summary(db)
+        summary.to_csv(f"{term}_summary.csv")
+        summaries.append(summary)
 
     if run_name is None: 
         # delete tmp folder
         os.chdir("..")
         os.rmdir("tmp_enrichment_results")
 
-    return {}
+    return {results: results, summaries: summaries}
 
 
 
