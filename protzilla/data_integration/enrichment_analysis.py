@@ -17,6 +17,8 @@ def go_analysis_with_STRING(
     organism can be any taxon id, could add a mapping here (name to id)
     think about output format and plots
     '''
+    #TODO: set logging level for whole django app in beginning
+    logging.basicConfig(level=logging.NOTSET)
 
     # proteins should be df with two columns: Protein ID and numeric ranking column
     if (
@@ -31,6 +33,7 @@ def go_analysis_with_STRING(
     # set statistical_background variable because get_functional_enrichmentGUI() function needs it
     # empty string means no background provided via upload
     if background == "":
+        logging.info("No background provided, using entire proteome")
         statistical_background = None
     else:
         # assuming headerless one column file, tab separated
@@ -41,8 +44,9 @@ def go_analysis_with_STRING(
             header=None,
         )
         statistical_background = read.iloc[:, 0].tolist()
-    
-    expression_change_col = proteins.loc[:, proteins.columns != "Protein ID"][0]
+ 
+    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0].to_frame()
+    print(expression_change_col)
     proteins.set_index("Protein ID", inplace=True)
     up_protein_list   = list(proteins[expression_change_col > 0].index)
     down_protein_list = list(proteins[expression_change_col < 0].index)
@@ -55,8 +59,10 @@ def go_analysis_with_STRING(
     # change working direcory to run folder for enrichment analysis
     # or make tmp folder
     if run_name:
-        os.mkdir(RUNS_PATH / run_name / "enrichment_results")
-        os.chdir(RUNS_PATH / run_name / "enrichment_results")
+        results_folder = RUNS_PATH / run_name / "enrichment_results"
+        if not results_folder.exists():
+            os.mkdir(results_folder)
+        os.chdir(results_folder)
     else:
         os.mkdir("tmp_enrichment_results")
         os.chdir("tmp_enrichment_results")
@@ -70,8 +76,9 @@ def go_analysis_with_STRING(
 
     if "up" in directions or "both" in directions:
         logging.info("Starting analysis for up-regulated proteins")
-        # use gui function because it includes background
-        up_df = restring.get_functional_enrichmentGUI(up_protein_list, **string_params)
+        
+        # TODO: fork project and add background to this function
+        up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
         # only wait 1 sec overall?
         logging.info("Finished analysis for up-regulated proteins")
@@ -79,8 +86,8 @@ def go_analysis_with_STRING(
     
     if "down" in directions or "both" in directions:
         logging.info("Starting analysis for down-regulated proteins")
-        # use gui function because it includes background
-        down_df = restring.get_functional_enrichmentGUI(down_protein_list, **string_params) 
+        
+        down_df = restring.get_functional_enrichment(down_protein_list, **string_params) 
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -123,7 +130,7 @@ def go_analysis_offline(proteins, protein_set_dbs, background, cutoff):
 
     enr = gp.enrich(
         gene_list=proteins,
-        gene_sets=protein_sets,
+        gene_sets=protein_set_dbs,
         background=background,  # "hsapiens_gene_ensembl",
         outdir=None,
         verbose=True,
