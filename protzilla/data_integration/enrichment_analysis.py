@@ -35,8 +35,6 @@ def go_analysis_with_STRING(
     up_protein_list   = list(proteins[expression_change_col > 0].index)
     down_protein_list = list(proteins[expression_change_col < 0].index)
 
-    # set statistical_background variable because get_functional_enrichmentGUI() function needs it
-    # empty string means no background provided via upload
     if background == "":
         logging.info("No background provided, using entire proteome")
         statistical_background = None
@@ -69,7 +67,6 @@ def go_analysis_with_STRING(
     details_folder_name = "enrichment_details"
     details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
     os.makedirs(details_folder_path)
-
     os.chdir(details_folder_path)
 
     # maybe add mapping to string API for identifiers before this (dont forget background)
@@ -77,11 +74,10 @@ def go_analysis_with_STRING(
     if "up" in directions or "both" in directions:
         logging.info("Starting analysis for up-regulated proteins")
         
-        # TODO: fork project and add background to this function
         up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
-        # only wait 1 sec overall?
         logging.info("Finished analysis for up-regulated proteins")
+        # only wait 1 sec overall?
         sleep(1)
     
     if "down" in directions or "both" in directions:
