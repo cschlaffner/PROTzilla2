@@ -1,12 +1,11 @@
 import json
 import sys
-from unittest import mock
 from shutil import rmtree
-from protzilla.constants.paths import RUNS_PATH
+from unittest import mock
 
 import pytest
 
-from protzilla.constants.paths import PROJECT_PATH
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.utilities.random import random_string
 
 sys.path.append(f"{PROJECT_PATH}/..")
@@ -201,4 +200,3 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
     )
     runner.compute_workflow()
     rmtree(RUNS_PATH / name)
-
