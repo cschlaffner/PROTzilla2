@@ -1,6 +1,8 @@
 import json
 import sys
 from unittest import mock
+from shutil import rmtree
+from protzilla.constants.paths import RUNS_PATH
 
 import pytest
 
@@ -185,15 +187,18 @@ def test_serialize_workflow_graphs():
 
 
 def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+    name = "test_runner_integration" + random_string()
     runner = Runner(
         **{
             "workflow": "standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
-            "run_name": f"{tests_folder_name}/test_runner_{random_string()}",
+            "run_name": f"{name}",
             "df_mode": "disk",
             "all_plots": False,
             "verbose": False,
         }
     )
     runner.compute_workflow()
+    rmtree(RUNS_PATH / name)
+
