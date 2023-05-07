@@ -30,6 +30,11 @@ def go_analysis_with_STRING(
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
     
+    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0].to_frame()
+    proteins.set_index("Protein ID", inplace=True)
+    up_protein_list   = list(proteins[expression_change_col > 0].index)
+    down_protein_list = list(proteins[expression_change_col < 0].index)
+
     # set statistical_background variable because get_functional_enrichmentGUI() function needs it
     # empty string means no background provided via upload
     if background == "":
@@ -44,33 +49,28 @@ def go_analysis_with_STRING(
             header=None,
         )
         statistical_background = read.iloc[:, 0].tolist()
- 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0].to_frame()
-    print(expression_change_col)
-    proteins.set_index("Protein ID", inplace=True)
-    up_protein_list   = list(proteins[expression_change_col > 0].index)
-    down_protein_list = list(proteins[expression_change_col < 0].index)
 
     string_params = {
         "species": organism,
         "caller_ID": "PROTzilla",
+        "statistical_background": statistical_background,
     }
 
     # change working direcory to run folder for enrichment analysis
     # or make tmp folder
-    if run_name:
-        results_folder = RUNS_PATH / run_name / "enrichment_results"
-        if not results_folder.exists():
-            os.mkdir(results_folder)
-        os.chdir(results_folder)
-    else:
-        os.mkdir("tmp_enrichment_results")
-        os.chdir("tmp_enrichment_results")
+    results_folder = RUNS_PATH / run_name / "enrichment_results" if run_name else "tmp_enrichment_results"
+    os.makedirs(results_folder, exist_ok=True)
 
-    # make folder for details
-    details_folder_name = f"enrichment_details_{random_string()}"
-    os.mkdir(details_folder_name)
-    os.chdir(details_folder_name)
+    # make folder for current enrichment analysis and details of analysis
+    enrichment_folder_name = f"enrichment_{random_string()}"
+    enrichment_folder_path = os.path.join(results_folder, enrichment_folder_name)
+    os.makedirs(enrichment_folder_path)
+
+    details_folder_name = "enrichment_details"
+    details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
+    os.makedirs(details_folder_path)
+
+    os.chdir(details_folder_path)
 
     # maybe add mapping to string API for identifiers before this (dont forget background)
 
@@ -91,14 +91,14 @@ def go_analysis_with_STRING(
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
-    # change working directory back to enrichment_results folder
+    # change working directory back to current enrichment folder
     os.chdir("..")
 
     logging.info("Summarizing enrichment results")
     results = []
     summaries = []
     for term in protein_set_dbs:
-        db = restring.aggregate_results(directories=[details_folder_name], kind=term)
+        db = restring.aggregate_results(directories=[details_folder_name], kind=term, PATH=enrichment_folder_path)
         result = restring.tableize_aggregated(db)
         result.to_csv(f"{term}_results.csv")
         results.append(result)
@@ -106,12 +106,12 @@ def go_analysis_with_STRING(
         summary.to_csv(f"{term}_summary.csv")
         summaries.append(summary)
 
-    if run_name is None: 
+    if results_folder == "tmp_enrichment_results": 
         # delete tmp folder
         os.chdir("..")
         os.rmdir("tmp_enrichment_results")
 
-    return {results: results, summaries: summaries}
+    return {"results": results, "summaries": summaries}
 
 
 
