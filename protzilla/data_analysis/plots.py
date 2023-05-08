@@ -68,6 +68,22 @@ def scatter_plot(
 def create_volcano_plot(
     p_values, log2_fc, fc_threshold, alpha, proteins_of_interest=None
 ):
+    """
+    Function to create a volcano plot from p values and log2 fold change with the
+    possibility to annotate proteins of interest.
+    
+    :param p_values:dataframe with p values
+    :type p_values: pd.Dataframe
+    :param log2_fc: dataframe with log2 fold change
+    :type log2_fc: pd.Dataframe
+    :param fc_threshold: the threshold for the fold change to show
+    :type fc_threshold: float
+    :param alpha: the alpha value for the significance line
+    :type alpha: float
+    :param proteins_of_interest: the proteins that should be annotated in the plot
+    :type proteins_of_interest: list or None
+    """
+
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
