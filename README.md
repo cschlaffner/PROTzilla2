@@ -5,6 +5,11 @@
 
 ## Setup
 
+### Script:
+
+To make it easy to get started (on MacOS, Linux (only tested on Ubuntu)) we have written `run_protzilla.sh`. The script takes care of installing miniconda, creating the environment and starting the Server at  `http://127.0.0.1:8000`. Everytime you want to run PROTzilla, just execute the script. You can either do that via the command-line from within Project-Folder (`PROTzilla2') by running `./run_protzilla.sh` or opening the
+
+
 ### Environment
 
 PROTzilla2 uses Python 3.11 and conda to manage the environment and pip for installing packages.
