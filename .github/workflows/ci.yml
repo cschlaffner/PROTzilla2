@@ -29,7 +29,7 @@ jobs:
       - name: run tests, build coverage file
         run: |
           export PYTHONPATH=. pytest
-          pytest --cache-clear --cov=. --cov-branch --cov-report term-missing tests/protzilla
+          pytest --cache-clear --cov=. --cov-branch --cov-report term-missing tests/
       
       - name: format with black
         run: python -m black .

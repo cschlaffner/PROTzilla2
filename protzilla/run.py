@@ -1,14 +1,21 @@
 import json
 import shutil
 import traceback
+from io import BytesIO
 from pathlib import Path
 from shutil import rmtree
+
+import plotly
+from PIL import Image
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import get_all_default_params_for_methods
+from .workflow_helper import (
+    get_all_default_params_for_methods,
+    get_workflow_default_param_value,
+)
 
 
 class Run:
@@ -225,6 +232,10 @@ class Run:
         self.write_local_workflow()
 
     def next_step(self, name=None):
+        if not name:
+            name = get_workflow_default_param_value(
+                self.workflow_config, *(self.current_run_location()), "output_name"
+            )
         try:
             self.history.add_step(
                 self.section,
@@ -311,3 +322,21 @@ class Run:
             if step.step == "metadata_import":
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
+
+    def export_plots(self, format_):
+        exports = []
+        for plot in self.plots:
+            if isinstance(plot, plotly.graph_objs.Figure):  # to catch dicts
+                if format_ in ["eps", "tiff"]:
+                    png_binary = plotly.io.to_image(plot, format="png", scale=4)
+                    img = Image.open(BytesIO(png_binary)).convert("RGB")
+                    binary = BytesIO()
+                    if format_ == "tiff":
+                        img.save(binary, format="tiff", compression="tiff_lzw")
+                    else:
+                        img.save(binary, format=format_)
+                    exports.append(binary)
+                else:
+                    binary_string = plotly.io.to_image(plot, format=format_, scale=4)
+                    exports.append(BytesIO(binary_string))
+        return exports

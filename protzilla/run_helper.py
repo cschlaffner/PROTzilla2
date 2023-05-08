@@ -9,7 +9,10 @@ def insert_special_params(param_dict, run):
         or param_dict["type"] == "named_output_with_fields"
     ):
         param_dict["steps"] = [name for name in run.history.step_names if name]
-        if "default" in param_dict and param_dict["default"]:
+        if param_dict.get("optional", False):
+            param_dict["steps"].append("None")
+
+        if "default" in param_dict and param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None

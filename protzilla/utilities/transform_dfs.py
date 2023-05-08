@@ -52,3 +52,7 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     intensity_df.insert(2, "Gene", gene_info)
 
     return intensity_df
+
+
+def is_long_format(df: pd.DataFrame):
+    return set(df.columns[:3]) == {"Sample", "Protein ID", "Gene"}

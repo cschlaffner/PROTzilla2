@@ -46,13 +46,12 @@ def anova(
     """
     assert grouping in metadata_df.columns
 
-    if selected_groups is None or selected_groups == []:
-        selected_groups = metadata_df["Group"].unique()[:2]
+    if not selected_groups:
+        selected_groups = metadata_df[grouping].unique()[:2]
         logging.warning("auto-selected first two groups in anova")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns[3]
-    print(metadata_df)
     intensity_df = pd.merge(
         left=intensity_df,
         right=metadata_df[["Sample", grouping]],
@@ -95,6 +94,6 @@ def anova(
 
     return {
         "p_values_df": tested_df,
-        "corrected_p_values": corrected_p_values,
+        "corrected_p_values": list(corrected_p_values),
         "corrected_alpha": corrected_alpha,
     }

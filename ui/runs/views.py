@@ -1,13 +1,18 @@
 import sys
+import tempfile
 import traceback
 import pandas as pd
+import zipfile
 
+import plotly.graph_objs as go
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import FileResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
+
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 sys.path.append(f"{BASE_DIR}/..")
 
@@ -60,8 +65,12 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next"),
-            current_plots=[plot.to_html() for plot in run.plots],
+            name_field=make_name_field(allow_next, "runs_next", run),
+            current_plots=[
+                plot.to_html(include_plotlyjs=False, full_html=False)
+                for plot in run.plots
+                if not isinstance(plot, dict)
+            ],
             show_next=run.calculated_method is not None
             or (run.step == "plot" and len(run.plots) > 0),
             show_back=bool(run.history.steps),
@@ -275,6 +284,27 @@ def plot(request, run_name):
 
     parameters.update(parameters_from_post(post_data))
     run.create_plot_from_location(section, step, method, parameters)
+
+    for index, p in enumerate(run.plots):
+        if isinstance(p, dict):
+            for message in run.plots[index]["messages"]:
+                trace = (
+                    build_trace_alert(message["trace"]) if "trace" in message else ""
+                )
+
+                # map error level to bootstrap css class
+                lvl_to_css_class = {
+                    40: "alert-danger",
+                    30: "alert-warning",
+                    20: "alert-info",
+                }
+                messages.add_message(
+                    request,
+                    message["level"],
+                    f"{message['msg']} {trace}",
+                    lvl_to_css_class[message["level"]],
+                )
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -311,3 +341,25 @@ def outputs_of_step(request, run_name):
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
+
+
+def download_plots(request, run_name):
+    run = active_runs[run_name]
+    format_ = request.GET["format"]
+    exported = run.export_plots(format_=format_)
+    if len(exported) == 1:
+        filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
+        return FileResponse(exported[0], filename=filename, as_attachment=True)
+
+    f = tempfile.NamedTemporaryFile()
+    with zipfile.ZipFile(f, "w") as zf:
+        for i, plot in enumerate(exported):
+            filename = (
+                f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
+            )
+            zf.writestr(filename, plot.getvalue())
+    return FileResponse(
+        open(f.name, "rb"),
+        filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
+        as_attachment=True,
+    )
