@@ -1,10 +1,11 @@
 import json
 import sys
+from shutil import rmtree
 from unittest import mock
 
 import pytest
 
-from protzilla.constants.paths import PROJECT_PATH
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.utilities.random import random_string
 
 sys.path.append(f"{PROJECT_PATH}/..")
@@ -182,3 +183,20 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_imputation_graphs
         elif step["name"] == "filter_proteins":
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
+
+
+def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+    name = "test_runner_integration" + random_string()
+    runner = Runner(
+        **{
+            "workflow": "standard",
+            "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+            "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "run_name": f"{name}",
+            "df_mode": "disk",
+            "all_plots": False,
+            "verbose": False,
+        }
+    )
+    runner.compute_workflow()
+    rmtree(RUNS_PATH / name)
