@@ -1,7 +1,8 @@
 import json
 from shutil import rmtree
-from PIL import Image
+
 import pytest
+from PIL import Image
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH

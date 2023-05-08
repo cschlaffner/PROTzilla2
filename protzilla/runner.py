@@ -85,7 +85,7 @@ class Runner:
                     self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
-                self.run.next_step(f"{self.run.current_workflow_location()}")
+                self.run.next_step()
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":

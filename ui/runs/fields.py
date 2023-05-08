@@ -139,8 +139,20 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next, form):
+def make_name_field(allow_next, form, run):
+    default = get_workflow_default_param_value(
+        run.workflow_config, *(run.current_run_location()), "output_name"
+    )
+    if not default:
+        default = ""
+
     return render_to_string(
         "runs/field_text.html",
-        context=dict(disabled=not allow_next, key="name", name="Name:", form=form),
+        context=dict(
+            disabled=not allow_next,
+            key="name",
+            name="Name:",
+            form=form,
+            default=default,
+        ),
     )

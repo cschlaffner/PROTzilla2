@@ -9,7 +9,7 @@ def insert_special_params(param_dict, run):
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
-        if param_dict["default"]:
+        if param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None

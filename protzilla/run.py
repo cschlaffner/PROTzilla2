@@ -1,17 +1,21 @@
 import json
 import shutil
 import traceback
+from io import BytesIO
 from pathlib import Path
 from shutil import rmtree
+
 import plotly
 from PIL import Image
-from io import BytesIO
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import get_all_default_params_for_methods
+from .workflow_helper import (
+    get_all_default_params_for_methods,
+    get_workflow_default_param_value,
+)
 
 
 class Run:
@@ -228,6 +232,10 @@ class Run:
         self.write_local_workflow()
 
     def next_step(self, name=None):
+        if not name:
+            name = get_workflow_default_param_value(
+                self.workflow_config, *(self.current_run_location()), "output_name"
+            )
         try:
             self.history.add_step(
                 self.section,
