@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 from scipy import stats
+import logging
 
 from .differential_expression_helper import apply_multiple_testing_correction
 
@@ -45,6 +46,14 @@ def t_test(
     and the corrected alpha, as well as filtered out proteins.
     :rtype: Tuple[pandas DataFrame, dict]
     """
+    assert grouping in metadata_df.columns
+
+    if not group1:
+        group1 = metadata_df[grouping].unique()[0]
+        logging.warning("auto-selected first group in t-test")
+    if not group2:
+        group2 = metadata_df[grouping].unique()[1]
+        logging.warning("auto-selected second group in t-test")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
     intensity_name = intensity_df.columns.values.tolist()[3]
