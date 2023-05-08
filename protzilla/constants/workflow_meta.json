@@ -781,6 +781,7 @@
             "name": "Proteins of Interest",
             "type": "named_output_with_fields",
             "fill_dynamic": ["proteins_of_interest"],
+            "default": [null, null, null],
             "fields": {
               "proteins_of_interest": {
                 "type": "categorical",
