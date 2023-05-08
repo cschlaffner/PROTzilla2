@@ -19,7 +19,7 @@ else
   exit 1
 fi
 
-# Check if Miniconda is already installed
+# Check if some sort of conda is already installed
 if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/anaconda3" ]; then
   echo "Miniconda or Anaconda are already installed."
   conda init bash

@@ -1,7 +1,14 @@
 #!/bin/bash
 
+if ! [[ "$OSTYPE" == "linux-gnu"* ]] && ! [[ "$OSTYPE" == "darwin"* ]]; then
+  echo "OS not supported, use the install_windows.bat script (to be written)."
+  exit 1
+fi
+
+ENV_NAME="protzilla"
+
 # Check if the environment exists
-if conda info --envs | grep -q $ENV_NAME; then
+if conda info --envs | grep -q "$ENV_NAME"; then
   echo "$ENV_NAME environment already exists."
 else
   # Create a new environment
@@ -17,4 +24,5 @@ conda activate $ENV_NAME
 # conda info --envs | grep "$ENV_NAME"; exit 1
 
 # Install the requirements using pip
-pip install -r requirements.txt
+echo "Installing requirements..."
+pip install -q -r requirements.txt
