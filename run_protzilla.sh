@@ -25,7 +25,6 @@ fi
 
 ENV_STRING=$(conda info --envs | grep "$ENV_NAME")
 
-python --version
 if ! grep -q "\*" <<< "$ENV_STRING"; then
   eval "$(conda shell.bash hook)"
   conda activate protzilla
