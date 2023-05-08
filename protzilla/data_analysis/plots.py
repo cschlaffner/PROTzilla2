@@ -2,7 +2,9 @@ import dash_bio as dashbio
 import numpy as np
 
 
-def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha, proteins_of_interest=None):
+def create_volcano_plot(
+    p_values, log2_fc, fc_threshold, alpha, proteins_of_interest=None
+):
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,

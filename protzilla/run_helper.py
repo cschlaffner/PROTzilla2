@@ -4,7 +4,10 @@ from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
-    if param_dict["type"] == "named_output" or param_dict["type"] == "named_output_with_fields":
+    if (
+        param_dict["type"] == "named_output"
+        or param_dict["type"] == "named_output_with_fields"
+    ):
         param_dict["steps"] = [name for name in run.history.step_names if name]
         if "default" in param_dict and param_dict["default"]:
             selected = param_dict["default"][0]

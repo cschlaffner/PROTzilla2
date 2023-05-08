@@ -114,13 +114,13 @@ def change_field(request, run_name):
         response.status_code = 404  # not found
         return response
 
-    selected = request.POST.getlist('selected[]')
+    selected = request.POST.getlist("selected[]")
     post_id = request.POST["id"]
     if len(selected) > 1:
         # remove last 4 characters from post_id to get the original id
         # because multiple selected items are in id_div
         post_id = post_id[:-4]
-   
+
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
@@ -128,9 +128,9 @@ def change_field(request, run_name):
     for key in fields_to_fill:
         if len(selected) == 1:
             param_dict = parameters[key]
-        else: 
+        else:
             param_dict = parameters[post_id]["fields"][key]
-            
+
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
         elif param_dict["fill"] == "protein_ids":
@@ -264,7 +264,10 @@ def plot(request, run_name):
     for param in post_data:
         if "wrapper" in param:
             del post_copy[param]
-        elif f"{param}_wrapper" in param_dict and "fields" in param_dict[f"{param}_wrapper"]:
+        elif (
+            f"{param}_wrapper" in param_dict
+            and "fields" in param_dict[f"{param}_wrapper"]
+        ):
             if param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False):
                 del post_copy[param]
                 parameters[param] = post_data[param]
