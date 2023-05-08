@@ -14,14 +14,13 @@
 
 import numpy as np
 import pandas as pd
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
 import scipy
 import scipy.cluster.hierarchy as sch
 import scipy.spatial as scs
-from sklearn.impute import SimpleImputer
-
-import plotly.graph_objects as go
 from plotly import subplots
-import plotly.figure_factory as ff
+from sklearn.impute import SimpleImputer
 
 
 # pylint: disable=assignment-from-no-return, no-self-use

@@ -1,10 +1,10 @@
 import dash_bio as dashbio
-import pandas as pd
 import numpy as np
+import pandas as pd
 import plotly.express as px
-from protzilla.utilities.clustergram import Clustergram
 from django.contrib import messages
 
+from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 

@@ -1,8 +1,9 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from django.contrib import messages
 from scipy import stats
-import logging
 
 from .differential_expression_helper import apply_multiple_testing_correction
 
