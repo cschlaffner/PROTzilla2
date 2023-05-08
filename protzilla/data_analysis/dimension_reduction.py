@@ -135,6 +135,7 @@ def umap(
     :param random_state: determines the random number generator.
     :type random_state: int
     """
+
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         embedded_data_model = UMAP(

@@ -194,6 +194,22 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
             "run_name": f"{name}",
             "df_mode": "disk",
+            "all_plots": True,
+            "verbose": False,
+        }
+    )
+    runner.compute_workflow()
+    rmtree(RUNS_PATH / name)
+
+def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_name):
+    name = "test_runner_integration" + random_string()
+    runner = Runner(
+        **{
+            "workflow": "standard",
+            "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+            "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "run_name": f"{name}",
+            "df_mode": "disk",
             "all_plots": False,
             "verbose": False,
         }

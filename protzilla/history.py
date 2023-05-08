@@ -116,7 +116,7 @@ class History:
         raise ValueError(f"no step named '{name}'")
 
     def output_of_named_step(self, name, output):
-        if name == "None":
+        if not name or name == "None":
             return ""
         for saved_name, step in zip(self.step_names, self.steps):
             if saved_name == name:

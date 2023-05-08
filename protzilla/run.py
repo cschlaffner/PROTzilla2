@@ -171,7 +171,7 @@ class Run:
         location = (section, step, method)
         if step == "plot":
             self.create_step_plot(plot_map[location], parameters)
-        else:
+        elif plot_map.get(location):
             self.create_plot(plot_map[location], parameters)
 
         if section in ["importing", "data_preprocessing"]:
@@ -311,7 +311,8 @@ class Run:
                 "parameters"
             ].get(k)
             if param_dict and param_dict.get("type") == "named_output":
-                assert v is not None, f"please set default values for this named_output in workflow file"
+                # v should consist of values [named_step, output]
+                assert v is not None, f"please set default values for the named_output: {k} in workflow file"
                 call_parameters[k] = self.history.output_of_named_step(*v)
             else:
                 call_parameters[k] = v

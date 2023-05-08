@@ -629,7 +629,7 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -679,7 +679,7 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -742,12 +742,12 @@
           "my_named_param": {
             "name": "this should be a named param:",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "second_named": {
             "name": "another one:",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           }
         }
       }
@@ -760,22 +760,22 @@
           "p_values": {
             "name": "p-value df",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "log2_fc": {
             "name": "log2 fold change df",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "fc_threshold": {
             "name": "log2 fold change threshold",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "alpha": {
             "name": "alpha/corrected alpha",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           }
         }
       },
@@ -786,12 +786,12 @@
           "input_df": {
             "name": "Choose dataframe to be plotted",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "color_df": {
             "name": "Choose a dataframe to assign color to marks (optional)",
             "type": "named_output",
-            "default": null,
+            "default": [null, null],
             "optional": true
           }
         }
@@ -803,12 +803,12 @@
           "input_df": {
             "name": "Input dataframe: choose dataframe to be plotted",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "sample_group_df": {
             "name": "Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
             "type": "named_output",
-            "default": null,
+            "default": [null, null],
             "optional": true
           },
           "flip_axes": {
@@ -828,7 +828,7 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "n_clusters": {
             "name": "Number of clusters to form",
@@ -885,7 +885,7 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "n_components": {
             "name": "Dimension of the embedded space",
@@ -940,7 +940,7 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "n_neighbors": {
             "name": "Number of neighbors",
