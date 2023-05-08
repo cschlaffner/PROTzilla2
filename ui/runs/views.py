@@ -251,14 +251,26 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    parameters = parameters_from_post(request.POST)
+
+    parameters = {}
+    post_data = dict(request.POST)
+    del post_data["csrfmiddlewaretoken"]
+
     if run.step == "plot":
-        del parameters["chosen_method"]
-    parameters_copy = parameters.copy()
-    for param in parameters:
+        del post_data["chosen_method"]
+
+    post_copy = post_data.copy()
+    param_dict = run.workflow_meta[section][step][method]["parameters"]
+    for param in post_data:
         if "wrapper" in param:
-            del parameters_copy[param]
-    parameters = parameters_copy
+            del post_copy[param]
+        elif f"{param}_wrapper" in param_dict and "fields" in param_dict[f"{param}_wrapper"]:
+            if param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False):
+                del post_copy[param]
+                parameters[param] = post_data[param]
+    post_data = post_copy
+
+    parameters.update(parameters_from_post(post_data))
     run.create_plot_from_location(section, step, method, parameters)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
