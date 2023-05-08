@@ -4,6 +4,7 @@ import pytest
 from protzilla.data_analysis.differential_expression import t_test
 from protzilla.data_analysis.plots import create_volcano_plot
 
+
 @pytest.fixture
 def ttest_output():
     test_intensity_list = (
@@ -64,6 +65,7 @@ def ttest_output():
         fc_threshold=test_fc_threshold,
     )
 
+
 def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
     fig = create_volcano_plot(
         ttest_output["corrected_p_values_df"],
@@ -73,6 +75,7 @@ def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
     )
     if show_figures:
         fig.show()
+
 
 def test_plots_volcano_plot_multiple_annotations(ttest_output, show_figures):
     fig = create_volcano_plot(

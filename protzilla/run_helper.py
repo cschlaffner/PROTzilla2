@@ -12,7 +12,11 @@ def insert_special_params(param_dict, run):
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
-        if "default" in param_dict and param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
+        if (
+            "default" in param_dict
+            and param_dict["default"]
+            and param_dict["default"][0] in param_dict["steps"]
+        ):
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
@@ -32,7 +36,7 @@ def insert_special_params(param_dict, run):
         param_dict["class"] = "dynamic_trigger"
 
     if param_dict.get("default_select_all", False):
-        param_dict["default"] = param_dict.get("categories", [])
+        param_dict["default"] = list(param_dict.get("categories", []))
 
 
 def get_parameters(run, section, step, method):

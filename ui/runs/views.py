@@ -12,10 +12,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.workflow_helper import get_workflow_default_param_value
-
 sys.path.append(f"{BASE_DIR}/..")
-
 
 from protzilla.run import Run
 from ui.runs.fields import (
