@@ -3,15 +3,12 @@ import tempfile
 import traceback
 import zipfile
 
-import plotly.graph_objs as go
 from django.contrib import messages
 from django.http import FileResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
-
-from protzilla.workflow_helper import get_workflow_default_param_value
 
 sys.path.append(f"{BASE_DIR}/..")
 
