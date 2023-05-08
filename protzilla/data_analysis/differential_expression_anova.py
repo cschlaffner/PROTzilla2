@@ -46,8 +46,8 @@ def anova(
     """
     assert grouping in metadata_df.columns
 
-    if selected_groups is None or selected_groups == []:
-        selected_groups = metadata_df["Group"].unique()[:2]
+    if not selected_groups:
+        selected_groups = metadata_df[grouping].unique()[:2]
         logging.warning("auto-selected first two groups in anova")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
