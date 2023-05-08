@@ -48,7 +48,7 @@ def make_parameter_input(key, param_dict, disabled):
             additional_fields.append(make_parameter_input(
                 field_key, field_dict, disabled
             ))
-        param_dict["additional_fields"] = additional_fields 
+        param_dict["additional_fields"] = additional_fields
     elif param_dict["type"] == "metadata_df":
         template = "runs/field_empty.html"
     else:

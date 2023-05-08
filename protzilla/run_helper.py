@@ -25,6 +25,9 @@ def insert_special_params(param_dict, run):
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
 
+    if param_dict.get("default_select_all", False):
+        param_dict["default"] = param_dict.get("categories", [])
+
 
 def get_parameters(run, section, step, method):
     """constructs a dict with all parameters, inserts the correct defaults

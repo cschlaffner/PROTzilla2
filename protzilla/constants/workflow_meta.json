@@ -663,7 +663,8 @@
             "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
-            "multiple": true
+            "multiple": true,
+            "default_select_all": true
           },
           "metadata_df": {
             "type": "metadata_df",
