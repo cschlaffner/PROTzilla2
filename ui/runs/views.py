@@ -12,7 +12,6 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
-
 from protzilla.run import Run
 from ui.runs.fields import (
     make_current_fields,
@@ -61,7 +60,7 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next", run),
+            name_field=make_name_field(allow_next, "runs_next"),
             current_plots=[
                 plot.to_html(include_plotlyjs=False, full_html=False)
                 for plot in run.plots
