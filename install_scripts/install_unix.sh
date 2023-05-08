@@ -9,10 +9,10 @@ VERSION_TO_USE=""
 
 # check if the script is running on macos or linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  URL_TO_USE=$CONDA_URL+$LINUX_MINICONDA
+  URL_TO_USE=$CONDA_URL$LINUX_MINICONDA
   VERSION_TO_USE=$LINUX_MINICONDA
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  URL_TO_USE=$CONDA_URL+$MACOS_MINICONDA
+  URL_TO_USE=$CONDA_URL$MACOS_MINICONDA
   VERSION_TO_USE=$MACOS_MINICONDA
 else
   echo "OS not supported, use the install_windows.sh script (to be written)."
@@ -25,8 +25,9 @@ if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/anaconda3" ]; then
   conda init bash
 else
   echo "Installing Miniconda..."
+  echo "$URL_TO_USE"
   curl -O $URL_TO_USE
-  bash $VERSION_TO_USE -p "$HOME"/miniconda
+  bash $VERSION_TO_USE -y -p "$HOME"/miniconda
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
   echo "conda init"

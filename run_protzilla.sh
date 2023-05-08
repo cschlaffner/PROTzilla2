@@ -34,7 +34,10 @@ fi
 ENV_STRING=$(conda info --envs | grep "$ENV_NAME")
 if ! grep -q "\*" <<<"$ENV_STRING"; then
   eval "$(conda shell.bash hook)"
-  conda activate protzilla
+  conda activate "$ENV_NAME"
 fi
-python --version
+# for debugging
+# python --version
+cd "$(dirname $0)"
 python ui/manage.py runserver
+echo "quit protzilla"
