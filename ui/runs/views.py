@@ -24,7 +24,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import parameters_for_plot, parameters_from_post
 
 active_runs = {}
 
@@ -267,19 +267,8 @@ def plot(request, run_name):
     if run.step == "plot":
         del post_data["chosen_method"]
 
-    post_copy = post_data.copy()
     param_dict = run.workflow_meta[section][step][method]["parameters"]
-    for param in post_data:
-        if "wrapper" in param:
-            del post_copy[param]
-        elif (
-            f"{param}_wrapper" in param_dict
-            and "fields" in param_dict[f"{param}_wrapper"]
-            and param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False)
-        ):
-            del post_copy[param]
-            parameters[param] = post_data[param]
-    post_data = post_copy
+    post_data, parameters = parameters_for_plot(post_data, param_dict)
 
     parameters.update(parameters_from_post(post_data))
     run.create_plot_from_location(section, step, method, parameters)
