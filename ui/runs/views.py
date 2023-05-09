@@ -151,7 +151,7 @@ def change_field(request, run_name):
             else:
                 param_dict["categories"] = []
                 print(
-                    f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}"
+                    f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
 
         fields[key] = make_parameter_input(key, param_dict, disabled=False)
