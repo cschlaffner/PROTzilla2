@@ -6,7 +6,7 @@ PROTzilla aims to be a one-stop-shop for proteomics-researchers (with or without
 
 
 ## Quick(-and-easy)-Start-Guide
-To make it easy getting started we have written `run_protzilla.sh` for the macOS and Linux users and `run_protzilla.bat` for windows-users. The script takes care of installing miniconda, creating the environment and starting the Server at  `http://127.0.0.1:8000`. Everytime you want to run PROTzilla, just execute the script.
+To make it easy getting started we have written `run_protzilla.sh` for the macOS and Linux users and `run_protzilla.bat` for windows-users. The script takes care of installing miniconda, creating the environment, installing the requirements and starting the Server at  `http://127.0.0.1:8000`. Everytime you want to run PROTzilla, just execute the script.
 
 If you are on **macOS**: You can either do that via opening `run_protzilla.sh` with the terminal (right-click on the file -> "open with" -> "terminal")
 
@@ -27,11 +27,11 @@ Use `conda create -n <environment Name> python=3.11` to create the environment, 
 We use pre-commit hooks to lint and format the python code. For this to work, please run `pre-commit install` after installing the requirements (this has caused some problems when developing, especially for windows-users so temporarily deactivating this might be a good idea if you get persistent errors when trying to commit)
 
 
-## Using PROTzilla
 ### UI
-After you went through the setup, open a shell and move into the projectfolder. Once there, make sure the correct python/conda environment is activated and execute `python ui/manage.py runserver` to start the server locally. You can access it via your Browers of choice at  http://127.0.0.1:8000/runs. Since this is a normal Django Development-Server, you can use the usual flags and features that come with that like making it accessible to all users on the network that can see your machine by running `python ui/manage.py runserver 0.0.0.0:8000` instead (you might need to add `"*"` to `allowed_hosts` in ui/main/settings.py wo whitelist all external hosts).
+After you went through the setup, open a shell and move into the projectfolder. Once there, make sure the correct python/conda environment is activated and execute `python ui/manage.py runserver` to start the server locally. You can access it via your Browsers of choice at  http://127.0.0.1:8000/runs. Since this is a normal Django Development-Server, you can use the usual flags and features that come with that like making it accessible to all users on the network that can see your machine by running `python ui/manage.py runserver 0.0.0.0:8000` instead (you might need to add `"*"` to `allowed_hosts` in `ui/main/settings.py` to whitelist all external hosts).
 
 
+## Using PROTzilla
 ### Scripting
 We separated the UI and the calculations-part of PROTzilla making it possible to use PROTzilla just as an import in your own scripts or notebooks. A good starting-point is the `run` and `runner`-classes as well as looking at the tests (`PROTzilla2/tests/protzilla/test_run.py`, `PROTzilla2/tests/protzilla/test_runner.py`, `PROTzilla2/tests/protzilla/test_runner_cli.py`).
 
@@ -40,7 +40,7 @@ The runner exists to make it easy to compute a given dataset using a given workf
 
 For examples on how to use it, it might be easiest to look at the existing tests concering the runner, located at `PROTzilla2/tests/protzilla/test_runner_cli.py` and `PROTzilla2/tests/protzilla/test_runner.py` respectively.
 
-We are thinking making the runner usable from the web-interface, though currently this does not have a timeline.
+We are thinking about making the runner usable from the web-interface, though currently this does not have a timeline.
 
 ### Storage
 User-Data, that is workflows and runs, are saved at `PROTzilla2/user_data/workflows` and `PROTzilla2/user_data/runs` respectively. The Workflows saved here are the ones you are able to select when creating a run. We provide a "standard"-Workflow that covers all-out data-preprocessing and basic data-analysis. When you export a workflow (you will find the button in the sidebar when working on a run), it will be saved here as well.
