@@ -27,8 +27,8 @@
 | protzilla/data\_preprocessing/plots.py                                  |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                         |       20 |        2 |        8 |        3 |     82% |31, 40->49, 50 |
 | protzilla/history.py                                                    |      122 |        7 |       48 |        7 |     92% |33, 109, 116, 120, 126, 192, 207 |
-| protzilla/importing/metadata\_import.py                                 |       26 |        7 |       12 |        1 |     63% |     19-26 |
-| protzilla/importing/ms\_data\_import.py                                 |       30 |        0 |        4 |        0 |    100% |           |
+| protzilla/importing/metadata\_import.py                                 |       31 |       11 |       14 |        1 |     56% |     20-35 |
+| protzilla/importing/ms\_data\_import.py                                 |       35 |        4 |        8 |        2 |     86% |10-11, 52-53 |
 | protzilla/run.py                                                        |      226 |       31 |       72 |        7 |     83% |45-51, 55-61, 110-111, 160->158, 173, 181-182, 190-195, 227-228, 235->239, 250-253, 291->exit, 324, 329->328 |
 | protzilla/run\_helper.py                                                |       30 |        1 |       22 |        2 |     94% |10, 24->28 |
 | protzilla/runner.py                                                     |       76 |        5 |       30 |        4 |     92% |109, 118->121, 126-127, 140-141 |
@@ -69,7 +69,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      167 |      123 |       34 |        0 |     23% |32, 44-51, 80-93, 111-133, 137-144, 148-150, 154-156, 160-162, 166-175, 179-186, 190-198, 202-230, 234-261, 265-267, 271-272, 294-296, 300-314 |
 | ui/runs/views\_helper.py                                                |       39 |        1 |       16 |        2 |     95% |12->14, 18 |
-|                                                               **TOTAL** | **2648** |  **316** |  **563** |   **78** | **85%** |           |
+|                                                               **TOTAL** | **2658** |  **324** |  **569** |   **80** | **85%** |           |
 
 
 ## Setup coverage badge
