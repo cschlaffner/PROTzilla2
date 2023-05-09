@@ -48,6 +48,8 @@ def detail(request, run_name):
     allow_next = run.calculated_method is not None or (
         run.step == "plot" and len(run.plots) > 0
     )
+    if run.step_index == len(run.all_steps()) - 1:
+        allow_next = False
     return render(
         request,
         "runs/details.html",
@@ -66,8 +68,7 @@ def detail(request, run_name):
                 for plot in run.plots
                 if not isinstance(plot, dict)
             ],
-            show_next=run.calculated_method is not None
-            or (run.step == "plot" and len(run.plots) > 0),
+            show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),

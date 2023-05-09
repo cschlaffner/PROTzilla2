@@ -118,11 +118,6 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def handle_all_steps_completed(self):
-        # TODO 74 think about what should happen when all steps are completed
-        self.step_index = len(self.all_steps()) - 1
-        self.section, self.step, self.method = self.current_workflow_location()
-
     def update_workflow_config(self, section, index, parameters):
         self.workflow_config["sections"][section]["steps"][index][
             "parameters"
@@ -261,10 +256,7 @@ class Run:
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None
             self.plots = []
-            try:
-                self.section, self.step, self.method = self.current_workflow_location()
-            except IndexError:
-                self.handle_all_steps_completed()
+            self.section, self.step, self.method = self.current_workflow_location()
 
     def back_step(self):
         assert self.history.steps
