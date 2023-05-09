@@ -312,7 +312,9 @@ class Run:
             ].get(k)
             if param_dict and param_dict.get("type") == "named_output":
                 # v should consist of values [named_step, output]
-                assert v is not None, f"please set default values for the named_output: {k} in workflow file"
+                assert (
+                    v is not None
+                ), f"please set default values for the named_output: {k} in workflow file"
                 call_parameters[k] = self.history.output_of_named_step(*v)
             else:
                 call_parameters[k] = v

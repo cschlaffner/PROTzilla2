@@ -181,7 +181,8 @@
               "preprocessed_data",
               "dataframe"
             ],
-            "sample_group_df": null
+            "sample_group_df": [null, null],
+            "flip_axes": "no"
           }
         }
       ]

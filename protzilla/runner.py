@@ -131,7 +131,8 @@ class Runner:
         )
         for i, plot in enumerate(self.run.plots):
             plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
-            plot.write_html(plot_path)
+            if not isinstance(plot, dict):
+                plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
         answer = input(

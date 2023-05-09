@@ -113,7 +113,7 @@ def clustergram_plot(
     :rtype: [go.Figure]
     """
     try:
-        assert isinstance(input_df, pd.DataFrame)
+        assert isinstance(input_df, pd.DataFrame) and not input_df.empty
         assert isinstance(sample_group_df, pd.DataFrame) or not sample_group_df
 
         input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df

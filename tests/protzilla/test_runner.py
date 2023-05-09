@@ -200,6 +200,7 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
     )
     runner.compute_workflow()
 
+
 def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_name):
     name = tests_folder_name + "/test_runner_integration" + random_string()
     runner = Runner(
