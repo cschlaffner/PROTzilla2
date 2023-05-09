@@ -92,6 +92,7 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
         self.run_path = run_path
+        self.workflow_config_name = workflow_config_name
 
         self.workflow_config = self.read_local_workflow()
 
