@@ -248,15 +248,19 @@ class Run:
             traceback.print_exc()
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
-            self.df = self.result_df
-            self.result_df = None
             self.step_index += 1
-            self.calculated_method = None
-            self.current_parameters = {}
-            self.current_plot_parameters = {}
-            self.plotted_for_parameters = None
-            self.plots = []
-            self.section, self.step, self.method = self.current_workflow_location()
+            # important for runner, we do not want to update anything, when we do not have a step
+            try:
+                self.section, self.step, self.method = self.current_workflow_location()
+                self.df = self.result_df
+                self.result_df = None
+                self.calculated_method = None
+                self.current_parameters = {}
+                self.current_plot_parameters = {}
+                self.plotted_for_parameters = None
+                self.plots = []
+            except IndexError:
+                self.step_index -= 1
 
     def back_step(self):
         assert self.history.steps
