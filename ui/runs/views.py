@@ -275,10 +275,10 @@ def plot(request, run_name):
         elif (
             f"{param}_wrapper" in param_dict
             and "fields" in param_dict[f"{param}_wrapper"]
+            and param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False)
         ):
-            if param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False):
-                del post_copy[param]
-                parameters[param] = post_data[param]
+            del post_copy[param]
+            parameters[param] = post_data[param]
     post_data = post_copy
 
     parameters.update(parameters_from_post(post_data))
