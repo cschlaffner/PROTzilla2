@@ -15,6 +15,7 @@ from .history import History
 from .workflow_helper import (
     get_all_default_params_for_methods,
     get_workflow_default_param_value,
+    set_output_name,
 )
 
 
@@ -92,14 +93,9 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
         self.run_path = run_path
+        self.workflow_config_name = workflow_config_name
 
-        workflow_local_path = f"{self.run_path}/workflow.json"
-        if not Path(workflow_local_path).is_file():
-            workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
-            shutil.copy2(workflow_template_path, workflow_local_path)
-
-        with open(workflow_local_path, "r") as f:
-            self.workflow_config = json.load(f)
+        self.workflow_config = self.read_local_workflow()
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
@@ -117,6 +113,8 @@ class Run:
         self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
+
+
 
     def handle_all_steps_completed(self):
         # TODO 74 think about what should happen when all steps are completed
@@ -213,6 +211,16 @@ class Run:
         with open(workflow_local_path, "w") as f:
             json.dump(self.workflow_config, f, indent=2)
 
+    def read_local_workflow(self):
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        if not Path(workflow_local_path).is_file():
+            workflow_template_path = f"{WORKFLOWS_PATH}/{self.workflow_config_name}.json"
+            shutil.copy2(workflow_template_path, workflow_local_path)
+
+        with open(workflow_local_path, "r") as f:
+            workflow_config = json.load(f)
+        return workflow_config
+
     def insert_at_next_position(self, step_to_be_inserted, section, method):
         if self.section == section:
             past_steps_of_section = self.history.number_of_steps_in_section(section)
@@ -247,6 +255,7 @@ class Run:
                 self.plots,
                 name=name,
             )
+            self.name_step(-1, name)
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
@@ -344,3 +353,10 @@ class Run:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
         return exports
+
+    def name_step(self, index, name):
+        self.history.name_step_in_history(index, name)
+        set_output_name(
+            self.workflow_config, self.section, self.step_index_in_current_section, name
+        )
+        self.write_local_workflow()
