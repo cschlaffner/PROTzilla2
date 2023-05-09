@@ -71,7 +71,7 @@ def create_volcano_plot(
     """
     Function to create a volcano plot from p values and log2 fold change with the
     possibility to annotate proteins of interest.
-    
+
     :param p_values:dataframe with p values
     :type p_values: pd.Dataframe
     :param log2_fc: dataframe with log2 fold change
