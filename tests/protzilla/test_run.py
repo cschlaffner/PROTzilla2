@@ -17,8 +17,9 @@ def example_workflow():
         return json.load(f)
 
 
-def test_updated_params_in_workflow_config(example_workflow_short):
-    run_name = "test_export_workflow" + random_string()
+def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_name):
+    run_name = tests_folder_name + "/test_export_workflow" + random_string()
+
     run = Run.create(run_name, df_mode="memory")
 
     run.calculate_and_next(
@@ -51,13 +52,13 @@ def test_updated_params_in_workflow_config(example_workflow_short):
         ]
         == 1
     )
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_run_create():
+def test_run_create(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_create" + random_string()
+
     # here the run should be used like in the CLI
-    name = "test_run" + random_string()
-    run = Run.create(name)
+    run = Run.create(run_name)
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
@@ -70,15 +71,15 @@ def test_run_create():
     run.calculate_and_next(
         data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
     )
-    rmtree(RUNS_PATH / name)
     # print([s.outputs for s in run.history.steps])
     # to get a history that can be used to create a worklow, the section, step, method
     # should be set by calculate_and_next
 
 
-def test_run_back():
-    name = "test_run_back" + random_string()
-    run = Run.create(name)
+def test_run_back(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_back" + random_string()
+
+    run = Run.create(run_name)
     run.calculate_and_next(
         ms_data_import.max_quant_import,
         # call with str to make json serializable
@@ -95,11 +96,11 @@ def test_run_back():
     assert run.df.equals(df1)
     run.back_step()
     assert run.df is None
-    rmtree(RUNS_PATH / name)
 
 
-def test_run_continue():
-    run_name = "test_run_continue" + random_string()
+def test_run_continue(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_continue" + random_string()
+
     run = Run.create(run_name, df_mode="disk")
 
     run.calculate_and_next(
@@ -111,11 +112,10 @@ def test_run_continue():
     del run
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_current_run_location():
-    run_name = "test_run_current_location" + random_string()
+def test_current_run_location(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_current_location" + random_string()
     run = Run.create(
         run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
     )
@@ -138,11 +138,10 @@ def test_current_run_location():
         "filter_proteins",
         "low_frequency_filter",
     )
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_perform_calculation_logging(caplog):
-    run_name = "test_run_logging" + random_string()
+def test_perform_calculation_logging(caplog, tests_folder_name):
+    run_name = tests_folder_name + "/test_run_logging" + random_string()
     run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
@@ -160,11 +159,10 @@ def test_perform_calculation_logging(caplog):
     assert "ERROR" in caplog.text
     assert "LocalOutlierFactor" in caplog.text
     assert "NaN values" in caplog.text
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_insert_step(example_workflow_short):
-    run_name = "test_insert_as_next_step" + random_string()
+def test_insert_step(example_workflow_short, tests_folder_name):
+    run_name = tests_folder_name + "/test_insert_as_next_step" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
@@ -181,11 +179,10 @@ def test_insert_step(example_workflow_short):
             "file_path": None,
         },
     }
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_insert_at_next_position_correct_location(example_workflow):
-    run_name = "test_insert_as_next_step_correct_location" + random_string()
+def test_insert_at_next_position_correct_location(example_workflow, tests_folder_name):
+    run_name = tests_folder_name + "/test_insert_as_next_step_correct_location" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow
@@ -203,11 +200,10 @@ def test_insert_at_next_position_correct_location(example_workflow):
     # test added step is in first position
     assert preprocessing_steps["steps"][0]["name"] == "outlier_detection"
 
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_delete_step(example_workflow_short):
-    run_name = "test_delete_step" + random_string()
+def test_delete_step(example_workflow_short, tests_folder_name):
+    run_name = tests_folder_name + "/test_delete_step" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
@@ -215,11 +211,11 @@ def test_delete_step(example_workflow_short):
     count = len(importing_steps["steps"])
     run.delete_step("importing", 0)
     assert len(importing_steps["steps"]) == count - 1
-    rmtree(RUNS_PATH / run_name)
 
 
-def test_export_plot():
-    run_name = "test_export_plot" + random_string()
+def test_export_plot(tests_folder_name):
+    run_name = tests_folder_name + "/test_export_plot" + random_string()
+
     run = Run.create(run_name)
 
     run.calculate_and_next(
@@ -247,4 +243,21 @@ def test_export_plot():
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):
         Image.open(plot).verify()
-    rmtree(RUNS_PATH / run_name)
+
+def test_name_step(example_workflow_short, tests_folder_name):
+    # depends on test_read_write_local_workflow
+    run_name = tests_folder_name + "/test_name_step" + random_string()
+    run = Run.create(run_name)
+
+    run.workflow_config = example_workflow_short
+    # TODO 
+
+
+def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
+    run_name = tests_folder_name + "/test_read_write_local_workflow" + random_string()
+
+    run = Run.create(run_name)
+    run.workflow_config = example_workflow_short
+    run.write_local_workflow()
+    run.workflow_config = None
+    assert run.read_local_workflow() == example_workflow_short
