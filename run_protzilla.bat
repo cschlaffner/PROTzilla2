@@ -36,7 +36,7 @@ if %errorlevel% EQU 0 (
 
 REM Create the environment
 echo Creating protzilla_win environment...
-call conda create -y --name protzilla_win python=3.11
+call conda create -y --name protzilla_win python=3.11 -c conda-forge
 
 echo protzilla_win environment created.
 
