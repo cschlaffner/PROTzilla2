@@ -300,16 +300,11 @@ def test_differential_expression_anova(show_figures):
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=0.05,
     )
-    p_values = output_dict["corrected_p_values"]
+    corrected_p_values_df = output_dict["corrected_p_values_df"]
 
-    p_values_rounded = [round(x, 4) for x in p_values]
-
-    # fig = anova_heatmap(
-    #     output_df, grouping="Group", alpha=output_dict["corrected_alpha"]
-    # )
-    # if show_figures:
-    #     fig.show()
-
+    p_values_rounded = [
+        round(x, 4) for x in corrected_p_values_df["corrected_p_values"]
+    ]
     assertion_p_values = [
         0.0054,
         0.0013,
