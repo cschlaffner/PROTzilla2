@@ -1,8 +1,10 @@
 import dash_bio as dashbio
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from django.contrib import messages
 
+from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
@@ -80,3 +82,114 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
         annotation="Protein ID",
     )
     return [fig]
+
+
+def clustergram_plot(
+    input_df: pd.DataFrame, sample_group_df: pd.DataFrame | None, flip_axes: str
+):
+    """
+
+    :param grouping: the column name of the grouping variable in the
+        metadata_df
+    :type grouping: str
+
+    Creates a clustergram plot from a dataframe in protzilla wide format. The rows or
+    columns of the clustergram are ordered according to the clustering resulting from
+    the dendrogram. Optionally, a colorbar representing the different groups present
+    in the data can be added and the axes of the heatmap can be inverted
+
+    :param input_df: A dataframe in protzilla wide format, where each row
+        represents a sample and each column represents a feature.
+    :type input_df: pd.DataFrame
+    :param sample_group_df: A dataframe with a column that specifies the group of each
+        sample in `input_df`. Each group will be assigned a color, which will be shown
+        in the final plot as a colorbar next to the heatmap. This is an optional
+        parameter
+    :type sample_group_df: pd.DataFrame
+    :param flip_axes: If "yes", the rows and columns of the clustergram will be
+        swapped. If "no", the default orientation is used.
+    :type flip_axes: str
+    :return: returns a list with a figure or a list with a dictionary if an error occurs
+    :rtype: [go.Figure]
+    """
+    try:
+        assert isinstance(input_df, pd.DataFrame) and not input_df.empty
+        assert isinstance(sample_group_df, pd.DataFrame) or not sample_group_df
+
+        input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+        if isinstance(sample_group_df, pd.DataFrame):
+            assert len(input_df_wide.index.values.tolist()) == len(
+                sample_group_df.index.values.tolist()
+            )
+            assert sorted(input_df_wide.index.values.tolist()) == sorted(
+                sample_group_df.index.values.tolist()
+            )
+            # In the clustergram each row represents a sample that can pertain to a
+            # group. In the following code the necessary data structures are created
+            # to assign eachgroup to a unique color.
+            sample_group_dict = dict(
+                zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
+            )
+            n_groups = len(set(sample_group_dict.values()))
+            group_colors = px.colors.sample_colorscale(
+                "Turbo",
+                0.5 / n_groups + np.linspace(0, 1, n_groups, endpoint=False),
+            )
+            group_to_color_dict = dict(
+                zip(
+                    sample_group_df[sample_group_df.columns[0]].drop_duplicates(),
+                    group_colors,
+                )
+            )
+            # dictionary that maps each color to a group for the colorbar (legend)
+            color_label_dict = {v: k for k, v in group_to_color_dict.items()}
+            groups = [sample_group_dict[label] for label in input_df_wide.index.values]
+            # maps each row (sample) to the corresponding color
+            row_colors = [group_to_color_dict[g] for g in groups]
+        else:
+            row_colors = None
+            color_label_dict = None
+
+        clustergram = Clustergram(
+            flip_axes=False if flip_axes == "no" else True,
+            data=input_df_wide.values,
+            row_labels=input_df_wide.index.values.tolist(),
+            row_colors=row_colors,
+            row_colors_to_label_dict=color_label_dict,
+            column_labels=input_df_wide.columns.values.tolist(),
+            color_threshold={"row": 250, "col": 700},
+            line_width=2,
+            color_map=px.colors.diverging.RdBu,
+            hidden_labels=["row", "col"],
+        )
+
+        clustergram.update_layout(
+            autosize=True,
+        )
+        return [clustergram]
+    except AssertionError as e:
+        if not isinstance(input_df, pd.DataFrame):
+            msg = (
+                'The selected input for "input dataframe" is not a dataframe, '
+                'dataframes have the suffix "df"'
+            )
+        elif not isinstance(sample_group_df, pd.DataFrame):
+            msg = (
+                'The selected input for "grouping dataframe" is not a dataframe, '
+                'dataframes have the suffix "df"'
+            )
+        elif isinstance(sample_group_df, pd.DataFrame) and len(
+            input_df_wide.index.values.tolist()
+        ) != len(sample_group_df.index.values.tolist()):
+            msg = (
+                "There is a dimension mismatch between the input dataframe and the "
+                "grouping dataframe, both should have the same number of samples (rows)"
+            )
+        elif isinstance(sample_group_df, pd.DataFrame) and sorted(
+            input_df_wide.index.values.tolist()
+        ) != sorted(sample_group_df.index.values.tolist()):
+            msg = "The input dataframe and the grouping contain different samples"
+        else:
+            msg = f"An unknown error occurred: {e}"
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
