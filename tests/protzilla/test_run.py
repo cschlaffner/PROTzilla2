@@ -182,7 +182,11 @@ def test_insert_step(example_workflow_short, tests_folder_name):
 
 
 def test_insert_at_next_position_correct_location(example_workflow, tests_folder_name):
-    run_name = tests_folder_name + "/test_insert_as_next_step_correct_location" + random_string()
+    run_name = (
+        tests_folder_name
+        + "/test_insert_as_next_step_correct_location"
+        + random_string()
+    )
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow
@@ -199,7 +203,6 @@ def test_insert_at_next_position_correct_location(example_workflow, tests_folder
 
     # test added step is in first position
     assert preprocessing_steps["steps"][0]["name"] == "outlier_detection"
-
 
 
 def test_delete_step(example_workflow_short, tests_folder_name):
@@ -244,13 +247,14 @@ def test_export_plot(tests_folder_name):
     for plot in run.export_plots("eps"):
         Image.open(plot).verify()
 
+
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow
     run_name = tests_folder_name + "/test_name_step" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
-    # TODO 
+    # TODO
 
 
 def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
@@ -261,3 +265,8 @@ def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
     run.write_local_workflow()
     run.workflow_config = None
     assert run.read_local_workflow() == example_workflow_short
+
+
+def test_updated_workflow_file():
+    pass
+    # TODO

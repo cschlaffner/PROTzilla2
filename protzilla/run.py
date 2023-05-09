@@ -15,6 +15,7 @@ from .history import History
 from .workflow_helper import (
     get_all_default_params_for_methods,
     get_workflow_default_param_value,
+    set_output_name,
 )
 
 
@@ -211,7 +212,9 @@ class Run:
     def read_local_workflow(self):
         workflow_local_path = f"{self.run_path}/workflow.json"
         if not Path(workflow_local_path).is_file():
-            workflow_template_path = f"{WORKFLOWS_PATH}/{self.workflow_config_name}.json"
+            workflow_template_path = (
+                f"{WORKFLOWS_PATH}/{self.workflow_config_name}.json"
+            )
             shutil.copy2(workflow_template_path, workflow_local_path)
 
         with open(workflow_local_path, "r") as f:
@@ -252,6 +255,7 @@ class Run:
                 self.plots,
                 name=name,
             )
+            self.name_step(-1, name)
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
@@ -298,6 +302,7 @@ class Run:
                 if step == self.step:
                     return index
                 index += 1
+        return index
 
     def all_steps(self):
         steps = []
@@ -349,3 +354,13 @@ class Run:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
         return exports
+
+    def name_step(self, index, name):
+        self.history.name_step_in_history(index, name)
+        set_output_name(
+            self.workflow_config,
+            self.section,
+            self.step_index_in_current_section(),
+            name,
+        )
+        self.write_local_workflow()

@@ -263,7 +263,7 @@ def plot(request, run_name):
 
 def add_name(request, run_name):
     run = active_runs[run_name]
-    run.history.name_step(int(request.POST["index"]), request.POST["name"])
+    run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

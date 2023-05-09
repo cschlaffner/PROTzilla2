@@ -90,13 +90,13 @@ class History:
         )
         self.steps.append(executed_step)
         self.step_names.append(None)
-        self.name_step(-1, name)  # to have checks only in name_step
+        self.name_step_in_history(-1, name)  # to have checks only in name_step
         if not name:  # not saved in name_step
             self.save()
 
-    def name_step(self, index, name):
+    def name_step_in_history(self, index, name):
         if not name:
-            return
+            return False
         assert (
             self.step_names[index] is None
         ), f"step already has a name: {self.step_names[index]}"
