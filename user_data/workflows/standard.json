@@ -178,8 +178,8 @@
           "method": "clustergram",
           "parameters": {
             "input_df": [
-              "preprocessed_data",
-              "dataframe"
+              "anova",
+              "filtered_df"
             ],
             "sample_group_df": [null, null],
             "flip_axes": "no"
