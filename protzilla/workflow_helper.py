@@ -97,9 +97,3 @@ def validate_workflow_graphs(workflow_config, workflow_meta):
                                 f"Graph parameter {param} in graph {i} in step {step['name']} does not exist in workflow_meta"
                             )
     return True
-
-
-def set_output_name(workflow_config, section, step_index, output_name):
-    workflow_config["sections"][section]["steps"][step_index][
-        "output_name"
-    ] = output_name

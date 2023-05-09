@@ -15,7 +15,6 @@ from .history import History
 from .workflow_helper import (
     get_all_default_params_for_methods,
     get_workflow_default_param_value,
-    set_output_name,
 )
 
 
@@ -93,7 +92,6 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
         self.run_path = run_path
-        self.workflow_config_name = workflow_config_name
 
         self.workflow_config = self.read_local_workflow()
 
@@ -113,8 +111,6 @@ class Run:
         self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
-
-
 
     def handle_all_steps_completed(self):
         # TODO 74 think about what should happen when all steps are completed
@@ -255,7 +251,6 @@ class Run:
                 self.plots,
                 name=name,
             )
-            self.name_step(-1, name)
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
@@ -353,10 +348,3 @@ class Run:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
         return exports
-
-    def name_step(self, index, name):
-        self.history.name_step_in_history(index, name)
-        set_output_name(
-            self.workflow_config, self.section, self.step_index_in_current_section, name
-        )
-        self.write_local_workflow()
