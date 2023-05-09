@@ -1,0 +1,185 @@
+  Using cached idna-3.4-py3-none-any.whl (61 kB)
+Collecting urllib3<3,>=1.21.1 (from requests->dash-bio==1.0.2->-r requirements.txt (line 6))
+  Using cached urllib3-2.0.2-py3-none-any.whl (123 kB)
+Collecting certifi>=2017.4.17 (from requests->dash-bio==1.0.2->-r requirements.txt (line 6))
+  Using cached certifi-2023.5.7-py3-none-any.whl (156 kB)
+Collecting distlib<1,>=0.3.6 (from virtualenv>=20.10.0->pre-commit==3.1.0->-r requirements.txt (line 12))
+  Using cached distlib-0.3.6-py2.py3-none-any.whl (468 kB)
+Collecting filelock<4,>=3.11 (from virtualenv>=20.10.0->pre-commit==3.1.0->-r requirements.txt (line 12))
+  Using cached filelock-3.12.0-py3-none-any.whl (10 kB)
+Collecting pyrsistent!=0.17.0,!=0.17.1,!=0.17.2,>=0.14.0 (from jsonschema->dash-bio==1.0.2->-r requirements.txt (line 6))
+  Using cached pyrsistent-0.19.3-cp311-cp311-win_amd64.whl (62 kB)
+Collecting pyparsing (from periodictable->dash-bio==1.0.2->-r requirements.txt (line 6))
+  Using cached pyparsing-3.0.9-py3-none-any.whl (98 kB)
+Building wheels for collected packages: parmed
+  Building wheel for parmed (setup.py) ... error
+  error: subprocess-exited-with-error
+
+  × python setup.py bdist_wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [156 lines of output]
+      running bdist_wheel
+      running build
+      running build_py
+      creating build
+      creating build\lib.win-amd64-cpython-311
+      creating build\lib.win-amd64-cpython-311\parmed
+      copying parmed\constants.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\exceptions.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\geometry.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\parameters.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\periodic_table.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\residue.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\scripts.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\structure.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\symmetry.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\topologyobjects.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\vec3.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\_version.py -> build\lib.win-amd64-cpython-311\parmed
+      copying parmed\__init__.py -> build\lib.win-amd64-cpython-311\parmed
+      creating build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\amberformat.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\asciicrd.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\mask.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\netcdffiles.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\offlib.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\parameters.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\readparm.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\titratable_residues.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\_amberparm.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\_chamberparm.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\_tinkerparm.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      copying parmed\amber\__init__.py -> build\lib.win-amd64-cpython-311\parmed\amber
+      creating build\lib.win-amd64-cpython-311\parmed\modeller
+      copying parmed\modeller\residue.py -> build\lib.win-amd64-cpython-311\parmed\modeller
+      copying parmed\modeller\standardtemplates.py -> build\lib.win-amd64-cpython-311\parmed\modeller
+      copying parmed\modeller\__init__.py -> build\lib.win-amd64-cpython-311\parmed\modeller
+      creating build\lib.win-amd64-cpython-311\parmed\tinker
+      copying parmed\tinker\parameterfile.py -> build\lib.win-amd64-cpython-311\parmed\tinker
+      copying parmed\tinker\system.py -> build\lib.win-amd64-cpython-311\parmed\tinker
+      copying parmed\tinker\tinkerfiles.py -> build\lib.win-amd64-cpython-311\parmed\tinker
+      copying parmed\tinker\topologyobjects.py -> build\lib.win-amd64-cpython-311\parmed\tinker
+      copying parmed\tinker\__init__.py -> build\lib.win-amd64-cpython-311\parmed\tinker
+      creating build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\basedimension.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\baseunit.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\constants.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\mymatrix.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\prefix.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\quantity.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\standard_dimensions.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\unit.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\unit_definitions.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\unit_math.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\unit_operators.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      copying parmed\unit\__init__.py -> build\lib.win-amd64-cpython-311\parmed\unit
+      creating build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\cntrl.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\ewald.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\mdin.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\pb.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\qmmm.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\typing.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      copying parmed\amber\mdin\__init__.py -> build\lib.win-amd64-cpython-311\parmed\amber\mdin
+      creating build\lib.win-amd64-cpython-311\parmed\charmm
+      copying parmed\charmm\charmmcrds.py -> build\lib.win-amd64-cpython-311\parmed\charmm
+      copying parmed\charmm\parameters.py -> build\lib.win-amd64-cpython-311\parmed\charmm
+      copying parmed\charmm\psf.py -> build\lib.win-amd64-cpython-311\parmed\charmm
+      copying parmed\charmm\_charmmfile.py -> build\lib.win-amd64-cpython-311\parmed\charmm
+      copying parmed\charmm\__init__.py -> build\lib.win-amd64-cpython-311\parmed\charmm
+      creating build\lib.win-amd64-cpython-311\parmed\formats
+      creating build\lib.win-amd64-cpython-311\parmed\formats\pdbx
+      copying parmed\formats\pdbx\PdbxContainers.py -> build\lib.win-amd64-cpython-311\parmed\formats\pdbx
+      copying parmed\formats\pdbx\PdbxReader.py -> build\lib.win-amd64-cpython-311\parmed\formats\pdbx
+      copying parmed\formats\pdbx\PdbxWriter.py -> build\lib.win-amd64-cpython-311\parmed\formats\pdbx
+      copying parmed\formats\pdbx\__init__.py -> build\lib.win-amd64-cpython-311\parmed\formats\pdbx
+      creating build\lib.win-amd64-cpython-311\parmed\rosetta
+      copying parmed\rosetta\pose.py -> build\lib.win-amd64-cpython-311\parmed\rosetta
+      copying parmed\rosetta\__init__.py -> build\lib.win-amd64-cpython-311\parmed\rosetta
+      creating build\lib.win-amd64-cpython-311\parmed\rdkit
+      copying parmed\rdkit\rdkit.py -> build\lib.win-amd64-cpython-311\parmed\rdkit
+      copying parmed\rdkit\__init__.py -> build\lib.win-amd64-cpython-311\parmed\rdkit
+      copying parmed\formats\mol2.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\pdb.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\pqr.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\psf.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\registry.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\sdf.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      copying parmed\formats\__init__.py -> build\lib.win-amd64-cpython-311\parmed\formats
+      creating build\lib.win-amd64-cpython-311\parmed\utils
+      creating build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\config.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\FortranRecordReader.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\FortranRecordWriter.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_edit_descriptors.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_exceptions.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_input.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_lexer.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_misc.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_output.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\_parser.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      copying parmed\utils\fortranformat\__init__.py -> build\lib.win-amd64-cpython-311\parmed\utils\fortranformat
+      creating build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\parameters.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\reporters.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\topsystem.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\utils.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\xmlfile.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\openmm\__init__.py -> build\lib.win-amd64-cpython-311\parmed\openmm
+      copying parmed\utils\decorators.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\io.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\netcdf.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\pairlist.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\pandautils.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\timer.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      copying parmed\utils\__init__.py -> build\lib.win-amd64-cpython-311\parmed\utils
+      creating build\lib.win-amd64-cpython-311\parmed\gromacs
+      copying parmed\gromacs\gromacsgro.py -> build\lib.win-amd64-cpython-311\parmed\gromacs
+      copying parmed\gromacs\gromacstop.py -> build\lib.win-amd64-cpython-311\parmed\gromacs
+      copying parmed\gromacs\_cpp.py -> build\lib.win-amd64-cpython-311\parmed\gromacs
+      copying parmed\gromacs\_gromacsfile.py -> build\lib.win-amd64-cpython-311\parmed\gromacs
+      copying parmed\gromacs\__init__.py -> build\lib.win-amd64-cpython-311\parmed\gromacs
+      creating build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\actions.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\add1264.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\addljtype.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\argumentlist.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\changeradii.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\checkvalidity.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\exceptions.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\logos.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\parmed_cmd.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\parmlist.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      copying parmed\tools\__init__.py -> build\lib.win-amd64-cpython-311\parmed\tools
+      creating build\lib.win-amd64-cpython-311\parmed\namd
+      copying parmed\namd\namdbinfiles.py -> build\lib.win-amd64-cpython-311\parmed\namd
+      copying parmed\namd\__init__.py -> build\lib.win-amd64-cpython-311\parmed\namd
+      creating build\lib.win-amd64-cpython-311\parmed\tools\simulations
+      copying parmed\tools\simulations\openmm.py -> build\lib.win-amd64-cpython-311\parmed\tools\simulations
+      copying parmed\tools\simulations\sanderapi.py -> build\lib.win-amd64-cpython-311\parmed\tools\simulations
+      copying parmed\tools\simulations\__init__.py -> build\lib.win-amd64-cpython-311\parmed\tools\simulations
+      creating build\lib.win-amd64-cpython-311\parmed\entos
+      copying parmed\entos\converters.py -> build\lib.win-amd64-cpython-311\parmed\entos
+      copying parmed\entos\imports.py -> build\lib.win-amd64-cpython-311\parmed\entos
+      copying parmed\entos\__init__.py -> build\lib.win-amd64-cpython-311\parmed\entos
+      creating build\lib.win-amd64-cpython-311\parmed\dlpoly
+      copying parmed\dlpoly\dlpolyconfig.py -> build\lib.win-amd64-cpython-311\parmed\dlpoly
+      copying parmed\dlpoly\dlpolyfield.py -> build\lib.win-amd64-cpython-311\parmed\dlpoly
+      copying parmed\dlpoly\__init__.py -> build\lib.win-amd64-cpython-311\parmed\dlpoly
+      creating build\lib.win-amd64-cpython-311\parmed\modeller\data
+      copying parmed\modeller\data\standard_residues.lib -> build\lib.win-amd64-cpython-311\parmed\modeller\data
+      copying parmed\modeller\data\ccd_residue_templates.json -> build\lib.win-amd64-cpython-311\parmed\modeller\data
+      UPDATING build\lib.win-amd64-cpython-311\parmed/_version.py
+      set build\lib.win-amd64-cpython-311\parmed/_version.py to '4.1.0'
+      running build_ext
+      building 'parmed.amber._rdparm' extension
+      error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+      [end of output]
+
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for parmed
+  Running setup.py clean for parmed
+Failed to build parmed
+ERROR: Could not build wheels for parmed, which is required to install pyproject.toml-based projects
+
+(protzilla_win) F:\TestBenutzer\Downloads\PROTzilla2-install-windows-script\PROTzilla2-install-windows-script>pip install -r requirements.txt
