@@ -25,9 +25,9 @@ if ! conda --version >/dev/null; then
 fi
 
 eval "$(conda shell.bash hook)"
-ENV_STRING=$(conda info --envs | grep "$ENV_NAME")
 
-if [ "$ENV_STRING" == "" ]; then
+
+if ! conda info --envs | grep "$ENV_NAME" >/dev/null; then
   echo "'$ENV_NAME'-environment doesn't exist yet. Running create_env.sh..."
   ./install_scripts/create_env.sh
 fi
