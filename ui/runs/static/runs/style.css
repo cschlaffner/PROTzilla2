@@ -57,3 +57,11 @@ html, body {
 .form-select[multiple] {
     max-width: 800px !important;
 }
+
+#toggleChevron {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+.rotate-icon {
+    transform: rotate(180deg);
+}
