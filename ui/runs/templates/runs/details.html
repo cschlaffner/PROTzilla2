@@ -45,43 +45,48 @@
             <div id="main-content">
                 {# show history #}
                 {% if displayed_history %}
-                    <div class="row justify-content-center d-flex">
-                        <h3>History</h3>
+                    <div class="row d-flex justify-content-between">
+                        <h3 class="col-11">History</h3>
+                        <svg class="col" data-bs-toggle="collapse" href="#collapseHistory" role="button" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#4A536A" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
                     </div>
 
-                    {% for step in displayed_history %}
-                        <div class="row justify-content-center d-flex">
-                            <div class="col-7">
-                                {% if step.section_heading %}
-                                    <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
-                                {% endif %}
-
-                                <b>{{ step.display_name }}</b><br>
-                                {% if step.name %}
-                                    Name: {{ step.name }}<br>
-                                {% endif %}
-
-                                <div class="mb-3">
-                                    {% include "runs/fields.html" with fields=step.fields %}
-
-                                    {% if not step.name %}
-                                        {% include "runs/form_add_name.html" with index=step.index %}
+                    <div id="collapseHistory" class="collapse">
+                        {% for step in displayed_history %}
+                            <div class="row justify-content-center d-flex">
+                                <div class="col-7">
+                                    {% if step.section_heading %}
+                                        <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
                                     {% endif %}
+
+                                    <b>{{ step.display_name }}</b><br>
+                                    {% if step.name %}
+                                        Name: {{ step.name }}<br>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        {% include "runs/fields.html" with fields=step.fields %}
+
+                                        {% if not step.name %}
+                                            {% include "runs/form_add_name.html" with index=step.index %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {% if step.plots %}
-                            <div class="mb-4">
-                                {# display history plots #}
-                                {% for plot in step.plots %}
-                                    <div class="plot-wrapper">
-                                        {{ plot|safe }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                            {% if step.plots %}
+                                <div class="mb-4">
+                                    {# display history plots #}
+                                    {% for plot in step.plots %}
+                                        <div class="plot-wrapper">
+                                            {{ plot|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                     <hr class="my-4">
                 {% endif %}
 
