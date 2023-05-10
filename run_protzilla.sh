@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ENV_NAME="protzilla"
 
 if ! [[ "$OSTYPE" == "linux-gnu"* ]] && ! [[ "$OSTYPE" == "darwin"* ]]; then

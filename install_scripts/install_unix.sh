@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 ENV_NAME="protzilla"
 CONDA_URL="https://repo.anaconda.com/miniconda/"
 MACOS_MINICONDA="Miniconda3-latest-MacOSX-x86_64.sh"
@@ -35,7 +33,7 @@ else
   conda config --set auto_activate_base false
 fi
 
-if ! conda --version; then
+if ! conda --version >/dev/null; then
   echo "conda is not accessible. Check if the installation was successful."
   exit 1
 fi
@@ -50,5 +48,5 @@ fi
 echo ""
 echo "install complete. You can check if the environment can be activated by running:"
 echo "conda activate $ENV_NAME"
-echo "running run_protzilla.sh..."
+echo "returning..."
 
