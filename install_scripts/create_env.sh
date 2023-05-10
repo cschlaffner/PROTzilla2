@@ -26,3 +26,6 @@ conda activate $ENV_NAME
 # Install the requirements using pip
 echo "Installing requirements. This might take a while..."
 pip install -r requirements.txt
+
+echo "running protzilla..."
+./run_protzilla.sh

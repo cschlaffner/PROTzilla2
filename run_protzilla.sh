@@ -9,14 +9,14 @@ fi
 
 if ! conda --version >/dev/null; then
   echo "conda is not accessible. Checking if conda is installed..."
-  if ! [ -d "$HOME/miniconda3" ] && ! [ -d "$HOME/anaconda3" ]; then
+  if ! [ -d "$HOME/miniconda3" ] || [ -d "$HOME/miniconda" ] || [ -d "$HOME/anaconda3" ] || [ -d "$HOME/anaconda" ]; then
     echo "Miniconda or Anaconda are not installed. Running install_unix.sh..."
     ./install_scripts/install_unix.sh
   else
     echo "conda seems to be installed but not accessible. Check your path"
     exit 1
   fi
-  if ! conda --version; then
+  if ! conda --version >/dev/null; then
     echo "conda is still not accessible. Check if the installation was successful."
     exit 1
   fi
@@ -28,7 +28,6 @@ ENV_STRING=$(conda info --envs | grep "$ENV_NAME")
 if [ "$ENV_STRING" == "" ]; then
   echo "'$ENV_NAME'-environment doesn't exist yet. Running create_env.sh..."
   ./install_scripts/create_env.sh
-  echo "created '$ENV_NAME'-environment."
 fi
 
 ENV_STRING=$(conda info --envs | grep "$ENV_NAME")
