@@ -983,6 +983,11 @@
             "type": "file",
             "default": null
           },
+          "background": {
+            "name": "Background set (list of proteins or no upload)",
+            "type": "file",
+            "default": null
+          },
           "cutoff": {
             "name": "Cutoff for p-values",
             "type": "numeric",

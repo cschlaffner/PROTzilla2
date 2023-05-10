@@ -121,17 +121,14 @@ def go_analysis_with_STRING(
 
 def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     """dev notes
-    proteins: could be list of somewhere filtered proteins, could be dataframe with multiple columns and we just want to use first,
-    TODO: check what kind of IDs are allowed here
+    TODO(later!): make sure ID type for all inputs match
 
-    protein_sets: make upload? gmt file or dictionary
+    background: None defaults to all protein_sets proteins,
+    list or number of proteins? (could be upload or named_output)
+    for named-output: - list of proteins, or dataframe with multiple columns and we just want to use first
 
-    background: None defaults to all input proteins, list of proteins, or dataframe with multiple columns and we just want to use first?
-
-
-    cutoff: cutoff for p-value
+    cutoff: cutoff for p-value, only affects figure?
     """
-    # maybe choose first col of proteins df if there are multiple and warn user?
 
     if protein_sets_path == "":
         # TODO: error handle
@@ -139,7 +136,6 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
 
     file_extension = os.path.splitext(protein_sets_path)[1]
     if file_extension == ".csv":
-        logging.info("CSV file detected")
         with open(protein_sets_path, "r") as f:
             reader = csv.DictReader(f)
             protein_sets = {}
@@ -149,7 +145,6 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
                 protein_sets[key] = values
 
     elif file_extension == ".txt":
-        logging.info("Text file detected")
         with open("gene_sets.txt", "r") as f:
             protein_sets = {}
             for line in f:
@@ -158,12 +153,10 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
                 protein_sets[key] = values
 
     elif file_extension == ".json":
-        logging.info("JSON file detected")
         with open(protein_sets_path, "r") as f:
             protein_sets = json.load(f)
 
     elif file_extension == "gmt":
-        logging.info("Gene Matrix Transposed (GMT) file detected")
         # gseapy can handle gmt files
         protein_sets = protein_sets_path
 
@@ -186,17 +179,40 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
                 )
             ]
         )
+    
+    if background == "":
+        logging.info("No background provided, using ????")
+        background = None
+
+    file_extension = os.path.splitext(background)[1]
+    if file_extension == ".csv":
+        background = pd.read_csv(background, sep="\t", low_memory=False, header=None)
+        # if multiple columns, use first
+        background = background.iloc[:, 0].tolist()
+    elif file_extension == ".txt":
+        with open(background, "r") as f:
+            background = [line.strip() for line in f]
+    else:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Invalid file type for background. Must be .csv, .txt or no upload",
+                )
+            ]
+        )
 
     # gene set and gene list identifiers need to match
     enr = gp.enrich(
         gene_list=proteins,
         gene_sets=protein_sets,
-        background=background,  # "hsapiens_gene_ensembl",
+        background=background,
         cutoff=cutoff,
         outdir=None,
         verbose=True,
     )
 
+    print(enr.results.head())
     return {"enrichment_df": enr.results.sort_values(by="Adjusted P-value")}
 
 
