@@ -663,7 +663,8 @@
             "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
-            "multiple": true
+            "multiple": true,
+            "default_select_all": true
           },
           "metadata_df": {
             "type": "metadata_df",
@@ -776,7 +777,28 @@
             "name": "alpha/corrected alpha",
             "type": "named_output",
             "default": [null, null]
+          },
+          "proteins_of_interest_wrapper": {
+            "name": "Proteins of Interest",
+            "type": "named_output_with_fields",
+            "fill_dynamic": ["proteins_of_interest"],
+            "default": [null, null, null],
+            "fields": {
+              "proteins_of_interest": {
+                "type": "categorical",
+                "fill": "protein_ids",
+                "categories": [],
+                "default": null,
+                "multiple": true
+              }
+            }
           }
+        }
+      },
+      "heatmap": {
+        "name": "Heatmap",
+        "description": "",
+        "parameters": {
         }
       },
       "scatter_plot": {

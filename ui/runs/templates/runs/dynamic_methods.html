@@ -50,12 +50,26 @@
             const selected_choice = $(this).val();
             const triggered_id = $(this).attr("id");
 
+            let choices = [];
+            if (selected_choice === "") {
+                // if the selected choice is empty, we have a nested dynamic trigger
+                // and need to get all the values of the children
+                $(this).children().each(function() {
+                    let currentValue = $(this).val();
+                    if (currentValue !== "") {
+                        choices.push(currentValue);
+                    }
+                });
+            } else {
+                choices.push(selected_choice);
+            }
+
             $.ajax({
                 url: "{% url 'runs:change_field' run_name %}",
                 type: "POST",
                 data: {
                     id: triggered_id,
-                    selected: selected_choice,
+                    selected: choices,
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 },
                 success: function (response) {
