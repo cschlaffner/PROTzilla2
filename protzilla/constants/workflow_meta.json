@@ -350,8 +350,9 @@
         "parameters": {
           "reference_protein": {
             "name": "Reference Protein:",
-            "type": "protein_dropdown",
-            "default": ""
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the protein ID for the reference protein"
           }
         },
         "graphs": [
