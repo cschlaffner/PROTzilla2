@@ -105,11 +105,7 @@ class Run:
             self.workflow_meta = json.load(f)
 
         # make these a result of the step to be compatible with CLI?
-        try:
-            self.section, self.step, self.method = self.current_workflow_location()
-        except IndexError:
-            self.handle_all_steps_completed()
-
+        self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
         self.calculated_method = None
