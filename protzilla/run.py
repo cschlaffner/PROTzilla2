@@ -125,6 +125,11 @@ class Run:
         ] = parameters
         self.write_local_workflow()
 
+    def perform_current_step(self, parameters):
+        self.perform_calculation_from_location(
+            *self.current_workflow_location(), parameters
+        )
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         self.perform_calculation(method_map[location], parameters)
@@ -218,8 +223,8 @@ class Run:
             shutil.copy2(workflow_template_path, workflow_local_path)
 
         with open(workflow_local_path, "r") as f:
-            workflow_config = json.load(f)
-        return workflow_config
+            self.workflow_config = json.load(f)
+        return self.workflow_config
 
     def insert_at_next_position(self, step_to_be_inserted, section, method):
         if self.section == section:

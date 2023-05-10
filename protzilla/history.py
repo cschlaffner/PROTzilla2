@@ -98,7 +98,7 @@ class History:
         if not name:
             return False
         assert (
-            self.step_names[index] is None
+            len(self.step_names) >= index or self.step_names[index] is None
         ), f"step already has a name: {self.step_names[index]}"
         assert name not in self.step_names, f"name {name} is already taken"
         self.step_names[index] = name

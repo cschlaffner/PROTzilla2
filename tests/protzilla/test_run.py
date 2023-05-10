@@ -9,6 +9,7 @@ from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 @pytest.fixture
@@ -249,12 +250,19 @@ def test_export_plot(tests_folder_name):
 
 
 def test_name_step(example_workflow_short, tests_folder_name):
-    # depends on test_read_write_local_workflow
+    # depends on test_read_write_local_workflow, test_get_workflow_default_param_value
     run_name = tests_folder_name + "/test_name_step" + random_string()
     run = Run.create(run_name)
 
-    run.workflow_config = example_workflow_short
-    # TODO
+    run.history.step_names.append(None)
+    run.name_step(0, "first_step")
+    run.workflow_config = None
+    run.read_local_workflow()
+    output_name = get_workflow_default_param_value(
+        run.workflow_config, "importing", "ms_data_import", "max_quant_import", "output_name"
+    )
+
+    assert output_name == "first_step"
 
 
 def test_read_write_local_workflow(example_workflow_short, tests_folder_name):

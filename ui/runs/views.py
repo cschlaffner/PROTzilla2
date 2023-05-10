@@ -200,14 +200,13 @@ def export_workflow(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
 
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
-    run.perform_calculation_from_location(section, step, method, parameters)
+    run.perform_current_step(parameters)
 
     result = run.current_out
     if "messages" in result:

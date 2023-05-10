@@ -52,6 +52,7 @@ def get_defaults(method_params):
 
 
 def get_workflow_default_param_value(workflow_config, section, step, method, param):
+    # TODO 163: this should be based on step_index as there can be multiple steps with the same name
     steps = workflow_config["sections"][section]["steps"]
     for step_dict in steps:
         if step_dict["name"] == step and step_dict["method"] == method:
