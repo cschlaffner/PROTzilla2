@@ -44,7 +44,7 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "metadata_df":
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
-        template = "runs/field_plain_text.html"
+        template = "runs/field_text.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -149,7 +149,7 @@ def make_name_field(allow_next, form, run):
         default = ""
 
     return render_to_string(
-        "runs/field_text.html",
+        "runs/field_name_output_text.html",
         context=dict(
             disabled=not allow_next,
             key="name",
