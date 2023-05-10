@@ -1,0 +1,19 @@
+<script>
+    $(document).ready(function () {
+        let collapseState = sessionStorage.getItem('collapseState');
+        // hide history section per default
+        if (collapseState === 'collapsed' || collapseState === null) {
+            $('#collapseHistory').removeClass('show');
+            $('#toggleChevron').removeClass('rotate-icon');
+        } else {
+            $('#collapseHistory').addClass('show');
+            $('#toggleChevron').addClass('rotate-icon');
+        }
+    
+        $('#toggleChevron').click(function() {
+            $(this).toggleClass('rotate-icon');
+            let isCollapsed = $(this).attr('aria-expanded') === 'false';
+            sessionStorage.setItem('collapseState', isCollapsed ? 'collapsed' : 'expanded');
+        });
+    });
+</script>
