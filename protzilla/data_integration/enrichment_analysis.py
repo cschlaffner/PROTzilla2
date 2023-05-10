@@ -1,4 +1,6 @@
 import os
+import json
+import csv
 import logging
 from time import sleep, time
 import pandas as pd
@@ -10,14 +12,15 @@ from django.contrib import messages
 from ..constants.paths import RUNS_PATH
 from protzilla.utilities.random import random_string
 
+
 def go_analysis_with_STRING(
     proteins, protein_set_dbs, organism, background, directions, run_name=None
 ):
-    '''dev notes
+    """dev notes
     organism can be any taxon id, could add a mapping here (name to id)
     think about output format and plots
-    '''
-    #TODO: set logging level for whole django app in beginning
+    """
+    # TODO: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.NOTSET)
 
     # proteins should be df with two columns: Protein ID and numeric ranking column
@@ -29,10 +32,10 @@ def go_analysis_with_STRING(
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-    
+
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0].to_frame()
     proteins.set_index("Protein ID", inplace=True)
-    up_protein_list   = list(proteins[expression_change_col > 0].index)
+    up_protein_list = list(proteins[expression_change_col > 0].index)
     down_protein_list = list(proteins[expression_change_col < 0].index)
 
     if background == "":
@@ -56,7 +59,11 @@ def go_analysis_with_STRING(
 
     # change working direcory to run folder for enrichment analysis
     # or make tmp folder
-    results_folder = RUNS_PATH / run_name / "enrichment_results" if run_name else "tmp_enrichment_results"
+    results_folder = (
+        RUNS_PATH / run_name / "enrichment_results"
+        if run_name
+        else "tmp_enrichment_results"
+    )
     os.makedirs(results_folder, exist_ok=True)
 
     # make folder for current enrichment analysis and details of analysis
@@ -73,17 +80,17 @@ def go_analysis_with_STRING(
 
     if "up" in directions or "both" in directions:
         logging.info("Starting analysis for up-regulated proteins")
-        
+
         up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
         logging.info("Finished analysis for up-regulated proteins")
         # only wait 1 sec overall?
         sleep(1)
-    
+
     if "down" in directions or "both" in directions:
         logging.info("Starting analysis for down-regulated proteins")
-        
-        down_df = restring.get_functional_enrichment(down_protein_list, **string_params) 
+
+        down_df = restring.get_functional_enrichment(down_protein_list, **string_params)
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -94,7 +101,9 @@ def go_analysis_with_STRING(
     results = []
     summaries = []
     for term in protein_set_dbs:
-        db = restring.aggregate_results(directories=[details_folder_name], kind=term, PATH=enrichment_folder_path)
+        db = restring.aggregate_results(
+            directories=[details_folder_name], kind=term, PATH=enrichment_folder_path
+        )
         result = restring.tableize_aggregated(db)
         result.to_csv(f"{term}_results.csv")
         results.append(result)
@@ -102,7 +111,7 @@ def go_analysis_with_STRING(
         summary.to_csv(f"{term}_summary.csv")
         summaries.append(summary)
 
-    if results_folder == "tmp_enrichment_results": 
+    if results_folder == "tmp_enrichment_results":
         # delete tmp folder
         os.chdir("..")
         os.rmdir("tmp_enrichment_results")
@@ -110,8 +119,7 @@ def go_analysis_with_STRING(
     return {"results": results, "summaries": summaries}
 
 
-
-def go_analysis_offline(proteins, protein_set_dbs, background, cutoff):
+def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     """dev notes
     proteins: could be list of somewhere filtered proteins, could be dataframe with multiple columns and we just want to use first,
     TODO: check what kind of IDs are allowed here
@@ -123,12 +131,68 @@ def go_analysis_offline(proteins, protein_set_dbs, background, cutoff):
 
     cutoff: cutoff for p-value
     """
+    # maybe choose first col of proteins df if there are multiple and warn user?
+
+    if protein_sets_path == "":
+        # TODO: error handle
+        logging.info("No protein sets provided")
+
+    file_extension = os.path.splitext(protein_sets_path)[1]
+    if file_extension == ".csv":
+        logging.info("CSV file detected")
+        with open(protein_sets_path, "r") as f:
+            reader = csv.DictReader(f)
+            protein_sets = {}
+            for row in reader:
+                key = row["Key"]
+                values = row["Values"].split(",")
+                protein_sets[key] = values
+
+    elif file_extension == ".txt":
+        logging.info("Text file detected")
+        with open("gene_sets.txt", "r") as f:
+            protein_sets = {}
+            for line in f:
+                key, value_str = line.strip().split(":")
+                values = [v.strip() for v in value_str.split(",")]
+                protein_sets[key] = values
+
+    elif file_extension == ".json":
+        logging.info("JSON file detected")
+        with open(protein_sets_path, "r") as f:
+            protein_sets = json.load(f)
+
+    elif file_extension == "gmt":
+        logging.info("Gene Matrix Transposed (GMT) file detected")
+        # gseapy can handle gmt files
+        protein_sets = protein_sets_path
+
+    elif file_extension == "":
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="No file uploaded for protein sets.",
+                )
+            ]
+        )
+
+    else:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Invalid file type for protein sets. Must be .csv, .txt, or .json",
+                )
+            ]
+        )
 
     # gene set and gene list identifiers need to match
     enr = gp.enrich(
         gene_list=proteins,
-        gene_sets=protein_set_dbs,
+        gene_sets=protein_sets,
         background=background,  # "hsapiens_gene_ensembl",
+        cutoff=cutoff,
         outdir=None,
         verbose=True,
     )

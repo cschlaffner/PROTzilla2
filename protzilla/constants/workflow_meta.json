@@ -978,13 +978,10 @@
             "type": "named_output",
             "default": null
           },
-          "protein_set_dbs": {
-            "name": "Upload Protein Sets Libraries {'Name of set':['protein1', 'protein2',...],...}",
-            "type": "categorical",
-            "fill": "dbs_gseapy",
-            "categories": [],
-            "default": null,
-            "multiple": true
+          "protein_sets_path": {
+            "name": "Upload Protein Sets {'Name of set':['protein1', 'protein2',...],...}",
+            "type": "file",
+            "default": null
           },
           "cutoff": {
             "name": "Cutoff for p-values",
@@ -1006,9 +1003,12 @@
             "default": null
           },
           "protein_set_dbs": {
-            "name": "Protein Set Libraries",
-            "type": "file",
-            "default": null
+            "name": "Protein Sets Databases",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true
           },
           "cutoff": {
             "name": "Cutoff for p-values",
