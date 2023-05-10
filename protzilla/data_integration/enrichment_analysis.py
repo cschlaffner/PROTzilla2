@@ -124,6 +124,7 @@ def go_analysis_offline(proteins, protein_set_dbs, background, cutoff):
     cutoff: cutoff for p-value
     """
 
+    # gene set and gene list identifiers need to match
     enr = gp.enrich(
         gene_list=proteins,
         gene_sets=protein_set_dbs,
