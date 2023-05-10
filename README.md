@@ -8,7 +8,7 @@
 | protzilla/\_\_init\_\_.py                                               |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/\_\_init\_\_.py                                     |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/colors.py                                           |        2 |        0 |        0 |        0 |    100% |           |
-| protzilla/constants/location\_mapping.py                                |        8 |        0 |        4 |        1 |     92% |  22->exit |
+| protzilla/constants/location\_mapping.py                                |        8 |        0 |        2 |        0 |    100% |           |
 | protzilla/constants/logging.py                                          |        3 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/paths.py                                            |        6 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/clustering.py                                  |       20 |        1 |        6 |        1 |     92% |        76 |
@@ -71,7 +71,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      191 |      146 |       48 |        0 |     20% |33, 45-54, 82-95, 113-160, 164-171, 175-177, 181-183, 187-189, 193-202, 206-213, 217-225, 229-257, 261-297, 301-303, 307-308, 330-332, 336-350 |
 | ui/runs/views\_helper.py                                                |       49 |       10 |       22 |        2 |     75% |12->14, 18, 25-37 |
-|                                                               **TOTAL** | **3180** |  **450** |  **833** |  **137** | **82%** |           |
+|                                                               **TOTAL** | **3180** |  **450** |  **831** |  **136** | **82%** |           |
 
 
 ## Setup coverage badge
