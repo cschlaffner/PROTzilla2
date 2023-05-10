@@ -24,5 +24,5 @@ conda activate $ENV_NAME
 # conda info --envs | grep "$ENV_NAME"; exit 1
 
 # Install the requirements using pip
-echo "Installing requirements..."
-pip install -q -r requirements.txt
+echo "Installing requirements. This might take a while..."
+pip install -r requirements.txt
