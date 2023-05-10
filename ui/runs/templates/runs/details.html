@@ -8,14 +8,12 @@
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
         {% include 'runs/form_buttons.html' with results_exist=show_next %}
     {% endif %}
-    {% include 'runs/file_upload.html' %}
-    {% include 'runs/sidebar_toggle.html' %}
-    {% include 'runs/collapse_history.html' %}
 
 {% endblock %}
 
