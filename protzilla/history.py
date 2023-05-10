@@ -1,4 +1,5 @@
 import json
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -135,22 +136,42 @@ class History:
         return step, df
 
     def save(self):
-        # this assumes that parameters and outpus are json serializable
-        # e.g. dict/list/number/str or a nesting of these
-        to_save = [
-            dict(
-                section=step.section,
-                step=step.step,
-                method=step.method,
-                name=name,
-                parameters=step.parameters,
-                outputs=step.outputs,
+        if (history_dfs_path := RUNS_PATH / self.run_name / "history_dfs").exists():
+            shutil.rmtree(history_dfs_path)
+
+        to_save = []
+        for index, (name, step) in enumerate(zip(self.step_names, self.steps)):
+            to_save.append(
+                dict(
+                    section=step.section,
+                    step=step.step,
+                    method=step.method,
+                    name=name,
+                    parameters=self.serialize(
+                        step.parameters, index, step.section, step.step, step.method
+                    ),
+                    outputs=self.serialize(
+                        step.outputs, index, step.section, step.step, step.method
+                    ),
+                )
             )
-            for name, step in zip(self.step_names, self.steps)
-        ]
-        history_json = CustomJSONEncoder(self.run_name, indent=2).encode(to_save)
+        history_json = json.dumps(to_save, indent=2)
         with open(RUNS_PATH / self.run_name / "history.json", "w") as f:
             f.write(history_json)
+
+    def serialize(self, d, index, section, step, method):
+        cleaned = {}
+        for key, value in d.items():
+            if isinstance(value, pd.DataFrame):
+                filename = f"{index}-{section}-{step}-{method}-{key}.csv"
+
+                path = RUNS_PATH / self.run_name / "history_dfs" / filename
+                path.parent.mkdir(exist_ok=True)
+                value.to_csv(path)
+                cleaned[key] = {"__dataframe__": True, "path": str(path)}
+            else:
+                cleaned[key] = value
+        return cleaned
 
     def df_path(self, index: int):
         return RUNS_PATH / self.run_name / f"dataframes/df_{index}.csv"
@@ -190,21 +211,6 @@ class ExecutedStep:
         if self.dataframe_path is not None:
             return pd.read_csv(self.dataframe_path)
         return None
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def __init__(self, run_name, **kw):
-        self.run_name = run_name
-        super().__init__(**kw)
-
-    def default(self, obj):
-        if isinstance(obj, pd.DataFrame):
-            # TODO 124 dont write history_df when not in disk mode
-            path = RUNS_PATH / self.run_name / f"history_dfs/{random_string()}.csv"
-            path.parent.mkdir(exist_ok=True)
-            obj.to_csv(path)
-            return {"__dataframe__": True, "path": str(path)}
-        return json.JSONEncoder.default(self, obj)
 
 
 def load_dataframes(dct):
