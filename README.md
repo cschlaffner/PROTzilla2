@@ -22,11 +22,11 @@
 | protzilla/data\_preprocessing/filter\_proteins.py                       |       15 |        2 |        4 |        1 |     74% |     55-56 |
 | protzilla/data\_preprocessing/filter\_samples.py                        |       26 |        0 |        4 |        0 |    100% |           |
 | protzilla/data\_preprocessing/imputation.py                             |       74 |        1 |       14 |        3 |     95% |140, 290->299, 309->315 |
-| protzilla/data\_preprocessing/normalisation.py                          |       99 |        1 |       22 |        2 |     98% |243->254, 255 |
+| protzilla/data\_preprocessing/normalisation.py                          |       97 |        1 |       22 |        2 |     97% |243->254, 255 |
 | protzilla/data\_preprocessing/outlier\_detection.py                     |       67 |        3 |       12 |        4 |     89% |172, 189, 244, 245->exit |
 | protzilla/data\_preprocessing/plots.py                                  |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                         |       20 |        2 |        8 |        3 |     82% |31, 40->49, 50 |
-| protzilla/history.py                                                    |      122 |        6 |       48 |        6 |     93% |33, 109, 116, 126, 192, 207 |
+| protzilla/history.py                                                    |      126 |        5 |       52 |        5 |     94% |33, 109, 116, 126, 212 |
 | protzilla/importing/metadata\_import.py                                 |       31 |       11 |       14 |        1 |     56% |     20-35 |
 | protzilla/importing/ms\_data\_import.py                                 |       35 |        4 |        8 |        2 |     86% |10-11, 52-53 |
 | protzilla/run.py                                                        |      222 |       20 |       74 |        5 |     87% |45-51, 55-61, 151->149, 218-219, 226->230, 241-244, 283->exit, 320, 325->324 |
@@ -67,11 +67,11 @@
 | ui/main/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
 | ui/main/settings.py                                                     |       25 |        0 |        2 |        1 |     96% |    22->30 |
 | ui/runs/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
-| ui/runs/fields.py                                                       |       82 |       68 |       42 |        0 |     11% |13-29, 33-57, 68-70, 83-90, 94-97, 110-147, 151-157 |
+| ui/runs/fields.py                                                       |       84 |       70 |       44 |        0 |     11% |13-29, 33-59, 70-72, 85-92, 96-99, 112-149, 153-159 |
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      191 |      146 |       48 |        0 |     20% |33, 45-54, 82-95, 113-160, 164-171, 175-177, 181-183, 187-189, 193-202, 206-213, 217-225, 229-257, 261-297, 301-303, 307-308, 330-332, 336-350 |
 | ui/runs/views\_helper.py                                                |       49 |       10 |       22 |        2 |     75% |12->14, 18, 25-37 |
-|                                                               **TOTAL** | **3180** |  **450** |  **831** |  **136** | **82%** |           |
+|                                                               **TOTAL** | **3184** |  **451** |  **837** |  **135** | **82%** |           |
 
 
 ## Setup coverage badge
