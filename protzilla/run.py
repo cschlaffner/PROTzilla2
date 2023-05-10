@@ -105,11 +105,7 @@ class Run:
             self.workflow_meta = json.load(f)
 
         # make these a result of the step to be compatible with CLI?
-        try:
-            self.section, self.step, self.method = self.current_workflow_location()
-        except IndexError:
-            self.handle_all_steps_completed()
-
+        self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
         self.calculated_method = None
@@ -117,11 +113,6 @@ class Run:
         self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
-
-    def handle_all_steps_completed(self):
-        # TODO 74 think about what should happen when all steps are completed
-        self.step_index = len(self.all_steps()) - 1
-        self.section, self.step, self.method = self.current_workflow_location()
 
     def update_workflow_config(self, section, index, parameters):
         self.workflow_config["sections"][section]["steps"][index][
@@ -253,18 +244,19 @@ class Run:
             traceback.print_exc()
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
-            self.df = self.result_df
-            self.result_df = None
             self.step_index += 1
-            self.calculated_method = None
-            self.current_parameters = {}
-            self.current_plot_parameters = {}
-            self.plotted_for_parameters = None
-            self.plots = []
+            # important for runner, we do not want to update anything, when we do not have a step
             try:
                 self.section, self.step, self.method = self.current_workflow_location()
+                self.df = self.result_df
+                self.result_df = None
+                self.calculated_method = None
+                self.current_parameters = {}
+                self.current_plot_parameters = {}
+                self.plotted_for_parameters = None
+                self.plots = []
             except IndexError:
-                self.handle_all_steps_completed()
+                self.step_index -= 1
 
     def back_step(self):
         assert self.history.steps
