@@ -263,7 +263,9 @@ def plot(request, run_name):
 
     parameters = {}
     post_data = dict(request.POST)
-    del post_data["csrfmiddlewaretoken"]
+
+    if "csrfmiddlewaretoken" in post_data:
+        del post_data["csrfmiddlewaretoken"]
 
     if run.step == "plot":
         del post_data["chosen_method"]
