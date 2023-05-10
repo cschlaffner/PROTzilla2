@@ -11,7 +11,12 @@ $(document).ready(function () {
     }
 
     $('#toggleChevron').click(function() {
+        $(this).addClass('transform-icon');
         $(this).toggleClass('rotate-icon');
+        setTimeout(() => {
+            $(this).removeClass('transform-icon');
+        }, 300);
+ 
         let isCollapsed = $(this).attr('aria-expanded') === 'false';
         sessionStorage.setItem('collapseState', isCollapsed ? 'collapsed' : 'expanded');
     });
