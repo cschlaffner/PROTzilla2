@@ -53,6 +53,11 @@
           "name": "plot",
           "method": "volcano",
           "parameters": {}
+        },
+        {
+          "name": "plot",
+          "method": "volcano",
+          "parameters": {}
         }
       ]
     },

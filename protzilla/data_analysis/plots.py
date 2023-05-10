@@ -66,7 +66,25 @@ def scatter_plot(
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
 
-def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
+def create_volcano_plot(
+    p_values, log2_fc, fc_threshold, alpha, proteins_of_interest=None
+):
+    """
+    Function to create a volcano plot from p values and log2 fold change with the
+    possibility to annotate proteins of interest.
+
+    :param p_values:dataframe with p values
+    :type p_values: pd.Dataframe
+    :param log2_fc: dataframe with log2 fold change
+    :type log2_fc: pd.Dataframe
+    :param fc_threshold: the threshold for the fold change to show
+    :type fc_threshold: float
+    :param alpha: the alpha value for the significance line
+    :type alpha: float
+    :param proteins_of_interest: the proteins that should be annotated in the plot
+    :type proteins_of_interest: list or None
+    """
+
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
@@ -81,6 +99,47 @@ def create_volcano_plot(p_values, log2_fc, fc_threshold, alpha):
         title="Volcano Plot",
         annotation="Protein ID",
     )
+
+    if proteins_of_interest is None:
+        proteins_of_interest = []
+
+    # annotate the proteins of interest permanently in the plot
+    for protein in proteins_of_interest:
+        fig.add_annotation(
+            x=plot_df.loc[
+                plot_df["Protein ID"] == protein,
+                "log2_fold_change",
+            ].values[0],
+            y=-np.log10(
+                plot_df.loc[
+                    plot_df["Protein ID"] == protein,
+                    "corrected_p_value",
+                ].values[0]
+            ),
+            text=protein,
+            showarrow=True,
+            arrowhead=1,
+            font=dict(color="#ffffff"),
+            align="center",
+            arrowcolor="#4A536A",
+            bgcolor="#4A536A",
+            opacity=0.8,
+            ax=0,
+            ay=-20,
+        )
+
+    new_names = {
+        "Point(s) of interest": "Significant Proteins",
+        "Dataset": "Not Significant Proteins",
+    }
+
+    fig.for_each_trace(
+        lambda t: t.update(
+            name=new_names[t.name],
+            legendgroup=new_names[t.name],
+        )
+    )
+
     return [fig]
 
 
