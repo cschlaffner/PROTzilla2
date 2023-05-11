@@ -275,7 +275,7 @@ def test_name_step(example_workflow_short, tests_folder_name):
 
 
 def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
-    run_name = tests_folder_name + "/test_read_write_local_workflow" + random_string()
+    run_name = tests_folder_name + "/test_read_write_local_workflow_" + random_string()
 
     run = Run.create(run_name)
     run.workflow_config = example_workflow_short
@@ -289,7 +289,7 @@ def test_integration_updated_workflow_file(
 ):
     # depends on test_read_write_local_workflow
     run_name = (
-        tests_folder_name + "/test_integration_updated_workflow_file" + random_string()
+        tests_folder_name + "/test_integration_updated_workflow_file_" + random_string()
     )
     run = Run.create(run_name)
     run.workflow_config = example_workflow_short
