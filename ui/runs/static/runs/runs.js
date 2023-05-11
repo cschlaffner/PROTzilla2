@@ -11,9 +11,7 @@ $(document).ready(function () {
     }
 
     $('#toggleChevron').click(function() {
-        // add transform animation
         $(this).toggleClass('rotate-icon');
- 
         let isCollapsed = $(this).attr('aria-expanded') === 'false';
         sessionStorage.setItem('collapseState', isCollapsed ? 'collapsed' : 'expanded');
 
