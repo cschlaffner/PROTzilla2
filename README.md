@@ -8,11 +8,13 @@ PROTzilla aims to be a one-stop-shop for proteomics-researchers (with or without
 ## Quick(-and-easy)-Start-Guide
 To make it easy getting started we have written `run_protzilla.sh` for the macOS and Linux users and `run_protzilla.bat` for windows-users. The script takes care of installing miniconda, creating the environment, installing the requirements and starting the Server at  `http://127.0.0.1:8000`. Everytime you want to run PROTzilla, **just execute the script**. If you don't have some version of conda installed, the script will install miniconda. PROTzilla (and the script) will only work as we planned with it installed. Therefore, when installing conda you have to accept their terms and conditions and should accept the suggested folders and commands to be run (tldr: `Enter` and `yes` are your friends ;) )
 
+The first time starting PROTzilla might take up to 10 minutes.
+
 If you are on **macOS**: You can either do that via opening `run_protzilla.sh` with the terminal (right-click on the file -> "open with" -> "terminal").
 
 If you are on **linux or macOS**: Run the script from the command-line from within Project-Folder (`PROTzilla2`) by running `./run_protzilla.sh`.
 
-If you are on **Windows**: just double-click `run_protzilla.bat` and wait for the magic to happen.
+If you are on **Windows**: just double-click `run_protzilla.bat`. If you start PROTzilla for the first time you might need to restart the script after miniconda installation.
 
 In any case: the window that opens when you run the script (the terminal-window you ran the the script from) will also display error-messages and information about the communication between the web-frontent and the backend as well as error-messages from the protzilla-backend performing all the calculations, creating plots and so on.
 
