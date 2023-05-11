@@ -12,11 +12,7 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import (
-    get_all_default_params_for_methods,
-    get_workflow_default_param_value,
-    set_output_name,
-)
+from .workflow_helper import get_workflow_default_param_value, set_output_name
 
 
 class Run:
@@ -118,9 +114,7 @@ class Run:
         self.write_local_workflow()
 
     def perform_current_calculation_step(self, parameters):
-        self.perform_calculation_from_location(
-            *self.current_workflow_location(), parameters
-        )
+        self.perform_calculation_from_location(*self.current_run_location(), parameters)
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
