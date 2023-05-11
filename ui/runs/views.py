@@ -225,14 +225,13 @@ def export_workflow(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
 
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
-    run.perform_calculation_from_location(section, step, method, parameters)
+    run.perform_current_calculation_step(parameters)
 
     result = run.current_out
     if "messages" in result:
@@ -272,7 +271,7 @@ def plot(request, run_name):
     post_data, parameters = parameters_for_plot(post_data, param_dict)
 
     parameters.update(parameters_from_post(post_data))
-    run.create_plot_from_location(section, step, method, parameters)
+    run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
         if isinstance(p, dict):
@@ -299,7 +298,7 @@ def plot(request, run_name):
 
 def add_name(request, run_name):
     run = active_runs[run_name]
-    run.history.name_step(int(request.POST["index"]), request.POST["name"])
+    run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

@@ -1,6 +1,7 @@
 import traceback
-from django.contrib import messages
+
 import pandas as pd
+from django.contrib import messages
 from sklearn.preprocessing import StandardScaler
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms

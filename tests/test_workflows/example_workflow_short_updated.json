@@ -1,0 +1,62 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "ms_fragger_import",
+          "parameters": {
+            "intensity_name": "Intensity"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.1
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": "output_name1"
+        },
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {},
+          "graphs": [
+            {}
+          ]
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_count_filter",
+          "parameters": {},
+          "graphs": [
+            {}
+          ]
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "method": "umap",
+          "name": "dimension_reduction",
+          "parameters": {}
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}
