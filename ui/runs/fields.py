@@ -126,6 +126,8 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
+                if key.endswith("_wrapper"):
+                    key = key[:-8]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
