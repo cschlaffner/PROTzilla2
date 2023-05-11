@@ -979,7 +979,7 @@
             "default": null
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets {'Name of set':['protein1', 'protein2',...],...}",
+            "name": "Upload Protein Sets {'Name of set': ['protein1', 'protein2', ...], ...}",
             "type": "file",
             "default": null
           },
@@ -1007,13 +1007,19 @@
             "type": "named_output",
             "default": null
           },
-          "protein_set_dbs": {
-            "name": "Protein Sets Databases",
+          "protein_sets": {
+            "name": "Protein Sets",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
             "default": null,
             "multiple": true
+          },
+          "organism": {
+            "name": "Enrichr supported organism",
+            "type": "categorical",
+            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
+            "default": "human"
           },
           "cutoff": {
             "name": "Cutoff for p-values",

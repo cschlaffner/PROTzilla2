@@ -131,8 +131,14 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     """
 
     if protein_sets_path == "":
-        # TODO: error handle
-        logging.info("No protein sets provided")
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="No file uploaded for protein sets.",
+                )
+            ]
+        )
 
     file_extension = os.path.splitext(protein_sets_path)[1]
     if file_extension == ".csv":
@@ -160,16 +166,6 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
         # gseapy can handle gmt files
         protein_sets = protein_sets_path
 
-    elif file_extension == "":
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="No file uploaded for protein sets.",
-                )
-            ]
-        )
-
     else:
         return dict(
             messages=[
@@ -179,9 +175,9 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
                 )
             ]
         )
-    
+
     if background == "":
-        logging.info("No background provided, using ????")
+        logging.info("No background provided, using all proteins in protein sets")
         background = None
 
     file_extension = os.path.splitext(background)[1]
@@ -216,5 +212,16 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     return {"enrichment_df": enr.results.sort_values(by="Adjusted P-value")}
 
 
-def go_analysis_with_enrichr(proteins, protein_set_dbs, organism, background, cutoff):
-    return {}
+def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
+    """dev notes
+    protein_sets are categorical for now, could also be custom file upload later
+
+    background only works with uploaded file
+    """
+    enr = gp.enrichr(gene_list=proteins,
+                    gene_sets=protein_sets,
+                    organism=organism,
+                    cutoff=cutoff,
+                    outdir=None,
+                    )
+    return {"enrichment_df": enr.results.sort_values(by="Adjusted P-value")}
