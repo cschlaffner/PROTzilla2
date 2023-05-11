@@ -74,6 +74,7 @@ def go_analysis_with_STRING(
     details_folder_name = "enrichment_details"
     details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
     os.makedirs(details_folder_path)
+    start_dir = os.getcwd()
     os.chdir(details_folder_path)
 
     # maybe add mapping to string API for identifiers before this (dont forget background)
@@ -116,6 +117,8 @@ def go_analysis_with_STRING(
         os.chdir("..")
         os.rmdir("tmp_enrichment_results")
 
+    # switch back to original working directory
+    os.chdir(start_dir)
     return {"results": results, "summaries": summaries}
 
 
