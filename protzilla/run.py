@@ -117,7 +117,7 @@ class Run:
         ] = parameters_no_file_path
         self.write_local_workflow()
 
-    def perform_current_step(self, parameters):
+    def perform_current_calculation_step(self, parameters):
         self.perform_calculation_from_location(
             *self.current_workflow_location(), parameters
         )

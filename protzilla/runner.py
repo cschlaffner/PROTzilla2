@@ -113,7 +113,7 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
-        self.run.perform_current_step(params)
+        self.run.perform_current_calculation_step(params)
 
     def _create_plots_for_step(self, section, step):
         params = dict()

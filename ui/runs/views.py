@@ -233,7 +233,7 @@ def calculate(request, run_name):
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
-    run.perform_current_step(parameters)
+    run.perform_current_calculation_step(parameters)
 
     result = run.current_out
     if "messages" in result:

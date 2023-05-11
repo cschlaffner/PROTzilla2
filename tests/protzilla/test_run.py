@@ -256,6 +256,7 @@ def test_export_plot(tests_folder_name):
 
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow, test_get_workflow_default_param_value
+
     run_name = tests_folder_name + "/test_name_step" + random_string()
     run = Run.create(run_name)
 
@@ -288,6 +289,7 @@ def test_integration_updated_workflow_file(
     example_workflow_short, example_workflow_short_updated, tests_folder_name
 ):
     # depends on test_read_write_local_workflow
+    
     run_name = (
         tests_folder_name + "/test_integration_updated_workflow_file" + random_string()
     )
@@ -299,7 +301,7 @@ def test_integration_updated_workflow_file(
         file_path=f"{PROJECT_PATH}/tests/combined_protein_method_small_cut.tsv",
         intensity_name="Intensity",
     )
-    run.perform_current_step({"threshold": 0.1})
+    run.perform_current_calculation_step({"threshold": 0.1})
     run.next_step("output_name1")
 
     run.insert_step("filter_proteins", "data_preprocessing", "low_frequency_filter", 1)
