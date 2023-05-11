@@ -1,0 +1,2 @@
+accession,gene_id,num_var_seq,num_init_met,num_signal,num_variant,num_mutagen,num_conflict,num_peptide,num_propep,num_chain,num_nodes,num_edges,num_paths,list_paths_miscleavages,list_paths_hops,list_paths_variant,list_paths_mutagen,list_paths_conflict,protein_description
+P04637,P53_HUMAN,9,0,0,1363,33,0,0,0,1,13976,93882,,,,,,,Cellular tumor antigen p53

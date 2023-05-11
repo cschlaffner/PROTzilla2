@@ -1,0 +1,128 @@
+ID   MY_CUSTOM_PROTEIN             Reviewed;         8 AA.
+AC   QXXXXX    
+DT   03-MAY-2011, integrated into UniProtKB/TrEMBL.
+DT   22-NOV-2017, sequence version 2.
+DT   02-DEC-2020, entry version 69.
+DE   RecName: Full=Eukaryotic translation initiation factor 3 subunit J {ECO:0000256|HAMAP-Rule:MF_03009};
+DE            Short=eIF3j {ECO:0000256|HAMAP-Rule:MF_03009};
+DE   AltName: Full=Eukaryotic translation initiation factor 3 subunit 1 {ECO:0000256|HAMAP-Rule:MF_03009};
+DE   AltName: Full=eIF-3-alpha {ECO:0000256|HAMAP-Rule:MF_03009};
+DE   AltName: Full=eIF3 p35 {ECO:0000256|HAMAP-Rule:MF_03009};
+GN   Name=EIF3J {ECO:0000256|HAMAP-Rule:MF_03009,
+GN   ECO:0000313|Ensembl:ENSSSCP00000005055, ECO:0000313|VGNC:VGNC:87621};
+GN   Synonyms=EIF3S1 {ECO:0000256|HAMAP-Rule:MF_03009};
+OS   Sus scrofa (Pig).
+OC   Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi; Mammalia;
+OC   Eutheria; Laurasiatheria; Artiodactyla; Suina; Suidae; Sus.
+OX   NCBI_TaxID=9823 {ECO:0000313|Ensembl:ENSSSCP00000005055, ECO:0000313|Proteomes:UP000008227};
+RN   [1] {ECO:0000313|Ensembl:ENSSSCP00000005055, ECO:0000313|Proteomes:UP000008227}
+RP   NUCLEOTIDE SEQUENCE [LARGE SCALE GENOMIC DNA].
+RC   STRAIN=Duroc {ECO:0000313|Ensembl:ENSSSCP00000005055,
+RC   ECO:0000313|Proteomes:UP000008227};
+RG   Porcine genome sequencing project;
+RL   Submitted (NOV-2009) to the EMBL/GenBank/DDBJ databases.
+RN   [2] {ECO:0000313|Ensembl:ENSSSCP00000005055}
+RP   IDENTIFICATION.
+RG   Ensembl;
+RL   Submitted (JUL-2011) to UniProtKB.
+CC   -!- FUNCTION: Component of the eukaryotic translation initiation factor 3
+CC       (eIF-3) complex, which is required for several steps in the initiation
+CC       of protein synthesis. The eIF-3 complex associates with the 40S
+CC       ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-
+CC       2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex
+CC       (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC
+CC       and scanning of the mRNA for AUG recognition. The eIF-3 complex is also
+CC       required for disassembly and recycling of post-termination ribosomal
+CC       complexes and subsequently prevents premature joining of the 40S and
+CC       60S ribosomal subunits prior to initiation. The eIF-3 complex
+CC       specifically targets and initiates translation of a subset of mRNAs
+CC       involved in cell proliferation, including cell cycling, differentiation
+CC       and apoptosis, and uses different modes of RNA stem-loop binding to
+CC       exert either translational activation or repression. This subunit binds
+CC       directly within the mRNA entry channel of the 40S ribosome to the
+CC       aminoacyl (A) site. It may regulate the interaction between the 43S PIC
+CC       and mRNA. {ECO:0000256|HAMAP-Rule:MF_03009}.
+CC   -!- SUBUNIT: Component of the eukaryotic translation initiation factor 3
+CC       (eIF-3) complex, which is composed of 13 subunits: EIF3A, EIF3B, EIF3C,
+CC       EIF3D, EIF3E, EIF3F, EIF3G, EIF3H, EIF3I, EIF3J, EIF3K, EIF3L and
+CC       EIF3M. The eIF-3 complex appears to include 3 stable modules: module A
+CC       is composed of EIF3A, EIF3B, EIF3G and EIF3I; module B is composed of
+CC       EIF3F, EIF3H, and EIF3M; and module C is composed of EIF3C, EIF3D,
+CC       EIF3E, EIF3K and EIF3L. EIF3C of module C binds EIF3B of module A and
+CC       EIF3H of module B, thereby linking the three modules. EIF3J is a labile
+CC       subunit that binds to the eIF-3 complex via EIF3B. The eIF-3 complex
+CC       interacts with RPS6KB1 under conditions of nutrient depletion.
+CC       Mitogenic stimulation leads to binding and activation of a complex
+CC       composed of MTOR and RPTOR, leading to phosphorylation and release of
+CC       RPS6KB1 and binding of EIF4B to eIF-3. {ECO:0000256|HAMAP-
+CC       Rule:MF_03009}.
+CC   -!- SUBCELLULAR LOCATION: Cytoplasm {ECO:0000256|HAMAP-Rule:MF_03009}.
+CC   -!- PTM: Phosphorylated. Phosphorylation is enhanced upon serum
+CC       stimulation. {ECO:0000256|HAMAP-Rule:MF_03009}.
+CC   -!- SIMILARITY: Belongs to the eIF-3 subunit J family. {ECO:0000256|HAMAP-
+CC       Rule:MF_03009}.
+CC   -!- CAUTION: Lacks conserved residue(s) required for the propagation of
+CC       feature annotation. {ECO:0000256|HAMAP-Rule:MF_03009}.
+CC   ---------------------------------------------------------------------------
+CC   Copyrighted by the UniProt Consortium, see https://www.uniprot.org/terms
+CC   Distributed under the Creative Commons Attribution (CC BY 4.0) License
+CC   ---------------------------------------------------------------------------
+DR   EMBL; AEMK02000004; -; NOT_ANNOTATED_CDS; Genomic_DNA.
+DR   STRING; 9823.ENSSSCP00000005055; -.
+DR   PaxDb; F1SN05; -.
+DR   PeptideAtlas; F1SN05; -.
+DR   PRIDE; F1SN05; -.
+DR   Ensembl; ENSSSCT00000005181; ENSSSCP00000005055; ENSSSCG00000004691.
+DR   VGNC; VGNC:87621; EIF3J.
+DR   eggNOG; KOG4813; Eukaryota.
+DR   GeneTree; ENSGT00390000018400; -.
+DR   HOGENOM; CLU_085806_2_1_1; -.
+DR   InParanoid; F1SN05; -.
+DR   OMA; MPPKKWD; -.
+DR   TreeFam; TF101514; -.
+DR   Reactome; R-SSC-156827; L13a-mediated translational silencing of Ceruloplasmin expression.
+DR   Reactome; R-SSC-72649; Translation initiation complex formation.
+DR   Reactome; R-SSC-72689; Formation of a pool of free 40S subunits.
+DR   Reactome; R-SSC-72702; Ribosomal scanning and start codon recognition.
+DR   Proteomes; UP000008227; Chromosome 1.
+DR   Bgee; ENSSSCG00000004691; Expressed in longissimus thoracis muscle and 38 other tissues.
+DR   ExpressionAtlas; F1SN05; baseline.
+DR   GO; GO:0016282; C:eukaryotic 43S preinitiation complex; IEA:UniProtKB-UniRule.
+DR   GO; GO:0033290; C:eukaryotic 48S preinitiation complex; IEA:UniProtKB-UniRule.
+DR   GO; GO:0005852; C:eukaryotic translation initiation factor 3 complex; IBA:GO_Central.
+DR   GO; GO:0003743; F:translation initiation factor activity; IEA:UniProtKB-UniRule.
+DR   GO; GO:0001732; P:formation of cytoplasmic translation initiation complex; IEA:UniProtKB-UniRule.
+DR   Gene3D; 1.10.246.60; -; 1.
+DR   HAMAP; MF_03009; eIF3j; 1.
+DR   InterPro; IPR023194; eIF3-like_dom_sf.
+DR   InterPro; IPR013906; eIF3j.
+DR   PANTHER; PTHR21681; PTHR21681; 1.
+DR   Pfam; PF08597; eIF3_subunit; 1.
+PE   1: Evidence at protein level;
+KW   Coiled coil {ECO:0000256|SAM:Coils};
+KW   Cytoplasm {ECO:0000256|ARBA:ARBA00022490, ECO:0000256|HAMAP-Rule:MF_03009};
+KW   Initiation factor {ECO:0000256|HAMAP-Rule:MF_03009};
+KW   Phosphoprotein {ECO:0000256|HAMAP-Rule:MF_03009};
+KW   Protein biosynthesis {ECO:0000256|HAMAP-Rule:MF_03009};
+KW   Proteomics identification {ECO:0000213|PeptideAtlas:F1SN05};
+KW   Reference proteome {ECO:0000313|Proteomes:UP000008227}.
+FT   INIT_MET        1
+FT                   /note="Removed"
+FT                   /evidence="EXAMPLE Initiator Methionine"
+FT   SIGNAL          1..4
+FT                   /evidence="EXAMPLE Signal Peptide"
+FT   VARIANT         3
+FT                   /note="Missing (in Example)"
+FT                   /evidence="EXAMPLE Variant 1"
+FT                   /id="VAR_XXXXX1"
+FT   VARIANT         4
+FT                   /note="O -> L (in Example)"
+FT                   /evidence="EXAMPLE Variant 2"
+FT                   /id="VAR_XXXXX2"
+FT   VARIANT         5
+FT                   /note="T -> K (in Example)"
+FT                   /evidence="EXAMPLE Variant 3"
+FT                   /id="VAR_XXXXX3"
+SQ   SEQUENCE   8 AA;  988 MW;  XXXXXXXXXXXXXXXX CRC64;
+     MPROTEIN
+//
