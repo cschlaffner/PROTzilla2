@@ -10,7 +10,7 @@ if %errorlevel% EQU 0 (
 
 echo Anaconda not already installed.
 REM Check if Miniconda3 is installed
-miniconda --version >nul 2>&1
+call miniconda --version >nul 2>&1
 if %errorlevel% EQU 0 (
     echo Miniconda3 is already installed.
     goto check_environment
@@ -18,12 +18,15 @@ if %errorlevel% EQU 0 (
 echo Miniconda3 not already installed.
 
 REM Install Miniconda3
+echo Downloading Miniconda3...
+call powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe' -OutFile 'Miniconda3-latest.exe'"
 echo Installing Miniconda3...
-powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe' -OutFile 'Miniconda3-latest.exe'"
-start "" /wait Miniconda3-latest.exe /InstallationType=JustMe /AddToPath=0 /S
+start "" /wait Miniconda3-latest.exe /InstallationType=JustMe /AddToPath=1 /S /D=%UserProfile%\Miniconda3
 del Miniconda3-latest.exe
-
 echo Miniconda3 installation completed.
+echo please restart script
+pause
+goto :eof
 
 :check_environment
 REM Check if the environment exists
@@ -43,9 +46,9 @@ echo protzilla_win environment created.
 :activate_env
 REM Activate the environment and install requirements
 echo Activating protzilla_win environment...
-python --version
 call activate protzilla_win
-python --version
+pip install wheel
 pip install -r requirements.txt
+echo installed all requirements
 REM Run Django server
 python ui/manage.py runserver
