@@ -150,6 +150,7 @@ def test_history_step_naming():
     history.name_step_in_history(1, "two")
     assert history.step_names[0] == "one"
     assert history.step_names[1] == "two"
+    history.save()
     del history
     history2 = History.from_disk(name, df_mode="disk")
     assert history2.step_names[0] == "one"

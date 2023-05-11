@@ -362,6 +362,7 @@ class Run:
 
     def name_step(self, index, name):
         self.history.name_step_in_history(index, name)
+        self.history.save()
         set_output_name(
             self.workflow_config,
             self.section,
