@@ -27,7 +27,7 @@ def example_workflow_short_updated():
 
 
 def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_name):
-    run_name = tests_folder_name + "/test_export_workflow" + random_string()
+    run_name = tests_folder_name + "/test_export_workflow_" + random_string()
 
     run = Run.create(run_name, df_mode="memory")
 
@@ -64,7 +64,7 @@ def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_
 
 
 def test_run_create(tests_folder_name):
-    run_name = tests_folder_name + "/test_run_create" + random_string()
+    run_name = tests_folder_name + "/test_run_create_" + random_string()
 
     # here the run should be used like in the CLI
     run = Run.create(run_name)
@@ -86,7 +86,7 @@ def test_run_create(tests_folder_name):
 
 
 def test_run_back(tests_folder_name):
-    run_name = tests_folder_name + "/test_run_back" + random_string()
+    run_name = tests_folder_name + "/test_run_back_" + random_string()
 
     run = Run.create(run_name)
     run.calculate_and_next(
@@ -108,7 +108,7 @@ def test_run_back(tests_folder_name):
 
 
 def test_run_continue(tests_folder_name):
-    run_name = tests_folder_name + "/test_run_continue" + random_string()
+    run_name = tests_folder_name + "/test_run_continue_" + random_string()
 
     run = Run.create(run_name, df_mode="disk")
 
@@ -124,7 +124,7 @@ def test_run_continue(tests_folder_name):
 
 
 def test_current_run_location(tests_folder_name):
-    run_name = tests_folder_name + "/test_run_current_location" + random_string()
+    run_name = tests_folder_name + "/test_run_current_location_" + random_string()
     run = Run.create(
         run_name, df_mode="disk", workflow_config_name="test_data_preprocessing"
     )
@@ -150,7 +150,7 @@ def test_current_run_location(tests_folder_name):
 
 
 def test_perform_calculation_logging(caplog, tests_folder_name):
-    run_name = tests_folder_name + "/test_run_logging" + random_string()
+    run_name = tests_folder_name + "/test_run_logging_" + random_string()
     run = Run.create(run_name, df_mode="disk")
     run.calculate_and_next(
         ms_data_import.max_quant_import,
@@ -171,7 +171,7 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
 
 
 def test_insert_step(example_workflow_short, tests_folder_name):
-    run_name = tests_folder_name + "/test_insert_as_next_step" + random_string()
+    run_name = tests_folder_name + "/test_insert_as_next_step_" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
@@ -190,7 +190,7 @@ def test_insert_step(example_workflow_short, tests_folder_name):
 def test_insert_at_next_position_correct_location(example_workflow, tests_folder_name):
     run_name = (
         tests_folder_name
-        + "/test_insert_as_next_step_correct_location"
+        + "/test_insert_as_next_step_correct_location_"
         + random_string()
     )
     run = Run.create(run_name)
@@ -212,7 +212,7 @@ def test_insert_at_next_position_correct_location(example_workflow, tests_folder
 
 
 def test_delete_step(example_workflow_short, tests_folder_name):
-    run_name = tests_folder_name + "/test_delete_step" + random_string()
+    run_name = tests_folder_name + "/test_delete_step_" + random_string()
     run = Run.create(run_name)
 
     run.workflow_config = example_workflow_short
@@ -223,7 +223,7 @@ def test_delete_step(example_workflow_short, tests_folder_name):
 
 
 def test_export_plot(tests_folder_name):
-    run_name = tests_folder_name + "/test_export_plot" + random_string()
+    run_name = tests_folder_name + "/test_export_plot_" + random_string()
 
     run = Run.create(run_name)
 
@@ -257,7 +257,7 @@ def test_export_plot(tests_folder_name):
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow, test_get_workflow_default_param_value
 
-    run_name = tests_folder_name + "/test_name_step" + random_string()
+    run_name = tests_folder_name + "/test_name_step_" + random_string()
     run = Run.create(run_name)
 
     run.history.step_names.append(None)
@@ -276,7 +276,7 @@ def test_name_step(example_workflow_short, tests_folder_name):
 
 
 def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
-    run_name = tests_folder_name + "/test_read_write_local_workflow" + random_string()
+    run_name = tests_folder_name + "/test_read_write_local_workflow_" + random_string()
 
     run = Run.create(run_name)
     run.workflow_config = example_workflow_short
@@ -289,9 +289,9 @@ def test_integration_updated_workflow_file(
     example_workflow_short, example_workflow_short_updated, tests_folder_name
 ):
     # depends on test_read_write_local_workflow
-    
+
     run_name = (
-        tests_folder_name + "/test_integration_updated_workflow_file" + random_string()
+        tests_folder_name + "/test_integration_updated_workflow_file_" + random_string()
     )
     run = Run.create(run_name)
     run.workflow_config = example_workflow_short
