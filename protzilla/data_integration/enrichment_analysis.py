@@ -12,18 +12,26 @@ from django.contrib import messages
 from ..constants.paths import RUNS_PATH
 from protzilla.utilities.random import random_string
 
+last_call_time = None
+MIN_WAIT_TIME = 1  # Minimum wait time between API calls in seconds
+
+def get_functional_enrichment_with_delay(gene_list, **string_params):
+    global last_call_time
+    if last_call_time is not None:
+        elapsed_time = time.time() - last_call_time
+        if elapsed_time < MIN_WAIT_TIME:
+            time.sleep(MIN_WAIT_TIME - elapsed_time)
+    result_df = restring.get_functional_enrichment(gene_list, **string_params)
+    last_call_time = time.time()
+    return result_df
 
 def go_analysis_with_STRING(
     proteins, protein_set_dbs, organism, background, directions, run_name=None
 ):
-    """dev notes
-    organism can be any taxon id, could add a mapping here (name to id)
-    think about output format and plots
-    """
+
     # TODO: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.NOTSET)
 
-    # proteins should be df with two columns: Protein ID and numeric ranking column
     if (
         not isinstance(proteins, pd.DataFrame)
         or proteins.shape[1] != 2
@@ -77,21 +85,19 @@ def go_analysis_with_STRING(
     start_dir = os.getcwd()
     os.chdir(details_folder_path)
 
-    # maybe add mapping to string API for identifiers before this (dont forget background)
+    # enhancement: add mapping to string API for identifiers before this (dont forget background)
 
     if "up" in directions or "both" in directions:
         logging.info("Starting analysis for up-regulated proteins")
 
-        up_df = restring.get_functional_enrichment(up_protein_list, **string_params)
+        up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
         logging.info("Finished analysis for up-regulated proteins")
-        # only wait 1 sec overall?
-        sleep(1)
 
     if "down" in directions or "both" in directions:
         logging.info("Starting analysis for down-regulated proteins")
 
-        down_df = restring.get_functional_enrichment(down_protein_list, **string_params)
+        down_df = get_functional_enrichment_with_delay(down_protein_list, **string_params)
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -124,14 +130,12 @@ def go_analysis_with_STRING(
 
 def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     """dev notes
-    TODO(later!): make sure ID type for all inputs match
-
-    background: None defaults to all protein_sets proteins,
-    list or number of proteins? (could be upload or named_output)
+    background: list or number of proteins? (could be upload or named_output)
     for named-output: - list of proteins, or dataframe with multiple columns and we just want to use first
 
     cutoff: cutoff for p-value, only affects figure?
     """
+    # enhancement: make sure ID type for all inputs match
 
     if protein_sets_path == "":
         return dict(
@@ -221,6 +225,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
 
     background only works with uploaded file
     """
+    # enhancement: make sure ID type for all inputs match
     enr = gp.enrichr(gene_list=proteins,
                     gene_sets=protein_sets,
                     organism=organism,
