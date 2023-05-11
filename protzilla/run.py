@@ -214,6 +214,8 @@ class Run:
         else:
             self.insert_step(step_to_be_inserted, section, method, 0)
 
+        self.section, self.step, self.method = self.current_workflow_location()
+
     def export_workflow(self, name):
         with open(f"{WORKFLOWS_PATH}/{name}.json", "w") as f:
             json.dump(self.workflow_config, f, indent=2)
@@ -225,7 +227,7 @@ class Run:
     def next_step(self, name=None):
         if not name:
             name = get_workflow_default_param_value(
-                self.workflow_config, *(self.current_run_location()), "output_name"
+                self.workflow_config, *self.current_run_location(), "output_name"
             )
         try:
             self.history.add_step(
@@ -245,18 +247,14 @@ class Run:
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
             self.step_index += 1
-            # important for runner, we do not want to update anything, when we do not have a step
-            try:
-                self.section, self.step, self.method = self.current_workflow_location()
-                self.df = self.result_df
-                self.result_df = None
-                self.calculated_method = None
-                self.current_parameters = {}
-                self.current_plot_parameters = {}
-                self.plotted_for_parameters = None
-                self.plots = []
-            except IndexError:
-                self.step_index -= 1
+            self.section, self.step, self.method = self.current_workflow_location()
+            self.df = self.result_df
+            self.result_df = None
+            self.calculated_method = None
+            self.current_parameters = {}
+            self.current_plot_parameters = {}
+            self.plotted_for_parameters = None
+            self.plots = []
 
     def back_step(self):
         assert self.history.steps
@@ -276,7 +274,10 @@ class Run:
         self.step_index -= 1
 
     def current_workflow_location(self):
-        return self.all_steps()[self.step_index]
+        try:
+            return self.all_steps()[self.step_index]
+        except IndexError:
+            return "", "", ""
 
     def step_index_in_current_section(self):
         index = 0

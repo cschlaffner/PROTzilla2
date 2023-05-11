@@ -55,9 +55,11 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
         section = possible_section["section"]
         section_selected = False
         workflow_steps = []
+        global_finished = global_index < step_index
         for i, step in enumerate(workflow_section["steps"]):
             if global_index == step_index:
                 section_selected = True
+            global_finished = global_index < step_index
             workflow_steps.append(
                 {
                     "id": step["name"],
@@ -71,7 +73,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
                 }
             )
             global_index += 1
-        section_finished = global_index <= step_index
+        section_finished = global_finished
 
         possible_steps = []
         for step in possible_section["possible_steps"]:
