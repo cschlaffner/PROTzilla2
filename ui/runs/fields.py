@@ -131,9 +131,15 @@ def make_displayed_history(run):
         if history_step.section == "importing":
             fields = [""]
         else:
+            print("history_step.parameters")
+            print(history_step.parameters)
             for key, param_dict in parameters.items():
                 if key.endswith("_wrapper"):
                     key = key[:-8]
+                if key == "proteins_of_interest" and not key in history_step.parameters:
+                    history_step.parameters[key] = ["", ""]
+                print("key, param_dict")
+                print(key, param_dict)
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
