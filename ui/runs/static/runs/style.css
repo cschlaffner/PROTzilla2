@@ -57,3 +57,7 @@ html, body {
 .form-select[multiple] {
     max-width: 800px !important;
 }
+  
+.rotate-icon {
+    transform: rotate(180deg);
+}
