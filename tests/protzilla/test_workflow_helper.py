@@ -103,8 +103,16 @@ def test_get_workflow_default_param_value(example_workflow):
         "low_frequency_filter",
         "threshold",
     )
+    output_name = get_workflow_default_param_value(
+        example_workflow,
+        "data_preprocessing",
+        "normalisation",
+        "median",
+        "output_name",
+    )
 
     assert threshold_value == 0.2
+    assert output_name == "preprocessed-data"
 
 
 def test_get_workflow_default_param_value_nonexistent(example_workflow_short):

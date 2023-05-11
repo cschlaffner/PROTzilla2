@@ -145,11 +145,12 @@ def test_history_step_naming():
     history.add_step("a", "b", "c", {}, pd.DataFrame(), {"hello": 1}, [], name="one")
     history.add_step("a", "b", "c", {}, None, {"other": 9}, [])
     assert history.step_names[1] is None
-    history.name_step(1, "")
+    history.name_step_in_history(1, "")
     assert history.step_names[1] is None
-    history.name_step(1, "two")
+    history.name_step_in_history(1, "two")
     assert history.step_names[0] == "one"
     assert history.step_names[1] == "two"
+    history.save()
     del history
     history2 = History.from_disk(name, df_mode="disk")
     assert history2.step_names[0] == "one"
@@ -163,9 +164,9 @@ def test_history_step_naming_failed():
     history.add_step("a", "b", "c", {}, pd.DataFrame(), {"hello": 1}, [], name="one")
     history.add_step("a", "b", "c", {}, None, {"other": 9}, [], name="two")
     with pytest.raises(Exception):
-        history.name_step(0, "try")
+        history.name_step_in_history(0, "try")
     with pytest.raises(Exception):
-        history.name_step(1, "try2")
+        history.name_step_in_history(1, "try2")
     with pytest.raises(Exception):
         history.add_step("a", "b", "c", {}, pd.DataFrame(), {}, [], name="one")
     rmtree(RUNS_PATH / name)

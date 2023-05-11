@@ -113,9 +113,7 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
-        self.run.perform_calculation_from_location(
-            *self.run.current_workflow_location(), params
-        )
+        self.run.perform_current_calculation_step(params)
 
     def _create_plots_for_step(self, section, step):
         params = dict()
@@ -125,8 +123,7 @@ class Runner:
             params = get_defaults(
                 get_parameters(self.run, *self.run.current_workflow_location())
             )
-        self.run.create_plot_from_location(
-            *self.run.current_workflow_location(),
+        self.run.create_plot_from_current_location(
             parameters=params,
         )
         for i, plot in enumerate(self.run.plots):
