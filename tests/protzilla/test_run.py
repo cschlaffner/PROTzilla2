@@ -18,6 +18,14 @@ def example_workflow():
         return json.load(f)
 
 
+@pytest.fixture
+def example_workflow_short_updated():
+    with open(
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
+    ) as f:
+        return json.load(f)
+
+
 def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_name):
     run_name = tests_folder_name + "/test_export_workflow" + random_string()
 
@@ -175,10 +183,7 @@ def test_insert_step(example_workflow_short, tests_folder_name):
     assert importing_steps["steps"][1] == {
         "name": "metadata_import",
         "method": "metadata_import_method",
-        "parameters": {
-            "feature_orientation": "Columns (samples in rows, features in columns)",
-            "file_path": None,
-        },
+        "parameters": {},
     }
 
 
@@ -259,7 +264,11 @@ def test_name_step(example_workflow_short, tests_folder_name):
     run.workflow_config = None
     run.read_local_workflow()
     output_name = get_workflow_default_param_value(
-        run.workflow_config, "importing", "ms_data_import", "max_quant_import", "output_name"
+        run.workflow_config,
+        "importing",
+        "ms_data_import",
+        "max_quant_import",
+        "output_name",
     )
 
     assert output_name == "first_step"
@@ -275,6 +284,27 @@ def test_read_write_local_workflow(example_workflow_short, tests_folder_name):
     assert run.read_local_workflow() == example_workflow_short
 
 
-def test_updated_workflow_file():
-    pass
-    # TODO
+def test_integration_updated_workflow_file(
+    example_workflow_short, example_workflow_short_updated, tests_folder_name
+):
+    # depends on test_read_write_local_workflow
+    run_name = (
+        tests_folder_name + "/test_integration_updated_workflow_file" + random_string()
+    )
+    run = Run.create(run_name)
+    run.workflow_config = example_workflow_short
+
+    run.calculate_and_next(
+        ms_data_import.ms_fragger_import,
+        file_path=f"{PROJECT_PATH}/tests/combined_protein_method_small_cut.tsv",
+        intensity_name="Intensity",
+    )
+    run.perform_current_step({"threshold": 0.1})
+    run.next_step("output_name1")
+
+    run.insert_step("filter_proteins", "data_preprocessing", "low_frequency_filter", 1)
+    run.insert_step("filter_samples", "data_preprocessing", "protein_count_filter", 2)
+    run.insert_step("dimension_reduction", "data_analysis", "umap", 3)
+
+    run.workflow_config = None
+    assert run.read_local_workflow() == example_workflow_short_updated

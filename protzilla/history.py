@@ -97,8 +97,10 @@ class History:
     def name_step_in_history(self, index, name):
         if not name:
             return False
+        if self.step_names[index] == name:
+            return True
         assert (
-            len(self.step_names) >= index or self.step_names[index] is None
+            self.step_names[index] is None
         ), f"step already has a name: {self.step_names[index]}"
         assert name not in self.step_names, f"name {name} is already taken"
         self.step_names[index] = name

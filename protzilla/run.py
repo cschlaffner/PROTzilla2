@@ -119,10 +119,11 @@ class Run:
         self.step_index = len(self.all_steps()) - 1
         self.section, self.step, self.method = self.current_workflow_location()
 
-    def update_workflow_config(self, section, index, parameters):
+    def update_workflow_config(self, section, index, params):
+        parameters_no_file_path = {k: params[k] for k in params if k != "file_path"}
         self.workflow_config["sections"][section]["steps"][index][
             "parameters"
-        ] = parameters
+        ] = parameters_no_file_path
         self.write_local_workflow()
 
     def perform_current_step(self, parameters):
@@ -168,15 +169,22 @@ class Run:
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
 
-    def create_plot_from_location(self, section, step, method, parameters):
-        location = (section, step, method)
+    def create_plot_from_current_location(self, parameters):
+        location = (section, step, method) = self.current_workflow_location()
         if step == "plot":
+            self.update_workflow_config(
+                section, self.step_index_in_current_section(), parameters
+            )
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
+            self.workflow_config["sections"][section]["steps"][
+                self.step_index_in_current_section()
+            ]["graphs"] = [parameters]
+            self.write_local_workflow()
             self.create_plot(plot_map[location], parameters)
 
         if section in ["importing", "data_preprocessing"]:
-            self.plotted_for_parameters = self.current_parameters[method]
+            self.plotted_for_parameters = self.current_parameters.get(method)
             self.current_plot_parameters[method] = parameters
         else:  # not used in data analysis
             self.plotted_for_parameters = None
@@ -196,17 +204,10 @@ class Run:
         self.calculated_method = self.method
 
     def insert_step(self, step_to_be_inserted, section, method, index):
-        params_default = get_all_default_params_for_methods(
-            self.workflow_meta, section, step_to_be_inserted, method
-        )
-        step_dict = dict(
-            name=step_to_be_inserted,
-            method=method,
-            parameters=params_default,
-        )
-
+        step_dict = dict(name=step_to_be_inserted, method=method, parameters={})
+        if section == "data_preprocessing":
+            step_dict["graphs"] = [{}]
         self.workflow_config["sections"][section]["steps"].insert(index, step_dict)
-
         self.write_local_workflow()
 
     def write_local_workflow(self):
@@ -260,6 +261,13 @@ class Run:
                 self.plots,
                 name=name,
             )
+            index = self.step_index_in_current_section()
+            self.update_workflow_config(
+                self.section, index, self.current_parameters[self.calculated_method]
+            )
+            self.workflow_config["sections"][self.section]["steps"][index][
+                "method"
+            ] = self.calculated_method
             self.name_step(-1, name)
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again

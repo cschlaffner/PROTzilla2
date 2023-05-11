@@ -82,7 +82,9 @@ def test_runner_raises_error_for_missing_metadata_arg(
 
         monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
         monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-        monkeypatch.setattr(runner.run, "create_plot_from_location", mock.MagicMock())
+        monkeypatch.setattr(
+            runner.run, "create_plot_from_current_location", mock.MagicMock()
+        )
 
         runner.compute_workflow()
 
@@ -107,7 +109,7 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
@@ -138,14 +140,11 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
     mock_plot.assert_called_once_with(
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
         parameters={"graph_type": "Pie chart"},
     )
 

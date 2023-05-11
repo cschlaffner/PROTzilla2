@@ -123,8 +123,7 @@ class Runner:
             params = get_defaults(
                 get_parameters(self.run, *self.run.current_workflow_location())
             )
-        self.run.create_plot_from_location(
-            *self.run.current_workflow_location(),
+        self.run.create_plot_from_current_location(
             parameters=params,
         )
         for i, plot in enumerate(self.run.plots):

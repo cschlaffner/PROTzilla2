@@ -57,6 +57,7 @@ def test_all_button_parameters():
     )
 
     run.next_step()
+    run.step_index = 2
 
     assert_response(
         run_name,
@@ -72,9 +73,7 @@ def test_all_button_parameters():
     )
 
     plot_parameters = dict(graph_type="Pie chart")
-    run.create_plot_from_location(
-        "data_preprocessing", "filter_proteins", "low_frequency_filter", plot_parameters
-    )
+    run.create_plot_from_current_location(plot_parameters)
 
     assert_response(
         run_name,
