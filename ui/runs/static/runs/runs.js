@@ -11,6 +11,7 @@ $(document).ready(function () {
     }
 
     $('#toggleChevron').click(function() {
+        // add transform animation
         $(this).addClass('transform-icon');
         $(this).toggleClass('rotate-icon');
         setTimeout(() => {
@@ -19,6 +20,11 @@ $(document).ready(function () {
  
         let isCollapsed = $(this).attr('aria-expanded') === 'false';
         sessionStorage.setItem('collapseState', isCollapsed ? 'collapsed' : 'expanded');
+
+        // resize window to update plotly plots in history to full width
+        if (!isCollapsed) {
+            window.dispatchEvent(new Event('resize'));
+        }
     });
 
 

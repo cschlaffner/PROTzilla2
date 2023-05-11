@@ -14,6 +14,7 @@
     {% if section == "data_preprocessing" %}
         {% include 'runs/form_buttons.html' with results_exist=show_next %}
     {% endif %}
+    {% include 'runs/plot_width.html' with displayed_history=displayed_history%}
 
 {% endblock %}
 
