@@ -41,8 +41,18 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
+    elif param_dict["type"] == "named_output_with_fields":
+        template = "runs/field_named_with_fields.html"
+        additional_fields = []
+        for field_key, field_dict in param_dict["fields"].items():
+            additional_fields.append(
+                make_parameter_input(field_key, field_dict, disabled)
+            )
+        param_dict["additional_fields"] = additional_fields
     elif param_dict["type"] == "empty":
         template = "runs/field_empty.html"
+    elif param_dict["type"] == "text":
+        template = "runs/field_text.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -116,6 +126,8 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
+                if key.endswith("_wrapper"):
+                    key = key[:-8]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
@@ -139,8 +151,20 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next, form):
+def make_name_field(allow_next, form, run):
+    default = get_workflow_default_param_value(
+        run.workflow_config, *(run.current_run_location()), "output_name"
+    )
+    if not default:
+        default = ""
+
     return render_to_string(
-        "runs/field_text.html",
-        context=dict(disabled=not allow_next, key="name", name="Name:", form=form),
+        "runs/field_name_output_text.html",
+        context=dict(
+            disabled=not allow_next,
+            key="name",
+            name="Name:",
+            form=form,
+            default=default,
+        ),
     )

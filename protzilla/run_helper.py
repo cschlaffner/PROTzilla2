@@ -6,12 +6,19 @@ from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
-    if param_dict["type"] == "named_output":
+    if (
+        param_dict["type"] == "named_output"
+        or param_dict["type"] == "named_output_with_fields"
+    ):
         param_dict["steps"] = [name for name in run.history.step_names if name]
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
-        if param_dict["default"]:
+        if (
+            "default" in param_dict
+            and param_dict["default"]
+            and param_dict["default"][0] in param_dict["steps"]
+        ):
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
@@ -33,6 +40,9 @@ def insert_special_params(param_dict, run):
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
+
+    if param_dict.get("default_select_all", False):
+        param_dict["default"] = list(param_dict.get("categories", []))
 
 
 def get_parameters(run, section, step, method):
