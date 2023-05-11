@@ -266,7 +266,8 @@ def test_last_step_handling(example_workflow_short):
     previous_step_index = run.step_index
     previous_location = (run.section, run.step, run.method)
     run.next_step()
-    assert run.step_index == previous_step_index
-    assert (run.section, run.step, run.method) == previous_location
+    assert run.step_index > previous_step_index
+    assert (run.section, run.step, run.method) != previous_location
+    assert not run.step
 
     rmtree(RUNS_PATH / run_name)
