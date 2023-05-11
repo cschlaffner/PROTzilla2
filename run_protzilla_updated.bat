@@ -44,6 +44,7 @@ echo protzilla_win environment created.
 REM Activate the environment and install requirements
 echo Activating protzilla_win environment...
 call activate protzilla_win
+pip install wheel
 pip install -r requirements.txt
 REM Run Django server
 python ui/manage.py runserver
