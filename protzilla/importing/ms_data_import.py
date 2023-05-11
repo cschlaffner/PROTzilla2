@@ -1,11 +1,17 @@
 from pathlib import Path
 
 import pandas as pd
+from django.contrib import messages
 
 
 def max_quant_import(_, file_path, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
-    assert Path(file_path).is_file()
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a Max Quant file."
+        return None, dict(
+            meta_df=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
     selected_columns = ["Protein IDs", "Gene names"]
     read = pd.read_csv(
         file_path,
@@ -42,7 +48,12 @@ def ms_fragger_import(_, file_path, intensity_name):
         "Spectral Count",
         "Total Spectral Count",
     ]
-    assert Path(file_path).is_file()
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a MS Fragger file."
+        return None, dict(
+            meta_df=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
     selected_columns = ["Protein ID", "Gene"]
     read = pd.read_csv(
         file_path,

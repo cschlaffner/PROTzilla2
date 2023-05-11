@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from django.contrib import messages
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities.random import random_string
@@ -22,10 +23,18 @@ def metadata_import_method(df, file_path, feature_orientation):
         meta_df = pd.read_csv(file_path, sep="|", low_memory=False)
     elif file_path.endswith(".tsv"):
         meta_df = pd.read_csv(file_path, sep="\t", low_memory=False)
+    elif file_path == "":
+        msg = "The file upload is empty. Please select a metadata file."
+        return df, dict(
+            meta_df=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
     else:
-        raise TypeError(
-            "File format not supported. \
+        msg = "File format not supported. \
         Supported file formats are csv, xlsx, psv or tsv"
+        return df, dict(
+            meta_df=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
     # always return metadata in the same orientation (features as columns)

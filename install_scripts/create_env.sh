@@ -7,11 +7,10 @@ fi
 
 ENV_NAME="protzilla"
 
-# Check if the environment exists
+# Check if the environment exists, create if not
 if conda info --envs | grep -q "$ENV_NAME"; then
   echo "$ENV_NAME environment already exists."
 else
-  # Create a new environment
   echo "Creating $ENV_NAME environment..."
   conda create -y --name $ENV_NAME python=3.11
 fi
@@ -24,5 +23,7 @@ conda activate $ENV_NAME
 # conda info --envs | grep "$ENV_NAME"; exit 1
 
 # Install the requirements using pip
-echo "Installing requirements..."
-pip install -q -r requirements.txt
+echo "Installing requirements. This might take a while..."
+pip install -r requirements.txt
+
+echo "returning..."

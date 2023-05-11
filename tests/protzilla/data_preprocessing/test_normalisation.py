@@ -386,6 +386,9 @@ def test_ref_protein_normalisation(
 
 
 def test_ref_protein_missing(capsys, normalisation_by_ref_protein_df):
-    by_reference_protein(normalisation_by_ref_protein_df, "non_existing_Protein")
-    out, err = capsys.readouterr()
-    assert "The protein was not found" in out
+    _, current_out = by_reference_protein(
+        normalisation_by_ref_protein_df, "non_existing_Protein"
+    )
+
+    assert "messages" in current_out
+    assert "The protein was not found" in current_out["messages"][0]["msg"]
