@@ -24,7 +24,7 @@ echo Installing Miniconda3...
 start "" /wait Miniconda3-latest.exe /InstallationType=JustMe /AddToPath=1 /S /D=%UserProfile%\Miniconda3
 del Miniconda3-latest.exe
 echo Miniconda3 installation completed.
-echo please restart script
+echo please run the script again
 pause
 goto :eof
 
