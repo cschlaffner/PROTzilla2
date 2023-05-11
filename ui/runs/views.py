@@ -3,6 +3,7 @@ import tempfile
 import traceback
 import zipfile
 
+import pandas as pd
 from django.contrib import messages
 from django.http import FileResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -23,7 +24,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import parameters_for_plot, parameters_from_post
 
 active_runs = {}
 
@@ -48,6 +49,8 @@ def detail(request, run_name):
     allow_next = run.calculated_method is not None or (
         run.step == "plot" and len(run.plots) > 0
     )
+    if run.step_index == len(run.all_steps()) - 1:
+        allow_next = False
     return render(
         request,
         "runs/details.html",
@@ -66,8 +69,7 @@ def detail(request, run_name):
                 for plot in run.plots
                 if not isinstance(plot, dict)
             ],
-            show_next=run.calculated_method is not None
-            or (run.step == "plot" and len(run.plots) > 0),
+            show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
@@ -118,17 +120,42 @@ def change_field(request, run_name):
         response.status_code = 404  # not found
         return response
 
+    selected = request.POST.getlist("selected[]")
     post_id = request.POST["id"]
-    selected = request.POST["selected"]
+    if len(selected) > 1:
+        # remove last 4 characters from post_id to get the original id
+        # because multiple selected items are in id_div
+        post_id = post_id[:-4]
+
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = {}
     for key in fields_to_fill:
-        param_dict = parameters[key]
+        if len(selected) == 1:
+            param_dict = parameters[key]
+        else:
+            param_dict = parameters[post_id]["fields"][key]
+
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
-            fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        elif param_dict["fill"] == "protein_ids":
+            named_output = selected[0]
+            output_item = selected[1]
+            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            if isinstance(protein_itr, pd.DataFrame):
+                param_dict["categories"] = protein_itr["Protein ID"].unique()
+            elif isinstance(protein_itr, pd.Series):
+                param_dict["categories"] = protein_itr.unique()
+            elif isinstance(protein_itr, list):
+                param_dict["categories"] = protein_itr
+            else:
+                param_dict["categories"] = []
+                print(
+                    f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
+                )
+
+        fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
@@ -231,10 +258,22 @@ def calculate(request, run_name):
 
 def plot(request, run_name):
     run = active_runs[run_name]
-    parameters = parameters_from_post(request.POST)
+    section, step, method = run.current_run_location()
+
+    parameters = {}
+    post_data = dict(request.POST)
+
+    if "csrfmiddlewaretoken" in post_data:
+        del post_data["csrfmiddlewaretoken"]
+
     if run.step == "plot":
-        del parameters["chosen_method"]
-    run.create_plot_from_current_location(parameters)
+        del post_data["chosen_method"]
+
+    param_dict = run.workflow_meta[section][step][method]["parameters"]
+    post_data, parameters = parameters_for_plot(post_data, param_dict)
+
+    parameters.update(parameters_from_post(post_data))
+    run.create_plot_from_location(parameters)
 
     for index, p in enumerate(run.plots):
         if isinstance(p, dict):

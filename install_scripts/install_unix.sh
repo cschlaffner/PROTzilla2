@@ -20,28 +20,33 @@ else
 fi
 
 # Check if some sort of conda is already installed
-if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/anaconda3" ]; then
+if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/miniconda" ] || [ -d "$HOME/anaconda3" ] || [ -d "$HOME/anaconda" ]; then
   echo "Miniconda or Anaconda are already installed."
   conda init bash
 else
   echo "Installing Miniconda..."
   echo "$URL_TO_USE"
   curl -O $URL_TO_USE
-  bash $VERSION_TO_USE -y -p "$HOME"/miniconda
+  bash $VERSION_TO_USE -p "$HOME"/miniconda
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
-  echo "conda init"
-  conda init "$SHELL"
-  exec $SHELL
+  conda config --set auto_activate_base false
 fi
 
-if ! conda --version; then
+if ! conda --version >/dev/null; then
   echo "conda is not accessible. Check if the installation was successful."
   exit 1
 fi
 
-./install_scripts/create_env.sh
+if conda info --envs | grep -q "$ENV_NAME"; then
+  echo "$ENV_NAME environment already exists."
+else
+  echo "creating environment..."
+  ./install_scripts/create_env.sh
+fi
 
 echo ""
 echo "install complete. You can check if the environment can be activated by running:"
 echo "conda activate $ENV_NAME"
+echo "returning..."
+

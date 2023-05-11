@@ -6,7 +6,7 @@ from PIL import Image
 
 from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import metadata_import, ms_data_import
+from protzilla.importing import ms_data_import
 from protzilla.run import Run
 from protzilla.utilities.random import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
@@ -308,3 +308,25 @@ def test_integration_updated_workflow_file(
 
     run.workflow_config = None
     assert run.read_local_workflow() == example_workflow_short_updated
+
+
+def test_last_step_handling(example_workflow_short):
+    run_name = "last_step_handling" + random_string()
+    run = Run.create(run_name)
+    run.workflow_config = example_workflow_short
+
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.perform_calculation(
+        data_preprocessing.filter_proteins.by_low_frequency, dict(threshold=1)
+    )
+    previous_step_index = run.step_index
+    previous_location = (run.section, run.step, run.method)
+    run.next_step()
+    assert run.step_index == previous_step_index
+    assert (run.section, run.step, run.method) == previous_location
+
+    rmtree(RUNS_PATH / run_name)

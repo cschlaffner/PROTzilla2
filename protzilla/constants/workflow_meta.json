@@ -350,8 +350,9 @@
         "parameters": {
           "reference_protein": {
             "name": "Reference Protein:",
-            "type": "protein_dropdown",
-            "default": ""
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the protein ID for the reference protein"
           }
         },
         "graphs": [
@@ -416,7 +417,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -463,7 +464,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -510,7 +511,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -560,7 +561,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -663,7 +664,8 @@
             "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
-            "multiple": true
+            "multiple": true,
+            "default_select_all": true
           },
           "metadata_df": {
             "type": "metadata_df",
@@ -734,22 +736,6 @@
             "default": null
           }
         }
-      },
-      "test_named": {
-        "name": "this should have a named input",
-        "description": "",
-        "parameters": {
-          "my_named_param": {
-            "name": "this should be a named param:",
-            "type": "named_output",
-            "default": [null, null]
-          },
-          "second_named": {
-            "name": "another one:",
-            "type": "named_output",
-            "default": [null, null]
-          }
-        }
       }
     },
     "plot": {
@@ -776,7 +762,28 @@
             "name": "alpha/corrected alpha",
             "type": "named_output",
             "default": [null, null]
+          },
+          "proteins_of_interest_wrapper": {
+            "name": "Proteins of Interest",
+            "type": "named_output_with_fields",
+            "fill_dynamic": ["proteins_of_interest"],
+            "default": [null, null, null],
+            "fields": {
+              "proteins_of_interest": {
+                "type": "categorical",
+                "fill": "protein_ids",
+                "categories": [],
+                "default": null,
+                "multiple": true
+              }
+            }
           }
+        }
+      },
+      "heatmap": {
+        "name": "Heatmap",
+        "description": "",
+        "parameters": {
         }
       },
       "scatter_plot": {
