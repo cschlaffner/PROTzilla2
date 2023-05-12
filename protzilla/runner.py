@@ -66,10 +66,9 @@ class Runner:
         logging.info(f"Run {self.run_name} created at {self.run.run_path}")
 
         self.all_plots = all_plots
-        if self.all_plots:
-            self.plots_path = Path(f"{self.run.run_path}/plots")
-            self.plots_path.mkdir()
-            logging.info(f"Saving plots at {self.plots_path}")
+        self.plots_path = Path(f"{self.run.run_path}/plots")
+        self.plots_path.mkdir()
+        logging.info(f"Saving plots at {self.plots_path}")
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
@@ -77,6 +76,11 @@ class Runner:
             for step in steps["steps"]:
                 if section == "importing":
                     self._importing(step)
+                elif step["name"] == "plot":
+                    logging.info(
+                        f"creating plot: {*self.run.current_workflow_location(),}"
+                    )
+                    self._create_plots_for_step(section, step)
                 else:
                     logging.info(
                         f"performing step: {*self.run.current_workflow_location(),}"
@@ -87,7 +91,7 @@ class Runner:
                     self._perform_current_step(get_defaults(params))
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
-                self.run.next_step(f"{self.run.current_workflow_location()}")
+                self.run.next_step()
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
@@ -120,22 +124,23 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
-        self.run.perform_calculation_from_location(
-            *self.run.current_workflow_location(), params
-        )
+        self.run.perform_current_calculation_step(params)
 
     def _create_plots_for_step(self, section, step):
         params = dict()
         if "graphs" in step:
             params = _serialize_graphs(step["graphs"])
-
-        self.run.create_plot_from_location(
-            *self.run.current_workflow_location(),
+        elif step["name"] == "plot":
+            params = get_defaults(
+                get_parameters(self.run, *self.run.current_workflow_location())
+            )
+        self.run.create_plot_from_current_location(
             parameters=params,
         )
         for i, plot in enumerate(self.run.plots):
             plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
-            plot.write_html(plot_path)
+            if not isinstance(plot, dict):
+                plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
         answer = input(

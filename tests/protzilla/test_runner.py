@@ -90,7 +90,9 @@ def test_runner_raises_error_for_missing_metadata_arg(
 
         monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
         monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-        monkeypatch.setattr(runner.run, "create_plot_from_location", mock.MagicMock())
+        monkeypatch.setattr(
+            runner.run, "create_plot_from_current_location", mock.MagicMock()
+        )
 
         runner.compute_workflow()
 
@@ -114,7 +116,7 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
@@ -143,14 +145,11 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
     mock_plot.assert_called_once_with(
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
         parameters={"graph_type": "Pie chart"},
     )
 
@@ -188,3 +187,35 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_imputation_graphs
         elif step["name"] == "filter_proteins":
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
+
+
+def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+    name = tests_folder_name + "/test_runner_integration" + random_string()
+    runner = Runner(
+        **{
+            "workflow": "standard",
+            "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+            "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "run_name": f"{name}",
+            "df_mode": "disk",
+            "all_plots": True,
+            "verbose": False,
+        }
+    )
+    runner.compute_workflow()
+
+
+def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_name):
+    name = tests_folder_name + "/test_runner_integration" + random_string()
+    runner = Runner(
+        **{
+            "workflow": "standard",
+            "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+            "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "run_name": f"{name}",
+            "df_mode": "disk",
+            "all_plots": False,
+            "verbose": False,
+        }
+    )
+    runner.compute_workflow()

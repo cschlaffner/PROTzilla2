@@ -1,4 +1,9 @@
-from ..data_analysis import differential_expression, plots
+from ..data_analysis import (
+    clustering,
+    differential_expression,
+    dimension_reduction,
+    plots,
+)
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -16,12 +21,6 @@ determined by the section, step, and method keys found in the workflow_meta
 file that correspond to the method.
 """
 method_map = {
-    (
-        "data_analysis",
-        "differential_expression",
-        "test_named",
-    ): lambda df, **kwargs: print("warning: not implemented")
-    or (df, {}),
     (
         "importing",
         "ms_data_import",
@@ -133,6 +132,21 @@ method_map = {
         "differential_expression",
         "t_test",
     ): differential_expression.t_test,
+    (
+        "data_analysis",
+        "clustering",
+        "k_means",
+    ): clustering.k_means,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "t_sne",
+    ): dimension_reduction.t_sne,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "umap",
+    ): dimension_reduction.umap,
 }
 
 # reversed mapping of method callable and location
@@ -232,6 +246,16 @@ plot_map = {
     (
         "data_analysis",
         "plot",
+        "scatter_plot",
+    ): plots.scatter_plot,
+    (
+        "data_analysis",
+        "plot",
         "volcano",
     ): plots.create_volcano_plot,
+    (
+        "data_analysis",
+        "plot",
+        "clustergram",
+    ): plots.clustergram_plot,
 }

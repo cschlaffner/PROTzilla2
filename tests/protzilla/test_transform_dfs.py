@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
+from protzilla.utilities.transform_dfs import is_long_format, long_to_wide, wide_to_long
 
 
 @pytest.fixture
@@ -99,6 +99,11 @@ def test_transform_wide_to_long(
 ):
     w2l = wide_to_long(transform_df_wide, transform_df_long_gene_name_provider)
     pd.testing.assert_frame_equal(w2l, transform_df_long)
+
+
+def test_is_long_format(transform_df_long, transform_df_wide):
+    assert is_long_format(transform_df_long)
+    assert not is_long_format(transform_df_wide)
 
 
 def test_transform_wide_to_long_to_wide(

@@ -373,8 +373,9 @@
         "parameters": {
           "reference_protein": {
             "name": "Reference Protein:",
-            "type": "protein_dropdown",
-            "default": ""
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the protein ID for the reference protein"
           }
         },
         "graphs": [
@@ -439,7 +440,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -486,7 +487,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -533,7 +534,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -583,7 +584,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -683,7 +684,7 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -717,7 +718,8 @@
             "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
-            "multiple": true
+            "multiple": true,
+            "default_select_all": true
           },
           "metadata_df": {
             "type": "metadata_df",
@@ -733,7 +735,7 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -788,22 +790,6 @@
             "default": null
           }
         }
-      },
-      "test_named": {
-        "name": "this should have a named input",
-        "description": "",
-        "parameters": {
-          "my_named_param": {
-            "name": "this should be a named param:",
-            "type": "named_output",
-            "default": null
-          },
-          "second_named": {
-            "name": "another one:",
-            "type": "named_output",
-            "default": null
-          }
-        }
       }
     },
     "plot": {
@@ -814,22 +800,37 @@
           "p_values": {
             "name": "p-value df",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "log2_fc": {
             "name": "log2 fold change df",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "fc_threshold": {
             "name": "log2 fold change threshold",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
           },
           "alpha": {
             "name": "alpha/corrected alpha",
             "type": "named_output",
-            "default": null
+            "default": [null, null]
+          },
+          "proteins_of_interest_wrapper": {
+            "name": "Proteins of Interest",
+            "type": "named_output_with_fields",
+            "fill_dynamic": ["proteins_of_interest"],
+            "default": [null, null, null],
+            "fields": {
+              "proteins_of_interest": {
+                "type": "categorical",
+                "fill": "protein_ids",
+                "categories": [],
+                "default": null,
+                "multiple": true
+              }
+            }
           }
         }
       },
@@ -837,6 +838,209 @@
         "name": "Heatmap",
         "description": "",
         "parameters": {
+        }
+      },
+      "scatter_plot": {
+        "name": "Scatter plot",
+        "description":"Creates a scatter plot from data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "color_df": {
+            "name": "Choose a dataframe to assign color to marks (optional)",
+            "type": "named_output",
+            "default": [null, null],
+            "optional": true
+          }
+        }
+      },
+      "clustergram": {
+        "name": "Clustergram",
+        "description":"Creates a clustergram from data",
+        "parameters": {
+          "input_df": {
+            "name": "Input dataframe: choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "sample_group_df": {
+            "name": "Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
+            "type": "named_output",
+            "default": [null, null],
+            "optional": true
+          },
+          "flip_axes": {
+            "name": "Do you want to flip the orientation of the heatmap's axes?",
+            "type": "categorical",
+            "categories": ["yes", "no"],
+            "default": "no"
+          }
+        }
+      }
+    },
+    "clustering": {
+      "k_means": {
+        "name": "K-Means",
+        "description": "Partitions a number of samples in k clusters using k-means",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "n_clusters": {
+            "name": "Number of clusters to form",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 8
+          },
+          "random_state": {
+            "name": "Seed for centroid initialisation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "init_centroid_strategy": {
+            "name": "Method for initialisation of centroids",
+            "type":"categorical",
+            "categories": [
+              "k-means++",
+              "random"
+            ],
+            "default": "random"
+          },
+          "n_init": {
+            "name": "Number of times the k-means algorithm is run with different centroid seeds",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 10
+          },
+          "max_iter": {
+            "name": "Maximum number of iterations of the k-means algorithm for a single run.",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 300
+          },
+          "tolerance": {
+            "name": "Relative tolerance with regards to Frobenius norm",
+            "type": "numeric",
+            "min": 0,
+            "default": 1e-4
+          }
+        }
+      }
+    },
+    "dimension_reduction": {
+      "t_sne": {
+        "name": "t-SNE",
+        "description": "Dimension reduction of a dataframe using t-SNE",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "n_components": {
+            "name": "Dimension of the embedded space",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 2
+          },
+          "perplexity": {
+            "name": "Perplexity",
+            "type": "numeric",
+            "min": 5.0,
+            "max": 50.0,
+            "default": 30.0
+          },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean","manhattan","cosine", "haversine"
+            ],
+            "default": "euclidean"
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "n_iter": {
+            "name": "Maximum number of iterations for the optimization",
+            "type": "numeric",
+            "min": 250,
+            "step": 1,
+            "default": 1000
+          },
+          "n_iter_without_progress": {
+            "name": "Maximum number of iterations without progress before aborting the optimization ",
+            "type": "numeric",
+            "min": 250,
+            "step": 1,
+            "default": 300
+          }
+        }
+      },
+      "umap": {
+        "name": "UMAP",
+        "description":"Dimension reduction of a dataframe using UMAP",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "n_neighbors": {
+            "name": "Number of neighbors",
+            "type": "numeric",
+            "min": 2,
+            "max": 100,
+            "step": 1,
+            "default": 15
+          },
+          "n_components": {
+            "name": "Number of components",
+            "type": "numeric",
+            "min": 2,
+            "max": 100,
+            "step": 1,
+            "default": 2
+          },
+          "min_dist": {
+            "name": "The effective minimum distance between embedded points.",
+            "type": "numeric",
+            "min": 0.1,
+            "default": 0.1
+          },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean","manhattan","cosine", "haversine"
+            ],
+            "default": "euclidean"
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42
+          }
         }
       }
     }
