@@ -27,25 +27,11 @@ def leftover_peptide_df():
 
 
 @pytest.fixture
-def filtered_peptides_df():
-    filtered_peptides = (
-        ["Sample01", "P46459;P46459-2", "AAQSTAMNR", 253840.0, 0.0013764],
-        ["Sample02", "P46459;P46459-2", "AAQSTAMNR", 1371200.0, 0.0013764],
-        ["Sample03", "P46459;P46459-2", "AAQSTAMNR", 3048300.0, 0.0013764],
-        ["Sample04", "P46459;P46459-2", "AAQSTAMNR", np.NAN, 0.0013764],
-        ["Sample05", "P46459;P46459-2", "AAQSTAMNR", np.NAN, 0.0013764],
-    )
-    filtered_peptides_df = pd.DataFrame(
-        data=filtered_peptides,
-        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
-    )
-    filtered_peptides_df.sort_values(
-        by=["Sample", "Protein ID"], ignore_index=True, inplace=True
-    )
-    return filtered_peptides_df
+def filtered_peptides_list():
+    return ["AAQSTAMNR"]
 
 
-def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_df):
+def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
     _, import_out = peptide_import.peptide_import(
         ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
@@ -61,4 +47,4 @@ def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_df):
         fig.show()
 
     pd.testing.assert_frame_equal(out["peptide_df"], leftover_peptide_df)
-    pd.testing.assert_frame_equal(out["filtered_peptides"], filtered_peptides_df)
+    assert out["filtered_peptides"] == filtered_peptides_list
