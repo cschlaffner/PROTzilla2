@@ -190,12 +190,13 @@ def test_serialize_workflow_graphs():
 
 
 def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
-    name = tests_folder_name + "/test_runner_integration" + random_string()
+    name = tests_folder_name + "/test_runner_integration_" + random_string()
     runner = Runner(
         **{
             "workflow": "standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "peptides_path": None,
             "run_name": f"{name}",
             "df_mode": "disk",
             "all_plots": True,
@@ -212,6 +213,7 @@ def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_n
             "workflow": "standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "peptides_path": None,
             "run_name": f"{name}",
             "df_mode": "disk",
             "all_plots": False,
