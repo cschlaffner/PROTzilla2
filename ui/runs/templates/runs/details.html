@@ -106,69 +106,74 @@
                 {% endif %}
 
                 {# show current step #}
-                <div class="row justify-content-center d-flex">
-                    <h3>{{ display_name }}</h3>
-                    {# if there are plot parameters, display method and plot parameters next to each other #}
-                    {% if plot_fields %}
-                        <div class="col">
-                            <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
-                                  enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <div class="mb-1">
-                                    {{ method_dropdown }}
-                                </div>
-                                <div id="method_parameters" class="mb-2">
-                                    {% include "runs/fields.html" with fields=fields %}
-                                </div>
-                                <input type="submit" id="calculate_parameters_submit" value="Calculate"
-                                       class="btn btn-red">
-                            </form>
-                        </div>
-                        <div class="col">
-                            <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                  enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <div id="plot_parameters" class="mb-2">
-                                    {% include "runs/fields.html" with fields=plot_fields %}
-                                </div>
-                                <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
-                            </form>
-                        </div>
-                    {% else %}
-                        <div class="col-7">
-                            {% if step != "plot" %}
+                {% if not end_of_run %}
+                    <div class="row justify-content-center d-flex">
+                        <h3>{{ display_name }}</h3>
+                        {# if there are plot parameters, display method and plot parameters next to each other #}
+                        {% if plot_fields %}
+                            <div class="col">
                                 <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
-                                    {{ method_dropdown }}
+                                    <div class="mb-1">
+                                        {{ method_dropdown }}
+                                    </div>
                                     <div id="method_parameters" class="mb-2">
                                         {% include "runs/fields.html" with fields=fields %}
                                     </div>
-                                    <div class="form-group">
-                                        <input type="submit" value="Calculate" id="calculate_parameters_submit"
-                                               class="btn btn-red mr-auto">
-                                        {% if section == "data_preprocessing" %}
-                                            <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
-                                        {% endif %}
-                                    </div>
+                                    <input type="submit" id="calculate_parameters_submit" value="Calculate"
+                                           class="btn btn-red">
                                 </form>
-                            {% else %}
+                            </div>
+                            <div class="col">
                                 <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
-                                    {{ method_dropdown }}
-                                    <div id="method_parameters" class="mb-2">
-                                        {% include "runs/fields.html" with fields=fields %}
+                                    <div id="plot_parameters" class="mb-2">
+                                        {% include "runs/fields.html" with fields=plot_fields %}
                                     </div>
-                                    <div class="form-group">
-                                        <input type="submit" id="plot_parameters_submit" value="Plot"
-                                               class="btn btn-grey">
-                                    </div>
+                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
                                 </form>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-7">
+                                {% if step != "plot" %}
+                                    <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{ method_dropdown }}
+                                        <div id="method_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=fields %}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" value="Calculate" id="calculate_parameters_submit"
+                                                   class="btn btn-red mr-auto">
+                                            {% if section == "data_preprocessing" %}
+                                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{ method_dropdown }}
+                                        <div id="method_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=fields %}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" id="plot_parameters_submit" value="Plot"
+                                                   class="btn btn-grey">
+                                        </div>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p>You are at the end of the run. Go back to add more steps of the same section, or add steps of
+                        the next sections on the right.</p>
+                {% endif %}
 
                 {# show current plots #}
                 {% if current_plots %}

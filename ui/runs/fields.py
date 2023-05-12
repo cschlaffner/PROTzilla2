@@ -10,6 +10,8 @@ from ui.runs.views_helper import get_displayed_steps
 
 
 def make_current_fields(run, section, step, method):
+    if not step:
+        return []
     parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
@@ -82,6 +84,8 @@ def make_sidebar(request, run, run_name):
 
 
 def make_plot_fields(run, section, step, method):
+    if not step:
+        return
     plots = run.workflow_meta[section][step][method].get("graphs", [])
     plot_fields = []
     for plot in plots:
@@ -93,6 +97,8 @@ def make_plot_fields(run, section, step, method):
 
 
 def make_method_dropdown(run, section, step, method):
+    if not step:
+        return ""
     methods = run.workflow_meta[section][step].keys()
     method_names = [run.workflow_meta[section][step][key]["name"] for key in methods]
 
@@ -128,6 +134,8 @@ def make_displayed_history(run):
             for key, param_dict in parameters.items():
                 if key.endswith("_wrapper"):
                     key = key[:-8]
+                if key == "proteins_of_interest" and not key in history_step.parameters:
+                    history_step.parameters[key] = ["", ""]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
@@ -151,9 +159,11 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next, form, run):
+def make_name_field(allow_next, form, run, end_of_run):
+    if end_of_run:
+        return ""
     default = get_workflow_default_param_value(
-        run.workflow_config, *(run.current_run_location()), "output_name"
+        run.workflow_config, *run.current_run_location(), "output_name"
     )
     if not default:
         default = ""

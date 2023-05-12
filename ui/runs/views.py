@@ -46,11 +46,8 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.calculated_method is not None or (
-        run.step == "plot" and len(run.plots) > 0
-    )
-    if run.step_index == len(run.all_steps()) - 1:
-        allow_next = False
+    allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
+    end_of_run = not step
     return render(
         request,
         "runs/details.html",
@@ -63,7 +60,7 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next", run),
+            name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
             current_plots=[
                 plot.to_html(include_plotlyjs=False, full_html=False)
                 for plot in run.plots
@@ -73,6 +70,7 @@ def detail(request, run_name):
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
+            end_of_run=end_of_run,
         ),
     )
 
