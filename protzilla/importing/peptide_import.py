@@ -34,7 +34,9 @@ def peptide_import(ms_df, file_path, intensity_name):
     df = read.drop(columns=["Intensity"])
     id_df = df[id_columns]
     intensity_df = df.filter(regex=f"^{peptide_intensity_name} ", axis=1)
-    intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
+    intensity_df.columns = [
+        c[len(peptide_intensity_name) + 1 :] for c in intensity_df.columns
+    ]
     molten = pd.melt(
         pd.concat([id_df, intensity_df], axis=1),
         id_vars=id_columns,

@@ -70,3 +70,15 @@ def test_peptide_import(intensity_name):
     pd.testing.assert_frame_equal(
         out["peptide_df"], peptide_df(intensity_name), check_dtype=False
     )
+
+
+def test_peptide_import_ibaq():
+    _, out = peptide_import.peptide_import(
+        ms_df=None,
+        file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
+        intensity_name="iBAQ",
+    )
+
+    pd.testing.assert_frame_equal(
+        out["peptide_df"], peptide_df("LFQ intensity"), check_dtype=False
+    )
