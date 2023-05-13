@@ -2,7 +2,7 @@ import os
 import json
 import csv
 import logging
-from time import sleep, time
+import time
 import pandas as pd
 import numpy as np
 from restring import restring
@@ -15,6 +15,7 @@ from protzilla.utilities.random import random_string
 last_call_time = None
 MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
 
+
 def get_functional_enrichment_with_delay(protein_list, **string_params):
     global last_call_time
     if last_call_time is not None:
@@ -25,12 +26,17 @@ def get_functional_enrichment_with_delay(protein_list, **string_params):
     last_call_time = time.time()
     return result_df
 
-def go_analysis_with_STRING(
-    proteins, protein_set_dbs, organism, background=None, directions="both", run_name=None
-):
 
+def go_analysis_with_STRING(
+    proteins,
+    protein_set_dbs,
+    organism,
+    background=None,
+    directions="both",
+    run_name=None,
+):
     # TODO: set logging level for whole django app in beginning
-    logging.basicConfig(level=logging.NOTSET)
+    logging.basicConfig(level=logging.INFO)
 
     if (
         not isinstance(proteins, pd.DataFrame)
@@ -97,7 +103,9 @@ def go_analysis_with_STRING(
     if "down" in directions or "both" in directions:
         logging.info("Starting analysis for down-regulated proteins")
 
-        down_df = get_functional_enrichment_with_delay(down_protein_list, **string_params)
+        down_df = get_functional_enrichment_with_delay(
+            down_protein_list, **string_params
+        )
         restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -187,7 +195,9 @@ def go_analysis_offline(proteins, protein_sets_path, background):
     else:
         file_extension = os.path.splitext(background)[1]
         if file_extension == ".csv":
-            background = pd.read_csv(background, sep="\t", low_memory=False, header=None)
+            background = pd.read_csv(
+                background, sep="\t", low_memory=False, header=None
+            )
             # if multiple columns, use first
             background = background.iloc[:, 0].tolist()
         elif file_extension == ".txt":
@@ -222,10 +232,11 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
     background only works with uploaded file
     """
     # enhancement: make sure ID type for all inputs match
-    enr = gp.enrichr(gene_list=proteins,
-                    gene_sets=protein_sets,
-                    organism=organism,
-                    outdir=None,
-                    verbose=True,
-                    )
+    enr = gp.enrichr(
+        gene_list=proteins,
+        gene_sets=protein_sets,
+        organism=organism,
+        outdir=None,
+        verbose=True,
+    )
     return {"results": enr.results, "results2d": enr.res2d}
