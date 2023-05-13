@@ -128,12 +128,10 @@ def go_analysis_with_STRING(
     return {"results": results, "summaries": summaries}
 
 
-def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
+def go_analysis_offline(proteins, protein_sets_path, background):
     """dev notes
     background: list or number of proteins? (could be upload or named_output)
     for named-output: - list of proteins, or dataframe with multiple columns and we just want to use first
-
-    cutoff: cutoff for p-value, only affects figure?
     """
     # enhancement: make sure ID type for all inputs match
 
@@ -210,7 +208,6 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
         gene_list=proteins,
         gene_sets=protein_sets,
         background=background,
-        cutoff=cutoff,
         outdir=None,
         verbose=True,
     )
@@ -218,7 +215,7 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     return {"results": enr.results, "results2d": enr.res2d}
 
 
-def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
+def go_analysis_with_enrichr(proteins, protein_sets, organism):
     """dev notes
     protein_sets are categorical for now, could also be custom file upload later
 
@@ -228,7 +225,6 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
     enr = gp.enrichr(gene_list=proteins,
                     gene_sets=protein_sets,
                     organism=organism,
-                    cutoff=cutoff,
                     outdir=None,
                     )
     return {"results": enr.results, "results2d": enr.res2d}

@@ -1011,14 +1011,6 @@
             "name": "Background set (list of proteins or no upload)",
             "type": "file",
             "default": null
-          },
-          "cutoff": {
-            "name": "Cutoff for p-values",
-            "type": "numeric",
-            "min": 0,
-            "max": 1,
-            "step": 0.01,
-            "default": 0.05
           }
         }
       },
@@ -1044,14 +1036,6 @@
             "type": "categorical",
             "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
             "default": "human"
-          },
-          "cutoff": {
-            "name": "Cutoff for p-values",
-            "type": "numeric",
-            "min": 0,
-            "max": 1,
-            "step": 0.01,
-            "default": 0.05
           }
         }
       },
