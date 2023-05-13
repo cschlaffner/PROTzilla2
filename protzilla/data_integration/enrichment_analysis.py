@@ -13,20 +13,20 @@ from ..constants.paths import RUNS_PATH
 from protzilla.utilities.random import random_string
 
 last_call_time = None
-MIN_WAIT_TIME = 1  # Minimum wait time between API calls in seconds
+MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
 
-def get_functional_enrichment_with_delay(gene_list, **string_params):
+def get_functional_enrichment_with_delay(protein_list, **string_params):
     global last_call_time
     if last_call_time is not None:
         elapsed_time = time.time() - last_call_time
         if elapsed_time < MIN_WAIT_TIME:
             time.sleep(MIN_WAIT_TIME - elapsed_time)
-    result_df = restring.get_functional_enrichment(gene_list, **string_params)
+    result_df = restring.get_functional_enrichment(protein_list, **string_params)
     last_call_time = time.time()
     return result_df
 
 def go_analysis_with_STRING(
-    proteins, protein_set_dbs, organism, background, directions, run_name=None
+    proteins, protein_set_dbs, organism, background=None, directions="both", run_name=None
 ):
 
     # TODO: set logging level for whole django app in beginning
@@ -186,24 +186,24 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
     if background == "":
         logging.info("No background provided, using all proteins in protein sets")
         background = None
-
-    file_extension = os.path.splitext(background)[1]
-    if file_extension == ".csv":
-        background = pd.read_csv(background, sep="\t", low_memory=False, header=None)
-        # if multiple columns, use first
-        background = background.iloc[:, 0].tolist()
-    elif file_extension == ".txt":
-        with open(background, "r") as f:
-            background = [line.strip() for line in f]
     else:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Invalid file type for background. Must be .csv, .txt or no upload",
-                )
-            ]
-        )
+        file_extension = os.path.splitext(background)[1]
+        if file_extension == ".csv":
+            background = pd.read_csv(background, sep="\t", low_memory=False, header=None)
+            # if multiple columns, use first
+            background = background.iloc[:, 0].tolist()
+        elif file_extension == ".txt":
+            with open(background, "r") as f:
+                background = [line.strip() for line in f]
+        else:
+            return dict(
+                messages=[
+                    dict(
+                        level=messages.ERROR,
+                        msg="Invalid file type for background. Must be .csv, .txt or no upload",
+                    )
+                ]
+            )
 
     # gene set and gene list identifiers need to match
     enr = gp.enrich(
@@ -215,8 +215,7 @@ def go_analysis_offline(proteins, protein_sets_path, background, cutoff):
         verbose=True,
     )
 
-    print(enr.results.head())
-    return {"enrichment_df": enr.results.sort_values(by="Adjusted P-value")}
+    return {"results": enr.results, "results2d": enr.res2d}
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
@@ -232,4 +231,4 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, cutoff):
                     cutoff=cutoff,
                     outdir=None,
                     )
-    return {"enrichment_df": enr.results.sort_values(by="Adjusted P-value")}
+    return {"results": enr.results, "results2d": enr.res2d}
