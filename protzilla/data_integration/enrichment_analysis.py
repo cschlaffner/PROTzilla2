@@ -167,7 +167,7 @@ def go_analysis_offline(proteins, protein_sets_path, background):
         with open(protein_sets_path, "r") as f:
             protein_sets = json.load(f)
 
-    elif file_extension == "gmt":
+    elif file_extension == ".gmt":
         # gseapy can handle gmt files
         protein_sets = protein_sets_path
 
@@ -176,7 +176,7 @@ def go_analysis_offline(proteins, protein_sets_path, background):
             messages=[
                 dict(
                     level=messages.ERROR,
-                    msg="Invalid file type for protein sets. Must be .csv, .txt, or .json",
+                    msg="Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt",
                 )
             ]
         )
@@ -226,5 +226,6 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
                     gene_sets=protein_sets,
                     organism=organism,
                     outdir=None,
+                    verbose=True,
                     )
     return {"results": enr.results, "results2d": enr.res2d}

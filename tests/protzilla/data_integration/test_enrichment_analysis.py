@@ -46,3 +46,35 @@ def test_go_analysis_with_STRING_too_many_col_df():
     )
     assert "messages" in current_out
     assert "dataframe with Protein ID and numeric ranking column" in current_out["messages"][0]["msg"]
+
+def test_go_analysis_offline_no_protein_sets():
+    current_out = go_analysis_offline(
+        proteins=["Protein1", "Protein2", "Protein3"], 
+        protein_sets_path="", 
+        background=None
+    )
+    
+    assert "messages" in current_out
+    assert "No file uploaded for protein sets" in current_out["messages"][0]["msg"]
+
+def test_go_analysis_offline_invalid_protein_set_file():
+    current_out = go_analysis_offline(
+        proteins=["Protein1", "Protein2", "Protein3"], 
+        protein_sets_path="an_invalid_filetype.png", 
+        background="" # no background
+    )
+    
+    assert "messages" in current_out
+    assert "Invalid file type" in current_out["messages"][0]["msg"]
+    assert "protein sets" in current_out["messages"][0]["msg"]
+
+def test_go_analysis_offline_invalid_background_set_file():
+    current_out = go_analysis_offline(
+        proteins=["Protein1", "Protein2", "Protein3"], 
+        protein_sets_path="a_valid_filetype.gmt", 
+        background="an_invalid_filetype.png"
+    )
+    
+    assert "messages" in current_out
+    assert "Invalid file type" in current_out["messages"][0]["msg"]
+    assert "background" in current_out["messages"][0]["msg"]
