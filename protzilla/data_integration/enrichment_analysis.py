@@ -34,6 +34,7 @@ def go_analysis_with_STRING(
     background=None,
     directions="both",
     run_name=None,
+    folder_name=None,
 ):
     # TODO: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
@@ -52,7 +53,7 @@ def go_analysis_with_STRING(
     up_protein_list = list(proteins[expression_change_col > 0].index)
     down_protein_list = list(proteins[expression_change_col < 0].index)
 
-    if background == "":
+    if background == "" or background is None:
         logging.info("No background provided, using entire proteome")
         statistical_background = None
     else:
@@ -81,7 +82,8 @@ def go_analysis_with_STRING(
     os.makedirs(results_folder, exist_ok=True)
 
     # make folder for current enrichment analysis and details of analysis
-    enrichment_folder_name = f"enrichment_{random_string()}"
+    
+    enrichment_folder_name = f"enrichment_{random_string()}" if folder_name is None else folder_name
     enrichment_folder_path = os.path.join(results_folder, enrichment_folder_name)
     os.makedirs(enrichment_folder_path)
 
@@ -222,7 +224,7 @@ def go_analysis_offline(proteins, protein_sets_path, background):
         verbose=True,
     )
 
-    return {"results": enr.results, "results2d": enr.res2d}
+    return {"results": enr.results}
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism):
@@ -239,4 +241,4 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
         outdir=None,
         verbose=True,
     )
-    return {"results": enr.results, "results2d": enr.res2d}
+    return {"results": enr.results}

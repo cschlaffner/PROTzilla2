@@ -1,7 +1,10 @@
 import pandas as pd
 import time
 from unittest.mock import patch
+import os
+import shutil
 
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_STRING,
     go_analysis_offline,
@@ -159,3 +162,39 @@ def test_go_analysis_with_enrichr(mock_enrichment):
     current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
 
     assert current_out["results"].equals(mock_enrichment.results)
+
+@patch("protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay")
+def test_go_analysis_with_STRING(mock_enrichment):
+    proteins_df = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/input-t_test-log2_fold_change_df.csv")
+    up_path = f"{PROJECT_PATH}/tests/test_data/enrichment_data/UP_enrichment.KEGG.tsv"
+    up_df = pd.read_csv(up_path, header=0, sep="\t")
+    down_path = f"{PROJECT_PATH}/tests/test_data/enrichment_data/DOWN_enrichment.KEGG.tsv"
+    down_df = pd.read_csv(down_path, header=0, sep="\t")
+    results = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_results.csv", header=0)
+    summary = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_summary.csv", header=0)
+    mock_enrichment.side_effect = [up_df, down_df]
+
+    current_dir = os.getcwd()
+    # copy files to test aggregation
+    test_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data/tmp_enrichment_results/test_go_analysis_with_STRING"
+    os.makedirs(test_folder, exist_ok=True)
+    shutil.copy(up_path, test_folder)
+    shutil.copy(down_path, test_folder)
+    os.chdir(test_folder)
+
+    current_out = go_analysis_with_STRING(
+        proteins = proteins_df,
+        protein_set_dbs = ["KEGG"],
+        organism=9606,
+        directions="both",
+        run_name=None,
+        folder_name="test_go_analysis_with_STRING"
+    )
+
+    os.chdir(current_dir)
+    assert not os.path.exists(f"{PROJECT_PATH}/tests/test_data/enrichment_data/tmp_enrichment_results"), "tmp_enrichment_results folder was not deleted properly"
+    assert current_out["results"][0].equals(results)
+    assert current_out["summaries"][0].equals(summary)
+
+# check what happens if one of the list for directions is empty
+# maybe do one with a background?
