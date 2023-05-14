@@ -104,7 +104,10 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     last_call_time = None
     MIN_WAIT_TIME = 1
 
-    protein_list = ["Protein1", "Protein2"]
+    protein_list = [
+        "P09012,P62306,P62304",
+        "P09668,P43490,P04792,P02649,P60033,P56199,P15259,P02750,O95865,P08294,P0C0L5",
+    ]
     string_params = {"species": 9606, "caller_ID": "PROTzilla"}
     mock_data = {
         "term ID": ["GO:0005685", "GO:0070062"],
@@ -132,3 +135,27 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     assert call_time_second - call_time_first >= MIN_WAIT_TIME
     assert result1.equals(result2)
     assert result1.equals(mock_df)
+
+
+@patch("gseapy.enrichr")
+def test_go_analysis_with_enrichr(mock_enrichment):
+    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"]
+    protein_sets = ["KEGG_2016_Human", "Reactome_2013"]
+    organism = "human"
+
+    results_data = {
+        "Gene_set": protein_sets,
+        "Term": ["Osteoclast differentiation", "Tubeculosis"],
+        "Overlap": ["4/127", "3/180"],
+        "P-value": [1.1161882628266645e-13, 5.807039550271945e-12],
+        "Adjusted P-value": [3.1364890185429266e-11, 8.158890568132082e-10],
+        "Old P-value": [0, 0],
+        "Old Adjusted P-value": [0, 0],
+        "Odds Ratio": [6.997801852724132, 5.154266414152434],
+        "Combined Score": [208.7002497987126, 133.35092408122657],
+        "Genes": ["Protein1;Protein2;Protein3;Protein4", "Protein3;Protein5;Protein6"],
+    }
+    mock_enrichment.results = pd.DataFrame(results_data)
+    current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
+
+    assert current_out["results"].equals(mock_enrichment.results)
