@@ -21,11 +21,15 @@ def go_analysis_offline_result_no_bg():
         "Gene_set": ["gs_ind_0", "gs_ind_0"],
         "Term": ["Set1", "Set2"],
         "Overlap": ["4/8", "4/8"],
-        "P-value": [1.000000e+00, 1.000000e+00],
-        "Adjusted P-value": [1.000000e+00, 1.000000e+00],
+        "P-value": [1.000000e00, 1.000000e00],
+        "Adjusted P-value": [1.000000e00, 1.000000e00],
         "Odds Ratio": [5.294118e-01, 5.294118e-01],
-        "Genes": ["Protein3;Protein2;Protein4;Protein1", "Protein5;Protein6;Protein3;Protein1"],
+        "Genes": [
+            "Protein3;Protein2;Protein4;Protein1",
+            "Protein5;Protein6;Protein3;Protein1",
+        ],
     }
+
 
 @pytest.fixture
 def go_analysis_offline_result_with_bg():
@@ -36,8 +40,12 @@ def go_analysis_offline_result_with_bg():
         "P-value": [7.272727e-01, 7.272727e-01],
         "Adjusted P-value": [7.272727e-01, 7.272727e-01],
         "Odds Ratio": [9.529412e-01, 9.529412e-01],
-        "Genes": ["Protein3;Protein2;Protein4;Protein1", "Protein5;Protein6;Protein3;Protein1"],
+        "Genes": [
+            "Protein3;Protein2;Protein4;Protein1",
+            "Protein5;Protein6;Protein3;Protein1",
+        ],
     }
+
 
 @patch("restring.restring.get_functional_enrichment")
 def test_get_functional_enrichment_with_delay(mock_enrichment):
@@ -220,10 +228,7 @@ def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
 
     os.chdir(current_dir)
     assert "messages" in current_out
-    assert (
-        "No downregulated proteins"
-        in current_out["messages"][0]["msg"]
-    )
+    assert "No downregulated proteins" in current_out["messages"][0]["msg"]
 
     os.makedirs(test_folder, exist_ok=True)
     shutil.copy(down_path, test_folder)
@@ -241,26 +246,31 @@ def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
 
     os.chdir(current_dir)
     assert "messages" in current_out
-    assert (
-        "No upregulated proteins"
-        in current_out["messages"][0]["msg"]
-    )
+    assert "No upregulated proteins" in current_out["messages"][0]["msg"]
+
 
 def test_go_analysis_offline_protein_sets_json(go_analysis_offline_result_no_bg):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
 
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"], 
-        protein_sets_path=f"{test_data_folder}/protein_sets.json", 
+        proteins=[
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
+        protein_sets_path=f"{test_data_folder}/protein_sets.json",
     )
     df = current_out["results"]
 
     # Convert last column to list of sets because order can change
-    df['Genes'] = df['Genes'].apply(lambda x: set(x.split(';')))
-    results['Genes'] = results['Genes'].apply(lambda x: set(x.split(';')))
-    df['Genes'] = df['Genes'].apply(lambda x: sorted(x))
-    results['Genes'] = results['Genes'].apply(lambda x: sorted(x))
+    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
+    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
+    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
+    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
 
     # Convert the "Odds Ratio" column to a numeric type with the desired precision
     df["Odds Ratio"] = df["Odds Ratio"].astype(np.float64)
@@ -274,7 +284,9 @@ def test_go_analysis_offline_protein_sets_json(go_analysis_offline_result_no_bg)
     assert df_without_odds.equals(results_without_odds)
 
     # Compare the "Odds Ratio" column separately with a tolerance for numerical equality
-    odds_equal = np.isclose(df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08)
+    odds_equal = np.isclose(
+        df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08
+    )
     assert odds_equal.all()
 
 
@@ -283,16 +295,23 @@ def test_go_analysis_offline_protein_sets_csv(go_analysis_offline_result_no_bg):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
 
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"], 
-        protein_sets_path=f"{test_data_folder}/protein_sets.csv", 
+        proteins=[
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
+        protein_sets_path=f"{test_data_folder}/protein_sets.csv",
     )
     df = current_out["results"]
 
-        # Convert last column to list of sets because order can change
-    df['Genes'] = df['Genes'].apply(lambda x: set(x.split(';')))
-    results['Genes'] = results['Genes'].apply(lambda x: set(x.split(';')))
-    df['Genes'] = df['Genes'].apply(lambda x: sorted(x))
-    results['Genes'] = results['Genes'].apply(lambda x: sorted(x))
+    # Convert last column to list of sets because order can change
+    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
+    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
+    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
+    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
 
     # Compare all columns except the "Odds Ratio" column
     df_without_odds = df.drop(columns=["Odds Ratio"])
@@ -302,7 +321,9 @@ def test_go_analysis_offline_protein_sets_csv(go_analysis_offline_result_no_bg):
     assert df_without_odds.equals(results_without_odds)
 
     # Compare the "Odds Ratio" column separately with a tolerance for numerical equality
-    odds_equal = np.isclose(df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08)
+    odds_equal = np.isclose(
+        df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08
+    )
     assert odds_equal.all()
 
 
@@ -311,16 +332,23 @@ def test_go_analysis_offline_protein_sets_txt(go_analysis_offline_result_no_bg):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
 
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"], 
-        protein_sets_path=f"{test_data_folder}/protein_sets.txt", 
+        proteins=[
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
+        protein_sets_path=f"{test_data_folder}/protein_sets.txt",
     )
     df = current_out["results"]
 
     # Convert last column to list of sets because order can change
-    df['Genes'] = df['Genes'].apply(lambda x: set(x.split(';')))
-    results['Genes'] = results['Genes'].apply(lambda x: set(x.split(';')))
-    df['Genes'] = df['Genes'].apply(lambda x: sorted(x))
-    results['Genes'] = results['Genes'].apply(lambda x: sorted(x))
+    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
+    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
+    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
+    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
 
     # Compare all columns except the "Odds Ratio" column
     df_without_odds = df.drop(columns=["Odds Ratio"])
@@ -330,7 +358,9 @@ def test_go_analysis_offline_protein_sets_txt(go_analysis_offline_result_no_bg):
     assert df_without_odds.equals(results_without_odds)
 
     # Compare the "Odds Ratio" column separately with a tolerance for numerical equality
-    odds_equal = np.isclose(df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08)
+    odds_equal = np.isclose(
+        df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08
+    )
     assert odds_equal.all()
 
 
@@ -339,17 +369,24 @@ def test_go_analysis_offline_background_csv(go_analysis_offline_result_with_bg):
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
 
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"], 
+        proteins=[
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-        background=f"{test_data_folder}/background_test_proteins.csv"
+        background=f"{test_data_folder}/background_test_proteins.csv",
     )
     df = current_out["results"]
 
     # Convert last column to list of sets because order can change
-    df['Genes'] = df['Genes'].apply(lambda x: set(x.split(';')))
-    results['Genes'] = results['Genes'].apply(lambda x: set(x.split(';')))
-    df['Genes'] = df['Genes'].apply(lambda x: sorted(x))
-    results['Genes'] = results['Genes'].apply(lambda x: sorted(x))
+    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
+    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
+    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
+    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap"]
     # Compare all specified columns
@@ -359,7 +396,9 @@ def test_go_analysis_offline_background_csv(go_analysis_offline_result_with_bg):
     # Compare the numeric columns separately with a tolerance for numerical equality
     numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value"]
     for column in numerical_columns:
-        numerical_equal = np.isclose(df[column], results[column], rtol=1e-05, atol=1e-08)
+        numerical_equal = np.isclose(
+            df[column], results[column], rtol=1e-05, atol=1e-08
+        )
         assert numerical_equal.all()
 
 
@@ -368,17 +407,24 @@ def test_go_analysis_offline_background_txt(go_analysis_offline_result_with_bg):
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
 
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"], 
+        proteins=[
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-        background=f"{test_data_folder}/background_test_proteins.txt"
+        background=f"{test_data_folder}/background_test_proteins.txt",
     )
     df = current_out["results"]
 
     # Convert last column to list of sets because order can change
-    df['Genes'] = df['Genes'].apply(lambda x: set(x.split(';')))
-    results['Genes'] = results['Genes'].apply(lambda x: set(x.split(';')))
-    df['Genes'] = df['Genes'].apply(lambda x: sorted(x))
-    results['Genes'] = results['Genes'].apply(lambda x: sorted(x))
+    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
+    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
+    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
+    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap"]
     # Compare all specified columns
@@ -388,15 +434,19 @@ def test_go_analysis_offline_background_txt(go_analysis_offline_result_with_bg):
     # Compare the numeric columns separately with a tolerance for numerical equality
     numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value"]
     for column in numerical_columns:
-        numerical_equal = np.isclose(df[column], results[column], rtol=1e-05, atol=1e-08)
+        numerical_equal = np.isclose(
+            df[column], results[column], rtol=1e-05, atol=1e-08
+        )
         assert numerical_equal.all()
 
 
 def test_go_analysis_with_STRING_no_upregulated_proteins():
-    proteins_df = pd.DataFrame({
-        "Protein ID": ["Protein1", "Protein2", "Protein3"],
-        "log2_fold_change": [-1.0, -0.5, -0.0],
-    })
+    proteins_df = pd.DataFrame(
+        {
+            "Protein ID": ["Protein1", "Protein2", "Protein3"],
+            "log2_fold_change": [-1.0, -0.5, -0.0],
+        }
+    )
 
     current_out = go_analysis_with_STRING(
         proteins=proteins_df,
@@ -406,17 +456,16 @@ def test_go_analysis_with_STRING_no_upregulated_proteins():
     )
 
     assert "messages" in current_out
-    assert (
-        "No upregulated proteins"
-        in current_out["messages"][0]["msg"]
-    )
+    assert "No upregulated proteins" in current_out["messages"][0]["msg"]
 
 
 def test_go_analysis_with_STRING_no_downregulated_proteins():
-    proteins_df = pd.DataFrame({
-        "Protein ID": ["Protein1", "Protein2", "Protein3"],
-        "log2_fold_change": [1.0, 0.5, 0.0],
-    })
+    proteins_df = pd.DataFrame(
+        {
+            "Protein ID": ["Protein1", "Protein2", "Protein3"],
+            "log2_fold_change": [1.0, 0.5, 0.0],
+        }
+    )
 
     current_out = go_analysis_with_STRING(
         proteins=proteins_df,
@@ -426,17 +475,16 @@ def test_go_analysis_with_STRING_no_downregulated_proteins():
     )
 
     assert "messages" in current_out
-    assert (
-        "No downregulated proteins"
-        in current_out["messages"][0]["msg"]
-    )
+    assert "No downregulated proteins" in current_out["messages"][0]["msg"]
 
 
 def test_go_analysis_with_STRING_no_proteins():
-    proteins_df = pd.DataFrame({
-        "Protein ID": [],
-        "log2_fold_change": [],
-    })
+    proteins_df = pd.DataFrame(
+        {
+            "Protein ID": [],
+            "log2_fold_change": [],
+        }
+    )
 
     current_out = go_analysis_with_STRING(
         proteins=proteins_df,
@@ -447,10 +495,7 @@ def test_go_analysis_with_STRING_no_proteins():
 
     print(current_out)
     assert "messages" in current_out
-    assert (
-        "No proteins"
-        in current_out["messages"][0]["msg"]
-    )
+    assert "No proteins" in current_out["messages"][0]["msg"]
 
 
 def test_go_analysis_with_STRING_proteins_list():

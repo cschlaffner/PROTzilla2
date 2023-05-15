@@ -51,8 +51,8 @@ def go_analysis_with_STRING(
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
-    up_protein_list = list(proteins.loc[expression_change_col > 0, 'Protein ID'])
-    down_protein_list = list(proteins.loc[expression_change_col < 0, 'Protein ID'])
+    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
     if len(up_protein_list) == 0:
         if direction == "up":
@@ -66,7 +66,7 @@ def go_analysis_with_STRING(
             logging.warning(msg)
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
-        
+
     if len(down_protein_list) == 0:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
