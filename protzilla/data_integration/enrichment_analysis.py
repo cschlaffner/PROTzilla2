@@ -129,12 +129,13 @@ def go_analysis_with_STRING(
         summary.to_csv(f"{term}_summary.csv")
         summaries.append(summary)
 
+    # switch back to original working directory
+    os.chdir(start_dir)
+
     # delete tmp folder if it was created
     if os.path.basename(results_path) == "tmp_enrichment_results":
         shutil.rmtree(results_path)
 
-    # switch back to original working directory
-    os.chdir(start_dir)
     return {"results": results, "summaries": summaries}
 
 
