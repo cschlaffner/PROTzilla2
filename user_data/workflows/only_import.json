@@ -16,6 +16,13 @@
           "parameters": {
             "feature_orientation": "Rows (features in rows, samples in columns)"
           }
+        },
+        {
+          "name": "peptide_import",
+          "method": "peptide_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
         }
       ]
     },

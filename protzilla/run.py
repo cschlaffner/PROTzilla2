@@ -12,10 +12,7 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import (
-    get_all_default_params_for_methods,
-    get_workflow_default_param_value,
-)
+from .workflow_helper import get_workflow_default_param_value, set_output_name
 
 
 class Run:
@@ -92,14 +89,9 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.step_index = len(self.history.steps)
         self.run_path = run_path
+        self.workflow_config_name = workflow_config_name
 
-        workflow_local_path = f"{self.run_path}/workflow.json"
-        if not Path(workflow_local_path).is_file():
-            workflow_template_path = f"{WORKFLOWS_PATH}/{workflow_config_name}.json"
-            shutil.copy2(workflow_template_path, workflow_local_path)
-
-        with open(workflow_local_path, "r") as f:
-            self.workflow_config = json.load(f)
+        self.workflow_config = self.read_local_workflow()
 
         with open(WORKFLOW_META_PATH, "r") as f:
             self.workflow_meta = json.load(f)
@@ -114,11 +106,15 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def update_workflow_config(self, section, index, parameters):
+    def update_workflow_config(self, section, index, params):
+        parameters_no_file_path = {k: params[k] for k in params if k != "file_path"}
         self.workflow_config["sections"][section]["steps"][index][
             "parameters"
-        ] = parameters
+        ] = parameters_no_file_path
         self.write_local_workflow()
+
+    def perform_current_calculation_step(self, parameters):
+        self.perform_calculation_from_location(*self.current_run_location(), parameters)
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
@@ -129,6 +125,8 @@ class Run:
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
+        if "peptide_df" in call_parameters:
+            call_parameters["peptide_df"] = self.peptide_data
 
         if self.section in ["importing", "data_preprocessing"]:
             self.result_df, self.current_out = method_callable(
@@ -158,15 +156,22 @@ class Run:
         self.perform_calculation(method_callable, parameters)
         self.next_step(name=name)
 
-    def create_plot_from_location(self, section, step, method, parameters):
-        location = (section, step, method)
+    def create_plot_from_current_location(self, parameters):
+        location = (section, step, method) = self.current_workflow_location()
         if step == "plot":
+            self.update_workflow_config(
+                section, self.step_index_in_current_section(), parameters
+            )
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
+            self.workflow_config["sections"][section]["steps"][
+                self.step_index_in_current_section()
+            ]["graphs"] = [parameters]
+            self.write_local_workflow()
             self.create_plot(plot_map[location], parameters)
 
         if section in ["importing", "data_preprocessing"]:
-            self.plotted_for_parameters = self.current_parameters[method]
+            self.plotted_for_parameters = self.current_parameters.get(method)
             self.current_plot_parameters[method] = parameters
         else:  # not used in data analysis
             self.plotted_for_parameters = None
@@ -186,23 +191,28 @@ class Run:
         self.calculated_method = self.method
 
     def insert_step(self, step_to_be_inserted, section, method, index):
-        params_default = get_all_default_params_for_methods(
-            self.workflow_meta, section, step_to_be_inserted, method
-        )
-        step_dict = dict(
-            name=step_to_be_inserted,
-            method=method,
-            parameters=params_default,
-        )
-
+        step_dict = dict(name=step_to_be_inserted, method=method, parameters={})
+        if section == "data_preprocessing":
+            step_dict["graphs"] = [{}]
         self.workflow_config["sections"][section]["steps"].insert(index, step_dict)
-
         self.write_local_workflow()
 
     def write_local_workflow(self):
         workflow_local_path = f"{self.run_path}/workflow.json"
         with open(workflow_local_path, "w") as f:
             json.dump(self.workflow_config, f, indent=2)
+
+    def read_local_workflow(self):
+        workflow_local_path = f"{self.run_path}/workflow.json"
+        if not Path(workflow_local_path).is_file():
+            workflow_template_path = (
+                f"{WORKFLOWS_PATH}/{self.workflow_config_name}.json"
+            )
+            shutil.copy2(workflow_template_path, workflow_local_path)
+
+        with open(workflow_local_path, "r") as f:
+            self.workflow_config = json.load(f)
+        return self.workflow_config
 
     def insert_at_next_position(self, step_to_be_inserted, section, method):
         if self.section == section:
@@ -213,6 +223,8 @@ class Run:
             )
         else:
             self.insert_step(step_to_be_inserted, section, method, 0)
+
+        self.section, self.step, self.method = self.current_workflow_location()
 
     def export_workflow(self, name):
         with open(f"{WORKFLOWS_PATH}/{name}.json", "w") as f:
@@ -225,7 +237,7 @@ class Run:
     def next_step(self, name=None):
         if not name:
             name = get_workflow_default_param_value(
-                self.workflow_config, *(self.current_run_location()), "output_name"
+                self.workflow_config, *self.current_run_location(), "output_name"
             )
         try:
             self.history.add_step(
@@ -238,6 +250,14 @@ class Run:
                 self.plots,
                 name=name,
             )
+            index = self.step_index_in_current_section()
+            self.update_workflow_config(
+                self.section, index, self.current_parameters[self.calculated_method]
+            )
+            self.workflow_config["sections"][self.section]["steps"][index][
+                "method"
+            ] = self.calculated_method
+            self.name_step(-1, name)
         except TypeError:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
@@ -245,18 +265,14 @@ class Run:
             # TODO 100 add message to user?
         else:  # continue normally when no error occurs
             self.step_index += 1
-            # important for runner, we do not want to update anything, when we do not have a step
-            try:
-                self.section, self.step, self.method = self.current_workflow_location()
-                self.df = self.result_df
-                self.result_df = None
-                self.calculated_method = None
-                self.current_parameters = {}
-                self.current_plot_parameters = {}
-                self.plotted_for_parameters = None
-                self.plots = []
-            except IndexError:
-                self.step_index -= 1
+            self.section, self.step, self.method = self.current_workflow_location()
+            self.df = self.result_df
+            self.result_df = None
+            self.calculated_method = None
+            self.current_parameters = {}
+            self.current_plot_parameters = {}
+            self.plotted_for_parameters = None
+            self.plots = []
 
     def back_step(self):
         assert self.history.steps
@@ -276,7 +292,10 @@ class Run:
         self.step_index -= 1
 
     def current_workflow_location(self):
-        return self.all_steps()[self.step_index]
+        try:
+            return self.all_steps()[self.step_index]
+        except IndexError:
+            return "", "", ""
 
     def step_index_in_current_section(self):
         index = 0
@@ -285,6 +304,7 @@ class Run:
                 if step == self.step:
                     return index
                 index += 1
+        return index
 
     def all_steps(self):
         steps = []
@@ -319,6 +339,13 @@ class Run:
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
 
+    @property
+    def peptide_data(self):
+        for step in self.history.steps:
+            if step.step == "peptide_import":
+                return step.outputs["peptide_df"]
+        raise AttributeError("Peptides were not yet imported.")
+
     def export_plots(self, format_):
         exports = []
         for plot in self.plots:
@@ -336,3 +363,14 @@ class Run:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
         return exports
+
+    def name_step(self, index, name):
+        self.history.name_step_in_history(index, name)
+        self.history.save()
+        set_output_name(
+            self.workflow_config,
+            self.section,
+            self.step_index_in_current_section(),
+            name,
+        )
+        self.write_local_workflow()
