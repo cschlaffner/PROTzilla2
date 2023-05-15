@@ -655,7 +655,7 @@
             "default": 0
           },
           "peptide_df": {
-            "type": "peptide_df",
+            "type": "empty",
             "name": "peptide_df"
           }
         },
