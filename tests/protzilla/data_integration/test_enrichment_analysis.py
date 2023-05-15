@@ -6,7 +6,7 @@ import os
 import shutil
 import pytest
 
-from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_STRING,
     go_analysis_offline,
