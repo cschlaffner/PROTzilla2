@@ -78,13 +78,15 @@ def go_analysis_with_STRING(
     results_path = (
         RUNS_PATH / run_name / "enrichment_results"
         if run_name
-        else os.path.join(os.getcwd(),"tmp_enrichment_results")
+        else os.path.join(os.getcwd(), "tmp_enrichment_results")
     )
     os.makedirs(results_path, exist_ok=True)
 
     # make folder for current enrichment analysis and details of analysis
-    
-    enrichment_folder_name = f"enrichment_{random_string()}" if folder_name is None else folder_name
+
+    enrichment_folder_name = (
+        f"enrichment_{random_string()}" if folder_name is None else folder_name
+    )
     enrichment_folder_path = os.path.join(results_path, enrichment_folder_name)
     os.makedirs(enrichment_folder_path, exist_ok=True)
 
