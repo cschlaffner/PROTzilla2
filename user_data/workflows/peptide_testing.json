@@ -1,0 +1,82 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Rows (features in rows, samples in columns)"
+          }
+        },
+        {
+          "name": "peptide_import",
+          "method": "peptide_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        },
+        {
+          "name": "filter_peptides",
+          "method": "pep_filter",
+          "parameters": {
+            "threshold": 0,
+            "peptide_df": ""
+          },
+          "graphs": [
+            {
+              "graph_type ": "Pie chart"
+            }
+          ]
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": []
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}

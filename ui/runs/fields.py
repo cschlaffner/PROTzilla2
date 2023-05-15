@@ -51,7 +51,7 @@ def make_parameter_input(key, param_dict, disabled):
                 make_parameter_input(field_key, field_dict, disabled)
             )
         param_dict["additional_fields"] = additional_fields
-    elif param_dict["type"] == "metadata_df":
+    elif param_dict["type"] == "metadata_df" or param_dict["type"] == "peptide_df":
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
         template = "runs/field_text.html"

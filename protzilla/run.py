@@ -125,6 +125,8 @@ class Run:
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "metadata_df" in call_parameters:
             call_parameters["metadata_df"] = self.metadata
+        if "peptide_df" in call_parameters:
+            call_parameters["peptide_df"] = self.peptide_data
 
         if self.section in ["importing", "data_preprocessing"]:
             self.result_df, self.current_out = method_callable(
@@ -336,6 +338,13 @@ class Run:
             if step.step == "metadata_import":
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
+
+    @property
+    def peptide_data(self):
+        for step in self.history.steps:
+            if step.step == "peptide_import":
+                return step.outputs["peptide_df"]
+        raise AttributeError("Peptides were not yet imported.")
 
     def export_plots(self, format_):
         exports = []
