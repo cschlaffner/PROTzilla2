@@ -165,13 +165,14 @@ def test_go_analysis_with_enrichr(mock_enrichment):
 
 @patch("protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay")
 def test_go_analysis_with_STRING(mock_enrichment):
+    # add test data folder
     proteins_df = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/input-t_test-log2_fold_change_df.csv")
     up_path = f"{PROJECT_PATH}/tests/test_data/enrichment_data/UP_enrichment.KEGG.tsv"
     up_df = pd.read_csv(up_path, header=0, sep="\t")
     down_path = f"{PROJECT_PATH}/tests/test_data/enrichment_data/DOWN_enrichment.KEGG.tsv"
     down_df = pd.read_csv(down_path, header=0, sep="\t")
-    results = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_results.csv", header=0)
-    summary = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_summary.csv", header=0)
+    results = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_results.csv", header=0, index_col=0)
+    summary = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/enrichment_data/KEGG_summary.csv", header=0, index_col=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
     current_dir = os.getcwd()
