@@ -1054,7 +1054,7 @@
           "proteins": {
             "name": "Choose Proteins to run GO Analysis on",
             "type": "named_output",
-            "default": null
+            "default": [null,null]
           },
           "protein_sets_path": {
             "name": "Upload Protein Sets {'Name of set': ['protein1', 'protein2', ...], ...}",
@@ -1075,7 +1075,7 @@
           "proteins": {
             "name": "Choose Proteins to run GO Analysis on",
             "type": "named_output",
-            "default": null
+            "default": [null,null]
           },
           "protein_sets": {
             "name": "Protein Sets",
@@ -1100,7 +1100,7 @@
           "proteins": {
             "name": "Choose Proteins to run GO Analysis on",
             "type": "named_output",
-            "default": null
+            "default": [null,null]
           },
           "protein_set_dbs": {
             "name": "Protein Set Libraries",

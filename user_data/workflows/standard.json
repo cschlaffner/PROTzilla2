@@ -189,16 +189,6 @@
     },
     "data_integration": {
       "steps": [
-        {
-          "name": "enrichment_analysis",
-          "method": "go_analysis_offline",
-          "parameters": {}
-        },
-        {
-          "name": "enrichment_analysis",
-          "method": "go_analysis_offline",
-          "parameters": {}
-        }
       ]
     }
   }
