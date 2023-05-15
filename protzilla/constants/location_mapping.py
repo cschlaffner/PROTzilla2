@@ -13,9 +13,10 @@ from ..data_preprocessing import (
     imputation,
     normalisation,
     outlier_detection,
+    peptide_filter,
     transformation,
 )
-from ..importing import metadata_import, ms_data_import
+from ..importing import metadata_import, ms_data_import, peptide_import
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -38,6 +39,7 @@ method_map = {
         "metadata_import",
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
+    ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -118,6 +120,11 @@ method_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
+    (
+        "data_preprocessing",
+        "filter_peptides",
+        "pep_filter",
+    ): peptide_filter.by_pep_value,
     (
         "data_analysis",
         "differential_expression",
@@ -249,6 +256,11 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_preprocessing",
+        "filter_peptides",
+        "pep_filter",
+    ): peptide_filter.by_pep_value_plot,
     (
         "data_analysis",
         "plot",

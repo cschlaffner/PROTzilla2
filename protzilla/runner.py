@@ -30,6 +30,7 @@ class Runner:
         workflow: str,
         ms_data_path: str,
         meta_data_path: str | None,
+        peptides_path: str | None,
         run_name: str | None,
         df_mode: str | None = "disk",
         all_plots: bool = False,
@@ -43,6 +44,7 @@ class Runner:
 
         self.ms_data_path = ms_data_path
         self.meta_data_path = meta_data_path
+        self.peptides_path = peptides_path
         self.df_mode = df_mode if df_mode is not None else "disk"
         self.workflow = workflow
 
@@ -101,21 +103,28 @@ class Runner:
         elif step["name"] == "metadata_import":
             if self.meta_data_path is None:
                 raise ValueError(
-                    f"MetadataPath (--meta_data_path) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
+                    f" but is required for {step['name']}"
                 )
             params = step["parameters"]
             params["file_path"] = self.meta_data_path
             self._perform_current_step(params)
             logging.info("imported Meta Data")
-
+        elif step["name"] == "peptide_import":
+            if self.peptides_path is None:
+                raise ValueError(
+                    f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
+                    f"but is required for {step['name']}"
+                )
+            params = step["parameters"]
+            params["file_path"] = self.peptides_path
+            self._perform_current_step(params)
+            logging.info("imported Peptide Data")
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params):
-        self.run.perform_calculation_from_location(
-            *self.run.current_workflow_location(), params
-        )
+        self.run.perform_current_calculation_step(params)
 
     def _create_plots_for_step(self, section, step):
         params = dict()
@@ -125,8 +134,7 @@ class Runner:
             params = get_defaults(
                 get_parameters(self.run, *self.run.current_workflow_location())
             )
-        self.run.create_plot_from_location(
-            *self.run.current_workflow_location(),
+        self.run.create_plot_from_current_location(
             parameters=params,
         )
         for i, plot in enumerate(self.run.plots):

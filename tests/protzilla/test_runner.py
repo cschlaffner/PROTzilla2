@@ -1,11 +1,10 @@
 import json
 import sys
-from shutil import rmtree
 from unittest import mock
 
 import pytest
 
-from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities.random import random_string
 
 sys.path.append(f"{PROJECT_PATH}/..")
@@ -25,12 +24,20 @@ def metadata_path():
     return "tests/metadata_cut_columns.csv"
 
 
-def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
+@pytest.fixture
+def peptide_path():
+    return "tests/test_data/peptides_vsmall.txt"
+
+
+def test_runner_imports(
+    monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
+):
     importing_args = [
         "only_import",  # expects max-quant import, metadata import
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
+        f"--peptides_path={peptide_path}",
     ]
 
     kwargs = args_parser().parse_args(importing_args).__dict__
@@ -56,17 +63,18 @@ def test_runner_imports(monkeypatch, tests_folder_name, ms_data_path, metadata_p
                 "file_path": metadata_path,
             }
         ),
+        mock.call({"intensity_name": "iBAQ", "file_path": peptide_path}),
     ]
 
     mock_perform.assert_has_calls(calls)
-    assert mock_perform.call_count == 2
+    assert mock_perform.call_count == 3
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
     monkeypatch, tests_folder_name, ms_data_path
 ):
     no_metadata_args = [
-        "only_import",  # expects max-quant import, metadata import
+        "only_import",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
     ]
@@ -82,14 +90,15 @@ def test_runner_raises_error_for_missing_metadata_arg(
 
         monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
         monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-        monkeypatch.setattr(runner.run, "create_plot_from_location", mock.MagicMock())
+        monkeypatch.setattr(
+            runner.run, "create_plot_from_current_location", mock.MagicMock()
+        )
 
         runner.compute_workflow()
 
 
 def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
     calculating_args = [
-        # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
@@ -107,19 +116,17 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
     mock_perform.assert_any_call({"threshold": 0.2})
-    # import, filter proteins
     assert mock_perform.call_count == 2
     mock_plot.assert_not_called()
 
 
 def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
     plot_args = [
-        # expects: max-quant, filter proteins
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
@@ -138,14 +145,11 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
     monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_location", mock_plot)
+    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
 
     runner.compute_workflow()
 
     mock_plot.assert_called_once_with(
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
         parameters={"graph_type": "Pie chart"},
     )
 
@@ -186,12 +190,13 @@ def test_serialize_workflow_graphs():
 
 
 def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
-    name = tests_folder_name + "/test_runner_integration" + random_string()
+    name = tests_folder_name + "/test_runner_integration_" + random_string()
     runner = Runner(
         **{
             "workflow": "standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "peptides_path": None,
             "run_name": f"{name}",
             "df_mode": "disk",
             "all_plots": True,
@@ -208,6 +213,7 @@ def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_n
             "workflow": "standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+            "peptides_path": None,
             "run_name": f"{name}",
             "df_mode": "disk",
             "all_plots": False,

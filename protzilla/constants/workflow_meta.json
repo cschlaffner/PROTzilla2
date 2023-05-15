@@ -71,6 +71,29 @@
           }
         }
       }
+    },
+    "peptide_import": {
+      "peptide_import": {
+        "name": "Peptide Import",
+        "description": "Import Peptide-Data",
+        "parameters": {
+          "file_path": {
+            "name": "Peptide File",
+            "type": "file",
+            "default": null
+          },
+          "intensity_name": {
+            "name": "Intensity Parameter (same as MS-Data)",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default": "Intensity"
+          }
+        }
+      }
     }
   },
   "data_preprocessing": {
@@ -615,6 +638,37 @@
                 "Pie chart"
               ],
               "default": "Pie chart"
+            }
+          }
+        ]
+      }
+    },
+    "filter_peptides": {
+      "pep_filter": {
+        "name": "PEP Threshold",
+        "description": "Filter by PEP-Threshold",
+        "parameters": {
+          "threshold": {
+            "name": "Threshold Value for PEP",
+            "type": "numeric",
+            "min": 0,
+            "default": 0
+          },
+          "peptide_df": {
+            "type": "peptide_df",
+            "name": "peptide_df"
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Bar chart"
             }
           }
         ]
