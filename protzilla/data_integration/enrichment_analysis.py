@@ -167,7 +167,7 @@ def go_analysis_with_STRING(
     return {"results": results, "summaries": summaries}
 
 
-def go_analysis_offline(proteins, protein_sets_path, background):
+def go_analysis_offline(proteins, protein_sets_path, background=None):
     """dev notes
     background: list or number of proteins? (could be upload or named_output)
     for named-output: - list of proteins, or dataframe with multiple columns and we just want to use first
@@ -187,15 +187,15 @@ def go_analysis_offline(proteins, protein_sets_path, background):
     file_extension = os.path.splitext(protein_sets_path)[1]
     if file_extension == ".csv":
         with open(protein_sets_path, "r") as f:
-            reader = csv.DictReader(f)
+            reader = csv.reader(f)
             protein_sets = {}
             for row in reader:
-                key = row["Key"]
-                values = row["Values"].split(",")
+                key = row[0]
+                values = row[1:]
                 protein_sets[key] = values
 
     elif file_extension == ".txt":
-        with open("gene_sets.txt", "r") as f:
+        with open(protein_sets_path, "r") as f:
             protein_sets = {}
             for line in f:
                 key, value_str = line.strip().split(":")
@@ -220,7 +220,7 @@ def go_analysis_offline(proteins, protein_sets_path, background):
             ]
         )
 
-    if background == "":
+    if background == "" or background is None:
         logging.info("No background provided, using all proteins in protein sets")
         background = None
     else:
