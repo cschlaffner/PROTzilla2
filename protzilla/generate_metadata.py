@@ -7,6 +7,8 @@ filepath = (
     "C:\\Users\\Dell\\Documents\\Übungen\\BP\\ExampleData\\MaxQuant_BA46_INSOLUBLE\\"
 )
 
+# AD50_BA46_INSOLUBLE_01
+
 df, _ = max_quant_import(
     "",
     intensity_name="iBAQ",
@@ -18,10 +20,14 @@ df = df.drop(columns=["Protein ID", "Gene", "iBAQ"])
 
 df = df.drop_duplicates()
 
-df["BioReplicate"] = df["Sample"].str.split("_").str[0]
-df["Condition"] = df["Sample"].str.split("\d").str[0]
+df["BioReplicate"] = df["Sample"].str.split("\d").str[0]
+df["Condition"] = df["Sample"].str.split("_").str[0]
 df["Run"] = df["Sample"]
 df["IsotopeLabelType"] = "L"
+df["ending"] = df["Sample"].str.split("_", n=1).str[1]
+df["Sample"] = df["Condition"] + "_BA46_" + df["ending"]
+
+df = df.drop(columns=["ending"])
 
 # arr_values = np.append(arr_values_raw, zeros, axis=0)
 
