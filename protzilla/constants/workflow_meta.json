@@ -684,7 +684,10 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -735,7 +738,10 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -800,28 +806,46 @@
           "p_values": {
             "name": "p-value df",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "log2_fc": {
             "name": "log2 fold change df",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "fc_threshold": {
             "name": "log2 fold change threshold",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "alpha": {
             "name": "alpha/corrected alpha",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "proteins_of_interest_wrapper": {
             "name": "Proteins of Interest",
             "type": "named_output_with_fields",
-            "fill_dynamic": ["proteins_of_interest"],
-            "default": [null, null, null],
+            "fill_dynamic": [
+              "proteins_of_interest"
+            ],
+            "default": [
+              null,
+              null,
+              null
+            ],
             "fields": {
               "proteins_of_interest": {
                 "type": "categorical",
@@ -842,40 +866,55 @@
       },
       "scatter_plot": {
         "name": "Scatter plot",
-        "description":"Creates a scatter plot from data",
+        "description": "Creates a scatter plot from data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "color_df": {
             "name": "Choose a dataframe to assign color to marks (optional)",
             "type": "named_output",
-            "default": [null, null],
+            "default": [
+              null,
+              null
+            ],
             "optional": true
           }
         }
       },
       "clustergram": {
         "name": "Clustergram",
-        "description":"Creates a clustergram from data",
+        "description": "Creates a clustergram from data",
         "parameters": {
           "input_df": {
             "name": "Input dataframe: choose dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "sample_group_df": {
             "name": "Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
             "type": "named_output",
-            "default": [null, null],
+            "default": [
+              null,
+              null
+            ],
             "optional": true
           },
           "flip_axes": {
             "name": "Do you want to flip the orientation of the heatmap's axes?",
             "type": "categorical",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "no"
           }
         }
@@ -889,7 +928,10 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_clusters": {
             "name": "Number of clusters to form",
@@ -908,7 +950,7 @@
           },
           "init_centroid_strategy": {
             "name": "Method for initialisation of centroids",
-            "type":"categorical",
+            "type": "categorical",
             "categories": [
               "k-means++",
               "random"
@@ -946,7 +988,10 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_components": {
             "name": "Dimension of the embedded space",
@@ -966,7 +1011,10 @@
             "name": "Distance metric",
             "type": "categorical",
             "categories": [
-              "euclidean","manhattan","cosine", "haversine"
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "haversine"
             ],
             "default": "euclidean"
           },
@@ -996,12 +1044,15 @@
       },
       "umap": {
         "name": "UMAP",
-        "description":"Dimension reduction of a dataframe using UMAP",
+        "description": "Dimension reduction of a dataframe using UMAP",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_neighbors": {
             "name": "Number of neighbors",
@@ -1029,7 +1080,10 @@
             "name": "Distance metric",
             "type": "categorical",
             "categories": [
-              "euclidean","manhattan","cosine", "haversine"
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "haversine"
             ],
             "default": "euclidean"
           },
@@ -1043,7 +1097,27 @@
           }
         }
       }
+    },
+    "variation_graph": {
+      "variation_graph": {
+        "name": "Variation Graph",
+        "description": "Create a variation graph (graphml-Format) for a Protein and its Isoforms. This, currently, only works with Uniport-IDs and online",
+        "parameters": {
+          "protein_id": {
+            "name": "Protein ID",
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the Uniprot-ID of the Protein"
+          },
+          "run_path": {
+            "type": "run_path",
+            "name": "run_path",
+            "default": null
+          }
+        }
+      }
     }
   },
-  "data_integration": {}
+  "data_integration": {
+  }
 }

@@ -1,46 +1,51 @@
+import logging
 import subprocess
+import urllib.error
+import urllib.request
+from pathlib import Path
 
-import pandas as pd
-import requests
-
-from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
+from django.contrib import messages
 
 
-def create_graph(
-    protein_id: str, peptide_df: pd.DataFrame, run_name: str, queue_size: int = None
-):
-    if not _protein_in_peptide_df(protein_id, peptide_df):
-        raise ValueError(f"Protein {protein_id} not found in peptide_df.")
+def create_graph(protein_id: str, run_path: str, queue_size: int = None):
+    path_to_protein_file, msg = _get_protein_file(protein_id, run_path)
 
-    path_to_protein_file = _get_protein_file(protein_id)
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} --export_output_folder={RUNS_PATH}/{run_name}/exported_graphs"
+    if msg and path_to_protein_file is None:
+        return dict(graph_path=None, messages=[dict(level=messages.ERROR, msg=msg)])
+
+    output_folder = f"{run_path}/graphs"
+    output_csv = f"{run_path}/graphs/{protein_id}.csv"
+    graph_path = f"{run_path}/exported_graphs/{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} --export_output_folder={output_folder} --output_csv={output_csv}"
     subprocess.run(cmd_str, shell=True)
 
-    return dict(
-        graph_path=f"{RUNS_PATH}/{run_name}/exported_graphs/{protein_id}.graphml"
-    )
+    msg = f"Graph created for protein {protein_id} at {graph_path}"
+
+    return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
-def _get_protein_file(protein_id) -> str:
+def _get_protein_file(protein_id, run_path) -> (str, str):
     protein_id = protein_id.upper()
+    path_to_graphs = f"{run_path}/graphs"
+    path_to_protein_file = f"{path_to_graphs}/{protein_id}.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
-    r = requests.get(url)
-    print(r.text)
-    if r.status_code != 200:
-        raise ValueError(f"Protein {protein_id} not found at UniprotKB.")
-    elif not r.text:
-        raise ValueError(f"Empty file returned for protein {protein_id}.")
+    msg = ""
+
+    if not Path(path_to_graphs).exists():
+        Path(path_to_graphs).mkdir(parents=True, exist_ok=True)
+    if Path(path_to_protein_file).exists():
+        logging.info(
+            f"Protein file {path_to_protein_file} already exists. Skipping download."
+        )
     else:
-        path_to_protein_file = f"{TEST_DATA_PATH}/proteins/{protein_id}.txt"
-        with open(path_to_protein_file, "w") as f:
-            f.write(r.text)
+        try:
+            urllib.request.urlretrieve(url, path_to_protein_file)
+        except urllib.error.URLError as e:
+            msg = f"Error downloading protein {protein_id}. Error: {e}"
+            logging.error(msg)
 
-    return path_to_protein_file
-
-
-def _protein_in_peptide_df(protein_id: str, peptide_df) -> bool:
-    return protein_id in peptide_df.loc[:, "Protein ID"].unique().tolist()
+    return path_to_protein_file, msg
 
 
 if __name__ == "__main__":
-    create_graph("F1SN00")
+    create_graph("F1SN85", "test_run")

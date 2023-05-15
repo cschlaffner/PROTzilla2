@@ -3,6 +3,7 @@ from ..data_analysis import (
     differential_expression,
     dimension_reduction,
     plots,
+    protein_variation_graph,
 )
 from ..data_preprocessing import (
     filter_proteins,
@@ -147,6 +148,11 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "variation_graph",
+        "variation_graph",
+    ): protein_variation_graph.create_graph,
 }
 
 # reversed mapping of method callable and location

@@ -127,6 +127,8 @@ class Run:
             call_parameters["metadata_df"] = self.metadata
         if "peptide_df" in call_parameters:
             call_parameters["peptide_df"] = self.peptide_data
+        if "run_path" in call_parameters:
+            call_parameters["run_path"] = self.run_path
 
         if self.section in ["importing", "data_preprocessing"]:
             self.result_df, self.current_out = method_callable(
