@@ -176,11 +176,11 @@ def test_go_analysis_with_STRING(mock_enrichment):
 
     current_dir = os.getcwd()
     # copy files to test aggregation
-    test_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data/tmp_enrichment_results/test_go_analysis_with_STRING"
+    test_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
     os.makedirs(test_folder, exist_ok=True)
     shutil.copy(up_path, test_folder)
     shutil.copy(down_path, test_folder)
-    os.chdir(test_folder)
+    os.chdir(f"{PROJECT_PATH}/tests/test_data/enrichment_data")
 
     current_out = go_analysis_with_STRING(
         proteins = proteins_df,

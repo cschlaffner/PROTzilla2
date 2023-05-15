@@ -3,6 +3,7 @@ import json
 import csv
 import logging
 import time
+import shutil
 import pandas as pd
 import numpy as np
 from restring import restring
@@ -74,22 +75,22 @@ def go_analysis_with_STRING(
 
     # change working direcory to run folder for enrichment analysis
     # or make tmp folder
-    results_folder = (
+    results_path = (
         RUNS_PATH / run_name / "enrichment_results"
         if run_name
-        else "tmp_enrichment_results"
+        else os.path.join(os.getcwd(),"tmp_enrichment_results")
     )
-    os.makedirs(results_folder, exist_ok=True)
+    os.makedirs(results_path, exist_ok=True)
 
     # make folder for current enrichment analysis and details of analysis
     
     enrichment_folder_name = f"enrichment_{random_string()}" if folder_name is None else folder_name
-    enrichment_folder_path = os.path.join(results_folder, enrichment_folder_name)
-    os.makedirs(enrichment_folder_path)
+    enrichment_folder_path = os.path.join(results_path, enrichment_folder_name)
+    os.makedirs(enrichment_folder_path, exist_ok=True)
 
     details_folder_name = "enrichment_details"
     details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
-    os.makedirs(details_folder_path)
+    os.makedirs(details_folder_path, exist_ok=True)
     start_dir = os.getcwd()
     os.chdir(details_folder_path)
 
@@ -128,10 +129,9 @@ def go_analysis_with_STRING(
         summary.to_csv(f"{term}_summary.csv")
         summaries.append(summary)
 
-    if results_folder == "tmp_enrichment_results":
-        # delete tmp folder
-        os.chdir("..")
-        os.rmdir("tmp_enrichment_results")
+    # delete tmp folder if it was created
+    if os.path.basename(results_path) == "tmp_enrichment_results":
+        shutil.rmtree(results_path)
 
     # switch back to original working directory
     os.chdir(start_dir)
