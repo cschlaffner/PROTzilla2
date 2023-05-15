@@ -3,6 +3,7 @@ import tempfile
 import traceback
 import zipfile
 
+import networkx as nx
 import pandas as pd
 from django.contrib import messages
 from django.http import FileResponse, HttpResponseRedirect, JsonResponse
@@ -271,6 +272,16 @@ def plot(request, run_name):
     post_data, parameters = parameters_for_plot(post_data, param_dict)
 
     parameters.update(parameters_from_post(post_data))
+
+    print("parameters")
+    print(parameters)
+
+    if run.method == "variation_graph":
+        print("variation_graph")
+        return variation_plot(request, run_name)
+        # return HttpResponseRedirect(reverse("runs:variation_plot", args=(run_name,)))
+
+    print("post varaiation_graph")
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
@@ -351,3 +362,50 @@ def download_plots(request, run_name):
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
     )
+
+
+def variation_plot(request, run_name):
+    run = active_runs[run_name]
+    section, step, method = run.current_run_location()
+    post_data = dict(request.POST)
+
+    # print(request.__dict__)
+
+    param_dict = run.workflow_meta[section][step][method]["parameters"]
+    post_data, parameters = parameters_for_plot(post_data, param_dict)
+
+    parameters.update(parameters_from_post(post_data))
+
+    print("parameters")
+    print(parameters)
+    call_params = run.exchange_named_outputs_with_data(parameters)
+    import pprint
+
+    pprint.pprint(call_params)
+    graphml_file = call_params["graph_file_path"]
+
+    # Read the GraphML file
+    # graphml_file = "/Users/anton/Documents/code/PROTzilla2/tests/test_data/exported_graphs/QXXXXX.graphml"
+    graph = nx.read_graphml(graphml_file)
+
+    node_labels = nx.get_node_attributes(graph, "aminoacid")
+    print(node_labels)
+
+    pprint.pprint(graph.__dict__)
+
+    # Convert the graph to a format compatible with Cytoscape.js
+    nodes = [
+        {"data": {"id": node, "label": node_labels[node]}} for node in graph.nodes()
+    ]
+    edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
+    elements = nodes + edges
+
+    # nodes = [{'data': {'id': node, 'label': graph.nodes[node]['label']}} for node in
+    #          graph.nodes()]
+    # edges = [{'data': {'source': u, 'target': v}} for u, v in graph.edges()]
+    # elements = nodes + edges
+
+    # Pass the graph data to the template
+    context = {"elements": elements}
+
+    return render(request, "runs/visualisation.html", context)

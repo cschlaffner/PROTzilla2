@@ -918,6 +918,20 @@
             "default": "no"
           }
         }
+      },
+      "variation_graph": {
+        "name": "Protein Variation Graph",
+        "description": "Visualises a Protein-Variation-Graph",
+        "parameters": {
+          "graph_file_path":{
+            "name": "Graph File Path from previous graph generation",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          }
+        }
       }
     },
     "clustering": {

@@ -20,9 +20,11 @@ def create_graph(protein_id: str, run_path: str, queue_size: int = None):
             )
 
     output_folder = f"{run_path}/graphs"
-    output_csv = f"{run_path}/graphs/{protein_id}.csv"
-    graph_path = f"{run_path}/exported_graphs/{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} --export_output_folder={output_folder} --output_csv={output_csv}"
+    output_csv = f"{output_folder}/{protein_id}.csv"
+    graph_path = f"{output_folder}/{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                --export_output_folder={output_folder} \
+                --output_csv={output_csv}"
     subprocess.run(cmd_str, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
@@ -52,7 +54,3 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
             return "", r
 
     return path_to_protein_file, r
-
-
-if __name__ == "__main__":
-    create_graph("F1SN85", "test_run")

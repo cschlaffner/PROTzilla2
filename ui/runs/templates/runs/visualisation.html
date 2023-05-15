@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/cytoscape-3.24.0.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/cytoscape-dagre.js' %}"></script>
+
+{% endblock %}
+
+{% block content %}
+    <style>
+        #cy {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <div id="cy"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("cytoscape")
+            var cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: {{ elements|safe }},
+                layout: {
+                    name: 'cose', // Use the 'cose' layout algorithm
+                    idealEdgeLength: 100,
+                    nodeOverlap: 20,
+                    refresh: 20,
+                    fit: true,
+                    padding: 30,
+                    randomize: false,
+                    componentSpacing: 100,
+                    nodeRepulsion: 400000,
+                    edgeElasticity: 100,
+                    nestingFactor: 5,
+                    gravity: 80,
+                    numIter: 1000,
+                    initialTemp: 200,
+                    coolingFactor: 0.95,
+                    minTemp: 1.0
+                },
+                style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'label': 'data(label)', // Use the 'label' attribute for node labels
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'background-color': 'lightblue', // Example node style
+                        'width': '60px',
+                        'height': '60px'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#ccc',
+                        'target-arrow-color': '#ccc',
+                        'target-arrow-shape': 'triangle'
+                    }
+                }
+            ]
+            });
+        });
+    </script>
+
+{% endblock %}
