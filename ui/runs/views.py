@@ -1,16 +1,17 @@
 import sys
+import tempfile
 import traceback
+import zipfile
 
+import pandas as pd
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import FileResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
-import plotly.graph_objs as go
 
 sys.path.append(f"{BASE_DIR}/..")
-
 
 from protzilla.run import Run
 from ui.runs.fields import (
@@ -23,7 +24,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import parameters_for_plot, parameters_from_post
 
 active_runs = {}
 
@@ -45,9 +46,8 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.calculated_method is not None or (
-        run.step == "plot" and len(run.plots) > 0
-    )
+    allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
+    end_of_run = not step
     return render(
         request,
         "runs/details.html",
@@ -60,16 +60,17 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next"),
+            name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
             current_plots=[
-                plot.to_html() if not isinstance(plot, dict) else ""
+                plot.to_html(include_plotlyjs=False, full_html=False)
                 for plot in run.plots
+                if not isinstance(plot, dict)
             ],
-            show_next=run.calculated_method is not None
-            or (run.step == "plot" and len(run.plots) > 0),
+            show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
+            end_of_run=end_of_run,
         ),
     )
 
@@ -117,17 +118,42 @@ def change_field(request, run_name):
         response.status_code = 404  # not found
         return response
 
+    selected = request.POST.getlist("selected[]")
     post_id = request.POST["id"]
-    selected = request.POST["selected"]
+    if len(selected) > 1:
+        # remove last 4 characters from post_id to get the original id
+        # because multiple selected items are in id_div
+        post_id = post_id[:-4]
+
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
     fields_to_fill = parameters[post_id]["fill_dynamic"]
 
     fields = {}
     for key in fields_to_fill:
-        param_dict = parameters[key]
+        if len(selected) == 1:
+            param_dict = parameters[key]
+        else:
+            param_dict = parameters[post_id]["fields"][key]
+
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
-            fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        elif param_dict["fill"] == "protein_ids":
+            named_output = selected[0]
+            output_item = selected[1]
+            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            if isinstance(protein_itr, pd.DataFrame):
+                param_dict["categories"] = protein_itr["Protein ID"].unique()
+            elif isinstance(protein_itr, pd.Series):
+                param_dict["categories"] = protein_itr.unique()
+            elif isinstance(protein_itr, list):
+                param_dict["categories"] = protein_itr
+            else:
+                param_dict["categories"] = []
+                print(
+                    f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
+                )
+
+        fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
@@ -199,14 +225,13 @@ def export_workflow(request, run_name):
 
 def calculate(request, run_name):
     run = active_runs[run_name]
-    section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
 
     for k, v in dict(request.FILES).items():
         # assumption: only one file uploaded
         parameters[k] = v[0].temporary_file_path()
-    run.perform_calculation_from_location(section, step, method, parameters)
+    run.perform_current_calculation_step(parameters)
 
     result = run.current_out
     if "messages" in result:
@@ -232,10 +257,21 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    parameters = parameters_from_post(request.POST)
+
+    parameters = {}
+    post_data = dict(request.POST)
+
+    if "csrfmiddlewaretoken" in post_data:
+        del post_data["csrfmiddlewaretoken"]
+
     if run.step == "plot":
-        del parameters["chosen_method"]
-    run.create_plot_from_location(section, step, method, parameters)
+        del post_data["chosen_method"]
+
+    param_dict = run.workflow_meta[section][step][method]["parameters"]
+    post_data, parameters = parameters_for_plot(post_data, param_dict)
+
+    parameters.update(parameters_from_post(post_data))
+    run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
         if isinstance(p, dict):
@@ -262,7 +298,7 @@ def plot(request, run_name):
 
 def add_name(request, run_name):
     run = active_runs[run_name]
-    run.history.name_step(int(request.POST["index"]), request.POST["name"])
+    run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -293,3 +329,25 @@ def outputs_of_step(request, run_name):
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
+
+
+def download_plots(request, run_name):
+    run = active_runs[run_name]
+    format_ = request.GET["format"]
+    exported = run.export_plots(format_=format_)
+    if len(exported) == 1:
+        filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
+        return FileResponse(exported[0], filename=filename, as_attachment=True)
+
+    f = tempfile.NamedTemporaryFile()
+    with zipfile.ZipFile(f, "w") as zf:
+        for i, plot in enumerate(exported):
+            filename = (
+                f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
+            )
+            zf.writestr(filename, plot.getvalue())
+    return FileResponse(
+        open(f.name, "rb"),
+        filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
+        as_attachment=True,
+    )

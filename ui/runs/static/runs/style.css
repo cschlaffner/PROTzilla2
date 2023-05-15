@@ -53,3 +53,11 @@ html, body {
 .plot-wrapper div:nth-child(2) {
     width: 100%;
 }
+
+.form-select[multiple] {
+    max-width: 800px !important;
+}
+  
+.rotate-icon {
+    transform: rotate(180deg);
+}

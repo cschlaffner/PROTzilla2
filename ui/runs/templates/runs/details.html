@@ -7,13 +7,14 @@
 
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
         {% include 'runs/form_buttons.html' with results_exist=show_next %}
     {% endif %}
-    {% include 'runs/file_upload.html'%}
-    {% include 'runs/sidebar_toggle.html' %}
+    {% include 'runs/plot_width.html' with displayed_history=displayed_history%}
 
 {% endblock %}
 
@@ -37,129 +38,142 @@
             <div class="header justify-content-end d-flex" id="header-content">
                 <button type="button" id="sidebarCollapse" class="btn btn-blue p-1 d-inline">
                     <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="22" height="22"
-                    id="header_toggle">
+                         id="header_toggle">
                 </button>
             </div>
 
             <div id="main-content">
                 {# show history #}
                 {% if displayed_history %}
-                    <div class="row justify-content-center d-flex">
-                        <h3>History</h3>
+                    <div class="row d-flex justify-content-between align-items-center">
+                        <h3 class="col-11">History</h3>
+                        <svg data-bs-toggle="collapse" id="toggleChevron" href="#collapseHistory" role="button" aria-expanded="false" aria-controls="collapseHistory" xmlns="http://www.w3.org/2000/svg" width="27" height="27" fill="#4A536A" class="bi bi-chevron-down col" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
                     </div>
 
-                    {% for step in displayed_history %}
-                        <div class="row justify-content-center d-flex">
-                            <div class="col-7">
-                                {% if step.section_heading %}
-                                    <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
-                                {% endif %}
-
-                                <b>{{ step.display_name }}</b><br>
-                                {% if step.name %}
-                                    Name: {{ step.name }}<br>
-                                {% endif %}
-
-                                <div class="mb-3">
-                                    {% include "runs/fields.html" with fields=step.fields %}
-
-                                    {% if not step.name %}
-                                        {% include "runs/form_add_name.html" with index=step.index %}
+                    <div id="collapseHistory" class="collapse">
+                        {% for step in displayed_history %}
+                            <div class="row justify-content-center d-flex">
+                                <div class="col-7">
+                                    {% if step.section_heading %}
+                                        <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
                                     {% endif %}
+
+                                    <b>{{ step.display_name }}</b><br>
+                                    {% if step.name %}
+                                        Name: {{ step.name }}<br>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        {% include "runs/fields.html" with fields=step.fields %}
+
+                                        {% if not step.name %}
+                                            {% include "runs/form_add_name.html" with index=step.index %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {% if step.plots %}
-                            <div class="mb-4">
-                                {# display history plots #}
-                                {% for plot in step.plots %}
-                                    <div class="plot-wrapper">
-                                        {{ plot|safe }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
+                            {% if step.plots %}
+                                <div class="mb-4">
+                                    {# display history plots #}
+                                    {% for plot in step.plots %}
+                                        <div class="plot-wrapper">
+                                            {{ plot|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                     <hr class="my-4">
                 {% endif %}
 
-            {# include django messages for alerting user #}
-            {% if messages %}
-                <div class="messages">
-                    {% for message in messages %}
-                        <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
-                             role="alert">
-                            {{ message | safe }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                </div>
-                <br>
-            {% endif %}
+                {# include django messages for alerting user #}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                                 role="alert">
+                                {{ message | safe }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <br>
+                {% endif %}
 
-            {# show current step #}
-            <div class="row justify-content-center d-flex">
-                <h3>{{ display_name }}</h3>
-                {# if there are plot parameters, display method and plot parameters next to each other #}
-                {% if plot_fields %}
-                    <div class="col">
-                        <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
-                              enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="mb-1">
-                                {{ method_dropdown }}
+                {# show current step #}
+                {% if not end_of_run %}
+                    <div class="row justify-content-center d-flex">
+                        <h3>{{ display_name }}</h3>
+                        {# if there are plot parameters, display method and plot parameters next to each other #}
+                        {% if plot_fields %}
+                            <div class="col">
+                                <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
+                                      enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="mb-1">
+                                        {{ method_dropdown }}
+                                    </div>
+                                    <div id="method_parameters" class="mb-2">
+                                        {% include "runs/fields.html" with fields=fields %}
+                                    </div>
+                                    <input type="submit" id="calculate_parameters_submit" value="Calculate"
+                                           class="btn btn-red">
+                                </form>
                             </div>
-                            <div id="method_parameters" class="mb-2">
-                                {% include "runs/fields.html" with fields=fields %}
-                            </div>
-                            <input type="submit" id="calculate_parameters_submit" value="Calculate" class="btn btn-red">
-                        </form>
-                    </div>
-                    <div class="col">
-                        <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                              enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div id="plot_parameters" class="mb-2">
-                                {% include "runs/fields.html" with fields=plot_fields %}
-                            </div>
-                            <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
-                        </form>
-                    </div>
-                {% else %}
-                    <div class="col-7">
-                        {% if step != "plot" %}
-                            <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
-                                  enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {{ method_dropdown }}
-                                <div id="method_parameters" class="mb-2">
-                                    {% include "runs/fields.html" with fields=fields %}
-                                </div>
-                                <div class="form-group">
-                                    <input type="submit" value="Calculate" id="calculate_parameters_submit"
-                                           class="btn btn-red mr-auto">
-                                    {% if section == "data_preprocessing" %}
-                                        <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
-                                    {% endif %}
-                                </div>
-                            </form>
-                        {% else %}
-                            <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                  enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {{ method_dropdown }}
-                                <div id="method_parameters" class="mb-2">
-                                    {% include "runs/fields.html" with fields=fields %}
-                                </div>
-                                <div class="form-group">
+                            <div class="col">
+                                <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
+                                      enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div id="plot_parameters" class="mb-2">
+                                        {% include "runs/fields.html" with fields=plot_fields %}
+                                    </div>
                                     <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
-                                </div>
-                            </form>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="col-7">
+                                {% if step != "plot" %}
+                                    <form action="{% url 'runs:calculate' run_name %}" id="calc_form" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{ method_dropdown }}
+                                        <div id="method_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=fields %}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" value="Calculate" id="calculate_parameters_submit"
+                                                   class="btn btn-red mr-auto">
+                                            {% if section == "data_preprocessing" %}
+                                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{ method_dropdown }}
+                                        <div id="method_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=fields %}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" id="plot_parameters_submit" value="Plot"
+                                                   class="btn btn-grey">
+                                        </div>
+                                    </form>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
+                {% else %}
+                    <p>You are at the end of the run. Go back to add more steps of the same section, or add steps of
+                        the next sections on the right.</p>
                 {% endif %}
-            </div>
 
                 {# show current plots #}
                 {% if current_plots %}
@@ -171,28 +185,47 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
-                {# navigation between steps #}
-                <div class="justify-content-end d-flex">
-                    {% if show_next %}
-                        <div class="col-3 mb-2">
-                            <div class="form-group mb-0">
-                                {{ name_field }}
-                            </div>
+                <div class="row">
+                    <div class="d-flex col">
+                        {% if current_plots %}
+                            <form action="{% url 'runs:download_plots' run_name %}">
+                                <select class="form-select mb-2" name="format">
+                                    <option value="png" selected="selected">png</option>
+                                    <option value="tiff">tiff</option>
+                                    <option value="svg">svg</option>
+                                    <option value="pdf">pdf</option>
+                                    <option value="eps">eps</option>
+                                    <option value="jpg">jpg</option>
+                                </select>
+                                <button class="btn btn-grey">Download plots</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        {# navigation between steps #}
+                        <div class="justify-content-end d-flex">
+                            {% if show_next %}
+                                <div class="col-5 mb-2">
+                                    <div class="form-group mb-0">
+                                        {{ name_field }}
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
-                </div>
-                <div class="justify-content-end d-flex">
-                    <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto" {% if not show_back %}
-                            disabled {% endif %}>Back</a>
-                            <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next</button>
+                        <div class="justify-content-end d-flex">
+                            <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto"
+                                            {% if not show_back %}
+                                       disabled {% endif %}>Back</a>
+                                    <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>

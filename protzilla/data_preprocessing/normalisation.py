@@ -1,6 +1,7 @@
 import traceback
 
 import pandas as pd
+from django.contrib import messages
 from sklearn.preprocessing import StandardScaler
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
@@ -167,7 +168,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
 def by_reference_protein(
     intensity_df: pd.DataFrame,
-    reference_protein: str = None,
+    reference_protein: str,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-intensity normalisation in reference
@@ -195,11 +196,11 @@ def by_reference_protein(
             reference_protein_group = group
             break
     else:
-        try:
-            raise ValueError("The protein was not found")
-        except ValueError as error:
-            print(str(error))
-        return scaled_df, pd.DataFrame(dropped_samples, columns=["Dropped Samples"])
+        msg = "The protein was not found"
+        return scaled_df, dict(
+            dropped_samples=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
 
     samples = intensity_df["Sample"].unique().tolist()
     for sample in samples:

@@ -116,8 +116,6 @@ def umap(
     enables you to adjust the most significant parameters that affect the output. \
     You can find the default values for the non-adjustable parameters here:
     https://umap-learn.readthedocs.io/en/latest/api.html
-    Please note that the umap-learn package uses the numba version 0.57.0rc1, which is \
-    a beta version, so some bugs might arise
     
     :param input_df: the dataframe, whose dimensions should be reduced.
     :type input_df: pd.DataFrame
@@ -137,7 +135,8 @@ def umap(
     :param random_state: determines the random number generator.
     :type random_state: int
     """
-    intensity_df_wide = long_to_wide(input_df)
+
+    intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         embedded_data_model = UMAP(
             n_neighbors=n_neighbors,

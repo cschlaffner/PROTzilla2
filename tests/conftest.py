@@ -23,7 +23,7 @@ def show_figures(request):
 
 @pytest.fixture(scope="session")
 def tests_folder_name():
-    return f"/tests_{random_string()}"
+    return f"tests_{random_string()}"
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -1,10 +1,22 @@
+import copy
+
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
-    if param_dict["type"] == "named_output":
+    if (
+        param_dict["type"] == "named_output"
+        or param_dict["type"] == "named_output_with_fields"
+    ):
         param_dict["steps"] = [name for name in run.history.step_names if name]
-        if param_dict["default"]:
+        if param_dict.get("optional", False):
+            param_dict["steps"].append("None")
+
+        if (
+            "default" in param_dict
+            and param_dict["default"]
+            and param_dict["default"][0] in param_dict["steps"]
+        ):
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
@@ -23,18 +35,23 @@ def insert_special_params(param_dict, run):
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
 
+    if param_dict.get("default_select_all", False):
+        param_dict["default"] = list(param_dict.get("categories", []))
+
 
 def get_parameters(run, section, step, method):
-    parameters = run.workflow_meta[section][step][method]["parameters"]
+    """constructs a dict with all parameters, inserts the correct defaults
+    and handles special parameter types"""
+    # deepcopy to not change run.workflow_meta
+    parameters = copy.deepcopy(run.workflow_meta[section][step][method]["parameters"])
     output = {}
+
     for key, param_dict in parameters.items():
-        # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # to not change workflow_meta
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
         )
-        if run.current_parameters is not None and key in run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
+        if method in run.current_parameters and key in run.current_parameters[method]:
+            param_dict["default"] = run.current_parameters[method][key]
         elif workflow_default is not None:
             param_dict["default"] = workflow_default
 

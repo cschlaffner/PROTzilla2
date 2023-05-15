@@ -1,13 +1,19 @@
-from ..data_analysis import differential_expression
+from ..data_analysis import (
+    clustering,
+    differential_expression,
+    dimension_reduction,
+    plots,
+)
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
     imputation,
     normalisation,
     outlier_detection,
+    peptide_filter,
     transformation,
 )
-from ..importing import metadata_import, ms_data_import
+from ..importing import metadata_import, ms_data_import, peptide_import
 
 """
 In this data structure, a method is associated with a location. The location is
@@ -15,12 +21,6 @@ determined by the section, step, and method keys found in the workflow_meta
 file that correspond to the method.
 """
 method_map = {
-    (
-        "data_analysis",
-        "differential_expression",
-        "test_named",
-    ): lambda df, **kwargs: print("warning: not implemented")
-    or (df, {}),
     (
         "importing",
         "ms_data_import",
@@ -30,13 +30,13 @@ method_map = {
         "importing",
         "ms_data_import",
         "ms_fragger_import",
-    ): lambda df, feature_orientation, file: print("warning: not implemented")
-    or (df, {}),
+    ): ms_data_import.ms_fragger_import,
     (
         "importing",
         "metadata_import",
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
+    ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -118,6 +118,11 @@ method_map = {
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
     (
+        "data_preprocessing",
+        "filter_peptides",
+        "pep_filter",
+    ): peptide_filter.by_pep_value,
+    (
         "data_analysis",
         "differential_expression",
         "anova",
@@ -127,6 +132,21 @@ method_map = {
         "differential_expression",
         "t_test",
     ): differential_expression.t_test,
+    (
+        "data_analysis",
+        "clustering",
+        "k_means",
+    ): clustering.k_means,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "t_sne",
+    ): dimension_reduction.t_sne,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "umap",
+    ): dimension_reduction.umap,
 }
 
 # reversed mapping of method callable and location
@@ -218,4 +238,24 @@ plot_map = {
         "outlier_detection",
         "isolation_forest",
     ): outlier_detection.by_isolation_forest_plot,
+    (
+        "data_preprocessing",
+        "filter_peptides",
+        "pep_filter",
+    ): peptide_filter.by_pep_value_plot,
+    (
+        "data_analysis",
+        "plot",
+        "scatter_plot",
+    ): plots.scatter_plot,
+    (
+        "data_analysis",
+        "plot",
+        "volcano",
+    ): plots.create_volcano_plot,
+    (
+        "data_analysis",
+        "plot",
+        "clustergram",
+    ): plots.clustergram_plot,
 }
