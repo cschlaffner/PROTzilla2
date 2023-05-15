@@ -194,7 +194,7 @@ def test_go_analysis_with_STRING(mock_enrichment):
         proteins=proteins_df,
         protein_set_dbs=["KEGG"],
         organism=9606,
-        directions="both",
+        direction="both",
         run_name=None,
         folder_name="test_go_analysis_with_STRING",
     )
@@ -207,5 +207,166 @@ def test_go_analysis_with_STRING(mock_enrichment):
     assert current_out["summaries"][0].equals(summary)
 
 
-# check what happens if one of the list for directions is empty
-# maybe do one with a background?
+@patch(
+    "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
+)
+def test_go_analysis_with_STRING_and_background(mock_enrichment):
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    proteins_df = pd.read_csv(
+        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+    )
+
+    up_path = f"{test_data_folder}/UP_enrichment.KEGG.tsv"
+    up_df = pd.read_csv(up_path, header=0, sep="\t")
+    down_path = f"{test_data_folder}/DOWN_enrichment.KEGG.tsv"
+    down_df = pd.read_csv(down_path, header=0, sep="\t")
+
+    results = pd.read_csv(f"{test_data_folder}/KEGG_results.csv", header=0, index_col=0)
+    summary = pd.read_csv(f"{test_data_folder}/KEGG_summary.csv", header=0, index_col=0)
+    mock_enrichment.side_effect = [up_df, down_df]
+
+    # copy files to test aggregation
+    test_folder = f"{test_data_folder}/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
+    os.makedirs(test_folder, exist_ok=True)
+    shutil.copy(up_path, test_folder)
+    shutil.copy(down_path, test_folder)
+    current_dir = os.getcwd()
+    os.chdir(test_data_folder)
+
+    current_out = go_analysis_with_STRING(
+        proteins=proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="both",
+        background=f"{test_data_folder}/background_imported_proteins.csv",
+        run_name=None,
+        folder_name="test_go_analysis_with_STRING",
+    )
+
+    os.chdir(current_dir)
+    assert current_out["results"][0].equals(results)
+    assert current_out["summaries"][0].equals(summary)
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
+)
+def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    proteins_df = pd.read_csv(
+        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+    )
+    up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
+    down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
+
+    up_path = f"{test_data_folder}/UP_enrichment.KEGG.tsv"
+    up_df = pd.read_csv(up_path, header=0, sep="\t")
+    down_path = f"{test_data_folder}/DOWN_enrichment.KEGG.tsv"
+    down_df = pd.read_csv(down_path, header=0, sep="\t")
+    mock_enrichment.side_effect = [up_df, down_df]
+
+    # copy files to test aggregation
+    test_folder = f"{test_data_folder}/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
+    os.makedirs(test_folder, exist_ok=True)
+    shutil.copy(up_path, test_folder)
+    current_dir = os.getcwd()
+    os.chdir(test_data_folder)
+
+    current_out = go_analysis_with_STRING(
+        proteins=up_proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="both",
+        run_name=None,
+        folder_name="test_go_analysis_with_STRING",
+    )
+
+    os.chdir(current_dir)
+    assert "messages" in current_out
+    assert (
+        "No downregulated proteins"
+        in current_out["messages"][0]["msg"]
+    )
+
+    os.makedirs(test_folder, exist_ok=True)
+    shutil.copy(down_path, test_folder)
+    current_dir = os.getcwd()
+    os.chdir(test_data_folder)
+
+    current_out = go_analysis_with_STRING(
+        proteins=down_proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="both",
+        run_name=None,
+        folder_name="test_go_analysis_with_STRING",
+    )
+
+    os.chdir(current_dir)
+    assert "messages" in current_out
+    assert (
+        "No upregulated proteins"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+def test_go_analysis_with_STRING_no_upregulated_proteins():
+    proteins_df = pd.DataFrame({
+        "Protein ID": ["Protein1", "Protein2", "Protein3"],
+        "log2_fold_change": [-1.0, -0.5, -0.0],
+    })
+
+    current_out = go_analysis_with_STRING(
+        proteins=proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="up",
+    )
+
+    assert "messages" in current_out
+    assert (
+        "No upregulated proteins"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+def test_go_analysis_with_STRING_no_downregulated_proteins():
+    proteins_df = pd.DataFrame({
+        "Protein ID": ["Protein1", "Protein2", "Protein3"],
+        "log2_fold_change": [1.0, 0.5, 0.0],
+    })
+
+    current_out = go_analysis_with_STRING(
+        proteins=proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="down",
+    )
+
+    assert "messages" in current_out
+    assert (
+        "No downregulated proteins"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+def test_go_analysis_with_STRING_no_proteins():
+    proteins_df = pd.DataFrame({
+        "Protein ID": [],
+        "log2_fold_change": [],
+    })
+
+    current_out = go_analysis_with_STRING(
+        proteins=proteins_df,
+        protein_set_dbs=["KEGG"],
+        organism=9606,
+        direction="both",
+    )
+
+    print(current_out)
+    assert "messages" in current_out
+    assert (
+        "No proteins"
+        in current_out["messages"][0]["msg"]
+    )
+

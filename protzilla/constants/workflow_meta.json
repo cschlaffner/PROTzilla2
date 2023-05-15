@@ -1061,7 +1061,7 @@
             "type": "numeric",
             "default": 9606
           },
-          "directions": {
+          "direction": {
             "name": "Direction of the analysis",
             "type": "categorical",
             "categories": [

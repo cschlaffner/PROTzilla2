@@ -33,12 +33,13 @@ def go_analysis_with_STRING(
     protein_set_dbs,
     organism,
     background=None,
-    directions="both",
+    direction="both",
     run_name=None,
     folder_name=None,
 ):
     # TODO: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
+    out_messages = []
 
     if (
         not isinstance(proteins, pd.DataFrame)
@@ -49,10 +50,32 @@ def go_analysis_with_STRING(
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0].to_frame()
-    proteins.set_index("Protein ID", inplace=True)
-    up_protein_list = list(proteins[expression_change_col > 0].index)
-    down_protein_list = list(proteins[expression_change_col < 0].index)
+    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    up_protein_list = list(proteins.loc[expression_change_col > 0, 'Protein ID'])
+    down_protein_list = list(proteins.loc[expression_change_col < 0, 'Protein ID'])
+
+    if len(up_protein_list) == 0:
+        if direction == "up":
+            msg = "No upregulated proteins found. Check your input or select 'down' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both" and len(down_protein_list) == 0:
+            msg = "No proteins found. Check your input."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No upregulated proteins found. Running analysis for 'down' direction only."
+            logging.warning(msg)
+            direction = "down"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
+        
+    if len(down_protein_list) == 0:
+        if direction == "down":
+            msg = "No downregulated proteins found. Check your input or select 'up' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No downregulated proteins found. Running analysis for 'up' direction only."
+            logging.warning(msg)
+            direction = "up"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if background == "" or background is None:
         logging.info("No background provided, using entire proteome")
@@ -98,14 +121,14 @@ def go_analysis_with_STRING(
 
     # enhancement: add mapping to string API for identifiers before this (dont forget background)
 
-    if "up" in directions or "both" in directions:
+    if direction == "up" or direction == "both":
         logging.info("Starting analysis for up-regulated proteins")
 
         up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
         restring.write_functional_enrichment_tables(up_df, prefix="UP_")
         logging.info("Finished analysis for up-regulated proteins")
 
-    if "down" in directions or "both" in directions:
+    if direction == "down" or direction == "both":
         logging.info("Starting analysis for down-regulated proteins")
 
         down_df = get_functional_enrichment_with_delay(
@@ -137,6 +160,9 @@ def go_analysis_with_STRING(
     # delete tmp folder if it was created
     if os.path.basename(results_path) == "tmp_enrichment_results":
         shutil.rmtree(results_path)
+
+    if len(out_messages) > 0:
+        return dict(messages=out_messages, results=results, summaries=summaries)
 
     return {"results": results, "summaries": summaries}
 
