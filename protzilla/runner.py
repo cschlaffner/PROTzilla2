@@ -102,7 +102,7 @@ class Runner:
                 self.run.next_step()
                 DebugInfo().measure_end("total next step overhead")
         logging.info(str(DebugInfo()))
-        DebugInfo().save_print_elements()
+        DebugInfo().save()
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":

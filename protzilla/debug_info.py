@@ -73,6 +73,7 @@ class DebugInfo:
         if run_name is not None:
             self.run_name = run_name
         path = Path(f"{PROJECT_PATH}/user_data/debug/{self.run_name}.txt")
+        print("saving in", path)
         with open(path, "w") as f:
             f.write(str(self))
 
