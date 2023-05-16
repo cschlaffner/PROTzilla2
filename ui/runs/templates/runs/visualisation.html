@@ -1,74 +1,88 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 {% load static %}
+<head>
+    <style id="__________cytoscape_stylesheet">.__________cytoscape_container {
+        position: relative;
+    }</style>
+    <title>cytoscape-klay.js demo</title>
 
-{% block js %}
-{#    <script type="text/javascript" src="{% static 'js/cytoscape-3.24.0.min.js' %}"></script>#}
-{#    <script type="text/javascript" src="{% static 'js/cytoscape-dagre.js' %}"></script>#}
-{#    <script type="text/javascript" src="{% static 'js/cytoscape-klay.js' %}"></script>#}
-{#    <script type="text/javascript" src="{% static 'js/klay-2.js' %}"></script>#}
-{#    <script type="text/javascript" src="{% static 'js/cytoscape-fcose.js' %}"></script>#}
-{% endblock %}
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
-{% block content %}
+    <!-- the demo uses fetch() -->
+    <script src="https://unpkg.com/bluebird@3.5.1/js/browser/bluebird.js"></script>
+    <script src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+    <script src="https://unpkg.com/klayjs@0.4.1/klay.js"></script>
+    <script type="text/javascript" src="{% static 'js/cytoscape-klay.js' %}"></script>
+
     <style>
+        body {
+            font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+            font-size: 14px;
+        }
+
         #cy {
-            height: 1080px;
-            width: 1920px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        h1 {
+            opacity: 0.5;
+            font-size: 1em;
+            font-weight: bold;
         }
     </style>
-    <div id="cy"></div>
-    <script type="module"> //type="module"
-        import cytoscape from "/cytoscape";
-        import cytoscapeKlay from '/cytoscape-klay';
 
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
-            console.log("cytoscape")
-            cytoscape.use(cytoscapeKlay);
-            var cy = cytoscape({
+
+            var cy = window.cy = cytoscape({
                 container: document.getElementById('cy'),
-                elements: {{ elements|safe }},
+
+                // demo your layout
                 layout: {
-                    name: 'cose',
-                    {#idealEdgeLength: 100,#}
-                    {#nodeOverlap: 20,#}
-                    {#refresh: 20,#}
-                    {#fit: true,#}
-                    {#padding: 30,#}
-                    {#randomize: false,#}
-                    {#componentSpacing: 100,#}
-                    {#nodeRepulsion: 400000,#}
-                    {#edgeElasticity: 100,#}
-                    {#nestingFactor: 5,#}
-                    {#gravity: 80,#}
-                    {#numIter: 1000,#}
-                    {#initialTemp: 200,#}
-                    {#coolingFactor: 0.95,#}
-                    {#minTemp: 1.0#}
+                    name: 'klay',
+
+                    // some more options here...
                 },
+
                 style: [
                     {
                         selector: 'node',
                         style: {
-                            'label': 'data(label)', // Use the 'label' attribute for node labels
-                            'text-valign': 'center',
-                            'text-halign': 'center',
-                            'background-color': 'lightblue', // Example node style
-                            'width': '60px',
-                            'height': '60px'
+                            'background-color': '#dd4de2'
                         }
                     },
+
                     {
                         selector: 'edge',
                         style: {
-                            'width': 2,
-                            'line-color': '#ccc',
-                            'target-arrow-color': '#ccc',
-                            'target-arrow-shape': 'triangle'
+                            'curve-style': 'bezier',
+                            'target-arrow-shape': 'triangle',
+                            'line-color': '#dd4de2',
+                            'target-arrow-color': '#dd4de2',
+                            'opacity': 0.5
                         }
                     }
-                ]
+                ],
+
+                elements: {{ elements|safe }}
             });
         });
     </script>
-
-{% endblock %}
+</head>
+<body>
+<h1>cytoscape-klay.js demo</h1>
+<div id="cy"></div>
+</body>
+</html>
