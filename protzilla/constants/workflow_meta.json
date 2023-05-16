@@ -151,6 +151,32 @@
           }
         ]
       },
+      "proteins_missing_filter": {
+        "name": "Proteins Missing",
+        "description": "Filters all samples that contain less that a set percentage of proteins",
+        "parameters": {
+          "percentage": {
+            "name": "Percentage of minimum non-missing proteins per sample",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
       "protein_intensity_sum_filter": {
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
