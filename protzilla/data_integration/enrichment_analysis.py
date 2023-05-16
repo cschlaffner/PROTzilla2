@@ -18,6 +18,17 @@ MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
 
 
 def get_functional_enrichment_with_delay(protein_list, **string_params):
+    """
+    This method performs online functional enrichment analysis using the STRING DB API
+    via the restring package. It adds a delay between calls to the API to avoid
+    exceeding the rate limit.
+    :param protein_list: list of protein IDs to perform enrichment analysis for
+    :type protein_list: list
+    :param string_params: parameters for the restring package
+    :type string_params: dict
+    :return: dataframe with functional enrichment results
+    :rtype: pandas.DataFrame
+    """
     global last_call_time
     if last_call_time is not None:
         elapsed_time = time.time() - last_call_time
@@ -37,6 +48,42 @@ def go_analysis_with_STRING(
     run_name=None,
     folder_name=None,
 ):
+    """
+    This method performs online functional enrichment analysis using the STRING DB API
+    via the restring package. It writes the results to a folder in an 
+    enrichment_results folder in the run folder or to a tmp folder (for testing).
+    Results for up- and down-regulated proteins are then aggregated and written
+    into summary and results dataframes. These are also written to the run folder.
+
+    :param proteins: dataframe with protein IDs and expression change column 
+        (e.g. log2 fold change). The expression change column is used to determine
+        up- and down-regulated proteins. The magnitude of the expression change is
+        not used.
+    :type proteins: pandas.DataFrame
+    :param protein_set_dbs: list of protein set databases to use for enrichment
+        Possible values: KEGG, Component, Function, Process and RCTM
+    :type protein_set_dbs: list
+    :param organism: organism to use for enrichment as NCBI taxon identifier
+        (e.g. Human is 9606)
+    :type organism: int
+    :param background: path to csv file with background proteins (one protein ID per line).
+        If no background is provided, the entire proteome is used as background.
+    :type background: str or None
+    :param direction: direction of enrichment analysis. 
+        Possible values: up, down, both
+        - up: Log2FC is > 0
+        - down: Log2FC is < 0
+        - both: functional enrichment info is retrieved for upregulated and downregulated 
+        proteins separately, but the terms are aggregated for the summary and results
+    :type direction: str
+    :param run_name: name of the run folder to write results to. If None, a tmp folder
+        is used.
+    :type run_name: str or None
+    :param folder_name: name of the folder to write results to. If None, a random string
+        is used. This is for testing purposes.
+    :type folder_name: str or None    
+    """
+
     # TODO: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
     out_messages = []
@@ -106,7 +153,6 @@ def go_analysis_with_STRING(
     os.makedirs(results_path, exist_ok=True)
 
     # make folder for current enrichment analysis and details of analysis
-
     enrichment_folder_name = (
         f"enrichment_{random_string()}" if folder_name is None else folder_name
     )
@@ -168,10 +214,34 @@ def go_analysis_with_STRING(
 
 
 def go_analysis_offline(proteins, protein_sets_path, background=None):
-    """dev notes
-    background: list or number of proteins? (could be upload or named_output)
-    for named-output: - list of proteins, or dataframe with multiple columns and we just want to use first
     """
+    A method that performs offline overrepresentation analysis for a given set of proteins
+    against a given set of protein sets using the GSEApy package.
+    For the analysis a hypergeometric test is used.
+
+    :param proteins: proteins to be analyzed
+    :type proteins: list, series or dataframe
+    :param protein_sets_path: path to file containing protein sets. The identifers 
+        in the protein_sets should be the same type as the backgrounds and the proteins.
+
+        This could be any of the following file types: .gmt, .txt, .csv, .json
+        - .txt: 
+            Set_name: Protein1, Protein2, ...
+            Set_name2: Protein2, Protein3, ...
+        - .csv:
+            Set_name, Protein1, Protein2, ...
+            Set_name2, Protein2, Protein3, ...
+        - .json:
+            {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type protein_sets_path: str
+    :param background: background proteins to be used for the analysis. If no
+        background is provided, all proteins in protein sets are used.
+        The background is defined by your experiment.
+    :type background: str or None
+    """
+    # enhancement: proteins could also be a number input (or an uploaded file)
+    # dependency: refactoring/designing of more complex input choices
+
     # enhancement: make sure ID type for all inputs match
 
     if protein_sets_path == "":
@@ -257,11 +327,12 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism):
-    """dev notes
-    protein_sets are categorical for now, could also be custom file upload later
+    # This needs to have gene identifiers
 
-    background only works with uploaded file
-    """
+    # enhancement: protein_sets are categorical for now, could also be custom file upload later
+    #       background parameter would work then (with uploaded file)
+    # dependency: refactoring/designing of more complex input choices
+
     # enhancement: make sure ID type for all inputs match
     enr = gp.enrichr(
         gene_list=proteins,
