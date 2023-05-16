@@ -155,16 +155,6 @@ method_map = {
         "enrichment_analysis",
         "go_analysis_with_STRING",
     ): enrichment_analysis.go_analysis_with_STRING,
-    (
-        "data_integration",
-        "enrichment_analysis",
-        "go_analysis_with_enrichr",
-    ): enrichment_analysis.go_analysis_with_enrichr,
-    (
-        "data_integration",
-        "enrichment_analysis",
-        "go_analysis_offline",
-    ): enrichment_analysis.go_analysis_offline,
 }
 
 # reversed mapping of method callable and location

@@ -1,2 +1,0 @@
-Set1: Protein1, Protein2, Protein3, Protein4, Protein7, Protein8, Protein9, Protein10
-Set2: Protein1, Protein3, Protein5, Protein6, Protein7, Protein8, Protein9, Protein10

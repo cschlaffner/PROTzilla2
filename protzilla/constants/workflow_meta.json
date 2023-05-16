@@ -1047,52 +1047,6 @@
   },
   "data_integration": {  
     "enrichment_analysis": {
-      "go_analysis_offline": {
-        "name": "GO Analysis offline",
-        "description": "Offline GO Analysis using a hypergeometric test",
-        "parameters": {
-          "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
-            "type": "named_output",
-            "default": [null,null]
-          },
-          "protein_sets_path": {
-            "name": "Upload Protein Sets {'Name of set': ['protein1', 'protein2', ...], ...}",
-            "type": "file",
-            "default": null
-          },
-          "background": {
-            "name": "Background set (list of proteins or no upload)",
-            "type": "file",
-            "default": null
-          }
-        }
-      },
-      "go_analysis_with_enrichr": {
-        "name": "GO Analysis with enrichr",
-        "description": "Online GO Analysis using Enrichr API",
-        "parameters": {
-          "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
-            "type": "named_output",
-            "default": [null,null]
-          },
-          "protein_sets": {
-            "name": "Protein Sets",
-            "type": "categorical",
-            "fill": "dbs_gseapy",
-            "categories": [],
-            "default": null,
-            "multiple": true
-          },
-          "organism": {
-            "name": "Enrichr supported organism",
-            "type": "categorical",
-            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
-            "default": "human"
-          }
-        }
-      },
       "go_analysis_with_STRING": {
         "name": "GO Analysis with STRING",
         "description": "Online GO Analysis using STRING API",
