@@ -47,12 +47,12 @@ def go_analysis_with_STRING(
 ):
     """
     This method performs online functional enrichment analysis using the STRING DB API
-    via the restring package. It writes the results to a folder in an 
+    via the restring package. It writes the results to a folder in an
     enrichment_results folder in the run folder or to a tmp folder (for testing).
     Results for up- and down-regulated proteins are then aggregated and written
     into summary and results dataframes. These are also written to the run folder.
 
-    :param proteins: dataframe with protein IDs and expression change column 
+    :param proteins: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
         up- and down-regulated proteins. The magnitude of the expression change is
         not used.
@@ -66,11 +66,11 @@ def go_analysis_with_STRING(
     :param background: path to csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background: str or None
-    :param direction: direction of enrichment analysis. 
+    :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
-        - both: functional enrichment info is retrieved for upregulated and downregulated 
+        - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the summary and results
     :type direction: str
     :param run_name: name of the run folder to write results to. If None, a tmp folder
@@ -78,7 +78,7 @@ def go_analysis_with_STRING(
     :type run_name: str or None
     :param folder_name: name of the folder to write results to. If None, a random string
         is used. This is for testing purposes.
-    :type folder_name: str or None    
+    :type folder_name: str or None
     """
 
     # TODO: set logging level for whole django app in beginning
