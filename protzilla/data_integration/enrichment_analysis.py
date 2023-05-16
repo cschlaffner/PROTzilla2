@@ -327,13 +327,26 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism):
-    # This needs to have gene identifiers
+    """
+    A method that performs online overrepresentation analysis for a given set of proteins
+    against a given set of protein sets using the GSEApy package which accesses
+    the Enrichr API. Given Uniprot Protein IDs are converted to gene symbols.
 
+    :param proteins: proteins to be analyzed
+    :type proteins: list, series or dataframe
+    :param protein_sets: list of Enrichr Library name(s) to use as sets for the enrichment
+        (e.g. ['KEGG_2016','KEGG_2013'])
+    :type protein_sets_path: list of str
+    :param organism: organism to be used for the analysis, must be one of the following
+        supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
+    :type organism: str
+        
+    """
     # enhancement: protein_sets are categorical for now, could also be custom file upload later
     #       background parameter would work then (with uploaded file)
     # dependency: refactoring/designing of more complex input choices
 
-    # enhancement: make sure ID type for all inputs match
+    # TODO: convert Uniprot IDs to gene symbols
     enr = gp.enrichr(
         gene_list=proteins,
         gene_sets=protein_sets,
