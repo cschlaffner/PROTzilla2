@@ -1,21 +1,22 @@
 import copy
+import os, psutil
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
     if (
-        param_dict["type"] == "named_output"
-        or param_dict["type"] == "named_output_with_fields"
+            param_dict["type"] == "named_output"
+            or param_dict["type"] == "named_output_with_fields"
     ):
         param_dict["steps"] = [name for name in run.history.step_names if name]
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
         if (
-            "default" in param_dict
-            and param_dict["default"]
-            and param_dict["default"][0] in param_dict["steps"]
+                "default" in param_dict
+                and param_dict["default"]
+                and param_dict["default"][0] in param_dict["steps"]
         ):
             selected = param_dict["default"][0]
         else:
@@ -27,7 +28,7 @@ def insert_special_params(param_dict, run):
             # Sample not needed for anova and t-test
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
-            ].unique()
+                ].unique()
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
@@ -58,3 +59,8 @@ def get_parameters(run, section, step, method):
         insert_special_params(param_dict, run)
         output[key] = param_dict
     return output
+
+
+def get_memory_usage():
+    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+    return f"{round(memory_mb,1)} MB"

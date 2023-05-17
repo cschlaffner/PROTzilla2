@@ -11,6 +11,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
+from protzilla.run_helper import get_memory_usage
+
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
@@ -71,7 +73,7 @@ def detail(request, run_name):
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
-            used_memory=234,
+            used_memory=get_memory_usage(),
         ),
     )
 
