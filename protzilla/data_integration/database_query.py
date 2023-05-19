@@ -1,5 +1,6 @@
 import requests
 from xml.etree.ElementTree import Element, SubElement, tostring
+import pandas
 
 
 def biomart_query(queries, filter_name, attributes):
@@ -32,3 +33,8 @@ def biomart_query(queries, filter_name, attributes):
     )
     for line in response.iter_lines():
         yield line.decode("utf-8").split("\t")
+
+
+def uniprot_query(uniprot_ids):
+    df = pandas.read_csv("uniprot.tsv", sep="\t")
+    return df[df.Entry.isin(uniprot_ids)]
