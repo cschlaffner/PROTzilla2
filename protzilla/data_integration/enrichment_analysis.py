@@ -51,12 +51,12 @@ def go_analysis_with_STRING(
 ):
     """
     This method performs online functional enrichment analysis using the STRING DB API
-    via the restring package. It writes the results to a folder in an 
+    via the restring package. It writes the results to a folder in an
     enrichment_results folder in the run folder or to a tmp folder (for testing).
     Results for up- and down-regulated proteins are then aggregated and written
     into summary and results dataframes. These are also written to the run folder.
 
-    :param proteins: dataframe with protein IDs and expression change column 
+    :param proteins: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
         up- and down-regulated proteins. The magnitude of the expression change is
         not used.
@@ -70,11 +70,11 @@ def go_analysis_with_STRING(
     :param background: path to csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background: str or None
-    :param direction: direction of enrichment analysis. 
+    :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
-        - both: functional enrichment info is retrieved for upregulated and downregulated 
+        - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the summary and results
     :type direction: str
     :param run_name: name of the run folder to write results to. If None, a tmp folder
@@ -82,7 +82,7 @@ def go_analysis_with_STRING(
     :type run_name: str or None
     :param folder_name: name of the folder to write results to. If None, a random string
         is used. This is for testing purposes.
-    :type folder_name: str or None    
+    :type folder_name: str or None
     """
 
     # TODO: set logging level for whole django app in beginning
@@ -222,11 +222,11 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
-    :param protein_sets_path: path to file containing protein sets. The identifers 
+    :param protein_sets_path: path to file containing protein sets. The identifers
         in the protein_sets should be the same type as the backgrounds and the proteins.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
-        - .txt: 
+        - .txt:
             Set_name: Protein1, Protein2, ...
             Set_name2: Protein2, Protein3, ...
         - .csv:
@@ -355,8 +355,16 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                     without_isoforms.add(protein)
             proteins_list.extend(list(without_isoforms))
 
-    q = list(biomart_query(proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]))
-    q += list(biomart_query(proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]))
+    q = list(
+        biomart_query(
+            proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
+        )
+    )
+    q += list(
+        biomart_query(
+            proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
+        )
+    )
     q = dict(list(set(map(tuple, q))))
 
     # check per group in proteins if all proteins have the same gene symbol
@@ -387,7 +395,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                 filtered_groups.append(group)
             elif len(set(symbols)) == 1:
                 gene_symbols.append(symbols[0].upper())
-            else:               
+            else:
                 gene_symbols.extend([s.upper() for s in symbols if s is not None])
 
     return gene_symbols, filtered_groups
@@ -434,7 +442,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
         )
 
     gene_symbols, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(proteins)
- 
+
     enr = gp.enrichr(
         gene_list=gene_symbols,
         gene_sets=protein_sets,
@@ -445,6 +453,10 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
 
     if len(filtered_groups) > 0:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return dict(results=enr.results, filtered_groups = filtered_groups, messages=[dict(level=messages.WARNING, msg=msg)])
+        return dict(
+            results=enr.results,
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.WARNING, msg=msg)],
+        )
 
     return {"results": enr.results, "filtered_groups": filtered_groups}

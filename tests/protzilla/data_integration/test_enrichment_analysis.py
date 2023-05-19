@@ -85,30 +85,6 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     assert result1.equals(mock_df)
 
 
-@patch("gseapy.enrichr")
-def test_go_analysis_with_enrichr(mock_enrichment):
-    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"]
-    protein_sets = ["KEGG_2016_Human", "Reactome_2013"]
-    organism = "human"
-
-    results_data = {
-        "Gene_set": protein_sets,
-        "Term": ["Osteoclast differentiation", "Tubeculosis"],
-        "Overlap": ["4/127", "3/180"],
-        "P-value": [1.1161882628266645e-13, 5.807039550271945e-12],
-        "Adjusted P-value": [3.1364890185429266e-11, 8.158890568132082e-10],
-        "Old P-value": [0, 0],
-        "Old Adjusted P-value": [0, 0],
-        "Odds Ratio": [6.997801852724132, 5.154266414152434],
-        "Combined Score": [208.7002497987126, 133.35092408122657],
-        "Genes": ["Protein1;Protein2;Protein3;Protein4", "Protein3;Protein5;Protein6"],
-    }
-    mock_enrichment.results = pd.DataFrame(results_data)
-    current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
-
-    assert current_out["results"].equals(mock_enrichment.results)
-
-
 @patch(
     "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
 )
@@ -585,3 +561,51 @@ def test_go_analysis_offline_invalid_background_set_file():
     assert "messages" in current_out
     assert "Invalid file type" in current_out["messages"][0]["msg"]
     assert "background" in current_out["messages"][0]["msg"]
+
+
+def test_go_analysis_with_enrichr_wrong_proteins_input():
+    current_out = go_analysis_with_enrichr(
+        proteins="Protein1;Protein2;aStringOfProteins",
+        protein_set_dbs=["KEGG"],
+        organism="human",
+    )
+
+    assert "messages" in current_out
+    assert "Invalid input" in current_out["messages"][0]["msg"]
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_go_analysis_with_enrichr(mock_gene_symbols):
+    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"]
+    protein_sets = ["Reactome_2013"]
+    organism = "human"
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv")
+
+    mock_gene_symbols.return_value = [
+        "ENO1", "ENO2", "ENO3", 
+        "HK2", "HK1", "HK3",
+        "IDH3B", "ATP6V1G2", "GPT2",
+        "SDHB", "COX6B1"
+    ], ["Protein5"]
+    current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
+    df = current_out["results"]
+ 
+    column_names = ["Term", "Genes", "Gene_set", "Overlap"]
+    # Compare all specified columns
+    for column in column_names:
+        assert df[column].equals(results[column])
+
+    # Compare the numeric columns separately with a tolerance for numerical equality
+    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value", "Old P-value", 
+                         "Old Adjusted P-value", "Combined Score"]
+    for column in numerical_columns:
+        numerical_equal = np.isclose(
+            df[column], results[column], rtol=1e-05, atol=1e-08
+        )
+        assert numerical_equal.all()
+
+    assert "messages" in current_out
+    assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
