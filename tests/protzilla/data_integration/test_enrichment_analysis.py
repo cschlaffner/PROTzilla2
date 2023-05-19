@@ -566,7 +566,7 @@ def test_go_analysis_offline_invalid_background_set_file():
 def test_go_analysis_with_enrichr_wrong_proteins_input():
     current_out = go_analysis_with_enrichr(
         proteins="Protein1;Protein2;aStringOfProteins",
-        protein_set_dbs=["KEGG"],
+        protein_sets=["KEGG"],
         organism="human",
     )
 
