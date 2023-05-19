@@ -585,22 +585,35 @@ def test_go_analysis_with_enrichr(mock_gene_symbols):
     results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv")
 
     mock_gene_symbols.return_value = [
-        "ENO1", "ENO2", "ENO3", 
-        "HK2", "HK1", "HK3",
-        "IDH3B", "ATP6V1G2", "GPT2",
-        "SDHB", "COX6B1"
+        "ENO1",
+        "ENO2",
+        "ENO3",
+        "HK2",
+        "HK1",
+        "HK3",
+        "IDH3B",
+        "ATP6V1G2",
+        "GPT2",
+        "SDHB",
+        "COX6B1",
     ], ["Protein5"]
     current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
     df = current_out["results"]
- 
+
     column_names = ["Term", "Genes", "Gene_set", "Overlap"]
     # Compare all specified columns
     for column in column_names:
         assert df[column].equals(results[column])
 
     # Compare the numeric columns separately with a tolerance for numerical equality
-    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value", "Old P-value", 
-                         "Old Adjusted P-value", "Combined Score"]
+    numerical_columns = [
+        "Odds Ratio",
+        "P-value",
+        "Adjusted P-value",
+        "Old P-value",
+        "Old Adjusted P-value",
+        "Combined Score",
+    ]
     for column in numerical_columns:
         numerical_equal = np.isclose(
             df[column], results[column], rtol=1e-05, atol=1e-08
