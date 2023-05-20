@@ -1090,7 +1090,7 @@
         }
       },
       "go_analysis_with_enrichr": {
-        "name": "GO Analysis with enrichr",
+        "name": "GO Analysis with Enrichr",
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
           "proteins": {

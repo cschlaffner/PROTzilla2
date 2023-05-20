@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 import time
 from unittest.mock import patch
 import os
 import shutil
+import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
@@ -300,7 +302,6 @@ def test_go_analysis_with_STRING_too_many_col_df():
         "dataframe with Protein ID and numeric ranking column"
         in current_out["messages"][0]["msg"]
     )
-
 
 
 def test_go_analysis_with_enrichr_wrong_proteins_input():

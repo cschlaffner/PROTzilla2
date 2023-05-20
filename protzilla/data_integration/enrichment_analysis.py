@@ -213,7 +213,6 @@ def go_analysis_with_STRING(
     return {"results": results, "summaries": summaries}
 
 
-
 def uniprot_ids_to_uppercase_gene_symbols(proteins):
     """
     A method that converts a list of uniprot ids to uppercase gene symbols.
