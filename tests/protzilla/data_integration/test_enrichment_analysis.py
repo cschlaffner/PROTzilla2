@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from unittest.mock import patch
+import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
@@ -19,6 +20,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     assert "Invalid input" in current_out["messages"][0]["msg"]
 
 
+@pytest.mark.internet(required=True)
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )

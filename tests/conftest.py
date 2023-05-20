@@ -5,9 +5,35 @@ from shutil import rmtree
 import numpy as np
 import pandas as pd
 import pytest
+import socket
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities.random import random_string
+
+
+def check_internet_connection():
+    try:
+        with socket.create_connection(("www.google.com", 80)):
+            return True
+    except OSError:
+        return False
+
+
+def pytest_configure(config):
+    internet_available = check_internet_connection()
+    config.addinivalue_line(
+        "markers", f"internet(required: bool = True): Mark test as dependent on an internet connection (internet_available={internet_available})"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        internet_marker = item.get_closest_marker("internet")
+        if internet_marker:
+            internet_required = internet_marker.kwargs.get("required", True)
+            if not internet_required or (internet_required and check_internet_connection()):
+                continue
+            item.add_marker(pytest.mark.skip(reason="Internet connection not available"))
 
 
 def pytest_addoption(parser):
