@@ -655,7 +655,7 @@
             "default": 0
           },
           "peptide_df": {
-            "type": "peptide_df",
+            "type": "empty",
             "name": "peptide_df"
           }
         },
@@ -722,7 +722,7 @@
             "default_select_all": true
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -785,7 +785,7 @@
             "default": null
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -1045,5 +1045,33 @@
       }
     }
   },
-  "data_integration": {}
+  "data_integration": {  
+    "enrichment_analysis": {
+      "go_analysis_with_enrichr": {
+        "name": "GO Analysis with enrichr",
+        "description": "Online GO Analysis using Enrichr API",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_sets": {
+            "name": "Protein Sets",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true
+          },
+          "organism": {
+            "name": "Enrichr supported organism",
+            "type": "categorical",
+            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
+            "default": "human"
+          }
+        }
+      }
+    }
+  }
 }
