@@ -7,6 +7,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_enrichr,
 )
 
+
 def test_go_analysis_with_enrichr_wrong_proteins_input():
     current_out = go_analysis_with_enrichr(
         proteins="Protein1;Protein2;aStringOfProteins",
