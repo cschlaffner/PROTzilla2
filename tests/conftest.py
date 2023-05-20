@@ -5,7 +5,7 @@ from shutil import rmtree
 import numpy as np
 import pandas as pd
 import pytest
-import socket
+import requests
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities.random import random_string
@@ -13,9 +13,9 @@ from ..protzilla.utilities.random import random_string
 
 def check_internet_connection():
     try:
-        with socket.create_connection(("www.google.com", 80)):
-            return True
-    except OSError:
+        response = requests.get("https://www.google.com", stream=True)
+        return True
+    except requests.exceptions.RequestException:
         return False
 
 
