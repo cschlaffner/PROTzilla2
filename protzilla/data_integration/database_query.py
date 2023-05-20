@@ -35,6 +35,13 @@ def biomart_query(queries, filter_name, attributes):
         yield line.decode("utf-8").split("\t")
 
 
-def uniprot_query(uniprot_ids):
+def uniprot_query(uniprot_ids, fields):
     df = pandas.read_csv("uniprot.tsv", sep="\t")
-    return df[df.Entry.isin(uniprot_ids)]
+    df.index = df["Entry"]
+    return df[df.Entry.isin(uniprot_ids)][fields].to_dict("index")
+
+
+def uniprot_query_dataframe(uniprot_ids, fields):
+    df = pandas.read_csv("uniprot.tsv", sep="\t")
+    df.index = df["Entry"]
+    return df[df.Entry.isin(uniprot_ids)][fields]
