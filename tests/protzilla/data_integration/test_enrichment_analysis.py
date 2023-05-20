@@ -20,7 +20,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     assert "Invalid input" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.internet(required=True)
+@pytest.mark.internet()
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )

@@ -29,10 +29,8 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     for item in items:
         internet_marker = item.get_closest_marker("internet")
-        if internet_marker:
-            internet_required = internet_marker.kwargs.get("required", True)
-            if not internet_required or (internet_required and check_internet_connection()):
-                continue
+        internet_connection = check_internet_connection()
+        if internet_marker and not internet_connection:
             item.add_marker(pytest.mark.skip(reason="Internet connection not available"))
 
 
