@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 def download_uniprot():
+    # takes a little more than a minute
     with requests.get(
         "https://rest.uniprot.org/uniprotkb/stream",
         params=dict(
@@ -26,5 +27,9 @@ def download_uniprot():
 
 
 if __name__ == "__main__":
-    # takes a little more than a minute
-    download_uniprot()
+    if not (Path(__file__).parent / "uniprot.tsv").exists():
+        print("downloading Uniprot (about one minute)")
+        download_uniprot()
+        print("done downloading")
+    else:
+        print("Uniprot already downloaded")

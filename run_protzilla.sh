@@ -49,6 +49,8 @@ echo "checking for and installing new requirements..."
 pip install -q -r requirements.txt
 echo "done."
 
+python protzilla/data_integration/database_download.py
+
 echo "starting protzilla..."
 python ui/manage.py runserver
 echo "quit protzilla"
