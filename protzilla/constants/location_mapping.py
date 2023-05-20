@@ -153,6 +153,11 @@ method_map = {
     (
         "data_integration",
         "enrichment_analysis",
+        "go_analysis_with_enrichr",
+    ): enrichment_analysis.go_analysis_with_enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
         "go_analysis_offline",
     ): enrichment_analysis.go_analysis_offline,
 }
