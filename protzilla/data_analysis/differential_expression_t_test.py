@@ -17,6 +17,7 @@ def t_test(
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
+    log_base,
 ):
     """
     A function to conduct a two sample t-test between groups defined in the
@@ -66,6 +67,7 @@ def t_test(
     )
     p_values = []
     fold_change = []
+    log2_fold_change = []
     filtered_proteins = []
 
     for protein in proteins:
@@ -101,7 +103,12 @@ def t_test(
 
         p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
         p_values.append(p)
-        fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
+        if log_base == "":
+            fc = np.mean(group2_intensities) / np.mean(group1_intensities)
+        else:
+            fc = log_base ** (np.mean(group2_intensities) - np.mean(group1_intensities))
+        fold_change.append(fc)
+        log2_fold_change.append(np.log2(fc))
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
@@ -109,7 +116,6 @@ def t_test(
         alpha=alpha,
     )
 
-    log2_fold_change = np.log2(fold_change)
     p_values_thresh = alpha if corrected_alpha is None else corrected_alpha
     p_values_mask = corrected_p_values < p_values_thresh
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
@@ -132,6 +138,10 @@ def t_test(
     log2_fold_change_df = pd.DataFrame(
         list(zip(proteins, log2_fold_change)),
         columns=["Protein ID", "log2_fold_change"],
+    )
+    fold_change_df = pd.DataFrame(
+        list(zip(proteins, fold_change)),
+        columns=["Protein ID", "fold_change"],
     )
 
     proteins_filtered = len(filtered_proteins) > 0

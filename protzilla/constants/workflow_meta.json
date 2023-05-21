@@ -717,7 +717,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None",
+            "default": "None", 
             "multiple": true,
             "default_select_all": true
           },
@@ -758,6 +758,13 @@
             "type": "numeric",
             "min": 0,
             "default": 0
+          },
+          "log_base": {
+            "name": "base of log transformation(leave empty if no log transformation was performed on the data)",
+            "type": "numeric",
+            "min": 2,
+            "max": 4294967295,
+            "default": null
           },
           "grouping": {
             "name": "Grouping",
