@@ -4,6 +4,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
+from ..data_integration import enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -52,6 +53,11 @@ method_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing,
     (
         "data_preprocessing",
         "outlier_detection",
@@ -147,6 +153,11 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_enrichr",
+    ): enrichment_analysis.go_analysis_with_enrichr,
 }
 
 # reversed mapping of method callable and location
@@ -173,6 +184,11 @@ plot_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing_plot,
     (
         "data_preprocessing",
         "normalisation",

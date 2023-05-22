@@ -151,6 +151,32 @@
           }
         ]
       },
+      "proteins_missing_filter": {
+        "name": "Proteins Missing",
+        "description": "Filters all samples that contain less than a set percentage of proteins",
+        "parameters": {
+          "percentage": {
+            "name": "Percentage of minimum non-missing proteins per sample",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
       "protein_intensity_sum_filter": {
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
@@ -655,7 +681,7 @@
             "default": 0
           },
           "peptide_df": {
-            "type": "peptide_df",
+            "type": "empty",
             "name": "peptide_df"
           }
         },
@@ -722,7 +748,7 @@
             "default_select_all": true
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -792,7 +818,7 @@
             "default": null
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -1052,5 +1078,33 @@
       }
     }
   },
-  "data_integration": {}
+  "data_integration": {  
+    "enrichment_analysis": {
+      "go_analysis_with_enrichr": {
+        "name": "GO Analysis with enrichr",
+        "description": "Online GO Analysis using Enrichr API",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_sets": {
+            "name": "Protein Sets",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true
+          },
+          "organism": {
+            "name": "Enrichr supported organism",
+            "type": "categorical",
+            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
+            "default": "human"
+          }
+        }
+      }
+    }
+  }
 }
