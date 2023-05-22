@@ -7,6 +7,7 @@ import pytest
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_enrichr,
+    go_analysis_offline,
 )
 
 
