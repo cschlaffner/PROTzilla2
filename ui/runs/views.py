@@ -2,6 +2,7 @@ import sys
 import tempfile
 import traceback
 import zipfile
+import logging
 
 import pandas as pd
 from django.contrib import messages
@@ -133,7 +134,11 @@ def change_field(request, run_name):
         if len(selected) == 1:
             param_dict = parameters[key]
         else:
-            param_dict = parameters[post_id]["fields"][key]
+            if "fields" in parameters[post_id]:
+                param_dict = parameters[post_id]["fields"][key]
+            else:
+                # testing this out
+                param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
@@ -152,6 +157,19 @@ def change_field(request, run_name):
                 print(
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
+        elif param_dict["fill"] == "enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
+            print(output_item)
+            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            # proteinitr NOne
+            if not isinstance(protein_itr, pd.DataFrame):
+                logging.warning(
+                    f"Warning: expected protein_itr to be an enrichment DataFrame but got {type(protein_itr)}. Proceeding with empty list."
+                )
+            else: 
+                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
+
 
         fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
