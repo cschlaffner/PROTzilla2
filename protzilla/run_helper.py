@@ -1,7 +1,4 @@
 import copy
-import os
-
-import psutil
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -61,8 +58,3 @@ def get_parameters(run, section, step, method):
         insert_special_params(param_dict, run)
         output[key] = param_dict
     return output
-
-
-def get_memory_usage():
-    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024**2
-    return f"{round(memory_mb,1)} MB"
