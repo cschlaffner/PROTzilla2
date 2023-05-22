@@ -1,4 +1,5 @@
 import copy
+
 import gseapy as gp
 
 from protzilla.workflow_helper import get_workflow_default_param_value
