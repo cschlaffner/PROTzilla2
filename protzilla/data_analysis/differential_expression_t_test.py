@@ -48,7 +48,10 @@ def t_test(
     a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
     a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
     a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
-    a df fold_change_df, containing the fold_changes per protein.
+    a df fold_change_df, containing the fold_changes per protein,
+    a df t_statistic_df, containing the t-statistic per protein,
+    a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
+
     :rtype: dict
     """
     assert grouping in metadata_df.columns
@@ -156,6 +159,11 @@ def t_test(
         columns=["Protein ID", "fold_change"],
     )
 
+    t_statistic_df = pd.DataFrame(
+        list(zip(proteins, t_statistic)),
+        columns=["Protein ID", "fold_change"],
+    )
+
     proteins_filtered = len(filtered_proteins) > 0
     proteins_filtered_warning_msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
 
@@ -167,7 +175,7 @@ def t_test(
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
         fold_change_df=fold_change_df,
-        t_statistic=t_statistic,
+        t_statistic_df=t_statistic_df,
         significant_proteins_df=significant_proteins_df,
         messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
