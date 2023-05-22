@@ -153,7 +153,7 @@
       },
       "proteins_missing_filter": {
         "name": "Proteins Missing",
-        "description": "Filters all samples that contain less that a set percentage of proteins",
+        "description": "Filters all samples that contain less than a set percentage of proteins",
         "parameters": {
           "percentage": {
             "name": "Percentage of minimum non-missing proteins per sample",
