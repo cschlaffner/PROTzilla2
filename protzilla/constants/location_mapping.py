@@ -55,6 +55,11 @@ method_map = {
     ): filter_samples.by_protein_count,
     (
         "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing,
+    (
+        "data_preprocessing",
         "outlier_detection",
         "pca",
     ): outlier_detection.by_pca,
@@ -179,6 +184,11 @@ plot_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing_plot,
     (
         "data_preprocessing",
         "normalisation",
