@@ -170,6 +170,7 @@
               "preprocessed_data",
               "dataframe"
             ],
+            "log_base": 2,
             "grouping": "Group"
           }
         },

@@ -20,4 +20,4 @@ def apply_multiple_testing_correction(p_values: list, method: str, alpha: float)
     correction = multipletests(pvals=p_values, alpha=alpha, method=to_param[method])
     if method == "Bonferroni":
         return correction[1], correction[3]
-    return correction[1], None
+    return correction[1], alpha

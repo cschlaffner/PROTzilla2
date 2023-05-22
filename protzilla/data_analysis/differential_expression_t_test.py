@@ -42,11 +42,14 @@ def t_test(
     :param alpha: the alpha value for the t-test
     :type alpha: float
 
-    :return: a dataframe in typical protzilla long format
-    with the differentially expressed proteins and a dict, containing
-    the corrected p-values and the log2 fold change, the alpha used
-    and the corrected alpha, as well as filtered out proteins.
-    :rtype: Tuple[pandas DataFrame, dict]
+    :return: a dict containing a dataframe in typical protzilla long format ccontaining the differentially expressed proteins,
+    a df corrected_p_values, containing the p_values after application of multiple testing correction,
+    a df log2_fold_change, containing the log2 fold changes per protein,
+    a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
+    a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
+    a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
+    a df fold_change_df, containing the fold_changes per protein.
+    :rtype: dict
     """
     assert grouping in metadata_df.columns
 
@@ -91,7 +94,6 @@ def t_test(
                 corrected_p_values=None,
                 log2_fold_change=None,
                 fc_threshold=None,
-                alpha=alpha,
                 corrected_alpha=None,
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
@@ -152,9 +154,9 @@ def t_test(
         corrected_p_values_df=corrected_p_values_df,
         log2_fold_change_df=log2_fold_change_df,
         fc_threshold=fc_threshold,
-        alpha=alpha,
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
+        fold_change_df=fold_change_df,
         messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
