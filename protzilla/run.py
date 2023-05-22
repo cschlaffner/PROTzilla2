@@ -110,8 +110,12 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def update_workflow_config(self, params):
-        (section, step, method) = self.current_workflow_location()
+    def update_workflow_config(self, params, location=None):
+        if not location:
+            (section, step, method) = self.current_workflow_location()
+        else:
+            (section, step, method) = location
+
         index = self.step_index_in_current_section()
         parameters_no_file_path = {
             k: params[k]
@@ -119,7 +123,7 @@ class Run:
             if get_parameter_type(self.workflow_meta, section, step, method, k)
             != "file"
         }
-        self.workflow_config["sections"][self.section]["steps"][index][
+        self.workflow_config["sections"][section]["steps"][index][
             "parameters"
         ] = parameters_no_file_path
         self.write_local_workflow()
@@ -130,6 +134,7 @@ class Run:
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         self.perform_calculation(method_map[location], parameters)
+        self.update_workflow_config(parameters, location)
 
     def perform_calculation(self, method_callable, parameters: dict):
         self.section, self.step, self.method = location_map[method_callable]
@@ -149,7 +154,6 @@ class Run:
             self.result_df = None
             self.current_out = method_callable(**call_parameters)
 
-        self.update_workflow_config(parameters)
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
@@ -249,17 +253,18 @@ class Run:
                 self.workflow_config, *self.current_run_location(), "output_name"
             )
         try:
+            parameters = self.current_parameters.get(self.calculated_method, {})
             self.history.add_step(
                 self.section,
                 self.step,
                 self.calculated_method,
-                self.current_parameters[self.calculated_method],
+                parameters,
                 self.result_df,
                 self.current_out,
                 self.plots,
                 name=name,
             )
-            self.update_workflow_config(self.current_parameters[self.calculated_method])
+            self.update_workflow_config(parameters)
             index = self.step_index_in_current_section()
             self.workflow_config["sections"][self.section]["steps"][index][
                 "method"

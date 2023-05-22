@@ -11,6 +11,7 @@ from protzilla.utilities.random import random_string
 def test_metadata_import():
     name = "test_run" + random_string()
     run = Run.create(name)
+    run.step_index += 1
     run.calculate_and_next(
         metadata_import.metadata_import_method,
         file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
@@ -26,6 +27,8 @@ def test_metadata_orientation():
     name2 = "test_run" + random_string()
     run1 = Run.create(name1)
     run2 = Run.create(name2)
+    run1.step_index += 1
+    run2.step_index += 1
     run1.calculate_and_next(
         metadata_import.metadata_import_method,
         file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
