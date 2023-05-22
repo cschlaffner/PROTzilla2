@@ -47,7 +47,7 @@ def by_protein_count(intensity_df: pd.DataFrame, threshold):
 def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
     intensity_name = intensity_df.columns.values.tolist()[3]
 
-    total_protein_count = intensity_df.nunique()["Protein ID"]
+    total_protein_count = intensity_df["Protein ID"].nunique()
     sample_protein_count = (
         intensity_df[~intensity_df[intensity_name].isnull()]
         .groupby("Sample")["Protein ID"]

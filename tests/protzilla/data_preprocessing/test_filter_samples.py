@@ -51,9 +51,9 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
     list_samples_excluded_2 = dropouts2["filtered_samples"]
     list_samples_excluded_3 = dropouts3["filtered_samples"]
 
-    fig = by_proteins_missing_plot(filter_samples_df, result_df1, dropouts1, "Pie chart")[
-        0
-    ]
+    fig = by_proteins_missing_plot(
+        filter_samples_df, result_df1, dropouts1, "Pie chart"
+    )[0]
     if show_figures:
         fig.show()
 
@@ -68,8 +68,8 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
     ] == list_samples_excluded_2, f"excluded samples do not match \
                 Sample2 and Sample3, but are {list_samples_excluded_2}"
     assert [
-            "Sample2",
-            "Sample3",
+        "Sample2",
+        "Sample3",
     ] == list_samples_excluded_3, f"excluded samples do not match \
                     Sample2 and Sample3, but are {list_samples_excluded_2}"
 
