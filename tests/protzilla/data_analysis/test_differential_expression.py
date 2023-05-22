@@ -158,7 +158,7 @@ def test_differential_expression_t_test_with_log_data(show_figures):
     )
 
     log2_fc = [-1, -0.1]
-
+    # because of the longer fc calculation the comparison does not work as accurately as on paper (inaccuracy due to multiple float operations)
     log2fc_rounded = [
         round(x, 1) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
     ]
