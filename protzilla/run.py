@@ -12,7 +12,11 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .workflow_helper import get_workflow_default_param_value, set_output_name
+from .workflow_helper import (
+    get_parameter_type,
+    get_workflow_default_param_value,
+    set_output_name,
+)
 
 
 class Run:
@@ -106,9 +110,16 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def update_workflow_config(self, section, index, params):
-        parameters_no_file_path = {k: params[k] for k in params if k != "file_path"}
-        self.workflow_config["sections"][section]["steps"][index][
+    def update_workflow_config(self, params):
+        (section, step, method) = self.current_workflow_location()
+        index = self.step_index_in_current_section()
+        parameters_no_file_path = {
+            k: params[k]
+            for k in params
+            if get_parameter_type(self.workflow_meta, section, step, method, k)
+            != "file"
+        }
+        self.workflow_config["sections"][self.section]["steps"][index][
             "parameters"
         ] = parameters_no_file_path
         self.write_local_workflow()
@@ -138,9 +149,7 @@ class Run:
             self.result_df = None
             self.current_out = method_callable(**call_parameters)
 
-        self.update_workflow_config(
-            self.section, self.step_index_in_current_section(), parameters
-        )
+        self.update_workflow_config(parameters)
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
@@ -161,9 +170,7 @@ class Run:
     def create_plot_from_current_location(self, parameters):
         location = (section, step, method) = self.current_workflow_location()
         if step == "plot":
-            self.update_workflow_config(
-                section, self.step_index_in_current_section(), parameters
-            )
+            self.update_workflow_config(parameters)
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
             self.workflow_config["sections"][section]["steps"][
@@ -252,10 +259,8 @@ class Run:
                 self.plots,
                 name=name,
             )
+            self.update_workflow_config(self.current_parameters[self.calculated_method])
             index = self.step_index_in_current_section()
-            self.update_workflow_config(
-                self.section, index, self.current_parameters[self.calculated_method]
-            )
             self.workflow_config["sections"][self.section]["steps"][index][
                 "method"
             ] = self.calculated_method
