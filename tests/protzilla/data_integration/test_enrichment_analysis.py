@@ -105,8 +105,15 @@ def test_go_analysis_with_enrichr(mock_gene_symbols):
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
 
 
-def test_go_analysis_offline_protein_sets_json(go_analysis_offline_result_no_bg):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+@pytest.mark.parametrize(
+    "protein_sets_path",
+    [
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt"
+    ],
+)
+def test_go_analysis_offline_protein_sets(protein_sets_path, go_analysis_offline_result_no_bg):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
 
     current_out = go_analysis_offline(
@@ -118,7 +125,7 @@ def test_go_analysis_offline_protein_sets_json(go_analysis_offline_result_no_bg)
             "Protein5",
             "Protein6",
         ],
-        protein_sets_path=f"{test_data_folder}/protein_sets.json",
+        protein_sets_path=protein_sets_path,
     )
     df = current_out["results"]
 
@@ -146,81 +153,14 @@ def test_go_analysis_offline_protein_sets_json(go_analysis_offline_result_no_bg)
     assert odds_equal.all()
 
 
-def test_go_analysis_offline_protein_sets_csv(go_analysis_offline_result_no_bg):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.DataFrame(go_analysis_offline_result_no_bg)
-
-    current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
-        protein_sets_path=f"{test_data_folder}/protein_sets.csv",
-    )
-    df = current_out["results"]
-
-    # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
-
-    # Compare all columns except the "Odds Ratio" column
-    df_without_odds = df.drop(columns=["Odds Ratio"])
-    results_without_odds = results.drop(columns=["Odds Ratio"])
-
-    # Assert the remaining columns are equal
-    assert df_without_odds.equals(results_without_odds)
-
-    # Compare the "Odds Ratio" column separately with a tolerance for numerical equality
-    odds_equal = np.isclose(
-        df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08
-    )
-    assert odds_equal.all()
-
-
-def test_go_analysis_offline_protein_sets_txt(go_analysis_offline_result_no_bg):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.DataFrame(go_analysis_offline_result_no_bg)
-
-    current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
-        protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-    )
-    df = current_out["results"]
-
-    # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
-
-    # Compare all columns except the "Odds Ratio" column
-    df_without_odds = df.drop(columns=["Odds Ratio"])
-    results_without_odds = results.drop(columns=["Odds Ratio"])
-
-    # Assert the remaining columns are equal
-    assert df_without_odds.equals(results_without_odds)
-
-    # Compare the "Odds Ratio" column separately with a tolerance for numerical equality
-    odds_equal = np.isclose(
-        df["Odds Ratio"], results["Odds Ratio"], rtol=1e-05, atol=1e-08
-    )
-    assert odds_equal.all()
-
-
-def test_go_analysis_offline_background_csv(go_analysis_offline_result_with_bg):
+@pytest.mark.parametrize(
+    "background_path",
+    [
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.csv",
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.txt",
+    ],
+)
+def test_go_analysis_offline_background(background_path, go_analysis_offline_result_with_bg):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
 
@@ -234,45 +174,7 @@ def test_go_analysis_offline_background_csv(go_analysis_offline_result_with_bg):
             "Protein6",
         ],
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-        background=f"{test_data_folder}/background_test_proteins.csv",
-    )
-    df = current_out["results"]
-
-    # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
-
-    column_names = ["Term", "Genes", "Gene_set", "Overlap"]
-    # Compare all specified columns
-    for column in column_names:
-        assert df[column].equals(results[column])
-
-    # Compare the numeric columns separately with a tolerance for numerical equality
-    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value"]
-    for column in numerical_columns:
-        numerical_equal = np.isclose(
-            df[column], results[column], rtol=1e-05, atol=1e-08
-        )
-        assert numerical_equal.all()
-
-
-def test_go_analysis_offline_background_txt(go_analysis_offline_result_with_bg):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.DataFrame(go_analysis_offline_result_with_bg)
-
-    current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
-        protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-        background=f"{test_data_folder}/background_test_proteins.txt",
+        background=background_path
     )
     df = current_out["results"]
 
