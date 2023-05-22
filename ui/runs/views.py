@@ -393,7 +393,13 @@ def variation_plot(request, run_name):
     pprint.pprint(graph.__dict__)
 
     nodes = [
-        {"data": {"id": node, "label": graph.nodes[node]["aminoacid"]}}
+        {
+            "data": {
+                "id": node,
+                "label": graph.nodes[node]["aminoacid"],
+                "width": len(graph.nodes[node]["aminoacid"]) * 24,
+            }
+        }
         for node in graph.nodes()
     ]
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]

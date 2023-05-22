@@ -1115,7 +1115,7 @@
     "variation_graph": {
       "variation_graph": {
         "name": "Variation Graph",
-        "description": "Create a variation graph (graphml-Format) for a Protein and its Isoforms. This, currently, only works with Uniport-IDs and online",
+        "description": "Create a variation graph (.graphml) for a Protein. The data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the generation. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
