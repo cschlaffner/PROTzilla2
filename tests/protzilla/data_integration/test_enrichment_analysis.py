@@ -109,10 +109,12 @@ def test_go_analysis_with_enrichr(mock_gene_symbols):
     [
         f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
         f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt"
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt",
     ],
 )
-def test_go_analysis_offline_protein_sets(protein_sets_path, go_analysis_offline_result_no_bg):
+def test_go_analysis_offline_protein_sets(
+    protein_sets_path, go_analysis_offline_result_no_bg
+):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
 
     current_out = go_analysis_offline(
@@ -159,7 +161,9 @@ def test_go_analysis_offline_protein_sets(protein_sets_path, go_analysis_offline
         f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.txt",
     ],
 )
-def test_go_analysis_offline_background(background_path, go_analysis_offline_result_with_bg):
+def test_go_analysis_offline_background(
+    background_path, go_analysis_offline_result_with_bg
+):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
 
@@ -173,7 +177,7 @@ def test_go_analysis_offline_background(background_path, go_analysis_offline_res
             "Protein6",
         ],
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
-        background=background_path
+        background=background_path,
     )
     df = current_out["results"]
 
