@@ -22,7 +22,7 @@
 | protzilla/data\_integration/enrichment\_analysis.py                     |       57 |       41 |       36 |        3 |     23% |19-79, 107, 109, 140 |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                           |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                       |       15 |        2 |        4 |        1 |     74% |     55-56 |
-| protzilla/data\_preprocessing/filter\_samples.py                        |       26 |        0 |        4 |        0 |    100% |           |
+| protzilla/data\_preprocessing/filter\_samples.py                        |       34 |        0 |        4 |        0 |    100% |           |
 | protzilla/data\_preprocessing/imputation.py                             |       74 |        1 |       14 |        3 |     95% |140, 290->299, 309->315 |
 | protzilla/data\_preprocessing/normalisation.py                          |       97 |        1 |       22 |        2 |     97% |244->255, 256 |
 | protzilla/data\_preprocessing/outlier\_detection.py                     |       67 |        3 |       12 |        4 |     89% |172, 189, 244, 245->exit |
@@ -53,7 +53,7 @@
 | tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |       30 |        0 |        4 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/\_\_init\_\_.py                     |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py           |       16 |        1 |        2 |        1 |     89% |        48 |
-| tests/protzilla/data\_preprocessing/test\_filter\_samples.py            |       29 |        2 |        4 |        2 |     88% |    74, 99 |
+| tests/protzilla/data\_preprocessing/test\_filter\_samples.py            |       42 |        3 |        6 |        3 |     88% |58, 88, 113 |
 | tests/protzilla/data\_preprocessing/test\_imputation.py                 |       87 |       10 |       10 |        5 |     85% |154-155, 179-180, 204-205, 232-233, 258-259 |
 | tests/protzilla/data\_preprocessing/test\_normalisation.py              |       67 |        4 |       12 |        4 |     90% |309, 325, 351, 377 |
 | tests/protzilla/data\_preprocessing/test\_outlier\_detection.py         |       41 |        3 |        6 |        3 |     87% |65, 79, 95 |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      190 |      145 |       48 |        0 |     20% |33, 45-51, 80-93, 111-158, 162-169, 173-175, 179-181, 185-187, 191-200, 204-211, 215-223, 227-254, 258-296, 300-302, 306-307, 329-331, 335-349 |
 | ui/runs/views\_helper.py                                                |       51 |       10 |       22 |        2 |     75% |12->14, 18, 25-37 |
-|                                                               **TOTAL** | **3469** |  **540** |  **923** |  **145** | **80%** |           |
+|                                                               **TOTAL** | **3490** |  **541** |  **925** |  **146** | **80%** |           |
 
 
 ## Setup coverage badge
