@@ -72,6 +72,7 @@ def t_test(
     fold_change = []
     log2_fold_change = []
     filtered_proteins = []
+    t_statistic = []
 
     for protein in proteins:
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
@@ -103,8 +104,11 @@ def t_test(
             filtered_proteins.append(protein)
             continue
 
-        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
+        t, p = stats.ttest_ind(group1_intensities, group2_intensities)
+        print(t)
+        print(p)
         p_values.append(p)
+        t_statistic.append(t)
         if log_base == "":
             fc = np.mean(group2_intensities) / np.mean(group1_intensities)
         else:
@@ -118,8 +122,7 @@ def t_test(
         alpha=alpha,
     )
 
-    p_values_thresh = alpha if corrected_alpha is None else corrected_alpha
-    p_values_mask = corrected_p_values < p_values_thresh
+    p_values_mask = corrected_p_values < corrected_alpha
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
 
     remaining_proteins = [
@@ -131,6 +134,13 @@ def t_test(
         if p_values_mask[i] and fold_change_mask[i]
     ]
     de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
+
+    significant_proteins = [
+        protein for i, protein in enumerate(remaining_proteins) if p_values_mask[i]
+    ]
+    significant_proteins_df = intensity_df.loc[
+        intensity_df["Protein ID"].isin(significant_proteins)
+    ]
 
     corrected_p_values_df = pd.DataFrame(
         list(zip(proteins, corrected_p_values)),
@@ -157,6 +167,8 @@ def t_test(
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
         fold_change_df=fold_change_df,
+        t_statistic=t_statistic,
+        significant_proteins_df=significant_proteins_df,
         messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
