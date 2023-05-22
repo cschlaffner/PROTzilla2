@@ -1082,7 +1082,7 @@
             "default": [null,null]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets {'Name of set': ['protein1', 'protein2', ...], ...}",
+            "name": "Upload Protein Sets (json, csv (one per line: Set_name, Protein1,...), txt (one per line: Set_name: Protein1,...), gmt)",
             "type": "file",
             "default": null
           },
