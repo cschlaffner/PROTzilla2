@@ -1,12 +1,10 @@
-from ..data_integration import (
-    enrichment_analysis,
-)
 from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
     plots,
 )
+from ..data_integration import enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,

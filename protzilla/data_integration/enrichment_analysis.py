@@ -1,5 +1,5 @@
-import pandas as pd
 import gseapy as gp
+import pandas as pd
 from django.contrib import messages
 
 from .database_query import biomart_query

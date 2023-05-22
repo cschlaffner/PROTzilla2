@@ -22,7 +22,8 @@ def check_internet_connection():
 def pytest_configure(config):
     internet_available = check_internet_connection()
     config.addinivalue_line(
-        "markers", f"internet(required: bool = True): Mark test as dependent on an internet connection (internet_available={internet_available})"
+        "markers",
+        f"internet(required: bool = True): Mark test as dependent on an internet connection (internet_available={internet_available})",
     )
 
 
@@ -31,7 +32,9 @@ def pytest_collection_modifyitems(config, items):
         internet_marker = item.get_closest_marker("internet")
         internet_connection = check_internet_connection()
         if internet_marker and not internet_connection:
-            item.add_marker(pytest.mark.skip(reason="Internet connection not available"))
+            item.add_marker(
+                pytest.mark.skip(reason="Internet connection not available")
+            )
 
 
 def pytest_addoption(parser):
