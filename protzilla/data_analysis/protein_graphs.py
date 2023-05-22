@@ -26,6 +26,8 @@ def create_graph(protein_id: str, run_path: str, queue_size: int = None):
                 --export_output_folder={output_folder} \
                 --output_csv={output_csv}\
                 -ft VARIANT -d skip"
+    # -ft VAR_SEQ --no_merge
+
     subprocess.run(cmd_str, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"

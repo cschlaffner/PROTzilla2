@@ -383,8 +383,8 @@ def variation_plot(request, run_name):
 
     pprint.pprint(call_params)
 
-    # graphml_file = call_params["graph_file_path"]
-    graphml_file = "/Users/anton/Documents/code/PROTzilla2/tests/test_data/exported_graphs/QXXXXX-s3.graphml"
+    graphml_file = call_params["graph_file_path"]
+    # graphml_file = "/Users/anton/Documents/code/PROTzilla2/tests/test_data/exported_graphs/QXXXXX-s3.graphml"
 
     graph = nx.read_graphml(graphml_file)
     node_labels = nx.get_node_attributes(graph, "aminoacid")
@@ -392,21 +392,12 @@ def variation_plot(request, run_name):
 
     pprint.pprint(graph.__dict__)
 
-    # Convert the graph to a format compatible with Cytoscape.js
-    # nodes = [
-    #     {"data": {"id": node, "label": node_labels[node]}} for node in graph.nodes()
-    # ]
-    # edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
-    # elements = nodes + edges
-
     nodes = [
         {"data": {"id": node, "label": graph.nodes[node]["aminoacid"]}}
         for node in graph.nodes()
     ]
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
-
-    # Pass the graph data to the template
     context = {"elements": elements}
 
     return render(request, "runs/visualisation.html", context)
