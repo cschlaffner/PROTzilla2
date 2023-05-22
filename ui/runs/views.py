@@ -11,11 +11,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.utilities.memory import get_memory_usage
-
 sys.path.append(f"{BASE_DIR}/..")
-
 from protzilla.run import Run
+from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
