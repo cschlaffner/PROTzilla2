@@ -1087,7 +1087,7 @@
             "default": null
           },
           "background": {
-            "name": "Background set (list of proteins or no upload)",
+            "name": "Background set (one protein per line csv or txt or no upload)",
             "type": "file",
             "default": null
           }
