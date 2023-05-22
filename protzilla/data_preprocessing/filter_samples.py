@@ -44,7 +44,28 @@ def by_protein_count(intensity_df: pd.DataFrame, threshold):
     )
 
 
+def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
+    intensity_name = intensity_df.columns.values.tolist()[3]
+
+    total_protein_count = intensity_df["Protein ID"].nunique()
+    sample_protein_count = (
+        intensity_df[~intensity_df[intensity_name].isnull()]
+        .groupby("Sample")["Protein ID"]
+        .nunique()
+    )
+    filtered_samples_list = sample_protein_count[
+        ~sample_protein_count.gt(total_protein_count * percentage)
+    ].index.tolist()
+    return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
+        filtered_samples=filtered_samples_list
+    )
+
+
 def by_protein_intensity_sum_plot(df, result_df, current_out, graph_type):
+    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+
+
+def by_proteins_missing_plot(df, result_df, current_out, graph_type):
     return _build_pie_bar_plot(df, result_df, current_out, graph_type)
 
 
