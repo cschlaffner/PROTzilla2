@@ -14,6 +14,7 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
+from protzilla.run_helper import get_parameters
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -99,6 +100,39 @@ def change_method(request, run_name):
             plot_parameters=render_to_string(
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
+            ),
+        ),
+        safe=False,
+    )
+
+
+def change_dynamic_input(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    dynamic_input_value = request.POST["selected_input"]
+    dynamic_input_key = request.POST["id"]
+    param_dict = get_parameters(run, run.section, run.step, run.method)[
+        dynamic_input_key
+    ]
+    dynamic_fields = []
+    for field_key, field_dict in param_dict["dynamic_parameters"].items():
+        if dynamic_input_value in field_dict["selected_category"]:
+            dynamic_fields.append(
+                make_parameter_input(field_key, field_dict, disabled=False)
+            )
+    return JsonResponse(
+        dict(
+            parameters=render_to_string(
+                "runs/dynamic_fields.html", context=dict(fields=dynamic_fields)
             ),
         ),
         safe=False,

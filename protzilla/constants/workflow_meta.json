@@ -1042,6 +1042,79 @@
             "default": 42
           }
         }
+      },
+      "method_name": {
+        "name": "random method",
+        "description":"Dimension reduction of a dataframe using UMAP",
+        "dynamic_inputs_keys": ["param2", "param3"],
+        "parameters": {
+          "param1": {
+            "name": "Distance metric",
+            "type": "categorical_dynamic",
+            "categories": ["euclidean", "manhattan", "long island"],
+            "default": "euclidean",
+            "dynamic_inputs": {
+              "euclidean": ["param2", "param3"],
+              "manhattan": ["param2"]
+            }
+          },
+          "param2": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": ["lala", "lalo"],
+            "default": "lala",
+            "dynamic_inputs": {
+              "lala": ["param3"]
+            },
+            "dynamic": true
+          },
+          "param3": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": ["parapa", "parapo"],
+            "default": "parapa",
+            "dynamic": true
+          }
+        }
+      },
+      "method_name1": {
+        "name": "random method1",
+        "description":"Dimension reduction of a dataframe using UMAP",
+        "parameters": {
+          "param1": {
+            "name": "Distance metric",
+            "type": "categorical_dynamic",
+            "categories": ["euclidean", "manhattan", "long island"],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "another_param": {
+                "name": "param",
+                "type": "numeric",
+                "selected_category": ["euclidean", "manhattan"],
+                "min": 0,
+                "max": 4294967295,
+                "step": 1,
+                "default": 42
+              },
+              "rec_param": {
+                "name": "rec param",
+                "type": "categorical_dynamic",
+                "selected_category": ["euclidean"],
+                "categories": ["para", "paaa"],
+                "default": "paaa",
+                "dynamic_parameters": {
+                  "param2": {
+                    "name": "Distance metric",
+                    "type": "categorical",
+                    "selected_category": ["para"],
+                    "categories": ["lala", "lalo"],
+                    "default": "lala"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

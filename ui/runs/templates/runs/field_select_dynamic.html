@@ -1,0 +1,14 @@
+{#  params: name, categories, key, class, disabled, multiple, dynamic_fields, default#}
+
+{#{% include "runs/field_select.html" with name=name categories=categories key=key class="{{class}} dynamic_input" disabled=disabled multiple=multiple default=default%}#}
+{% csrf_token %}
+{%if name %}<label for="{{ key }}">{{ name }}</label>{% endif %}
+<select name="{{ key }}" id="{{ key }}"
+        class="form-select dynamic_input"
+        {% if disabled %} disabled {% endif %}
+        {% if multiple %} multiple {% endif %}>
+    {% for option in categories %}
+        <option value="{{ option }}" {% if option in default%} selected="selected" {% endif %} >{{ option }}</option>
+    {% endfor %}
+</select>
+{% include "runs/dynamic_fields.html" with key=key dynamic_fields=dynamic_fields %}

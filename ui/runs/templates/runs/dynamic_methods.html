@@ -25,6 +25,25 @@
                 alert(e.responseJSON.error); // alert error message to user
             });
         });
+        $(".dynamic_input").on("input", function () {
+            const selected_input = $(this).val();
+            const id = $(this).attr("id");
+            $.ajax({
+                url: "{% url 'runs:change_dynamic_input' run_name %}",
+                type: "POST",
+                data: {
+                    selected_input: selected_input,
+                    id: id,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    $(`#dynamic_fields_${id}`).html(response.parameters);
+                }
+            }).fail(function (e) {
+                console.log('Error:', e);
+                alert(e.responseJSON.error); // alert error message to user
+            });
+        });
         $("#method_parameters").on("change", ".named", function () {
             const id = $(this).attr("id");
             const step_name = $(this).val();

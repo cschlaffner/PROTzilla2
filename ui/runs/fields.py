@@ -15,7 +15,7 @@ def make_current_fields(run, section, step, method):
     parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
-        # todo 59 - restructure current_parameters
+        # are these methods needed here?
         param_dict = param_dict.copy()  # to not change workflow_meta
         workflow_default = get_workflow_default_param_value(
             run.workflow_config, section, step, method, key
@@ -39,6 +39,15 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "categorical":
         param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_select.html"
+    elif param_dict["type"] == "categorical_dynamic":
+        template = "runs/field_select_dynamic.html"
+        dynamic_fields = []
+        for field_key, field_dict in param_dict["dynamic_parameters"].items():
+            if param_dict["default"] in field_dict["selected_category"]:
+                dynamic_fields.append(
+                    make_parameter_input(field_key, field_dict, disabled)
+                )
+        param_dict["dynamic_fields"] = dynamic_fields
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
