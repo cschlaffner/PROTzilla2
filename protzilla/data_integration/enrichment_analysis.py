@@ -176,6 +176,23 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
 
     # enhancement: make sure ID type for all inputs match
 
+    # make list of proteins
+    if isinstance(proteins, pd.DataFrame):
+        proteins = proteins["Protein ID"].unique().tolist()
+    elif isinstance(proteins, pd.Series):
+        proteins = proteins.unique().tolist()
+    elif isinstance(proteins, list):
+        pass
+    else:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Invalid input type for proteins. Must be list, series or dataframe",
+                )
+            ]
+        )
+
     if protein_sets_path == "":
         return dict(
             messages=[
