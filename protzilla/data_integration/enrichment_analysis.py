@@ -247,12 +247,23 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
             )
 
     # gene set and gene list identifiers need to match
-    enr = gp.enrich(
-        gene_list=proteins,
-        gene_sets=protein_sets,
-        background=background,
-        outdir=None,
-        verbose=True,
-    )
+    try:
+        enr = gp.enrich(
+            gene_list=proteins,
+            gene_sets=protein_sets,
+            background=background,
+            outdir=None,
+            verbose=True,
+        )
+    except ValueError as e:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Something went wrong with the analysis. Please check your inputs.",
+                    trace=str(e),
+                )
+            ]
+        )
 
     return {"results": enr.results}
