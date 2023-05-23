@@ -31,7 +31,6 @@ $(document).ready(function () {
     // show file name on upload
     $('.file-input').on('change', function(){
         let id = $(this).attr("id");
-        console.log(id);
         $('#chosen-'+ id).text(this.files[0].name);
     })
 });
