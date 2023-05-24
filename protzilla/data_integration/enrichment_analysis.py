@@ -132,7 +132,7 @@ def go_analysis_with_STRING(
         out_messages.append(dict(level=messages.INFO, msg=msg))
     elif not isinstance(protein_set_dbs, list):
         protein_set_dbs = [protein_set_dbs]
-        
+
     if background == "" or background is None:
         logging.info("No background provided, using entire proteome")
         statistical_background = None

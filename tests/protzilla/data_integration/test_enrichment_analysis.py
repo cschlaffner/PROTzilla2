@@ -305,38 +305,6 @@ def test_go_analysis_with_STRING_too_many_col_df():
     )
 
 
-@pytest.fixture
-def go_analysis_offline_result_no_bg():
-    return {
-        "Gene_set": ["gs_ind_0", "gs_ind_0"],
-        "Term": ["Set1", "Set2"],
-        "Overlap": ["4/8", "4/8"],
-        "P-value": [1.000000e00, 1.000000e00],
-        "Adjusted P-value": [1.000000e00, 1.000000e00],
-        "Odds Ratio": [5.294118e-01, 5.294118e-01],
-        "Genes": [
-            "Protein3;Protein2;Protein4;Protein1",
-            "Protein5;Protein6;Protein3;Protein1",
-        ],
-    }
-
-
-@pytest.fixture
-def go_analysis_offline_result_with_bg():
-    return {
-        "Gene_set": ["gs_ind_0", "gs_ind_0"],
-        "Term": ["Set1", "Set2"],
-        "Overlap": ["4/8", "4/8"],
-        "P-value": [7.272727e-01, 7.272727e-01],
-        "Adjusted P-value": [7.272727e-01, 7.272727e-01],
-        "Odds Ratio": [9.529412e-01, 9.529412e-01],
-        "Genes": [
-            "Protein3;Protein2;Protein4;Protein1",
-            "Protein5;Protein6;Protein3;Protein1",
-        ],
-    }
-
-
 def test_go_analysis_with_enrichr_wrong_proteins_input():
     current_out = go_analysis_with_enrichr(
         proteins="Protein1;Protein2;aStringOfProteins",
@@ -397,6 +365,38 @@ def test_go_analysis_with_enrichr(mock_gene_symbols):
 
     assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+
+@pytest.fixture
+def go_analysis_offline_result_no_bg():
+    return {
+        "Gene_set": ["gs_ind_0", "gs_ind_0"],
+        "Term": ["Set1", "Set2"],
+        "Overlap": ["4/8", "4/8"],
+        "P-value": [1.000000e00, 1.000000e00],
+        "Adjusted P-value": [1.000000e00, 1.000000e00],
+        "Odds Ratio": [5.294118e-01, 5.294118e-01],
+        "Genes": [
+            "Protein3;Protein2;Protein4;Protein1",
+            "Protein5;Protein6;Protein3;Protein1",
+        ],
+    }
+
+
+@pytest.fixture
+def go_analysis_offline_result_with_bg():
+    return {
+        "Gene_set": ["gs_ind_0", "gs_ind_0"],
+        "Term": ["Set1", "Set2"],
+        "Overlap": ["4/8", "4/8"],
+        "P-value": [7.272727e-01, 7.272727e-01],
+        "Adjusted P-value": [7.272727e-01, 7.272727e-01],
+        "Odds Ratio": [9.529412e-01, 9.529412e-01],
+        "Genes": [
+            "Protein3;Protein2;Protein4;Protein1",
+            "Protein5;Protein6;Protein3;Protein1",
+        ],
+    }
 
 
 @pytest.mark.parametrize(
