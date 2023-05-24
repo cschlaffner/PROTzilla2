@@ -23,6 +23,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
     make_sidebar,
+    make_dynamic_fields,
 )
 from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_for_plot, parameters_from_post
@@ -118,22 +119,20 @@ def change_dynamic_input(request, run_name):
         response.status_code = 404  # not found
         return response
 
-    dynamic_input_value = request.POST["selected_input"]
-    dynamic_input_key = request.POST["id"]
-    param_dict = get_parameters(run, run.section, run.step, run.method)[
-        dynamic_input_key
-    ]
-    dynamic_fields = []
-    for field_key, field_dict in param_dict["dynamic_parameters"].items():
-        if dynamic_input_value in field_dict["selected_category"]:
-            dynamic_fields.append(
-                make_parameter_input(field_key, field_dict, disabled=False)
-            )
+    dynamic_trigger_value = request.POST["selected_input"]
+    dynamic_trigger_key = request.POST["key"]
+    all_parameters_dict = get_parameters(run, run.section, run.step, run.method)
+    dynamic_trigger_param_dict = all_parameters_dict[dynamic_trigger_key]
+    dynamic_fields = make_dynamic_fields(
+        dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
+    )
+    parameters = render_to_string(
+        "runs/dynamic_fields.html",
+        context=dict(dynamic_fields=dynamic_fields),
+    )
     return JsonResponse(
         dict(
-            parameters=render_to_string(
-                "runs/dynamic_fields.html", context=dict(fields=dynamic_fields)
-            ),
+            parameters=parameters,
         ),
         safe=False,
     )
