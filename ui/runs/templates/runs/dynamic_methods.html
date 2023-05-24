@@ -28,6 +28,7 @@
         $("#method_parameters").on("change", ".named", function () {
             const id = $(this).attr("id");
             const step_name = $(this).val();
+            const currentElement = $(this);
 
             $.ajax({
                 url: "{% url 'runs:outputs_of_step' run_name %}",
@@ -42,6 +43,12 @@
                     $.each(response, function (index, value) {
                         outputs.append($("<option></option>").attr("value", value).text(value));
                     })
+
+                    // Check if the current element also is "dynamic_trigger"
+                    // needs to update to ensure correct values
+                    if (currentElement.parent().hasClass("dynamic_trigger")) {
+                        currentElement.parent().trigger("change");
+                    }
                 }
             })
         });
