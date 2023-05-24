@@ -1046,26 +1046,34 @@
       "method_name": {
         "name": "random method",
         "description":"Dimension reduction of a dataframe using UMAP",
-        "dynamic_inputs_keys": ["param2", "param3"],
         "parameters": {
           "param1": {
             "name": "Distance metric",
             "type": "categorical_dynamic",
             "categories": ["euclidean", "manhattan", "long island"],
             "default": "euclidean",
-            "dynamic_inputs": {
-              "euclidean": ["param2", "param3"],
-              "manhattan": ["param2"]
+            "dynamic_parameters": {
+              "euclidean": ["param2"],
+              "manhattan": ["another_param"]
             }
           },
           "param2": {
             "name": "Distance metric",
-            "type": "categorical",
+            "type": "categorical_dynamic",
             "categories": ["lala", "lalo"],
             "default": "lala",
-            "dynamic_inputs": {
+            "dynamic_parameters": {
               "lala": ["param3"]
             },
+            "dynamic": true
+          },
+          "another_param": {
+            "name": "param",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
             "dynamic": true
           },
           "param3": {
@@ -1077,8 +1085,8 @@
           }
         }
       },
-      "method_name1": {
-        "name": "random method1",
+      "method_name2": {
+        "name": "random method2",
         "description":"Dimension reduction of a dataframe using UMAP",
         "parameters": {
           "param1": {
@@ -1087,32 +1095,25 @@
             "categories": ["euclidean", "manhattan", "long island"],
             "default": "euclidean",
             "dynamic_parameters": {
-              "another_param": {
-                "name": "param",
-                "type": "numeric",
-                "selected_category": ["euclidean", "manhattan"],
-                "min": 0,
-                "max": 4294967295,
-                "step": 1,
-                "default": 42
-              },
-              "rec_param": {
-                "name": "rec param",
-                "type": "categorical_dynamic",
-                "selected_category": ["euclidean"],
-                "categories": ["para", "paaa"],
-                "default": "paaa",
-                "dynamic_parameters": {
-                  "param2": {
-                    "name": "Distance metric",
-                    "type": "categorical",
-                    "selected_category": ["para"],
-                    "categories": ["lala", "lalo"],
-                    "default": "lala"
-                  }
-                }
-              }
+              "euclidean": ["param2"],
+              "manhattan": ["another_param"]
             }
+          },
+          "param2": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": ["lala", "lalo"],
+            "default": "lala",
+            "dynamic": true
+          },
+          "another_param": {
+            "name": "param",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
           }
         }
       }

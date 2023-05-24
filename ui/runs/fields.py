@@ -26,12 +26,17 @@ def make_current_fields(run, section, step, method):
             param_dict["default"] = workflow_default
 
         insert_special_params(param_dict, run)
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
+        # until here
+        if "dynamic" in param_dict:
+            continue
+        current_fields.append(
+            make_parameter_input(key, param_dict, parameters, disabled=False)
+        )
 
     return current_fields
 
 
-def make_parameter_input(key, param_dict, disabled):
+def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
         if "step" not in param_dict:
@@ -41,12 +46,10 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_select.html"
     elif param_dict["type"] == "categorical_dynamic":
         template = "runs/field_select_dynamic.html"
-        dynamic_fields = []
-        for field_key, field_dict in param_dict["dynamic_parameters"].items():
-            if param_dict["default"] in field_dict["selected_category"]:
-                dynamic_fields.append(
-                    make_parameter_input(field_key, field_dict, disabled)
-                )
+        selected_category = param_dict["default"]
+        dynamic_fields = make_dynamic_fields(
+            param_dict, selected_category, all_parameters_dict, disabled
+        )
         param_dict["dynamic_fields"] = dynamic_fields
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
@@ -75,6 +78,20 @@ def make_parameter_input(key, param_dict, disabled):
             key=key,
         ),
     )
+
+
+def make_dynamic_fields(param_dict, selected_category, all_parameters_dict, disabled):
+    dynamic_fields = []
+    if selected_category in param_dict["dynamic_parameters"]:
+        dynamic_parameters_list = param_dict["dynamic_parameters"][selected_category]
+        for field_key in dynamic_parameters_list:
+            field_dict = all_parameters_dict[field_key]
+            dynamic_fields.append(
+                make_parameter_input(
+                    field_key, field_dict, all_parameters_dict, disabled
+                )
+            )
+    return dynamic_fields
 
 
 def make_sidebar(request, run, run_name):
