@@ -1,6 +1,8 @@
 import pandas as pd
 from django.contrib import messages
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
+from sklearn.model_selection import GridSearchCV
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -79,3 +81,53 @@ def k_means(
             labels=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
+
+
+def gmm_bic_score(estimator, X):
+    """Callable to pass to GridSearchCV that will use the BIC score."""
+    # Make it negative since GridSearchCV expects a score to maximize
+    return -estimator.bic(X)
+
+
+def expectation_maximisation(
+    input_df: pd.DataFrame,
+    model_selection: bool,
+    n_components: int,
+    covariance_type: str,
+    init_params: str,
+    max_iter: int,
+):
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    try:
+        if model_selection:
+            param_grid = {
+                "n_components": n_components,
+                "covariance_type": covariance_type,
+                "init_params": init_params,
+                "max_iter": max_iter,
+            }
+            grid_search = GridSearchCV(
+                GaussianMixture(), param_grid=param_grid, scoring=gmm_bic_score
+            )
+            # GridSearchCV searches for the model with the best score
+            grid_search.fit(input_df_wide)
+            # The best model found is called on the data
+            labels = grid_search.predict(input_df_wide)
+            return dict(
+                model=grid_search.best_estimator_,
+                labels=labels,
+            )
+        else:
+            model = GaussianMixture(
+                n_components=n_components,
+                covariance_type=covariance_type,
+                init_params=init_params,
+                max_iter=max_iter,
+            )
+            labels = model.fit_predict(input_df_wide)
+            return dict(
+                model=model,
+                labels=labels,
+            )
+    except:
+        pass
