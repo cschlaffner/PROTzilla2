@@ -84,7 +84,7 @@ def go_analysis_with_STRING(
     :type folder_name: str or None
     """
 
-    # TODO: set logging level for whole django app in beginning
+    # TODO 182: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
     out_messages = []
 
@@ -124,6 +124,13 @@ def go_analysis_with_STRING(
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
+    if protein_set_dbs is None or protein_set_dbs == "":
+        protein_set_dbs = ["KEGG", "Component", "Function", "Process", "RCTM"]
+        msg = "No protein set databases selected. Using all protein set databases."
+        out_messages.append(dict(level=messages.INFO, msg=msg))
+    elif not isinstance(protein_set_dbs, list):
+        protein_set_dbs = [protein_set_dbs]
+        
     if background == "" or background is None:
         logging.info("No background provided, using entire proteome")
         statistical_background = None
