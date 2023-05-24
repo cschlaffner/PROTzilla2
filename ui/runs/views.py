@@ -13,7 +13,10 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
+from protzilla.utilities.memory import get_memory_usage
+
 from protzilla.run import Run
+from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -71,6 +74,7 @@ def detail(request, run_name):
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
+            used_memory=get_memory_usage(),
         ),
     )
 
@@ -163,7 +167,7 @@ def create(request):
     run = Run.create(
         run_name,
         request.POST["workflow_config_name"],
-        df_mode="disk_memory",
+        df_mode=request.POST["df_mode"],
     )
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

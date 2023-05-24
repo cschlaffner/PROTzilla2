@@ -74,6 +74,7 @@ def test_run_create(tests_folder_name):
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
+    run.step_index += 1
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
@@ -96,6 +97,7 @@ def test_run_back(tests_folder_name):
         intensity_name="Intensity",
     )
     df1 = run.df
+    run.step_index += 1
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
@@ -232,6 +234,7 @@ def test_export_plot(tests_folder_name):
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
+    run.step_index += 1
     run.perform_calculation(
         data_preprocessing.filter_proteins.by_low_frequency, dict(threshold=1)
     )
