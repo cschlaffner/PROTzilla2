@@ -29,7 +29,6 @@ $(document).ready(function () {
 
     // control file input text
     $(document).on('change', '.file-input', function() {
-        console.log("changed");
         let id = $(this).attr("id");
         $('#chosen-' + id).text(this.files[0].name);
     });

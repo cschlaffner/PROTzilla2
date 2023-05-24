@@ -657,7 +657,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type - Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -1108,12 +1108,12 @@
             "default": [null,null]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets (json, csv (one per line: Set_name, Protein1,...), txt (one per line: Set_name: Protein1,...), gmt)",
+            "name": "Upload Protein Sets (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
           "background": {
-            "name": "Background set (one protein per line csv or txt or no upload)",
+            "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
           }
