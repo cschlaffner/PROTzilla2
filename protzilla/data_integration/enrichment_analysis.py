@@ -178,7 +178,13 @@ def go_analysis_with_STRING(
         logging.info("Starting analysis for up-regulated proteins")
 
         up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
-        restring.write_functional_enrichment_tables(up_df, prefix="UP_")
+        try:
+            restring.write_functional_enrichment_tables(up_df, prefix="UP_")
+        except KeyError as e:
+            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
+
         logging.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
@@ -187,7 +193,12 @@ def go_analysis_with_STRING(
         down_df = get_functional_enrichment_with_delay(
             down_protein_list, **string_params
         )
-        restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
+        try:
+            restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
+        except KeyError as e:
+            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
         logging.info("Finished analysis for down-regulated proteins")
 
     # change working directory back to current enrichment folder
