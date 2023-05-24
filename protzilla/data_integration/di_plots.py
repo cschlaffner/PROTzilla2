@@ -7,7 +7,12 @@ from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 
 def go_enrichment_bar_plot(
-    input_df, categories, top_terms, cutoff, title="", colors=None
+    input_df,
+    categories,
+    top_terms,
+    cutoff,
+    title="",
+    colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
 ):
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."

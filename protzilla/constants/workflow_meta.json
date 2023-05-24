@@ -1176,7 +1176,8 @@
             "name": "Colors for the plot (optional)",
             "type": "categorical",
             "multiple": true,
-            "fill": "matplotlib_colors"
+            "fill": "matplotlib_colors",
+            "default": null
           }
         }
       }

@@ -52,23 +52,17 @@ def detail(request, run_name):
 
     current_plots = []
     for plot in run.plots:
-        if not isinstance(plot, dict):
-            if (section, step, method) == (
-                "data_integration",
-                "plot",
-                "go_enrichment_bar_plot",
-            ):
-                current_plots.append(
-                    '<img class="" src="data:image/png;base64, {}">'.format(
-                        plot.decode("utf-8")
-                    )
+        if isinstance(plot, bytes):
+            # Base64 encoded image
+            current_plots.append(
+                '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    plot.decode("utf-8")
                 )
-            else:
-                current_plots.append(
-                    plot.to_html(include_plotlyjs=False, full_html=False)
-                )
-        else:
+            )
+        elif isinstance(plot, dict):
             current_plots.append(None)
+        else:
+            current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
     return render(
         request,
@@ -175,12 +169,15 @@ def change_field(request, run_name):
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
         elif param_dict["fill"] == "enrichment_categories":
+            # WIP think about this again
             named_output = selected[0]
             output_item = selected[1]
             print(output_item)
             protein_itr = run.history.output_of_named_step(named_output, output_item)
-            # proteinitr NOne
-            if not isinstance(protein_itr, pd.DataFrame):
+            if (
+                not isinstance(protein_itr, pd.DataFrame)
+                or not "Gene_set" in protein_itr.columns
+            ):
                 logging.warning(
                     f"Warning: expected protein_itr to be an enrichment DataFrame but got {type(protein_itr)}. Proceeding with empty list."
                 )
