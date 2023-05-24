@@ -27,10 +27,10 @@ $(document).ready(function () {
         $('#sidebar').toggleClass('active');
     });
 
-    
-    // show file name on upload
-    $('.file-input').on('change', function(){
+    // control file input text
+    $(document).on('change', '.file-input', function() {
+        console.log("changed");
         let id = $(this).attr("id");
-        $('#chosen-'+ id).text(this.files[0].name);
-    })
+        $('#chosen-' + id).text(this.files[0].name);
+    });
 });
