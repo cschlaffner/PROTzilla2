@@ -1,7 +1,4 @@
-from ..data_integration import (
-    enrichment_analysis,
-    di_plots
-)
+from ..data_integration import enrichment_analysis, di_plots
 from ..data_analysis import (
     clustering,
     differential_expression,

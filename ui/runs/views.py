@@ -49,6 +49,27 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+
+    current_plots = []
+    for plot in run.plots:
+        if not isinstance(plot, dict):
+            if (section, step, method) == (
+                "data_integration",
+                "plot",
+                "go_enrichment_bar_plot",
+            ):
+                current_plots.append(
+                    '<img class="" src="data:image/png;base64, {}">'.format(
+                        plot.decode("utf-8")
+                    )
+                )
+            else:
+                current_plots.append(
+                    plot.to_html(include_plotlyjs=False, full_html=False)
+                )
+        else:
+            current_plots.append(None)
+
     return render(
         request,
         "runs/details.html",
@@ -62,11 +83,7 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
-            current_plots=[
-                plot.to_html(include_plotlyjs=False, full_html=False)
-                for plot in run.plots
-                if not isinstance(plot, dict)
-            ],
+            current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
@@ -167,9 +184,8 @@ def change_field(request, run_name):
                 logging.warning(
                     f"Warning: expected protein_itr to be an enrichment DataFrame but got {type(protein_itr)}. Proceeding with empty list."
                 )
-            else: 
+            else:
                 param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
-
 
         fields[key] = make_parameter_input(key, param_dict, disabled=False)
 
