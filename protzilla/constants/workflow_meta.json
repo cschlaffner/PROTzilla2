@@ -1174,7 +1174,7 @@
             "fill_dynamic": ["categories"]
           },
           "categories": {
-            "name": "Categories to be plotted",
+            "name": "Categories/Sets to be plotted",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
@@ -1188,7 +1188,7 @@
             "default": 10
           },
           "cutoff": {
-            "name": "Only terms with Adjusted P-value < cutoff will be shown",
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
             "type": "numeric",
             "min": 0,
             "max": 1,
