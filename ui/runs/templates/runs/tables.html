@@ -2,9 +2,33 @@
 {% load static %}
 
 {% block css %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
 {% endblock %}
 
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                ajax: "{% url 'runs:tables_content' run_name index 'key' %}",
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
-    Hello
+    <table id="example" class="display" style="width:100%">
+        <thead>
+        <tr>
+            <th>Name</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>Name</th>
+        </tr>
+        </tfoot>
+    </table>
 {% endblock %}

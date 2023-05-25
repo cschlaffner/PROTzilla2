@@ -354,4 +354,10 @@ def download_plots(request, run_name):
 
 
 def tables(request, run_name, index):
-    return render(request, "runs/tables.html")
+    return render(
+        request, "runs/tables.html", context=dict(run_name=run_name, index=index)
+    )
+
+
+def tables_content(request, run_name, index, key):
+    return JsonResponse({"data": [[i] for i in range(100)]})

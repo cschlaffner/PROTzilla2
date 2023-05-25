@@ -35,4 +35,9 @@ urlpatterns = [
     ),
     path("<str:run_name>/download_plots", views.download_plots, name="download_plots"),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables"),
+    path(
+        "<str:run_name>/tables/<int:index>/<str:key>",
+        views.tables_content,
+        name="tables_content",
+    ),
 ]
