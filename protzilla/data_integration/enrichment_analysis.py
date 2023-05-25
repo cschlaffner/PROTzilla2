@@ -41,6 +41,23 @@ def get_functional_enrichment_with_delay(protein_list, **string_params):
     return result_df
 
 
+def merge_restring_dfs(df_dict):
+    """
+    This method merges the dataframes returned by the restring package
+    into a single dataframe.
+
+    :param df_dict: dictionary with dataframes returned by the restring package
+    :type df_dict: dict
+    :return: merged dataframe
+    :rtype: pandas.DataFrame
+    """
+    dfs = []
+    for term, df in df_dict.items():
+        df["Gene_set"] = term
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True)
+
+
 def go_analysis_with_STRING(
     proteins,
     protein_set_dbs,
@@ -84,6 +101,8 @@ def go_analysis_with_STRING(
     :param folder_name: name of the folder to write results to. If None, a random string
         is used. This is for testing purposes.
     :type folder_name: str or None
+    :return: dictionary with summary and results dataframes
+    :rtype: dict
     """
 
     # TODO 182: set logging level for whole django app in beginning
@@ -207,18 +226,26 @@ def go_analysis_with_STRING(
     os.chdir("..")
 
     logging.info("Summarizing enrichment results")
-    results = []
-    summaries = []
+    results = {}
+    summaries = {}
     for term in protein_set_dbs:
         db = restring.aggregate_results(
             directories=[details_folder_name], kind=term, PATH=enrichment_folder_path
         )
         result = restring.tableize_aggregated(db)
         result.to_csv(f"{term}_results.csv")
-        results.append(result)
+        results[term] = result
         summary = restring.summary(db)
         summary.to_csv(f"{term}_summary.csv")
-        summaries.append(summary)
+        summaries[term] = summary
+
+    # combine all results and summaries
+    if len(results) > 1:
+        merged_results = merge_restring_dfs(results)
+        merged_summary = merge_restring_dfs(summaries)
+    else:
+        merged_results = results[term]
+        merged_summary = summaries[term]
 
     # switch back to original working directory
     os.chdir(start_dir)
@@ -230,7 +257,7 @@ def go_analysis_with_STRING(
     if len(out_messages) > 0:
         return dict(messages=out_messages, results=results, summaries=summaries)
 
-    return {"results": results, "summaries": summaries}
+    return {"result": merged_results, "summary": merged_summary}
 
 
 def uniprot_ids_to_uppercase_gene_symbols(proteins):

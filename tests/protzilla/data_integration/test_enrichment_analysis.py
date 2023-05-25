@@ -12,6 +12,7 @@ from protzilla.data_integration.enrichment_analysis import (
     get_functional_enrichment_with_delay,
     go_analysis_with_enrichr,
     go_analysis_offline,
+    merge_restring_dfs,
 )
 
 
@@ -53,6 +54,32 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     assert result1.equals(mock_df)
 
 
+def test_merge_restring_dfs():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    KEGG_result = pd.read_csv(f"{test_data_folder}/KEGG_results.csv", header=0)
+    KEGG_summary = pd.read_csv(f"{test_data_folder}/KEGG_summary.csv", header=0)
+    Process_result = pd.read_csv(f"{test_data_folder}/Process_results.csv", header=0)
+    Process_summary = pd.read_csv(f"{test_data_folder}/Process_summary.csv", header=0)
+    merged_results = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
+    merged_summaries = pd.read_csv(f"{test_data_folder}/merged_summaries.csv", header=0)
+
+    result = merge_restring_dfs(dict(KEGG=KEGG_result, Process=Process_result))
+    summary = merge_restring_dfs(dict(KEGG=KEGG_summary, Process=Process_summary))
+
+    column_names = ["term", "common", "Gene_set"]
+    for column in column_names:
+        assert result[column].equals(merged_results[column])
+
+    numerical_equal = np.isclose(
+        result["enrichment_details"],
+        merged_results["enrichment_details"],
+        rtol=1e-05,
+        atol=1e-08,
+    )
+    assert numerical_equal.all()
+    assert summary.equals(merged_summaries)
+
+
 @patch(
     "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
 )
@@ -60,7 +87,7 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     "background",
     [
         None,
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/background_imported_proteins.csv"
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/background_imported_proteins.csv",
     ],
 )
 def test_go_analysis_with_STRING(mock_enrichment, background):
@@ -100,8 +127,8 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
     assert not os.path.exists(
         f"{test_data_folder}tmp_enrichment_results"
     ), "tmp_enrichment_results folder was not deleted properly"
-    assert current_out["results"][0].equals(results)
-    assert current_out["summaries"][0].equals(summary)
+    assert current_out["result"].equals(results)
+    assert current_out["summary"].equals(summary)
 
 
 @patch(
