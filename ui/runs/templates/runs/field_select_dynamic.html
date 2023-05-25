@@ -11,6 +11,6 @@
         <option value="{{ option }}" {% if option in default%} selected="selected" {% endif %} >{{ option }}</option>
     {% endfor %}
 </select>
-<div id=dynamic_fields_{{ key }}">
+<div id="dynamic_fields_{{ key }}">
 {% include "runs/dynamic_fields.html" with key=key dynamic_fields=dynamic_fields %}
 </div>
