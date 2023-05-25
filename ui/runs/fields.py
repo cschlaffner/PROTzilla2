@@ -15,18 +15,6 @@ def make_current_fields(run, section, step, method):
     parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
-        # are these methods needed here?
-        param_dict = param_dict.copy()  # to not change workflow_meta
-        workflow_default = get_workflow_default_param_value(
-            run.workflow_config, section, step, method, key
-        )
-        if key in run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
-        elif workflow_default is not None:
-            param_dict["default"] = workflow_default
-
-        insert_special_params(param_dict, run)
-        # until here
         if "dynamic" in param_dict:
             continue
         current_fields.append(

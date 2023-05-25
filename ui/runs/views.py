@@ -127,8 +127,8 @@ def change_dynamic_input(request, run_name):
         dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
     )
     parameters = render_to_string(
-        "runs/dynamic_fields.html",
-        context=dict(dynamic_fields=dynamic_fields),
+        "runs/fields.html",
+        context=dict(fields=dynamic_fields),
     )
     return JsonResponse(
         dict(
