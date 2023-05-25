@@ -11,24 +11,28 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
     <script>
         $(document).ready(function () {
-            $('#example').DataTable({
-                ajax: "{% url 'runs:tables_content' run_name index 'key' %}",
+            $.ajax({
+                url: "{% url 'runs:tables_content' run_name index %}",
+                type: "GET",
+                data: {"key": $('#tables_dropdown').val()},
+                success: function (response) {
+                    let tr = $("<tr>");
+                    response.columns.forEach(element => {
+                        tr.append($("<th>").text(element))
+                    });
+                    $("#example").html($("<thead>").append(tr))
+                        .DataTable({data: response.data});
+                }
             });
         });
     </script>
 {% endblock %}
 
 {% block content %}
-    <table id="example" class="display" style="width:100%">
-        <thead>
-        <tr>
-            <th>Name</th>
-        </tr>
-        </thead>
-        <tfoot>
-        <tr>
-            <th>Name</th>
-        </tr>
-        </tfoot>
-    </table>
+    {% if not options %}
+        No tables found in this step.
+    {% else %}
+        {% include 'runs/field_select_with_label.html' with key="tables_dropdown" name="chose table: " categories=options %}
+        <table id="example" class="display" style="width:100%"></table>
+    {% endif %}
 {% endblock %}

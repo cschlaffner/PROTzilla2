@@ -354,10 +354,28 @@ def download_plots(request, run_name):
 
 
 def tables(request, run_name, index):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+
+    options = []
+    for key, value in run.history.steps[index].outputs.items():
+        if isinstance(value, pd.DataFrame):
+            options.append(key)
+
     return render(
-        request, "runs/tables.html", context=dict(run_name=run_name, index=index)
+        request,
+        "runs/tables.html",
+        context=dict(
+            run_name=run_name, index=index, options=[(opt, opt) for opt in options]
+        ),
     )
 
 
-def tables_content(request, run_name, index, key):
-    return JsonResponse({"data": [[i] for i in range(100)]})
+def tables_content(request, run_name, index):
+    run = active_runs[run_name]
+    key = request.GET["key"]
+    out = run.history.steps[index].outputs[key]
+    return JsonResponse(
+        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
+    )
