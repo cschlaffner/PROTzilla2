@@ -1,5 +1,4 @@
 import logging
-import pprint
 import subprocess
 from pathlib import Path
 
@@ -64,24 +63,31 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str, seq_len: i
     distances = {node: -1 for node in protein_graph.nodes}
     distances[starting_point] = 0
 
-    print("topo_order")
-    print(topo_order)
+    # print("topo_order")
+    # print(topo_order)
     for node in topo_order:
+        if node == starting_point:
+            aminoacid_len = 0
+        else:
+            aminoacid_len = int(len(g.nodes[node]["aminoacid"]))
+
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
-                aminoacid_len = int(len(g.nodes[node]["aminoacid"]))
-                if node == starting_point:
-                    aminoacid_len = 0
                 distances[neighbor] = max(
                     distances[neighbor], distances[node] + aminoacid_len
-                )  # distances[node] + 1
+                )
 
-    print("distances")
-    print(distances)
+    # print("distances")
+    # print(distances)
 
     # +2 to account for the start and end-node that are always in the graph but skipped
-    index = [[i, []] for i in range(seq_len)]
+    index = [[] for i in range(seq_len)]
+    # print("seq_len")
+    # print(seq_len)
+    distances = dict(sorted(distances.items(), key=lambda x: x[1]))
+    # print("type", type(distances))
     for node in distances:
+        print("node", node)
         if (
             protein_graph.nodes[node]["aminoacid"] == "__start__"
             or protein_graph.nodes[node]["aminoacid"] == "__end__"
@@ -92,7 +98,15 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str, seq_len: i
             distances[node],
             distances[node] + len(protein_graph.nodes[node]["aminoacid"]),
         ):
-            index[i][1].append(node)
+            # print("i", "node", "distance[node]", "distances[node] + len(protein_graph.nodes[node]['aminoacid'])")
+            # print(i, (node), distances[node], distances[node] + len(protein_graph.nodes[node]["aminoacid"]))
+            # print("len index")
+            # print(len(index))
+            if i >= len(index):
+                for _ in range(len(index), i + 1):
+                    print("appending", _)
+                    index.append([])
+            index[i].append(node)
 
     return distances, index
 
@@ -122,12 +136,15 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
 
 
 if __name__ == "__main__":
+    # g = nx.read_graphml(
+    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/Q7Z3B0.graphml"
+    # )
     g = nx.read_graphml(
-        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/Q7Z3B0.graphml"
+        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
     )
     seq_len = 0
     for node in g.nodes:
-        print(g.nodes[node]["aminoacid"])
+        # print(g.nodes[node]["aminoacid"])
         if g.nodes[node]["aminoacid"] == "__end__":
             seq_len = int(g.nodes[node]["position"]) - 1
             break
@@ -136,14 +153,15 @@ if __name__ == "__main__":
             "No end node found -> therefore couldn't determine sequence length"
         )
 
-    pprint.pprint(g.__dict__)
-    print(g.edges)
-    print(g.nodes)
+    # pprint.pprint(g.__dict__)
+    # print(g.edges)
+    # print(g.nodes)
 
     distances, index = _create_graph_index(
         protein_graph=g, starting_point="n0", seq_len=seq_len
     )
-    print("distances")
-    print(distances)
+    # print("distances")
+    # print(distances)
     print("index")
-    print(index)
+    for i, index in enumerate(index):
+        print(i, index, sep=": ", end="; ")
