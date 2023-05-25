@@ -12,8 +12,8 @@ def apply_multiple_testing_correction(p_values: list, method: str, alpha: float)
     :type method: str
     :param alpha: the alpha value to be used for the correction
     :type alpha: float
-    :return: a tuple containing the corrected p-values and the\
-        corrected alpha value (if applicable)
+    :return: a tuple containing the corrected p-values and (depending on the correction method)\
+          either the input alpha value or the corrected alpha value
     :rtype: tuple
     """
     to_param = {"Bonferroni": "bonferroni", "Benjamini-Hochberg": "fdr_bh"}

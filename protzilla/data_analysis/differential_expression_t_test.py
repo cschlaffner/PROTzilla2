@@ -42,7 +42,7 @@ def t_test(
     :param alpha: the alpha value for the t-test
     :type alpha: float
 
-    :return: a dict containing a dataframe in typical protzilla long format ccontaining the differentially expressed proteins,
+    :return: a dict containing a dataframe de_proteins_df in typical protzilla long format containing the differentially expressed proteins,
     a df corrected_p_values, containing the p_values after application of multiple testing correction,
     a df log2_fold_change, containing the log2 fold changes per protein,
     a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
@@ -108,8 +108,6 @@ def t_test(
             continue
 
         t, p = stats.ttest_ind(group1_intensities, group2_intensities)
-        print(t)
-        print(p)
         p_values.append(p)
         t_statistic.append(t)
         if log_base == "":
