@@ -13,9 +13,9 @@
 | protzilla/constants/paths.py                                            |        7 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/clustering.py                                  |       20 |        1 |        6 |        1 |     92% |        76 |
 | protzilla/data\_analysis/differential\_expression.py                    |        5 |        2 |        0 |        0 |     60% |       8-9 |
-| protzilla/data\_analysis/differential\_expression\_anova.py             |       30 |        2 |        8 |        2 |     89% |52-53, 86->91 |
+| protzilla/data\_analysis/differential\_expression\_anova.py             |       30 |        3 |        8 |        2 |     87% | 52-53, 87 |
 | protzilla/data\_analysis/differential\_expression\_helper.py            |        7 |        1 |        2 |        1 |     78% |        22 |
-| protzilla/data\_analysis/differential\_expression\_t\_test.py           |       48 |        0 |       14 |        0 |    100% |           |
+| protzilla/data\_analysis/differential\_expression\_t\_test.py           |       57 |        0 |       18 |        0 |    100% |           |
 | protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        4 |       10 |        2 |     86% |62-67, 95, 163 |
 | protzilla/data\_analysis/plots.py                                       |       75 |        2 |       34 |        3 |     95% |55, 64->66, 253 |
 | protzilla/data\_integration/database\_query.py                          |       11 |        8 |        4 |        0 |     20% |      7-35 |
@@ -46,9 +46,9 @@
 | tests/\_\_init\_\_.py                                                   |        0 |        0 |        0 |        0 |    100% |           |
 | tests/conftest.py                                                       |       54 |        3 |       10 |        1 |     94% | 18-19, 35 |
 | tests/protzilla/\_\_init\_\_.py                                         |        0 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/data\_analysis/test\_analysis\_plots.py                 |       21 |        2 |        4 |        2 |     84% |    77, 89 |
+| tests/protzilla/data\_analysis/test\_analysis\_plots.py                 |       21 |        2 |        4 |        2 |     84% |    78, 90 |
 | tests/protzilla/data\_analysis/test\_clustering.py                      |       22 |        0 |        0 |        0 |    100% |           |
-| tests/protzilla/data\_analysis/test\_differential\_expression.py        |       70 |        2 |       14 |        2 |     95% |   74, 230 |
+| tests/protzilla/data\_analysis/test\_differential\_expression.py        |       83 |        2 |       16 |        2 |     96% |   82, 306 |
 | tests/protzilla/data\_analysis/test\_dimension\_reduction.py            |       45 |        8 |        0 |        0 |     82% |91-114, 119-143 |
 | tests/protzilla/data\_analysis/test\_plots\_data\_analysis.py           |       66 |        5 |       22 |       11 |     82% |75, 82, 89, 96->exit, 102->exit, 112, 119, 126->exit, 131->exit, 157->exit, 179->exit |
 | tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      198 |        0 |       26 |        0 |    100% |           |
@@ -80,7 +80,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      192 |      145 |       48 |        0 |     20% |36, 48-54, 84-97, 115-162, 166-173, 177-179, 183-185, 189-191, 195-204, 208-215, 219-227, 231-258, 262-300, 304-306, 310-311, 333-335, 339-353 |
 | ui/runs/views\_helper.py                                                |       51 |       10 |       22 |        2 |     75% |12->14, 18, 25-37 |
-|                                                               **TOTAL** | **3853** |  **553** | **1029** |  **154** | **81%** |           |
+|                                                               **TOTAL** | **3875** |  **554** | **1035** |  **154** | **81%** |           |
 
 
 ## Setup coverage badge
