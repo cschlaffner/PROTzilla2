@@ -351,3 +351,7 @@ def download_plots(request, run_name):
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
     )
+
+
+def tables(request, run_name, index):
+    return render(request, "runs/tables.html")
