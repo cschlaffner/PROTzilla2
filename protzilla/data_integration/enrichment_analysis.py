@@ -2,12 +2,262 @@ import csv
 import json
 import logging
 import os
-
-import gseapy as gp
+import time
+import shutil
 import pandas as pd
+import numpy as np
+from restring import restring
+import gseapy as gp
 from django.contrib import messages
 
 from .database_query import biomart_query
+
+from ..constants.paths import RUNS_PATH
+from protzilla.utilities.random import random_string
+
+last_call_time = None
+MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
+
+
+def get_functional_enrichment_with_delay(protein_list, **string_params):
+    """
+    This method performs online functional enrichment analysis using the STRING DB API
+    via the restring package. It adds a delay between calls to the API to avoid
+    exceeding the rate limit.
+    :param protein_list: list of protein IDs to perform enrichment analysis for
+    :type protein_list: list
+    :param string_params: parameters for the restring package
+    :type string_params: dict
+    :return: dataframe with functional enrichment results
+    :rtype: pandas.DataFrame
+    """
+    global last_call_time
+    if last_call_time is not None:
+        elapsed_time = time.time() - last_call_time
+        if elapsed_time < MIN_WAIT_TIME:
+            time.sleep(MIN_WAIT_TIME - elapsed_time)
+    result_df = restring.get_functional_enrichment(protein_list, **string_params)
+    last_call_time = time.time()
+    return result_df
+
+
+def merge_restring_dfs(df_dict):
+    """
+    This method merges the dataframes returned by the restring package
+    into a single dataframe.
+
+    :param df_dict: dictionary with dataframes returned by the restring package
+    :type df_dict: dict
+    :return: merged dataframe
+    :rtype: pandas.DataFrame
+    """
+    dfs = []
+    for term, df in df_dict.items():
+        df["Gene_set"] = term
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True)
+
+
+def go_analysis_with_STRING(
+    proteins,
+    protein_set_dbs,
+    organism,
+    background=None,
+    direction="both",
+    run_name=None,
+    folder_name=None,
+):
+    """
+    This method performs online functional enrichment analysis using the STRING DB API
+    via the restring package. It writes the results to a folder in an
+    enrichment_results folder in the run folder or to a tmp folder (for testing).
+    Results for up- and down-regulated proteins are then aggregated and written
+    into summary and results dataframes. These are also written to the run folder.
+
+    :param proteins: dataframe with protein IDs and expression change column
+        (e.g. log2 fold change). The expression change column is used to determine
+        up- and down-regulated proteins. The magnitude of the expression change is
+        not used.
+    :type proteins: pandas.DataFrame
+    :param protein_set_dbs: list of protein set databases to use for enrichment
+        Possible values: KEGG, Component, Function, Process and RCTM
+    :type protein_set_dbs: list
+    :param organism: organism to use for enrichment as NCBI taxon identifier
+        (e.g. Human is 9606)
+    :type organism: int
+    :param background: path to csv file with background proteins (one protein ID per line).
+        If no background is provided, the entire proteome is used as background.
+    :type background: str or None
+    :param direction: direction of enrichment analysis.
+        Possible values: up, down, both
+        - up: Log2FC is > 0
+        - down: Log2FC is < 0
+        - both: functional enrichment info is retrieved for upregulated and downregulated
+        proteins separately, but the terms are aggregated for the summary and results
+    :type direction: str
+    :param run_name: name of the run folder to write results to. If None, a tmp folder
+        is used.
+    :type run_name: str or None
+    :param folder_name: name of the folder to write results to. If None, a random string
+        is used. This is for testing purposes.
+    :type folder_name: str or None
+    :return: dictionary with summary and results dataframes
+    :rtype: dict
+    """
+
+    # TODO 182: set logging level for whole django app in beginning
+    logging.basicConfig(level=logging.INFO)
+    out_messages = []
+
+    if (
+        not isinstance(proteins, pd.DataFrame)
+        or proteins.shape[1] != 2
+        or not "Protein ID" in proteins.columns
+        or not proteins.iloc[:, 1].dtype == np.number
+    ):
+        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
+
+    if len(up_protein_list) == 0:
+        if direction == "up":
+            msg = "No upregulated proteins found. Check your input or select 'down' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both" and len(down_protein_list) == 0:
+            msg = "No proteins found. Check your input."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No upregulated proteins found. Running analysis for 'down' direction only."
+            logging.warning(msg)
+            direction = "down"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
+
+    if len(down_protein_list) == 0:
+        if direction == "down":
+            msg = "No downregulated proteins found. Check your input or select 'up' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No downregulated proteins found. Running analysis for 'up' direction only."
+            logging.warning(msg)
+            direction = "up"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
+
+    if protein_set_dbs is None or protein_set_dbs == "":
+        protein_set_dbs = ["KEGG", "Component", "Function", "Process", "RCTM"]
+        msg = "No protein set databases selected. Using all protein set databases."
+        out_messages.append(dict(level=messages.INFO, msg=msg))
+    elif not isinstance(protein_set_dbs, list):
+        protein_set_dbs = [protein_set_dbs]
+
+    if background == "" or background is None:
+        logging.info("No background provided, using entire proteome")
+        statistical_background = None
+    else:
+        # assuming headerless one column file, tab separated
+        read = pd.read_csv(
+            background,
+            sep="\t",
+            low_memory=False,
+            header=None,
+        )
+        statistical_background = read.iloc[:, 0].tolist()
+
+    string_params = {
+        "species": organism,
+        "caller_ID": "PROTzilla",
+        "statistical_background": statistical_background,
+    }
+
+    # change working direcory to run folder for enrichment analysis
+    # or make tmp folder
+    results_path = (
+        RUNS_PATH / run_name / "enrichment_results"
+        if run_name
+        else os.path.join(os.getcwd(), "tmp_enrichment_results")
+    )
+    os.makedirs(results_path, exist_ok=True)
+
+    # make folder for current enrichment analysis and details of analysis
+    enrichment_folder_name = (
+        f"enrichment_{random_string()}" if folder_name is None else folder_name
+    )
+    enrichment_folder_path = os.path.join(results_path, enrichment_folder_name)
+    os.makedirs(enrichment_folder_path, exist_ok=True)
+
+    details_folder_name = "enrichment_details"
+    details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
+    os.makedirs(details_folder_path, exist_ok=True)
+    start_dir = os.getcwd()
+    os.chdir(details_folder_path)
+
+    # enhancement: add mapping to string API for identifiers before this (dont forget background)
+
+    if direction == "up" or direction == "both":
+        logging.info("Starting analysis for up-regulated proteins")
+
+        up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
+        try:
+            restring.write_functional_enrichment_tables(up_df, prefix="UP_")
+        except KeyError as e:
+            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
+
+        logging.info("Finished analysis for up-regulated proteins")
+
+    if direction == "down" or direction == "both":
+        logging.info("Starting analysis for down-regulated proteins")
+
+        down_df = get_functional_enrichment_with_delay(
+            down_protein_list, **string_params
+        )
+        try:
+            restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
+        except KeyError as e:
+            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
+        logging.info("Finished analysis for down-regulated proteins")
+
+    # change working directory back to current enrichment folder
+    os.chdir("..")
+
+    logging.info("Summarizing enrichment results")
+    results = {}
+    summaries = {}
+    for term in protein_set_dbs:
+        db = restring.aggregate_results(
+            directories=[details_folder_name], kind=term, PATH=enrichment_folder_path
+        )
+        result = restring.tableize_aggregated(db)
+        result.to_csv(f"{term}_results.csv")
+        results[term] = result
+        summary = restring.summary(db)
+        summary.to_csv(f"{term}_summary.csv")
+        summaries[term] = summary
+
+    # combine all results and summaries
+    if len(results) > 1:
+        merged_results = merge_restring_dfs(results)
+        merged_summary = merge_restring_dfs(summaries)
+    else:
+        merged_results = results[term]
+        merged_summary = summaries[term]
+
+    # switch back to original working directory
+    os.chdir(start_dir)
+
+    # delete tmp folder if it was created
+    if os.path.basename(results_path) == "tmp_enrichment_results":
+        shutil.rmtree(results_path)
+
+    if len(out_messages) > 0:
+        return dict(messages=out_messages, results=results, summaries=summaries)
+
+    return {"result": merged_results, "summary": merged_summary}
 
 
 def uniprot_ids_to_uppercase_gene_symbols(proteins):
