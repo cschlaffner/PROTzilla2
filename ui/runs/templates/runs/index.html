@@ -23,6 +23,13 @@
             {% endfor %}
           </select>
         </div>
+        <div class="mb-2">
+          <label for="df_mode">memory mode:</label>
+          <select name="df_mode" id="df_mode" class="form-select">
+            <option value="disk_memory" selected >standard</option>
+            <option value="disk">low memory</option>
+          </select>
+        </div>
         <input type="submit" value="Create" class="btn btn-red">
       </form>
     </div>

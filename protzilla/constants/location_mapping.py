@@ -5,6 +5,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
+from ..data_integration import enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -53,6 +54,11 @@ method_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing,
     (
         "data_preprocessing",
         "outlier_detection",
@@ -189,6 +195,11 @@ plot_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing_plot,
     (
         "data_preprocessing",
         "normalisation",
