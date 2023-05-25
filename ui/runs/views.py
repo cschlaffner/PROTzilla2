@@ -186,7 +186,7 @@ def change_field(request, run_name):
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
 
-        fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
     return JsonResponse(fields, safe=False)
 

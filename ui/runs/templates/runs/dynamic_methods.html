@@ -40,7 +40,14 @@
                 success: function (response) {
                     console.log("hallo");
                     console.log(response.parameters);
-                    $(`#dynamic_fields_${key}`).html(response.parameters);
+                    const dynamic_id = `dynamic_fields_${key}`
+                    console.log(dynamic_id);
+                    if($(`dynamic_fields_${key}`).length == 0) {
+                        console.log("yes!");
+                    } else {
+                        console.log("no clue!");
+                    }
+                    $("#"+dynamic_id).html(response.parameters);
                 }
             }).fail(function (e) {
                 console.log('Error:', e);

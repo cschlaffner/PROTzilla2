@@ -60,7 +60,9 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
         additional_fields = []
         for field_key, field_dict in param_dict["fields"].items():
             additional_fields.append(
-                make_parameter_input(field_key, field_dict, disabled)
+                make_parameter_input(
+                    field_key, field_dict, all_parameters_dict, disabled
+                )
             )
         param_dict["additional_fields"] = additional_fields
     elif param_dict["type"] == "metadata_df" or param_dict["type"] == "peptide_df":
@@ -118,7 +120,9 @@ def make_plot_fields(run, section, step, method):
         for key, param_dict in plot.items():
             if method in run.current_plot_parameters:
                 param_dict["default"] = run.current_plot_parameters[method][key]
-            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+            plot_fields.append(
+                make_parameter_input(key, param_dict, plot, disabled=False)
+            )
     return plot_fields
 
 
@@ -166,7 +170,9 @@ def make_displayed_history(run):
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
+                fields.append(
+                    make_parameter_input(key, param_dict, parameters, disabled=True)
+                )
         plots = [
             plot.to_html(include_plotlyjs=False, full_html=False)
             for plot in history_step.plots
