@@ -2,6 +2,7 @@ import sys
 import tempfile
 import traceback
 import zipfile
+import numpy as np
 
 import pandas as pd
 from django.contrib import messages
@@ -376,6 +377,7 @@ def tables_content(request, run_name, index):
     run = active_runs[run_name]
     key = request.GET["key"]
     out = run.history.steps[index].outputs[key]
+    out = out.replace(np.nan, None)
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
