@@ -56,10 +56,18 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
 
 def test_merge_restring_dfs():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    KEGG_result = pd.read_csv(f"{test_data_folder}/KEGG_results.csv", header=0)
-    KEGG_summary = pd.read_csv(f"{test_data_folder}/KEGG_summary.csv", header=0)
-    Process_result = pd.read_csv(f"{test_data_folder}/Process_results.csv", header=0)
-    Process_summary = pd.read_csv(f"{test_data_folder}/Process_summary.csv", header=0)
+    KEGG_result = pd.read_csv(
+        f"{test_data_folder}/KEGG_results.csv", header=0, index_col=0
+    )
+    KEGG_summary = pd.read_csv(
+        f"{test_data_folder}/KEGG_summary.csv", header=0, index_col=0
+    )
+    Process_result = pd.read_csv(
+        f"{test_data_folder}/Process_results.csv", header=0, index_col=0
+    )
+    Process_summary = pd.read_csv(
+        f"{test_data_folder}/Process_summary.csv", header=0, index_col=0
+    )
     merged_results = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
     merged_summaries = pd.read_csv(f"{test_data_folder}/merged_summaries.csv", header=0)
 

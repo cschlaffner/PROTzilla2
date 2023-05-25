@@ -55,7 +55,7 @@ def merge_restring_dfs(df_dict):
     dfs = []
     for term, df in df_dict.items():
         df["Gene_set"] = term
-        dfs.append(df)
+        dfs.append(df.reset_index())
     return pd.concat(dfs, ignore_index=True)
 
 
