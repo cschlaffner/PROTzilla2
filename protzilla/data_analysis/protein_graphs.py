@@ -74,6 +74,9 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str, seq_len: i
             longest_paths[node],
             longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]),
         ):
+            # needed because variations can make the longest path longer than
+            # the reference sequence.
+            # As calculating that is hard, we just append when needed
             if i >= len(index):
                 for _ in range(len(index), i + 1):
                     index.append([])
@@ -82,22 +85,24 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str, seq_len: i
     return longest_paths, index
 
 
-def _longest_paths(protein_graph: nx.Graph, starting_point: str):
+def _longest_paths(protein_graph: nx.Graph, start_node: str):
     """
     create mapping from node to distance where the distance is the longest path
     from the starting point to each node
+
+    A Variation is assumed to only ever be one aminoacid long
     """
 
     topo_order = list(nx.topological_sort(protein_graph))
 
     distances = {node: -1 for node in protein_graph.nodes}
-    distances[starting_point] = 0
+    distances[start_node] = 0
 
     for node in topo_order:
-        if node == starting_point:
+        if node == start_node:
             aminoacid_len = 0
         else:
-            aminoacid_len = int(len(g.nodes[node]["aminoacid"]))
+            aminoacid_len = int(len(protein_graph.nodes[node]["aminoacid"]))
 
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
@@ -145,7 +150,7 @@ if __name__ == "__main__":
             break
     else:
         raise ValueError(
-            "No end node found -> therefore couldn't determine sequence length"
+            "No __end__ node found -> therefore couldn't determine ref.-sequence length"
         )
 
     distances, index = _create_graph_index(
