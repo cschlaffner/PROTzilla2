@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{% static 'js/cytoscape-3.24.0.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/klay.0.4.1.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cytoscape-klay.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/cytoscape-dagre.js' %}"></script>
 
     <style>
         body {
@@ -77,9 +78,8 @@
                             'text-valign': 'center',
                             'text-halign': 'center',
                             'width': getWidth,
-                            {#'padding': "20px",#}
                             'background-color': 'lightblue',
-                            {#'horizontal-text-margin': '10px',#}
+                            'horizontal-text-margin': '10px',
                         }
                     },
                     {
@@ -92,7 +92,6 @@
                             'target-arrow-color': '#ccc',
                             'source-endpoint': '90deg',
                             'target-endpoint': '270deg',
-                            {#'target-endpoint-offset': '25px',#}
                         }
                     }
                 ],
