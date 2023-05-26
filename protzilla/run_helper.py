@@ -1,4 +1,6 @@
 import copy
+import restring
+import gseapy as gp
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -31,6 +33,10 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
+        elif param_dict["fill"] == "dbs_restring":
+            param_dict["categories"] = restring.settings.file_types
+        elif param_dict["fill"] == "dbs_gseapy":
+            param_dict["categories"] = gp.get_library_name()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
