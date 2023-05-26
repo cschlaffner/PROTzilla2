@@ -34,9 +34,9 @@ urlpatterns = [
         "<str:run_name>/export_workflow", views.export_workflow, name="export_workflow"
     ),
     path("<str:run_name>/download_plots", views.download_plots, name="download_plots"),
-    path("<str:run_name>/tables/<int:index>", views.tables, name="tables"),
+    path("<str:run_name>/tables/<int:index>/<str:key>", views.tables, name="tables"),
     path(
-        "<str:run_name>/tables_content/<int:index>",
+        "<str:run_name>/tables_content/<int:index>/<str:key>",
         views.tables_content,
         name="tables_content",
     ),

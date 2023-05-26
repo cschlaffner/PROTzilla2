@@ -12,7 +12,7 @@
     <script>
         $(document).ready(function () {
             $.ajax({
-                url: "{% url 'runs:tables_content' run_name index %}",
+                url: "{% url 'runs:tables_content' run_name index key %}",
                 type: "GET",
                 data: {"key": $('#tables_dropdown').val()},
                 success: function (response) {
@@ -35,6 +35,9 @@
                         });
                 }
             });
+            $('#tables_dropdown').on("change", function () {
+                window.location.href = $(this).val()
+            })
         });
     </script>
 {% endblock %}
@@ -43,7 +46,7 @@
     {% if not options %}
         No tables found in this step.
     {% else %}
-        {% include 'runs/field_select_with_label.html' with key="tables_dropdown" name="chose table: " categories=options %}
+        {% include 'runs/field_select_with_label.html' with key="tables_dropdown" name="chose table: " categories=options selected="" %}
         <table id="example" class="display" style="width:100%"></table>
     {% endif %}
 {% endblock %}
