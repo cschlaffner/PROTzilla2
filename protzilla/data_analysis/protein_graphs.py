@@ -67,6 +67,7 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
             try:
                 seq_len = int(protein_graph.nodes[node]["position"]) - 1
             except KeyError:
+                # minimum number of amino acids is number of nodes - 2 (start and end)
                 seq_len = protein_graph.number_of_nodes() - 2
                 logging.info(
                     f"Set sequence length to {seq_len}, based on number of nodes"
@@ -76,7 +77,6 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:
-        # print("node", node)
         if (
             protein_graph.nodes[node]["aminoacid"] == "__start__"
             or protein_graph.nodes[node]["aminoacid"] == "__end__"
