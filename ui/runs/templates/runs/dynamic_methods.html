@@ -44,7 +44,7 @@
                         outputs.append($("<option></option>").attr("value", value).text(value));
                     })
 
-                    // Check if the current element also is "dynamic_trigger"
+                    // Check if the current element is also "dynamic_trigger"
                     // needs to update to ensure correct values
                     if (currentElement.parent().hasClass("dynamic_trigger")) {
                         currentElement.parent().trigger("change");

@@ -146,14 +146,11 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        if len(selected) == 1:
-            param_dict = parameters[key]
-        else:
-            if "fields" in parameters[post_id]:
-                param_dict = parameters[post_id]["fields"][key]
-            else:
-                # testing this out
-                param_dict = parameters[key]
+        param_dict = (
+            parameters[post_id]["fields"][key]
+            if "fields" in parameters[post_id]
+            else parameters[key]
+        )
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
@@ -173,10 +170,8 @@ def change_field(request, run_name):
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
         elif param_dict["fill"] == "enrichment_categories":
-            # WIP think about this again
             named_output = selected[0]
             output_item = selected[1]
-            print(output_item)
             protein_itr = run.history.output_of_named_step(named_output, output_item)
             if (
                 not isinstance(protein_itr, pd.DataFrame)

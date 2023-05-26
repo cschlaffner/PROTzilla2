@@ -136,10 +136,11 @@ def make_displayed_history(run):
                     key = key[:-8]
                 if key == "proteins_of_interest" and not key in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
-                if key in history_step.parameters:
-                    param_dict["default"] = history_step.parameters[key]
-                else:
-                    param_dict["default"] = None
+                param_dict["default"] = (
+                    history_step.parameters[key]
+                    if key in history_step.parameters
+                    else None
+                )
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
