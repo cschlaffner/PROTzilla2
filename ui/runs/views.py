@@ -354,15 +354,20 @@ def download_plots(request, run_name):
     )
 
 
-def tables(request, run_name, index, key):
+def tables(request, run_name, index, key=None):
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
 
-    options = [""]
+    options = []
     for k, value in run.history.steps[index].outputs.items():
         if isinstance(value, pd.DataFrame) and k != key:
             options.append(k)
+
+    if key is None and options:
+        return HttpResponseRedirect(
+            reverse("runs:tables", args=(run_name, index, options[0]))
+        )
 
     return render(
         request,
@@ -370,7 +375,7 @@ def tables(request, run_name, index, key):
         context=dict(
             run_name=run_name,
             index=index,
-            options=[(opt, opt) for opt in options],
+            options=[(opt, opt) for opt in [key] + options],
             key=key,
         ),
     )
