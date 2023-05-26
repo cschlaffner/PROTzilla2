@@ -297,7 +297,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
         )
     )
-    q = dict(list(set(map(tuple, q))))
+    q = dict(set(map(tuple, q)))
 
     # check per group in proteins if all proteins have the same gene symbol
     # if yes, use that gene symbol, otherwise use all gene symbols
@@ -325,7 +325,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             if not any(symbols):
                 # no gene symbol for any protein in group
                 filtered_groups.append(group)
-            elif len(set(symbols)) == 1:
+            elif len(symbols) == 1:
                 gene_symbols.append(symbols[0].upper())
             else:
                 gene_symbols.extend([s.upper() for s in symbols if s is not None])
