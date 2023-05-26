@@ -53,13 +53,23 @@ def peptides_to_isoform(
     return
 
 
-def _create_graph_index(protein_graph: nx.Graph, starting_point: str, seq_len: int):
+def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
     """
     create mapping from starting point to node (where a nodes starting point is its
     point when taking the longest possible path
     """
 
     longest_paths = _longest_paths(protein_graph, starting_point)
+
+    seq_len = 0
+    for node in g.nodes:
+        if g.nodes[node]["aminoacid"] == "__end__":
+            seq_len = int(g.nodes[node]["position"]) - 1
+            break
+    else:
+        raise ValueError(
+            "No __end__ node found -> therefore couldn't determine ref.-sequence length"
+        )
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:
@@ -143,16 +153,5 @@ if __name__ == "__main__":
     g = nx.read_graphml(
         "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
     )
-    seq_len = 0
-    for node in g.nodes:
-        if g.nodes[node]["aminoacid"] == "__end__":
-            seq_len = int(g.nodes[node]["position"]) - 1
-            break
-    else:
-        raise ValueError(
-            "No __end__ node found -> therefore couldn't determine ref.-sequence length"
-        )
 
-    distances, index = _create_graph_index(
-        protein_graph=g, starting_point="n0", seq_len=seq_len
-    )
+    distances, index = _create_graph_index(protein_graph=g, starting_point="n0")
