@@ -62,18 +62,21 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
     longest_paths = _longest_paths(protein_graph, starting_point)
 
     seq_len = 0
-    for node in g.nodes:
-        if g.nodes[node]["aminoacid"] == "__end__":
-            seq_len = int(g.nodes[node]["position"]) - 1
-            break
-    else:
-        raise ValueError(
-            "No __end__ node found -> therefore couldn't determine ref.-sequence length"
-        )
+    for node in protein_graph.nodes:
+        if protein_graph.nodes[node]["aminoacid"] == "__end__":
+            try:
+                seq_len = int(protein_graph.nodes[node]["position"]) - 1
+            except KeyError:
+                seq_len = protein_graph.number_of_nodes() - 2
+                logging.info(
+                    f"Set sequence length to {seq_len}, based on number of nodes"
+                )
+            finally:
+                break
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:
-        print("node", node)
+        # print("node", node)
         if (
             protein_graph.nodes[node]["aminoacid"] == "__start__"
             or protein_graph.nodes[node]["aminoacid"] == "__end__"
@@ -92,7 +95,7 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
                     index.append([])
             index[i].append(node)
 
-    return longest_paths, index
+    return index
 
 
 def _longest_paths(protein_graph: nx.Graph, start_node: str):
@@ -154,4 +157,4 @@ if __name__ == "__main__":
         "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
     )
 
-    distances, index = _create_graph_index(protein_graph=g, starting_point="n0")
+    index = _create_graph_index(protein_graph=g, starting_point="n0")
