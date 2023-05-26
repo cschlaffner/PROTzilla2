@@ -1156,7 +1156,7 @@
             "placeholder": "Enter the Uniprot-ID of the Protein"
           },
           "run_path": {
-            "type": "run_path",
+            "type": "empty",
             "name": "run_path",
             "default": null
           }
