@@ -1,4 +1,5 @@
 import logging
+import re
 import subprocess
 from pathlib import Path
 
@@ -48,17 +49,17 @@ def peptides_to_isoform(
     protein_graph = nx.read_graphml(
         f"{RUNS_PATH}/{run_name}/graphs/{graph_name}.graphml"
     )
-    print()
+    # n0 is always the __start__ node in ProtGraph
+    _create_graph_index(protein_graph, "n0")
 
     return
 
 
 def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
     """
-    create mapping from starting point to node (where a nodes starting point is its
-    point when taking the longest possible path
+    create a mapping from the position in the protein to the node in the graph
+    TODO: this might be broken (in conjunction with the ref.-seq index) for versions where a ref.-seq is shorter than the longest path
     """
-
     longest_paths = _longest_paths(protein_graph, starting_point)
 
     seq_len = 0
@@ -96,6 +97,56 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
             index[i].append(node)
 
     return index
+
+
+def _create_ref_seq_index(protein_id: str, k: int, run_name: str):
+    # get seq from protein -> via protein-file?
+    with open(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt", "r") as f:
+        lines = f.readlines()
+
+    sequence_pattern = r"^SQ\s+SEQUENCE\s+\d+"
+
+    found_lines = []
+    matched = False
+    for line in lines:
+        if re.match(sequence_pattern, line):
+            matched = True
+        if matched:
+            if line.startswith("//"):
+                break
+            found_lines.append(line)
+
+    ref_seq = ""
+    for line in found_lines:
+        if line.startswith("SQ"):
+            line = line.split(" ")
+            for s in line:
+                if s == "":
+                    del line[line.index(s)]
+            print(line)
+            seq_len = int(line[2])
+            continue
+        if line.startswith("//"):
+            continue
+        ref_seq += line.strip()
+    ref_seq = ref_seq.replace(" ", "")
+
+    # create index
+    index = {}
+    kmer_list = []
+    for i, char in enumerate(ref_seq):
+        end_index = i + k if i + k < len(ref_seq) else len(ref_seq)
+        kmer = ref_seq[i:end_index]
+        kmer_list.append(kmer)
+        if kmer in index:
+            index[kmer].append(i)
+        else:
+            index[kmer] = [i]
+
+    for kmer in kmer_list:
+        assert kmer in index, f"kmer {kmer} not in index but should be"
+
+    return index, seq_len
 
 
 def _longest_paths(protein_graph: nx.Graph, start_node: str):
@@ -153,8 +204,9 @@ if __name__ == "__main__":
     # g = nx.read_graphml(
     #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/Q7Z3B0.graphml"
     # )
-    g = nx.read_graphml(
-        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
-    )
+    # g = nx.read_graphml(
+    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
+    # )
+    # index = _create_graph_index(protein_graph=g, starting_point="n0")
 
-    index = _create_graph_index(protein_graph=g, starting_point="n0")
+    _create_ref_seq_index("P10636", 5, "as")
