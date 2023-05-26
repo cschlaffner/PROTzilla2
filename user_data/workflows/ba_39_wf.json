@@ -1,0 +1,76 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            
+            "log_base": 2,
+            "grouping": "Group"
+          }
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": [
+      ]
+    }
+  }
+}
