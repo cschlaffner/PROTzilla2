@@ -49,6 +49,9 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+    show_table = run.current_out and any(
+        isinstance(v, pd.DataFrame) for v in run.current_out.values()
+    )
     return render(
         request,
         "runs/details.html",
@@ -72,6 +75,7 @@ def detail(request, run_name):
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
+            show_table=show_table,
         ),
     )
 
@@ -359,8 +363,13 @@ def tables(request, run_name, index, key=None):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
 
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
+
     options = []
-    for k, value in run.history.steps[index].outputs.items():
+    for k, value in outputs.items():
         if isinstance(value, pd.DataFrame) and k != key:
             options.append(k)
 
@@ -384,8 +393,11 @@ def tables(request, run_name, index, key=None):
 
 def tables_content(request, run_name, index, key):
     run = active_runs[run_name]
-    out = run.history.steps[index].outputs[key]
-    out = out.replace(np.nan, None)
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs[key]
+    else:
+        outputs = run.current_out[key]
+    out = outputs.replace(np.nan, None)
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )

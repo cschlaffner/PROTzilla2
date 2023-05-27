@@ -159,6 +159,10 @@
                                             {% if section == "data_preprocessing" %}
                                                 <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
                                             {% endif %}
+                                            {% if show_table %}
+                                                <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}" target="_blank"
+                                                   class="col-4 btn btn-grey me-2">View table</a>
+                                            {% endif %}
                                         </div>
                                     </form>
                                 {% else %}
