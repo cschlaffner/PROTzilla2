@@ -1,5 +1,6 @@
 import base64
 import io
+import pytest
 
 import pandas as pd
 from PIL import Image
@@ -56,7 +57,8 @@ def test_enrichment_bar_plot(show_figures):
         open_graph_from_base64(bar_base64[0])
 
 
-def test_enrichment_dot_plot(show_figures):
+@pytest.mark.parametrize("x_axis", ["Gene Sets", "Combined Score"])
+def test_enrichment_dot_plot(show_figures, x_axis):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
@@ -64,8 +66,10 @@ def test_enrichment_dot_plot(show_figures):
     bar_base64 = go_enrichment_dot_plot(
         input_df=enrichment_df,
         categories=["Reactome_2013"],
+        x_axis=x_axis,
         top_terms=5,
         cutoff=0.05,
+        dot_size=40,
         title="Reactome Enrichment Test",
         rotate_x_labels=False,
         show_ring=False,

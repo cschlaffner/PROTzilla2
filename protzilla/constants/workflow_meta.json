@@ -1223,6 +1223,14 @@
             "default": [null, null],
             "fill_dynamic": ["categories"]
           },
+          "x_axis": {
+            "name": "Variable for x-axis: categorical scatter plot for one or multiple gene sets, or display combined score for one gene set",
+            "type": "categorical",
+            "categories": [
+              "Gene Sets", "Combined Score"
+            ],
+            "default": "Gene Sets"
+          },
           "categories": {
             "name": "Categories/Sets to be plotted",
             "type": "categorical",
@@ -1257,6 +1265,11 @@
             "name": "Show ring around the dots",
             "type": "boolean",
             "default": false
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
           }
         }
       }

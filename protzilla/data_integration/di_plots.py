@@ -102,9 +102,11 @@ def go_enrichment_dot_plot(
     top_terms,
     cutoff,
     categories,
+    x_axis="Gene Sets",
     title="",
     rotate_x_labels=True,
     show_ring=False,
+    dot_size=5,
 ):
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
@@ -113,37 +115,54 @@ def go_enrichment_dot_plot(
     if not isinstance(categories, list):
         categories = [categories]
 
+    if len(categories) > 1 and x_axis == "Combined Score":
+        msg = "Combined Score is only available for one category. Choosing only one category or Gene Sets as x-axis."
+        return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
+
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(categories)]
 
     size_y = top_terms * len(categories)
     xticklabels_rot = 45 if rotate_x_labels else 0
-    try:
-        # ax = gp.dotplot(df,
-        #         size=10,
-        #         top_term=top_terms,
-        #         figsize=(3,size_y),
-        #         cutoff=cutoff,
-        #         title=title,
-        #         xticklabels_rot=xticklabels_rot,
-        #         show_ring=show_ring,
-        #      )
-        ax = gp.dotplot(
-            df,
-            column="Adjusted P-value",
-            x="Gene_set",  # set x axis, so you could do a multi-sample/library comparsion
-            size=10,
-            top_term=top_terms,
-            figsize=(3, size_y),
-            cutoff=cutoff,
-            title=title,
-            xticklabels_rot=xticklabels_rot,
-            show_ring=show_ring,
-        )
-    except ValueError as e:
-        msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+
+    if x_axis == "Gene Sets":
+        try:
+            ax = gp.dotplot(
+                df,
+                column="Adjusted P-value",
+                x="Gene_set",
+                size=dot_size,
+                top_term=top_terms,
+                figsize=(3, size_y),
+                cutoff=cutoff,
+                title=title,
+                xticklabels_rot=xticklabels_rot,
+                show_ring=show_ring,
+            )
+            return [fig_to_base64(ax.get_figure())]
+        except ValueError as e:
+            msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
-    return [fig_to_base64(ax.get_figure())]
+
+    elif x_axis == "Combined Score":
+        try:
+            ax = gp.dotplot(
+                df,
+                size=10,
+                top_term=top_terms,
+                figsize=(3, size_y),
+                cutoff=cutoff,
+                title=title,
+                xticklabels_rot=xticklabels_rot,
+                show_ring=show_ring,
+            )
+            return [fig_to_base64(ax.get_figure())]
+        except ValueError as e:
+            msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+            return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+    else:
+        msg = "Invalid x_axis value"
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
 
 def fig_to_base64(fig):
