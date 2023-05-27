@@ -1,11 +1,10 @@
-from ..data_integration import enrichment_analysis, di_plots
 from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
     plots,
 )
-from ..data_integration import enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -290,4 +289,9 @@ plot_map = {
         "plot",
         "go_enrichment_bar_plot",
     ): di_plots.go_enrichment_bar_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_dot_plot",
+    ): di_plots.go_enrichment_dot_plot,
 }

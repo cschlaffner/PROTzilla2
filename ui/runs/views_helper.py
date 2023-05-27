@@ -40,9 +40,11 @@ def parameters_for_plot(post_data, param_dict):
 def convert_str_if_possible(s):
     try:
         f = float(s)
+        return int(f) if int(f) == f else f
     except ValueError:
+        if s == "True" or s == "False":
+            return s == "True"
         return s
-    return int(f) if int(f) == f else f
 
 
 def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):

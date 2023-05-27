@@ -55,6 +55,8 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
         template = "runs/field_text.html"
+    elif param_dict["type"] == "boolean":
+        template = "runs/field_checkbox.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 

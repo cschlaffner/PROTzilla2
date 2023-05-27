@@ -1,13 +1,11 @@
-import io
 import base64
+import io
+
 import gseapy as gp
 import numpy as np
-import pandas as pd
 from django.contrib import messages
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
-
-from shutil import get_terminal_size
 
 
 def go_enrichment_bar_plot(
@@ -92,6 +90,55 @@ def go_enrichment_bar_plot(
             top_term=top_terms,
             color=colors,
             title=title,
+        )
+    except ValueError as e:
+        msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+    return [fig_to_base64(ax.get_figure())]
+
+
+def go_enrichment_dot_plot(
+    input_df,
+    top_terms,
+    cutoff,
+    categories,
+    title="",
+    rotate_x_labels=True,
+    show_ring=False,
+):
+    if input_df is None or len(input_df) == 0 or input_df.empty:
+        msg = "No data to plot. Please check your input data or run enrichment again."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    if not isinstance(categories, list):
+        categories = [categories]
+
+    # remove all Gene_sets that are not in categories
+    df = input_df[input_df["Gene_set"].isin(categories)]
+
+    size_y = top_terms * len(categories)
+    xticklabels_rot = 45 if rotate_x_labels else 0
+    try:
+        # ax = gp.dotplot(df,
+        #         size=10,
+        #         top_term=top_terms,
+        #         figsize=(3,size_y),
+        #         cutoff=cutoff,
+        #         title=title,
+        #         xticklabels_rot=xticklabels_rot,
+        #         show_ring=show_ring,
+        #      )
+        ax = gp.dotplot(
+            df,
+            column="Adjusted P-value",
+            x="Gene_set",  # set x axis, so you could do a multi-sample/library comparsion
+            size=10,
+            top_term=top_terms,
+            figsize=(3, size_y),
+            cutoff=cutoff,
+            title=title,
+            xticklabels_rot=xticklabels_rot,
+            show_ring=show_ring,
         )
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."

@@ -1212,6 +1212,53 @@
             "default": null
           }
         }
+      },
+      "go_enrichment_dot_plot": {
+        "name": "Dot plot for GO enrichment analysis",
+        "description":"Creates a categorical scatter plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 5
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "rotate_x_labels": {
+            "name": "Rotate x-axis labels (if multiple categories are selected)",
+            "type": "boolean",
+            "default": true
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          }
+        }
       }
     }
   }
