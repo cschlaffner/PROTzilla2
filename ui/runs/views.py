@@ -375,6 +375,7 @@ def tables(request, run_name, index, key=None):
         context=dict(
             run_name=run_name,
             index=index,
+            # put key as first option to make selected
             options=[(opt, opt) for opt in [key] + options],
             key=key,
         ),

@@ -11,10 +11,12 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
     <script>
         $(document).ready(function () {
+            let $tables_dropdown = $('#tables_dropdown');
+
             $.ajax({
                 url: "{% url 'runs:tables_content' run_name index key %}",
                 type: "GET",
-                data: {"key": $('#tables_dropdown').val()},
+                data: {"key": $tables_dropdown.val()},
                 success: function (response) {
                     let tr = $("<tr>");
                     response.columns.forEach(element => {
@@ -26,16 +28,16 @@
                             columnDefs: [{
                                 targets: "_all",
                                 render: function (data, type, row) {
-                                    if (type !== 'display' || (''+data).length < 50) {
+                                    if (type !== 'display' || ('' + data).length < 50) {
                                         return data;
                                     }
-                                    return `<span class="ellipsis" title="${data}">${(''+data).slice(0, 50)}…</span>`
+                                    return `<span class="ellipsis" title="${data}">${('' + data).slice(0, 50)}…</span>`
                                 },
                             }],
                         });
                 }
             });
-            $('#tables_dropdown').on("change", function () {
+            $tables_dropdown.on("change", function () {
                 window.location.href = $(this).val()
             })
         });
