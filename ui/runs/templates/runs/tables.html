@@ -46,16 +46,16 @@
 
 {% block content %}
     <div class="p-3">
-        {% if not options %}
-            No tables found in this step.
-        {% else %}
-            <div class="row">
-                <label for="tables_dropdown" class="col-2 d-flex align-items-center">Choose table</label>
-                <div class="col-4">
-                    {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
-                </div>
+    {% if not options %}
+        No tables found in this step.
+    {% else %}
+        <div class="row mb-2">
+            <label for="tables_dropdown" class="col-2 d-flex align-items-center">Choose table</label>
+            <div class="col-4">
+                {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
             </div>
-            <table id="example" class="display" style="width:100%"></table>
-        {% endif %}
+        </div>
+        <table id="example" class="display" style="width:100%"></table>
+    {% endif %}
     </div>
 {% endblock %}

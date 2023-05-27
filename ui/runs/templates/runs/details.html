@@ -70,10 +70,9 @@
 
                                     <div class="mb-3">
                                         {% include "runs/fields.html" with fields=step.fields %}
-                                        <div class="d-flex d-inline">
+                                        <div class="d-flex flex-nowrap">
                                             {% if step.table_link %}
-                                                <a href="{{ step.table_link }}" target="_blank" class="btn btn-grey">View
-                                                    table</a>
+                                            <a href="{{ step.table_link }}" target="_blank" class="col-2 btn btn-grey me-2">View table</a>
                                             {% endif %}
                                             {% if not step.name %}
                                                 {% include "runs/form_add_name.html" with index=step.index %}
