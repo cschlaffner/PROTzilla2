@@ -1171,7 +1171,7 @@
     "plot": {
       "go_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",
-        "description":"Creates a bar plot from GO enrichment data (offline and Enrichr for now)",
+        "description": "Creates a bar plot from GO enrichment data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",

@@ -2,12 +2,9 @@ import io
 import base64
 import gseapy as gp
 import numpy as np
-import pandas as pd
 from django.contrib import messages
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
-
-from shutil import get_terminal_size
 
 
 def go_enrichment_bar_plot(
