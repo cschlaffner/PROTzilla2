@@ -1214,7 +1214,7 @@
         }
       },
       "go_enrichment_dot_plot": {
-        "name": "Dot plot for GO enrichment analysis",
+        "name": "Dot plot for GO enrichment analysis (oflline & with Enrichr) ",
         "description":"Creates a categorical scatter plot from GO enrichment data",
         "parameters": {
           "input_df": {
@@ -1246,7 +1246,7 @@
             "default": 5
           },
           "cutoff": {
-            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "name": "Only terms with Adjusted P-value < cutoff will be shown",
             "type": "numeric",
             "min": 0,
             "max": 1,

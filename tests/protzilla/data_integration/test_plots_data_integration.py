@@ -63,7 +63,7 @@ def test_enrichment_dot_plot(show_figures, x_axis):
     enrichment_df = pd.read_csv(
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
     )
-    bar_base64 = go_enrichment_dot_plot(
+    dot_base64 = go_enrichment_dot_plot(
         input_df=enrichment_df,
         categories=["Reactome_2013"],
         x_axis=x_axis,
@@ -75,4 +75,18 @@ def test_enrichment_dot_plot(show_figures, x_axis):
         show_ring=False,
     )
     if show_figures:
-        open_graph_from_base64(bar_base64[0])
+        open_graph_from_base64(dot_base64[0])
+
+
+def test_enrichment_bar_plot_wrong_df():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    result = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
+    current_out = go_enrichment_dot_plot(
+        input_df=result,
+        categories=["KEGG", "Process"],
+        top_terms=10,
+        cutoff=0.05,
+    )[0]
+
+    assert "messages" in current_out
+    assert "Please input a dataframe from" in current_out["messages"][0]["msg"]

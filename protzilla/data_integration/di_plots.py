@@ -3,6 +3,7 @@ import io
 
 import gseapy as gp
 import numpy as np
+import pandas as pd
 from django.contrib import messages
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
@@ -99,15 +100,46 @@ def go_enrichment_bar_plot(
 
 def go_enrichment_dot_plot(
     input_df,
+    categories,
     top_terms,
     cutoff,
-    categories,
     x_axis="Gene Sets",
     title="",
     rotate_x_labels=True,
     show_ring=False,
     dot_size=5,
 ):
+    """
+    Creates a dot plot for the GO enrichment results. The plot is created using the gseapy library.
+    Only the top_terms that meet the cutoff are shown. The x_axis can be used to compare multiple
+    Gene Set Libraries or to display the Combined Score of one of them.
+
+    :param input_df: GO enrichment results (offline or Enrichr)
+    :type input_df: pandas.DataFrame
+    :param categories: Categories/Gene Set Libraries from enrichment to plot
+    :type categories: list
+    :param top_terms: Number of top enriched terms per category
+    :type top_terms: int
+    :param cutoff: Cutoff for the Adjusted p-value. Only terms with
+        Adjusted P-value < cutoff will be shown.
+    :type cutoff: float
+    :param x_axis: What to display on the x-axis: "Gene Sets" or "Combined Score", defaults to "Gene Sets"
+    :type x_axis: str
+    :param title: Title of the plot, defaults to ""
+    :type title: str, optional
+    :param rotate_x_labels: Rotate the x-axis labels by 45 degrees if Gene Sets are on x_axis, defaults to True
+    :type rotate_x_labels: bool
+    :param show_ring: Show a ring around the dots, defaults to False
+    :type show_ring: bool
+    :param dot_size: Size of the dots, defaults to 5
+    :type dot_size: int
+    :return: Base64 encoded image of the plot
+    :rtype: bytes
+    """
+    if not isinstance(input_df, pd.DataFrame) or not "Overlap" in input_df.columns:
+        msg = "Please input a dataframe from offline GO enrichment analysis or GO enrichment analysis with Enrichr."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
@@ -116,7 +148,7 @@ def go_enrichment_dot_plot(
         categories = [categories]
 
     if len(categories) > 1 and x_axis == "Combined Score":
-        msg = "Combined Score is only available for one category. Choosing only one category or Gene Sets as x-axis."
+        msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
         return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
