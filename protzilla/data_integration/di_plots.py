@@ -171,7 +171,12 @@ def go_enrichment_dot_plot(
                 xticklabels_rot=xticklabels_rot,
                 show_ring=show_ring,
             )
-            return [fig_to_base64(ax.get_figure())]
+            return [
+                dict(
+                    plot=fig_to_base64(ax.get_figure()),
+                    key="go_enrichment_dot_plot_img",
+                )
+            ]
         except ValueError as e:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
@@ -188,7 +193,12 @@ def go_enrichment_dot_plot(
                 xticklabels_rot=xticklabels_rot,
                 show_ring=show_ring,
             )
-            return [fig_to_base64(ax.get_figure())]
+            return [
+                dict(
+                    plot=fig_to_base64(ax.get_figure()),
+                    key="go_enrichment_dot_plot_img",
+                )
+            ]
         except ValueError as e:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
             return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]

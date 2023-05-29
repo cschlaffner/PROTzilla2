@@ -61,3 +61,7 @@ html, body {
 .rotate-icon {
     transform: rotate(180deg);
 }
+
+#go_enrichment_dot_plot_img {
+    width: 600px;
+}

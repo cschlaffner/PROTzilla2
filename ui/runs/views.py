@@ -58,12 +58,19 @@ def detail(request, run_name):
         if isinstance(plot, bytes):
             # Base64 encoded image
             current_plots.append(
-                '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                '<div class="row d-flex justify-content-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
                     plot.decode("utf-8")
                 )
             )
         elif isinstance(plot, dict):
-            current_plots.append(None)
+            if "plot" in plot:
+                current_plots.append(
+                    '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
+                        plot["key"], plot["plot"].decode("utf-8")
+                    )
+                )
+            else:
+                current_plots.append(None)
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
@@ -304,7 +311,7 @@ def plot(request, run_name):
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
-        if isinstance(p, dict):
+        if isinstance(p, dict) and "messages" in p:
             for message in run.plots[index]["messages"]:
                 trace = (
                     build_trace_alert(message["trace"]) if "trace" in message else ""

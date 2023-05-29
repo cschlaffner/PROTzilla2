@@ -153,12 +153,19 @@ def make_displayed_history(run):
             if isinstance(plot, bytes):
                 # Base64 encoded image
                 plots.append(
-                    '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    '<div class="row d-flex justify-content-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
                         plot.decode("utf-8")
                     )
                 )
             elif isinstance(plot, dict):
-                plots.append(None)
+                if "plot" in plot:
+                    plots.append(
+                        '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
+                            plot["key"], plot["plot"].decode("utf-8")
+                        )
+                    )
+                else:
+                    plots.append(None)
             else:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
