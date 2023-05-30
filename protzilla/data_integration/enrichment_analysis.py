@@ -268,7 +268,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
 
     :param proteins: list of uniprot ids
     :type proteins: list
-    :return: list of uppercase gene symbols and list of uniprot ids that were not found
+    :return: dict with keys uppercase gene symbols and values protein_groups and a list of uniprot ids that were not found
     :rtype: tuple
     """
     proteins_list = []
@@ -303,14 +303,14 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
     # check per group in proteins if all proteins have the same gene symbol
     # if yes, use that gene symbol, otherwise use all gene symbols
     filtered_groups = []
-    gene_symbols = []
+    gene_mapping = {}
     for group in proteins:
         if ";" not in group:
             symbol = q.get(group, None)
             if symbol is None:
                 filtered_groups.append(group)
             else:
-                gene_symbols.append(symbol.upper())
+                gene_mapping[symbol.upper()] = group
         else:
             # remove duplicate symbols within one group
             symbols = set()
@@ -327,11 +327,11 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                 # no gene symbol for any protein in group
                 filtered_groups.append(group)
             elif len(symbols) == 1:
-                gene_symbols.append(symbols[0].upper())
+                gene_mapping[symbols[0].upper()] = group
             else:
-                gene_symbols.extend([s.upper() for s in symbols if s is not None])
+                gene_mapping = {s.upper(): group for s in symbols if s is not None}
 
-    return gene_symbols, filtered_groups
+    return gene_mapping, filtered_groups
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism):
@@ -374,14 +374,19 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
             ]
         )
 
-    gene_symbols, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(proteins)
+    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(proteins)
 
     enr = gp.enrichr(
-        gene_list=gene_symbols,
+        gene_list=list(gene_mapping.keys()),
         gene_sets=protein_sets,
         organism=organism,
         outdir=None,
         verbose=True,
+    )
+
+    result = enr.results
+    result["Proteins"] = result["Genes"].apply(
+        lambda x: ",".join([gene_mapping[gene] for gene in x.split(";")])
     )
 
     if len(filtered_groups) > 0:

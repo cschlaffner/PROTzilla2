@@ -1156,12 +1156,12 @@
             "default": [null,null]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
           "background": {
-            "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
           }

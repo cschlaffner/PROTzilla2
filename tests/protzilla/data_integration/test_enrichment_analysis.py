@@ -322,30 +322,30 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
-def test_go_analysis_with_enrichr(mock_gene_symbols):
-    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"]
+def test_go_analysis_with_enrichr(mock_gene_mapping):
+    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6;Protein7;Protein8", "Protein9;Protein10;Protein11", "Protein12;Protein13"]
     protein_sets = ["Reactome_2013"]
     organism = "human"
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv")
+    results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t")
 
-    mock_gene_symbols.return_value = [
-        "ENO1",
-        "ENO2",
-        "ENO3",
-        "HK2",
-        "HK1",
-        "HK3",
-        "IDH3B",
-        "ATP6V1G2",
-        "GPT2",
-        "SDHB",
-        "COX6B1",
-    ], ["Protein5"]
+    mock_gene_mapping.return_value = {
+        "ENO1": "Protein1",
+        "ENO2": "Protein2",
+        "ENO3": "Protein3",
+        "HK2": "Protein4",
+        "HK1": "Protein6",
+        "HK3": "Protein7",
+        "IDH3B": "Protein8",
+        "ATP6V1G2": "Protein9",
+        "GPT2": "Protein10",
+        "SDHB": "Protein11",
+        "COX6B1": "Protein12;Protein13",
+    }, ["Protein5"]
     current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
     df = current_out["results"]
 
-    column_names = ["Term", "Genes", "Gene_set", "Overlap"]
+    column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
     # Compare all specified columns
     for column in column_names:
         assert df[column].equals(results[column])
