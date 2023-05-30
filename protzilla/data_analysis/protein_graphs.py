@@ -117,13 +117,10 @@ def _create_ref_seq_index(protein_id: str, k: int, run_name: str):
             found_lines.append(line)
 
     ref_seq = ""
+    seq_len = None
     for line in found_lines:
         if line.startswith("SQ"):
-            line = line.split(" ")
-            for s in line:
-                if s == "":
-                    del line[line.index(s)]
-            print(line)
+            line = line.split()
             seq_len = int(line[2])
             continue
         if line.startswith("//"):
@@ -209,4 +206,5 @@ if __name__ == "__main__":
     # )
     # index = _create_graph_index(protein_graph=g, starting_point="n0")
 
-    _create_ref_seq_index("P10636", 5, "as")
+    index, len = _create_ref_seq_index("Q7Z3B0", 5, "as")
+    print(index)
