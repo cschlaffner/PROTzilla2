@@ -110,22 +110,25 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def update_workflow_config(self, params, location=None):
+    def update_workflow_config(self, params, location=None, update_params=True):
         if not location:
             (section, step, method) = self.current_workflow_location()
         else:
             (section, step, method) = location
-
         index = self.step_index_in_current_section()
-        parameters_no_file_path = {
-            k: params[k]
-            for k in params
-            if get_parameter_type(self.workflow_meta, section, step, method, k)
-            != "file"
-        }
-        self.workflow_config["sections"][section]["steps"][index][
-            "parameters"
-        ] = parameters_no_file_path
+
+        if update_params:
+            parameters_no_file_path = {
+                k: params[k]
+                for k in params
+                if get_parameter_type(self.workflow_meta, section, step, method, k)
+                != "file"
+            }
+            self.workflow_config["sections"][section]["steps"][index][
+                "parameters"
+            ] = parameters_no_file_path
+
+        self.workflow_config["sections"][section]["steps"][index]["method"] = method
         self.write_local_workflow()
 
     def perform_current_calculation_step(self, parameters):

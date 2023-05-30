@@ -92,6 +92,9 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
+    section, step, _ = run.current_workflow_location()
+    run.update_workflow_config([], update_params=False)
+
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
