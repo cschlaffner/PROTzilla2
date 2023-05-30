@@ -100,33 +100,7 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
 
 
 def _create_ref_seq_index(protein_id: str, k: int, run_name: str):
-    # get seq from protein -> via protein-file?
-    with open(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt", "r") as f:
-        lines = f.readlines()
-
-    sequence_pattern = r"^SQ\s+SEQUENCE\s+\d+"
-
-    found_lines = []
-    matched = False
-    for line in lines:
-        if re.match(sequence_pattern, line):
-            matched = True
-        if matched:
-            if line.startswith("//"):
-                break
-            found_lines.append(line)
-
-    ref_seq = ""
-    seq_len = None
-    for line in found_lines:
-        if line.startswith("SQ"):
-            line = line.split()
-            seq_len = int(line[2])
-            continue
-        if line.startswith("//"):
-            continue
-        ref_seq += line.strip()
-    ref_seq = ref_seq.replace(" ", "")
+    ref_seq, seq_len = _get_ref_seq(run_name, protein_id)
 
     # create index
     index = {}
@@ -195,6 +169,45 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
             return "", r
 
     return path_to_protein_file, r
+
+
+def _get_ref_seq(run_name: str, protein_id: str):
+    with open(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt", "r") as f:
+        lines = f.readlines()
+
+    sequence_pattern = r"^SQ\s+SEQUENCE\s+\d+"
+
+    found_lines = []
+    matched = False
+    for line in lines:
+        if re.match(sequence_pattern, line):
+            matched = True
+        if matched:
+            if line.startswith("//"):
+                break
+            found_lines.append(line)
+
+    ref_seq = ""
+    seq_len = None
+    for line in found_lines:
+        # guaranteed to be exactly one line with all following aside from
+        # last line to be ref sequence
+        if line.startswith("SQ"):
+            line = line.split()
+            seq_len = int(line[2])
+            continue
+        # last line starts with "//"
+        if line.startswith("//"):
+            break
+        ref_seq += line.strip()
+    ref_seq = ref_seq.replace(" ", "")
+
+    if not ref_seq:
+        raise ValueError(f"Could not find sequence for {protein_id}")
+    elif seq_len is None:
+        logging.warning(f"Could not find sequence length for {protein_id}")
+
+    return ref_seq, seq_len
 
 
 if __name__ == "__main__":
