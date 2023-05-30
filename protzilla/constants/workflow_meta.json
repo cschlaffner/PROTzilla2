@@ -1044,31 +1044,31 @@
         }
       },
       "method_name": {
-        "name": "random method",
-        "description":"Dimension reduction of a dataframe using UMAP",
+        "name": "a method",
+        "description":"Description of a Method",
         "parameters": {
           "param1": {
-            "name": "Distance metric",
+            "name": "param1",
             "type": "categorical_dynamic",
             "categories": ["euclidean", "manhattan", "long island"],
             "default": "euclidean",
             "dynamic_parameters": {
-              "euclidean": ["param2"],
-              "manhattan": ["another_param"]
+              "euclidean": ["param21"],
+              "manhattan": ["param22"]
             }
           },
-          "param2": {
-            "name": "Distance metric",
+          "param21": {
+            "name": "show when euclidian is selected im param1",
             "type": "categorical_dynamic",
-            "categories": ["lala", "lalo"],
-            "default": "lala",
+            "categories": ["category3", "category4"],
+            "default": "category3",
             "dynamic_parameters": {
-              "lala": ["param3"]
+              "category3": ["param3"]
             },
             "dynamic": true
           },
-          "another_param": {
-            "name": "param",
+          "param22": {
+            "name": "show when manhattan is selected in param1",
             "type": "numeric",
             "min": 0,
             "max": 4294967295,
@@ -1077,42 +1077,10 @@
             "dynamic": true
           },
           "param3": {
-            "name": "Distance metric",
+            "name": "show when category3 is selected",
             "type": "categorical",
-            "categories": ["parapa", "parapo"],
-            "default": "parapa",
-            "dynamic": true
-          }
-        }
-      },
-      "method_name2": {
-        "name": "random method2",
-        "description":"Dimension reduction of a dataframe using UMAP",
-        "parameters": {
-          "param1": {
-            "name": "Distance metric",
-            "type": "categorical_dynamic",
-            "categories": ["euclidean", "manhattan", "long island"],
-            "default": "euclidean",
-            "dynamic_parameters": {
-              "euclidean": ["param2"],
-              "manhattan": ["another_param"]
-            }
-          },
-          "param2": {
-            "name": "Distance metric",
-            "type": "categorical",
-            "categories": ["lala", "lalo"],
-            "default": "lala",
-            "dynamic": true
-          },
-          "another_param": {
-            "name": "param",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 42,
+            "categories": ["random category", "another category"],
+            "default": "random category",
             "dynamic": true
           }
         }

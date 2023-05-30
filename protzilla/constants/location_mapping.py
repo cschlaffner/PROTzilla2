@@ -147,6 +147,11 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "method_name",
+    ): dimension_reduction.method_name,
 }
 
 # reversed mapping of method callable and location
