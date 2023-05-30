@@ -1,0 +1,29 @@
+<script>
+    $(document).ready(function () {
+        $('#plot_form').on('submit', function (e) {
+            console.log("protein_graph submit")
+            e.preventDefault(); // Prevent form submission
+            let selected_method = $("#chosen_method").val();
+            if (selected_method !== "variation_graph") {
+                console.log("not variation_graph")
+                $(this).submit();
+                return
+            }
+            console.log("in variation_graph")
+            $.ajax({
+                url: "{% url 'runs:protein_plot' run_name %}",
+                type: 'POST',
+                data: $(this).serialize(), // Serialize form data
+                success: function (response) {
+                    // Update the container element with the received graph data
+                    console.log(response)
+                    $('#cy').html(response);
+                },
+                error: function (xhr, status, error) {
+                    console.log("error")
+                    console.log(error)
+                }
+            });
+        });
+    });
+</script>
