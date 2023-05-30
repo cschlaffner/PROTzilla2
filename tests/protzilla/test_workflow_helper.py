@@ -95,6 +95,29 @@ def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
     assert workflow_meta_copy == workflow_meta
 
 
+def test_get_parameter_type(workflow_meta):
+    assert (
+        workflow_helper.get_parameter_type(
+            workflow_meta,
+            "data_preprocessing",
+            "imputation",
+            "knn",
+            "number_of_neighbours",
+        )
+        == "numeric"
+    )
+    assert (
+        workflow_helper.get_parameter_type(
+            workflow_meta,
+            "importing",
+            "ms_data_import",
+            "max_quant_import",
+            "file_path",
+        )
+        == "file"
+    )
+
+
 def test_get_workflow_default_param_value(example_workflow):
     threshold_value = get_workflow_default_param_value(
         example_workflow,

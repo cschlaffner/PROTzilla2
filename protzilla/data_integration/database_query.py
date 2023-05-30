@@ -1,5 +1,6 @@
-import requests
 from xml.etree.ElementTree import Element, SubElement, tostring
+
+import requests
 
 
 def biomart_query(queries, filter_name, attributes):
