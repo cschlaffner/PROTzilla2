@@ -145,6 +145,11 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
