@@ -315,7 +315,10 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     )
 
     assert "messages" in current_out
-    assert "Invalid input" in current_out["messages"][0]["msg"]
+    assert (
+        "dataframe with Protein ID and numeric ranking column"
+        in current_out["messages"][0]["msg"]
+    )
 
 
 @pytest.mark.internet()
@@ -333,6 +336,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping):
         "Protein9;Protein10;Protein11",
         "Protein12;Protein13",
     ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
     protein_sets = ["Reactome_2013"]
     organism = "human"
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
@@ -353,7 +357,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping):
         "SDHB": "Protein11",
         "COX6B1": "Protein12;Protein13",
     }, ["Protein5"]
-    current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
+    current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
     df = current_out["results"]
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
@@ -424,17 +428,20 @@ def test_go_analysis_offline_protein_sets(
     protein_sets_path, go_analysis_offline_result_no_bg
 ):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
 
     current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
+        proteins=proteins_df,
         protein_sets_path=protein_sets_path,
+        direction="up",
     )
     df = current_out["results"]
 
@@ -474,18 +481,21 @@ def test_go_analysis_offline_background(
 ):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
 
     current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
+        proteins=proteins_df,
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
         background=background_path,
+        direction="up"
     )
     df = current_out["results"]
 
@@ -510,10 +520,13 @@ def test_go_analysis_offline_background(
 
 
 def test_go_analysis_offline_no_protein_sets():
+    proteins = ["Protein1","Protein2","Protein3",]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
+        proteins=proteins_df,
         protein_sets_path="",
         background=None,
+        direction="up"
     )
 
     assert "messages" in current_out
@@ -521,10 +534,13 @@ def test_go_analysis_offline_no_protein_sets():
 
 
 def test_go_analysis_offline_invalid_protein_set_file():
+    proteins = ["Protein1","Protein2","Protein3",]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
+        proteins=proteins_df,
         protein_sets_path="an_invalid_filetype.png",
         background="",  # no background
+        direction="up"
     )
 
     assert "messages" in current_out
@@ -533,10 +549,13 @@ def test_go_analysis_offline_invalid_protein_set_file():
 
 
 def test_go_analysis_offline_invalid_background_set_file():
+    proteins = ["Protein1","Protein2","Protein3",]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
+        proteins=proteins_df,
         protein_sets_path="a_valid_filetype.gmt",
         background="an_invalid_filetype.png",
+        direction="up"
     )
 
     assert "messages" in current_out
