@@ -329,12 +329,14 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             elif len(symbols) == 1:
                 gene_mapping[symbols[0].upper()] = group
             else:
-                gene_mapping = {s.upper(): group for s in symbols if s is not None}
+                gene_mapping.update(
+                    {s.upper(): group for s in symbols if s is not None}
+                )
 
     return gene_mapping, filtered_groups
 
 
-def go_analysis_with_enrichr(proteins, protein_sets, organism):
+def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both"):
     """
     A method that performs online overrepresentation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package which accesses
@@ -350,57 +352,158 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
+    :param direction: direction of enrichment analysis.
+        Possible values: up, down, both
+        - up: Log2FC is > 0
+        - down: Log2FC is < 0
+        - both: functional enrichment info is retrieved for upregulated and downregulated
+        proteins separately, but the terms are aggregated for the summary and results
+    :type direction: str
     :return: dictionary with results and filtered groups
     :rtype: dict
     """
     # enhancement: protein_sets are categorical for now, could also be custom file upload later
     #       background parameter would work then (with uploaded file)
     # dependency: refactoring/designing of more complex input choices
+    out_messages = []
 
-    # make list of proteins
-    if isinstance(proteins, pd.DataFrame):
-        proteins = proteins["Protein ID"].unique().tolist()
-    elif isinstance(proteins, pd.Series):
-        proteins = proteins.unique().tolist()
-    elif isinstance(proteins, list):
-        pass
-    else:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Invalid input type for proteins. Must be list, series or dataframe",
-                )
-            ]
+    if (
+        not isinstance(proteins, pd.DataFrame)
+        or proteins.shape[1] != 2
+        or not "Protein ID" in proteins.columns
+        or not proteins.iloc[:, 1].dtype == np.number
+    ):
+        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
+
+    if len(up_protein_list) == 0:
+        if direction == "up":
+            msg = "No upregulated proteins found. Check your input or select 'down' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both" and len(down_protein_list) == 0:
+            msg = "No proteins found. Check your input."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No upregulated proteins found. Running analysis for 'down' direction only."
+            logging.warning(msg)
+            direction = "down"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
+
+    if len(down_protein_list) == 0:
+        if direction == "down":
+            msg = "No downregulated proteins found. Check your input or select 'up' direction."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        elif direction == "both":
+            msg = "No downregulated proteins found. Running analysis for 'up' direction only."
+            logging.warning(msg)
+            direction = "up"
+            out_messages.append(dict(level=messages.WARNING, msg=msg))
+
+    if direction == "up" or direction == "both":
+        logging.info("Starting analysis for up-regulated proteins")
+        logging.info("Mapping Uniprot IDs to gene symbols")
+        up_gene_mapping, up_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+            up_protein_list
         )
 
-    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(proteins)
+        up_enriched = gp.enrichr(
+            gene_list=list(up_gene_mapping.keys()),
+            gene_sets=protein_sets,
+            organism=organism,
+            outdir=None,
+            verbose=True,
+        ).results
 
-    enr = gp.enrichr(
-        gene_list=list(gene_mapping.keys()),
-        gene_sets=protein_sets,
-        organism=organism,
-        outdir=None,
-        verbose=True,
-    )
+        up_enriched["Proteins"] = up_enriched["Genes"].apply(
+            lambda x: ",".join([up_gene_mapping[gene] for gene in x.split(";")])
+        )
+        logging.info("Finished analysis for up-regulated proteins")
 
-    result = enr.results
-    result["Proteins"] = result["Genes"].apply(
-        lambda x: ",".join([gene_mapping[gene] for gene in x.split(";")])
-    )
+    if direction == "down" or direction == "both":
+        logging.info("Starting analysis for down-regulated proteins")
+        logging.info("Mapping Uniprot IDs to gene symbols")
+        down_gene_mapping, down_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+            down_protein_list
+        )
+
+        down_enriched = gp.enrichr(
+            gene_list=list(down_gene_mapping.keys()),
+            gene_sets=protein_sets,
+            organism=organism,
+            outdir=None,
+            verbose=True,
+        ).results
+
+        down_enriched["Proteins"] = down_enriched["Genes"].apply(
+            lambda x: ",".join([down_gene_mapping[gene] for gene in x.split(";")])
+        )
+        logging.info("Finished analysis for down-regulated proteins")
+
+
+    if direction == "both":
+        filtered_groups = up_filtered_groups + down_filtered_groups
+
+        logging.info("Merge results for up- and down-regulated proteins")
+        enriched = up_enriched.set_index(["Gene_set", "Term"])
+        down_enriched.set_index(["Gene_set", "Term"], inplace=True)
+        for gene_set, term in down_enriched.index:
+            if (gene_set, term) in enriched.index:
+                if (
+                    down_enriched.loc[(gene_set, term), "Adjusted P-value"]
+                    < up_enriched.loc[(gene_set, term), "Adjusted P-value"]
+                ):
+                    enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
+
+                enriched.loc[(gene_set, term), "Proteins"] = ",".join(
+                    [
+                        up_enriched.loc[(gene_set, term), "Proteins"],
+                        down_enriched.loc[(gene_set, term), "Proteins"],
+                    ]
+                )
+                enriched.loc[(gene_set, term), "Genes"] = ";".join(
+                    [
+                        up_enriched.loc[(gene_set, term), "Genes"],
+                        down_enriched.loc[(gene_set, term), "Genes"],
+                    ]
+                )
+                enriched.loc[(gene_set, term), "Overlap"] = (
+                    str(
+                        str((up_enriched.loc[(gene_set, term), "Overlap"])).split("/")[
+                            0
+                        ]
+                        + str((down_enriched.loc[(gene_set, term), "Overlap"])).split(
+                            "/"
+                        )[0]
+                    )
+                    + "/"
+                    + str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
+                )
+
+            else:
+                enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
+    else:
+        enriched = up_enriched if direction == "up" else down_enriched
+        filtered_groups = (
+            up_filtered_groups if direction == "up" else down_filtered_groups
+        )
 
     if len(filtered_groups) > 0:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
+        out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
-            results=enr.results,
+            results=enriched,
             filtered_groups=filtered_groups,
-            messages=[dict(level=messages.WARNING, msg=msg)],
+            messages=out_messages,
         )
 
-    return {"results": enr.results, "filtered_groups": filtered_groups}
+    return {"results": enriched, "filtered_groups": filtered_groups}
 
 
-def go_analysis_offline(proteins, protein_sets_path, background=None):
+def go_analysis_offline(proteins, protein_sets_path, background=None, direction="both"):
     """
     A method that performs offline overrepresentation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package.
@@ -425,6 +528,15 @@ def go_analysis_offline(proteins, protein_sets_path, background=None):
         background is provided, all proteins in protein sets are used.
         The background is defined by your experiment.
     :type background: str or None
+        :param direction: direction of enrichment analysis.
+        Possible values: up, down, both
+        - up: Log2FC is > 0
+        - down: Log2FC is < 0
+        - both: functional enrichment info is retrieved for upregulated and downregulated
+        proteins separately, but the terms are aggregated for the summary and results
+    :type direction: str
+    :return: dictionary with results dataframe
+    :rtype: dict
     """
     # enhancement: proteins could also be a number input (or an uploaded file)
     # dependency: refactoring/designing of more complex input choices

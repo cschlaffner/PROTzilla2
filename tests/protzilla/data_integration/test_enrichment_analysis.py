@@ -323,11 +323,22 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
 def test_go_analysis_with_enrichr(mock_gene_mapping):
-    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6;Protein7;Protein8", "Protein9;Protein10;Protein11", "Protein12;Protein13"]
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6;Protein7;Protein8",
+        "Protein9;Protein10;Protein11",
+        "Protein12;Protein13",
+    ]
     protein_sets = ["Reactome_2013"]
     organism = "human"
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t")
+    results = pd.read_csv(
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
+    )
 
     mock_gene_mapping.return_value = {
         "ENO1": "Protein1",
