@@ -99,27 +99,6 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
     return index
 
 
-def _create_ref_seq_index(protein_id: str, k: int, run_name: str):
-    ref_seq, seq_len = _get_ref_seq(run_name, protein_id)
-
-    # create index
-    index = {}
-    kmer_list = []
-    for i, char in enumerate(ref_seq):
-        end_index = i + k if i + k < len(ref_seq) else len(ref_seq)
-        kmer = ref_seq[i:end_index]
-        kmer_list.append(kmer)
-        if kmer in index:
-            index[kmer].append(i)
-        else:
-            index[kmer] = [i]
-
-    for kmer in kmer_list:
-        assert kmer in index, f"kmer {kmer} not in index but should be"
-
-    return index, seq_len
-
-
 def _longest_paths(protein_graph: nx.Graph, start_node: str):
     """
     create mapping from node to distance where the distance is the longest path
@@ -171,8 +150,29 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
     return path_to_protein_file, r
 
 
-def _get_ref_seq(run_name: str, protein_id: str):
-    with open(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt", "r") as f:
+def _create_ref_seq_index(protein_path: str, k: int = 5):
+    ref_seq, seq_len = _get_ref_seq(protein_path)
+
+    # create index
+    index = {}
+    kmer_list = []
+    for i, char in enumerate(ref_seq):
+        end_index = i + k if i + k < len(ref_seq) else len(ref_seq)
+        kmer = ref_seq[i:end_index]
+        kmer_list.append(kmer)
+        if kmer in index:
+            index[kmer].append(i)
+        else:
+            index[kmer] = [i]
+
+    for kmer in kmer_list:
+        assert kmer in index, f"kmer {kmer} not in index but should be"
+
+    return index, seq_len
+
+
+def _get_ref_seq(protein_path: str):
+    with open(protein_path, "r") as f:
         lines = f.readlines()
 
     sequence_pattern = r"^SQ\s+SEQUENCE\s+\d+"
@@ -203,9 +203,11 @@ def _get_ref_seq(run_name: str, protein_id: str):
     ref_seq = ref_seq.replace(" ", "")
 
     if not ref_seq:
-        raise ValueError(f"Could not find sequence for {protein_id}")
-    elif seq_len is None:
-        logging.warning(f"Could not find sequence length for {protein_id}")
+        raise ValueError(f"Could not find sequence for protein at path {protein_path}")
+    if seq_len is None:
+        logging.warning(
+            f"Could not find sequence length for protein at path {protein_path}"
+        )
 
     return ref_seq, seq_len
 
@@ -219,5 +221,5 @@ if __name__ == "__main__":
     # )
     # index = _create_graph_index(protein_graph=g, starting_point="n0")
 
-    index, len = _create_ref_seq_index("Q7Z3B0", 5, "as")
+    index, len = _create_ref_seq_index("SIM46", 5, "as")
     print(index)

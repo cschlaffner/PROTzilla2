@@ -1,7 +1,12 @@
 import networkx as nx
 import pytest
 
-from protzilla.data_analysis.protein_graphs import _create_graph_index, _longest_paths
+from protzilla.constants.paths import TEST_DATA_PATH
+from protzilla.data_analysis.protein_graphs import (
+    _create_graph_index,
+    _create_ref_seq_index,
+    _longest_paths,
+)
 
 
 # TODO: add markdown pictures of the graphs
@@ -228,3 +233,62 @@ def test_create_graph_index_multi_route(complex_route):
 
     planned = [["1"], ["1"], ["1"], ["2", "3"], ["4", "5", "6"], ["7"], ["8"], ["8"]]
     assert index == planned
+
+
+def test_create_ref_seq_index():
+    index, seq_len = _create_ref_seq_index(
+        protein_path=f"{TEST_DATA_PATH}/proteins/PKHUO.txt", k=5
+    )
+
+    planned = {
+        "MASRG": [0],
+        "ASRGA": [1],
+        "SRGAL": [2],
+        "RGALR": [3],
+        "GALRR": [4],
+        "ALRRC": [5],
+        "LRRCL": [6],
+        "RRCLS": [7],
+        "RCLSP": [8],
+        "CLSPG": [9],
+        "LSPGL": [10],
+        "SPGLP": [11],
+        "PGLPR": [12],
+        "GLPRL": [13],
+        "LPRLL": [14],
+        "PRLLH": [15],
+        "RLLHL": [16],
+        "LLHLS": [17],
+        "LHLSR": [18],
+        "HLSRG": [19],
+        "LSRGL": [20],
+        "SRGLA": [21],
+        "RGLA": [22],
+        "GLA": [23],
+        "LA": [24],
+        "A": [25],
+    }
+    assert index == planned
+    assert seq_len == 26
+
+
+def test_create_ref_seq_index():
+    index, seq_len = _create_ref_seq_index(
+        protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=5
+    )
+
+    planned = {
+        "ABCDE": [0, 6],
+        "BCDEG": [1],
+        "CDEGA": [2],
+        "DEGAB": [3],
+        "EGABC": [4],
+        "GABCD": [5],
+        "BCDET": [7],
+        "CDET": [8],
+        "DET": [9],
+        "ET": [10],
+        "T": [11],
+    }
+    assert index == planned
+    assert seq_len == 12
