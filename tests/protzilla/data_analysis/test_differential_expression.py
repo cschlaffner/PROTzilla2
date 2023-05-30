@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_analysis.differential_expression import anova, t_test
+from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.plots import create_volcano_plot
 
 
@@ -53,7 +54,7 @@ def test_differential_expression_t_test(show_figures):
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    current_out = t_test(
+    current_out = linear_model(
         test_intensity_df,
         test_metadata_df,
         grouping="Group",
