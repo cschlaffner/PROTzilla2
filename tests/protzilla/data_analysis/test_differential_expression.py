@@ -85,14 +85,14 @@ def test_differential_expression_linear_model(
         current_out["corrected_p_values_df"],
         current_out["log2_fold_change_df"],
         current_out["fc_threshold"],
-        current_out["alpha"],
+        current_out["corrected_alpha"],
     )
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0108, 0.4318, 1.000]
-    log2_fc = [-5, -0.5, 0]
-    de_proteins = ["Protein1"]
+    corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
+    log2_fc = [-5, -0.5, 0, -2.5]
+    de_proteins = ["Protein1", "Protein4"]
 
     p_values_rounded = [
         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
@@ -103,10 +103,9 @@ def test_differential_expression_linear_model(
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
+    assert (current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins).all()
     assert current_out["fc_threshold"] == test_fc_threshold
-    assert current_out["alpha"] == test_alpha
-    assert current_out["corrected_alpha"] is None
+    assert current_out["corrected_alpha"] == test_alpha
 
 
 def test_differential_expression_t_test(

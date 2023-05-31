@@ -141,7 +141,6 @@ def linear_model(
         corrected_p_values_df=corrected_p_values_df,
         log2_fold_change_df=log2_fold_change_df,
         fc_threshold=fc_threshold,
-        alpha=alpha,
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
         messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
