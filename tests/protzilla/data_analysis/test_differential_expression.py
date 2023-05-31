@@ -8,7 +8,7 @@ from protzilla.data_analysis.plots import create_volcano_plot
 
 
 @pytest.fixture
-def data_test_differential_expression():
+def diff_expr_test_data():
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -63,10 +63,10 @@ def data_test_differential_expression():
 
 
 def test_differential_expression_linear_model(
-    data_test_differential_expression,
+        diff_expr_test_data,
     show_figures,
 ):
-    test_intensity_df, test_metadata_df = data_test_differential_expression
+    test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
     test_fc_threshold = 0
 
@@ -109,9 +109,9 @@ def test_differential_expression_linear_model(
 
 
 def test_differential_expression_t_test(
-    data_test_differential_expression, show_figures
+        diff_expr_test_data, show_figures
 ):
-    test_intensity_df, test_metadata_df = data_test_differential_expression
+    test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
     test_fc_threshold = 0.9
 
@@ -221,7 +221,7 @@ def test_differential_expression_t_test_with_log_data(show_figures):
     assert log2fc_rounded == log2_fc
 
 
-def test_differential_expression_t_test_with_nan(data_test_differential_expression):
+def test_differential_expression_t_test_with_nan(diff_expr_test_data):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -249,7 +249,7 @@ def test_differential_expression_t_test_with_nan(data_test_differential_expressi
         data=test_intensity_list,
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
-    _, test_metadata_df = data_test_differential_expression
+    _, test_metadata_df = diff_expr_test_data
 
     test_alpha = 0.05
     test_fc_threshold = 0
@@ -271,7 +271,7 @@ def test_differential_expression_t_test_with_nan(data_test_differential_expressi
 
 
 def test_differential_expression_t_test_with_zero_mean(
-    data_test_differential_expression, show_figures
+        diff_expr_test_data, show_figures
 ):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
@@ -308,7 +308,7 @@ def test_differential_expression_t_test_with_zero_mean(
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    _, test_metadata_df = data_test_differential_expression
+    _, test_metadata_df = diff_expr_test_data
 
     test_alpha = 0.05
     test_fc_threshold = 0
