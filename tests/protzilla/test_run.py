@@ -30,16 +30,15 @@ def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_
     run_name = tests_folder_name + "/test_export_workflow_" + random_string()
 
     run = Run.create(run_name, df_mode="memory")
+    run.workflow_config = example_workflow_short
 
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
-        intensity_name="Intensity",
+    run.perform_current_calculation_step_and_next(
+        dict(
+            file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+            intensity_name="Intensity",
+        )
     )
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
+    run.perform_current_calculation_step(
         {"threshold": 0.5},
     )
     assert (
@@ -74,7 +73,10 @@ def test_run_create(tests_folder_name):
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
+
+    # skip metadata import
     run.step_index += 1
+
     run.calculate_and_next(
         data_preprocessing.filter_proteins.by_low_frequency, threshold=1
     )
