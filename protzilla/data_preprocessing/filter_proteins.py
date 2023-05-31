@@ -43,6 +43,20 @@ def by_low_frequency(intensity_df, threshold):
 
 
 def by_samples_missing(df, percentage):
+    """
+    This function filters proteins based on its amount of nan values.
+    If the percentage of existing values is below a threshold (percentage), the protein is filtered out.
+    :param df: the intensity dataframe that should be filtered\
+    in long format
+    :type df: pd.DataFrame
+    :param percentage: float ranging from 0 to 1. Defining the\
+    minimum percentage of samples, of which the protein should have been detected in.\
+    :type percentage: float
+    :return: returns the filtered df as a Dataframe and a dict with a listof Protein IDs\
+    that were discarded and a list of Protein IDs\
+    that were kept
+    :rtype: Tuple[pandas DataFrame, dict]
+    """
     intensity_name = df.columns[3]
     protein_list = df["Protein ID"].unique()
     sample_count = df["Sample"].nunique()
