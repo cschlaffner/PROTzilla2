@@ -338,41 +338,35 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
 
 def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
     logging.info("Merging results for up- and down-regulated proteins")
-    enriched = up_enriched.set_index(["Gene_set", "Term"]).copy()
+    up_enriched.set_index(["Gene_set", "Term"], inplace=True)
     down_enriched.set_index(["Gene_set", "Term"], inplace=True)
+    enriched = up_enriched.copy()
     for gene_set, term in down_enriched.index:
         if (gene_set, term) in enriched.index:
             if (
                 down_enriched.loc[(gene_set, term), "Adjusted P-value"]
-                < up_enriched.loc[(gene_set, term), "Adjusted P-value"]
+                < enriched.loc[(gene_set, term), "Adjusted P-value"]
             ):
                 enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
 
-            enriched.loc[(gene_set, term), "Proteins"] = ",".join(
-                [
-                    up_enriched.loc[(gene_set, term), "Proteins"],
-                    down_enriched.loc[(gene_set, term), "Proteins"],
-                ]
-            )
-            enriched.loc[(gene_set, term), "Genes"] = ";".join(
-                [
-                    up_enriched.loc[(gene_set, term), "Genes"],
-                    down_enriched.loc[(gene_set, term), "Genes"],
-                ]
-            )
+            # merge proteins, genes and overlap columns
+            proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(","))
+            proteins.update(down_enriched.loc[(gene_set, term), "Proteins"].split(","))
+            enriched.loc[(gene_set, term), "Proteins"] = ",".join(list(proteins))
+
+            genes = set(up_enriched.loc[(gene_set, term), "Genes"].split(";"))
+            genes.update(down_enriched.loc[(gene_set, term), "Genes"].split(";"))
+            enriched.loc[(gene_set, term), "Genes"] = ";".join(list(genes))
+
             enriched.loc[(gene_set, term), "Overlap"] = (
-                str(
-                    str((up_enriched.loc[(gene_set, term), "Overlap"])).split("/")[0]
-                    + str((down_enriched.loc[(gene_set, term), "Overlap"])).split("/")[
-                        0
-                    ]
-                )
+                str(len(genes))
                 + "/"
                 + str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
             )
 
         else:
-            enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
+            enriched.loc[(gene_set, term), :] = down_enriched.loc[(gene_set, term), :]
+
     return enriched.reset_index()
 
 

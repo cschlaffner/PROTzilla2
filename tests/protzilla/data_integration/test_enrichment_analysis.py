@@ -13,6 +13,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_enrichr,
     go_analysis_offline,
     merge_restring_dfs,
+    merge_up_down_regulated_proteins_results,
 )
 
 
@@ -495,7 +496,7 @@ def test_go_analysis_offline_background(
         proteins=proteins_df,
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
         background=background_path,
-        direction="up"
+        direction="up",
     )
     df = current_out["results"]
 
@@ -520,13 +521,14 @@ def test_go_analysis_offline_background(
 
 
 def test_go_analysis_offline_no_protein_sets():
-    proteins = ["Protein1","Protein2","Protein3",]
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=proteins_df,
-        protein_sets_path="",
-        background=None,
-        direction="up"
+        proteins=proteins_df, protein_sets_path="", background=None, direction="up"
     )
 
     assert "messages" in current_out
@@ -534,13 +536,17 @@ def test_go_analysis_offline_no_protein_sets():
 
 
 def test_go_analysis_offline_invalid_protein_set_file():
-    proteins = ["Protein1","Protein2","Protein3",]
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path="an_invalid_filetype.png",
         background="",  # no background
-        direction="up"
+        direction="up",
     )
 
     assert "messages" in current_out
@@ -549,15 +555,81 @@ def test_go_analysis_offline_invalid_protein_set_file():
 
 
 def test_go_analysis_offline_invalid_background_set_file():
-    proteins = ["Protein1","Protein2","Protein3",]
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path="a_valid_filetype.gmt",
         background="an_invalid_filetype.png",
-        direction="up"
+        direction="up",
     )
 
     assert "messages" in current_out
     assert "Invalid file type" in current_out["messages"][0]["msg"]
     assert "background" in current_out["messages"][0]["msg"]
+
+
+def test_merge_up_down_regulated_proteins_results():
+    up_enriched = pd.DataFrame(
+        {
+            "Gene_set": ["Set1", "Set2", "Set4"],
+            "Term": ["Term1", "Term2", "Term4"],
+            "Adjusted P-value": [0.01, 0.05, 0.001],
+            "Proteins": ["Protein1", "Protein2", "Protein4;Protein5"],
+            "Genes": ["Gene1", "Gene2", "Gene4;GeneX"],
+            "Overlap": ["1/10", "1/30", "2/40"],
+        }
+    )
+
+    down_enriched = pd.DataFrame(
+        {
+            "Gene_set": ["Set2", "Set3", "Set4"],
+            "Term": ["Term2", "Term3", "Term4"],
+            "Adjusted P-value": [0.02, 0.03, 0.0001],
+            "Proteins": ["Protein3", "Protein4", "Protein3"],
+            "Genes": ["GeneX", "Gene4", "GeneX"],
+            "Overlap": ["1/30", "1/40", "1/40"],
+        }
+    )
+
+    expected_output = pd.DataFrame(
+        {
+            "Gene_set": ["Set1", "Set2", "Set3", "Set4"],
+            "Term": ["Term1", "Term2", "Term3", "Term4"],
+            "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
+            "Proteins": [
+                "Protein1",
+                "Protein2,Protein3",
+                "Protein4",
+                "Protein3,Protein4;Protein5",
+            ],
+            "Genes": ["Gene1", "Gene2;GeneX", "Gene4", "Gene4;GeneX"],
+            "Overlap": ["1/10", "2/30", "1/40", "2/40"],
+        }
+    )
+
+    merged = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+    merged.set_index(["Gene_set", "Term"], inplace=True)
+    expected_output.set_index(["Gene_set", "Term"], inplace=True)
+    merged = merged.sort_index()
+    expected_output = expected_output.sort_index()
+
+    merged["Genes"] = merged["Genes"].apply(lambda x: set(x.split(";")))
+    expected_output["Genes"] = expected_output["Genes"].apply(
+        lambda x: set(x.split(";"))
+    )
+    merged["Genes"] = merged["Genes"].apply(lambda x: sorted(x))
+    expected_output["Genes"] = expected_output["Genes"].apply(lambda x: sorted(x))
+
+    merged["Proteins"] = merged["Proteins"].apply(lambda x: set(x.split(",")))
+    expected_output["Proteins"] = expected_output["Proteins"].apply(
+        lambda x: set(x.split(","))
+    )
+    merged["Proteins"] = merged["Proteins"].apply(lambda x: sorted(x))
+    expected_output["Proteins"] = expected_output["Proteins"].apply(lambda x: sorted(x))
+
+    pd.testing.assert_frame_equal(merged, expected_output)
