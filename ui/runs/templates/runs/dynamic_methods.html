@@ -5,15 +5,12 @@
     // The CSRF token is included in the data object to prevent cross-site request forgery attacks.
 
     function update_for_protein_graph(){
-        console.log("update_for_protein_graph");
         console.log($('#chosen_method'))
         if ($('#chosen_method').val() === 'variation_graph'){
-            console.log("variation_graph");
             const form = $('#plot_form');
             form.attr('target', '_blank');
             form.attr('action', "{% url 'runs:variation_plot' run_name %}")
         }else{
-            console.log("not variation_graph");
             const form = $('#plot_form');
             form.attr('action', "{% url 'runs:plot' run_name %}")
             form.attr('target', '_self');
@@ -21,7 +18,6 @@
     }
 
     $(document).ready(function () {
-        console.log("ready!");
         update_for_protein_graph();
         $("#chosen_method").change(function () {
             const selected_method = $(this).val();
