@@ -91,7 +91,7 @@ def linear_model(
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
 
-        # lm(intesity ~ group + constant)
+        # lm(intensity ~ group + constant)
         Y = protein_df[[intensity_name]]
         X = protein_df[[grouping]]
         X = sm.add_constant(X)
