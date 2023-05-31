@@ -10,11 +10,6 @@
     <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
 
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-    <script type="text/javascript" src="{% static 'js/cytoscape-3.24.0.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/klay.0.4.1.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/cytoscape-klay.js' %}"></script>
-
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
