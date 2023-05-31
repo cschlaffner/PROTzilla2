@@ -15,8 +15,6 @@
     <script type="text/javascript" src="{% static 'js/klay.0.4.1.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cytoscape-klay.js' %}"></script>
 
-    {% include 'runs/protein_graphs_request.html' with section=section step=step%}
-
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
