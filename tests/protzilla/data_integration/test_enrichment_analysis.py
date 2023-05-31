@@ -490,13 +490,13 @@ def test_go_analysis_offline_background(
         "Protein5",
         "Protein6",
     ]
-    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [-1.0] * 6})
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
         background=background_path,
-        direction="up",
+        direction="down",
     )
     df = current_out["results"]
 
