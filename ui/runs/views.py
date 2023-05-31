@@ -172,14 +172,23 @@ def change_field(request, run_name):
         elif param_dict["fill"] == "enrichment_categories":
             named_output = selected[0]
             output_item = selected[1]
-            protein_itr = run.history.output_of_named_step(named_output, output_item)
+
+            # TODO: this is a bit hacky, but it works for now
+            # should be refactored when we rework the named input handling
+            # KeyError is expected here because named_output trigger change_field
+            # twice to make sure that the categories are updated after the named_output has updated
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
+
             if (
                 not isinstance(protein_itr, pd.DataFrame)
                 or not "Gene_set" in protein_itr.columns
             ):
-                logging.warning(
-                    f"Warning: expected protein_itr to be an enrichment DataFrame but got {type(protein_itr)}. Proceeding with empty list."
-                )
+                param_dict["categories"] = []
             else:
                 param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
 
