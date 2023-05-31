@@ -134,6 +134,10 @@ class Run:
     def perform_current_calculation_step(self, parameters):
         self.perform_calculation_from_location(*self.current_run_location(), parameters)
 
+    def perform_current_calculation_step_and_next(self, parameters, name=None):
+        self.perform_calculation_from_location(*self.current_run_location(), parameters)
+        self.next_step(name=name)
+
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
         self.perform_calculation(method_map[location], parameters)
@@ -313,14 +317,12 @@ class Run:
             return "", "", ""
 
     def step_index_in_current_section(self):
-        index = 0
+        steps_before_this_section = 0
         for section, step, method in self.all_steps():
             if section == self.section:
-                if step == self.step:
-                    if method == self.method:
-                        return index
-                index += 1
-        return index
+                return self.step_index - steps_before_this_section
+            steps_before_this_section += 1 # this should not be +1
+        raise Exception(f"section {self.section} not found")
 
     def all_steps(self):
         steps = []
