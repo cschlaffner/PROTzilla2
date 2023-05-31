@@ -156,9 +156,9 @@ method_map = {
     ): dimension_reduction.umap,
     (
         "data_analysis",
-        "variation_graph",
-        "variation_graph",
-    ): protein_graphs.create_graph,
+        "protein_graphs",
+        "peptides_to_isoform",
+    ): protein_graphs.peptides_to_isoform,
     (
         "data_integration",
         "enrichment_analysis",

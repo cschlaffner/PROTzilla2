@@ -951,8 +951,8 @@
           }
         }
       },
-      "variation_graph": {
-        "name": "Protein Variation Graph",
+      "isoform_graph": {
+        "name": "Peptide to Isoforms Graph",
         "description": "Visualises a Protein-Variation-Graph",
         "parameters": {
           "graph_file_path":{
@@ -1144,9 +1144,9 @@
         }
       }
     },
-    "variation_graph": {
-      "variation_graph": {
-        "name": "Variation Graph",
+    "protein_graphs": {
+      "peptides_to_isoform": {
+        "name": "Peptide to Isoform",
         "description": "Create a variation graph (.graphml) for a Protein. The data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the generation. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
@@ -1155,9 +1155,14 @@
             "default": "",
             "placeholder": "Enter the Uniprot-ID of the Protein"
           },
-          "run_path": {
+          "run_name": {
             "type": "empty",
-            "name": "run_path",
+            "name": "run_name",
+            "default": null
+          },
+          "peptide_df": {
+            "type": "empty",
+            "name": "peptide_df",
             "default": null
           }
         }

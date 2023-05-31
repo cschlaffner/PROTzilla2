@@ -11,7 +11,8 @@ from django.contrib import messages
 from protzilla.constants.paths import RUNS_PATH
 
 
-def create_graph(protein_id: str, run_path: str, queue_size: int = None):
+def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
+    run_path = f"{RUNS_PATH}/{run_name}"
     path_to_protein_file, request = _get_protein_file(protein_id, run_path)
 
     if request is not None:
@@ -20,7 +21,7 @@ def create_graph(protein_id: str, run_path: str, queue_size: int = None):
                          Statuscode:{request.status_code}, {request.reason}. \
                          Got: {request.text}. Tip: check if the ID is correct"
             return dict(
-                raph_path=None,
+                graph_path=None,
                 messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
             )
 
@@ -40,19 +41,48 @@ def create_graph(protein_id: str, run_path: str, queue_size: int = None):
     return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
-def peptides_to_isoform(
-    peptide_df: pd.DataFrame, protein_id: str, graph_name: str, run_name: str
-):
-    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
-    df["Sequence"].tolist()
+def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
+    out_dict = _create_graph(protein_id, run_name)
+    if out_dict["graph_path"] is None:
+        return out_dict
 
-    protein_graph = nx.read_graphml(
-        f"{RUNS_PATH}/{run_name}/graphs/{graph_name}.graphml"
-    )
+    graph_path = out_dict["graph_path"]
+
+    k = 5
+    allowed_mismatches = 2
+
+    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
+
+    protein_graph = nx.read_graphml(graph_path)
+    protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
+
     # n0 is always the __start__ node in ProtGraph
     _create_graph_index(protein_graph, "n0")
 
-    return
+    ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
+
+    peptides = df["Sequence"].tolist()
+    peptide_matches = {}
+    for peptide in peptides:
+        kmer = peptide[:k]
+        matched_starts = []
+        for start_pos in ref_index[kmer]:
+            mismatch_counter = 0
+            for i, aminoacid in enumerate(
+                ref_seq[start_pos : start_pos + len(peptide)]
+            ):
+                if aminoacid != peptide[i]:
+                    mismatch_counter += 1
+                if mismatch_counter > allowed_mismatches:
+                    break
+
+            if mismatch_counter <= allowed_mismatches:
+                matched_starts.append(start_pos)
+        peptide_matches[peptide] = matched_starts
+    logging.warning("peptide_matches")
+    logging.warning(peptide_matches)
+
+    return dict(graph_path=graph_path, messages=[out_dict["messages"]])
 
 
 def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
@@ -168,7 +198,7 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
     for kmer in kmer_list:
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
-    return index, seq_len
+    return index, ref_seq, seq_len
 
 
 def _get_ref_seq(protein_path: str):
@@ -221,5 +251,5 @@ if __name__ == "__main__":
     # )
     # index = _create_graph_index(protein_graph=g, starting_point="n0")
 
-    index, len = _create_ref_seq_index("SIM46", 5, "as")
+    index, ref_seq, seq_len = _create_ref_seq_index("SIM46", 5, "as")
     print(index)

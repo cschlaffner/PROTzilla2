@@ -11,13 +11,6 @@
           }
         },
         {
-          "name": "metadata_import",
-          "method": "metadata_import_method",
-          "parameters": {
-            "feature_orientation": "Rows (features in rows, samples in columns)"
-          }
-        },
-        {
           "name": "peptide_import",
           "method": "peptide_import",
           "parameters": {
@@ -27,53 +20,25 @@
       ]
     },
     "data_preprocessing": {
-      "steps": [
-        {
-          "name": "imputation",
-          "method": "knn",
-          "parameters": {
-            "number_of_neighbours": 10
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            },
-            {
-              "graph_type_quantites": "Pie chart"
-            }
-          ]
-        },
-        {
-          "name": "normalisation",
-          "method": "median",
-          "parameters": {
-            "percentile": 0.4
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            }
-          ]
-        },
-        {
-          "name": "filter_peptides",
-          "method": "pep_filter",
-          "parameters": {
-            "threshold": 0,
-            "peptide_df": ""
-          },
-          "graphs": [
-            {
-              "graph_type ": "Pie chart"
-            }
-          ]
-        }
-      ]
+      "steps": []
     },
     "data_analysis": {
-      "steps": []
+      "steps": [
+        {
+          "name": "protein_graphs",
+          "method": "peptides_to_isoform",
+          "parameters": {
+            "protein_id": ""
+          }
+        },
+        {
+          "name": "plot",
+          "method": "isoform_graph",
+          "parameters": {
+            "input_df": [null, null]
+          }
+        }
+      ]
     },
     "data_integration": {
       "steps": []
