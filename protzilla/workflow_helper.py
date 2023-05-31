@@ -52,6 +52,8 @@ def get_defaults(method_params):
 
 
 def get_parameter_type(workflow_meta, section, step, method, param):
+    if f"{param}_wrapper" in workflow_meta[section][step][method]["parameters"]:
+        return workflow_meta[section][step][method]["parameters"][f"{param}_wrapper"]["fields"][param]["type"]
     return workflow_meta[section][step][method]["parameters"][param]["type"]
 
 
