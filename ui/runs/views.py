@@ -13,8 +13,6 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
-from protzilla.utilities.memory import get_memory_usage
-
 from protzilla.run import Run
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
