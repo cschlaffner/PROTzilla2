@@ -69,7 +69,7 @@ def by_samples_missing(df, percentage):
     )
 
 
-def by_low_frequency_plot(df, result_df, current_out, graph_type):
+def _build_pie_bar_plot(df, result_df, current_out, graph_type):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
             values_of_sectors=[
@@ -91,5 +91,9 @@ def by_low_frequency_plot(df, result_df, current_out, graph_type):
     return [fig]
 
 
+def by_low_frequency_plot(df, result_df, current_out, graph_type):
+    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+
+
 def by_samples_missing_plot(df, result_df, current_out, graph_type):
-    pass
+    return _build_pie_bar_plot(df, result_df, current_out, graph_type)

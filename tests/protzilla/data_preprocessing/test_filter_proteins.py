@@ -6,6 +6,7 @@ from protzilla.data_preprocessing.filter_proteins import (
     by_low_frequency,
     by_low_frequency_plot,
     by_samples_missing,
+    by_samples_missing_plot,
 )
 
 
@@ -94,11 +95,11 @@ def test_filter_proteins_by_missing_samples(
     )
     list_proteins_excluded = dropouts["filtered_proteins"]
 
-    # fig = by_samples_missing_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[
-    #    0
-    # ]
-    # if show_figures:
-    #    fig.show()
+    fig = by_samples_missing_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[
+        0
+    ]
+    if show_figures:
+        fig.show()
     assert ["Protein2", "Protein3", "Protein4", "Protein5"] == list_proteins_excluded
 
     result_df, dropouts = by_samples_missing(
