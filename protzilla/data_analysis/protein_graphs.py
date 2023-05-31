@@ -42,7 +42,13 @@ def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
 
 
 def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
-    out_dict = _create_graph(protein_id, run_name)
+    if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
+        out_dict = _create_graph(protein_id, run_name)
+    else:
+        out_dict = dict(
+            graph_path=f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml",
+            msg=[dict(level=messages.INFO, msg="Graph already exists")],
+        )
     if out_dict["graph_path"] is None:
         return out_dict
 
@@ -51,6 +57,12 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     k = 5
     allowed_mismatches = 2
 
+    # df = peptide_df.loc[peptide_df['Protein ID'] in protein_id]
+    print(peptide_df)
+
+    # Proteine aus df schmeiße nach Motto REV__Q9UL68-2
+    peptide_df.to_csv("/Users/anton/Desktop/peptides.csv")
+    print(peptide_df["Protein ID"])
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
 
     protein_graph = nx.read_graphml(graph_path)
