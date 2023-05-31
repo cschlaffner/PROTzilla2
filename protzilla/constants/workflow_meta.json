@@ -743,7 +743,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None",
+            "default": "None", 
             "multiple": true,
             "default_select_all": true
           },
@@ -784,6 +784,12 @@
             "type": "numeric",
             "min": 0,
             "default": 0
+          },
+          "log_base": {
+            "name": "base of log transformation (leave empty if no log transformation was performed on the data)",
+            "type": "numeric",
+            "min": 2,
+            "default": null
           },
           "grouping": {
             "name": "Grouping",
@@ -1136,8 +1142,50 @@
   },
   "data_integration": {  
     "enrichment_analysis": {
+      "go_analysis_with_STRING": {
+        "name": "GO Analysis with STRING",
+        "description": "Online GO Analysis using STRING API",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_set_dbs": {
+            "name": "Protein Set Libraries",
+            "type": "categorical",
+            "fill": "dbs_restring",
+            "categories": [],
+            "default": null,
+            "multiple": true
+          },
+          "organism": {
+            "name": "Organism / NCBI taxon identifiers (e.g. Human is 9606)",
+            "type": "numeric",
+            "default": 9606
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
+          },
+          "background": {
+            "name": "Background set (no upload = entire proteome)",
+            "type": "file",
+            "default": null
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
+          }
+        }
+      },
       "go_analysis_with_enrichr": {
-        "name": "GO Analysis with enrichr",
+        "name": "GO Analysis with Enrichr",
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
           "proteins": {
