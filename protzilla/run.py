@@ -317,7 +317,8 @@ class Run:
         for section, step, method in self.all_steps():
             if section == self.section:
                 if step == self.step:
-                    return index
+                    if method == self.method:
+                        return index
                 index += 1
         return index
 
