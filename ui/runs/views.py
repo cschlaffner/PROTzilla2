@@ -366,53 +366,7 @@ def download_plots(request, run_name):
     )
 
 
-def variation_plot(request, run_name):
-    run = active_runs[run_name]
-    section, step, method = run.current_run_location()
-    post_data = dict(request.POST)
-
-    # print(request.__dict__)
-
-    param_dict = run.workflow_meta[section][step][method]["parameters"]
-    post_data, parameters = parameters_for_plot(post_data, param_dict)
-
-    parameters.update(parameters_from_post(post_data))
-
-    print("parameters")
-    print(parameters)
-    call_params = run.exchange_named_outputs_with_data(parameters)
-    import pprint
-
-    pprint.pprint(call_params)
-
-    graphml_file = call_params["graph_file_path"]
-    # graphml_file = "/Users/anton/Documents/code/PROTzilla2/tests/test_data/exported_graphs/QXXXXX-s3.graphml"
-
-    graph = nx.read_graphml(graphml_file)
-    node_labels = nx.get_node_attributes(graph, "aminoacid")
-    print(node_labels)
-
-    pprint.pprint(graph.__dict__)
-
-    nodes = [
-        {
-            "data": {
-                "id": node,
-                "label": graph.nodes[node]["aminoacid"],
-                "width": len(graph.nodes[node]["aminoacid"]) * 24,
-            }
-        }
-        for node in graph.nodes()
-    ]
-    edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
-    elements = nodes + edges
-    context = {"elements": elements}
-
-    return render(request, "runs/visualisation.html", context)
-
-
 def protein_plot(request, run_name):
-    # plan: inject protein plot into plot div
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     post_data = dict(request.POST)
@@ -454,4 +408,4 @@ def protein_plot(request, run_name):
     elements = nodes + edges
     context = {"elements": elements}
 
-    return render(request, "runs/protein_graphs_vis.html", context)
+    return render(request, "runs/protein_graph.html", context)

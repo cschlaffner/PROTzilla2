@@ -9,7 +9,7 @@
         if ($('#chosen_method').val() === 'variation_graph'){
             const form = $('#plot_form');
             form.attr('target', '_blank');
-            form.attr('action', "{% url 'runs:variation_plot' run_name %}")
+            form.attr('action', "{% url 'runs:protein_plot' run_name %}")
         }else{
             const form = $('#plot_form');
             form.attr('action', "{% url 'runs:plot' run_name %}")

@@ -34,6 +34,5 @@ urlpatterns = [
         "<str:run_name>/export_workflow", views.export_workflow, name="export_workflow"
     ),
     path("<str:run_name>/download_plots", views.download_plots, name="download_plots"),
-    path("<str:run_name>/variation_plot", views.variation_plot, name="variation_plot"),
     path("<str:run_name>/protein_plot", views.protein_plot, name="protein_plot"),
 ]
