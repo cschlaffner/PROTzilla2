@@ -102,51 +102,9 @@ def test_differential_expression_linear_model(
     assert current_out["corrected_alpha"] is None
 
 
-def test_differential_expression_t_test(show_figures):
-    test_intensity_list = (
-        ["Sample1", "Protein1", "Gene1", 18],
-        ["Sample1", "Protein2", "Gene1", 16],
-        ["Sample1", "Protein3", "Gene1", 1],
-        ["Sample2", "Protein1", "Gene1", 20],
-        ["Sample2", "Protein2", "Gene1", 15],
-        ["Sample2", "Protein3", "Gene1", 2],
-        ["Sample3", "Protein1", "Gene1", 22],
-        ["Sample3", "Protein2", "Gene1", 14],
-        ["Sample3", "Protein3", "Gene1", 3],
-        ["Sample4", "Protein1", "Gene1", 8],
-        ["Sample4", "Protein2", "Gene1", 15],
-        ["Sample4", "Protein3", "Gene1", 1],
-        ["Sample5", "Protein1", "Gene1", 10],
-        ["Sample5", "Protein2", "Gene1", 14],
-        ["Sample5", "Protein3", "Gene1", 2],
-        ["Sample6", "Protein1", "Gene1", 12],
-        ["Sample6", "Protein2", "Gene1", 13],
-        ["Sample6", "Protein3", "Gene1", 3],
-        ["Sample7", "Protein1", "Gene1", 12],
-        ["Sample7", "Protein2", "Gene1", 13],
-        ["Sample7", "Protein3", "Gene1", 3],
-    )
+def test_differential_expression_t_test(data_test_differential_expression, show_figures):
 
-    test_intensity_df = pd.DataFrame(
-        data=test_intensity_list,
-        columns=["Sample", "Protein ID", "Gene", "Intensity"],
-    )
-
-    test_metadata_list = (
-        ["Sample1", "Group1"],
-        ["Sample2", "Group1"],
-        ["Sample3", "Group1"],
-        ["Sample4", "Group2"],
-        ["Sample5", "Group2"],
-        ["Sample6", "Group2"],
-        ["Sample7", "Group3"],
-    )
-
-    test_metadata_df = pd.DataFrame(
-        data=test_metadata_list,
-        columns=["Sample", "Group"],
-    )
-
+    test_intensity_df, test_metadata_df = data_test_differential_expression
     test_alpha = 0.05
     test_fc_threshold = 0
 
@@ -189,7 +147,7 @@ def test_differential_expression_t_test(show_figures):
     assert current_out["corrected_alpha"] is None
 
 
-def test_differential_expression_t_test_with_nan():
+def test_differential_expression_t_test_with_nan(data_test_differential_expression):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -213,26 +171,12 @@ def test_differential_expression_t_test_with_nan():
         ["Sample7", "Protein2", "Gene1", 13],
         ["Sample7", "Protein3", "Gene1", 3],
     )
-
     test_intensity_df = pd.DataFrame(
         data=test_intensity_list,
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
+    _, test_metadata_df = data_test_differential_expression
 
-    test_metadata_list = (
-        ["Sample1", "Group1"],
-        ["Sample2", "Group1"],
-        ["Sample3", "Group1"],
-        ["Sample4", "Group2"],
-        ["Sample5", "Group2"],
-        ["Sample6", "Group2"],
-        ["Sample7", "Group3"],
-    )
-
-    test_metadata_df = pd.DataFrame(
-        data=test_metadata_list,
-        columns=["Sample", "Group"],
-    )
 
     test_alpha = 0.05
     test_fc_threshold = 0
@@ -252,7 +196,7 @@ def test_differential_expression_t_test_with_nan():
     assert "NaN values" in current_out["messages"][0]["msg"]
 
 
-def test_differential_expression_t_test_with_zero_mean(show_figures):
+def test_differential_expression_t_test_with_zero_mean(data_test_differential_expression, show_figures):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -288,20 +232,7 @@ def test_differential_expression_t_test_with_zero_mean(show_figures):
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    test_metadata_list = (
-        ["Sample1", "Group1"],
-        ["Sample2", "Group1"],
-        ["Sample3", "Group1"],
-        ["Sample4", "Group2"],
-        ["Sample5", "Group2"],
-        ["Sample6", "Group2"],
-        ["Sample7", "Group3"],
-    )
-
-    test_metadata_df = pd.DataFrame(
-        data=test_metadata_list,
-        columns=["Sample", "Group"],
-    )
+    _, test_metadata_df = data_test_differential_expression
 
     test_alpha = 0.05
     test_fc_threshold = 0
