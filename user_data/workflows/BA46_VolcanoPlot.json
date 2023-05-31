@@ -108,7 +108,7 @@
       "steps": [
         {
           "name": "differential_expression",
-          "method": "t_test",
+          "method": "linear_model",
           "parameters": {
             "intensity_df": [
               "preprocessed_data",
@@ -122,31 +122,28 @@
             "group2": "CTR",
             "metadata_df": ""
           },
-          "output_name": "ttest"
+          "output_name": "linear_model"
         },
         {
           "name": "plot",
           "method": "volcano",
           "parameters": {
-            "proteins_of_interest": [
-              "P00738;P00738-2",
-              "P02671;P02671-2;CON__P02672"
-            ],
+            "proteins_of_interest": [],
             "p_values": [
-              "ttest",
+              "linear_model",
               "corrected_p_values_df"
             ],
             "log2_fc": [
-              "ttest",
+              "linear_model",
               "log2_fold_change_df"
             ],
             "fc_threshold": [
-              "ttest",
+              "linear_model",
               "fc_threshold"
             ],
             "alpha": [
-              "ttest",
-              "alpha"
+              "linear_model",
+              "corrected_alpha"
             ]
           }
         }
