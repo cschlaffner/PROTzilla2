@@ -42,6 +42,33 @@ def by_low_frequency(intensity_df, threshold):
     )
 
 
+def by_samples_missing(df, percentage):
+    intensity_name = df.columns[3]
+    protein_list = df["Protein ID"].unique()
+    sample_count = df["Sample"].nunique()
+    filtered_proteins_list = []
+    remaining_proteins_list = []
+
+    for protein in protein_list:
+        protein_df = df.loc[df["Protein ID"] == protein]
+        na_count = protein_df[intensity_name].isna().sum()
+        print(protein)
+        print(na_count)
+        print(sample_count)
+        if 1 - (na_count / sample_count) < percentage:
+            filtered_proteins_list += [protein]
+        else:
+            remaining_proteins_list += [protein]
+
+    return (
+        df[~(df["Protein ID"].isin(filtered_proteins_list))],
+        dict(
+            filtered_proteins=filtered_proteins_list,
+            remaining_proteins=remaining_proteins_list,
+        ),
+    )
+
+
 def by_low_frequency_plot(df, result_df, current_out, graph_type):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
@@ -62,3 +89,7 @@ def by_low_frequency_plot(df, result_df, current_out, graph_type):
             heading="Number of Filtered Proteins",
         )
     return [fig]
+
+
+def by_samples_missing_plot(df, result_df, current_out, graph_type):
+    pass

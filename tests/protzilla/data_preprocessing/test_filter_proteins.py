@@ -6,7 +6,6 @@ from protzilla.data_preprocessing.filter_proteins import (
     by_low_frequency,
     by_low_frequency_plot,
     by_samples_missing,
-    by_samples_missing_plot,
 )
 
 
@@ -41,8 +40,9 @@ def filter_proteins_df():
     return filter_proteins_df
 
 
+@pytest.fixture
 def filter_proteins_by_perentage_df():
-    filter_proteins_df = pd.DataFrame(
+    df = pd.DataFrame(
         (
             ["Sample1", "Protein1", "Gene1", 1],
             ["Sample1", "Protein2", "Gene1", np.nan],
@@ -68,6 +68,8 @@ def filter_proteins_by_perentage_df():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
+    return df
+
 
 def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
     result_df, dropouts = by_low_frequency(filter_proteins_df, threshold=0.6)
@@ -84,23 +86,31 @@ def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
             Protein1 and Protein4, but are {list_proteins_excluded}"
 
 
-def test_filter_proteins_by_percentage(filter_proteins_df, show_figures):
-    result_df, dropouts = by_samples_missing(filter_proteins_df, threshold=1.0)
+def test_filter_proteins_by_missing_samples(
+    filter_proteins_by_perentage_df, show_figures
+):
+    result_df, dropouts = by_samples_missing(
+        filter_proteins_by_perentage_df, percentage=1.0
+    )
     list_proteins_excluded = dropouts["filtered_proteins"]
 
-    fig = by_samples_missing_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[
-        0
-    ]
-    if show_figures:
-        fig.show()
+    # fig = by_samples_missing_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[
+    #    0
+    # ]
+    # if show_figures:
+    #    fig.show()
     assert ["Protein2", "Protein3", "Protein4", "Protein5"] == list_proteins_excluded
 
-    result_df, dropouts = by_samples_missing(filter_proteins_df, threshold=0.5)
+    result_df, dropouts = by_samples_missing(
+        filter_proteins_by_perentage_df, percentage=0.5
+    )
     list_proteins_excluded = dropouts["filtered_proteins"]
 
     assert ["Protein4", "Protein5"] == list_proteins_excluded
 
-    result_df, dropouts = by_samples_missing(filter_proteins_df, threshold=0.0)
+    result_df, dropouts = by_samples_missing(
+        filter_proteins_by_perentage_df, percentage=0.0
+    )
     list_proteins_excluded = dropouts["filtered_proteins"]
 
     assert [] == list_proteins_excluded
