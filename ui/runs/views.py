@@ -274,16 +274,6 @@ def plot(request, run_name):
     post_data, parameters = parameters_for_plot(post_data, param_dict)
 
     parameters.update(parameters_from_post(post_data))
-
-    print("parameters")
-    print(parameters)
-
-    if run.method == "variation_graph":
-        print("variation_graph")
-        return variation_plot(request, run_name)
-        # return HttpResponseRedirect(reverse("runs:variation_plot", args=(run_name,)))
-
-    print("post varaiation_graph")
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
