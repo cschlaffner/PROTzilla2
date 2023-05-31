@@ -111,7 +111,7 @@ def change_method(request, run_name):
     )
 
 
-def change_dynamic_input(request, run_name):
+def change_dynamic_fields(request, run_name):
     # can this be extracted into a seperate method? (duplicate in change_field, detail)
     try:
         if run_name not in active_runs:

@@ -25,6 +25,10 @@ def make_current_fields(run, section, step, method):
 
 
 def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
+    # In this method param_dict refers to the dictionary that contains all
+    # meta information about a specific parameter e.g. type, default value. The
+    # all_parameters_dict refers to the dictionary that contains all parameters for
+    # a method with its corresponding meta information
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
         if "step" not in param_dict:

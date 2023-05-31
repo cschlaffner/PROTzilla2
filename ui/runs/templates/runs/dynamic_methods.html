@@ -29,7 +29,7 @@
             const selected_input = $(this).val();
             const key = $(this).attr("id");
             $.ajax({
-                url: "{% url 'runs:change_dynamic_input' run_name %}",
+                url: "{% url 'runs:change_dynamic_fields' run_name %}",
                 type: "POST",
                 data: {
                     selected_input: selected_input,
