@@ -115,7 +115,7 @@ def go_analysis_with_STRING(
         or not "Protein ID" in proteins.columns
         or not proteins.iloc[:, 1].dtype == np.number
     ):
-        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
+        msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
@@ -336,7 +336,25 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
     return gene_mapping, filtered_groups
 
 
-def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
+def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=False):
+    """
+    A method that merges the results for up- and down-regulated proteins for the GSEApy
+    enrichment results. If a Gene_set and Term combination is present in both dataframes,
+    the one with the lower adjusted p-value is kept. Genes are merged and the overlap column
+    is updated according to the number of genes.
+    If mapped is True, the proteins were mapped to uppercase gene symbols and the proteins
+    need to be merged as well.
+
+    :param up_enriched: dataframe with enrichment results for up-regulated proteins
+    :type up_enriched: pandas.DataFrame
+    :param down_enriched: dataframe with enrichment results for down-regulated proteins
+    :type down_enriched: pandas.DataFrame
+    :param mapped: whether the proteins were mapped to uppercase gene symbols
+    :type mapped: bool
+    :return: merged dataframe
+    :rtype: pandas.DataFrame
+    """
+
     logging.info("Merging results for up- and down-regulated proteins")
     up_enriched.set_index(["Gene_set", "Term"], inplace=True)
     down_enriched.set_index(["Gene_set", "Term"], inplace=True)
@@ -350,9 +368,12 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
                 enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
 
             # merge proteins, genes and overlap columns
-            proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(","))
-            proteins.update(down_enriched.loc[(gene_set, term), "Proteins"].split(","))
-            enriched.loc[(gene_set, term), "Proteins"] = ",".join(list(proteins))
+            if mapped:
+                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(","))
+                proteins.update(
+                    down_enriched.loc[(gene_set, term), "Proteins"].split(",")
+                )
+                enriched.loc[(gene_set, term), "Proteins"] = ",".join(list(proteins))
 
             genes = set(up_enriched.loc[(gene_set, term), "Genes"].split(";"))
             genes.update(down_enriched.loc[(gene_set, term), "Genes"].split(";"))
@@ -399,6 +420,9 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
     # enhancement: protein_sets are categorical for now, could also be custom file upload later
     #       background parameter would work then (with uploaded file)
     # dependency: refactoring/designing of more complex input choices
+
+    # TODO 182: set logging level for whole django app in beginning
+    logging.basicConfig(level=logging.INFO)
     out_messages = []
 
     if (
@@ -407,7 +431,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         or not "Protein ID" in proteins.columns
         or not proteins.iloc[:, 1].dtype == np.number
     ):
-        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
+        msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
@@ -501,7 +525,9 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_proteins_results(
+            up_enriched, down_enriched, mapped=True
+        )
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
@@ -559,14 +585,18 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     # dependency: refactoring/designing of more complex input choices
 
     # enhancement: make sure ID type for all inputs match
+
+    # TODO 182: set logging level for whole django app in beginning
+    logging.basicConfig(level=logging.INFO)
     out_messages = []
+
     if (
         not isinstance(proteins, pd.DataFrame)
         or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
         or not proteins.iloc[:, 1].dtype == np.number
     ):
-        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. log2FC))"
+        msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
@@ -713,7 +743,9 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         logging.info("Finished analysis for up-regulated proteins")
 
     if direction == "both":
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_proteins_results(
+            up_enriched, down_enriched, mapped=False
+        )
     else:
         enriched = up_enriched if direction == "up" else down_enriched
 

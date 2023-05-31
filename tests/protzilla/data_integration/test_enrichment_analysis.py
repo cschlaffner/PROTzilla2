@@ -262,7 +262,7 @@ def test_go_analysis_with_STRING_proteins_list():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -275,7 +275,7 @@ def test_go_analysis_with_STRING_no_fc_df():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -303,7 +303,7 @@ def test_go_analysis_with_STRING_too_many_col_df():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -317,7 +317,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
 
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -612,7 +612,9 @@ def test_merge_up_down_regulated_proteins_results():
         }
     )
 
-    merged = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+    merged = merge_up_down_regulated_proteins_results(
+        up_enriched, down_enriched, mapped=True
+    )
     merged.set_index(["Gene_set", "Term"], inplace=True)
     expected_output.set_index(["Gene_set", "Term"], inplace=True)
     merged = merged.sort_index()

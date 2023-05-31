@@ -1084,7 +1084,7 @@
         "description": "Online GO Analysis using STRING API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1126,7 +1126,7 @@
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1159,7 +1159,7 @@
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
