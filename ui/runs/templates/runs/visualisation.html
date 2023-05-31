@@ -4,26 +4,26 @@
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
     <style>
-    body {
-        font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-        font-size: 14px;
-    }
+        body {
+            font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+            font-size: 14px;
+        }
 
-    #cy {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        z-index: 999;
-    }
+        #cy {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 999;
+        }
 
-    h1 {
-        opacity: 0.5;
-        font-size: 1em;
-        font-weight: bold;
-    }
-</style>
+        h1 {
+            opacity: 0.5;
+            font-size: 1em;
+            font-weight: bold;
+        }
+    </style>
 {% endblock %}
 
 {% block js %}
@@ -34,69 +34,69 @@
     <script type="text/javascript" src="{% static 'js/cytoscape-dagre.js' %}"></script>
 
     <script>
-    function getWidth(node) {
-        // curtesy to Simon Moe -> https://github.com/cytoscape/cytoscape.js/issues/2713#issuecomment-1062746258
-        /**
-         Calculate the width of a node given its text label `node.data('lbl')`
-         */
+        function getWidth(node) {
+            // curtesy to Simon Moe -> https://github.com/cytoscape/cytoscape.js/issues/2713#issuecomment-1062746258
+            /**
+             Calculate the width of a node given its text label `node.data('lbl')`
+             */
             // Create element with attributes needed to calculate text size
-        const ctx = document.createElement('canvas').getContext("2d");
-        const fStyle = node.pstyle('font-style').strValue;
-        const size = node.pstyle('font-size').pfValue + 'px';
-        const family = node.pstyle('font-family').strValue;
-        const weight = node.pstyle('font-weight').strValue;
-        ctx.font = fStyle + ' ' + weight + ' ' + size + ' ' + family;
+            const ctx = document.createElement('canvas').getContext("2d");
+            const fStyle = node.pstyle('font-style').strValue;
+            const size = node.pstyle('font-size').pfValue + 'px';
+            const family = node.pstyle('font-family').strValue;
+            const weight = node.pstyle('font-weight').strValue;
+            ctx.font = fStyle + ' ' + weight + ' ' + size + ' ' + family;
 
-        // For multiple lines, evaluate the width of the largest line
-        const lines = node.data('label').split('\n')
-        const lengths = lines.map(a => a.length);
-        const max_line = lengths.indexOf(Math.max(...lengths));
+            // For multiple lines, evaluate the width of the largest line
+            const lines = node.data('label').split('\n')
+            const lengths = lines.map(a => a.length);
+            const max_line = lengths.indexOf(Math.max(...lengths));
 
-        // User-defined padding
-        const padding = 20
-        return ctx.measureText(lines[max_line]).width + padding; // + padding;
-    }
+            // User-defined padding
+            const padding = 20
+            return ctx.measureText(lines[max_line]).width + padding; // + padding;
+        }
 
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var cy = window.cy = cytoscape({
-            container: document.getElementById('cy'),
-            layout: {
-                name: 'klay',
-                fit: true,
-                nodeDimensionsIncludeLabels: true,
-                avoidOverlap: true,
-            },
-            style: [
-                {
-                    selector: 'node',
-                    style: {
-                        'shape': "roundrectangle",
-                        'label': 'data(label)',
-                        'text-valign': 'center',
-                        'text-halign': 'center',
-                        'width': getWidth,
-                        'background-color': 'lightblue',
-                        'horizontal-text-margin': '10px',
-                    }
+        document.addEventListener('DOMContentLoaded', function () {
+            var cy = window.cy = cytoscape({
+                container: document.getElementById('cy'),
+                layout: {
+                    name: 'klay',
+                    fit: true,
+                    nodeDimensionsIncludeLabels: true,
+                    avoidOverlap: true,
                 },
-                {
-                    selector: 'edge',
-                    style: {
-                        'curve-style': 'bezier',
-                        'target-arrow-shape': 'triangle',
-                        'width': 2,
-                        'line-color': '#ccc',
-                        'target-arrow-color': '#ccc',
-                        'source-endpoint': '90deg',
-                        'target-endpoint': '270deg',
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'shape': "roundrectangle",
+                            'label': 'data(label)',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'width': getWidth,
+                            'background-color': 'lightblue',
+                            'horizontal-text-margin': '10px',
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'curve-style': 'bezier',
+                            'target-arrow-shape': 'triangle',
+                            'width': 2,
+                            'line-color': '#ccc',
+                            'target-arrow-color': '#ccc',
+                            'source-endpoint': '90deg',
+                            'target-endpoint': '270deg',
+                        }
                     }
-                }
-            ],
-            elements: {{ elements|safe }}
+                ],
+                elements: {{ elements|safe }}
+            });
         });
-    });
-</script>
+    </script>
 {% endblock %}
 
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
