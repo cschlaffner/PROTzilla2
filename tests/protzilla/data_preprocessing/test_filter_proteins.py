@@ -90,28 +90,32 @@ def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
 def test_filter_proteins_by_missing_samples(
     filter_proteins_by_perentage_df, show_figures
 ):
-    result_df, dropouts = by_samples_missing(
+    result_df, method_output = by_samples_missing(
         filter_proteins_by_perentage_df, percentage=1.0
     )
-    list_proteins_excluded = dropouts["filtered_proteins"]
 
-    fig = by_samples_missing_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[
-        0
-    ]
+    fig = by_samples_missing_plot(
+        filter_proteins_df, result_df, method_output, "Pie chart"
+    )[0]
     if show_figures:
         fig.show()
-    assert ["Protein2", "Protein3", "Protein4", "Protein5"] == list_proteins_excluded
+    assert method_output["filtered_proteins"] == [
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+    ]
 
-    result_df, dropouts = by_samples_missing(
+    result_df, method_output = by_samples_missing(
         filter_proteins_by_perentage_df, percentage=0.5
     )
-    list_proteins_excluded = dropouts["filtered_proteins"]
+    method_output["filtered_proteins"]
 
-    assert ["Protein4", "Protein5"] == list_proteins_excluded
+    assert method_output["filtered_proteins"] == ["Protein4", "Protein5"]
 
-    result_df, dropouts = by_samples_missing(
+    result_df, method_output = by_samples_missing(
         filter_proteins_by_perentage_df, percentage=0.0
     )
-    list_proteins_excluded = dropouts["filtered_proteins"]
+    method_output["filtered_proteins"]
 
-    assert [] == list_proteins_excluded
+    assert method_output["filtered_proteins"] == []

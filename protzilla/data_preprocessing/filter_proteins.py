@@ -52,13 +52,10 @@ def by_samples_missing(df, percentage):
     for protein in protein_list:
         protein_df = df.loc[df["Protein ID"] == protein]
         na_count = protein_df[intensity_name].isna().sum()
-        print(protein)
-        print(na_count)
-        print(sample_count)
         if 1 - (na_count / sample_count) < percentage:
-            filtered_proteins_list += [protein]
+            filtered_proteins_list.append(protein)
         else:
-            remaining_proteins_list += [protein]
+            remaining_proteins_list.append(protein)
 
     return (
         df[~(df["Protein ID"].isin(filtered_proteins_list))],
