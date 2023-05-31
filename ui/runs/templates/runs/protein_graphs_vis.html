@@ -1,10 +1,25 @@
+<style>
+    #cy {
+        position: absolute;
+        width: 75%;
+        height: 50%;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-width: 3px;
+        border-radius: 3px;
+        border-style: solid;
+        border-color: black;
+    }
+
+</style>
+
 <script>
     function getWidth(node) {
         // curtesy to Simon Moe -> https://github.com/cytoscape/cytoscape.js/issues/2713#issuecomment-1062746258
         /**
          Calculate the width of a node given its text label `node.data('lbl')`
          */
-        // Create element with attributes needed to calculate text size
+            // Create element with attributes needed to calculate text size
         const ctx = document.createElement('canvas').getContext("2d");
         const fStyle = node.pstyle('font-style').strValue;
         const size = node.pstyle('font-size').pfValue + 'px';
@@ -63,5 +78,5 @@
     });
 </script>
 
-<div id="cy"></div>
+{#<div id="cy"></div>#}
 
