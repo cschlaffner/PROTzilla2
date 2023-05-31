@@ -140,6 +140,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
