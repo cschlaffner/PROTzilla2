@@ -20,8 +20,9 @@ def linear_model(
     fc_threshold,
 ):
     """
-    A function to fit a linear model between groups defined in the
-    clinical data. The linear model is fit on the level of each protein.
+    A function to fit a linear model using Ordinary Least Squares for each Protein.
+    The linear model fits the protein intensities on Y axis and the grouping on X
+    for group1 X=-1 and group2 X=1
     The p-values are corrected for multiple testing.
 
     :param intensity_df: the dataframe that should be tested in long format
@@ -42,7 +43,7 @@ def linear_model(
     :type fc_threshold: float
 
     :return: a dataframe in typical protzilla long format with the differentially expressed
-    proteins and a dict, containing the corrected p-values and the log2 fold change, the alpha used
+    proteins and a dict, containing the corrected p-values and the log2 fold change (coefficients), the alpha used
     and the corrected alpha, as well as filtered out proteins.
     :rtype: Tuple[pandas DataFrame, dict]
     """
@@ -69,13 +70,10 @@ def linear_model(
 
     for protein in proteins:
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
-
         protein_df = protein_df.loc[
             (protein_df.loc[:, grouping] == group1)
             | (protein_df.loc[:, grouping] == group2)
         ]
-
-        #  is -1, 1 the way to map the grouping to?
         protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
 
         # if a protein has a NaN value in a sample, user should remove it
@@ -93,24 +91,17 @@ def linear_model(
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
 
-        # not needed, right?
-        # if the intensity of a group for a protein is 0, it should be filtered out
-        # if np.mean(group1_intensities.to_numpy()) == 0 or np.mean(group2_intensities.to_numpy()) == 0:
-        #     filtered_proteins.append(protein)
-        #     continue
-
+        #lm(intesity ~ group + constant)
         Y = protein_df[[intensity_name]]
         X = protein_df[[grouping]]
         X = sm.add_constant(X)
-        # Perform linear regression
         model = sm.OLS(Y, X)
         results = model.fit()
 
-        p = results.pvalues[grouping]  # Extract p-value for the coefficient of interest
-        p_values.append(p)
-        log2_fold_change.append(
-            results.params[grouping]
-        )  # Extract the coefficient (fold change)
+        # Extract p-value for the coefficient of interest
+        p_values.append(results.pvalues[grouping])
+        # Extract the coefficient (fold change)
+        log2_fold_change.append(results.params[grouping])
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
