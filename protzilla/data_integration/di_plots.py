@@ -51,6 +51,12 @@ def go_enrichment_bar_plot(
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
+    # This method can be used for both restring and gseapy results
+    # restring results are different from the expected gseapy results
+    # and need to be converted.
+    # This is done by renaming the columns accordingly and adding missing
+    # columns with placeholder values (since they are not used in the plot).
+    # Example files can be found in the tests/test_data/enrichment_data folder.
     restring_input = False
     if "score" in df.columns and "ID" in df.columns:
         # df is a restring summary file
@@ -65,6 +71,7 @@ def go_enrichment_bar_plot(
 
     if restring_input:
         # manual cutoff because gseapy does not support cutoffs for restring files
+        # and user expects the supplied cutoff to be applied
         df = df[df[fdr_column] <= cutoff]
         if len(df) == 0:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
@@ -72,9 +79,9 @@ def go_enrichment_bar_plot(
 
         column = "-log10(FDR)"
         df[column] = -1 * np.log10(df[fdr_column])
-        # prevent cutoff being applied again
-        cutoff = df[column].max()
         df["Overlap"] = "0/0"
+        # prevent cutoff from being applied again by barplot method
+        cutoff = df[column].max()
     else:
         column = "Adjusted P-value"
 
