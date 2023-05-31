@@ -102,8 +102,9 @@ def test_differential_expression_linear_model(
     assert current_out["corrected_alpha"] is None
 
 
-def test_differential_expression_t_test(data_test_differential_expression, show_figures):
-
+def test_differential_expression_t_test(
+    data_test_differential_expression, show_figures
+):
     test_intensity_df, test_metadata_df = data_test_differential_expression
     test_alpha = 0.05
     test_fc_threshold = 0
@@ -177,7 +178,6 @@ def test_differential_expression_t_test_with_nan(data_test_differential_expressi
     )
     _, test_metadata_df = data_test_differential_expression
 
-
     test_alpha = 0.05
     test_fc_threshold = 0
 
@@ -196,7 +196,9 @@ def test_differential_expression_t_test_with_nan(data_test_differential_expressi
     assert "NaN values" in current_out["messages"][0]["msg"]
 
 
-def test_differential_expression_t_test_with_zero_mean(data_test_differential_expression, show_figures):
+def test_differential_expression_t_test_with_zero_mean(
+    data_test_differential_expression, show_figures
+):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
