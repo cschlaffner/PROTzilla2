@@ -103,12 +103,14 @@ def linear_model(
         X = protein_df[[grouping]]
         X = sm.add_constant(X)
         # Perform linear regression
-        model = sm.OLS(Y,X)
+        model = sm.OLS(Y, X)
         results = model.fit()
 
         p = results.pvalues[grouping]  # Extract p-value for the coefficient of interest
         p_values.append(p)
-        log2_fold_change.append(results.params[grouping])  # Extract the coefficient (fold change)
+        log2_fold_change.append(
+            results.params[grouping]
+        )  # Extract the coefficient (fold change)
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
