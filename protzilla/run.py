@@ -321,7 +321,7 @@ class Run:
         for section, step, method in self.all_steps():
             if section == self.section:
                 return self.step_index - steps_before_this_section
-            steps_before_this_section += 1  # this should not be +1
+            steps_before_this_section += 1
         raise Exception(f"section {self.section} not found")
 
     def all_steps(self):
