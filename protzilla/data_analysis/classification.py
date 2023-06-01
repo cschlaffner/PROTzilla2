@@ -8,65 +8,129 @@ from sklearn.model_selection import (
     LeaveOneOut,
     LeavePOut,
     StratifiedKFold,
+    train_test_split,
+    ParameterGrid,
 )
+from sklearn.preprocessing import LabelEncoder
+
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def perform_grid_search(grid_search_model, model, param_grid: dict, scoring, cv=None):
     if grid_search_model == "Grid search":
-        clf = GridSearchCV(model, param_grid=param_grid, scoring=scoring)
+        clf = GridSearchCV(
+            model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
+        )
     elif grid_search_model == "Randomized search":
-        clf = RandomizedSearchCV(model, param_distributions=param_grid, scoring=scoring)
+        clf = RandomizedSearchCV(
+            model,
+            param_distributions=param_grid,
+            scoring=scoring,
+            cv=cv,
+            error_score="raise",
+        )
     return clf
 
 
 def perform_cross_validation(
-    cross_validation_strategy,
+    cross_validation_estimator,
     n_splits=5,
     n_repeats=10,
-    shuffle=False,
+    shuffle=True,
     random_state=42,
     p=None,
 ):
-    if cross_validation_strategy == "K-Fold":
+    if cross_validation_estimator == "K-Fold":
         return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
-    elif cross_validation_strategy == "Repeated K-Fold":
+    elif cross_validation_estimator == "Repeated K-Fold":
         return RepeatedKFold(
             n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
         )
-    elif cross_validation_strategy == "Stratified K-Fold":
+    elif cross_validation_estimator == "Stratified K-Fold":
         return StratifiedKFold(
             n_splits=n_splits, shuffle=shuffle, random_state=random_state
         )
-    elif cross_validation_strategy == "Leave one out":
+    elif cross_validation_estimator == "Leave one out":
         return LeaveOneOut()
-    elif cross_validation_strategy == "Leave p out":
+    elif cross_validation_estimator == "Leave p out":
         return LeavePOut(p)
 
 
-def perform_classification(
-    validation_strategy, grid_search_method, clf, clf_parameters, scoring, **parameters
+def create_dict_with_lists_as_values(d):
+    return {
+        key: value if isinstance(value, list) else [value] for key, value in d.items()
+    }
+
+
+def perform_train_test_split(
+    input_df, labels_df, test_size=None, random_state=None, shuffle=True, stratify=None
 ):
-    # work withfuntion set_params or create param_grid depending on the case
+    return train_test_split(
+        input_df,
+        labels_df,
+        test_size=test_size,
+        random_state=random_state,
+        shuffle=shuffle,
+        stratify=stratify,
+    )
+
+
+def perform_classification(
+    input_df,
+    labels_df,
+    validation_strategy,
+    grid_search_method,
+    clf,
+    clf_parameters,
+    scoring,
+    cross_validation_estimator=None,
+    test_validate_split=None,
+    **parameters,
+):
+    # work with function set_params or create param_grid depending on the case
     # check returns, what to return clf, scores, already fit and predict here? Take
-    # into account that scores are not always called using score function
-    if grid_search_method == "Manual" and validation_strategy == "Manual":
+    # into account that scores are not always called using score() function
+    if validation_strategy == "Manual" and grid_search_method == "Manual":
         pass
         # call normal estimator function and validate with validation data
-    elif grid_search_method == "Manual" and validation_strategy != "Manual":
-        # call normal estimator function, perform_cross_validation and cross_validation_eval or somethign like that
-        cv = perform_cross_validation(validation_strategy, **parameters)
-        # return cross_val_score()
-    elif grid_search_method != "Manual" and validation_strategy == "Manual":
-        pass
+        X_train, X_val, y_train, y_val = perform_train_test_split(
+            input_df, labels_df, test_size=test_validate_split
+        )
+        model = clf.set_params(**clf_parameters)
+        model.fit(X_train, y_train)
+        score = model.score(X_val, y_val)
+        return model
+    elif validation_strategy == "Manual" and grid_search_method != "Manual":
         # call perform_grid_search using only param_grid
-    elif grid_search_method != "Manual" and validation_strategy != "Manual":
-        pass
+        # cv should be equivalent to [(X_train, X_val, y_train, y_val)]
+        X_train, X_val, y_train, y_val = perform_train_test_split(
+            input_df, labels_df, test_size=test_validate_split
+        )
+        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
+        best_score = 0.0
+        best_params = None
+        for params in ParameterGrid(clf_parameters):
+            # Create the model with the current parameter combination
+            model = clf.set_params(**params)
+            model.fit(X_train, y_train)
+
+            # Check if this parameter combination is the best so far
+            score = model.score(X_val, y_val)
+            if score > best_score:
+                best_score = score
+                best_params = params
+                best_model = model
+        return best_model
+    elif validation_strategy != "Manual":
         # call perform_grid_search with parameter cv set to theresult of perform_cross_validation
-        cv = perform_cross_validation(validation_strategy, **parameters)
-        return perform_grid_search(
+        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
+        cv = perform_cross_validation(cross_validation_estimator, **parameters)
+        clf_fit = perform_grid_search(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
+        clf_fit.fit(input_df, labels_df)
+        model_evaluation_df = pd.DataFrame(clf_fit.cv_results_)
+        return clf_fit
 
 
 def random_forest(
@@ -82,11 +146,22 @@ def random_forest(
     bootstrap=True,
     random_state=42,
     model_selection: str = "Grid search",
-    validation_strategy: str = "Kfold",
+    validation_strategy: str = "Cross Validation",
     **kwargs,
 ):
+    # TODO select right column from labels_df ot try to predict
+    # add to shuffle!
+    # add user is able to choose group from metadata
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    samples_input_df = input_df_wide.reset_index(names="Sample")["Sample"]
+    y = pd.merge(samples_input_df, labels_df, on="Sample", how="inner")
+    y.sort_values(by="Sample", inplace=True)
+    y = y["Group"]
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
     clf = RandomForestClassifier()
+
     clf_parameters = dict(
         n_estimators=n_estimators,
         criterion=criterion,
@@ -98,8 +173,14 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
-    scoring = "a score"
-    clf = perform_classification(
-        validation_strategy, model_selection, clf, clf_parameters, scoring, **kwargs
+    scoring = "f1"
+    perform_classification(
+        input_df_wide,
+        y_encoded,
+        validation_strategy,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        **kwargs,
     )
-    clf.fit(input_df_wide)
