@@ -94,7 +94,72 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     logging.warning("peptide_matches")
     logging.warning(peptide_matches)
 
-    return dict(graph_path=graph_path, messages=[out_dict["messages"]])
+    # P82909: {'DNPKPNVSEALR': [29], 'KLVSQEEMEFIQR': [86], 'VVQVVKPHTPLIR': [11]}
+
+    peptide_to_node = {}
+    for peptide, indices in peptide_matches.items():
+        for start_index in indices:
+            for i in range(start_index, start_index + len(peptide)):
+                # lookup in which of the possible nodes the aa is present -> adopt graph index
+
+                if peptide in peptide_to_node:
+                    peptide_to_node[peptide].append((graph_index[i], i))
+                else:
+                    peptide_to_node[peptide] = [(graph_index[i], i)]
+
+    node_start_end = {}
+    for peptide, values in peptide_to_node.items():
+        for value in values:
+            for start_pos in peptide_matches[peptide]:
+                # TODO: iterate over all possible start positions for all values?
+                pos_aa = value[1]
+
+                for node, aa in value[0]:
+                    pos_aa - start_pos
+
+                    # TODO: what happens when ref_seq < longest path?
+                    aa_pos_in_node = pos_aa
+
+                    if node in node_start_end:
+                        if peptide not in node_start_end[node]:
+                            node_start_end[node][peptide] = {
+                                "start": (aa_pos_in_node, aa),
+                                "end": (aa_pos_in_node, aa),
+                            }
+                            continue
+
+                        if aa_pos_in_node < node_start_end[node][peptide]["start"][0]:
+                            node_start_end[node][peptide]["start"] = (
+                                aa_pos_in_node,
+                                aa,
+                            )
+
+                        elif aa_pos_in_node > node_start_end[node][peptide]["end"][0]:
+                            node_start_end[node][peptide]["end"] = (aa_pos_in_node, aa)
+
+                        elif (
+                            aa_pos_in_node == node_start_end[node][peptide]["start"][0]
+                        ):
+                            raise ValueError(
+                                "idt this should happen (maybe when theres two possible\
+                                 nodes?) -> think! debug!"
+                            )
+
+                    else:
+                        node_start_end[node] = {
+                            peptide: {
+                                "start": (aa_pos_in_node, aa),
+                                "end": (aa_pos_in_node, aa),
+                            }
+                        }
+
+    print("node_start_end")
+    print(node_start_end)
+
+    return dict(
+        graph_path=graph_path,
+        peptide_matches=peptide_matches,  # , messages=[out_dict["messages"]]
+    )
 
 
 def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
