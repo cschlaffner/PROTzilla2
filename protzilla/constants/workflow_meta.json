@@ -1167,6 +1167,52 @@
           }
         }
       }
+    },
+    "plot": {
+      "go_enrichment_bar_plot": {
+        "name": "Bar plot for GO enrichment analysis",
+        "description": "Creates a bar plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 10
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "colors": {
+            "name": "Colors for the plot (optional)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "matplotlib_colors",
+            "default": null
+          }
+        }
+      }
     }
   }
 }
