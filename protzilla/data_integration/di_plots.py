@@ -1,5 +1,6 @@
-import io
 import base64
+import io
+
 import gseapy as gp
 import numpy as np
 from django.contrib import messages

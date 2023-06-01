@@ -1,8 +1,8 @@
+import logging
 import sys
 import tempfile
 import traceback
 import zipfile
-import logging
 
 import pandas as pd
 from django.contrib import messages
