@@ -149,9 +149,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                         elif (
                             aa_pos_in_node == node_start_end[node][peptide]["start"][0]
                         ):
-                            raise ValueError(
-                                "idt this should happen (maybe when theres two possible\
-                                 nodes?) -> think! debug!"
+                            logging.warning(
+                                f"start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
                             )
 
                     else:
