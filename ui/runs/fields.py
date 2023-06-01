@@ -168,7 +168,9 @@ def make_displayed_history(run):
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(make_parameter_input(key, param_dict, parameters, disabled=True))
+                fields.append(
+                    make_parameter_input(key, param_dict, parameters, disabled=True)
+                )
 
         plots = []
         for plot in history_step.plots:
