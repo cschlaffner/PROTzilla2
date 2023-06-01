@@ -849,20 +849,18 @@
             "type": "named_output",
             "default": [null, null]
           },
-          "proteins_of_interest_wrapper": {
+          "proteins_of_interest_input": {
             "name": "Proteins of Interest",
-            "type": "named_output_with_fields",
-            "fill_dynamic": ["proteins_of_interest"],
-            "default": [null, null, null],
-            "fields": {
-              "proteins_of_interest": {
-                "type": "categorical",
-                "fill": "protein_ids",
-                "categories": [],
-                "default": null,
-                "multiple": true
-              }
-            }
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["proteins_of_interest"]
+          },
+          "proteins_of_interest": {
+            "type": "categorical",
+            "fill": "protein_ids",
+            "categories": [],
+            "default": null,
+            "multiple": true
           }
         }
       },

@@ -1,24 +1,18 @@
 import copy
-import restring
+
 import gseapy as gp
+import restring
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):
-    if (
-        param_dict["type"] == "named_output"
-        or param_dict["type"] == "named_output_with_fields"
-    ):
+    if param_dict["type"] == "named_output":
         param_dict["steps"] = [name for name in run.history.step_names if name]
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
-        if (
-            "default" in param_dict
-            and param_dict["default"]
-            and param_dict["default"][0] in param_dict["steps"]
-        ):
+        if param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
             selected = param_dict["default"][0]
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None

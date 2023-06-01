@@ -43,14 +43,6 @@ def make_parameter_input(key, param_dict, disabled):
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
-    elif param_dict["type"] == "named_output_with_fields":
-        template = "runs/field_named_with_fields.html"
-        additional_fields = []
-        for field_key, field_dict in param_dict["fields"].items():
-            additional_fields.append(
-                make_parameter_input(field_key, field_dict, disabled)
-            )
-        param_dict["additional_fields"] = additional_fields
     elif param_dict["type"] == "empty":
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
@@ -132,10 +124,6 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
-                if key.endswith("_wrapper"):
-                    key = key[:-8]
-                if key == "proteins_of_interest" and not key in history_step.parameters:
-                    history_step.parameters[key] = ["", ""]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
