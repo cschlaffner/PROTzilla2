@@ -110,26 +110,33 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = []
 
-    def update_workflow_config(self, params, location=None):
+    def update_workflow_config(self, params, location=None, update_params=True):
         if not location:
             (section, step, method) = self.current_workflow_location()
         else:
             (section, step, method) = location
-
         index = self.step_index_in_current_section()
-        parameters_no_file_path = {
-            k: params[k]
-            for k in params
-            if get_parameter_type(self.workflow_meta, section, step, method, k)
-            != "file"
-        }
-        self.workflow_config["sections"][section]["steps"][index][
-            "parameters"
-        ] = parameters_no_file_path
+
+        if update_params:
+            parameters_no_file_path = {
+                k: params[k]
+                for k in params
+                if get_parameter_type(self.workflow_meta, section, step, method, k)
+                != "file"
+            }
+            self.workflow_config["sections"][section]["steps"][index][
+                "parameters"
+            ] = parameters_no_file_path
+
+        self.workflow_config["sections"][section]["steps"][index]["method"] = method
         self.write_local_workflow()
 
     def perform_current_calculation_step(self, parameters):
         self.perform_calculation_from_location(*self.current_run_location(), parameters)
+
+    def perform_current_calculation_step_and_next(self, parameters, name=None):
+        self.perform_calculation_from_location(*self.current_run_location(), parameters)
+        self.next_step(name=name)
 
     def perform_calculation_from_location(self, section, step, method, parameters):
         location = (section, step, method)
@@ -312,13 +319,12 @@ class Run:
             return "", "", ""
 
     def step_index_in_current_section(self):
-        index = 0
+        steps_before_this_section = 0
         for section, step, method in self.all_steps():
             if section == self.section:
-                if step == self.step:
-                    return index
-                index += 1
-        return index
+                return self.step_index - steps_before_this_section
+            steps_before_this_section += 1
+        raise Exception(f"section {self.section} not found")
 
     def all_steps(self):
         steps = []
