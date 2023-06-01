@@ -2,18 +2,19 @@ import csv
 import json
 import logging
 import os
-import time
 import shutil
-import pandas as pd
-import numpy as np
-from restring import restring
-import gseapy as gp
-from django.contrib import messages
+import time
 
-from .database_query import biomart_query
+import gseapy as gp
+import numpy as np
+import pandas as pd
+from django.contrib import messages
+from restring import restring
+
+from protzilla.utilities.random import random_string
 
 from ..constants.paths import RUNS_PATH
-from protzilla.utilities.random import random_string
+from .database_query import biomart_query
 
 last_call_time = None
 MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds

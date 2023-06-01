@@ -1,5 +1,6 @@
 # Import differential_expression_anova's methods to remove redundant function definition
 from .differential_expression_anova import anova
+from .differential_expression_linear_model import linear_model
 from .differential_expression_t_test import t_test
 
 
@@ -7,3 +8,4 @@ from .differential_expression_t_test import t_test
 def unused():
     anova(**{})
     t_test(**{})
+    linear_model(**{})
