@@ -63,7 +63,7 @@ def diff_expr_test_data():
 
 
 def test_differential_expression_linear_model(
-        diff_expr_test_data,
+    diff_expr_test_data,
     show_figures,
 ):
     test_intensity_df, test_metadata_df = diff_expr_test_data
@@ -108,9 +108,7 @@ def test_differential_expression_linear_model(
     assert current_out["corrected_alpha"] == test_alpha
 
 
-def test_differential_expression_t_test(
-        diff_expr_test_data, show_figures
-):
+def test_differential_expression_t_test(diff_expr_test_data, show_figures):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
     test_fc_threshold = 0.9
@@ -271,7 +269,7 @@ def test_differential_expression_t_test_with_nan(diff_expr_test_data):
 
 
 def test_differential_expression_t_test_with_zero_mean(
-        diff_expr_test_data, show_figures
+    diff_expr_test_data, show_figures
 ):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],

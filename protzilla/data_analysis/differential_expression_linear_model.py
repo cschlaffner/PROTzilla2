@@ -118,8 +118,10 @@ def linear_model(
     ]
     de_proteins = [
         protein
-        for i, protein in enumerate(remaining_proteins)
-        if p_values_mask[i] and fold_change_mask[i]
+        for protein, has_p, has_fc in zip(
+            remaining_proteins, p_values_mask, fold_change_mask
+        )
+        if has_p and has_fc
     ]
     de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
 
