@@ -1,3 +1,4 @@
+import logging
 import sys
 import tempfile
 import traceback
@@ -14,6 +15,7 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
+from protzilla.run_helper import get_parameters
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
@@ -23,6 +25,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
     make_sidebar,
+    make_dynamic_fields,
 )
 from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_from_post
@@ -49,6 +52,21 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+
+    current_plots = []
+    for plot in run.plots:
+        if isinstance(plot, bytes):
+            # Base64 encoded image
+            current_plots.append(
+                '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    plot.decode("utf-8")
+                )
+            )
+        elif isinstance(plot, dict):
+            current_plots.append(None)
+        else:
+            current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
+
     return render(
         request,
         "runs/details.html",
@@ -62,11 +80,7 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
-            current_plots=[
-                plot.to_html(include_plotlyjs=False, full_html=False)
-                for plot in run.plots
-                if not isinstance(plot, dict)
-            ],
+            current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
@@ -105,6 +119,37 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
+        ),
+        safe=False,
+    )
+
+
+def change_dynamic_fields(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    dynamic_trigger_value = request.POST["selected_input"]
+    dynamic_trigger_key = request.POST["key"]
+    all_parameters_dict = get_parameters(run, run.section, run.step, run.method)
+    dynamic_trigger_param_dict = all_parameters_dict[dynamic_trigger_key]
+    dynamic_fields = make_dynamic_fields(
+        dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
+    )
+    parameters = render_to_string(
+        "runs/fields.html",
+        context=dict(fields=dynamic_fields),
+    )
+    return JsonResponse(
+        dict(
+            parameters=parameters,
         ),
         safe=False,
     )
@@ -160,8 +205,30 @@ def change_field(request, run_name):
                 print(
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
+        elif param_dict["fill"] == "enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
 
-        fields[key] = make_parameter_input(key, param_dict, disabled=False)
+            # TODO: this is a bit hacky, but it works for now
+            # should be refactored when we rework the named input handling
+            # KeyError is expected here because named_output trigger change_field
+            # twice to make sure that the categories are updated after the named_output has updated
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
+
+            if (
+                not isinstance(protein_itr, pd.DataFrame)
+                or not "Gene_set" in protein_itr.columns
+            ):
+                param_dict["categories"] = []
+            else:
+                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
+
+        fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
