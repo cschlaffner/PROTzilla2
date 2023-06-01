@@ -20,15 +20,15 @@ from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
+    make_dynamic_fields,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
     make_plot_fields,
     make_sidebar,
-    make_dynamic_fields,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_for_plot, parameters_from_post
+from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
 
@@ -180,18 +180,20 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        param_dict = (
-            parameters[post_id]["fields"][key]
-            if "fields" in parameters[post_id]
-            else parameters[key]
-        )
+        param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
-            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            # KeyError is expected when named_output triggers the fill
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
             if isinstance(protein_itr, pd.DataFrame):
                 param_dict["categories"] = protein_itr["Protein ID"].unique()
             elif isinstance(protein_itr, pd.Series):
@@ -330,20 +332,11 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-
-    parameters = {}
-    post_data = dict(request.POST)
-
-    if "csrfmiddlewaretoken" in post_data:
-        del post_data["csrfmiddlewaretoken"]
+    parameters = parameters_from_post(request.POST)
 
     if run.step == "plot":
-        del post_data["chosen_method"]
+        del parameters["chosen_method"]
 
-    param_dict = run.workflow_meta[section][step][method]["parameters"]
-    post_data, parameters = parameters_for_plot(post_data, param_dict)
-
-    parameters.update(parameters_from_post(post_data))
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
