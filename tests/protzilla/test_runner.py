@@ -229,7 +229,7 @@ def test_integration_all_methods_runner(workflow_meta, metadata_path, ms_data_pa
             for method, _ in step.items():
                 existing_methods.add((step_name, method))
 
-    # assert existing_methods == tested_methods
+    # assert existing_methods == tested_methods, "please add new methods to a workflow in test_workflows or add a new workflow"
 
     for workflow in test_workflows:
         name = tests_folder_name + "/test_runner_integration" + random_string()
