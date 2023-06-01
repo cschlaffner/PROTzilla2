@@ -177,29 +177,6 @@
         },
         {
           "name": "plot",
-          "method": "volcano",
-          "parameters": {
-            "proteins_of_interest": [],
-            "p_values": [
-              "ttest",
-              "corrected_p_values_df"
-            ],
-            "log2_fc": [
-              "ttest",
-              "log2_fold_change_df"
-            ],
-            "fc_threshold": [
-              "ttest",
-              "fc_threshold"
-            ],
-            "alpha": [
-              "ttest",
-              "corrected_alpha"
-            ]
-          }
-        },
-        {
-          "name": "plot",
           "method": "clustergram",
           "parameters": {
             "input_df": [
