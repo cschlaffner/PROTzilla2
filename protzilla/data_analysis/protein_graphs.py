@@ -68,11 +68,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     k = 5
     allowed_mismatches = 2
 
-    # this v didnt work before cause of the REV__ proteins
-    # Should work now -> Try out!
-
-    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
-
     protein_graph = nx.read_graphml(graph_path)
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
 
@@ -85,8 +80,10 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     print(ref_seq)
     print(seq_len)
 
+    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     peptides = df["Sequence"].tolist()
     peptide_matches = {}
+    mismatched_peptides = []
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
@@ -102,6 +99,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
             if mismatch_counter <= allowed_mismatches:
                 matched_starts.append(start_pos)
+            else:
+                mismatched_peptides.append(peptide)
         peptide_matches[peptide] = matched_starts
     logging.warning("peptide_matches")
     logging.warning(peptide_matches)
@@ -127,8 +126,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 pos_aa = value[1]
 
                 for node, aa in value[0]:
-                    pos_aa - start_pos
-
                     # TODO: what happens when ref_seq < longest path?
                     aa_pos_in_node = pos_aa
 
