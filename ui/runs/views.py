@@ -13,8 +13,6 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
-from protzilla.utilities.memory import get_memory_usage
-
 from protzilla.run import Run
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
@@ -92,6 +90,9 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
+    section, step, _ = run.current_workflow_location()
+    run.update_workflow_config([], update_params=False)
+
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
