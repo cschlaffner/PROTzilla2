@@ -20,12 +20,12 @@ from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
+    make_dynamic_fields,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
     make_plot_fields,
     make_sidebar,
-    make_dynamic_fields,
 )
 from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_from_post
