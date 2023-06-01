@@ -3,6 +3,7 @@ import io
 
 import gseapy as gp
 import numpy as np
+import pandas as pd
 from django.contrib import messages
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE

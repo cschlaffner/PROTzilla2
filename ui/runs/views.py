@@ -186,10 +186,7 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        if len(selected) == 1:
-            param_dict = parameters[key]
-        else:
-            param_dict = parameters[post_id]["fields"][key]
+        param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
