@@ -6,6 +6,7 @@ import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities.random import random_string
+from protzilla.workflow_helper import get_steps_of_workflow
 
 sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")
@@ -30,7 +31,7 @@ def peptide_path():
 
 
 def test_runner_imports(
-    monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
+        monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
 ):
     importing_args = [
         "only_import",  # expects max-quant import, metadata import
@@ -71,7 +72,7 @@ def test_runner_imports(
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
-    monkeypatch, tests_folder_name, ms_data_path
+        monkeypatch, tests_folder_name, ms_data_path
 ):
     no_metadata_args = [
         "only_import",
@@ -169,7 +170,7 @@ def test_serialize_graphs():
 
 def test_serialize_workflow_graphs():
     with open(
-        PROJECT_PATH / "tests" / "test_workflows" / "example_workflow.json", "r"
+            PROJECT_PATH / "tests" / "test_workflows" / "example_workflow.json", "r"
     ) as f:
         workflow_config = json.load(f)
 
@@ -204,6 +205,48 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
         }
     )
     runner.compute_workflow()
+
+
+def test_integration_all_methods_runner(workflow_meta, metadata_path, ms_data_path, tests_folder_name):
+    workflow1, workflow2 = None, None
+
+    with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods1.json", "r") as f:
+        workflow1 = json.load(f)
+    with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods2.json", "r") as f:
+        workflow2 = json.load(f)
+
+    test_workflows =[workflow1, workflow2]
+    # test if all methods are covered in workflow1, workflow2
+    tested_methods = set()
+    existing_methods = set()
+
+    for workflow in test_workflows:
+        for section in get_steps_of_workflow(workflow):
+            for step in section["steps"]:
+                tested_methods.add((step["name"], step["method"]))
+    for _, section in workflow_meta.items():
+        for step_name, step in section.items():
+            for method, _ in step.items():
+                existing_methods.add((step_name, method))
+
+    # assert existing_methods == tested_methods
+
+    for workflow in test_workflows:
+        name = tests_folder_name + "/test_runner_integration" + random_string()
+        runner = Runner(
+            **{
+                "workflow": "standard",
+                "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
+                "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
+                "peptides_path": None,
+                "run_name": f"{name}",
+                "df_mode": "disk",
+                "all_plots": False,
+                "verbose": False,
+            }
+        )
+        runner.run.workflow_config = workflow
+        runner.compute_workflow()
 
 
 def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_name):
