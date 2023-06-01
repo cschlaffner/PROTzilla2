@@ -9,9 +9,9 @@ from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 def go_enrichment_bar_plot(
     input_df,
-    categories,
     top_terms,
     cutoff,
+    categories=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
 ):
@@ -41,6 +41,9 @@ def go_enrichment_bar_plot(
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not "Term" in input_df.columns:
+        msg = "Please choose an enrichment result dataframe to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     if not isinstance(categories, list):
         categories = [categories]
@@ -65,9 +68,6 @@ def go_enrichment_bar_plot(
         restring_input = True
         input_df = input_df.rename(columns={"term": "Term"})
         fdr_column = input_df.columns[2]
-    elif not "Term" in input_df.columns:
-        msg = "Please choose an enrichment result dataframe to plot."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(categories)]
