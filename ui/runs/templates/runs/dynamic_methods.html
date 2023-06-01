@@ -6,7 +6,7 @@
 
     function update_for_protein_graph(){
         console.log($('#chosen_method'))
-        if ($('#chosen_method').val() === 'variation_graph'){
+        if ($('#chosen_method').val() === 'isoform_graph'){
             const form = $('#plot_form');
             form.attr('target', '_blank');
             form.attr('action', "{% url 'runs:protein_plot' run_name %}")
