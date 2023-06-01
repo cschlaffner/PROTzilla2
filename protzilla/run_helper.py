@@ -1,7 +1,8 @@
 import copy
 
 import gseapy as gp
-import restring
+from restring import restring
+import matplotlib.colors as mcolors
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -38,6 +39,8 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = restring.settings.file_types
         elif param_dict["fill"] == "dbs_gseapy":
             param_dict["categories"] = gp.get_library_name()
+        elif param_dict["fill"] == "matplotlib_colors":
+            param_dict["categories"] = mcolors.CSS4_COLORS
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"

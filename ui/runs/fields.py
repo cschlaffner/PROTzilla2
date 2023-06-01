@@ -160,18 +160,30 @@ def make_displayed_history(run):
                     key = key[:-8]
                 if key == "proteins_of_interest" and not key in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
-                param_dict["default"] = history_step.parameters[key]
+                param_dict["default"] = (
+                    history_step.parameters[key]
+                    if key in history_step.parameters
+                    else None
+                )
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(
-                    make_parameter_input(key, param_dict, parameters, disabled=True)
+                fields.append(make_parameter_input(key, param_dict, parameters, disabled=True))
+
+        plots = []
+        for plot in history_step.plots:
+            if isinstance(plot, bytes):
+                # Base64 encoded image
+                plots.append(
+                    '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                        plot.decode("utf-8")
+                    )
                 )
-        plots = [
-            plot.to_html(include_plotlyjs=False, full_html=False)
-            for plot in history_step.plots
-            if not isinstance(plot, dict)
-        ]
+            elif isinstance(plot, dict):
+                plots.append(None)
+            else:
+                plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
+
         displayed_history.append(
             dict(
                 display_name=name,

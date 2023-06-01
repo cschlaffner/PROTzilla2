@@ -2,6 +2,7 @@ import sys
 import tempfile
 import traceback
 import zipfile
+import logging
 
 import pandas as pd
 from django.contrib import messages
@@ -51,6 +52,21 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+
+    current_plots = []
+    for plot in run.plots:
+        if isinstance(plot, bytes):
+            # Base64 encoded image
+            current_plots.append(
+                '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    plot.decode("utf-8")
+                )
+            )
+        elif isinstance(plot, dict):
+            current_plots.append(None)
+        else:
+            current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
+
     return render(
         request,
         "runs/details.html",
@@ -64,11 +80,7 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
-            current_plots=[
-                plot.to_html(include_plotlyjs=False, full_html=False)
-                for plot in run.plots
-                if not isinstance(plot, dict)
-            ],
+            current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
@@ -168,10 +180,11 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        if len(selected) == 1:
-            param_dict = parameters[key]
-        else:
-            param_dict = parameters[post_id]["fields"][key]
+        param_dict = (
+            parameters[post_id]["fields"][key]
+            if "fields" in parameters[post_id]
+            else parameters[key]
+        )
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
@@ -190,6 +203,28 @@ def change_field(request, run_name):
                 print(
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
+        elif param_dict["fill"] == "enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
+
+            # TODO: this is a bit hacky, but it works for now
+            # should be refactored when we rework the named input handling
+            # KeyError is expected here because named_output trigger change_field
+            # twice to make sure that the categories are updated after the named_output has updated
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
+
+            if (
+                not isinstance(protein_itr, pd.DataFrame)
+                or not "Gene_set" in protein_itr.columns
+            ):
+                param_dict["categories"] = []
+            else:
+                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
 
         fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
