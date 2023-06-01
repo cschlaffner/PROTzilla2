@@ -47,31 +47,43 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     else:
         out_dict = dict(
             graph_path=f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml",
-            msg=[dict(level=messages.INFO, msg="Graph already exists")],
+            messages=[dict(level=messages.INFO, msg="Graph already exists")],
         )
+
+    if protein_id not in peptide_df["Protein ID"].tolist():
+        return dict(
+            graph_path=out_dict["graph_path"],
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg=f"Protein {protein_id} cannot be found in the peptide data",
+                )
+            ],
+        )
+
     if out_dict["graph_path"] is None:
         return out_dict
-
     graph_path = out_dict["graph_path"]
 
     k = 5
     allowed_mismatches = 2
 
-    # df = peptide_df.loc[peptide_df['Protein ID'] in protein_id]
-    print(peptide_df)
+    # this v didnt work before cause of the REV__ proteins
+    # Should work now -> Try out!
 
-    # Proteine aus df schmeiße nach Motto REV__Q9UL68-2
-    peptide_df.to_csv("/Users/anton/Desktop/peptides.csv")
-    print(peptide_df["Protein ID"])
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
 
     protein_graph = nx.read_graphml(graph_path)
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
 
     # n0 is always the __start__ node in ProtGraph
-    _create_graph_index(protein_graph, "n0")
+    graph_index = _create_graph_index(protein_graph, "n0")
+    print(graph_index)
 
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
+    print(ref_index)
+    print(ref_seq)
+    print(seq_len)
 
     peptides = df["Sequence"].tolist()
     peptide_matches = {}
