@@ -4,6 +4,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
+from ..data_integration import enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -44,6 +45,11 @@ method_map = {
     ): filter_proteins.by_low_frequency,
     (
         "data_preprocessing",
+        "filter_proteins",
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing,
+    (
+        "data_preprocessing",
         "filter_samples",
         "protein_intensity_sum_filter",
     ): filter_samples.by_protein_intensity_sum,
@@ -52,6 +58,11 @@ method_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing,
     (
         "data_preprocessing",
         "outlier_detection",
@@ -147,6 +158,21 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_STRING",
+    ): enrichment_analysis.go_analysis_with_STRING,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_enrichr",
+    ): enrichment_analysis.go_analysis_with_enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_offline",
+    ): enrichment_analysis.go_analysis_offline,
 }
 
 # reversed mapping of method callable and location
@@ -165,6 +191,11 @@ plot_map = {
     ): filter_proteins.by_low_frequency_plot,
     (
         "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    ): filter_proteins.by_samples_missing_plot,
+    (
+        "data_preprocessing",
         "filter_samples",
         "protein_intensity_sum_filter",
     ): filter_samples.by_protein_intensity_sum_plot,
@@ -173,6 +204,11 @@ plot_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing_plot,
     (
         "data_preprocessing",
         "normalisation",
