@@ -133,9 +133,17 @@ def test_get_workflow_default_param_value(example_workflow):
         "median",
         "output_name",
     )
+    output_name_t_test = get_workflow_default_param_value(
+        example_workflow,
+        "data_analysis",
+        "differential_expression",
+        "t_test",
+        "output_name",
+    )
 
     assert threshold_value == 0.2
     assert output_name == "preprocessed-data"
+    assert output_name_t_test == None
 
 
 def test_get_workflow_default_param_value_nonexistent(example_workflow_short):

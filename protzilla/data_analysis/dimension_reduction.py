@@ -166,3 +166,8 @@ def umap(
             embedded_data=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
+
+
+def method_name(*args, **kwargs):
+    print("hurray")
+    return dict()

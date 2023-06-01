@@ -21,22 +21,6 @@ def parameters_from_post(post):
     return parameters
 
 
-def parameters_for_plot(post_data, param_dict):
-    post_copy = post_data.copy()
-    parameters = {}
-    for param in post_data:
-        if "wrapper" in param:
-            del post_copy[param]
-        elif (
-            f"{param}_wrapper" in param_dict
-            and "fields" in param_dict[f"{param}_wrapper"]
-            and param_dict[f"{param}_wrapper"]["fields"][param].get("multiple", False)
-        ):
-            del post_copy[param]
-            parameters[param] = post_data[param]
-    return post_copy, parameters
-
-
 def convert_str_if_possible(s):
     try:
         f = float(s)

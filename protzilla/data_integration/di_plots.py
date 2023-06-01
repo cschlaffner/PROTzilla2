@@ -3,7 +3,6 @@ import io
 
 import gseapy as gp
 import numpy as np
-import pandas as pd
 from django.contrib import messages
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
@@ -11,9 +10,9 @@ from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 def go_enrichment_bar_plot(
     input_df,
-    categories,
     top_terms,
     cutoff,
+    categories=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
 ):
@@ -44,8 +43,32 @@ def go_enrichment_bar_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
+    # This method can be used for both restring and gseapy results
+    # restring results are different from the expected gseapy results
+    # and need to be converted.
+    # This is done by renaming the columns accordingly and adding missing
+    # columns with placeholder values (since they are not used in the plot).
+    # Example files can be found in the tests/test_data/enrichment_data folder.
+    restring_input = False
+    if "score" in input_df.columns and "ID" in input_df.columns:
+        # df is a restring summary file
+        restring_input = True
+        input_df = input_df.rename(columns={"ID": "Term"})
+        fdr_column = "score"
+    elif "term" in input_df.columns and "common" in input_df.columns:
+        # df is a restring results file
+        restring_input = True
+        input_df = input_df.rename(columns={"term": "Term"})
+        fdr_column = input_df.columns[2]
+    elif not "Term" in input_df.columns:
+        msg = "Please choose an enrichment result dataframe to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
     if not isinstance(categories, list):
         categories = [categories]
+    if len(categories) == 0:
+        msg = "Please select at least one category to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(categories)]
@@ -53,20 +76,9 @@ def go_enrichment_bar_plot(
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
-    restring_input = False
-    if "score" in df.columns and "ID" in df.columns:
-        # df is a restring summary file
-        restring_input = True
-        df = df.rename(columns={"ID": "Term"})
-        fdr_column = "score"
-    elif "term" in df.columns and "common" in df.columns:
-        # df is a restring results file
-        restring_input = True
-        df = df.rename(columns={"term": "Term"})
-        fdr_column = df.columns[2]
-
     if restring_input:
         # manual cutoff because gseapy does not support cutoffs for restring files
+        # and user expects the supplied cutoff to be applied
         df = df[df[fdr_column] <= cutoff]
         if len(df) == 0:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
@@ -74,9 +86,9 @@ def go_enrichment_bar_plot(
 
         column = "-log10(FDR)"
         df[column] = -1 * np.log10(df[fdr_column])
-        # prevent cutoff being applied again
-        cutoff = df[column].max()
         df["Overlap"] = "0/0"
+        # prevent cutoff from being applied again by barplot method
+        cutoff = df[column].max()
     else:
         column = "Adjusted P-value"
 

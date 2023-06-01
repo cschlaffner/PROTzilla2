@@ -140,6 +140,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
@@ -153,6 +158,11 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "method_name",
+    ): dimension_reduction.method_name,
     (
         "data_integration",
         "enrichment_analysis",

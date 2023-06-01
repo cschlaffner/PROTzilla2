@@ -1,17 +1,18 @@
-import time
 import os
 import shutil
-import pytest
+import time
 from unittest.mock import patch
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
-    go_analysis_with_STRING,
     get_functional_enrichment_with_delay,
-    go_analysis_with_enrichr,
     go_analysis_offline,
+    go_analysis_with_enrichr,
+    go_analysis_with_STRING,
     merge_restring_dfs,
 )
 

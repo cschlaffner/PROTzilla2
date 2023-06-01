@@ -172,7 +172,8 @@
             ],
             "log_base": 2,
             "grouping": "Group"
-          }
+          },
+          "output_name": "ttest"
         },
         {
           "name": "plot",

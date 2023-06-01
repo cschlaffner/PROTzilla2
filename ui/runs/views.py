@@ -2,7 +2,6 @@ import sys
 import tempfile
 import traceback
 import zipfile
-import logging
 
 import pandas as pd
 from django.contrib import messages
@@ -14,13 +13,13 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
-from protzilla.utilities.memory import get_memory_usage
-
 from protzilla.run import Run
+from protzilla.run_helper import get_parameters
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
+    make_dynamic_fields,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
@@ -28,7 +27,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_for_plot, parameters_from_post
+from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
 
@@ -111,6 +110,9 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
+    section, step, _ = run.current_workflow_location()
+    run.update_workflow_config([], update_params=False)
+
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
@@ -123,6 +125,37 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
+        ),
+        safe=False,
+    )
+
+
+def change_dynamic_fields(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    dynamic_trigger_value = request.POST["selected_input"]
+    dynamic_trigger_key = request.POST["key"]
+    all_parameters_dict = get_parameters(run, run.section, run.step, run.method)
+    dynamic_trigger_param_dict = all_parameters_dict[dynamic_trigger_key]
+    dynamic_fields = make_dynamic_fields(
+        dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
+    )
+    parameters = render_to_string(
+        "runs/fields.html",
+        context=dict(fields=dynamic_fields),
+    )
+    return JsonResponse(
+        dict(
+            parameters=parameters,
         ),
         safe=False,
     )
@@ -153,18 +186,23 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        param_dict = (
-            parameters[post_id]["fields"][key]
-            if "fields" in parameters[post_id]
-            else parameters[key]
-        )
+        if len(selected) == 1:
+            param_dict = parameters[key]
+        else:
+            param_dict = parameters[post_id]["fields"][key]
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
-            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            # KeyError is expected when named_output triggers the fill
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
             if isinstance(protein_itr, pd.DataFrame):
                 param_dict["categories"] = protein_itr["Protein ID"].unique()
             elif isinstance(protein_itr, pd.Series):
@@ -176,21 +214,8 @@ def change_field(request, run_name):
                 print(
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
-        elif param_dict["fill"] == "enrichment_categories":
-            named_output = selected[0]
-            output_item = selected[1]
-            protein_itr = run.history.output_of_named_step(named_output, output_item)
-            if (
-                not isinstance(protein_itr, pd.DataFrame)
-                or not "Gene_set" in protein_itr.columns
-            ):
-                logging.warning(
-                    f"Warning: expected protein_itr to be an enrichment DataFrame but got {type(protein_itr)}. Proceeding with empty list."
-                )
-            else:
-                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
 
-        fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
@@ -294,20 +319,11 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-
-    parameters = {}
-    post_data = dict(request.POST)
-
-    if "csrfmiddlewaretoken" in post_data:
-        del post_data["csrfmiddlewaretoken"]
+    parameters = parameters_from_post(request.POST)
 
     if run.step == "plot":
-        del post_data["chosen_method"]
+        del parameters["chosen_method"]
 
-    param_dict = run.workflow_meta[section][step][method]["parameters"]
-    post_data, parameters = parameters_for_plot(post_data, param_dict)
-
-    parameters.update(parameters_from_post(post_data))
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
