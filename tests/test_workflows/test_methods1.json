@@ -243,6 +243,36 @@
     },
     "data_integration": {
       "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_with_enrichr",
+          "parameters": {
+            "proteins": [
+              "t_test",
+              "de_proteins_df"
+            ]
+          }
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_with_STRING",
+          "parameters": {
+            "proteins": [
+              "t_test",
+              "de_proteins_df"
+            ]
+          }
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_offline",
+          "parameters": {
+            "proteins": [
+              "t_test",
+              "de_proteins_df"
+            ]
+          }
+        }
       ]
     }
   }
