@@ -822,6 +822,69 @@
             "default": null
           }
         }
+      },
+      "linear_model": {
+        "name": "linear model",
+        "description": "A function to fit a linear model using Ordinary Least Squares for each Protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
+        "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "fc_threshold": {
+            "name": "Fold change threshold",
+            "type": "numeric",
+            "min": 0,
+            "default": 0
+          },
+          "grouping": {
+            "name": "Grouping",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
       }
     },
     "plot": {
@@ -849,20 +912,18 @@
             "type": "named_output",
             "default": [null, null]
           },
-          "proteins_of_interest_wrapper": {
+          "proteins_of_interest_input": {
             "name": "Proteins of Interest",
-            "type": "named_output_with_fields",
-            "fill_dynamic": ["proteins_of_interest"],
-            "default": [null, null, null],
-            "fields": {
-              "proteins_of_interest": {
-                "type": "categorical",
-                "fill": "protein_ids",
-                "categories": [],
-                "default": null,
-                "multiple": true
-              }
-            }
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["proteins_of_interest"]
+          },
+          "proteins_of_interest": {
+            "type": "categorical",
+            "fill": "protein_ids",
+            "categories": [],
+            "default": null,
+            "multiple": true
           }
         }
       },
@@ -1074,6 +1135,48 @@
             "default": 42
           }
         }
+      },
+      "method_name": {
+        "name": "a method",
+        "description":"Description of a Method",
+        "parameters": {
+          "param1": {
+            "name": "param1",
+            "type": "categorical_dynamic",
+            "categories": ["euclidean", "manhattan", "long island"],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "euclidean": ["param21"],
+              "manhattan": ["param22"]
+            }
+          },
+          "param21": {
+            "name": "show when euclidian is selected im param1",
+            "type": "categorical_dynamic",
+            "categories": ["category3", "category4"],
+            "default": "category3",
+            "dynamic_parameters": {
+              "category3": ["param3"]
+            },
+            "dynamic": true
+          },
+          "param22": {
+            "name": "show when manhattan is selected in param1",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
+          },
+          "param3": {
+            "name": "show when category3 is selected",
+            "type": "categorical",
+            "categories": ["random category", "another category"],
+            "default": "random category",
+            "dynamic": true
+          }
+        }
       }
     }
   },
@@ -1163,6 +1266,52 @@
           "background": {
             "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
+            "default": null
+          }
+        }
+      }
+    },
+    "plot": {
+      "go_enrichment_bar_plot": {
+        "name": "Bar plot for GO enrichment analysis",
+        "description": "Creates a bar plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 10
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "colors": {
+            "name": "Colors for the plot (optional)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "matplotlib_colors",
             "default": null
           }
         }
