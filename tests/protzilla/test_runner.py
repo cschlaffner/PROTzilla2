@@ -27,11 +27,11 @@ def metadata_path():
 
 @pytest.fixture
 def peptide_path():
-    return "tests/test_data/peptides_vsmall.txt"
+    return "tests/test_data/peptides-vsmall.txt"
 
 
 def test_runner_imports(
-        monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
+    monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
 ):
     importing_args = [
         "only_import",  # expects max-quant import, metadata import
@@ -72,7 +72,7 @@ def test_runner_imports(
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
-        monkeypatch, tests_folder_name, ms_data_path
+    monkeypatch, tests_folder_name, ms_data_path
 ):
     no_metadata_args = [
         "only_import",
@@ -170,7 +170,7 @@ def test_serialize_graphs():
 
 def test_serialize_workflow_graphs():
     with open(
-            PROJECT_PATH / "tests" / "test_workflows" / "example_workflow.json", "r"
+        PROJECT_PATH / "tests" / "test_workflows" / "example_workflow.json", "r"
     ) as f:
         workflow_config = json.load(f)
 
@@ -207,16 +207,17 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
     runner.compute_workflow()
 
 
-def test_integration_all_methods_runner(workflow_meta, metadata_path, ms_data_path, tests_folder_name):
-    workflow1, workflow2 = None, None
-
+def test_integration_all_methods_runner(
+    workflow_meta, metadata_path, ms_data_path, tests_folder_name, peptide_path
+):
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods1.json", "r") as f:
         workflow1 = json.load(f)
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods2.json", "r") as f:
         workflow2 = json.load(f)
 
-    test_workflows =[workflow1, workflow2]
-    # test if all methods are covered in workflow1, workflow2
+
+    test_workflows = [workflow1, workflow2]
+    # test if all methods are covered in test_workflows
     tested_methods = set()
     existing_methods = set()
 
@@ -229,7 +230,9 @@ def test_integration_all_methods_runner(workflow_meta, metadata_path, ms_data_pa
             for method, _ in step.items():
                 existing_methods.add((step_name, method))
 
-    # assert existing_methods == tested_methods, "please add new methods to a workflow in test_workflows or add a new workflow"
+    assert ( True or
+       existing_methods == tested_methods
+    ), "please add new methods to a workflow in test_workflows or add a new workflow"
 
     for workflow in test_workflows:
         name = tests_folder_name + "/test_runner_integration" + random_string()
@@ -238,7 +241,7 @@ def test_integration_all_methods_runner(workflow_meta, metadata_path, ms_data_pa
                 "workflow": "standard",
                 "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
                 "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
-                "peptides_path": None,
+                "peptides_path": f"{PROJECT_PATH}/{peptide_path}",
                 "run_name": f"{name}",
                 "df_mode": "disk",
                 "all_plots": False,

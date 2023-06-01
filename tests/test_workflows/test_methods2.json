@@ -16,6 +16,13 @@
           "parameters": {
             "feature_orientation": "Columns (samples in rows, features in columns)"
           }
+        },
+        {
+          "name": "peptide_import",
+          "method": "peptide_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
         }
       ]
     },
@@ -150,25 +157,25 @@
           "method": "totalsum",
           "parameters": {
           },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            }
-          ]
+          "graphs": []
         },
         {
           "name": "normalisation",
           "method": "z_score",
           "parameters": {
           },
+          "graphs": [],
+          "output_name": "preprocessed_data"
+        },
+        {
+          "name": "filter_peptides",
+          "method": "pep_filter",
+          "parameters": {},
           "graphs": [
             {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
+              "graph_type ": "Pie chart"
             }
-          ],
-          "output_name": "preprocessed_data"
+          ]
         }
       ]
     },

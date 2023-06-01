@@ -116,6 +116,16 @@
           "output_name": "umap"
         },
         {
+          "name": "dimension_reduction",
+          "method": "t_sne",
+          "parameters": {
+            "input_df": [
+              "preprocessed_data",
+              "dataframe"
+            ]
+          }
+        },
+        {
           "name": "plot",
           "method": "scatter_plot",
           "parameters": {
@@ -145,7 +155,6 @@
             "tolerance": 0.0001
           }
         },
-
         {
           "name": "differential_expression",
           "method": "anova",
@@ -187,7 +196,8 @@
             ],
             "log_base": 2,
             "grouping": "Group"
-          }
+          },
+          "output_name": "t_test"
         },
         {
           "name": "differential_expression",
@@ -207,7 +217,6 @@
           },
           "output_name": "linear_model"
         },
-
         {
           "name": "plot",
           "method": "volcano",
