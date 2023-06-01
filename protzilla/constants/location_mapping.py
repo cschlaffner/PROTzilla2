@@ -1,11 +1,10 @@
-from ..data_integration import enrichment_analysis, di_plots
 from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
     plots,
 )
-from ..data_integration import enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -139,6 +138,11 @@ method_map = {
         "differential_expression",
         "t_test",
     ): differential_expression.t_test,
+    (
+        "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
     (
         "data_analysis",
         "clustering",

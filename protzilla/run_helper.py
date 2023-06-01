@@ -1,8 +1,8 @@
 import copy
 
 import gseapy as gp
-from restring import restring
 import matplotlib.colors as mcolors
+from restring import restring
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -12,7 +12,7 @@ def insert_special_params(param_dict, run):
         param_dict["type"] == "named_output"
         or param_dict["type"] == "named_output_with_fields"
     ):
-        param_dict["steps"] = [name for name in run.history.step_names if name]
+        param_dict["steps"] = [name for name in run.history.step_names if name][::-1]
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
