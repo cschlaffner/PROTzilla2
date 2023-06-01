@@ -15,6 +15,7 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
+from protzilla.run_helper import get_parameters
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
@@ -24,6 +25,7 @@ from ui.runs.fields import (
     make_parameter_input,
     make_plot_fields,
     make_sidebar,
+    make_dynamic_fields,
 )
 from ui.runs.utilities.alert import build_trace_alert
 from ui.runs.views_helper import parameters_for_plot, parameters_from_post
@@ -122,6 +124,37 @@ def change_method(request, run_name):
     )
 
 
+def change_dynamic_fields(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    dynamic_trigger_value = request.POST["selected_input"]
+    dynamic_trigger_key = request.POST["key"]
+    all_parameters_dict = get_parameters(run, run.section, run.step, run.method)
+    dynamic_trigger_param_dict = all_parameters_dict[dynamic_trigger_key]
+    dynamic_fields = make_dynamic_fields(
+        dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
+    )
+    parameters = render_to_string(
+        "runs/fields.html",
+        context=dict(fields=dynamic_fields),
+    )
+    return JsonResponse(
+        dict(
+            parameters=parameters,
+        ),
+        safe=False,
+    )
+
+
 def change_field(request, run_name):
     # can this be extracted into a seperate method? (duplicate in change_method, detail)
     # e.g. "try_reactivate_run"
@@ -193,7 +226,7 @@ def change_field(request, run_name):
             else:
                 param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
 
-        fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
     return JsonResponse(fields, safe=False)
 

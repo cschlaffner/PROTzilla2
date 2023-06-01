@@ -1074,6 +1074,48 @@
             "default": 42
           }
         }
+      },
+      "method_name": {
+        "name": "a method",
+        "description":"Description of a Method",
+        "parameters": {
+          "param1": {
+            "name": "param1",
+            "type": "categorical_dynamic",
+            "categories": ["euclidean", "manhattan", "long island"],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "euclidean": ["param21"],
+              "manhattan": ["param22"]
+            }
+          },
+          "param21": {
+            "name": "show when euclidian is selected im param1",
+            "type": "categorical_dynamic",
+            "categories": ["category3", "category4"],
+            "default": "category3",
+            "dynamic_parameters": {
+              "category3": ["param3"]
+            },
+            "dynamic": true
+          },
+          "param22": {
+            "name": "show when manhattan is selected in param1",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
+          },
+          "param3": {
+            "name": "show when category3 is selected",
+            "type": "categorical",
+            "categories": ["random category", "another category"],
+            "default": "random category",
+            "dynamic": true
+          }
+        }
       }
     }
   },
