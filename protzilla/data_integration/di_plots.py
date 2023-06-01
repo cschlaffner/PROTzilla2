@@ -44,12 +44,9 @@ def go_enrichment_bar_plot(
 
     if not isinstance(categories, list):
         categories = [categories]
-
-    # remove all Gene_sets that are not in categories
-    df = input_df[input_df["Gene_set"].isin(categories)]
-
-    if colors == "" or colors is None or len(colors) == 0:
-        colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
+    if len(categories) == 0:
+        msg = "Please select at least one category to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     # This method can be used for both restring and gseapy results
     # restring results are different from the expected gseapy results
@@ -58,16 +55,25 @@ def go_enrichment_bar_plot(
     # columns with placeholder values (since they are not used in the plot).
     # Example files can be found in the tests/test_data/enrichment_data folder.
     restring_input = False
-    if "score" in df.columns and "ID" in df.columns:
+    if "score" in input_df.columns and "ID" in input_df.columns:
         # df is a restring summary file
         restring_input = True
-        df = df.rename(columns={"ID": "Term"})
+        input_df = input_df.rename(columns={"ID": "Term"})
         fdr_column = "score"
-    elif "term" in df.columns and "common" in df.columns:
+    elif "term" in input_df.columns and "common" in input_df.columns:
         # df is a restring results file
         restring_input = True
-        df = df.rename(columns={"term": "Term"})
-        fdr_column = df.columns[2]
+        input_df = input_df.rename(columns={"term": "Term"})
+        fdr_column = input_df.columns[2]
+    elif not "Term" in input_df.columns:
+        msg = "Please choose an enrichment result dataframe to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    # remove all Gene_sets that are not in categories
+    df = input_df[input_df["Gene_set"].isin(categories)]
+
+    if colors == "" or colors is None or len(colors) == 0:
+        colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
     if restring_input:
         # manual cutoff because gseapy does not support cutoffs for restring files
