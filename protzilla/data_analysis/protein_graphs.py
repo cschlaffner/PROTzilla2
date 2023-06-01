@@ -136,7 +136,10 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
             if i >= len(index):
                 for _ in range(len(index), i + 1):
                     index.append([])
-            index[i].append(node)
+            aa_pos_in_node = i - longest_paths[node]
+            index[i].append(
+                (node, protein_graph.nodes[node]["aminoacid"][aa_pos_in_node])
+            )
 
     return index
 
