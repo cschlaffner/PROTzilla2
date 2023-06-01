@@ -161,8 +161,33 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                             }
                         }
 
+
+    was passiert, wenn ein peptid mehrfach pro knoten vorkommt?
+    muss vlt noch in node_start_end berücksichtigt werden
+    -> verschiedene start_pos aus peptide_matching!
+
+
     print("node_start_end")
     print(node_start_end)
+
+    node_mod = {}
+    for node, peptides_dict in node_start_end.items():
+        for peptide, values in peptides_dict.items():
+            if node not in node_mod:
+                node_mod[node] = [(values["start"][0], values["end"][0])]
+            else:
+                node_mod[node].append((values["start"][0], values["end"][0]))
+        node_mod[node] = sorted(node_mod[node], key=lambda x: x[0])
+
+    print("node_mod")
+    print(node_mod)
+
+    for node, positions_list in node_mod.items():
+        for start, end in positions_list:
+            pass
+
+
+
 
     return dict(
         graph_path=graph_path,
