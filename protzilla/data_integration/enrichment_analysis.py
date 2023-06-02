@@ -404,7 +404,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
     :type proteins: list, series or dataframe
     :param protein_sets: list of Enrichr Library name(s) to use as sets for the enrichment
         (e.g. ['KEGG_2016','KEGG_2013'])
-    :type protein_sets_path: list of str
+    :type protein_sets: list of str
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
