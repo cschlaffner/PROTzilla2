@@ -43,82 +43,86 @@ def filter_samples_df():
 
 
 def test_by_proteins_missing(filter_samples_df, show_figures):
-    result_df1, dropouts1 = by_proteins_missing(filter_samples_df, percentage=0.5)
-    result_df2, dropouts2 = by_proteins_missing(filter_samples_df, percentage=0.6)
-    result_df3, dropouts3 = by_proteins_missing(filter_samples_df, percentage=0.65)
+    result_df1, method_output1 = by_proteins_missing(filter_samples_df, percentage=0.5)
+    result_df2, method_output2 = by_proteins_missing(filter_samples_df, percentage=0.6)
+    result_df3, method_output3 = by_proteins_missing(filter_samples_df, percentage=0.65)
 
-    list_samples_excluded_1 = dropouts1["filtered_samples"]
-    list_samples_excluded_2 = dropouts2["filtered_samples"]
-    list_samples_excluded_3 = dropouts3["filtered_samples"]
+    list_samples_excluded_1 = method_output1["filtered_samples"]
+    list_samples_excluded_2 = method_output2["filtered_samples"]
+    list_samples_excluded_3 = method_output3["filtered_samples"]
 
     fig = by_proteins_missing_plot(
-        filter_samples_df, result_df1, dropouts1, "Pie chart"
+        filter_samples_df, result_df1, method_output1, "Pie chart"
     )[0]
     if show_figures:
         fig.show()
 
-    assert [
-        "Sample2",
-    ] == list_samples_excluded_1, f"excluded samples do not match \
+    assert list_samples_excluded_1 == [
+        "Sample2"
+    ], f"excluded samples do not match \
                 Sample2, but are {list_samples_excluded_1}"
 
-    assert [
+    assert list_samples_excluded_2 == [
         "Sample2",
         "Sample3",
-    ] == list_samples_excluded_2, f"excluded samples do not match \
+    ], f"excluded samples do not match \
                 Sample2 and Sample3, but are {list_samples_excluded_2}"
-    assert [
+    assert list_samples_excluded_3 == [
         "Sample2",
         "Sample3",
-    ] == list_samples_excluded_3, f"excluded samples do not match \
-                    Sample2 and Sample3, but are {list_samples_excluded_2}"
+    ], f"excluded samples do not match \
+                    Sample2 and Sample3, but are {list_samples_excluded_3}"
 
 
 def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
-    result_df1, dropouts1 = by_protein_count(filter_samples_df, threshold=0.3)
-    result_df2, dropouts2 = by_protein_count(filter_samples_df, threshold=1)
+    result_df1, method_output1 = by_protein_count(filter_samples_df, threshold=0.3)
+    result_df2, method_output2 = by_protein_count(filter_samples_df, threshold=1)
 
-    list_samples_excluded_1 = dropouts1["filtered_samples"]
-    list_samples_excluded_2 = dropouts2["filtered_samples"]
+    list_samples_excluded_1 = method_output1["filtered_samples"]
+    list_samples_excluded_2 = method_output2["filtered_samples"]
 
-    fig = by_protein_count_plot(filter_samples_df, result_df1, dropouts1, "Pie chart")[
-        0
-    ]
+    fig = by_protein_count_plot(
+        filter_samples_df, result_df1, method_output1, "Pie chart"
+    )[0]
     if show_figures:
         fig.show()
 
-    assert [
+    assert list_samples_excluded_1 == [
         "Sample1",
         "Sample2",
-    ] == list_samples_excluded_1, f"excluded samples do not match \
+    ], f"excluded samples do not match \
             Sample1 and Sample2, but are {list_samples_excluded_1}"
 
-    assert [
-        "Sample1",
-    ] == list_samples_excluded_2, f"excluded samples do not match \
+    assert list_samples_excluded_2 == [
+        "Sample1"
+    ], f"excluded samples do not match \
             Sample1, but are {list_samples_excluded_2}"
 
 
 def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
-    result_df1, dropouts1 = by_protein_intensity_sum(filter_samples_df, threshold=1)
-    result_df2, dropouts2 = by_protein_intensity_sum(filter_samples_df, threshold=0.3)
+    result_df1, method_output1 = by_protein_intensity_sum(
+        filter_samples_df, threshold=1
+    )
+    result_df2, method_output2 = by_protein_intensity_sum(
+        filter_samples_df, threshold=0.3
+    )
 
-    list_samples_excluded_1 = dropouts1["filtered_samples"]
-    list_samples_excluded_2 = dropouts2["filtered_samples"]
+    list_samples_excluded_1 = method_output1["filtered_samples"]
+    list_samples_excluded_2 = method_output2["filtered_samples"]
 
     fig = by_protein_intensity_sum_plot(
-        filter_samples_df, result_df1, dropouts1, "Pie chart"
+        filter_samples_df, result_df1, method_output1, "Pie chart"
     )[0]
     if show_figures:
         fig.show()
 
-    assert [
-        "Sample3",
-    ] == list_samples_excluded_1, f"excluded samples do not match \
+    assert list_samples_excluded_1 == [
+        "Sample3"
+    ], f"excluded samples do not match \
             Sample3, but are {list_samples_excluded_1}"
 
-    assert [
+    assert list_samples_excluded_2 == [
         "Sample2",
         "Sample3",
-    ] == list_samples_excluded_2, f"excluded samples do not match \
+    ], f"excluded samples do not match \
             Sample2 and Sample3, but are {list_samples_excluded_2}"

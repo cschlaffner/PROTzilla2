@@ -45,6 +45,11 @@ method_map = {
     ): filter_proteins.by_low_frequency,
     (
         "data_preprocessing",
+        "filter_proteins",
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing,
+    (
+        "data_preprocessing",
         "filter_samples",
         "protein_intensity_sum_filter",
     ): filter_samples.by_protein_intensity_sum,
@@ -194,6 +199,11 @@ plot_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
         "filter_samples",
