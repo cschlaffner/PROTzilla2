@@ -164,11 +164,6 @@ method_map = {
         "umap",
     ): dimension_reduction.umap,
     (
-        "data_analysis",
-        "dimension_reduction",
-        "method_name",
-    ): dimension_reduction.method_name,
-    (
         "data_integration",
         "enrichment_analysis",
         "go_analysis_with_STRING",
