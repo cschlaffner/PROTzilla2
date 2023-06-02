@@ -63,6 +63,7 @@ def ttest_output():
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
         fc_threshold=test_fc_threshold,
+        log_base="",
     )
 
 
@@ -71,7 +72,7 @@ def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
         p_values=ttest_output["corrected_p_values_df"],
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=ttest_output["fc_threshold"],
-        alpha=ttest_output["alpha"],
+        alpha=ttest_output["corrected_alpha"],
     )
     if show_figures:
         fig.show()
@@ -82,7 +83,7 @@ def test_plots_volcano_plot_multiple_annotations(ttest_output, show_figures):
         p_values=ttest_output["corrected_p_values_df"],
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=ttest_output["fc_threshold"],
-        alpha=ttest_output["alpha"],
+        alpha=ttest_output["corrected_alpha"],
         proteins_of_interest=["Protein1", "Protein2"],
     )
     if show_figures:

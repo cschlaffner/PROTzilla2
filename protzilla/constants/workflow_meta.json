@@ -151,6 +151,32 @@
           }
         ]
       },
+      "proteins_missing_filter": {
+        "name": "Proteins Missing",
+        "description": "Filters all samples that contain less than a set percentage of proteins",
+        "parameters": {
+          "percentage": {
+            "name": "Percentage of minimum non-missing proteins per sample",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
       "protein_intensity_sum_filter": {
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
@@ -631,7 +657,7 @@
           },
           {
             "graph_type_quantites": {
-              "name": "Graph type – Imputed Values:",
+              "name": "Graph type - Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -655,7 +681,7 @@
             "default": 0
           },
           "peptide_df": {
-            "type": "peptide_df",
+            "type": "empty",
             "name": "peptide_df"
           }
         },
@@ -717,12 +743,12 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None",
+            "default": "None", 
             "multiple": true,
             "default_select_all": true
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -731,6 +757,75 @@
       "t_test": {
         "name": "t-Test",
         "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
+        "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "fc_threshold": {
+            "name": "Fold change threshold",
+            "type": "numeric",
+            "min": 0,
+            "default": 0
+          },
+          "log_base": {
+            "name": "base of log transformation (leave empty if no log transformation was performed on the data)",
+            "type": "numeric",
+            "min": 2,
+            "default": null
+          },
+          "grouping": {
+            "name": "Grouping",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      },
+      "linear_model": {
+        "name": "linear model",
+        "description": "A function to fit a linear model using Ordinary Least Squares for each Protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
             "name": "Input Dataframe",
@@ -785,7 +880,7 @@
             "default": null
           },
           "metadata_df": {
-            "type": "metadata_df",
+            "type": "empty",
             "name": "metadata_df",
             "default": null
           }
@@ -817,20 +912,18 @@
             "type": "named_output",
             "default": [null, null]
           },
-          "proteins_of_interest_wrapper": {
+          "proteins_of_interest_input": {
             "name": "Proteins of Interest",
-            "type": "named_output_with_fields",
-            "fill_dynamic": ["proteins_of_interest"],
-            "default": [null, null, null],
-            "fields": {
-              "proteins_of_interest": {
-                "type": "categorical",
-                "fill": "protein_ids",
-                "categories": [],
-                "default": null,
-                "multiple": true
-              }
-            }
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["proteins_of_interest"]
+          },
+          "proteins_of_interest": {
+            "type": "categorical",
+            "fill": "protein_ids",
+            "categories": [],
+            "default": null,
+            "multiple": true
           }
         }
       },
@@ -1042,8 +1135,187 @@
             "default": 42
           }
         }
+      },
+      "method_name": {
+        "name": "a method",
+        "description":"Description of a Method",
+        "parameters": {
+          "param1": {
+            "name": "param1",
+            "type": "categorical_dynamic",
+            "categories": ["euclidean", "manhattan", "long island"],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "euclidean": ["param21"],
+              "manhattan": ["param22"]
+            }
+          },
+          "param21": {
+            "name": "show when euclidian is selected im param1",
+            "type": "categorical_dynamic",
+            "categories": ["category3", "category4"],
+            "default": "category3",
+            "dynamic_parameters": {
+              "category3": ["param3"]
+            },
+            "dynamic": true
+          },
+          "param22": {
+            "name": "show when manhattan is selected in param1",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
+          },
+          "param3": {
+            "name": "show when category3 is selected",
+            "type": "categorical",
+            "categories": ["random category", "another category"],
+            "default": "random category",
+            "dynamic": true
+          }
+        }
       }
     }
   },
-  "data_integration": {}
+  "data_integration": {  
+    "enrichment_analysis": {
+      "go_analysis_with_STRING": {
+        "name": "GO Analysis with STRING",
+        "description": "Online GO Analysis using STRING API",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_set_dbs": {
+            "name": "Protein Set Libraries",
+            "type": "categorical",
+            "fill": "dbs_restring",
+            "categories": [],
+            "default": null,
+            "multiple": true
+          },
+          "organism": {
+            "name": "Organism / NCBI taxon identifiers (e.g. Human is 9606)",
+            "type": "numeric",
+            "default": 9606
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
+          },
+          "background": {
+            "name": "Background set (no upload = entire proteome)",
+            "type": "file",
+            "default": null
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
+          }
+        }
+      },
+      "go_analysis_with_enrichr": {
+        "name": "GO Analysis with Enrichr",
+        "description": "Online GO Analysis using Enrichr API",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_sets": {
+            "name": "Protein Sets",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true
+          },
+          "organism": {
+            "name": "Enrichr supported organism",
+            "type": "categorical",
+            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
+            "default": "human"
+          }
+        }
+      },
+      "go_analysis_offline": {
+        "name": "GO Analysis offline",
+        "description": "Offline GO Analysis using a hypergeometric test",
+        "parameters": {
+          "proteins": {
+            "name": "Choose Proteins to run GO Analysis on",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "protein_sets_path": {
+            "name": "Upload Protein Sets (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "type": "file",
+            "default": null
+          },
+          "background": {
+            "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+            "type": "file",
+            "default": null
+          }
+        }
+      }
+    },
+    "plot": {
+      "go_enrichment_bar_plot": {
+        "name": "Bar plot for GO enrichment analysis",
+        "description": "Creates a bar plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 10
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "colors": {
+            "name": "Colors for the plot (optional)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "matplotlib_colors",
+            "default": null
+          }
+        }
+      }
+    }
+  }
 }

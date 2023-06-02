@@ -51,6 +51,14 @@ def get_defaults(method_params):
     }
 
 
+def get_parameter_type(workflow_meta, section, step, method, param):
+    if f"{param}_wrapper" in workflow_meta[section][step][method]["parameters"]:
+        return workflow_meta[section][step][method]["parameters"][f"{param}_wrapper"][
+            "fields"
+        ][param]["type"]
+    return workflow_meta[section][step][method]["parameters"][param]["type"]
+
+
 def get_workflow_default_param_value(workflow_config, section, step, method, param):
     # TODO 163: this should be based on step_index as there can be multiple steps with the same name
     steps = workflow_config["sections"][section]["steps"]

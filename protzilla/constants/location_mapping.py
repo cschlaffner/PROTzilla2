@@ -4,6 +4,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -52,6 +53,11 @@ method_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing,
     (
         "data_preprocessing",
         "outlier_detection",
@@ -134,6 +140,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
@@ -147,6 +158,26 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "method_name",
+    ): dimension_reduction.method_name,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_STRING",
+    ): enrichment_analysis.go_analysis_with_STRING,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_with_enrichr",
+    ): enrichment_analysis.go_analysis_with_enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_offline",
+    ): enrichment_analysis.go_analysis_offline,
 }
 
 # reversed mapping of method callable and location
@@ -173,6 +204,11 @@ plot_map = {
         "filter_samples",
         "protein_count_filter",
     ): filter_samples.by_protein_count_plot,
+    (
+        "data_preprocessing",
+        "filter_samples",
+        "proteins_missing_filter",
+    ): filter_samples.by_proteins_missing_plot,
     (
         "data_preprocessing",
         "normalisation",
@@ -258,4 +294,9 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_bar_plot",
+    ): di_plots.go_enrichment_bar_plot,
 }
