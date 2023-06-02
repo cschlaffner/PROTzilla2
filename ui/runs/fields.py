@@ -1,6 +1,8 @@
 import sys
 
+import pandas
 from django.template.loader import render_to_string
+from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
@@ -146,7 +148,7 @@ def make_displayed_history(run):
             for key, param_dict in parameters.items():
                 if key.endswith("_wrapper"):
                     key = key[:-8]
-                if key == "proteins_of_interest" and not key in history_step.parameters:
+                if key == "proteins_of_interest" and key not in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
@@ -170,6 +172,11 @@ def make_displayed_history(run):
             else:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
+        has_df = any(
+            isinstance(v, pandas.DataFrame) for v in history_step.outputs.values()
+        )
+        table_url = reverse("runs:tables_nokey", args=(run.run_name, i))
+
         displayed_history.append(
             dict(
                 display_name=name,
@@ -178,6 +185,7 @@ def make_displayed_history(run):
                 section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
+                table_link=table_url if has_df else "",
             )
         )
     return displayed_history

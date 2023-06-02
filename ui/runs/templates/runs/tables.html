@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/datatables-1.13.4.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/datatables-1.13.4.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "{% url 'runs:tables_content' run_name index key %}",
+                type: "GET",
+                success: function (response) {
+                    let tr = $("<tr>");
+                    response.columns.forEach(element => {
+                        tr.append($("<th>").text(element))
+                    });
+                    $("#example").html($("<thead>").append(tr))
+                        .DataTable({
+                            data: response.data,
+                            columnDefs: [{
+                                targets: "_all",
+                                render: function (data, type, row) {
+                                    if (type !== 'display' || ('' + data).length < 50) {
+                                        return data;
+                                    }
+                                    return `<span class="ellipsis" title="${data}">${('' + data).slice(0, 50)}…</span>`
+                                },
+                            }],
+                        });
+                }
+            });
+            $('#tables_dropdown').on("change", function () {
+                window.location.href = $(this).val()
+            })
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="p-3">
+        <div class="input-group mb-3 w-50">
+            <span class="input-group-text">Choose table</span>
+            {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
+        </div>
+        <table id="example" class="display" style="width:100%"></table>
+    </div>
+{% endblock %}
