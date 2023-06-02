@@ -17,7 +17,7 @@
 | protzilla/data\_analysis/differential\_expression\_helper.py            |        7 |        1 |        2 |        1 |     78% |        22 |
 | protzilla/data\_analysis/differential\_expression\_linear\_model.py     |       47 |        6 |       12 |        3 |     85% |52-53, 55-56, 81-83 |
 | protzilla/data\_analysis/differential\_expression\_t\_test.py           |       57 |        0 |       18 |        0 |    100% |           |
-| protzilla/data\_analysis/dimension\_reduction.py                        |       36 |        6 |       10 |        2 |     83% |62-67, 95, 163, 171-172 |
+| protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        4 |       10 |        2 |     86% |62-67, 95, 163 |
 | protzilla/data\_analysis/plots.py                                       |       77 |        3 |       36 |        4 |     94% |55, 64->66, 106, 255 |
 | protzilla/data\_integration/database\_query.py                          |       11 |        8 |        4 |        0 |     20% |      7-35 |
 | protzilla/data\_integration/di\_plots.py                                |       52 |        2 |       18 |        2 |     94% |    68, 77 |
@@ -83,7 +83,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      246 |      195 |       70 |        0 |     17% |37, 49-73, 100-116, 133-154, 165-237, 241-248, 252-254, 258-260, 264-266, 270-279, 283-290, 294-302, 306-333, 337-366, 370-372, 376-377, 399-401, 405-419, 427-448, 462-468 |
 | ui/runs/views\_helper.py                                                |       41 |        1 |       16 |        2 |     95% |12->14, 18 |
-|                                                               **TOTAL** | **4159** |  **629** | **1113** |  **168** | **80%** |           |
+|                                                               **TOTAL** | **4156** |  **627** | **1113** |  **168** | **81%** |           |
 
 
 ## Setup coverage badge
