@@ -11,12 +11,9 @@
     <script type="text/javascript" src="{% static 'js/datatables-1.13.4.min.js' %}"></script>
     <script>
         $(document).ready(function () {
-            let $tables_dropdown = $('#tables_dropdown');
-
             $.ajax({
                 url: "{% url 'runs:tables_content' run_name index key %}",
                 type: "GET",
-                data: {"key": $tables_dropdown.val()},
                 success: function (response) {
                     let tr = $("<tr>");
                     response.columns.forEach(element => {
@@ -37,7 +34,7 @@
                         });
                 }
             });
-            $tables_dropdown.on("change", function () {
+            $('#tables_dropdown').on("change", function () {
                 window.location.href = $(this).val()
             })
         });
@@ -46,16 +43,10 @@
 
 {% block content %}
     <div class="p-3">
-    {% if not options %}
-        No tables found in this step.
-    {% else %}
-        <div class="row mb-2">
-            <label for="tables_dropdown" class="col-2 d-flex align-items-center">Choose table</label>
-            <div class="col-4">
-                {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
-            </div>
+        <div class="input-group mb-3 w-50">
+            <span class="input-group-text">Choose table</span>
+            {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
         </div>
         <table id="example" class="display" style="width:100%"></table>
-    {% endif %}
     </div>
 {% endblock %}

@@ -363,6 +363,7 @@ def tables(request, run_name, index, key=None):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
 
+    # use current output when applicable (not yet in history)
     if index < len(run.history.steps):
         outputs = run.history.steps[index].outputs
     else:
@@ -374,6 +375,7 @@ def tables(request, run_name, index, key=None):
             options.append(k)
 
     if key is None and options:
+        # choose an option if url without key is used
         return HttpResponseRedirect(
             reverse("runs:tables", args=(run_name, index, options[0]))
         )
