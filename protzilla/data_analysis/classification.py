@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
@@ -16,11 +17,14 @@ from sklearn.preprocessing import LabelEncoder
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
-def perform_grid_search(grid_search_model, model, param_grid: dict, scoring, cv=None):
+def perform_grid_search(
+    grid_search_model, model, param_grid: dict, scoring, cv=None, train_val_split=None
+):
     if grid_search_model == "Grid search":
         clf = GridSearchCV(
             model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
         )
+        return clf
     elif grid_search_model == "Randomized search":
         clf = RandomizedSearchCV(
             model,
@@ -29,7 +33,32 @@ def perform_grid_search(grid_search_model, model, param_grid: dict, scoring, cv=
             cv=cv,
             error_score="raise",
         )
-    return clf
+        return clf
+    else:
+        # refactor this an create a custom estimator that does this
+        X_train, X_val, y_train, y_val = train_val_split
+        # Initialize dictionaries to store results
+        results = {
+            "mean_train_score": [],
+            "mean_test_score": [],
+            "std_train_score": [],
+            "std_test_score": [],
+        }
+
+        # Iterate over the parameter grid
+        for params in ParameterGrid(param_grid):
+            model = model.set_params(**params)
+            model.fit(X_train, y_train)
+            train_scores = model.score(X_train, y_train)
+            val_scores = model.score(X_val, y_val)
+
+            # Store the results for the current parameter combination
+            results = update_raw_evaluation_data(
+                results, params, train_scores, val_scores
+            )
+        results_df = pd.DataFrame(results)
+
+        return model, results_df
 
 
 def perform_cross_validation(
@@ -54,6 +83,26 @@ def perform_cross_validation(
         return LeaveOneOut()
     elif cross_validation_estimator == "Leave p out":
         return LeavePOut(p)
+
+
+def update_raw_evaluation_data(results, params, train_scores, val_scores):
+    for param_name, param_value in params.items():
+        results |= {f"param_{param_name}": param_value}
+    results["mean_train_score"].append(np.mean(train_scores))
+    results["std_train_score"].append(np.std(train_scores))
+    results["mean_test_score"].append(np.mean(val_scores))
+    results["std_test_score"].append(np.std(val_scores))
+    return results
+
+
+# maybe add option to hide or show certain columns
+def create_model_evaluation_df(raw_evaluation_df, clf_parameters):
+    # create model evaluation dataframe
+    columns_names = ["param_" + key for key in clf_parameters.keys()]
+    columns_names.append("mean_test_score")
+    # for multimetrics evaluation
+    # columns_names.append([["mean_test_" + score] for score in scoring])
+    return raw_evaluation_df[columns_names]
 
 
 def create_dict_with_lists_as_values(d):
@@ -91,46 +140,59 @@ def perform_classification(
     # check returns, what to return clf, scores, already fit and predict here? Take
     # into account that scores are not always called using score() function
     if validation_strategy == "Manual" and grid_search_method == "Manual":
-        pass
-        # call normal estimator function and validate with validation data
         X_train, X_val, y_train, y_val = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
-        score = model.score(X_val, y_val)
-        return model
+        train_scores = model.score(X_train, y_train)
+        val_scores = model.score(X_val, y_val)
+
+        results = update_raw_evaluation_data(
+            {
+                "mean_train_score": [],
+                "mean_test_score": [],
+                "std_train_score": [],
+                "std_test_score": [],
+            },
+            clf_parameters,
+            train_scores,
+            val_scores,
+        )
+        raw_evaluation_df = pd.DataFrame(results)
+        model_evaluation_df = create_model_evaluation_df(
+            raw_evaluation_df, clf_parameters
+        )
+        return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
-        # call perform_grid_search using only param_grid
-        # cv should be equivalent to [(X_train, X_val, y_train, y_val)]
-        X_train, X_val, y_train, y_val = perform_train_test_split(
+        train_val_split = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
         )
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        best_score = 0.0
-        best_params = None
-        for params in ParameterGrid(clf_parameters):
-            # Create the model with the current parameter combination
-            model = clf.set_params(**params)
-            model.fit(X_train, y_train)
-
-            # Check if this parameter combination is the best so far
-            score = model.score(X_val, y_val)
-            if score > best_score:
-                best_score = score
-                best_params = params
-                best_model = model
-        return best_model
+        model, raw_evaluation_df = perform_grid_search(
+            grid_search_method,
+            clf,
+            clf_parameters,
+            scoring,
+            train_val_split=train_val_split,
+        )
+        model_evaluation_df = create_model_evaluation_df(
+            raw_evaluation_df, clf_parameters
+        )
+        return model, model_evaluation_df
     elif validation_strategy != "Manual":
-        # call perform_grid_search with parameter cv set to theresult of perform_cross_validation
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         cv = perform_cross_validation(cross_validation_estimator, **parameters)
-        clf_fit = perform_grid_search(
+        model = perform_grid_search(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
-        clf_fit.fit(input_df, labels_df)
-        model_evaluation_df = pd.DataFrame(clf_fit.cv_results_)
-        return clf_fit
+        model.fit(input_df, labels_df)
+
+        # create model evaluation dataframe
+        model_evaluation_df = create_model_evaluation_df(
+            pd.DataFrame(model.cv_results_), clf_parameters
+        )
+        return model, model_evaluation_df
 
 
 def random_forest(
@@ -147,11 +209,15 @@ def random_forest(
     random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
+    scoring: list[str] = "accuracy",
     **kwargs,
 ):
     # TODO select right column from labels_df ot try to predict
-    # add to shuffle!
-    # add user is able to choose group from metadata
+    # TODO add warning to user that data should be to shuffled, give that is being sorted at the beginning!
+    # TODO add user is able to choose group from metadata
+    # TODO add parameters for gridsearch and cross validation
+    # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
+
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     samples_input_df = input_df_wide.reset_index(names="Sample")["Sample"]
@@ -160,6 +226,7 @@ def random_forest(
     y = y["Group"]
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
+
     clf = RandomForestClassifier()
 
     clf_parameters = dict(
@@ -173,8 +240,7 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
-    scoring = "f1"
-    perform_classification(
+    model, model_evaluation_df = perform_classification(
         input_df_wide,
         y_encoded,
         validation_strategy,
