@@ -1216,11 +1216,6 @@
             "name": "Background set (no upload = entire proteome)",
             "type": "file",
             "default": null
-          },
-          "run_name": {
-            "type": "empty",
-            "name": "run_name",
-            "default": null
           }
         }
       },
