@@ -5,7 +5,7 @@ from ..data_analysis import (
     plots,
     protein_graphs,
 )
-from ..data_integration import enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -44,6 +44,11 @@ method_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency,
+    (
+        "data_preprocessing",
+        "filter_proteins",
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing,
     (
         "data_preprocessing",
         "filter_samples",
@@ -141,6 +146,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
@@ -159,6 +169,11 @@ method_map = {
         "protein_graphs",
         "peptides_to_isoform",
     ): protein_graphs.peptides_to_isoform,
+    (
+        "data_analysis",
+        "dimension_reduction",
+        "method_name",
+    ): dimension_reduction.method_name,
     (
         "data_integration",
         "enrichment_analysis",
@@ -190,6 +205,11 @@ plot_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
         "filter_samples",
@@ -290,4 +310,9 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_bar_plot",
+    ): di_plots.go_enrichment_bar_plot,
 }

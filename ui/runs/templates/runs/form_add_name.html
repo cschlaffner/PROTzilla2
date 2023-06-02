@@ -1,5 +1,5 @@
 {# params: run_name index #}
-<form action="{% url 'runs:add_name' run_name %}" method="post">
+<form action="{% url 'runs:add_name' run_name %}" method="post" class="col">
     {% csrf_token %}
     <div class="input-group">
         <input type="text" name="name" class="form-control" placeholder="name the output of this step">

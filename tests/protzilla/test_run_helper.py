@@ -88,7 +88,7 @@ def test_insert_special_params_named_output():
     run = Mock()
     run.history = Mock()
     run.history.output_keys_of_named_step = MagicMock(return_value=["mock_output_name"])
-    run.history.step_names = ["step1", "step2"]
+    run.history.step_names = ["step2", "step1"]
 
     insert_special_params(param_dict, run)
     assert param_dict == expected

@@ -40,9 +40,30 @@
                 alert(e.responseJSON.error); // alert error message to user
             });
         });
+        $(document).on("input", ".dynamic_parameter_trigger", function() {
+            const selected_input = $(this).val();
+            const key = $(this).attr("id");
+            $.ajax({
+                url: "{% url 'runs:change_dynamic_fields' run_name %}",
+                type: "POST",
+                data: {
+                    selected_input: selected_input,
+                    key: key,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    const dynamic_id = `dynamic_fields_${key}`
+                    $("#"+dynamic_id).html(response.parameters);
+                }
+            }).fail(function (e) {
+                console.log('Error:', e);
+                alert(e.responseJSON.error); // alert error message to user
+            });
+        });
         $("#method_parameters").on("change", ".named", function () {
             const id = $(this).attr("id");
             const step_name = $(this).val();
+            const currentElement = $(this);
 
             $.ajax({
                 url: "{% url 'runs:outputs_of_step' run_name %}",
@@ -57,10 +78,15 @@
                     $.each(response, function (index, value) {
                         outputs.append($("<option></option>").attr("value", value).text(value));
                     })
+
+                    // Check if the current element is also "dynamic_trigger"
+                    // needs to update to ensure correct values
+                    if (currentElement.parent().hasClass("dynamic_trigger")) {
+                        currentElement.parent().trigger("change");
+                    }
                 }
             })
         });
-
         $("#method_parameters").on("change", ".dynamic_trigger", function () {
             const selected_choice = $(this).val();
             const triggered_id = $(this).attr("id");
