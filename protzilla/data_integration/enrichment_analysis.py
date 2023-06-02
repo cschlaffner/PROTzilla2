@@ -90,10 +90,8 @@ def go_analysis_with_STRING(
 ):
     """
     This method performs online functional enrichment analysis using the STRING DB API
-    via the restring package. It writes the results to a folder in an
-    enrichment_results folder in the run folder or to a tmp folder (for testing).
-    Results for up- and down-regulated proteins are then aggregated and written
-    into summary and results dataframes. These are also written to the run folder.
+    via the restring package. Results for up- and down-regulated proteins are aggregated
+    and written into a result dataframe.
 
     :param proteins: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
@@ -116,7 +114,7 @@ def go_analysis_with_STRING(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the summary and results
     :type direction: str
-    :return: dictionary with summary and results dataframes
+    :return: dictionary with enriched dataframe
     :rtype: dict
     """
 
@@ -200,7 +198,6 @@ def go_analysis_with_STRING(
 
         # remove unwanted protein set databases
         up_df = up_df[up_df.index.isin(protein_set_dbs)]
-        up_df.to_csv("up_df.csv")
         logging.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
@@ -218,7 +215,6 @@ def go_analysis_with_STRING(
 
         # remove unwanted protein set databases
         down_df = down_df[down_df.index.isin(protein_set_dbs)]
-        down_df.to_csv("down_df.csv")
         logging.info("Finished analysis for down-regulated proteins")
 
     logging.info("Summarizing enrichment results")
@@ -230,7 +226,7 @@ def go_analysis_with_STRING(
     if len(out_messages) > 0:
         return dict(messages=out_messages, results=merged_df)
 
-    return {"result": merged_df}
+    return {"enriched_df": merged_df}
 
 
 def uniprot_ids_to_uppercase_gene_symbols(proteins):
