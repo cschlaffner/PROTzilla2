@@ -67,7 +67,7 @@ def go_enrichment_bar_plot(
 
     if not isinstance(categories, list):
         categories = [categories]
-    if len(categories) == 0:
+    if not categories:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
@@ -113,9 +113,9 @@ def go_enrichment_bar_plot(
 
 def go_enrichment_dot_plot(
     input_df,
-    categories,
     top_terms,
     cutoff,
+    categories=[],
     x_axis_type="Gene Sets",
     title="",
     rotate_x_labels=True,
@@ -159,6 +159,9 @@ def go_enrichment_dot_plot(
 
     if not isinstance(categories, list):
         categories = [categories]
+    if not categories:
+        msg = "Please select at least one category to plot."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     if len(categories) > 1 and x_axis == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
