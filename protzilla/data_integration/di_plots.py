@@ -189,7 +189,7 @@ def go_enrichment_dot_plot(
             )
             return [
                 dict(
-                    plot=fig_to_base64(ax.get_figure()),
+                    plot_base64=fig_to_base64(ax.get_figure()),
                     key="go_enrichment_dot_plot_img",
                 )
             ]
@@ -211,7 +211,7 @@ def go_enrichment_dot_plot(
             )
             return [
                 dict(
-                    plot=fig_to_base64(ax.get_figure()),
+                    plot_base64=fig_to_base64(ax.get_figure()),
                     key="go_enrichment_dot_plot_img",
                 )
             ]

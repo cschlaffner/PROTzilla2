@@ -168,10 +168,10 @@ def make_displayed_history(run):
                     )
                 )
             elif isinstance(plot, dict):
-                if "plot" in plot:
+                if "plot_base64" in plot:
                     plots.append(
                         '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
-                            plot["key"], plot["plot"].decode("utf-8")
+                            plot["key"], plot["plot_base64"].decode("utf-8")
                         )
                     )
                 else:
