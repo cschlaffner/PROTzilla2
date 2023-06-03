@@ -118,7 +118,7 @@ def go_enrichment_dot_plot(
     categories=[],
     x_axis_type="Gene Sets",
     title="",
-    rotate_x_labels=True,
+    rotate_x_labels=False,
     show_ring=False,
     dot_size=5,
 ):
@@ -163,7 +163,7 @@ def go_enrichment_dot_plot(
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if len(categories) > 1 and x_axis == "Combined Score":
+    if len(categories) > 1 and x_axis_type == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
         return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
 
@@ -195,7 +195,7 @@ def go_enrichment_dot_plot(
             ]
         except ValueError as e:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+            return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
     elif x_axis_type == "Combined Score":
         try:

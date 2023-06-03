@@ -26,8 +26,9 @@ def convert_str_if_possible(s):
         f = float(s)
         return int(f) if int(f) == f else f
     except ValueError:
-        if s == "True" or s == "False":
-            return s == "True"
+        if s == "checked":
+            # s is a checkbox
+            return True
         return s
 
 
