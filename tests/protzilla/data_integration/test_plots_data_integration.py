@@ -125,8 +125,8 @@ def test_enrichment_bar_plot_cutoff():
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.parametrize("x_axis", ["Gene Sets", "Combined Score"])
-def test_enrichment_dot_plot(show_figures, x_axis):
+@pytest.mark.parametrize("x_axis_type", ["Gene Sets", "Combined Score"])
+def test_enrichment_dot_plot(show_figures, x_axis_type):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
@@ -134,7 +134,7 @@ def test_enrichment_dot_plot(show_figures, x_axis):
     dot_base64 = go_enrichment_dot_plot(
         input_df=enrichment_df,
         categories=["Reactome_2013"],
-        x_axis=x_axis,
+        x_axis_type=x_axis_type,
         top_terms=5,
         cutoff=0.05,
         dot_size=40,

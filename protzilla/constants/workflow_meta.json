@@ -1284,7 +1284,7 @@
             "default": [null, null],
             "fill_dynamic": ["categories"]
           },
-          "x_axis": {
+          "x_axis_type": {
             "name": "Variable for x-axis: categorical scatter plot for one or multiple gene sets, or display combined score for one gene set",
             "type": "categorical",
             "categories": [

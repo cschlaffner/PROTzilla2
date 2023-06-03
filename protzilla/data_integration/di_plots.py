@@ -116,7 +116,7 @@ def go_enrichment_dot_plot(
     categories,
     top_terms,
     cutoff,
-    x_axis="Gene Sets",
+    x_axis_type="Gene Sets",
     title="",
     rotate_x_labels=True,
     show_ring=False,
@@ -124,7 +124,7 @@ def go_enrichment_dot_plot(
 ):
     """
     Creates a dot plot for the GO enrichment results. The plot is created using the gseapy library.
-    Only the top_terms that meet the cutoff are shown. The x_axis can be used to compare multiple
+    Only the top_terms that meet the cutoff are shown. The x axis can be used to compare multiple
     Gene Set Libraries or to display the Combined Score of one of them.
 
     :param input_df: GO enrichment results (offline or Enrichr)
@@ -136,8 +136,8 @@ def go_enrichment_dot_plot(
     :param cutoff: Cutoff for the Adjusted p-value. Only terms with
         Adjusted P-value < cutoff will be shown.
     :type cutoff: float
-    :param x_axis: What to display on the x-axis: "Gene Sets" or "Combined Score", defaults to "Gene Sets"
-    :type x_axis: str
+    :param x_axis_type: What to display on the x-axis: "Gene Sets" or "Combined Score", defaults to "Gene Sets"
+    :type x_axis_type: str
     :param title: Title of the plot, defaults to ""
     :type title: str, optional
     :param rotate_x_labels: Rotate the x-axis labels by 45 degrees if Gene Sets are on x_axis, defaults to True
@@ -170,7 +170,7 @@ def go_enrichment_dot_plot(
     size_y = top_terms * len(categories)
     xticklabels_rot = 45 if rotate_x_labels else 0
 
-    if x_axis == "Gene Sets":
+    if x_axis_type == "Gene Sets":
         try:
             ax = gp.dotplot(
                 df,
@@ -194,7 +194,7 @@ def go_enrichment_dot_plot(
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
-    elif x_axis == "Combined Score":
+    elif x_axis_type == "Combined Score":
         try:
             ax = gp.dotplot(
                 df,
@@ -216,7 +216,7 @@ def go_enrichment_dot_plot(
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
             return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
     else:
-        msg = "Invalid x_axis value"
+        msg = "Invalid x_axis_type value"
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
 
