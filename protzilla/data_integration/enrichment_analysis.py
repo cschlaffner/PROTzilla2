@@ -439,11 +439,11 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
-    if len(up_protein_list) == 0:
+    if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-        elif direction == "both" and len(down_protein_list) == 0:
+        elif direction == "both" and not down_protein_list:
             msg = "No proteins found. Check your input."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
@@ -452,7 +452,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if len(down_protein_list) == 0:
+    if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -535,7 +535,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             up_filtered_groups if direction == "up" else down_filtered_groups
         )
 
-    if len(filtered_groups) > 0:
+    if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
@@ -604,7 +604,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
-    if len(up_protein_list) == 0:
+    if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
