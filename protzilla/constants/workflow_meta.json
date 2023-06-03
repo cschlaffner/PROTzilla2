@@ -1293,7 +1293,7 @@
             "default": "Gene Sets"
           },
           "categories": {
-            "name": "Categories/Sets to be plotted",
+            "name": "Categories/Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
