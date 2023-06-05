@@ -2,8 +2,8 @@ import sys
 import tempfile
 import traceback
 import zipfile
-import numpy as np
 
+import numpy as np
 import pandas as pd
 from django.contrib import messages
 from django.http import FileResponse, HttpResponseRedirect, JsonResponse
