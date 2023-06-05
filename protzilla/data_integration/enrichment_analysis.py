@@ -78,7 +78,9 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
         else:
             enriched.loc[(gene_set, term), :] = down_df.loc[(gene_set, term), :]
 
-    return enriched.reset_index()
+    enriched = enriched.astype({"number_of_genes": int, "number_of_genes_in_background": int, "ncbiTaxonId": int})
+    enriched.reset_index(inplace=True)
+    return enriched
 
 
 def go_analysis_with_STRING(

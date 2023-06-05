@@ -89,6 +89,8 @@ def test_merge_up_down_regulated_dfs_restring():
             "inputGenes": ["protein1,protein2", "protein3"],
             "preferredNames": ["gene1,gene2", "gene3"],
             "number_of_genes": [2, 1],
+            "number_of_genes_in_background": [20, 100],
+            "ncbiTaxonId": [9606, 9606],
         }
     )
 
@@ -101,6 +103,8 @@ def test_merge_up_down_regulated_dfs_restring():
             "inputGenes": ["protein2,protein4", "protein5"],
             "preferredNames": ["gene2,gene4", "gene5"],
             "number_of_genes": [2, 1],
+            "number_of_genes_in_background": [20, 50],
+            "ncbiTaxonId": [9606, 9606],
         }
     )
 
@@ -113,11 +117,13 @@ def test_merge_up_down_regulated_dfs_restring():
             "inputGenes": ["protein2,protein4,protein1", "protein3", "protein5"],
             "preferredNames": ["gene2,gene4,gene1", "gene3", "gene5"],
             "number_of_genes": [3, 1, 1],
+            "number_of_genes_in_background": [20, 100, 50],
+            "ncbiTaxonId": [9606, 9606, 9606],
         }
     )
 
     merged = merge_up_down_regulated_dfs_restring(up_df, down_df)
-    merged["number_of_genes"] = merged["number_of_genes"].astype("int64")
+    expected_output = expected_output.astype({"number_of_genes": "int32", "number_of_genes_in_background": "int32", "ncbiTaxonId": "int32"})
     merged.set_index(["category", "term"], inplace=True)
     expected_output.set_index(["category", "term"], inplace=True)
     merged = merged.sort_index()
@@ -154,8 +160,7 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
     )
 
-    # TODO: make new result to read
-    results = pd.read_csv(f"{test_data_folder}/merged_restring.csv", header=0)
+    results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
     current_out = go_analysis_with_STRING(
@@ -165,6 +170,8 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         direction="both",
         background=background,
     )
+    print(results)
+    print(current_out["enriched_df"])
 
     assert current_out["enriched_df"].equals(results)
 
