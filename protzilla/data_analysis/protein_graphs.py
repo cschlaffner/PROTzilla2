@@ -94,11 +94,25 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     print(graph_index)
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
-    peptides = df["Sequence"].tolist()
+    pattern = rf"^({protein_id}-\d+)$"
+    filter = df["Protein ID"].str.contains(pattern)
+    df = df[~filter]
+
+    # peptide_df.to_csv(
+    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide2/history_dfs/simple_P22626.csv"
+    # )
+
+    # TODO: check with chris how this should be done
+    # intensity_name = [col for col in df.columns if "intensity" in col][0]
+    # df = df.dropna(subset=[intensity_name])
+
+    peptides = df["Sequence"].unique().tolist()
     longest_peptide_len = max([len(peptide) for peptide in peptides])
 
     peptide_matches = {}
     mismatched_peptides = []
+    print("peptides")
+    print(peptides)
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
@@ -147,6 +161,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
         for value in values:
             for start_pos in peptide_matches[peptide]:
                 # TODO: iterate over all possible start positions for all values?
+
                 pos_aa = value[1]
 
                 for node, aa in value[0]:
@@ -156,22 +171,39 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     if node in node_start_end:
                         if peptide not in node_start_end[node]:
                             node_start_end[node][peptide] = {
+                                start_pos: {
+                                    "start": (aa_pos_in_node, aa),
+                                    "end": (aa_pos_in_node, aa),
+                                }
+                            }
+                            continue
+                        if start_pos not in node_start_end[node][peptide]:
+                            node_start_end[node][peptide][start_pos] = {
                                 "start": (aa_pos_in_node, aa),
                                 "end": (aa_pos_in_node, aa),
                             }
                             continue
-
-                        if aa_pos_in_node < node_start_end[node][peptide]["start"][0]:
-                            node_start_end[node][peptide]["start"] = (
+                        if (
+                            aa_pos_in_node
+                            < node_start_end[node][peptide][start_pos]["start"][0]
+                        ):
+                            node_start_end[node][peptide][start_pos]["start"] = (
                                 aa_pos_in_node,
                                 aa,
                             )
 
-                        elif aa_pos_in_node > node_start_end[node][peptide]["end"][0]:
-                            node_start_end[node][peptide]["end"] = (aa_pos_in_node, aa)
+                        elif (
+                            aa_pos_in_node
+                            > node_start_end[node][peptide][start_pos]["end"][0]
+                        ):
+                            node_start_end[node][peptide][start_pos]["end"] = (
+                                aa_pos_in_node,
+                                aa,
+                            )
 
                         elif (
-                            aa_pos_in_node == node_start_end[node][peptide]["start"][0]
+                            aa_pos_in_node
+                            == node_start_end[node][peptide][start_pos]["start"][0]
                         ):
                             logging.warning(
                                 f"start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
@@ -180,8 +212,10 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     else:
                         node_start_end[node] = {
                             peptide: {
-                                "start": (aa_pos_in_node, aa),
-                                "end": (aa_pos_in_node, aa),
+                                start_pos: {
+                                    "start": (aa_pos_in_node, aa),
+                                    "end": (aa_pos_in_node, aa),
+                                }
                             }
                         }
 
@@ -194,11 +228,12 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     node_mod = {}
     for node, peptides_dict in node_start_end.items():
-        for peptide, values in peptides_dict.items():
-            if node not in node_mod:
-                node_mod[node] = [(values["start"][0], values["end"][0])]
-            else:
-                node_mod[node].append((values["start"][0], values["end"][0]))
+        for peptide, start_pos_dict in peptides_dict.items():
+            for start_pos, values in start_pos_dict.items():
+                if node not in node_mod:
+                    node_mod[node] = [(values["start"][0], values["end"][0])]
+                else:
+                    node_mod[node].append((values["start"][0], values["end"][0]))
         node_mod[node] = sorted(node_mod[node], key=lambda x: x[0])
 
     print("node_mod")
@@ -289,11 +324,6 @@ def _longest_paths(protein_graph: nx.Graph, start_node: str):
     A Variation is assumed to only ever be one aminoacid long
     """
     topo_order = list(nx.topological_sort(protein_graph))
-    print("topo order")
-    print(topo_order)
-
-    print("neighbors")
-    print(list(protein_graph.neighbors("n57")))
 
     distances = {node: -1 for node in protein_graph.nodes}
     distances[start_node] = 0
@@ -315,6 +345,8 @@ def _longest_paths(protein_graph: nx.Graph, start_node: str):
             print(f"node {node} distance is -1, skipping")
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
+
+    # check for consistent order
     for node, d_node, longest_path in zip(
         topo_order, longest_paths.keys(), longest_paths.values()
     ):
@@ -434,7 +466,16 @@ if __name__ == "__main__":
     # g = nx.read_graphml(
     #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide_test/graphs/Q7Z3B0.graphml"
     # )
-    g = nx.read_graphml(
-        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide_test/graphs/P98160.graphml"
+    # g = nx.read_graphml(
+    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide_test/graphs/P98160.graphml"
+    # )
+    # index = _create_graph_index(protein_graph=g, seq_len=4391)
+
+    peptide_df = pd.read_csv(
+        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide2/history_dfs/simple_P22626.csv"
     )
-    index = _create_graph_index(protein_graph=g, seq_len=4391)
+    peptide_df = peptide_df.drop(columns=["Unnamed: 0"])
+
+    out_dict = peptides_to_isoform(
+        peptide_df=peptide_df, protein_id="P22626", run_name="peptide2"
+    )
