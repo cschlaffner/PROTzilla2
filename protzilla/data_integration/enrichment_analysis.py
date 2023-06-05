@@ -597,7 +597,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if len(down_protein_list) == 0:
+    if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
