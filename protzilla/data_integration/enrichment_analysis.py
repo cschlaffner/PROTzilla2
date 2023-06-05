@@ -317,22 +317,17 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             symbols = set()
             for protein in group.split(";"):
                 if "-" in protein:
-                    symbols.add(q.get(protein.split("-")[0], None))
+                    protein = protein.split("-")[0]
                 elif "_VAR_" in protein:
-                    symbols.add(q.get(protein.split("_VAR_")[0], None))
-                else:
-                    symbols.add(q.get(protein, None))
+                    protein = protein.split("_VAR_")[0]
+                if result := q.get(protein):
+                    symbols.add(result)
 
-            symbols = list(symbols)
-            if not any(symbols):
-                # no gene symbol for any protein in group
+            if not symbols:  # no gene symbol for any protein in group
                 filtered_groups.append(group)
-            elif len(symbols) == 1:
-                gene_mapping[symbols[0].upper()] = group
             else:
-                gene_mapping.update(
-                    {s.upper(): group for s in symbols if s is not None}
-                )
+                for symbol in symbols:
+                    gene_mapping[symbol.upper()] = group
 
     return gene_mapping, filtered_groups
 
