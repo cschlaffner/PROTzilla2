@@ -123,6 +123,32 @@
             }
           }
         ]
+      },
+      "samples_missing_filter": {
+        "name": "Samples Missing",
+        "description": "Filters all proteins that are contained in less than a set percentage samples",
+        "parameters": {
+          "percentage": {
+            "name": "Percentage of minimum non-missing samples per protein",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
       }
     },
     "filter_samples": {
@@ -1135,48 +1161,6 @@
             "default": 42
           }
         }
-      },
-      "method_name": {
-        "name": "a method",
-        "description":"Description of a Method",
-        "parameters": {
-          "param1": {
-            "name": "param1",
-            "type": "categorical_dynamic",
-            "categories": ["euclidean", "manhattan", "long island"],
-            "default": "euclidean",
-            "dynamic_parameters": {
-              "euclidean": ["param21"],
-              "manhattan": ["param22"]
-            }
-          },
-          "param21": {
-            "name": "show when euclidian is selected im param1",
-            "type": "categorical_dynamic",
-            "categories": ["category3", "category4"],
-            "default": "category3",
-            "dynamic_parameters": {
-              "category3": ["param3"]
-            },
-            "dynamic": true
-          },
-          "param22": {
-            "name": "show when manhattan is selected in param1",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 42,
-            "dynamic": true
-          },
-          "param3": {
-            "name": "show when category3 is selected",
-            "type": "categorical",
-            "categories": ["random category", "another category"],
-            "default": "random category",
-            "dynamic": true
-          }
-        }
       }
     }
   },
@@ -1285,7 +1269,7 @@
     "plot": {
       "go_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",
-        "description": "Creates a bar plot from GO enrichment data",
+        "description":"Creates a bar plot from GO enrichment data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
@@ -1324,6 +1308,66 @@
             "multiple": true,
             "fill": "matplotlib_colors",
             "default": null
+          }
+        }
+      },
+      "go_enrichment_dot_plot": {
+        "name": "Dot plot for GO enrichment analysis (oflline & with Enrichr) ",
+        "description":"Creates a categorical scatter plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "x_axis_type": {
+            "name": "Variable for x-axis: categorical scatter plot for one or multiple gene sets, or display combined score for one gene set",
+            "type": "categorical",
+            "categories": [
+              "Gene Sets", "Combined Score"
+            ],
+            "default": "Gene Sets"
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 5
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "rotate_x_labels": {
+            "name": "Rotate x-axis labels (if multiple categories are selected)",
+            "type": "boolean",
+            "default": true
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
           }
         }
       }
