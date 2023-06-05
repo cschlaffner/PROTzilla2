@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+import requests
 from unittest.mock import patch
 
 import numpy as np
@@ -328,6 +329,15 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
 def test_go_analysis_with_enrichr(mock_gene_mapping):
+    # Check if enrichr API is available
+    api_url = "https://maayanlab.cloud/Enrichr/addList"
+    try:
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            pytest.skip("Enrichr API is currently unavailable")
+    except requests.exceptions.RequestException:
+        pytest.skip("Enrichr API is currently unavailable")
+
     proteins = [
         "Protein1",
         "Protein2",
