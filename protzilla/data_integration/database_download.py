@@ -1,6 +1,4 @@
 import requests
-import shutil
-import gzip
 from pathlib import Path
 from requests.adapters import HTTPAdapter, Retry
 import re
@@ -48,12 +46,11 @@ def download_uniprot_paged():
 
 
 def download_uniprot_stream():
-    # takes a little more than a minute
     with requests.get(
         "https://rest.uniprot.org/uniprotkb/stream",
         params=dict(
             format="tsv",
-            query="(organism_id:9606)",
+            query="(organism_id:9606) AND (reviewed:true)",
             fields="accession,id,protein_name,gene_names,organism_name,length",
             compress="true",
         ),
@@ -64,18 +61,17 @@ def download_uniprot_stream():
             for chunk in tqdm(r.iter_content(chunk_size=8192)):
                 f.write(chunk)
 
-    # with gzip.open(data_integration / "uniprot.tsv.gz", "rb") as g:
-    #     with open(data_integration / "uniprot.tsv", "wb") as f:
-    #         shutil.copyfileobj(g, f)
-
-    # Path(data_integration / "uniprot.tsv.gz").unlink()
-
 
 if __name__ == "__main__":
     database_path.mkdir(exist_ok=True)
     if not (database_path / "uniprot.tsv").exists():
         print("downloading Uniprot (about one minute, 600 iterations)")
-        download_uniprot_stream()
-        print("done downloading")
+        try:
+            download_uniprot_stream()
+        except Exception as e:
+            print(e)
+            print("failed to download")
+        else:
+            print("done downloading")
     else:
         print("Uniprot already downloaded")
