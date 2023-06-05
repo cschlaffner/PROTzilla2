@@ -120,18 +120,11 @@ def test_merge_up_down_regulated_dfs_restring():
     )
 
     merged = merge_up_down_regulated_dfs_restring(up_df, down_df)
-    merged = merged.astype(
-        {
-            "number_of_genes": "int64",
-            "number_of_genes_in_background": "int64",
-            "ncbiTaxonId": "int64",
-        }
-    )
     expected_output = expected_output.astype(
         {
-            "number_of_genes": "int64",
-            "number_of_genes_in_background": "int64",
-            "ncbiTaxonId": "int64",
+            "number_of_genes": "int32",
+            "number_of_genes_in_background": "int32",
+            "ncbiTaxonId": "int32",
         }
     )
     merged.set_index(["category", "term"], inplace=True)
