@@ -3,6 +3,7 @@ import sys
 import tempfile
 import traceback
 import zipfile
+import numpy as np
 
 import pandas as pd
 from django.contrib import messages
@@ -67,6 +68,9 @@ def detail(request, run_name):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
+    show_table = run.current_out and any(
+        isinstance(v, pd.DataFrame) for v in run.current_out.values()
+    )
     return render(
         request,
         "runs/details.html",
@@ -86,6 +90,7 @@ def detail(request, run_name):
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
+            show_table=show_table,
             used_memory=get_memory_usage(),
         ),
     )
@@ -416,4 +421,51 @@ def download_plots(request, run_name):
         open(f.name, "rb"),
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
+    )
+
+
+def tables(request, run_name, index, key=None):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+
+    # use current output when applicable (not yet in history)
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
+
+    options = []
+    for k, value in outputs.items():
+        if isinstance(value, pd.DataFrame) and k != key:
+            options.append(k)
+
+    if key is None and options:
+        # choose an option if url without key is used
+        return HttpResponseRedirect(
+            reverse("runs:tables", args=(run_name, index, options[0]))
+        )
+
+    return render(
+        request,
+        "runs/tables.html",
+        context=dict(
+            run_name=run_name,
+            index=index,
+            # put key as first option to make selected
+            options=[(opt, opt) for opt in [key] + options],
+            key=key,
+        ),
+    )
+
+
+def tables_content(request, run_name, index, key):
+    run = active_runs[run_name]
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs[key]
+    else:
+        outputs = run.current_out[key]
+    out = outputs.replace(np.nan, None)
+    return JsonResponse(
+        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
