@@ -186,9 +186,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
         for start, end in positions_list:
             pass
 
-
-
-
     return dict(
         graph_path=graph_path,
         peptide_matches=peptide_matches,  # , messages=[out_dict["messages"]]

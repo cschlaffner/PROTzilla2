@@ -199,7 +199,15 @@ def test_create_graph_index_simple(simple_graph):
     G, start_node = simple_graph
     index = _create_graph_index(G, start_node)
 
-    planned = [["1"], ["1"], ["1"], ["1"], ["1"], ["1"], ["1"]]
+    planned = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+        [("1", "E")],
+        [("1", "F")],
+        [("1", "G")],
+    ]
     assert index == planned
 
 
@@ -207,7 +215,7 @@ def test_create_graph_index_shortcut(shortcut):
     G, start_node = shortcut
     index = _create_graph_index(G, start_node)
 
-    planned = [["1"], ["1"], ["1"], ["2"], ["3"]]
+    planned = [[("1", "A")], [("1", "B")], [("1", "C")], [("2", "D")], [("3", "E")]]
     assert index == planned
 
 
@@ -215,7 +223,14 @@ def test_create_graph_index_multiple(multi_route):
     G, start_node = multi_route
     index = _create_graph_index(G, start_node)
 
-    planned = [["1"], ["1"], ["1"], ["2", "3"], ["4"], ["4"]]
+    planned = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
+        [("4", "F")],
+        [("4", "G")],
+    ]
     assert index == planned
 
 
@@ -223,7 +238,14 @@ def test_create_graph_index_multiple_shortcut(multi_route_shortcut):
     G, start_node = multi_route_shortcut
     index = _create_graph_index(G, start_node)
 
-    planned = [["1"], ["1"], ["1"], ["2", "3"], ["4"], ["4"]]
+    planned = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
+        [("4", "F")],
+        [("4", "G")],
+    ]
     assert index == planned
 
 
@@ -231,12 +253,21 @@ def test_create_graph_index_multi_route(complex_route):
     G, start_node = complex_route
     index = _create_graph_index(G, start_node)
 
-    planned = [["1"], ["1"], ["1"], ["2", "3"], ["4", "5", "6"], ["7"], ["8"], ["8"]]
+    planned = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
+        [("4", "F"), ("5", "H"), ("6", "I")],
+        [("7", "L")],
+        [("8", "R")],
+        [("8", "S")],
+    ]
     assert index == planned
 
 
 def test_create_ref_seq_index():
-    index, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_ref_seq_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/PKHUO.txt", k=5
     )
 
@@ -272,8 +303,8 @@ def test_create_ref_seq_index():
     assert seq_len == 26
 
 
-def test_create_ref_seq_index():
-    index, seq_len = _create_ref_seq_index(
+def test_create_ref_seq_index_own_protein():
+    index, _, seq_len = _create_ref_seq_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=5
     )
 
