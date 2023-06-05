@@ -14,6 +14,11 @@ urlpatterns = [
     path("<str:run_name>/back", views.back, name="back"),
     path("<str:run_name>/change_method", views.change_method, name="change_method"),
     path(
+        "<str:run_name>/change_dynamic_fields",
+        views.change_dynamic_fields,
+        name="change_dynamic_fields",
+    ),
+    path(
         "<str:run_name>/all_button_parameters",
         views.all_button_parameters,
         name="all_button_parameters",
@@ -34,4 +39,11 @@ urlpatterns = [
         "<str:run_name>/export_workflow", views.export_workflow, name="export_workflow"
     ),
     path("<str:run_name>/download_plots", views.download_plots, name="download_plots"),
+    path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),
+    path("<str:run_name>/tables/<int:index>/<str:key>", views.tables, name="tables"),
+    path(
+        "<str:run_name>/tables_content/<int:index>/<str:key>",
+        views.tables_content,
+        name="tables_content",
+    ),
 ]

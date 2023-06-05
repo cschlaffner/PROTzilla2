@@ -1,9 +1,10 @@
-import requests
 from xml.etree.ElementTree import Element, SubElement, tostring
 import pandas
 from pathlib import Path
 
 database_path = Path(__file__).parent / "databases"
+
+import requests
 
 
 def biomart_query(queries, filter_name, attributes):

@@ -170,8 +170,10 @@
               "preprocessed_data",
               "dataframe"
             ],
+            "log_base": 2,
             "grouping": "Group"
-          }
+          },
+          "output_name": "ttest"
         },
         {
           "name": "plot",
@@ -188,7 +190,8 @@
       ]
     },
     "data_integration": {
-      "steps": []
+      "steps": [
+      ]
     }
   }
 }

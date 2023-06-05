@@ -17,6 +17,7 @@ def t_test(
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
+    log_base,
 ):
     """
     A function to conduct a two sample t-test between groups defined in the
@@ -41,11 +42,17 @@ def t_test(
     :param alpha: the alpha value for the t-test
     :type alpha: float
 
-    :return: a dataframe in typical protzilla long format
-    with the differentially expressed proteins and a dict, containing
-    the corrected p-values and the log2 fold change, the alpha used
-    and the corrected alpha, as well as filtered out proteins.
-    :rtype: Tuple[pandas DataFrame, dict]
+    :return: a dict containing a dataframe de_proteins_df in typical protzilla long format containing the differentially expressed proteins,
+    a df corrected_p_values, containing the p_values after application of multiple testing correction,
+    a df log2_fold_change, containing the log2 fold changes per protein,
+    a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
+    a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
+    a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
+    a df fold_change_df, containing the fold_changes per protein,
+    a df t_statistic_df, containing the t-statistic per protein,
+    a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
+
+    :rtype: dict
     """
     assert grouping in metadata_df.columns
 
@@ -66,7 +73,9 @@ def t_test(
     )
     p_values = []
     fold_change = []
+    log2_fold_change = []
     filtered_proteins = []
+    t_statistic = []
 
     for protein in proteins:
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
@@ -89,7 +98,6 @@ def t_test(
                 corrected_p_values=None,
                 log2_fold_change=None,
                 fc_threshold=None,
-                alpha=alpha,
                 corrected_alpha=None,
                 messages=[dict(level=messages.ERROR, msg=msg)],
             )
@@ -99,9 +107,15 @@ def t_test(
             filtered_proteins.append(protein)
             continue
 
-        p = stats.ttest_ind(group1_intensities, group2_intensities)[1]
+        t, p = stats.ttest_ind(group1_intensities, group2_intensities)
         p_values.append(p)
-        fold_change.append(np.mean(group2_intensities) / np.mean(group1_intensities))
+        t_statistic.append(t)
+        if log_base == "":
+            fc = np.mean(group2_intensities) / np.mean(group1_intensities)
+        else:
+            fc = log_base ** (np.mean(group2_intensities) - np.mean(group1_intensities))
+        fold_change.append(fc)
+        log2_fold_change.append(np.log2(fc))
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
@@ -109,20 +123,28 @@ def t_test(
         alpha=alpha,
     )
 
-    log2_fold_change = np.log2(fold_change)
-    p_values_thresh = alpha if corrected_alpha is None else corrected_alpha
-    p_values_mask = corrected_p_values < p_values_thresh
+    p_values_mask = corrected_p_values < corrected_alpha
     fold_change_mask = np.abs(log2_fold_change) > fc_threshold
 
     remaining_proteins = [
         protein for protein in proteins if protein not in filtered_proteins
     ]
+
     de_proteins = [
         protein
-        for i, protein in enumerate(remaining_proteins)
-        if p_values_mask[i] and fold_change_mask[i]
+        for protein, has_p, has_fc in zip(
+            remaining_proteins, p_values_mask, fold_change_mask
+        )
+        if has_p and has_fc
     ]
     de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
+
+    significant_proteins = [
+        protein for i, protein in enumerate(remaining_proteins) if p_values_mask[i]
+    ]
+    significant_proteins_df = intensity_df.loc[
+        intensity_df["Protein ID"].isin(significant_proteins)
+    ]
 
     corrected_p_values_df = pd.DataFrame(
         list(zip(proteins, corrected_p_values)),
@@ -133,6 +155,15 @@ def t_test(
         list(zip(proteins, log2_fold_change)),
         columns=["Protein ID", "log2_fold_change"],
     )
+    fold_change_df = pd.DataFrame(
+        list(zip(proteins, fold_change)),
+        columns=["Protein ID", "fold_change"],
+    )
+
+    t_statistic_df = pd.DataFrame(
+        list(zip(proteins, t_statistic)),
+        columns=["Protein ID", "fold_change"],
+    )
 
     proteins_filtered = len(filtered_proteins) > 0
     proteins_filtered_warning_msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
@@ -142,9 +173,11 @@ def t_test(
         corrected_p_values_df=corrected_p_values_df,
         log2_fold_change_df=log2_fold_change_df,
         fc_threshold=fc_threshold,
-        alpha=alpha,
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
+        fold_change_df=fold_change_df,
+        t_statistic_df=t_statistic_df,
+        significant_proteins_df=significant_proteins_df,
         messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],

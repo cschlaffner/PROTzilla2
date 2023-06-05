@@ -8,8 +8,14 @@
         {% if run_name %}
             <div class="navbar-brand text-white" style="margin-right:7rem;">Run: {{run_name}}</div>
         {%endif%}
-        <a class="navbar-brand text-white" href="https://github.com/antonneubauer/PROTzilla2">
-            <img src="{% static 'img/github-mark-white.svg' %}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
-        </a>
+
+        <div class="navbar-brand text-white">
+            {% if used_memory %}
+                Memory: {{ used_memory }}&nbsp &nbsp
+            {%endif%}
+            <a class="navbar-brand text-white" href="https://github.com/antonneubauer/PROTzilla2">
+                <img src="{% static 'img/github-mark-white.svg' %}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            </a>
+        </div>
     </div>
 </nav>
