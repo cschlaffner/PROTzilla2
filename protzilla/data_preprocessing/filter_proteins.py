@@ -42,7 +42,45 @@ def by_low_frequency(intensity_df, threshold):
     )
 
 
-def by_low_frequency_plot(df, result_df, current_out, graph_type):
+def by_samples_missing(df, percentage):
+    """
+    This function filters proteins based on its amount of nan values.
+    If the percentage of existing values is below a threshold (percentage), the protein is filtered out.
+    :param df: the intensity dataframe that should be filtered\
+    in long format
+    :type df: pd.DataFrame
+    :param percentage: float ranging from 0 to 1. Defining the\
+    minimum percentage of samples, of which the protein should have been detected in.\
+    :type percentage: float
+    :return: returns the filtered df as a Dataframe and a dict with a listof Protein IDs\
+    that were discarded and a list of Protein IDs\
+    that were kept
+    :rtype: Tuple[pandas DataFrame, dict]
+    """
+    intensity_name = df.columns[3]
+    protein_list = df["Protein ID"].unique()
+    sample_count = df["Sample"].nunique()
+    filtered_proteins_list = []
+    remaining_proteins_list = []
+
+    for protein in protein_list:
+        protein_df = df.loc[df["Protein ID"] == protein]
+        na_count = protein_df[intensity_name].isna().sum()
+        if 1 - (na_count / sample_count) < percentage:
+            filtered_proteins_list.append(protein)
+        else:
+            remaining_proteins_list.append(protein)
+
+    return (
+        df[~(df["Protein ID"].isin(filtered_proteins_list))],
+        dict(
+            filtered_proteins=filtered_proteins_list,
+            remaining_proteins=remaining_proteins_list,
+        ),
+    )
+
+
+def _build_pie_bar_plot(df, result_df, current_out, graph_type):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
             values_of_sectors=[
@@ -62,3 +100,11 @@ def by_low_frequency_plot(df, result_df, current_out, graph_type):
             heading="Number of Filtered Proteins",
         )
     return [fig]
+
+
+def by_low_frequency_plot(df, result_df, current_out, graph_type):
+    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+
+
+def by_samples_missing_plot(df, result_df, current_out, graph_type):
+    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
