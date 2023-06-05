@@ -365,22 +365,18 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
 
             # merge proteins, genes and overlap columns
             if mapped:
-                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(","))
+                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(";"))
                 proteins.update(
-                    down_enriched.loc[(gene_set, term), "Proteins"].split(",")
+                    down_enriched.loc[(gene_set, term), "Proteins"].split(";")
                 )
-                enriched.loc[(gene_set, term), "Proteins"] = ",".join(list(proteins))
+                enriched.loc[(gene_set, term), "Proteins"] = ";".join(list(proteins))
 
             genes = set(up_enriched.loc[(gene_set, term), "Genes"].split(";"))
             genes.update(down_enriched.loc[(gene_set, term), "Genes"].split(";"))
             enriched.loc[(gene_set, term), "Genes"] = ";".join(list(genes))
 
-            enriched.loc[(gene_set, term), "Overlap"] = (
-                str(len(genes))
-                + "/"
-                + str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
-            )
-
+            total = str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
+            enriched.loc[(gene_set, term), "Overlap"] = f"{len(genes)}/{total}"
         else:
             enriched.loc[(gene_set, term), :] = down_enriched.loc[(gene_set, term), :]
 
@@ -484,7 +480,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             )
 
         up_enriched["Proteins"] = up_enriched["Genes"].apply(
-            lambda x: ",".join([up_gene_mapping[gene] for gene in x.split(";")])
+            lambda x: ";".join([up_gene_mapping[gene] for gene in x.split(";")])
         )
         logging.info("Finished analysis for up-regulated proteins")
 
@@ -515,7 +511,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             )
 
         down_enriched["Proteins"] = down_enriched["Genes"].apply(
-            lambda x: ",".join([down_gene_mapping[gene] for gene in x.split(";")])
+            lambda x: ";".join([down_gene_mapping[gene] for gene in x.split(";")])
         )
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -567,7 +563,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         background is provided, all proteins in protein sets are used.
         The background is defined by your experiment.
     :type background: str or None
-        :param direction: direction of enrichment analysis.
+    :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
