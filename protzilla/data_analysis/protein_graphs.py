@@ -30,8 +30,9 @@ def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
     graph_path = f"{output_folder}/{protein_id}.graphml"
     cmd_str = f"protgraph -egraphml {path_to_protein_file} \
                 --export_output_folder={output_folder} \
-                --output_csv={output_csv}\
-                -ft VARIANT -d skip"
+                --output_csv={output_csv} \
+                -ft VARIANT \
+                -d skip"
     # -ft VAR_SEQ --no_merge
 
     subprocess.run(cmd_str, shell=True)
@@ -42,6 +43,8 @@ def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
 
 
 def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
+    # TODO: error when protein_id is not in peptide_df
+
     if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
         out_dict = _create_graph(protein_id, run_name)
     else:
@@ -71,17 +74,29 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     protein_graph = nx.read_graphml(graph_path)
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
 
-    # n0 is always the __start__ node in ProtGraph
-    graph_index = _create_graph_index(protein_graph, "n0")
-    print(graph_index)
-
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
-    print(ref_index)
-    print(ref_seq)
-    print(seq_len)
+    # print(ref_index)
+    # print(ref_seq)
+    # print(seq_len)
+
+    graph_index, msg = _create_graph_index(protein_graph, seq_len)
+    if msg:
+        return dict(
+            graph_path=graph_path,
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg=msg,
+                )
+            ],
+        )
+    print("graph_index")
+    print(graph_index)
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     peptides = df["Sequence"].tolist()
+    longest_peptide_len = max([len(peptide) for peptide in peptides])
+
     peptide_matches = {}
     mismatched_peptides = []
     for peptide in peptides:
@@ -117,6 +132,15 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     peptide_to_node[peptide].append((graph_index[i], i))
                 else:
                     peptide_to_node[peptide] = [(graph_index[i], i)]
+
+    print("peptide_to_node")
+    print(peptide_to_node)
+
+    # P98160: 'n47': [(2037, 2053), (2103, 2117), (2155, 2861), (2155, 2375),
+    # (2162, 2846), (2195, 2976), (2295, 2311), (2393, 2407), (2480, 2878),
+    # (2489, 2503), (2523, 2536), (2655, 2664), (2682, 2696), (2779, 2793),
+    # (2977, 2978)],
+    # 'IEPSSSHVAEGQTLDLNCVVPGQAHAQVTWHK': [2155, 2344, 2830],
 
     node_start_end = {}
     for peptide, values in peptide_to_node.items():
@@ -161,11 +185,9 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                             }
                         }
 
-
-    was passiert, wenn ein peptid mehrfach pro knoten vorkommt?
-    muss vlt noch in node_start_end berücksichtigt werden
-    -> verschiedene start_pos aus peptide_matching!
-
+    # was passiert, wenn ein peptid mehrfach pro knoten vorkommt?
+    # muss vlt noch in node_start_end berücksichtigt werden
+    # -> verschiedene start_pos aus peptide_matching!
 
     print("node_start_end")
     print(node_start_end)
@@ -184,6 +206,18 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     for node, positions_list in node_mod.items():
         for start, end in positions_list:
+            try:
+                assert start <= end
+                assert end - start + 1 <= longest_peptide_len
+            except AssertionError:
+                print("###################")
+                print("node, positions_list, start, end")
+                print(node, positions_list, start, end)
+                print("###################")
+                # raise e
+
+    for node, positions_list in node_mod.items():
+        for start, end in positions_list:
             pass
 
     return dict(
@@ -192,26 +226,33 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     )
 
 
-def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
+def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
     """
     create a mapping from the position in the protein to the node in the graph
     TODO: this might be broken (in conjunction with the ref.-seq index) for versions where a ref.-seq is shorter than the longest path
     """
-    longest_paths = _longest_paths(protein_graph, starting_point)
-
-    seq_len = 0
     for node in protein_graph.nodes:
-        if protein_graph.nodes[node]["aminoacid"] == "__end__":
-            try:
-                seq_len = int(protein_graph.nodes[node]["position"]) - 1
-            except KeyError:
-                # minimum number of amino acids is number of nodes - 2 (start and end)
-                seq_len = protein_graph.number_of_nodes() - 2
-                logging.info(
-                    f"Set sequence length to {seq_len}, based on number of nodes"
-                )
-            finally:
-                break
+        if protein_graph.nodes[node]["aminoacid"] == "__start__":
+            starting_point = node
+            break
+    else:
+        msg = "No starting point found in the graph. An error in the graph creation is likely."
+        return None, msg
+
+    longest_paths = _longest_paths(protein_graph, starting_point)
+    # print("longest path")
+    # print(longest_paths)
+    # print(max(longest_paths))
+
+    for node in protein_graph.nodes:
+        if (
+            protein_graph.nodes[node]["aminoacid"] == "__end__"
+            and longest_paths[node] < seq_len
+        ):
+            msg = f"The longest path to the last node is shorter than the reference \
+            sequence. An error in the graph creation is likely. Node: {node}, \
+            longest path: {longest_paths[node]}, seq_len: {seq_len}"
+            return None, msg
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:
@@ -233,10 +274,11 @@ def _create_graph_index(protein_graph: nx.Graph, starting_point: str):
                     index.append([])
             aa_pos_in_node = i - longest_paths[node]
             index[i].append(
+                # (node, AA)
                 (node, protein_graph.nodes[node]["aminoacid"][aa_pos_in_node])
             )
 
-    return index
+    return index, ""
 
 
 def _longest_paths(protein_graph: nx.Graph, start_node: str):
@@ -246,8 +288,12 @@ def _longest_paths(protein_graph: nx.Graph, start_node: str):
 
     A Variation is assumed to only ever be one aminoacid long
     """
-
     topo_order = list(nx.topological_sort(protein_graph))
+    print("topo order")
+    print(topo_order)
+
+    print("neighbors")
+    print(list(protein_graph.neighbors("n57")))
 
     distances = {node: -1 for node in protein_graph.nodes}
     distances[start_node] = 0
@@ -256,14 +302,25 @@ def _longest_paths(protein_graph: nx.Graph, start_node: str):
         if node == start_node:
             aminoacid_len = 0
         else:
-            aminoacid_len = int(len(protein_graph.nodes[node]["aminoacid"]))
+            aminoacid_len = len(protein_graph.nodes[node]["aminoacid"])
 
+        # TODO: ´if` might be unnecessary
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
                 distances[neighbor] = max(
                     distances[neighbor], distances[node] + aminoacid_len
                 )
-    return dict(sorted(distances.items(), key=lambda x: x[1]))
+
+        else:
+            print(f"node {node} distance is -1, skipping")
+
+    longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
+    for node, d_node, longest_path in zip(
+        topo_order, longest_paths.keys(), longest_paths.values()
+    ):
+        assert node == d_node, f"{node} != {d_node}, {longest_path}"
+
+    return longest_paths
 
 
 def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | None):
@@ -345,7 +402,7 @@ def _get_ref_seq(protein_path: str):
     if not ref_seq:
         raise ValueError(f"Could not find sequence for protein at path {protein_path}")
     if seq_len is None:
-        logging.warning(
+        raise ValueError(
             f"Could not find sequence length for protein at path {protein_path}"
         )
 
@@ -353,13 +410,31 @@ def _get_ref_seq(protein_path: str):
 
 
 if __name__ == "__main__":
+    #     G = nx.DiGraph()
+    #     G.add_edge("0", "1")
+    #     G.add_edge("1", "2")
+    #     G.add_edge("1", "3")
+    #     G.add_edge("1", "4")
+    #     G.add_edge("2", "4")
+    #     G.add_edge("3", "4")
+    #     G.add_edge("4", "5")
+    #
+    #     nx.set_node_attributes(
+    #         G,
+    #         {
+    #             "0": {"aminoacid": "__start__"},
+    #             "1": {"aminoacid": "ABC"},
+    #             "2": {"aminoacid": "D"},
+    #             "3": {"aminoacid": "E"},
+    #             "4": {"aminoacid": "FG"},
+    #             "5": {"aminoacid": "__end__"},
+    #         },
+    #     )
+    #     g = G
     # g = nx.read_graphml(
-    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/Q7Z3B0.graphml"
+    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide_test/graphs/Q7Z3B0.graphml"
     # )
-    # g = nx.read_graphml(
-    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/as/graphs/P10636.graphml"
-    # )
-    # index = _create_graph_index(protein_graph=g, starting_point="n0")
-
-    index, ref_seq, seq_len = _create_ref_seq_index("SIM46", 5, "as")
-    print(index)
+    g = nx.read_graphml(
+        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide_test/graphs/P98160.graphml"
+    )
+    index = _create_graph_index(protein_graph=g, seq_len=4391)

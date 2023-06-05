@@ -474,14 +474,15 @@ def tables_content(request, run_name, index, key):
 def protein_plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    post_data = dict(request.POST)
+    # post_data = dict(request.POST)
+    parameters = dict(request.POST)
 
     # print(request.__dict__)
 
-    param_dict = run.workflow_meta[section][step][method]["parameters"]
-    post_data, parameters = parameters_for_plot(post_data, param_dict)
+    # param_dict = run.workflow_meta[section][step][method]["parameters"]
+    # post_data, parameters = parameters_for_plot(post_data, param_dict)
 
-    parameters.update(parameters_from_post(post_data))
+    # parameters.update(parameters_from_post(post_data))
 
     print("parameters")
     print(parameters)
