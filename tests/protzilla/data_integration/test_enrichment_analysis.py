@@ -621,18 +621,12 @@ def test_merge_up_down_regulated_proteins_results():
     merged = merged.sort_index()
     expected_output = expected_output.sort_index()
 
-    merged["Genes"] = merged["Genes"].apply(lambda x: set(x.split(";")))
-    expected_output["Genes"] = expected_output["Genes"].apply(
-        lambda x: set(x.split(";"))
-    )
-    merged["Genes"] = merged["Genes"].apply(lambda x: sorted(x))
-    expected_output["Genes"] = expected_output["Genes"].apply(lambda x: sorted(x))
-
-    merged["Proteins"] = merged["Proteins"].apply(lambda x: set(x.split(",")))
-    expected_output["Proteins"] = expected_output["Proteins"].apply(
-        lambda x: set(x.split(","))
-    )
-    merged["Proteins"] = merged["Proteins"].apply(lambda x: sorted(x))
-    expected_output["Proteins"] = expected_output["Proteins"].apply(lambda x: sorted(x))
+    for col in ["Genes", "Proteins"]:
+        merged[col] = merged[col].apply(lambda x: set(x.split(";")))
+        expected_output[col] = expected_output[col].apply(
+            lambda x: set(x.split(";"))
+        )
+        merged[col] = merged[col].apply(lambda x: sorted(x))
+        expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
     pd.testing.assert_frame_equal(merged, expected_output)

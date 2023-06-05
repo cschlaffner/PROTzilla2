@@ -383,6 +383,39 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     return enriched.reset_index()
 
 
+def enricher_helper(protein_list, protein_sets, organism, direction):
+    logging.info("Mapping Uniprot IDs to gene symbols")
+    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+        protein_list
+    )
+    logging.info(f"Starting analysis for {direction}-regulated proteins")
+
+    try:
+        enriched = gp.enrichr(
+            gene_list=list(gene_mapping.keys()),
+            gene_sets=protein_sets,
+            organism=organism,
+            outdir=None,
+            verbose=True,
+        ).results
+    except ValueError as e:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Something went wrong with the analysis. Please check your inputs.",
+                    trace=str(e),
+                )
+            ]
+        )
+
+    enriched["Proteins"] = enriched["Genes"].apply(
+        lambda x: ";".join([gene_mapping[gene] for gene in x.split(";")])
+    )
+    logging.info(f"Finished analysis for {direction}-regulated proteins")
+    return enriched, filtered_groups
+
+
 def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both"):
     """
     A method that performs online overrepresentation analysis for a given set of proteins
@@ -454,66 +487,10 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        logging.info("Starting analysis for up-regulated proteins")
-        logging.info("Mapping Uniprot IDs to gene symbols")
-        up_gene_mapping, up_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
-            up_protein_list
-        )
-
-        try:
-            up_enriched = gp.enrichr(
-                gene_list=list(up_gene_mapping.keys()),
-                gene_sets=protein_sets,
-                organism=organism,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-
-        up_enriched["Proteins"] = up_enriched["Genes"].apply(
-            lambda x: ";".join([up_gene_mapping[gene] for gene in x.split(";")])
-        )
-        logging.info("Finished analysis for up-regulated proteins")
+        up_enriched, up_filtered_groups = enricher_helper(up_protein_list, protein_sets, organism, "up")
 
     if direction == "down" or direction == "both":
-        logging.info("Starting analysis for down-regulated proteins")
-        logging.info("Mapping Uniprot IDs to gene symbols")
-        down_gene_mapping, down_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
-            down_protein_list
-        )
-
-        try:
-            down_enriched = gp.enrichr(
-                gene_list=list(down_gene_mapping.keys()),
-                gene_sets=protein_sets,
-                organism=organism,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-
-        down_enriched["Proteins"] = down_enriched["Genes"].apply(
-            lambda x: ";".join([down_gene_mapping[gene] for gene in x.split(";")])
-        )
-        logging.info("Finished analysis for down-regulated proteins")
+        down_enriched, down_filtered_groups = enricher_helper(down_protein_list, protein_sets, organism, "down")
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
