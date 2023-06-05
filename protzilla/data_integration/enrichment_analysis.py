@@ -384,10 +384,22 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
 
 
 def enricher_helper(protein_list, protein_sets, organism, direction):
+    """
+    A helper method for the enrichment analysis with Enrichr. It maps the proteins to uppercase gene symbols
+    and performs the enrichment analysis with GSEApy. It returns the enrichment results and the groups that
+    were filtered out because no gene symbol could be found.
+
+    :param protein_list: list of proteins
+    :type protein_list: list
+    :param protein_sets: list of protein sets to perform the enrichment analysis with
+    :type protein_sets: list
+    :param organism: organism
+    :type organism: str
+    :param direction: direction of regulation ("up" or "down")
+    :type direction: str
+    """
     logging.info("Mapping Uniprot IDs to gene symbols")
-    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
-        protein_list
-    )
+    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_list)
     logging.info(f"Starting analysis for {direction}-regulated proteins")
 
     try:
@@ -487,10 +499,14 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = enricher_helper(up_protein_list, protein_sets, organism, "up")
+        up_enriched, up_filtered_groups = enricher_helper(
+            up_protein_list, protein_sets, organism, "up"
+        )
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = enricher_helper(down_protein_list, protein_sets, organism, "down")
+        down_enriched, down_filtered_groups = enricher_helper(
+            down_protein_list, protein_sets, organism, "down"
+        )
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups

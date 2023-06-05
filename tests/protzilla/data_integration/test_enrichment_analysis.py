@@ -604,9 +604,9 @@ def test_merge_up_down_regulated_proteins_results():
             "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
             "Proteins": [
                 "Protein1",
-                "Protein2,Protein3",
+                "Protein2;Protein3",
                 "Protein4",
-                "Protein3,Protein4;Protein5",
+                "Protein3;Protein4;Protein5",
             ],
             "Genes": ["Gene1", "Gene2;GeneX", "Gene4", "Gene4;GeneX"],
             "Overlap": ["1/10", "2/30", "1/40", "2/40"],
@@ -623,9 +623,7 @@ def test_merge_up_down_regulated_proteins_results():
 
     for col in ["Genes", "Proteins"]:
         merged[col] = merged[col].apply(lambda x: set(x.split(";")))
-        expected_output[col] = expected_output[col].apply(
-            lambda x: set(x.split(";"))
-        )
+        expected_output[col] = expected_output[col].apply(lambda x: set(x.split(";")))
         merged[col] = merged[col].apply(lambda x: sorted(x))
         expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
