@@ -186,6 +186,7 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         results[col] = results[col].apply(lambda x: set(x.split(",")))
         out_df[col] = out_df[col].apply(lambda x: sorted(x))
         results[col] = results[col].apply(lambda x: sorted(x))
+
     assert out_df.equals(results)
 
 
