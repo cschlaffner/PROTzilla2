@@ -58,11 +58,7 @@ def go_enrichment_bar_plot(
         # df is a restring file
         restring_input = True
         input_df = input_df.rename(
-            columns={
-                "description": "Term",
-                "p_value": "P-value",
-                "category": "Gene_set",
-            }
+            columns={"description": "Term", "p_value": "P-value"}
         )
         input_df["Overlap"] = "0/0"
     elif not "Term" in input_df.columns:

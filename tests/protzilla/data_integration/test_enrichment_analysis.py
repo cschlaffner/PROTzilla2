@@ -151,9 +151,11 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
     )
 
-    up_df = pd.read_csv(f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0)
+    up_df = pd.read_csv(
+        f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
+    )
     down_df = pd.read_csv(
-        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
+        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
 
     results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)

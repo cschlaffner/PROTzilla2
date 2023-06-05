@@ -205,6 +205,7 @@ def go_analysis_with_STRING(
             return dict(messages=out_messages)
 
         # remove unwanted protein set databases
+        up_df.reset_index(inplace=True)
         up_df = up_df[up_df["category"].isin(protein_set_dbs)]
         logging.info("Finished analysis for up-regulated proteins")
 
@@ -222,6 +223,7 @@ def go_analysis_with_STRING(
             return dict(messages=out_messages)
 
         # remove unwanted protein set databases
+        down_df.reset_index(inplace=True)
         down_df = down_df[down_df["category"].isin(protein_set_dbs)]
         logging.info("Finished analysis for down-regulated proteins")
 
@@ -230,6 +232,7 @@ def go_analysis_with_STRING(
         merged_df = merge_up_down_regulated_dfs_restring(up_df, down_df)
     else:
         merged_df = up_df if direction == "up" else down_df
+    merged_df.rename(columns={"category": "Gene_set"}, inplace=True)
 
     if len(out_messages) > 0:
         return dict(messages=out_messages, results=merged_df)
