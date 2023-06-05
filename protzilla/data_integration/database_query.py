@@ -1,6 +1,9 @@
 import requests
 from xml.etree.ElementTree import Element, SubElement, tostring
 import pandas
+from pathlib import Path
+
+database_path = Path(__file__).parent / "databases"
 
 
 def biomart_query(queries, filter_name, attributes):
@@ -36,12 +39,12 @@ def biomart_query(queries, filter_name, attributes):
 
 
 def uniprot_query(uniprot_ids, fields):
-    df = pandas.read_csv("uniprot.tsv", sep="\t")
+    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
     df.index = df["Entry"]
     return df[df.Entry.isin(uniprot_ids)][fields].to_dict("index")
 
 
 def uniprot_query_dataframe(uniprot_ids, fields):
-    df = pandas.read_csv("uniprot.tsv", sep="\t")
+    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
     df.index = df["Entry"]
     return df[df.Entry.isin(uniprot_ids)][fields]

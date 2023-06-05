@@ -4,9 +4,10 @@ import gzip
 from pathlib import Path
 from requests.adapters import HTTPAdapter, Retry
 import re
+from tqdm import tqdm
 
 
-data_integration = Path(__file__).parent
+database_path = Path(__file__).parent / "databases"
 
 
 def get_next_link(headers):
@@ -35,7 +36,7 @@ def download_uniprot_paged():
 
     url = "https://rest.uniprot.org/uniprotkb/search?fields=accession,id,protein_name,gene_names,organism_name,length&format=tsv&query=%28organism_id:9606%29%20AND%20%28reviewed%3Atrue%29&size=500"
     progress = 0
-    with open(data_integration / "uniprot.tsv", "w") as f:
+    with open(database_path / "uniprot.tsv", "w") as f:
         for batch, total in get_batch(url, session):
             lines = batch.text.splitlines()
             if not progress:
@@ -59,10 +60,8 @@ def download_uniprot_stream():
         stream=True,
     ) as r:
         r.raise_for_status()
-        with open(data_integration / "uniprot.tsv", "wb") as f:
-            # shutil.copyfileobj(r.raw, f)
-            for chunk in r.iter_content(chunk_size=8192):
-                print(end=".")
+        with open(database_path / "uniprot.tsv", "wb") as f:
+            for chunk in tqdm(r.iter_content(chunk_size=8192)):
                 f.write(chunk)
 
     # with gzip.open(data_integration / "uniprot.tsv.gz", "rb") as g:
@@ -73,8 +72,9 @@ def download_uniprot_stream():
 
 
 if __name__ == "__main__":
-    if not (data_integration / "uniprot.tsv").exists():
-        print("downloading Uniprot (about one minute)")
+    database_path.mkdir(exist_ok=True)
+    if not (database_path / "uniprot.tsv").exists():
+        print("downloading Uniprot (about one minute, 600 iterations)")
         download_uniprot_stream()
         print("done downloading")
     else:
