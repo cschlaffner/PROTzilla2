@@ -215,7 +215,6 @@ def test_integration_all_methods_runner(
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods2.json", "r") as f:
         workflow2 = json.load(f)
 
-
     test_workflows = [workflow1, workflow2]
     # test if all methods are covered in test_workflows
     tested_methods = set()
@@ -230,8 +229,8 @@ def test_integration_all_methods_runner(
             for method, _ in step.items():
                 existing_methods.add((step_name, method))
 
-    assert ( True or
-       existing_methods == tested_methods
+    assert (
+        existing_methods == tested_methods
     ), "please add new methods to a workflow in test_workflows or add a new workflow"
 
     for workflow in test_workflows:
