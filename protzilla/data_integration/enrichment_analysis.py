@@ -78,7 +78,13 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
         else:
             enriched.loc[(gene_set, term), :] = down_df.loc[(gene_set, term), :]
 
-    enriched = enriched.astype({"number_of_genes": int, "number_of_genes_in_background": int, "ncbiTaxonId": int})
+    enriched = enriched.astype(
+        {
+            "number_of_genes": int,
+            "number_of_genes_in_background": int,
+            "ncbiTaxonId": int,
+        }
+    )
     enriched.reset_index(inplace=True)
     return enriched
 
@@ -199,7 +205,7 @@ def go_analysis_with_STRING(
             return dict(messages=out_messages)
 
         # remove unwanted protein set databases
-        up_df = up_df[up_df.index.isin(protein_set_dbs)]
+        up_df = up_df[up_df["category"].isin(protein_set_dbs)]
         logging.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
@@ -216,7 +222,7 @@ def go_analysis_with_STRING(
             return dict(messages=out_messages)
 
         # remove unwanted protein set databases
-        down_df = down_df[down_df.index.isin(protein_set_dbs)]
+        down_df = down_df[down_df["category"].isin(protein_set_dbs)]
         logging.info("Finished analysis for down-regulated proteins")
 
     logging.info("Summarizing enrichment results")

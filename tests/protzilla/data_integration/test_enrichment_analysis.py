@@ -1,6 +1,3 @@
-import csv
-import os
-import shutil
 import time
 from unittest.mock import patch
 
@@ -123,7 +120,13 @@ def test_merge_up_down_regulated_dfs_restring():
     )
 
     merged = merge_up_down_regulated_dfs_restring(up_df, down_df)
-    expected_output = expected_output.astype({"number_of_genes": "int32", "number_of_genes_in_background": "int32", "ncbiTaxonId": "int32"})
+    expected_output = expected_output.astype(
+        {
+            "number_of_genes": "int32",
+            "number_of_genes_in_background": "int32",
+            "ncbiTaxonId": "int32",
+        }
+    )
     merged.set_index(["category", "term"], inplace=True)
     expected_output.set_index(["category", "term"], inplace=True)
     merged = merged.sort_index()
@@ -163,17 +166,27 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
     results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
-    current_out = go_analysis_with_STRING(
+    out_df = go_analysis_with_STRING(
         proteins=proteins_df,
         protein_set_dbs=["KEGG", "Process"],
         organism=9606,
         direction="both",
         background=background,
-    )
-    print(results)
-    print(current_out["enriched_df"])
+    )["enriched_df"]
 
-    assert current_out["enriched_df"].equals(results)
+    results = results.astype(
+        {
+            "number_of_genes": "int32",
+            "number_of_genes_in_background": "int32",
+            "ncbiTaxonId": "int32",
+        }
+    )
+    for col in ["inputGenes", "preferredNames"]:
+        out_df[col] = out_df[col].apply(lambda x: set(x.split(",")))
+        results[col] = results[col].apply(lambda x: set(x.split(",")))
+        out_df[col] = out_df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
+    assert out_df.equals(results)
 
 
 @patch(
@@ -187,47 +200,28 @@ def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
     up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
     down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
 
-    up_path = f"{test_data_folder}/UP_enrichment.KEGG.tsv"
-    up_df = pd.read_csv(up_path, header=0, sep="\t")
-    down_path = f"{test_data_folder}/DOWN_enrichment.KEGG.tsv"
-    down_df = pd.read_csv(down_path, header=0, sep="\t")
+    up_df = pd.read_csv(f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0)
+    down_df = pd.read_csv(
+        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
+    )
     mock_enrichment.side_effect = [up_df, down_df]
-
-    # copy files to test aggregation
-    test_folder = f"{test_data_folder}/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
-    os.makedirs(test_folder, exist_ok=True)
-    shutil.copy(up_path, test_folder)
-    current_dir = os.getcwd()
-    os.chdir(test_data_folder)
 
     current_out = go_analysis_with_STRING(
         proteins=up_proteins_df,
-        protein_set_dbs=["KEGG"],
+        protein_set_dbs=["KEGG", "Process"],
         organism=9606,
         direction="both",
-        run_name=None,
-        folder_name="test_go_analysis_with_STRING",
     )
-
-    os.chdir(current_dir)
     assert "messages" in current_out
     assert "No downregulated proteins" in current_out["messages"][0]["msg"]
 
-    os.makedirs(test_folder, exist_ok=True)
-    shutil.copy(down_path, test_folder)
-    current_dir = os.getcwd()
-    os.chdir(test_data_folder)
-
     current_out = go_analysis_with_STRING(
         proteins=down_proteins_df,
-        protein_set_dbs=["KEGG"],
+        protein_set_dbs=["KEGG", "Process"],
         organism=9606,
         direction="both",
-        run_name=None,
-        folder_name="test_go_analysis_with_STRING",
     )
 
-    os.chdir(current_dir)
     assert "messages" in current_out
     assert "No upregulated proteins" in current_out["messages"][0]["msg"]
 
