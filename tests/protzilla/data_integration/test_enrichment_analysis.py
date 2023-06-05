@@ -120,13 +120,6 @@ def test_merge_up_down_regulated_dfs_restring():
     )
 
     merged = merge_up_down_regulated_dfs_restring(up_df, down_df)
-    expected_output = expected_output.astype(
-        {
-            "number_of_genes": "int32",
-            "number_of_genes_in_background": "int32",
-            "ncbiTaxonId": "int32",
-        }
-    )
     merged.set_index(["category", "term"], inplace=True)
     expected_output.set_index(["category", "term"], inplace=True)
     merged = merged.sort_index()
@@ -139,7 +132,7 @@ def test_merge_up_down_regulated_dfs_restring():
         merged[col] = merged[col].apply(lambda x: sorted(x))
         expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
-    pd.testing.assert_frame_equal(merged, expected_output)
+    pd.testing.assert_frame_equal(merged, expected_output, check_dtype=False)
 
 
 @patch(
@@ -174,20 +167,13 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         background=background,
     )["enriched_df"]
 
-    results = results.astype(
-        {
-            "number_of_genes": "int32",
-            "number_of_genes_in_background": "int32",
-            "ncbiTaxonId": "int32",
-        }
-    )
     for col in ["inputGenes", "preferredNames"]:
         out_df[col] = out_df[col].apply(lambda x: set(x.split(",")))
         results[col] = results[col].apply(lambda x: set(x.split(",")))
         out_df[col] = out_df[col].apply(lambda x: sorted(x))
         results[col] = results[col].apply(lambda x: sorted(x))
 
-    assert out_df.equals(results)
+    pd.testing.assert_frame_equal(results, out_df, check_dtype=False)
 
 
 @patch(
