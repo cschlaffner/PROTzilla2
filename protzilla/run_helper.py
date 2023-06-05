@@ -2,7 +2,7 @@ import copy
 
 import gseapy as gp
 import matplotlib.colors as mcolors
-from restring import restring
+import restring
 
 from protzilla.workflow_helper import get_workflow_default_param_value
 

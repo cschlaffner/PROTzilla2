@@ -6,7 +6,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.run_helper import get_parameters, insert_special_params
+from protzilla.run_helper import get_parameters
 from protzilla.workflow_helper import get_workflow_default_param_value
 from ui.runs.views_helper import get_displayed_steps
 
@@ -53,6 +53,8 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
         template = "runs/field_text.html"
+    elif param_dict["type"] == "boolean":
+        template = "runs/field_checkbox.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -163,12 +165,19 @@ def make_displayed_history(run):
             if isinstance(plot, bytes):
                 # Base64 encoded image
                 plots.append(
-                    '<div class="row d-flex justify-content-between align-items-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    '<div class="row d-flex justify-content-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
                         plot.decode("utf-8")
                     )
                 )
             elif isinstance(plot, dict):
-                plots.append(None)
+                if "plot_base64" in plot:
+                    plots.append(
+                        '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
+                            plot["key"], plot["plot_base64"].decode("utf-8")
+                        )
+                    )
+                else:
+                    plots.append(None)
             else:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
