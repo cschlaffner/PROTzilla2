@@ -1109,13 +1109,15 @@
               null
             ]
           },
-          "labels_df": {
+          "labels_column": {
             "name": "Choose corresponding metadata df",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "selected_groups"
+            ],
+            "categories": [],
+            "default": "None"
           },
           "train_test_split": {
             "name": "Choose the size of the test data set (you can either enter the absolute number of test samples or a number between 0.0 and 1.0 to represent the percentage of test samples)",
@@ -1170,6 +1172,11 @@
             "max": 4294967295,
             "step": 1,
             "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
           }
         }
       }

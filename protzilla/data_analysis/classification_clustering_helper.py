@@ -64,6 +64,7 @@ def perform_cross_validation(
     shuffle=True,
     random_state=42,
     p=None,
+    **parameters,
 ):
     if cross_validation_estimator == "K-Fold":
         return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)

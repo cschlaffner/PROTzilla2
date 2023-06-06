@@ -87,7 +87,8 @@ def perform_classification(
 
 def random_forest(
     input_df: pd.DataFrame,
-    labels_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
     n_estimators=100,
     criterion="gini",
     max_depth=None,
@@ -106,8 +107,11 @@ def random_forest(
     # TODO how to refit
     # TODO save object model with Pickle
     # TODO add parameter train_test_split
+    # TODO add parameters for gridnd cross validation
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    # "Sample" column should not always have header Sample, modify accordingly
+    labels_df = metadata_df[["Sample", labels_column]]
     y_encoded = encode_labels(input_df_wide, labels_df)
 
     clf = RandomForestClassifier()
