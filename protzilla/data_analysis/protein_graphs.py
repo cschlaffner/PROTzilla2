@@ -1,4 +1,6 @@
 import logging
+import math
+import pprint
 import re
 import subprocess
 from pathlib import Path
@@ -79,7 +81,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     # print(ref_seq)
     # print(seq_len)
 
-    graph_index, msg = _create_graph_index(protein_graph, seq_len)
+    graph_index, msg, longest_paths = _create_graph_index(protein_graph, seq_len)
     if msg:
         return dict(
             graph_path=graph_path,
@@ -90,8 +92,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 )
             ],
         )
-    print("graph_index")
-    print(graph_index)
+    # print("graph_index")
+    # print(graph_index)
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     pattern = rf"^({protein_id}-\d+)$"
@@ -107,8 +109,9 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     # df = df.dropna(subset=[intensity_name])
 
     peptides = df["Sequence"].unique().tolist()
-    longest_peptide_len = max([len(peptide) for peptide in peptides])
+    max([len(peptide) for peptide in peptides])
 
+    # Peptide Matching
     peptide_matches = {}
     mismatched_peptides = []
     print("peptides")
@@ -116,10 +119,10 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
-        for start_pos in ref_index[kmer]:
+        for match_start_pos in ref_index[kmer]:
             mismatch_counter = 0
             for i, aminoacid in enumerate(
-                ref_seq[start_pos : start_pos + len(peptide)]
+                ref_seq[match_start_pos : match_start_pos + len(peptide)]
             ):
                 if aminoacid != peptide[i]:
                     mismatch_counter += 1
@@ -127,12 +130,11 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     break
 
             if mismatch_counter <= allowed_mismatches:
-                matched_starts.append(start_pos)
+                matched_starts.append(match_start_pos)
             else:
                 mismatched_peptides.append(peptide)
         peptide_matches[peptide] = matched_starts
-    logging.warning("peptide_matches")
-    logging.warning(peptide_matches)
+    logging.info("peptide_matches:\n", peptide_matches)
 
     # P82909: {'DNPKPNVSEALR': [29], 'KLVSQEEMEFIQR': [86], 'VVQVVKPHTPLIR': [11]}
 
@@ -147,8 +149,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 else:
                     peptide_to_node[peptide] = [(graph_index[i], i)]
 
-    print("peptide_to_node")
-    print(peptide_to_node)
+    # print("peptide_to_node")
+    # print(peptide_to_node)
 
     # P98160: 'n47': [(2037, 2053), (2103, 2117), (2155, 2861), (2155, 2375),
     # (2162, 2846), (2195, 2976), (2295, 2311), (2393, 2407), (2480, 2878),
@@ -158,102 +160,233 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     node_start_end = {}
     for peptide, values in peptide_to_node.items():
-        for value in values:
-            for start_pos in peptide_matches[peptide]:
-                # TODO: iterate over all possible start positions for all values?
+        peptide_len = len(peptide)
 
-                pos_aa = value[1]
+        # print("peptide:", peptide)
 
-                for node, aa in value[0]:
+        for i, match_start_pos in enumerate(peptide_matches[peptide]):
+            for aa_match_values in values:
+                # print("after loops")
+                # print(node_start_end)
+
+                if i < len(peptide_matches[peptide]) - 1:
+                    next_start = peptide_matches[peptide][i + 1]
+                elif aa_match_values[1] < match_start_pos:
+                    continue
+                else:
+                    next_start = math.inf
+
+                if peptide == "FGNYNQQ" and aa_match_values[1] == 308:
+                    # raise Exception
+                    pass
+
+                if aa_match_values[1] < match_start_pos:
+                    logging.info(
+                        "found 'less than match start'", peptide, aa_match_values[1]
+                    )
+                    continue
+                if aa_match_values[1] > match_start_pos + peptide_len:
+                    logging.warning(
+                        "should probably be skipped as likely part of next match"
+                    )
+                if aa_match_values[1] >= next_start:
+                    logging.info(
+                        "found 'greater than next start'", peptide, aa_match_values[1]
+                    )
+                    continue
+                pos_aa = aa_match_values[1]
+
+                for node, aa in aa_match_values[0]:
                     # TODO: what happens when ref_seq < longest path?
                     aa_pos_in_node = pos_aa
 
                     if node in node_start_end:
                         if peptide not in node_start_end[node]:
                             node_start_end[node][peptide] = {
-                                start_pos: {
+                                match_start_pos: {
                                     "start": (aa_pos_in_node, aa),
                                     "end": (aa_pos_in_node, aa),
                                 }
                             }
                             continue
-                        if start_pos not in node_start_end[node][peptide]:
-                            node_start_end[node][peptide][start_pos] = {
+                        if match_start_pos not in node_start_end[node][peptide]:
+                            node_start_end[node][peptide][match_start_pos] = {
                                 "start": (aa_pos_in_node, aa),
                                 "end": (aa_pos_in_node, aa),
                             }
                             continue
                         if (
                             aa_pos_in_node
-                            < node_start_end[node][peptide][start_pos]["start"][0]
+                            < node_start_end[node][peptide][match_start_pos]["start"][0]
                         ):
-                            node_start_end[node][peptide][start_pos]["start"] = (
+                            node_start_end[node][peptide][match_start_pos]["start"] = (
                                 aa_pos_in_node,
                                 aa,
                             )
 
                         elif (
                             aa_pos_in_node
-                            > node_start_end[node][peptide][start_pos]["end"][0]
+                            > node_start_end[node][peptide][match_start_pos]["end"][0]
                         ):
-                            node_start_end[node][peptide][start_pos]["end"] = (
+                            node_start_end[node][peptide][match_start_pos]["end"] = (
                                 aa_pos_in_node,
                                 aa,
                             )
 
                         elif (
                             aa_pos_in_node
-                            == node_start_end[node][peptide][start_pos]["start"][0]
+                            == node_start_end[node][peptide][match_start_pos]["start"][
+                                0
+                            ]
                         ):
                             logging.warning(
-                                f"start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
+                                f"match_start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
                             )
 
                     else:
                         node_start_end[node] = {
                             peptide: {
-                                start_pos: {
+                                match_start_pos: {
                                     "start": (aa_pos_in_node, aa),
                                     "end": (aa_pos_in_node, aa),
                                 }
                             }
                         }
+                # print("node_start_end")
+                # print(node_start_end)
 
     # was passiert, wenn ein peptid mehrfach pro knoten vorkommt?
     # muss vlt noch in node_start_end berücksichtigt werden
-    # -> verschiedene start_pos aus peptide_matching!
+    # -> verschiedene match_start_pos aus peptide_matching!
 
-    print("node_start_end")
-    print(node_start_end)
+    # print("node_start_end")
+    # print(node_start_end)
 
     node_mod = {}
     for node, peptides_dict in node_start_end.items():
         for peptide, start_pos_dict in peptides_dict.items():
-            for start_pos, values in start_pos_dict.items():
+            for match_start_pos, values in start_pos_dict.items():
                 if node not in node_mod:
                     node_mod[node] = [(values["start"][0], values["end"][0])]
                 else:
                     node_mod[node].append((values["start"][0], values["end"][0]))
         node_mod[node] = sorted(node_mod[node], key=lambda x: x[0])
+    # print("node_mod pre merge")
+    # print(node_mod)
 
-    print("node_mod")
+    # node_mod
+    # merge tuples where start of second tuple is smaller or equal to end of first tuple
+    for node, positions_list in node_mod.items():
+        new_positions_list = []
+        for start, end in positions_list:
+            if len(new_positions_list) == 0:
+                new_positions_list.append((start, end))
+                continue
+            if start <= new_positions_list[-1][1]:
+                new_positions_list[-1] = (new_positions_list[-1][0], end)
+            else:
+                new_positions_list.append((start, end))
+        node_mod[node] = new_positions_list
+
+    print("node_mod, post merge")
     print(node_mod)
 
-    for node, positions_list in node_mod.items():
-        for start, end in positions_list:
-            try:
-                assert start <= end
-                assert end - start + 1 <= longest_peptide_len
-            except AssertionError:
-                print("###################")
-                print("node, positions_list, start, end")
-                print(node, positions_list, start, end)
-                print("###################")
-                # raise e
+    print("protein graph before modification")
+    pprint.pprint(protein_graph.__dict__)
 
+    logging.info("modifying graph")
     for node, positions_list in node_mod.items():
+        # 'n4': [(302, 308), (325, 349), (353, 359)]
+        old_node = protein_graph.nodes[node].copy()
+        # logging.warning(f"modifying node {node}, positions_list {positions_list}")
         for start, end in positions_list:
-            pass
+            logging.warning(f"s:{start}, e:{end}, old aa: {old_node['aminoacid']}")
+            logging.warning(f"leftover: {protein_graph.nodes[node]['aminoacid']}")
+
+            if (
+                longest_paths[node] == start
+                and longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"])
+                == end
+            ):
+                logging.warning("match full node")
+                nx.set_node_attributes(
+                    protein_graph,
+                    {
+                        node: {
+                            "aminoacid": protein_graph.nodes[node]["aminoacid"],
+                            "match": True,
+                        }
+                    },
+                )
+                continue
+
+            before_node = False
+            if start > longest_paths[node]:
+                before_node = True
+                before_node_label = old_node["aminoacid"][: start - longest_paths[node]]
+                # get predecessor of old node, connect edges to before_node
+                # protein_graph.predecessors(node)
+                before_node_id = f"n{len(protein_graph.nodes)}"
+                predecessors = list(protein_graph.predecessors(node))
+
+                protein_graph.add_node(
+                    before_node_id, aminoacid=before_node_label, match=False
+                )
+                for predecessor in predecessors:
+                    protein_graph.add_edge(predecessor, before_node_id)
+                    protein_graph.remove_edge(predecessor, node)
+
+                # update longest_paths
+                longest_paths[before_node_id] = longest_paths[node]
+                longest_paths[node] = longest_paths[before_node_id] + len(
+                    before_node_label
+                )
+
+            match_node_label = old_node["aminoacid"][
+                longest_paths[node] : end + 1  # TODO: aaaahhhhh why +1??
+            ]
+            match_node_id = f"n{len(protein_graph.nodes)}"
+            protein_graph.add_node(
+                match_node_id, aminoacid=match_node_label, match=True
+            )
+            # create edges to match_node from before_node to match_node
+            # or from predecessors of old_node to match_node if no before_node
+            if before_node:
+                protein_graph.add_edge(before_node_id, match_node_id)
+                longest_paths[match_node_id] = longest_paths[before_node_id] + len(
+                    match_node_label
+                )
+            else:
+                longest_paths[match_node_id] = longest_paths[node]
+                longest_paths[node] = longest_paths[match_node_id] + len(
+                    match_node_label
+                )
+                predecessors = list(protein_graph.predecessors(node))
+                for predecessor in predecessors:
+                    protein_graph.add_edge(predecessor, match_node_id)
+                    protein_graph.remove_edge(predecessor, node)
+
+            if end != longest_paths[node] + len(old_node["aminoacid"]):
+                after_node_label = old_node["aminoacid"][longest_paths[node] :]
+                nx.set_node_attributes(
+                    protein_graph,
+                    {node: {"aminoacid": after_node_label, "match": False}},
+                )
+                protein_graph.add_edge(match_node_id, node)
+            else:
+                successors = list(protein_graph.successors(node))
+                for successor in successors:
+                    protein_graph.add_edge(match_node_id, successor)
+                    protein_graph.remove_edge(node, successor)
+
+        # print("protein_graph.nodes")
+        # for node_here in protein_graph.nodes:
+        #     pprint.pprint(node_here)
+        #     pprint.pprint(protein_graph.nodes[node_here])
+
+    pprint.pprint(protein_graph.__dict__)
+
+    nx.write_graphml(protein_graph, graph_path)
 
     return dict(
         graph_path=graph_path,
@@ -313,7 +446,7 @@ def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
                 (node, protein_graph.nodes[node]["aminoacid"][aa_pos_in_node])
             )
 
-    return index, ""
+    return index, "", longest_paths
 
 
 def _longest_paths(protein_graph: nx.Graph, start_node: str):
@@ -477,5 +610,5 @@ if __name__ == "__main__":
     peptide_df = peptide_df.drop(columns=["Unnamed: 0"])
 
     out_dict = peptides_to_isoform(
-        peptide_df=peptide_df, protein_id="P22626", run_name="peptide2"
+        peptide_df=peptide_df, protein_id="P22626", run_name="peptide3"
     )
