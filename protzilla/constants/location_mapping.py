@@ -41,11 +41,6 @@ method_map = {
     (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency,
-    (
-        "data_preprocessing",
-        "filter_proteins",
         "samples_missing_filter",
     ): filter_proteins.by_samples_missing,
     (
@@ -189,11 +184,6 @@ location. The location is determined by the section, step, and method keys
 found in the workflow_meta file that correspond to the method.
 """
 plot_map = {
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency_plot,
     (
         "data_preprocessing",
         "filter_proteins",
