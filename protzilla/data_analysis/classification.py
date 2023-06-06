@@ -1,103 +1,16 @@
-import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import (
-    GridSearchCV,
-    RandomizedSearchCV,
-    KFold,
-    RepeatedKFold,
-    LeaveOneOut,
-    LeavePOut,
-    StratifiedKFold,
-    train_test_split,
-    ParameterGrid,
-)
 from sklearn.preprocessing import LabelEncoder
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
-from protzilla.data_analysis.classification_clustering_helper import GridSearchManual
-
-
-def perform_grid_search(
-    grid_search_model, model, param_grid: dict, scoring, cv=None, train_val_split=None
-):
-    if grid_search_model == "Grid search":
-        return GridSearchCV(
-            model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
-        )
-    elif grid_search_model == "Randomized search":
-        return RandomizedSearchCV(
-            model,
-            param_distributions=param_grid,
-            scoring=scoring,
-            cv=cv,
-            error_score="raise",
-        )
-    else:
-        return GridSearchManual(model=model, param_grid=param_grid)
-
-
-def perform_cross_validation(
-    cross_validation_estimator,
-    n_splits=5,
-    n_repeats=10,
-    shuffle=True,
-    random_state=42,
-    p=None,
-):
-    if cross_validation_estimator == "K-Fold":
-        return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
-    elif cross_validation_estimator == "Repeated K-Fold":
-        return RepeatedKFold(
-            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
-        )
-    elif cross_validation_estimator == "Stratified K-Fold":
-        return StratifiedKFold(
-            n_splits=n_splits, shuffle=shuffle, random_state=random_state
-        )
-    elif cross_validation_estimator == "Leave one out":
-        return LeaveOneOut()
-    elif cross_validation_estimator == "Leave p out":
-        return LeavePOut(p)
-
-
-def update_raw_evaluation_data(results, params, train_scores, val_scores):
-    for param_name, param_value in params.items():
-        results |= {f"param_{param_name}": param_value}
-    results["mean_train_score"].append(np.mean(train_scores))
-    results["std_train_score"].append(np.std(train_scores))
-    results["mean_test_score"].append(np.mean(val_scores))
-    results["std_test_score"].append(np.std(val_scores))
-    return results
-
-
-# maybe add option to hide or show certain columns
-def create_model_evaluation_df(raw_evaluation_df, clf_parameters):
-    # create model evaluation dataframe
-    columns_names = ["param_" + key for key in clf_parameters.keys()]
-    columns_names.append("mean_test_score")
-    # for multimetrics evaluation
-    # columns_names.append([["mean_test_" + score] for score in scoring])
-    return raw_evaluation_df[columns_names]
-
-
-def create_dict_with_lists_as_values(d):
-    return {
-        key: value if isinstance(value, list) else [value] for key, value in d.items()
-    }
-
-
-def perform_train_test_split(
-    input_df, labels_df, test_size=None, random_state=None, shuffle=True, stratify=None
-):
-    return train_test_split(
-        input_df,
-        labels_df,
-        test_size=test_size,
-        random_state=random_state,
-        shuffle=shuffle,
-        stratify=stratify,
-    )
+from protzilla.data_analysis.classification_clustering_helper import (
+    perform_grid_search,
+    perform_cross_validation,
+    update_raw_evaluation_data,
+    create_model_evaluation_df,
+    create_dict_with_lists_as_values,
+    perform_train_test_split,
+)
 
 
 def perform_classification(
@@ -162,7 +75,7 @@ def perform_classification(
         model = perform_grid_search(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
-        model.fit(input_df, input_df)
+        model.fit(input_df, labels_df)
 
         # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df(
