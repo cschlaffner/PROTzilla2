@@ -41,6 +41,13 @@ def insert_special_params(param_dict, run):
     if param_dict.get("default_select_all", False):
         param_dict["default"] = list(param_dict.get("categories", []))
 
+    if (
+        param_dict["type"] == "numeric"
+        and ("multiple" in param_dict and param_dict["multiple"])
+        and isinstance(param_dict["default"], list)
+    ):
+        param_dict["default"] = "-".join(str(num) for num in param_dict["default"])
+
 
 def get_parameters(run, section, step, method):
     """constructs a dict with all parameters, inserts the correct defaults

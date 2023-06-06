@@ -1148,7 +1148,8 @@
           "n_estimators": {
             "name": "The number of trees in the forest.",
             "type": "numeric",
-            "default": 100
+            "default": 100,
+            "multiple": true
           },
           "criterion": {
             "name": "The function to measure the quality of a split",
@@ -1158,12 +1159,14 @@
               "log_loss",
               "entropy"
             ],
-            "default": "gini"
+            "default": "gini",
+            "multiple": true
           },
           "max_depth": {
             "name": "The maximum depth of the tree.",
             "type": "numeric",
-            "default": 1
+            "default": 1,
+            "multiple": true
           },
           "random_state": {
             "name": "Seed for random number generation",
@@ -1171,7 +1174,8 @@
             "min": 0,
             "max": 4294967295,
             "step": 1,
-            "default": 6
+            "default": 6,
+            "multiple": true
           },
           "metadata_df": {
             "type": "empty",

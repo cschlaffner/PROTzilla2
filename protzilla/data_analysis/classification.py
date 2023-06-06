@@ -107,7 +107,8 @@ def random_forest(
     # TODO how to refit
     # TODO save object model with Pickle
     # TODO add parameter train_test_split
-    # TODO add parameters for gridnd cross validation
+    # TODO add parameters for grid search and cross validation
+    # TODO add scoring to workflow meta and also in backend
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     # "Sample" column should not always have header Sample, modify accordingly
