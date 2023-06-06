@@ -59,7 +59,7 @@ def test_runner_imports(
         mock.call({"intensity_name": "iBAQ", "file_path": ms_data_path}),
         mock.call(
             {
-                "feature_orientation": "Rows (features in rows, samples in columns)",
+                "feature_orientation": "Columns (samples in rows, features in columns)",
                 "file_path": metadata_path,
             }
         ),
