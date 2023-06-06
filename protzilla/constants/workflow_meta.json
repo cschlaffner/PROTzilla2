@@ -1342,6 +1342,29 @@
             "default": "both"
           }
         }
+      },
+      "gsea_preranked": {
+        "name": "GSEA Preranked",
+        "description": "TODO",
+        "parameters": {
+          "protein_df": {
+            "name": "Dataframe with Protein IDs and a column to use for ranking (e.g. p values)",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "ranking_direction": {
+            "name": "Sort the ranking column (ascending - smaller values are better, descending - larger values are better)",
+            "type": "categorical",
+            "categories": [
+              "ascending",
+              "descending"
+            ],
+            "default": "ascending"
+          }
+        }
       }
     },
     "plot": {

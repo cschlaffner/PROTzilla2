@@ -178,6 +178,16 @@ method_map = {
         "enrichment_analysis",
         "go_analysis_offline",
     ): enrichment_analysis.go_analysis_offline,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea",
+    ): enrichment_analysis.gsea,
 }
 
 # reversed mapping of method callable and location

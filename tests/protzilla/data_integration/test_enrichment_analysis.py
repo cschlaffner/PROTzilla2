@@ -11,6 +11,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_offline,
     go_analysis_with_enrichr,
     go_analysis_with_STRING,
+    gsea,
     merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
@@ -18,7 +19,6 @@ from protzilla.data_integration.enrichment_analysis import (
 
 @patch("restring.restring.get_functional_enrichment")
 def test_get_functional_enrichment_with_delay(mock_enrichment):
-    last_call_time = None
     MIN_WAIT_TIME = 1
 
     protein_list = [
@@ -654,3 +654,14 @@ def test_merge_up_down_regulated_proteins_results():
     expected_output["Proteins"] = expected_output["Proteins"].apply(lambda x: sorted(x))
 
     pd.testing.assert_frame_equal(merged, expected_output)
+
+
+def test_gsea():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    proteins = pd.read_csv(
+        f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        index_col=0,
+    )
+    print(proteins)
+    result = gsea(proteins)
+    print(result)

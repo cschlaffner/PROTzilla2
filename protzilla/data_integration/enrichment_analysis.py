@@ -12,6 +12,16 @@ from restring import restring
 
 from .database_query import biomart_query
 
+# Import enrichment analysis gsea methods to remove redundant function definition
+from .enrichment_analysis_gsea import gsea, gsea_preranked
+
+
+# call methods for precommit hook not to delete imports
+def unused():
+    gsea_preranked(**{})
+    gsea(**{})
+
+
 last_call_time = None
 MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
 
