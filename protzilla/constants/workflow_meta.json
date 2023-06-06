@@ -1003,6 +1003,84 @@
         }
       }
     },
+    "classification": {
+      "random_forest": {
+        "name": "Random Forest",
+        "description": "",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_df": {
+            "name": "Choose corresponding metadata df",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "train_test_split": {
+            "name": "Choose the size of the test data set (you can either enter the absolute number of test samples or a number between 0.0 and 1.0 to represent the percentage of test samples)",
+            "type": "numeric",
+            "default": 0.20
+          },
+          "validation_strategy": {
+            "name": "Validation Strategy",
+            "type": "categorical_dynamic",
+            "categories": ["K-Fold", "Repeated K-Fold", "Stratified K-Fold", "Leave one out", "Leave p out", "Manual"],
+            "default": "K-Fold",
+            "dynamic_parameters": {
+              "Manual": ["train_val_split"]
+            }
+          },
+          "train_val_split": {
+            "name": "Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 0.20
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical",
+            "categories": ["Grid search", "Randomized search"],
+            "default": "Grid search"
+          },
+          "n_estimators": {
+            "name": "The number of trees in the forest.",
+            "type": "numeric",
+            "default": 100
+          },
+          "criterion": {
+            "name": "The function to measure the quality of a split",
+            "type": "categorical",
+            "categories": [
+              "gini",
+              "log_loss",
+              "entropy"
+            ],
+            "default": "gini"
+          },
+          "max_depth": {
+            "name": "The maximum depth of the tree.",
+            "type": "numeric",
+            "default": 1
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          }
+        }
+      }
+    },
     "dimension_reduction": {
       "t_sne": {
         "name": "t-SNE",
