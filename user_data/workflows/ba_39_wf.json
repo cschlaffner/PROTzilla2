@@ -7,7 +7,7 @@
           "name": "ms_data_import",
           "method": "max_quant_import",
           "parameters": {
-            "intensity_name": "iBAQ"
+            "intensity_name": "Intensity"
           }
         },
         {
@@ -22,8 +22,8 @@
     "data_preprocessing": {
       "steps": [
         {
-          "name": "filter_samples",
-          "method": "proteins_missing_filter",
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
           "parameters": {
             "percentage": 1.0
           },
@@ -34,8 +34,8 @@
           ]
         },
         {
-          "name": "filter_proteins",
-          "method": "samples_missing_filter",
+          "name": "filter_samples",
+          "method": "proteins_missing_filter",
           "parameters": {
             "percentage": 1.0
           },
