@@ -1,6 +1,5 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_clustering_helper import (
@@ -10,6 +9,7 @@ from protzilla.data_analysis.classification_clustering_helper import (
     create_model_evaluation_df,
     create_dict_with_lists_as_values,
     perform_train_test_split,
+    encode_labels,
 )
 
 
@@ -110,13 +110,7 @@ def random_forest(
     # TODO save object model with Pickle
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
-    input_df_wide.sort_values(by="Sample", inplace=True)
-    samples_input_df = input_df_wide.reset_index(names="Sample")["Sample"]
-    y = pd.merge(samples_input_df, labels_df, on="Sample", how="inner")
-    y.sort_values(by="Sample", inplace=True)
-    y = y["Group"]
-    label_encoder = LabelEncoder()
-    y_encoded = label_encoder.fit_transform(y)
+    y_encoded = encode_labels(input_df_wide, labels_df)
 
     clf = RandomForestClassifier()
 
