@@ -4,7 +4,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
-from ..data_integration import enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -43,6 +43,11 @@ method_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency,
+    (
+        "data_preprocessing",
+        "filter_proteins",
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing,
     (
         "data_preprocessing",
         "filter_samples",
@@ -140,6 +145,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
@@ -161,8 +171,18 @@ method_map = {
     (
         "data_integration",
         "enrichment_analysis",
+        "go_analysis_with_STRING",
+    ): enrichment_analysis.go_analysis_with_STRING,
+    (
+        "data_integration",
+        "enrichment_analysis",
         "go_analysis_with_enrichr",
     ): enrichment_analysis.go_analysis_with_enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "go_analysis_offline",
+    ): enrichment_analysis.go_analysis_offline,
 }
 
 # reversed mapping of method callable and location
@@ -179,6 +199,11 @@ plot_map = {
         "filter_proteins",
         "low_frequency_filter",
     ): filter_proteins.by_low_frequency_plot,
+    (
+        "data_preprocessing",
+        "filter_proteins",
+        "low_frequency_filter",
+    ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
         "filter_samples",
@@ -279,4 +304,14 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_bar_plot",
+    ): di_plots.go_enrichment_bar_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_dot_plot",
+    ): di_plots.go_enrichment_dot_plot,
 }

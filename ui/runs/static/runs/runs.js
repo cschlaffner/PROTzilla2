@@ -27,9 +27,9 @@ $(document).ready(function () {
         $('#sidebar').toggleClass('active');
     });
 
-    
-    // show file name on upload
-    $('#file_path').on('change', function(){
-        $('#file-chosen').text(this.files[0].name);
-    })
+    // control file input text
+    $(document).on('change', '.file-input', function() {
+        let id = $(this).attr("id");
+        $('#chosen-' + id).text(this.files[0].name);
+    });
 });

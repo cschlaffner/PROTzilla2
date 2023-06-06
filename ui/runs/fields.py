@@ -1,10 +1,12 @@
 import sys
 
+import pandas
 from django.template.loader import render_to_string
+from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.run_helper import get_parameters, insert_special_params
+from protzilla.run_helper import get_parameters
 from protzilla.workflow_helper import get_workflow_default_param_value
 from ui.runs.views_helper import get_displayed_steps
 
@@ -15,23 +17,20 @@ def make_current_fields(run, section, step, method):
     parameters = get_parameters(run, section, step, method)
     current_fields = []
     for key, param_dict in parameters.items():
-        # todo 59 - restructure current_parameters
-        param_dict = param_dict.copy()  # to not change workflow_meta
-        workflow_default = get_workflow_default_param_value(
-            run.workflow_config, section, step, method, key
+        if "dynamic" in param_dict:
+            continue
+        current_fields.append(
+            make_parameter_input(key, param_dict, parameters, disabled=False)
         )
-        if key in run.current_parameters:
-            param_dict["default"] = run.current_parameters[key]
-        elif workflow_default is not None:
-            param_dict["default"] = workflow_default
-
-        insert_special_params(param_dict, run)
-        current_fields.append(make_parameter_input(key, param_dict, disabled=False))
 
     return current_fields
 
 
-def make_parameter_input(key, param_dict, disabled):
+def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
+    # In this method param_dict refers to the dictionary that contains all
+    # meta information about a specific parameter e.g. type, default value. The
+    # all_parameters_dict refers to the dictionary that contains all parameters for
+    # a method with its corresponding meta information
     if param_dict["type"] == "numeric":
         template = "runs/field_number.html"
         if "step" not in param_dict:
@@ -39,22 +38,23 @@ def make_parameter_input(key, param_dict, disabled):
     elif param_dict["type"] == "categorical":
         param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_select.html"
+    elif param_dict["type"] == "categorical_dynamic":
+        template = "runs/field_select_dynamic.html"
+        selected_category = param_dict["default"]
+        dynamic_fields = make_dynamic_fields(
+            param_dict, selected_category, all_parameters_dict, disabled
+        )
+        param_dict["dynamic_fields"] = dynamic_fields
     elif param_dict["type"] == "file":
         template = "runs/field_file.html"
     elif param_dict["type"] == "named_output":
         template = "runs/field_named.html"
-    elif param_dict["type"] == "named_output_with_fields":
-        template = "runs/field_named_with_fields.html"
-        additional_fields = []
-        for field_key, field_dict in param_dict["fields"].items():
-            additional_fields.append(
-                make_parameter_input(field_key, field_dict, disabled)
-            )
-        param_dict["additional_fields"] = additional_fields
     elif param_dict["type"] == "empty":
         template = "runs/field_empty.html"
     elif param_dict["type"] == "text":
         template = "runs/field_text.html"
+    elif param_dict["type"] == "boolean":
+        template = "runs/field_checkbox.html"
     else:
         raise ValueError(f"cannot match parameter type {param_dict['type']}")
 
@@ -66,6 +66,20 @@ def make_parameter_input(key, param_dict, disabled):
             key=key,
         ),
     )
+
+
+def make_dynamic_fields(param_dict, selected_category, all_parameters_dict, disabled):
+    dynamic_fields = []
+    if selected_category in param_dict["dynamic_parameters"]:
+        dynamic_parameters_list = param_dict["dynamic_parameters"][selected_category]
+        for field_key in dynamic_parameters_list:
+            field_dict = all_parameters_dict[field_key]
+            dynamic_fields.append(
+                make_parameter_input(
+                    field_key, field_dict, all_parameters_dict, disabled
+                )
+            )
+    return dynamic_fields
 
 
 def make_sidebar(request, run, run_name):
@@ -92,7 +106,9 @@ def make_plot_fields(run, section, step, method):
         for key, param_dict in plot.items():
             if method in run.current_plot_parameters:
                 param_dict["default"] = run.current_plot_parameters[method][key]
-            plot_fields.append(make_parameter_input(key, param_dict, disabled=False))
+            plot_fields.append(
+                make_parameter_input(key, param_dict, plot, disabled=False)
+            )
     return plot_fields
 
 
@@ -134,18 +150,42 @@ def make_displayed_history(run):
             for key, param_dict in parameters.items():
                 if key.endswith("_wrapper"):
                     key = key[:-8]
-                if key == "proteins_of_interest" and not key in history_step.parameters:
+                if key == "proteins_of_interest" and key not in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
                 param_dict["default"] = history_step.parameters[key]
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(make_parameter_input(key, param_dict, disabled=True))
-        plots = [
-            plot.to_html(include_plotlyjs=False, full_html=False)
-            for plot in history_step.plots
-            if not isinstance(plot, dict)
-        ]
+                fields.append(
+                    make_parameter_input(key, param_dict, parameters, disabled=True)
+                )
+
+        plots = []
+        for plot in history_step.plots:
+            if isinstance(plot, bytes):
+                # Base64 encoded image
+                plots.append(
+                    '<div class="row d-flex justify-content-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                        plot.decode("utf-8")
+                    )
+                )
+            elif isinstance(plot, dict):
+                if "plot_base64" in plot:
+                    plots.append(
+                        '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
+                            plot["key"], plot["plot_base64"].decode("utf-8")
+                        )
+                    )
+                else:
+                    plots.append(None)
+            else:
+                plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
+
+        has_df = any(
+            isinstance(v, pandas.DataFrame) for v in history_step.outputs.values()
+        )
+        table_url = reverse("runs:tables_nokey", args=(run.run_name, i))
+
         displayed_history.append(
             dict(
                 display_name=name,
@@ -154,6 +194,7 @@ def make_displayed_history(run):
                 section_heading=section_heading,
                 name=run.history.step_names[i],
                 index=i,
+                table_link=table_url if has_df else "",
             )
         )
     return displayed_history

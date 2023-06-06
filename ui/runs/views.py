@@ -3,6 +3,7 @@ import tempfile
 import traceback
 import zipfile
 
+import numpy as np
 import pandas as pd
 from django.contrib import messages
 from django.http import FileResponse, HttpResponseRedirect, JsonResponse
@@ -12,11 +13,14 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+
 from protzilla.run import Run
+from protzilla.run_helper import get_parameters
 from protzilla.utilities.memory import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
+    make_dynamic_fields,
     make_method_dropdown,
     make_name_field,
     make_parameter_input,
@@ -24,7 +28,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_for_plot, parameters_from_post
+from ui.runs.views_helper import parameters_from_post
 
 active_runs = {}
 
@@ -48,6 +52,31 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+
+    current_plots = []
+    for plot in run.plots:
+        if isinstance(plot, bytes):
+            # Base64 encoded image
+            current_plots.append(
+                '<div class="row d-flex justify-content-center mb-4"><img src="data:image/png;base64, {}"></div>'.format(
+                    plot.decode("utf-8")
+                )
+            )
+        elif isinstance(plot, dict):
+            if "plot_base64" in plot:
+                current_plots.append(
+                    '<div class="row d-flex justify-content-center mb-4"><img id="{}" src="data:image/png;base64, {}"></div>'.format(
+                        plot["key"], plot["plot_base64"].decode("utf-8")
+                    )
+                )
+            else:
+                current_plots.append(None)
+        else:
+            current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
+
+    show_table = run.current_out and any(
+        isinstance(v, pd.DataFrame) for v in run.current_out.values()
+    )
     return render(
         request,
         "runs/details.html",
@@ -61,16 +90,13 @@ def detail(request, run_name):
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
             name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
-            current_plots=[
-                plot.to_html(include_plotlyjs=False, full_html=False)
-                for plot in run.plots
-                if not isinstance(plot, dict)
-            ],
+            current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
+            show_table=show_table,
             used_memory=get_memory_usage(),
         ),
     )
@@ -89,6 +115,9 @@ def change_method(request, run_name):
         return response
 
     run.method = request.POST["method"]
+    section, step, _ = run.current_workflow_location()
+    run.update_workflow_config([], update_params=False)
+
     current_fields = make_current_fields(run, run.section, run.step, run.method)
     plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
@@ -101,6 +130,37 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
+        ),
+        safe=False,
+    )
+
+
+def change_dynamic_fields(request, run_name):
+    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run.continue_existing(run_name)
+        run = active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    dynamic_trigger_value = request.POST["selected_input"]
+    dynamic_trigger_key = request.POST["key"]
+    all_parameters_dict = get_parameters(run, run.section, run.step, run.method)
+    dynamic_trigger_param_dict = all_parameters_dict[dynamic_trigger_key]
+    dynamic_fields = make_dynamic_fields(
+        dynamic_trigger_param_dict, dynamic_trigger_value, all_parameters_dict, False
+    )
+    parameters = render_to_string(
+        "runs/fields.html",
+        context=dict(fields=dynamic_fields),
+    )
+    return JsonResponse(
+        dict(
+            parameters=parameters,
         ),
         safe=False,
     )
@@ -131,17 +191,20 @@ def change_field(request, run_name):
 
     fields = {}
     for key in fields_to_fill:
-        if len(selected) == 1:
-            param_dict = parameters[key]
-        else:
-            param_dict = parameters[post_id]["fields"][key]
+        param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected].unique()
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
-            protein_itr = run.history.output_of_named_step(named_output, output_item)
+            # KeyError is expected when named_output triggers the fill
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
             if isinstance(protein_itr, pd.DataFrame):
                 param_dict["categories"] = protein_itr["Protein ID"].unique()
             elif isinstance(protein_itr, pd.Series):
@@ -154,7 +217,30 @@ def change_field(request, run_name):
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
 
-        fields[key] = make_parameter_input(key, param_dict, disabled=False)
+        elif param_dict["fill"] == "enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
+
+            # TODO: this is a bit hacky, but it works for now
+            # should be refactored when we rework the named input handling
+            # KeyError is expected here because named_output trigger change_field
+            # twice to make sure that the categories are updated after the named_output has updated
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
+
+            if (
+                not isinstance(protein_itr, pd.DataFrame)
+                or not "Gene_set" in protein_itr.columns
+            ):
+                param_dict["categories"] = []
+            else:
+                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
+
+        fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
     return JsonResponse(fields, safe=False)
 
@@ -258,24 +344,15 @@ def calculate(request, run_name):
 def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-
-    parameters = {}
-    post_data = dict(request.POST)
-
-    if "csrfmiddlewaretoken" in post_data:
-        del post_data["csrfmiddlewaretoken"]
+    parameters = parameters_from_post(request.POST)
 
     if run.step == "plot":
-        del post_data["chosen_method"]
+        del parameters["chosen_method"]
 
-    param_dict = run.workflow_meta[section][step][method]["parameters"]
-    post_data, parameters = parameters_for_plot(post_data, param_dict)
-
-    parameters.update(parameters_from_post(post_data))
     run.create_plot_from_current_location(parameters)
 
     for index, p in enumerate(run.plots):
-        if isinstance(p, dict):
+        if isinstance(p, dict) and "messages" in p:
             for message in run.plots[index]["messages"]:
                 trace = (
                     build_trace_alert(message["trace"]) if "trace" in message else ""
@@ -351,4 +428,51 @@ def download_plots(request, run_name):
         open(f.name, "rb"),
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
+    )
+
+
+def tables(request, run_name, index, key=None):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+
+    # use current output when applicable (not yet in history)
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
+
+    options = []
+    for k, value in outputs.items():
+        if isinstance(value, pd.DataFrame) and k != key:
+            options.append(k)
+
+    if key is None and options:
+        # choose an option if url without key is used
+        return HttpResponseRedirect(
+            reverse("runs:tables", args=(run_name, index, options[0]))
+        )
+
+    return render(
+        request,
+        "runs/tables.html",
+        context=dict(
+            run_name=run_name,
+            index=index,
+            # put key as first option to make selected
+            options=[(opt, opt) for opt in [key] + options],
+            key=key,
+        ),
+    )
+
+
+def tables_content(request, run_name, index, key):
+    run = active_runs[run_name]
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs[key]
+    else:
+        outputs = run.current_out[key]
+    out = outputs.replace(np.nan, None)
+    return JsonResponse(
+        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )

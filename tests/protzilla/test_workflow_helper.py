@@ -95,6 +95,29 @@ def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
     assert workflow_meta_copy == workflow_meta
 
 
+def test_get_parameter_type(workflow_meta):
+    assert (
+        workflow_helper.get_parameter_type(
+            workflow_meta,
+            "data_preprocessing",
+            "imputation",
+            "knn",
+            "number_of_neighbours",
+        )
+        == "numeric"
+    )
+    assert (
+        workflow_helper.get_parameter_type(
+            workflow_meta,
+            "importing",
+            "ms_data_import",
+            "max_quant_import",
+            "file_path",
+        )
+        == "file"
+    )
+
+
 def test_get_workflow_default_param_value(example_workflow):
     threshold_value = get_workflow_default_param_value(
         example_workflow,
@@ -110,9 +133,17 @@ def test_get_workflow_default_param_value(example_workflow):
         "median",
         "output_name",
     )
+    output_name_t_test = get_workflow_default_param_value(
+        example_workflow,
+        "data_analysis",
+        "differential_expression",
+        "t_test",
+        "output_name",
+    )
 
     assert threshold_value == 0.2
     assert output_name == "preprocessed-data"
+    assert output_name_t_test == None
 
 
 def test_get_workflow_default_param_value_nonexistent(example_workflow_short):

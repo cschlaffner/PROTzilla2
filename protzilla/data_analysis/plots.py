@@ -102,6 +102,8 @@ def create_volcano_plot(
 
     if proteins_of_interest is None:
         proteins_of_interest = []
+    elif not isinstance(proteins_of_interest, list):
+        proteins_of_interest = [proteins_of_interest]
 
     # annotate the proteins of interest permanently in the plot
     for protein in proteins_of_interest:
