@@ -15,50 +15,26 @@ from sklearn.model_selection import (
 from sklearn.preprocessing import LabelEncoder
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
+from protzilla.data_analysis.classification_clustering_helper import GridSearchManual
 
 
 def perform_grid_search(
     grid_search_model, model, param_grid: dict, scoring, cv=None, train_val_split=None
 ):
     if grid_search_model == "Grid search":
-        clf = GridSearchCV(
+        return GridSearchCV(
             model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
         )
-        return clf
     elif grid_search_model == "Randomized search":
-        clf = RandomizedSearchCV(
+        return RandomizedSearchCV(
             model,
             param_distributions=param_grid,
             scoring=scoring,
             cv=cv,
             error_score="raise",
         )
-        return clf
     else:
-        # refactor this an create a custom estimator that does this
-        X_train, X_val, y_train, y_val = train_val_split
-        # Initialize dictionaries to store results
-        results = {
-            "mean_train_score": [],
-            "mean_test_score": [],
-            "std_train_score": [],
-            "std_test_score": [],
-        }
-
-        # Iterate over the parameter grid
-        for params in ParameterGrid(param_grid):
-            model = model.set_params(**params)
-            model.fit(X_train, y_train)
-            train_scores = model.score(X_train, y_train)
-            val_scores = model.score(X_val, y_val)
-
-            # Store the results for the current parameter combination
-            results = update_raw_evaluation_data(
-                results, params, train_scores, val_scores
-            )
-        results_df = pd.DataFrame(results)
-
-        return model, results_df
+        return GridSearchManual(model=model, param_grid=param_grid)
 
 
 def perform_cross_validation(
@@ -169,15 +145,15 @@ def perform_classification(
             input_df, labels_df, test_size=test_validate_split
         )
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model, raw_evaluation_df = perform_grid_search(
+        model = perform_grid_search(
             grid_search_method,
             clf,
             clf_parameters,
             scoring,
-            train_val_split=train_val_split,
         )
+        model.fit(train_val_split)
         model_evaluation_df = create_model_evaluation_df(
-            raw_evaluation_df, clf_parameters
+            pd.DataFrame(model.results), clf_parameters
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual":
@@ -186,7 +162,7 @@ def perform_classification(
         model = perform_grid_search(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
-        model.fit(input_df, labels_df)
+        model.fit(input_df, input_df)
 
         # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df(
@@ -217,6 +193,8 @@ def random_forest(
     # TODO add user is able to choose group from metadata
     # TODO add parameters for gridsearch and cross validation
     # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
+    # TODO how to refit
+    # TODO save object model with Pickle
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
@@ -250,3 +228,4 @@ def random_forest(
         scoring,
         **kwargs,
     )
+    return dict(model=model, model_evaluation_df=model_evaluation_df)
