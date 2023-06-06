@@ -1404,7 +1404,7 @@
         }
       },
       "go_enrichment_dot_plot": {
-        "name": "Dot plot for GO enrichment analysis (oflline & with Enrichr) ",
+        "name": "Dot plot for GO enrichment analysis (offline & with Enrichr) ",
         "description": "Creates a categorical scatter plot from GO enrichment data",
         "parameters": {
           "input_df": {

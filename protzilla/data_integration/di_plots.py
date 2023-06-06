@@ -76,7 +76,7 @@ def go_enrichment_bar_plot(
 
     if value == "fdr":  # only available for restring result
         if restring_input:
-            # manual cutoff because gseapy does not support cutoffs for restring files
+            # manual cutoff because gseapy does not support cutoffs for fdr
             # and user expects the supplied cutoff to be applied
             df = df[df["fdr"] <= cutoff]
             if len(df) == 0:
@@ -85,7 +85,7 @@ def go_enrichment_bar_plot(
 
             column = "-log10(FDR)"
             df[column] = -1 * np.log10(df["fdr"])
-            # prevent cutoff from being applied again by barplot method
+            # prevent cutoff from being applied again by bar plot method
             cutoff = df[column].max()
         else:
             return [
