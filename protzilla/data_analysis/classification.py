@@ -3,7 +3,8 @@ from sklearn.ensemble import RandomForestClassifier
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_clustering_helper import (
-    perform_grid_search,
+    perform_grid_search_cv,
+    perform_grid_search_manual,
     perform_cross_validation,
     update_raw_evaluation_data,
     create_model_evaluation_df,
@@ -58,7 +59,7 @@ def perform_classification(
             input_df, labels_df, test_size=test_validate_split
         )
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model = perform_grid_search(
+        model = perform_grid_search_manual(
             grid_search_method,
             clf,
             clf_parameters,
@@ -72,7 +73,7 @@ def perform_classification(
     elif validation_strategy != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         cv = perform_cross_validation(cross_validation_estimator, **parameters)
-        model = perform_grid_search(
+        model = perform_grid_search_cv(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
         model.fit(input_df, labels_df)
@@ -90,10 +91,6 @@ def random_forest(
     n_estimators=100,
     criterion="gini",
     max_depth=None,
-    min_samples_split=2,
-    min_samples_leaf=1,
-    max_features="sqrt",
-    max_leaf_nodes=None,
     bootstrap=True,
     random_state=42,
     model_selection: str = "Grid search",
@@ -108,6 +105,7 @@ def random_forest(
     # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
     # TODO how to refit
     # TODO save object model with Pickle
+    # TODO add parameter train_test_split
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     y_encoded = encode_labels(input_df_wide, labels_df)
@@ -118,10 +116,6 @@ def random_forest(
         n_estimators=n_estimators,
         criterion=criterion,
         max_depth=max_depth,
-        min_samples_split=min_samples_split,
-        min_samples_leaf=min_samples_leaf,
-        max_features=max_features,
-        max_leaf_nodes=max_leaf_nodes,
         bootstrap=bootstrap,
         random_state=random_state,
     )

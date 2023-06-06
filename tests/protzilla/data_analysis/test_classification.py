@@ -81,7 +81,7 @@ def meta_numeric_df():
     "validation_strategy,model_selection",
     [
         ("Manual", "Manual"),
-        ("Manual", "Grid search Manual"),
+        ("Manual", "Grid search"),
         ("K-Fold", "Manual"),
         ("K-Fold", "Grid search"),
         ("K-Fold", "Randomized search"),

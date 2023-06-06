@@ -28,8 +28,8 @@ def encode_labels(input_df_wide, labels_df):
     return y_encoded
 
 
-def perform_grid_search(
-    grid_search_model, model, param_grid: dict, scoring, cv=None, train_val_split=None
+def perform_grid_search_cv(
+    grid_search_model, model, param_grid: dict, scoring, cv=None
 ):
     if grid_search_model == "Grid search" or grid_search_model == "Manual":
         return GridSearchCV(
@@ -43,8 +43,18 @@ def perform_grid_search(
             cv=cv,
             error_score="raise",
         )
-    elif grid_search_model == "Grid search Manual":
+
+
+def perform_grid_search_manual(
+    grid_search_model,
+    model,
+    param_grid: dict,
+    scoring,
+):
+    if grid_search_model == "Grid search":
         return GridSearchManual(model=model, param_grid=param_grid)
+    elif grid_search_model == "Randomized search":
+        pass
 
 
 def perform_cross_validation(
