@@ -54,7 +54,7 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
         .nunique()
     )
     filtered_samples_list = sample_protein_count[
-        ~sample_protein_count.gt(total_protein_count * percentage)
+        ~sample_protein_count.ge(total_protein_count * percentage)
     ].index.tolist()
     return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
         filtered_samples=filtered_samples_list
