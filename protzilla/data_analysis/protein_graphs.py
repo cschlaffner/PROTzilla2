@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
+    logger.info(f"Creating graph for protein {protein_id}")
     run_path = f"{RUNS_PATH}/{run_name}"
     path_to_protein_file, request = _get_protein_file(protein_id, run_path)
 
@@ -47,7 +48,7 @@ def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
     subprocess.run(cmd_str, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
-
+    logging.info(msg)
     return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
@@ -57,9 +58,9 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     filter = df["Protein ID"].str.contains(pattern)
     df = df[~filter]
 
-    # TODO: check with chris how this should be done
     intensity_name = [col for col in df.columns if "intensity" in col][0]
     df = df.dropna(subset=[intensity_name])
+    # TODO drop where values == 0
 
     if df.empty:
         return dict(
@@ -81,17 +82,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             messages=[dict(level=messages.INFO, msg="Graph already exists")],
         )
 
-    if protein_id not in peptide_df["Protein ID"].tolist():
-        return dict(
-            graph_path=out_dict["graph_path"],
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg=f"Protein {protein_id} cannot be found in the peptide data",
-                )
-            ],
-        )
-
     if out_dict["graph_path"] is None:
         return out_dict
     graph_path = out_dict["graph_path"]
@@ -101,6 +91,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     protein_graph = nx.read_graphml(graph_path)
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
+    matched_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}_modified.graphml"
 
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
 
@@ -137,7 +128,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             else:
                 peptide_mismatches.append(peptide)
         peptide_matches[peptide] = matched_starts
-    logger.info(f"peptide matches: {peptide_matches}")
+
+    logger.info(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
     logger.info(f"peptide mismatches: {peptide_mismatches}")
 
     peptide_to_node = {}
@@ -167,16 +159,16 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     next_start = math.inf
 
                 if aa_match_values[1] < match_start_pos:
-                    logger.info(
+                    logger.debug(
                         "found 'less than match start'", peptide, aa_match_values[1]
                     )
                     continue
                 if aa_match_values[1] > match_start_pos + peptide_len:
-                    logger.warning(
+                    logger.debug(
                         "should probably be skipped as likely part of next match"
                     )
                 if aa_match_values[1] >= next_start:
-                    logger.info(
+                    logger.debug(
                         "found 'greater than next start'", peptide, aa_match_values[1]
                     )
                     continue
@@ -225,7 +217,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                                 0
                             ]
                         ):
-                            logger.warning(
+                            logger.debug(
                                 f"match_start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
                             )
 
@@ -372,12 +364,14 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     protein_graph.add_edge(match_node_id, successor)
                     protein_graph.remove_edge(node, successor)
 
-    nx.write_graphml(protein_graph, graph_path)
+    nx.write_graphml(protein_graph, matched_graph_path)
 
     return dict(
         graph_path=graph_path,
-        peptide_matches=peptide_matches,  # , messages=[out_dict["messages"]]
+        matched_graph_path=matched_graph_path,
+        peptide_matches=peptide_matches,
         peptide_mismatches=peptide_mismatches,
+        messages=out_dict["messages"],
     )
 
 
@@ -392,12 +386,10 @@ def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
             break
     else:
         msg = "No starting point found in the graph. An error in the graph creation is likely."
+        logging.error(msg)
         return None, msg
 
     longest_paths = _longest_paths(protein_graph, starting_point)
-    # print("longest path")
-    # print(longest_paths)
-    # print(max(longest_paths))
 
     for node in protein_graph.nodes:
         if (
@@ -454,15 +446,15 @@ def _longest_paths(protein_graph: nx.Graph, start_node: str):
         else:
             aminoacid_len = len(protein_graph.nodes[node]["aminoacid"])
 
-        # TODO: ´if` might be unnecessary
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
                 distances[neighbor] = max(
                     distances[neighbor], distances[node] + aminoacid_len
                 )
-
         else:
-            print(f"node {node} distance is -1, skipping")
+            raise Exception(
+                f"The node {node} was not visited in the topological order (distance should be set already)"
+            )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
 
@@ -489,6 +481,7 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
             f"Protein file {path_to_protein_file} already exists. Skipping download."
         )
     else:
+        logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
         if r.status_code == 200:
             with open(path_to_protein_file, "wb") as f:
@@ -500,6 +493,7 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
 
 
 def _create_ref_seq_index(protein_path: str, k: int = 5):
+    logger.info("Creating reference sequence index")
     ref_seq, seq_len = _get_ref_seq(protein_path)
 
     # create index
