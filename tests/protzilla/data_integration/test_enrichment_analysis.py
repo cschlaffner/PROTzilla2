@@ -1,12 +1,12 @@
 import os
 import shutil
 import time
-import requests
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (

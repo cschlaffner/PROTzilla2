@@ -499,10 +499,14 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = enrichr_helper(up_protein_list, protein_sets, organism, "up")
+        up_enriched, up_filtered_groups = enrichr_helper(
+            up_protein_list, protein_sets, organism, "up"
+        )
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = enrichr_helper(down_protein_list, protein_sets, organism, "down")
+        down_enriched, down_filtered_groups = enrichr_helper(
+            down_protein_list, protein_sets, organism, "down"
+        )
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
@@ -524,7 +528,11 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             messages=out_messages,
         )
 
-    return {"results": enriched, "filtered_groups": filtered_groups}
+    return {
+        "results": enriched,
+        "filtered_groups": filtered_groups,
+        "messages": out_messages,
+    }
 
 
 def go_analysis_offline(proteins, protein_sets_path, background=None, direction="both"):
