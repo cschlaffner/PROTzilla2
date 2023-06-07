@@ -1,0 +1,219 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "low_frequency_filter",
+          "parameters": {
+            "threshold": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "outlier_detection",
+          "method": "local_outlier_factor",
+          "parameters": {
+            "number_of_neighbors": 3
+          },
+          "output_name": null
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "fc_threshold": 0,
+            "log_base": 2,
+            "grouping": "Group",
+            "group1": "CTR",
+            "group2": "AD",
+            "metadata_df": ""
+          },
+          "output_name": "ttest"
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_with_STRING",
+          "parameters": {
+            "proteins": [
+              "ttest",
+              "log2_fold_change_df"
+            ],
+            "protein_set_dbs": [
+              "KEGG",
+              "Process"
+            ],
+            "organism": 9606,
+            "direction": "both"
+          },
+          "output_name": "enrichment_STRING"
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_with_enrichr",
+          "parameters": {
+            "proteins": [
+              "ttest",
+              "log2_fold_change_df"
+            ],
+            "protein_sets": [
+              "KEGG_2013",
+              "KEGG_2015"
+            ],
+            "organism": "human"
+          },
+          "output_name": "enrichment_enrichr"
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "go_analysis_offline",
+          "parameters": {
+            "proteins": [
+              "ttest",
+              "log2_fold_change_df"
+            ]
+          },
+          "output_name": "enrichment_offline"
+        },
+        {
+          "name": "plot",
+          "method": "go_enrichment_bar_plot",
+          "parameters": {
+            "input_df": [
+              "enrichment_STRING",
+              "enriched_df"
+            ],
+            "categories": [
+              "Process",
+              "KEGG"
+            ],
+            "value": "p_value",
+            "top_terms": 10,
+            "cutoff": 0.05,
+            "title": ""
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
+          "method": "go_enrichment_dot_plot",
+          "parameters": {
+            "input_df": [
+              "enrichment_enrichr",
+              "results"
+            ],
+            "x_axis_type": "Gene Sets",
+            "categories": [
+              "KEGG_2013",
+              "KEGG_2015"
+            ],
+            "top_terms": 5,
+            "cutoff": 0.05,
+            "title": "",
+            "rotate_x_labels": true,
+            "dot_size": 5
+          },
+          "output_name": null
+        }
+      ]
+    }
+  }
+}

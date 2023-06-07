@@ -207,6 +207,7 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
     runner.compute_workflow()
 
 
+@pytest.mark.internet()
 def test_integration_all_methods_runner(
     workflow_meta, metadata_path, ms_data_path, tests_folder_name, peptide_path
 ):
@@ -214,10 +215,13 @@ def test_integration_all_methods_runner(
         workflow1 = json.load(f)
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods2.json", "r") as f:
         workflow2 = json.load(f)
+    with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods_enrichment.json", "r") as f:
+        workflow_enrichment = json.load(f)
 
-    test_workflows = [workflow1, workflow2]
+    test_workflows = [workflow_enrichment, workflow1, workflow2]
     # test if all methods are covered in test_workflows
-    tested_methods = set()
+    # excluding ms_fragger_import because of different input file
+    tested_methods = {('ms_data_import', 'ms_fragger_import')}
     existing_methods = set()
 
     for workflow in test_workflows:
