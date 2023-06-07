@@ -377,6 +377,13 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism):
 
     gene_symbols, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(proteins)
 
+    if not gene_symbols:
+        msg = "All proteins could not be mapped to gene symbols"
+        return dict(
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+
     enr = gp.enrichr(
         gene_list=gene_symbols,
         gene_sets=protein_sets,

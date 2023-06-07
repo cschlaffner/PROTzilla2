@@ -121,7 +121,12 @@ class History:
             if saved_name == name:
                 if output == "dataframe":
                     return step.dataframe
-                return step.outputs[output]
+                try:
+                    return step.outputs[output]
+                except KeyError:
+                    raise Exception(
+                        f"output: {output} not in step.outputs: {step.outputs.keys()}"
+                    )
         raise ValueError(f"no step named '{name}'")
 
     def pop_step(self):

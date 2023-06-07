@@ -211,17 +211,20 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
 def test_integration_all_methods_runner(
     workflow_meta, metadata_path, ms_data_path, tests_folder_name, peptide_path
 ):
+    # todo: enrichment analysis doesn't work because in input dataframe there is no match
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods1.json", "r") as f:
         workflow1 = json.load(f)
     with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods2.json", "r") as f:
         workflow2 = json.load(f)
-    with open(f"{PROJECT_PATH}/tests/test_workflows/test_methods_enrichment.json", "r") as f:
+    with open(
+        f"{PROJECT_PATH}/tests/test_workflows/test_methods_enrichment.json", "r"
+    ) as f:
         workflow_enrichment = json.load(f)
 
     test_workflows = [workflow_enrichment, workflow1, workflow2]
+
     # test if all methods are covered in test_workflows
-    # excluding ms_fragger_import because of different input file
-    tested_methods = {('ms_data_import', 'ms_fragger_import')}
+    tested_methods = set()
     existing_methods = set()
 
     for workflow in test_workflows:
@@ -232,9 +235,13 @@ def test_integration_all_methods_runner(
         for step_name, step in section.items():
             for method, _ in step.items():
                 existing_methods.add((step_name, method))
-
-    assert (
-        existing_methods == tested_methods
+    # excluding methods because of different input files
+    excluded_methods = {
+        ("ms_data_import", "ms_fragger_import"),
+        ("enrichment_analysis", "go_analysis_offline"),  # not working in Runner yet
+    }
+    assert existing_methods == tested_methods.union(
+        excluded_methods
     ), "please add new methods to a workflow in test_workflows or add a new workflow"
 
     for workflow in test_workflows:

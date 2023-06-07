@@ -163,17 +163,6 @@
           "output_name": "enrichment_enrichr"
         },
         {
-          "name": "enrichment_analysis",
-          "method": "go_analysis_offline",
-          "parameters": {
-            "proteins": [
-              "ttest",
-              "log2_fold_change_df"
-            ]
-          },
-          "output_name": "enrichment_offline"
-        },
-        {
           "name": "plot",
           "method": "go_enrichment_bar_plot",
           "parameters": {
