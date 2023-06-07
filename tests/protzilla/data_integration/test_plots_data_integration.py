@@ -45,7 +45,7 @@ def test_enrichment_bar_plot_restring(show_figures):
 def test_enrichment_bar_plot(show_figures):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     bar_base64 = go_enrichment_bar_plot(
         input_df=enrichment_df,
@@ -72,7 +72,7 @@ def test_enrichment_bar_plot_empty_df():
 def test_enrichment_bar_plot_no_category():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     current_out = go_enrichment_bar_plot(
         input_df=enrichment_df,
@@ -113,7 +113,7 @@ def test_enrichment_bar_plot_cutoff():
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
 
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     current_out = go_enrichment_bar_plot(
         input_df=enrichment_df,
