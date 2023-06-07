@@ -296,22 +296,17 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             symbols = set()
             for protein in group.split(";"):
                 if "-" in protein:
-                    symbols.add(q.get(protein.split("-")[0], None))
+                    protein = protein.split("-")[0]
                 elif "_VAR_" in protein:
-                    symbols.add(q.get(protein.split("_VAR_")[0], None))
-                else:
-                    symbols.add(q.get(protein, None))
+                    protein = protein.split("_VAR_")[0]
+                if result := q.get(protein):
+                    symbols.add(result)
 
-            symbols = list(symbols)
-            if not any(symbols):
-                # no gene symbol for any protein in group
+            if not symbols:  # no gene symbol for any protein in group
                 filtered_groups.append(group)
-            elif len(symbols) == 1:
-                gene_mapping[symbols[0].upper()] = group
             else:
-                gene_mapping.update(
-                    {s.upper(): group for s in symbols if s is not None}
-                )
+                for symbol in symbols:
+                    gene_mapping[symbol.upper()] = group
 
     return gene_mapping, filtered_groups
 
@@ -349,26 +344,67 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
 
             # merge proteins, genes and overlap columns
             if mapped:
-                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(","))
+                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(";"))
                 proteins.update(
-                    down_enriched.loc[(gene_set, term), "Proteins"].split(",")
+                    down_enriched.loc[(gene_set, term), "Proteins"].split(";")
                 )
-                enriched.loc[(gene_set, term), "Proteins"] = ",".join(list(proteins))
+                enriched.loc[(gene_set, term), "Proteins"] = ";".join(list(proteins))
 
             genes = set(up_enriched.loc[(gene_set, term), "Genes"].split(";"))
             genes.update(down_enriched.loc[(gene_set, term), "Genes"].split(";"))
             enriched.loc[(gene_set, term), "Genes"] = ";".join(list(genes))
 
-            enriched.loc[(gene_set, term), "Overlap"] = (
-                str(len(genes))
-                + "/"
-                + str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
-            )
-
+            total = str(up_enriched.loc[(gene_set, term), "Overlap"]).split("/")[1]
+            enriched.loc[(gene_set, term), "Overlap"] = f"{len(genes)}/{total}"
         else:
             enriched.loc[(gene_set, term), :] = down_enriched.loc[(gene_set, term), :]
 
     return enriched.reset_index()
+
+
+def enrichr_helper(protein_list, protein_sets, organism, direction):
+    """
+    A helper method for the enrichment analysis with Enrichr. It maps the proteins to uppercase gene symbols
+    and performs the enrichment analysis with GSEApy. It returns the enrichment results and the groups that
+    were filtered out because no gene symbol could be found.
+
+    :param protein_list: list of proteins
+    :type protein_list: list
+    :param protein_sets: list of protein sets to perform the enrichment analysis with
+    :type protein_sets: list
+    :param organism: organism
+    :type organism: str
+    :param direction: direction of regulation ("up" or "down")
+    :type direction: str
+    """
+    logging.info("Mapping Uniprot IDs to gene symbols")
+    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_list)
+    logging.info(f"Starting analysis for {direction}-regulated proteins")
+
+    try:
+        enriched = gp.enrichr(
+            gene_list=list(gene_mapping.keys()),
+            gene_sets=protein_sets,
+            organism=organism,
+            outdir=None,
+            verbose=True,
+        ).results
+    except ValueError as e:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="Something went wrong with the analysis. Please check your inputs.",
+                    trace=str(e),
+                )
+            ]
+        )
+
+    enriched["Proteins"] = enriched["Genes"].apply(
+        lambda x: ";".join([gene_mapping[gene] for gene in x.split(";")])
+    )
+    logging.info(f"Finished analysis for {direction}-regulated proteins")
+    return enriched, filtered_groups
 
 
 def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both"):
@@ -383,7 +419,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
     :type proteins: list, series or dataframe
     :param protein_sets: list of Enrichr Library name(s) to use as sets for the enrichment
         (e.g. ['KEGG_2016','KEGG_2013'])
-    :type protein_sets_path: list of str
+    :type protein_sets: list of str
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
@@ -418,11 +454,11 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
-    if len(up_protein_list) == 0:
+    if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-        elif direction == "both" and len(down_protein_list) == 0:
+        elif direction == "both" and not down_protein_list:
             msg = "No proteins found. Check your input."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
@@ -431,7 +467,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if len(down_protein_list) == 0:
+    if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -442,66 +478,14 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        logging.info("Starting analysis for up-regulated proteins")
-        logging.info("Mapping Uniprot IDs to gene symbols")
-        up_gene_mapping, up_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
-            up_protein_list
+        up_enriched, up_filtered_groups = enrichr_helper(
+            up_protein_list, protein_sets, organism, "up"
         )
-
-        try:
-            up_enriched = gp.enrichr(
-                gene_list=list(up_gene_mapping.keys()),
-                gene_sets=protein_sets,
-                organism=organism,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-
-        up_enriched["Proteins"] = up_enriched["Genes"].apply(
-            lambda x: ",".join([up_gene_mapping[gene] for gene in x.split(";")])
-        )
-        logging.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
-        logging.info("Starting analysis for down-regulated proteins")
-        logging.info("Mapping Uniprot IDs to gene symbols")
-        down_gene_mapping, down_filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
-            down_protein_list
+        down_enriched, down_filtered_groups = enrichr_helper(
+            down_protein_list, protein_sets, organism, "down"
         )
-
-        try:
-            down_enriched = gp.enrichr(
-                gene_list=list(down_gene_mapping.keys()),
-                gene_sets=protein_sets,
-                organism=organism,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-
-        down_enriched["Proteins"] = down_enriched["Genes"].apply(
-            lambda x: ",".join([down_gene_mapping[gene] for gene in x.split(";")])
-        )
-        logging.info("Finished analysis for down-regulated proteins")
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
@@ -514,7 +498,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             up_filtered_groups if direction == "up" else down_filtered_groups
         )
 
-    if len(filtered_groups) > 0:
+    if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
@@ -523,7 +507,11 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             messages=out_messages,
         )
 
-    return {"results": enriched, "filtered_groups": filtered_groups}
+    return {
+        "results": enriched,
+        "filtered_groups": filtered_groups,
+        "messages": out_messages,
+    }
 
 
 def go_analysis_offline(proteins, protein_sets_path, background=None, direction="both"):
@@ -551,7 +539,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         background is provided, all proteins in protein sets are used.
         The background is defined by your experiment.
     :type background: str or None
-        :param direction: direction of enrichment analysis.
+    :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
@@ -583,7 +571,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
-    if len(up_protein_list) == 0:
+    if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -596,7 +584,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if len(down_protein_list) == 0:
+    if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])

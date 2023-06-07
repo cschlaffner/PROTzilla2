@@ -4,6 +4,7 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
@@ -346,6 +347,15 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
 def test_go_analysis_with_enrichr(mock_gene_mapping):
+    # Check if enrichr API is available
+    api_url = "https://maayanlab.cloud/Enrichr/addList"
+    try:
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            pytest.skip("Enrichr API is currently unavailable")
+    except requests.exceptions.RequestException:
+        pytest.skip("Enrichr API is currently unavailable")
+
     proteins = [
         "Protein1",
         "Protein2",
@@ -622,9 +632,9 @@ def test_merge_up_down_regulated_proteins_results():
             "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
             "Proteins": [
                 "Protein1",
-                "Protein2,Protein3",
+                "Protein2;Protein3",
                 "Protein4",
-                "Protein3,Protein4;Protein5",
+                "Protein3;Protein4;Protein5",
             ],
             "Genes": ["Gene1", "Gene2;GeneX", "Gene4", "Gene4;GeneX"],
             "Overlap": ["1/10", "2/30", "1/40", "2/40"],
@@ -639,18 +649,10 @@ def test_merge_up_down_regulated_proteins_results():
     merged = merged.sort_index()
     expected_output = expected_output.sort_index()
 
-    merged["Genes"] = merged["Genes"].apply(lambda x: set(x.split(";")))
-    expected_output["Genes"] = expected_output["Genes"].apply(
-        lambda x: set(x.split(";"))
-    )
-    merged["Genes"] = merged["Genes"].apply(lambda x: sorted(x))
-    expected_output["Genes"] = expected_output["Genes"].apply(lambda x: sorted(x))
-
-    merged["Proteins"] = merged["Proteins"].apply(lambda x: set(x.split(",")))
-    expected_output["Proteins"] = expected_output["Proteins"].apply(
-        lambda x: set(x.split(","))
-    )
-    merged["Proteins"] = merged["Proteins"].apply(lambda x: sorted(x))
-    expected_output["Proteins"] = expected_output["Proteins"].apply(lambda x: sorted(x))
+    for col in ["Genes", "Proteins"]:
+        merged[col] = merged[col].apply(lambda x: set(x.split(";")))
+        expected_output[col] = expected_output[col].apply(lambda x: set(x.split(";")))
+        merged[col] = merged[col].apply(lambda x: sorted(x))
+        expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
     pd.testing.assert_frame_equal(merged, expected_output)

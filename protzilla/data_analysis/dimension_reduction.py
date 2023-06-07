@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 from sklearn.manifold import TSNE
-from umap import UMAP
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -135,6 +134,9 @@ def umap(
     :param random_state: determines the random number generator.
     :type random_state: int
     """
+
+    # umap import is slow, so it should only get imported when needed
+    from umap import UMAP
 
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
