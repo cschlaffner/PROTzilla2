@@ -1296,16 +1296,6 @@
               "worm"
             ],
             "default": "human"
-          },
-          "direction": {
-            "name": "Direction of the analysis",
-            "type": "categorical",
-            "categories": [
-              "both",
-              "up",
-              "down"
-            ],
-            "default": "both"
           }
         }
       },
@@ -1330,16 +1320,6 @@
             "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
-          },
-          "direction": {
-            "name": "Direction of the analysis",
-            "type": "categorical",
-            "categories": [
-              "both",
-              "up",
-              "down"
-            ],
-            "default": "both"
           }
         }
       },
