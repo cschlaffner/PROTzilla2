@@ -144,8 +144,8 @@ def random_forest(
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
-        X_test_df=X_test,
-        y_test_df=y_test,
-        X_train_df=X_train,
-        y_train_df=y_train,
+        X_test_df=pd.DataFrame(X_test),
+        y_test_df=pd.DataFrame(y_test),
+        X_train_df=pd.DataFrame(X_train),
+        y_train_df=pd.DataFrame(y_train),
     )
