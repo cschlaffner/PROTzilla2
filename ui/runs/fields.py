@@ -149,6 +149,8 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
+                if "dynamic" in param_dict:
+                    continue
                 if key.endswith("_wrapper"):
                     key = key[:-8]
                 if key == "proteins_of_interest" and key not in history_step.parameters:

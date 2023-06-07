@@ -69,7 +69,11 @@
                                     {% endif %}
 
                                     <div class="mb-3">
-                                        {% include "runs/fields.html" with fields=step.fields %}
+                                        {% if "Classification" in step.display_name%}
+                                            {% include "runs/fields_classification_methods.html" with fields=step.fields %}
+                                        {% else %}
+                                            {% include "runs/fields.html" with fields=step.fields %}
+                                        {% endif %}
                                         <div class="d-flex flex-nowrap">
                                             {% if step.table_link %}
                                                 <a href="{{ step.table_link }}" target="_blank"
