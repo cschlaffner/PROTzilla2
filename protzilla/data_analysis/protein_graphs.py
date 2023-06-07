@@ -113,7 +113,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     # Peptide Matching
     peptide_matches = {}
-    mismatched_peptides = []
+    peptide_mismatches = []
     print("peptides")
     print(peptides)
     for peptide in peptides:
@@ -132,7 +132,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             if mismatch_counter <= allowed_mismatches:
                 matched_starts.append(match_start_pos)
             else:
-                mismatched_peptides.append(peptide)
+                peptide_mismatches.append(peptide)
         peptide_matches[peptide] = matched_starts
     logging.info("peptide_matches:\n", peptide_matches)
 
@@ -314,7 +314,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     {
                         node: {
                             "aminoacid": protein_graph.nodes[node]["aminoacid"],
-                            "match": True,
+                            "match": "true",
                         }
                     },
                 )
@@ -323,14 +323,16 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             before_node = False
             if start > longest_paths[node]:
                 before_node = True
-                before_node_label = old_node["aminoacid"][: start - longest_paths[node]]
+                before_node_label = old_node["aminoacid"][longest_paths[node] : start]
+                # print("before_node_label, s, e")
+                # print(before_node_label, start, end)
                 # get predecessor of old node, connect edges to before_node
                 # protein_graph.predecessors(node)
                 before_node_id = f"n{len(protein_graph.nodes)}"
                 predecessors = list(protein_graph.predecessors(node))
 
                 protein_graph.add_node(
-                    before_node_id, aminoacid=before_node_label, match=False
+                    before_node_id, aminoacid=before_node_label, match="false"
                 )
                 for predecessor in predecessors:
                     protein_graph.add_edge(predecessor, before_node_id)
@@ -347,14 +349,14 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             ]
             match_node_id = f"n{len(protein_graph.nodes)}"
             protein_graph.add_node(
-                match_node_id, aminoacid=match_node_label, match=True
+                match_node_id, aminoacid=match_node_label, match="true"
             )
             # create edges to match_node from before_node to match_node
             # or from predecessors of old_node to match_node if no before_node
             if before_node:
                 protein_graph.add_edge(before_node_id, match_node_id)
                 longest_paths[match_node_id] = longest_paths[before_node_id] + len(
-                    match_node_label
+                    before_node_label
                 )
             else:
                 longest_paths[match_node_id] = longest_paths[node]
@@ -366,13 +368,29 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     protein_graph.add_edge(predecessor, match_node_id)
                     protein_graph.remove_edge(predecessor, node)
 
-            if end != longest_paths[node] + len(old_node["aminoacid"]):
-                after_node_label = old_node["aminoacid"][longest_paths[node] :]
+            # after_node scheint noch n bisschen broken zu sein -> label nicht richtig gesetzt
+            # -> vorherige AAs noch dabei, einige am ende verschluckt?
+
+            if end < longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]):
+                after_node_label = old_node["aminoacid"][
+                    longest_paths[match_node_id] + len(match_node_label) :
+                ]
+                print("after_node_label")
+                print(after_node_label)
                 nx.set_node_attributes(
                     protein_graph,
-                    {node: {"aminoacid": after_node_label, "match": False}},
+                    {node: {"aminoacid": after_node_label, "match": "false"}},
                 )
                 protein_graph.add_edge(match_node_id, node)
+                longest_paths[node] = longest_paths[match_node_id] + len(
+                    match_node_label
+                )
+            elif end > longest_paths[node] + len(
+                protein_graph.nodes[node]["aminoacid"]
+            ):
+                raise Exception(
+                    "end > longest_paths[node] + len(protein_graph.nodes[node]['aminoacid'])"
+                )
             else:
                 successors = list(protein_graph.successors(node))
                 for successor in successors:
@@ -391,6 +409,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     return dict(
         graph_path=graph_path,
         peptide_matches=peptide_matches,  # , messages=[out_dict["messages"]]
+        peptide_mismatches=peptide_mismatches,
     )
 
 
