@@ -665,7 +665,7 @@ def test_gsea():
         f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
         index_col=0,
     )
-    print(proteins)
+
     result = gsea(proteins)
     print(result)
 
@@ -677,5 +677,5 @@ def test_gsea_preranked():
         index_col=0,
     )
     current_out = gsea_preranked(proteins_significant, "ascending")
-    print(current_out["enriched_df"])
-
+    current_out["enriched_df"].to_csv("enriched_preranked.csv")
+    current_out["ranking"].to_csv("ranking_preranked.csv")
