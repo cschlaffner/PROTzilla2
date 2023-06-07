@@ -93,6 +93,7 @@ def test_random_forest(validation_strategy, model_selection):
     random_forest(
         input_df,
         meta_df[["Sample", "Group"]],
+        "Group",
         n_estimators=3,
         test_validate_split=0.20,
         model_selection=model_selection,

@@ -89,6 +89,7 @@ def random_forest(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
+    train_test_split: int = 0.2,
     n_estimators=100,
     criterion="gini",
     max_depth=None,
@@ -99,21 +100,27 @@ def random_forest(
     scoring: list[str] = "accuracy",
     **kwargs,
 ):
-    # TODO select right column from labels_df ot try to predict
     # TODO add warning to user that data should be to shuffled, give that is being sorted at the beginning!
-    # TODO add user is able to choose group from metadata
     # TODO add parameters for gridsearch and cross validation
     # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
     # TODO how to refit
     # TODO save object model with Pickle
-    # TODO add parameter train_test_split
-    # TODO add parameters for grid search and cross validation
+    # TODO add parameters for grid search and cross validation,in general to sub steps
     # TODO add scoring to workflow meta and also in backend
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
     # "Sample" column should not always have header Sample, modify accordingly
     labels_df = metadata_df[["Sample", labels_column]]
     y_encoded = encode_labels(input_df_wide, labels_df)
+
+    X_train, X_test, y_train, y_test = perform_train_test_split(
+        input_df_wide,
+        y_encoded,
+        test_size=train_test_split,
+        random_state=random_state,
+        shuffle=True,
+    )
 
     clf = RandomForestClassifier()
 
@@ -125,8 +132,8 @@ def random_forest(
         random_state=random_state,
     )
     model, model_evaluation_df = perform_classification(
-        input_df_wide,
-        y_encoded,
+        X_train,
+        y_train,
         validation_strategy,
         model_selection,
         clf,
@@ -134,4 +141,11 @@ def random_forest(
         scoring,
         **kwargs,
     )
-    return dict(model=model, model_evaluation_df=model_evaluation_df)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        X_test_df=X_test,
+        y_test_df=y_test,
+        X_train_df=X_train,
+        y_train_df=y_train,
+    )
