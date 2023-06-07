@@ -504,8 +504,8 @@ def protein_plot(request, run_name):
         {
             "data": {
                 "id": node,
-                "label": graph.nodes[node]["aminoacid"],
-                "width": len(graph.nodes[node]["aminoacid"]) * 24,
+                "label": graph.nodes[node].get("aminoacid", "####### BAAAAD #######"),
+                "match": graph.nodes[node].get("match", "false"),
             }
         }
         for node in graph.nodes()

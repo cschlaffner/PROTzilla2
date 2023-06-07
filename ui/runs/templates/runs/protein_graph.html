@@ -78,6 +78,9 @@
                             'width': getWidth,
                             'background-color': 'lightblue',
                             'horizontal-text-margin': '10px',
+                            'color': function (node) {
+                                return node.data('match') === "true" ? 'red' : 'black';
+                            }
                         }
                     },
                     {
