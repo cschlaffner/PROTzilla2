@@ -186,14 +186,16 @@ def gsea(protein_df):
         cls.append(group_value)
 
     # try not providing name column in df
-    # # run gsea
-    # # enrichr libraries are supported by gsea module. Just provide the name
-    # gs_res = gp.gsea(data=gene_exp,  # or data='./P53_resampling_data.txt'
-    #                  gene_sets=["KEGG_2016"],  # or enrichr library names
-    #                  cls=cls,
-    #                  # set permutation_type to phenotype if samples >=15
-    #                  permutation_type='phenotype',
-    #                  permutation_num=1000,  # reduce number to speed up test
-    #                  outdir=None,  # do not write output to disk
-    #                  method='signal_to_noise',
-    #                  threads=4, seed=7)
+    # run gsea
+    # enrichr libraries are supported by gsea module. Just provide the name
+    gs_res = gp.gsea(data=df,  # or data='./P53_resampling_data.txt'
+                     gene_sets=["KEGG_2016"],  # or enrichr library names
+                     cls=cls,
+                     # set permutation_type to phenotype if samples >=15
+                     permutation_type='phenotype',
+                     permutation_num=1000,  # reduce number to speed up test
+                     outdir=None,  # do not write output to disk
+                     method='signal_to_noise',
+                     threads=4, seed=7)
+
+    return dict(enriched_df=gs_res.res2d, filtered_groups=filtered_groups)

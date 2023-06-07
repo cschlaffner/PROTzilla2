@@ -667,7 +667,7 @@ def test_gsea():
     )
 
     result = gsea(proteins)
-    print(result)
+    result["enriched_df"].to_csv("gsea_result_sig_prot.csv")
 
 
 def test_gsea_preranked():
