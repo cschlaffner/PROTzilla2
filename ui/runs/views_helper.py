@@ -24,9 +24,12 @@ def parameters_from_post(post):
 def convert_str_if_possible(s):
     try:
         f = float(s)
+        return int(f) if int(f) == f else f
     except ValueError:
+        if s == "checked":
+            # s is a checkbox
+            return True
         return s
-    return int(f) if int(f) == f else f
 
 
 def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):

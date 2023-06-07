@@ -1,0 +1,5 @@
+{#  params: name, key, default #}
+
+<input type="checkbox" id="{{ key }}" name="{{ key }}" value="checked"
+{% if default %} checked {% endif %}/>
+{% if name %}<label for="{{ key }}">{{ name }}</label>{% endif %}
