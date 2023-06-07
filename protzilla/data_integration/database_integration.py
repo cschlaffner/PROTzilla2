@@ -3,10 +3,7 @@ import pandas as pd
 from protzilla.data_integration.database_query import uniprot_query_dataframe
 
 
-def add_uniprot_data(dataframe):
-    print(dataframe)
-
-    fields = ["Gene Names", "Organism", "Length"]
+def add_uniprot_data(dataframe, fields):
     groups = dataframe["Protein ID"].tolist()
     # group size
     # [(1, 305), (2, 203), (3, 91), (4, 52), (5, 24), (7, 13), (6, 11), (8, 8), (9, 4), (10, 3), (15, 2), (16, 2), (17, 1), (23, 1), (13, 1), (18, 1), (31, 1), (21, 1)]
@@ -29,14 +26,12 @@ def add_uniprot_data(dataframe):
             cleaned.add(protein)
             all_proteins.add(protein)
         clean_groups.append(cleaned)
-    print(len(all_proteins))
     res: pd.DataFrame = uniprot_query_dataframe(list(all_proteins), fields)
 
     new_columns = {k: [] for k in fields}  # data that will be added to input df
     for group in clean_groups:
-        group_dict = {
-            k: [] for k in fields
-        }  # data that different members of group have
+        group_dict = {k: [] for k in fields}
+        # data that different members of group have
         for member in group:
             if member not in res.index:
                 continue
@@ -54,15 +49,16 @@ def add_uniprot_data(dataframe):
             new_columns[field].append(";".join(map(str, set(group_dict[field]))))
 
     out = pd.concat([dataframe, pd.DataFrame(new_columns)], axis=1)
-    print(out)
-    out.to_csv("out.csv")
     return {"result": out}
 
 
 if __name__ == "__main__":
-    add_uniprot_data(
-        pd.read_csv(
-            "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/PROTzilla2/user_data/runs/adfg/history_dfs/7-data_analysis-differential_expression-t_test-log2_fold_change_df.csv",
-            index_col=0,
-        )
+    df = pd.read_csv(
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/PROTzilla2/user_data/runs/adfg/history_dfs/7-data_analysis-differential_expression-t_test-log2_fold_change_df.csv",
+        index_col=0,
     )
+    from time import time
+
+    t = time()
+    add_uniprot_data(df, fields=["Gene Names", "Organism", "Length"])
+    print(time() - t)
