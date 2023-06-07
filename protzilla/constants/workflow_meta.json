@@ -1346,14 +1346,7 @@
             "name": "Fields",
             "type": "categorical",
             "multiple": true,
-            "categories": [
-              "Entry",
-              "Entry Name",
-              "Protein names",
-              "Gene Names",
-              "Organism",
-              "Length"
-            ]
+            "fill": "uniprot_fields"
           }
         }
       }

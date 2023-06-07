@@ -3,7 +3,9 @@ import pandas as pd
 from protzilla.data_integration.database_query import uniprot_query_dataframe
 
 
-def add_uniprot_data(dataframe, fields):
+def add_uniprot_data(dataframe, fields=None):
+    if not fields:
+        return {"result": dataframe}
     groups = dataframe["Protein ID"].tolist()
     # group size
     # [(1, 305), (2, 203), (3, 91), (4, 52), (5, 24), (7, 13), (6, 11), (8, 8), (9, 4), (10, 3), (15, 2), (16, 2), (17, 1), (23, 1), (13, 1), (18, 1), (31, 1), (21, 1)]
