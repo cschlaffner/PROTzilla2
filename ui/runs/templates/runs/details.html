@@ -151,7 +151,11 @@
                                         {% csrf_token %}
                                         {{ method_dropdown }}
                                         <div id="method_parameters" class="mb-2">
-                                            {% include "runs/fields.html" with fields=fields %}
+                                            {% if step == "classification" %}
+                                                {% include "runs/fields_classification_methods.html" with fields=fields %}
+                                            {% else %}
+                                                {% include "runs/fields.html" with fields=fields %}
+                                            {% endif %}
                                         </div>
                                         <div class="form-group">
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"

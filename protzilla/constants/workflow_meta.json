@@ -1120,7 +1120,7 @@
             "default": "None"
           },
           "train_test_split": {
-            "name": "Choose the size of the test data set (you can either enter the absolute number of test samples or a number between 0.0 and 1.0 to represent the percentage of test samples)",
+            "name": "Test size",
             "type": "numeric",
             "default": 0.20
           },
