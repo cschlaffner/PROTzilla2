@@ -6,6 +6,8 @@ from protzilla.data_integration.database_query import uniprot_query_dataframe
 def add_uniprot_data(dataframe, fields=None):
     if not fields:
         return {"result": dataframe}
+    if isinstance(fields, str):
+        fields = [fields]
     groups = dataframe["Protein ID"].tolist()
     # group size
     # [(1, 305), (2, 203), (3, 91), (4, 52), (5, 24), (7, 13), (6, 11), (8, 8), (9, 4), (10, 3), (15, 2), (16, 2), (17, 1), (23, 1), (13, 1), (18, 1), (31, 1), (21, 1)]
@@ -38,10 +40,8 @@ def add_uniprot_data(dataframe, fields=None):
             if member not in res.index:
                 continue
             result = res.loc[member]
-            for col, val in dict(result).items():
-                if col in ["Gene Names", "Protein names"] and not isinstance(
-                    val, float
-                ):
+            for col, val in result.to_dict().items():
+                if col == "Gene Names" and not isinstance(val, float):
                     # to remove space seperated groupings
                     group_dict[col].extend(val.split())
                 else:
