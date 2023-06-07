@@ -77,6 +77,19 @@ def meta_numeric_df():
     return meta_df
 
 
+@pytest.fixture
+def random_forest_out(classification_df, meta_df, validation_strategy, model_selection):
+    return random_forest(
+        classification_df,
+        meta_df,
+        "Group",
+        n_estimators=3,
+        test_validate_split=0.20,
+        model_selection=model_selection,
+        validation_strategy=validation_strategy,
+    )
+
+
 @pytest.mark.parametrize(
     "validation_strategy,model_selection",
     [
@@ -87,15 +100,12 @@ def meta_numeric_df():
         ("K-Fold", "Randomized search"),
     ],
 )
-def test_random_forest(validation_strategy, model_selection):
-    input_df = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/preprocessed_data.csv")
-    meta_df = pd.read_csv(f"{PROJECT_PATH}/tests/test_data/meta.csv")
-    random_forest(
-        input_df,
-        meta_df[["Sample", "Group"]],
-        "Group",
-        n_estimators=3,
-        test_validate_split=0.20,
-        model_selection=model_selection,
-        validation_strategy=validation_strategy,
-    )
+def test_random_forest_score(random_forest_out, validation_strategy, model_selection):
+    model_evaluation_df = random_forest_out["model_evaluation_df"]
+    assert (
+        model_evaluation_df["mean_test_score"].values[0] > 0.8
+    ), f"Failed with validation strategy {validation_strategy} and model selection strategy {model_selection}"
+
+
+def test_random_forest_probability(validation_strategy, model_selection):
+    pass

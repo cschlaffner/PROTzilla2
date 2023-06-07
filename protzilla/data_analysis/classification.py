@@ -22,7 +22,6 @@ def perform_classification(
     clf,
     clf_parameters,
     scoring,
-    cross_validation_estimator=None,
     test_validate_split=None,
     **parameters,
 ):
@@ -72,7 +71,7 @@ def perform_classification(
         return model, model_evaluation_df
     elif validation_strategy != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(cross_validation_estimator, **parameters)
+        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
         model = perform_grid_search_cv(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )
@@ -101,11 +100,11 @@ def random_forest(
     **kwargs,
 ):
     # TODO add warning to user that data should be to shuffled, give that is being sorted at the beginning!
-    # TODO add parameters for gridsearch and cross validation
+    # TODO add parameters for gridsearch and cross validation,in general to sub steps
     # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
     # TODO how to refit
-    # TODO save object model with Pickle
-    # TODO add parameters for grid search and cross validation,in general to sub steps
+    # TODO save object model with Pickle done
+    # TODO add parameters for grid search and cross validation
     # TODO add scoring to workflow meta and also in backend
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
