@@ -13,6 +13,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_enrichr,
     go_analysis_with_STRING,
     gsea,
+    gsea_preranked,
     merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
@@ -669,10 +670,12 @@ def test_gsea():
     print(result)
 
 
-def test_prerank_gsea():
+def test_gsea_preranked():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     proteins_significant = pd.read_csv(
         f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,
     )
+    current_out = gsea_preranked(proteins_significant, "ascending")
+    print(current_out["enriched_df"])
 

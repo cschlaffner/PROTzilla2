@@ -84,21 +84,21 @@ def gsea_preranked(protein_df, ranking_direction):
     # TODO 182: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
 
-    protein_groups = protein_df.loc["Protein ID"].unique()
+    protein_groups = protein_df["Protein ID"].unique()
     # map input Uniprot IDs to gene symbols
     logging.info("Mapping Uniprot IDs to uppercase gene symbols")
     gene_mapping, group_to_genes_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
 
     logging.info("Ranking input")
     # make rnk df
-    rnk = pd.DataFrame()
+    rnk = pd.DataFrame(columns=["Gene symbol", "Score"])
     for group in protein_groups:
-        if group not in gene_mapping.values():
+        if group in filtered_groups:
             continue
         for gene in group_to_genes_mapping[group]:
             # if multiple genes per group, use same p value
-            rnk.loc["Gene symbol"] = gene
-            rnk.loc["Score"] = protein_df.loc[protein_df.columns[1], group]
+            score = protein_df.loc[protein_df["Protein ID"] == group, protein_df.columns[1]].values[0]
+            rnk.loc[len(rnk)] = [gene, score]
 
     # if duplicate genes only keep the one with the worse score
     if ranking_direction == "ascending":
@@ -110,6 +110,7 @@ def gsea_preranked(protein_df, ranking_direction):
     rnk = rnk.sort_values(by="Score", ascending=ranking_direction == "ascending")
 
     logging.info("Running GSEA")
+    # assert len > 1 fails
     pre_res = gp.prerank(rnk=rnk,  # or rnk = rnk,
                          gene_sets='KEGG_2016',
                          threads=4,
@@ -120,7 +121,7 @@ def gsea_preranked(protein_df, ranking_direction):
                          seed=6,
                          verbose=True,  # see what's going on behind the scenes
                          )
-    return dict(result_df = pre_res.res2d, ranking = pre_res.ranking, filtered_groups = filtered_groups)
+    return dict(enriched_df = pre_res.res2d, ranking = pre_res.ranking, filtered_groups = filtered_groups)
 
 
 def gsea(protein_df):
