@@ -665,3 +665,12 @@ def test_gsea():
     print(proteins)
     result = gsea(proteins)
     print(result)
+
+
+def test_prerank_gsea():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    proteins_significant = pd.read_csv(
+        f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        index_col=0,
+    )
+

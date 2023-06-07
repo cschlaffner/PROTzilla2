@@ -1,7 +1,9 @@
 import gseapy as gp
 import pandas as pd
+import logging
 
 from protzilla.utilities.transform_dfs import long_to_wide
+from .database_query import biomart_query
 
 
 def uniprot_ids_to_uppercase_gene_symbols(proteins):
@@ -9,7 +11,6 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
     A method that converts a list of uniprot ids to uppercase gene symbols.
     This is done by querying the biomart database. If a protein group is not found
     in the database, it is added to the filtered_groups list.
-
     :param proteins: list of uniprot ids
     :type proteins: list
     :return: dict with keys uppercase gene symbols and values protein_groups and a list of uniprot ids that were not found
@@ -31,7 +32,6 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                 else:
                     without_isoforms.add(protein)
             proteins_list.extend(list(without_isoforms))
-
     q = list(
         biomart_query(
             proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
@@ -43,11 +43,11 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
         )
     )
     q = dict(set(map(tuple, q)))
-
     # check per group in proteins if all proteins have the same gene symbol
     # if yes, use that gene symbol, otherwise use all gene symbols
     filtered_groups = []
     gene_mapping = {}
+    group_to_genes_mapping = {}
     for group in proteins:
         if ";" not in group:
             symbol = q.get(group, None)
@@ -55,41 +55,61 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                 filtered_groups.append(group)
             else:
                 gene_mapping[symbol.upper()] = group
+                group_to_genes_mapping[group] = [symbol.upper()]
         else:
             # remove duplicate symbols within one group
             symbols = set()
             for protein in group.split(";"):
                 if "-" in protein:
-                    symbols.add(q.get(protein.split("-")[0], None))
+                    protein = protein.split("-")[0]
                 elif "_VAR_" in protein:
-                    symbols.add(q.get(protein.split("_VAR_")[0], None))
-                else:
-                    symbols.add(q.get(protein, None))
+                    protein = protein.split("_VAR_")[0]
+                if result := q.get(protein):
+                    symbols.add(result)
 
-            symbols = list(symbols)
-            if not any(symbols):
-                # no gene symbol for any protein in group
+            if not symbols:  # no gene symbol for any protein in group
                 filtered_groups.append(group)
-            elif len(symbols) == 1:
-                gene_mapping[symbols[0].upper()] = group
             else:
-                gene_mapping.update(
-                    {s.upper(): group for s in symbols if s is not None}
-                )
+                for symbol in symbols:
+                    gene_mapping[symbol.upper()] = group
+                group_to_genes_mapping[group] = list(symbols)
 
-    return gene_mapping, filtered_groups
+    return gene_mapping, group_to_genes_mapping, filtered_groups
 
 
 def gsea_preranked(protein_df, ranking_direction):
     """
     Run GSEA on a preranked list of proteins.
     """
-    # map input Uniprot IDs to gene symbols
-    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_df)
-    # mapping is not 1 - 1
-    # what if I have multiple genes for the same e.g. p value? because group got split up and
-    # mapped to different genes?
+    # TODO 182: set logging level for whole django app in beginning
+    logging.basicConfig(level=logging.INFO)
 
+    protein_groups = protein_df.loc["Protein ID"].unique()
+    # map input Uniprot IDs to gene symbols
+    logging.info("Mapping Uniprot IDs to uppercase gene symbols")
+    gene_mapping, group_to_genes_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+
+    logging.info("Ranking input")
+    # make rnk df
+    rnk = pd.DataFrame()
+    for group in protein_groups:
+        if group not in gene_mapping.values():
+            continue
+        for gene in group_to_genes_mapping[group]:
+            # if multiple genes per group, use same p value
+            rnk.loc["Gene symbol"] = gene
+            rnk.loc["Score"] = protein_df.loc[protein_df.columns[1], group]
+
+    # if duplicate genes only keep the one with the worse score
+    if ranking_direction == "ascending":
+        rnk = rnk.groupby("Gene symbol").max()
+    else:
+        rnk = rnk.groupby("Gene symbol").min()
+
+    # sort rank df by score according to ranking direction
+    rnk = rnk.sort_values(by="Score", ascending=ranking_direction == "ascending")
+
+    logging.info("Running GSEA")
     pre_res = gp.prerank(rnk=rnk,  # or rnk = rnk,
                          gene_sets='KEGG_2016',
                          threads=4,
@@ -109,6 +129,8 @@ def gsea(protein_df):
     # long_to_wide(protein_df).transpose()
 
     # map input Uniprot IDs to gene symbols
+    # same intensities for multiple genes from one group
 
     # bring df into the right format
     # TODO: find out if name column is required in df
+    pass
