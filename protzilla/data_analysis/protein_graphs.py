@@ -10,14 +10,8 @@ import pandas as pd
 import requests
 from django.contrib import messages
 
+from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)8.8s] %(message)s",
-    handlers=[logging.StreamHandler()],
-)
-logger = logging.getLogger(__name__)
 
 
 def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
@@ -60,7 +54,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     intensity_name = [col for col in df.columns if "intensity" in col][0]
     df = df.dropna(subset=[intensity_name])
-    # TODO drop where values == 0
+    df = df[df[intensity_name] != 0]
 
     if df.empty:
         return dict(
@@ -75,16 +69,12 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     peptides = df["Sequence"].unique().tolist()
 
     if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
-        out_dict = _create_graph(protein_id, run_name)
+        graph_path, message = _create_graph(protein_id, run_name)
+        if graph_path is None:
+            return dict(graph_path=None, messages=message)
     else:
-        out_dict = dict(
-            graph_path=f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml",
-            messages=[dict(level=messages.INFO, msg="Graph already exists")],
-        )
-
-    if out_dict["graph_path"] is None:
-        return out_dict
-    graph_path = out_dict["graph_path"]
+        logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
+        graph_path = (f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml",)
 
     k = 5
     allowed_mismatches = 2
