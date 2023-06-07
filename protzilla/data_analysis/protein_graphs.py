@@ -12,6 +12,13 @@ from django.contrib import messages
 
 from protzilla.constants.paths import RUNS_PATH
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)8.8s] %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
 
 def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
     run_path = f"{RUNS_PATH}/{run_name}"
@@ -45,7 +52,26 @@ def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
 
 
 def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
-    # TODO: error when protein_id is not in peptide_df
+    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
+    pattern = rf"^({protein_id}-\d+)$"
+    filter = df["Protein ID"].str.contains(pattern)
+    df = df[~filter]
+
+    # TODO: check with chris how this should be done
+    intensity_name = [col for col in df.columns if "intensity" in col][0]
+    df = df.dropna(subset=[intensity_name])
+
+    if df.empty:
+        return dict(
+            graph_path=None,
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg=f"No peptides found for isoform {protein_id} in Peptide Dataframe",
+                )
+            ],
+        )
+    peptides = df["Sequence"].unique().tolist()
 
     if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
         out_dict = _create_graph(protein_id, run_name)
@@ -77,9 +103,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
 
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
-    # print(ref_index)
-    # print(ref_seq)
-    # print(seq_len)
 
     graph_index, msg, longest_paths = _create_graph_index(protein_graph, seq_len)
     if msg:
@@ -92,30 +115,10 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 )
             ],
         )
-    # print("graph_index")
-    # print(graph_index)
-
-    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
-    pattern = rf"^({protein_id}-\d+)$"
-    filter = df["Protein ID"].str.contains(pattern)
-    df = df[~filter]
-
-    # peptide_df.to_csv(
-    #     "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide2/history_dfs/simple_P22626.csv"
-    # )
-
-    # TODO: check with chris how this should be done
-    # intensity_name = [col for col in df.columns if "intensity" in col][0]
-    # df = df.dropna(subset=[intensity_name])
-
-    peptides = df["Sequence"].unique().tolist()
-    max([len(peptide) for peptide in peptides])
 
     # Peptide Matching
     peptide_matches = {}
     peptide_mismatches = []
-    print("peptides")
-    print(peptides)
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
@@ -134,41 +137,28 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             else:
                 peptide_mismatches.append(peptide)
         peptide_matches[peptide] = matched_starts
-    logging.info("peptide_matches:\n", peptide_matches)
-
-    # P82909: {'DNPKPNVSEALR': [29], 'KLVSQEEMEFIQR': [86], 'VVQVVKPHTPLIR': [11]}
+    logger.info(f"peptide matches: {peptide_matches}")
+    logger.info(f"peptide mismatches: {peptide_mismatches}")
 
     peptide_to_node = {}
     for peptide, indices in peptide_matches.items():
         for start_index in indices:
             for i in range(start_index, start_index + len(peptide)):
-                # lookup in which of the possible nodes the aa is present -> adopt graph index
+                # TODO: when match is part of variation:
+                #  lookup in which of the possible nodes the aa is present
+                #  -> adopt graph index
 
                 if peptide in peptide_to_node:
                     peptide_to_node[peptide].append((graph_index[i], i))
                 else:
                     peptide_to_node[peptide] = [(graph_index[i], i)]
 
-    # print("peptide_to_node")
-    # print(peptide_to_node)
-
-    # P98160: 'n47': [(2037, 2053), (2103, 2117), (2155, 2861), (2155, 2375),
-    # (2162, 2846), (2195, 2976), (2295, 2311), (2393, 2407), (2480, 2878),
-    # (2489, 2503), (2523, 2536), (2655, 2664), (2682, 2696), (2779, 2793),
-    # (2977, 2978)],
-    # 'IEPSSSHVAEGQTLDLNCVVPGQAHAQVTWHK': [2155, 2344, 2830],
-
     node_start_end = {}
     for peptide, values in peptide_to_node.items():
         peptide_len = len(peptide)
 
-        # print("peptide:", peptide)
-
         for i, match_start_pos in enumerate(peptide_matches[peptide]):
             for aa_match_values in values:
-                # print("after loops")
-                # print(node_start_end)
-
                 if i < len(peptide_matches[peptide]) - 1:
                     next_start = peptide_matches[peptide][i + 1]
                 elif aa_match_values[1] < match_start_pos:
@@ -176,21 +166,17 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 else:
                     next_start = math.inf
 
-                if peptide == "FGNYNQQ" and aa_match_values[1] == 308:
-                    # raise Exception
-                    pass
-
                 if aa_match_values[1] < match_start_pos:
-                    logging.info(
+                    logger.info(
                         "found 'less than match start'", peptide, aa_match_values[1]
                     )
                     continue
                 if aa_match_values[1] > match_start_pos + peptide_len:
-                    logging.warning(
+                    logger.warning(
                         "should probably be skipped as likely part of next match"
                     )
                 if aa_match_values[1] >= next_start:
-                    logging.info(
+                    logger.info(
                         "found 'greater than next start'", peptide, aa_match_values[1]
                     )
                     continue
@@ -239,7 +225,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                                 0
                             ]
                         ):
-                            logging.warning(
+                            logger.warning(
                                 f"match_start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
                             )
 
@@ -252,15 +238,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                                 }
                             }
                         }
-                # print("node_start_end")
-                # print(node_start_end)
-
-    # was passiert, wenn ein peptid mehrfach pro knoten vorkommt?
-    # muss vlt noch in node_start_end berücksichtigt werden
-    # -> verschiedene match_start_pos aus peptide_matching!
-
-    # print("node_start_end")
-    # print(node_start_end)
 
     node_mod = {}
     for node, peptides_dict in node_start_end.items():
@@ -271,8 +248,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 else:
                     node_mod[node].append((values["start"][0], values["end"][0]))
         node_mod[node] = sorted(node_mod[node], key=lambda x: x[0])
-    # print("node_mod pre merge")
-    # print(node_mod)
 
     # node_mod
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
@@ -288,27 +263,18 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 new_positions_list.append((start, end))
         node_mod[node] = new_positions_list
 
-    print("node_mod, post merge")
-    print(node_mod)
-
-    print("protein graph before modification")
-    pprint.pprint(protein_graph.__dict__)
-
-    logging.info("modifying graph")
+    logger.info("modifying graph")
     for node, positions_list in node_mod.items():
         # 'n4': [(302, 308), (325, 349), (353, 359)]
         old_node = protein_graph.nodes[node].copy()
-        # logging.warning(f"modifying node {node}, positions_list {positions_list}")
+        old_node_starting_pos = longest_paths[node]
         for start, end in positions_list:
-            logging.warning(f"s:{start}, e:{end}, old aa: {old_node['aminoacid']}")
-            logging.warning(f"leftover: {protein_graph.nodes[node]['aminoacid']}")
-
             if (
                 longest_paths[node] == start
                 and longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"])
                 == end
             ):
-                logging.warning("match full node")
+                logger.warning("match full node")
                 nx.set_node_attributes(
                     protein_graph,
                     {
@@ -323,11 +289,11 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             before_node = False
             if start > longest_paths[node]:
                 before_node = True
-                before_node_label = old_node["aminoacid"][longest_paths[node] : start]
-                # print("before_node_label, s, e")
-                # print(before_node_label, start, end)
-                # get predecessor of old node, connect edges to before_node
-                # protein_graph.predecessors(node)
+                before_node_label = old_node["aminoacid"][
+                    longest_paths[node]
+                    - old_node_starting_pos : start
+                    - old_node_starting_pos
+                ]
                 before_node_id = f"n{len(protein_graph.nodes)}"
                 predecessors = list(protein_graph.predecessors(node))
 
@@ -345,14 +311,15 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 )
 
             match_node_label = old_node["aminoacid"][
-                longest_paths[node] : end + 1  # TODO: aaaahhhhh why +1??
+                longest_paths[node]
+                - old_node_starting_pos : end
+                - old_node_starting_pos
+                + 1  # + 1 cause it doesn't include `end`
             ]
             match_node_id = f"n{len(protein_graph.nodes)}"
             protein_graph.add_node(
                 match_node_id, aminoacid=match_node_label, match="true"
             )
-            # create edges to match_node from before_node to match_node
-            # or from predecessors of old_node to match_node if no before_node
             if before_node:
                 protein_graph.add_edge(before_node_id, match_node_id)
                 longest_paths[match_node_id] = longest_paths[before_node_id] + len(
@@ -368,15 +335,12 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     protein_graph.add_edge(predecessor, match_node_id)
                     protein_graph.remove_edge(predecessor, node)
 
-            # after_node scheint noch n bisschen broken zu sein -> label nicht richtig gesetzt
-            # -> vorherige AAs noch dabei, einige am ende verschluckt?
-
             if end < longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]):
                 after_node_label = old_node["aminoacid"][
-                    longest_paths[match_node_id] + len(match_node_label) :
+                    longest_paths[match_node_id]
+                    - old_node_starting_pos
+                    + len(match_node_label) :
                 ]
-                print("after_node_label")
-                print(after_node_label)
                 nx.set_node_attributes(
                     protein_graph,
                     {node: {"aminoacid": after_node_label, "match": "false"}},
@@ -388,6 +352,17 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             elif end > longest_paths[node] + len(
                 protein_graph.nodes[node]["aminoacid"]
             ):
+                pprint.pprint(protein_graph.__dict__)
+                print(
+                    "end, longest_paths[node] + len(protein_graph.nodes[node]['aminoacid']), node, protein_graph.nodes[node]['aminoacid'], match_node_label"
+                )
+                print(
+                    end,
+                    longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]),
+                    node,
+                    protein_graph.nodes[node]["aminoacid"],
+                    match_node_label,
+                )
                 raise Exception(
                     "end > longest_paths[node] + len(protein_graph.nodes[node]['aminoacid'])"
                 )
@@ -396,13 +371,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 for successor in successors:
                     protein_graph.add_edge(match_node_id, successor)
                     protein_graph.remove_edge(node, successor)
-
-        # print("protein_graph.nodes")
-        # for node_here in protein_graph.nodes:
-        #     pprint.pprint(node_here)
-        #     pprint.pprint(protein_graph.nodes[node_here])
-
-    pprint.pprint(protein_graph.__dict__)
 
     nx.write_graphml(protein_graph, graph_path)
 
@@ -517,7 +485,7 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
     if not Path(path_to_graphs).exists():
         Path(path_to_graphs).mkdir(parents=True, exist_ok=True)
     if Path(path_to_protein_file).exists():
-        logging.info(
+        logger.info(
             f"Protein file {path_to_protein_file} already exists. Skipping download."
         )
     else:
