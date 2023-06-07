@@ -81,7 +81,18 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
     return gene_mapping, group_to_genes_mapping, filtered_groups
 
 
-def gsea_preranked(protein_df, ranking_direction, seed=123):
+def gsea_preranked(
+    protein_df,
+    ranking_direction,
+    gene_sets_path,
+    gene_sets_enrichr,
+    number_of_permutations,
+    min_size,
+    max_size,
+    seed=123,
+):
+    # TODO: ask Sara if dynamic parameter params should be added to function or not
+    # if yes remove it somewhere before because it would be ugly for package usage
     """
     Run GSEA on a preranked list of proteins.
     """
@@ -148,8 +159,8 @@ def gsea_preranked(protein_df, ranking_direction, seed=123):
     )
 
 
-def gsea(protein_df):
-    # , grouping, metadata_df
+def gsea(protein_df, metadata_df, grouping, gene_sets_path, gene_sets_enrichr, seed=123):
+
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique()
     logging.info("Mapping Uniprot IDs to uppercase gene symbols")
@@ -185,17 +196,24 @@ def gsea(protein_df):
         group_value = protein_df.loc[protein_df["Sample"] == sample, "Group"].iloc[0]
         cls.append(group_value)
 
+    if set(cls) != 2:
+        msg = "Input groups have to be 2!"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     # try not providing name column in df
     # run gsea
     # enrichr libraries are supported by gsea module. Just provide the name
-    gs_res = gp.gsea(data=df,  # or data='./P53_resampling_data.txt'
-                     gene_sets=["KEGG_2016"],  # or enrichr library names
-                     cls=cls,
-                     # set permutation_type to phenotype if samples >=15
-                     permutation_type='phenotype',
-                     permutation_num=1000,  # reduce number to speed up test
-                     outdir=None,  # do not write output to disk
-                     method='signal_to_noise',
-                     threads=4, seed=7)
+    gs_res = gp.gsea(
+        data=df,  # or data='./P53_resampling_data.txt'
+        gene_sets=["KEGG_2016"],  # or enrichr library names
+        cls=cls,
+        # set permutation_type to phenotype if samples >=15
+        permutation_type="phenotype",
+        permutation_num=1000,  # reduce number to speed up test
+        outdir=None,  # do not write output to disk
+        method="signal_to_noise",
+        threads=4,
+        seed=seed,
+    )
 
     return dict(enriched_df=gs_res.res2d, filtered_groups=filtered_groups)
