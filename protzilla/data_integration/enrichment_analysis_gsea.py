@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 
-from protzilla.utilities.transform_dfs import long_to_wide
+from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import (
     read_protein_or_gene_sets_file,
@@ -68,16 +68,16 @@ def gsea_preranked(
         )
 
     logging.info("Ranking input")
-    rnk = pd.DataFrame(columns=["Gene symbol", "Score"])
+    rnk = pd.DataFrame(columns=["Gene symbol", "Ranking value"])
     for group in protein_groups:
         if group in filtered_groups:
             continue
         for gene in group_to_genes_mapping[group]:
             # if multiple genes per group, use same score value
-            score = protein_df.loc[
+            ranking_value = protein_df.loc[
                 protein_df["Protein ID"] == group, protein_df.columns[1]
             ].values[0]
-            rnk.loc[len(rnk)] = [gene, score]
+            rnk.loc[len(rnk)] = [gene, ranking_value]
 
     # if duplicate genes only keep the one with the worse score
     if ranking_direction == "ascending":
@@ -89,6 +89,7 @@ def gsea_preranked(
     rnk = rnk.sort_values(by="Score", ascending=ranking_direction == "ascending")
 
     logging.info("Running GSEA")
+    # wrap in try except?
     pre_res = gp.prerank(
         rnk=rnk,
         gene_sets=gene_sets,
@@ -102,11 +103,23 @@ def gsea_preranked(
         verbose=True,
     )
 
-    # TODO: add proteins here again
+    enriched_df = pre_res.res2d
+    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+        lambda x: ";".join([gene_symbols[gene] for gene in x.split(";")])
+    )
+
+    if filtered_groups:
+        msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
+        return dict(
+            enriched_df=enriched_df,
+            ranking=pre_res.ranking,
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.WARNING, msg=msg)],
+        )
+
     return dict(
-        enriched_df=pre_res.res2d,
+        enriched_df=enriched_df,
         ranking=pre_res.ranking,
-        filtered_groups=filtered_groups,
     )
 
 
@@ -125,6 +138,12 @@ def gsea(
     seed=123,
     **kwargs,
 ):
+    assert grouping in metadata_df.columns, "Grouping column not in metadata df"
+
+    if not is_intensity_df(protein_df):
+        msg = "Input must be a dataframe with protein IDs, samples and intensities"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique()
     logging.info("Mapping Uniprot IDs to uppercase gene symbols")
@@ -140,6 +159,20 @@ def gsea(
             filtered_groups=filtered_groups,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
+
+    if gene_sets_path is not None and gene_sets_path != "":
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr is not None and gene_sets_enrichr != []:
+        gene_sets = (
+            [gene_sets_enrichr]
+            if not isinstance(gene_sets_enrichr, list)
+            else gene_sets_enrichr
+        )
+    else:
+        msg = "No gene sets provided"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     # bring df into the right format (gene symbols in rows x samples in cols with intensities)
     protein_df_wide = long_to_wide(protein_df).transpose()
@@ -160,31 +193,40 @@ def gsea(
     df.set_index("Gene symbol", inplace=True)
 
     cls = []
-    for sample in samples:
-        # TODO: read grouping column from metadata and make cls list
-        # group_value = metadata.loc[metadata['Sample'] == sample, 'Group'].iloc[0]
-        # cls.append(group_value)
-        group_value = protein_df.loc[protein_df["Sample"] == sample, "Group"].iloc[0]
+    for sample in samples:  # make class label list for samples
+        group_value = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
         cls.append(group_value)
-
     if set(cls) != 2:
-        msg = "Input groups have to be 2!"
+        msg = "Input samples have to belong to exactly two groups"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    # try not providing name column in df
-    # run gsea
-    # enrichr libraries are supported by gsea module. Just provide the name
+    logging.info("Running GSEA")
+    # wrap in try except?
     gs_res = gp.gsea(
-        data=df,  # or data='./P53_resampling_data.txt'
-        gene_sets=["KEGG_2016"],  # or enrichr library names
+        data=df,
+        gene_sets=gene_sets,
         cls=cls,
-        # set permutation_type to phenotype if samples >=15
-        permutation_type="phenotype",
-        permutation_num=1000,  # reduce number to speed up test
-        outdir=None,  # do not write output to disk
-        method="signal_to_noise",
+        min_size=min_size,
+        max_size=max_size,
+        method=ranking_method,
+        permutation_type=permutation_type,
+        permutation_num=number_of_permutations,
+        weighted_score_type=weighted_score,
+        outdir=None,
         seed=seed,
     )
-    # TODO: add proteins here again
+    enriched_df = gs_res.res2d
+    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+        lambda x: ";".join([gene_symbols[gene] for gene in x.split(";")])
+    )
 
-    return dict(enriched_df=gs_res.res2d, filtered_groups=filtered_groups)
+    if filtered_groups:
+        msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
+        return dict(
+            enriched_df=enriched_df,
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.WARNING, msg=msg)],
+        )
+    return dict(
+        enriched_df=enriched_df,
+    )

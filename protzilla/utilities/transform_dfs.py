@@ -56,3 +56,30 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
 
 def is_long_format(df: pd.DataFrame):
     return set(df.columns[:3]) == {"Sample", "Protein ID", "Gene"}
+
+
+def is_intensity_df(df: pd.DataFrame):
+    """
+    Checks if the dataframe is an intensity dataframe.
+    An intensity dataframe should have the columns "Sample", "Protein ID" and
+    and intensity column.
+    :param df: the dataframe that should be checked
+    :type df: pd.DataFrame
+    :return: returns True if the dataframe is an intensity dataframe
+    :rtype: bool
+    """
+    required_columns = {"Sample", "Protein ID"}
+    intensity_columns = {
+        "Intensity",
+        "iBAQ",
+        "LFQ intensity",
+        "Normalised Intensity",
+        "Normalised iBAQ",
+        "Normalised LFQ intensity",
+    }
+
+    return (
+        isinstance(df, pd.DataFrame)
+        and required_columns.issubset(df.columns)
+        and intensity_columns.intersection(df.columns)
+    )

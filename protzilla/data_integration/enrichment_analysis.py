@@ -470,7 +470,6 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
 
     return {
         "results": enriched,
-        "filtered_groups": filtered_groups,
         "messages": out_messages,
     }
 
