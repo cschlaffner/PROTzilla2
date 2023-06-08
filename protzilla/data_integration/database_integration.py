@@ -50,6 +50,7 @@ def add_uniprot_data(dataframe, fields=None):
             # add unique values to only, join if necessary
             new_columns[field].append(";".join(map(str, set(group_dict[field]))))
 
+    # we can concat because clean groups has the same order as groups
     out = pd.concat([dataframe, pd.DataFrame(new_columns)], axis=1)
     return {"result": out}
 
