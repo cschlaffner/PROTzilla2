@@ -24,18 +24,21 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     df = df[df[intensity_name] != 0]
 
     if df.empty:
+        msg = f"No peptides found for isoform {protein_id} in Peptide Dataframe"
+        logger.error(msg)
         return dict(
             graph_path=None,
             messages=[
                 dict(
                     level=messages.ERROR,
-                    msg=f"No peptides found for isoform {protein_id} in Peptide Dataframe",
+                    msg=msg,
                 )
             ],
         )
     peptides = df["Sequence"].unique().tolist()
 
-    if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
+    potential_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
+    if not Path(potential_graph_path).exists():
         out_dict = _create_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
         message = out_dict["messages"]
@@ -43,7 +46,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             return dict(graph_path=None, messages=message)
     else:
         logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
-        graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
+        graph_path = potential_graph_path
 
     k = 5
     allowed_mismatches = 2
@@ -66,43 +69,10 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             ],
         )
 
-    # Peptide Matching
-    peptide_matches = {}
-    peptide_mismatches = []
-    for peptide in peptides:
-        kmer = peptide[:k]
-        matched_starts = []
-        for match_start_pos in ref_index[kmer]:
-            mismatch_counter = 0
-            for i, aminoacid in enumerate(
-                ref_seq[match_start_pos : match_start_pos + len(peptide)]
-            ):
-                if aminoacid != peptide[i]:
-                    mismatch_counter += 1
-                if mismatch_counter > allowed_mismatches:
-                    break
-
-            if mismatch_counter <= allowed_mismatches:
-                matched_starts.append(match_start_pos)
-            else:
-                peptide_mismatches.append(peptide)
-        peptide_matches[peptide] = matched_starts
-
-    logger.info(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
-    logger.info(f"peptide mismatches: {peptide_mismatches}")
-
-    peptide_to_node = {}
-    for peptide, indices in peptide_matches.items():
-        for start_index in indices:
-            for i in range(start_index, start_index + len(peptide)):
-                # TODO: when match is part of variation:
-                #  lookup in which of the possible nodes the aa is present
-                #  -> adopt graph index
-
-                if peptide in peptide_to_node:
-                    peptide_to_node[peptide].append((graph_index[i], i))
-                else:
-                    peptide_to_node[peptide] = [(graph_index[i], i)]
+    peptide_matches, peptide_mismatches = _match_peptides(
+        allowed_mismatches, peptides, ref_seq, ref_index, k
+    )
+    peptide_to_node = _map_matches_to_node(peptide_matches, graph_index)
 
     node_start_end = {}
     for peptide, values in peptide_to_node.items():
@@ -191,6 +161,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                         }
 
     node_mod = {}
+    # node
     for node, peptides_dict in node_start_end.items():
         for peptide, start_pos_dict in peptides_dict.items():
             for match_start_pos, values in start_pos_dict.items():
@@ -264,7 +235,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 longest_paths[node]
                 - old_node_starting_pos : end
                 - old_node_starting_pos
-                + 1  # + 1 cause it doesn't include `end`
+                + 1
+                # + 1 cause it doesn't include `end`
             ]
             match_node_id = f"n{len(protein_graph.nodes)}"
             protein_graph.add_node(
@@ -381,6 +353,7 @@ def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
             msg = f"The longest path to the last node is shorter than the reference \
             sequence. An error in the graph creation is likely. Node: {node}, \
             longest path: {longest_paths[node]}, seq_len: {seq_len}"
+            logger.error(msg)
             return None, msg
 
     index = [[] for i in range(seq_len)]
@@ -401,6 +374,7 @@ def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
             if i >= len(index):
                 for _ in range(len(index), i + 1):
                     index.append([])
+
             aa_pos_in_node = i - longest_paths[node]
             index[i].append(
                 # (node, AA)
@@ -466,17 +440,15 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
         logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
         r.raise_for_status()
-        if r.status_code == 200:
-            with open(path_to_protein_file, "wb") as f:
-                f.write(r.content)
-        else:
-            return "", r
+
+        with open(path_to_protein_file, "wb") as f:
+            f.write(r.content)
 
     return path_to_protein_file, r
 
 
 def _create_ref_seq_index(protein_path: str, k: int = 5):
-    logger.info("Creating reference sequence index")
+    logger.debug("Creating reference sequence index")
     ref_seq, seq_len = _get_ref_seq(protein_path)
 
     # create index
@@ -494,6 +466,7 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
     for kmer in kmer_list:
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
+    logging.debug("Finished creating reference sequence index")
     return index, ref_seq, seq_len
 
 
@@ -536,6 +509,52 @@ def _get_ref_seq(protein_path: str):
         )
 
     return ref_seq, seq_len
+
+
+def _match_peptides(allowed_mismatches: int, k: int, peptides, ref_index, ref_seq):
+    logger.debug("Matching peptides to reference sequence")
+    peptide_matches = {}
+    peptide_mismatches = []
+    for peptide in peptides:
+        kmer = peptide[:k]
+        matched_starts = []
+        for match_start_pos in ref_index[kmer]:
+            mismatch_counter = 0
+            for i, aminoacid in enumerate(
+                ref_seq[match_start_pos : match_start_pos + len(peptide)]
+            ):
+                if aminoacid != peptide[i]:
+                    mismatch_counter += 1
+                if mismatch_counter > allowed_mismatches:
+                    break
+
+            if mismatch_counter <= allowed_mismatches:
+                matched_starts.append(match_start_pos)
+            else:
+                peptide_mismatches.append(peptide)
+        peptide_matches[peptide] = matched_starts
+
+    logger.debug(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
+    logger.debug(f"peptide mismatches: {peptide_mismatches}")
+
+    return peptide_matches, peptide_mismatches
+
+
+def _map_matches_to_node(peptide_matches, graph_index):
+    peptide_to_node = {}
+    for peptide, indices in peptide_matches.items():
+        for start_index in indices:
+            for i in range(start_index, start_index + len(peptide)):
+                # TODO: when match is part of variation:
+                #  lookup in which of the possible nodes the aa is present
+                #  -> adopt graph index
+
+                if peptide in peptide_to_node:
+                    peptide_to_node[peptide].append((graph_index[i], i))
+                else:
+                    peptide_to_node[peptide] = [(graph_index[i], i)]
+
+    return peptide_to_node
 
 
 if __name__ == "__main__":
