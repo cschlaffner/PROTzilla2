@@ -98,35 +98,9 @@
   },
   "data_preprocessing": {
     "filter_proteins": {
-      "low_frequency_filter": {
-        "name": "Low Frequency",
-        "description": "This function filters proteins with a low frequency of occurrence from a protein dataframe based on a set threshold. The threshold is defined by the relative amount of samples a protein is detected in.",
-        "parameters": {
-          "threshold": {
-            "name": "Threshold for the relative amount of samples a protein is detected in:",
-            "type": "numeric",
-            "min": 0,
-            "max": 1,
-            "default": 0.5
-          }
-        },
-        "graphs": [
-          {
-            "graph_type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default": "Bar chart"
-            }
-          }
-        ]
-      },
       "samples_missing_filter": {
         "name": "Samples Missing",
-        "description": "Filters all proteins that are contained in less than a set percentage samples",
+        "description": "Filters all proteins that are contained in less than a set percentage of samples",
         "parameters": {
           "percentage": {
             "name": "Percentage of minimum non-missing samples per protein",

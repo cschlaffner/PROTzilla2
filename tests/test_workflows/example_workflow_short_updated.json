@@ -17,9 +17,9 @@
       "steps": [
         {
           "name": "filter_proteins",
-          "method": "low_frequency_filter",
+          "method": "samples_missing_filter",
           "parameters": {
-            "threshold": 0.1
+            "percentage": 0.1
           },
           "graphs": [
             {
@@ -30,7 +30,7 @@
         },
         {
           "name": "filter_proteins",
-          "method": "low_frequency_filter",
+          "method": "samples_missing_filter",
           "parameters": {},
           "graphs": [
             {}
