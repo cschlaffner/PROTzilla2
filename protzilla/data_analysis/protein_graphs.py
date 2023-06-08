@@ -534,11 +534,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
                 graph.add_node(before_node_id, aminoacid=before_label, match="false")
 
                 predecessors = list(graph.predecessors(node))
-                _update_new_node_after(before_node_id, node, predecessors)
-                # for predecessor in predecessors:
-                #     graph.add_edge(predecessor, before_node_id)
-                #     graph.remove_edge(predecessor, node)
-
+                _update_new_node_after(node, before_node_id, predecessors)
                 longest_paths[before_node_id] = longest_paths[node]
                 longest_paths[node] = longest_paths[before_node_id] + len(before_label)
 
@@ -557,13 +553,10 @@ def _modify_graph(graph, contig_positions, longest_paths):
                     before_label
                 )
             else:
+                predecessors = list(graph.predecessors(node))
+                _update_new_node_after(node, match_node_id, predecessors)
                 longest_paths[match_node_id] = longest_paths[node]
                 longest_paths[node] = longest_paths[match_node_id] + len(match_label)
-                predecessors = list(graph.predecessors(node))
-                _update_new_node_after(match_node_id, node, predecessors)
-                # for predecessor in predecessors:
-                #     graph.add_edge(predecessor, match_node_id)
-                #     graph.remove_edge(predecessor, node)
 
             if end < longest_paths[node] + _node_length(node):
                 s = longest_paths[match_node_id] - old_node_start + len(match_label)
