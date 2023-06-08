@@ -4,6 +4,13 @@ from django.contrib import messages
 
 
 class ProtzillaLoggingHandler(logging.Handler):
+    """
+    Courtesy of https://stackoverflow.com/users/9150146/sergey-pleshakov,
+                https://stackoverflow.com/a/56944256/1435167
+
+    A logging handler that emits styled log messages to the console.
+    """
+
     def __init__(self, level=logging.NOTSET):
         super().__init__(level)
         self.level = level

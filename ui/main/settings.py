@@ -141,12 +141,10 @@ LOGGING = {
         "django": {
             "level": "INFO",
             "class": "protzilla.constants.logging.ProtzillaLoggingHandler",
-            # 'name': 'django',
         },
     },
     "loggers": {
         "django": {
-            # 'name': 'django',
             "handlers": ["django"],
             "level": "INFO",
             "propagate": False,
