@@ -1145,7 +1145,7 @@
         "description": "Online GO Analysis using STRING API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1187,7 +1187,7 @@
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1204,6 +1204,14 @@
             "type": "categorical",
             "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
             "default": "human"
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
           }
         }
       },
@@ -1212,19 +1220,27 @@
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
           "background": {
-            "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
           }
         }
       }
