@@ -1103,7 +1103,7 @@
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical",
-            "categories": ["Grid search", "Randomized search"],
+            "categories": ["Grid search", "Randomized search", "Manual"],
             "default": "Grid search"
           },
           "n_estimators": {

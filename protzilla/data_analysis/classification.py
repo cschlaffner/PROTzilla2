@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_validate
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_helper import (
@@ -70,7 +71,29 @@ def perform_classification(
             pd.DataFrame(model.results), clf_parameters
         )
         return model, model_evaluation_df
-    elif validation_strategy != "Manual":
+    elif validation_strategy != "Manual" and grid_search_method == "Manual":
+        model = clf.set_params(**clf_parameters)
+        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        scores = cross_validate(
+            model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
+        )
+        raw_evaluation_df = update_raw_evaluation_data(
+            {
+                "mean_train_score": [],
+                "mean_test_score": [],
+                "std_train_score": [],
+                "std_test_score": [],
+            },
+            clf_parameters,
+            scores["train_score"],
+            scores["test_score"],
+        )
+        raw_evaluation_df = pd.DataFrame(raw_evaluation_df)
+        model_evaluation_df = create_model_evaluation_df(
+            raw_evaluation_df, clf_parameters
+        )
+        return model, model_evaluation_df
+    elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
         model = perform_grid_search_cv(
