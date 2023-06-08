@@ -40,7 +40,7 @@ def decode_labels(label_encoder, X_df, labels):
 def perform_grid_search_cv(
     grid_search_model, model, param_grid: dict, scoring, cv=None
 ):
-    if grid_search_model == "Grid search" or grid_search_model == "Manual":
+    if grid_search_model == "Grid search":
         return GridSearchCV(
             model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
         )
@@ -94,6 +94,9 @@ def perform_cross_validation(
 
 # maybe add option to hide or show certain columns
 def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters):
+    # The function transforms the cv_results_ dictionary obtained from a grid search cv
+    # methods into a model_evaluation_df, where each column represents an estimator
+    # parameter and its corresponding validation score.
     columns_names = ["param_" + key for key in clf_parameters.keys()]
     columns_names.append("mean_test_score")
     # for multimetrics evaluation
@@ -104,6 +107,10 @@ def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters):
 def create_model_evaluation_df_grid_search_manual(
     clf_parameters, train_scores, val_scores
 ):
+    # The function mimics the cv_results_ output from the grid search cv methods, but
+    # for grid search manual methods. Then transforms it to the  model_evaluation_df
+    # format, where each column represents an estimator parameter and its corresponding
+    # validation score.
     results = defaultdict(list)
     for param_name, param_value in clf_parameters.items():
         results[f"param_{param_name}"].append(param_value)
