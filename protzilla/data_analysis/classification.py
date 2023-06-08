@@ -99,6 +99,40 @@ def random_forest(
     scoring: list[str] = "accuracy",
     **kwargs,
 ):
+    """
+    Perform classification using a random forest algorithm.
+
+    :param input_df: The dataframe that should be classified in wide or long format
+    :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+     the target variable (labels) for classification.
+    :type labels_column: str
+    :param train_test_split: The proportion of data to be used for testing. Default is
+     0.2 (80-20 train-test split).
+    :type train_test_split: int, optional
+    :param n_estimators: The number of decision trees to be used in the random forest.
+    :type n_estimators: int, optional
+    :param criterion: The impurity measure used for tree construction.
+    :type criterion: str, optional
+    :param max_depth: The maximum depth of the decision trees. If not specified (None),
+     the trees will expand until all leaves are pure or contain minimum samples per leaf.
+    :type max_depth: int or None, optional
+    :param bootstrap: Whether bootstrap samples should be used when building trees.
+    :type bootstrap: bool, optional
+    :param random_state: The random seed for reproducibility.
+    :type random_state: int, optional
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str, optional
+    :param validation_strategy: The strategy for model validation.
+    :type validation_strategy: str, optional
+    :param scoring: The scoring metric(s) used to evaluate the model's performance
+    during validation.
+    :type scoring: list[str], optional
+    :param **kwargs: Additional keyword arguments to be passed to the function.
+
+    """
     # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
