@@ -1055,45 +1055,6 @@
             "default": 1e-4
           }
         }
-      },
-      "expectation_maximisation": {
-        "name": "Expectation maximisation",
-        "description": "",
-        "parameters": {
-          "input_df": {
-            "name": "Choose input dataframe",
-            "type": "named_output",
-            "default": [null, null]
-          },
-          "model_selection": {
-            "name": "Choose hyperparameter tuning strategy",
-            "type": "categorical",
-            "categories": ["Grid search", "Randomized search", "Manual"],
-            "default": "Grid search"
-          },
-          "n_components": {
-            "name": "The number of mixture components",
-            "type": "numeric",
-            "default": 1
-          },
-          "covariance_type": {
-            "name": "Type of covariance",
-            "type": "categorical",
-            "categories": ["full", "tied", "diag", "spherical"],
-            "default": "full"
-          },
-          "init_params": {
-            "name": "The method used to initialize the weights, the means and the precisions.",
-            "type": "categorical",
-            "categories": ["kmeans", "k-means++", "random", "random_from_data"],
-            "default": "kmeans"
-          },
-          "max_iter": {
-            "name": "The number of iterations tu perform",
-            "type": "numeric",
-            "default": 100
-          }
-        }
       }
     },
     "classification": {
