@@ -710,7 +710,10 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -743,7 +746,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None", 
+            "default": "None",
             "multiple": true,
             "default_select_all": true
           },
@@ -761,7 +764,10 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -830,7 +836,10 @@
           "intensity_df": {
             "name": "Input Dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "multiple_testing_correction_method": {
             "name": "Multiple Testing Correction Method:",
@@ -895,28 +904,45 @@
           "p_values": {
             "name": "p-value df",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "log2_fc": {
             "name": "log2 fold change df",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "fc_threshold": {
             "name": "log2 fold change threshold",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "alpha": {
             "name": "alpha/corrected alpha",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "proteins_of_interest_input": {
             "name": "Proteins of Interest",
             "type": "named_output",
-            "default": [null, null],
-            "fill_dynamic": ["proteins_of_interest"]
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "proteins_of_interest"
+            ]
           },
           "proteins_of_interest": {
             "type": "categorical",
@@ -935,40 +961,55 @@
       },
       "scatter_plot": {
         "name": "Scatter plot",
-        "description":"Creates a scatter plot from data",
+        "description": "Creates a scatter plot from data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "color_df": {
             "name": "Choose a dataframe to assign color to marks (optional)",
             "type": "named_output",
-            "default": [null, null],
+            "default": [
+              null,
+              null
+            ],
             "optional": true
           }
         }
       },
       "clustergram": {
         "name": "Clustergram",
-        "description":"Creates a clustergram from data",
+        "description": "Creates a clustergram from data",
         "parameters": {
           "input_df": {
             "name": "Input dataframe: choose dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "sample_group_df": {
             "name": "Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
             "type": "named_output",
-            "default": [null, null],
+            "default": [
+              null,
+              null
+            ],
             "optional": true
           },
           "flip_axes": {
             "name": "Do you want to flip the orientation of the heatmap's axes?",
             "type": "categorical",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "no"
           }
         }
@@ -982,7 +1023,10 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_clusters": {
             "name": "Number of clusters to form",
@@ -1001,7 +1045,7 @@
           },
           "init_centroid_strategy": {
             "name": "Method for initialisation of centroids",
-            "type":"categorical",
+            "type": "categorical",
             "categories": [
               "k-means++",
               "random"
@@ -1039,7 +1083,10 @@
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_components": {
             "name": "Dimension of the embedded space",
@@ -1059,7 +1106,10 @@
             "name": "Distance metric",
             "type": "categorical",
             "categories": [
-              "euclidean","manhattan","cosine", "haversine"
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "haversine"
             ],
             "default": "euclidean"
           },
@@ -1089,12 +1139,15 @@
       },
       "umap": {
         "name": "UMAP",
-        "description":"Dimension reduction of a dataframe using UMAP",
+        "description": "Dimension reduction of a dataframe using UMAP",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
             "type": "named_output",
-            "default": [null, null]
+            "default": [
+              null,
+              null
+            ]
           },
           "n_neighbors": {
             "name": "Number of neighbors",
@@ -1122,7 +1175,10 @@
             "name": "Distance metric",
             "type": "categorical",
             "categories": [
-              "euclidean","manhattan","cosine", "haversine"
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "haversine"
             ],
             "default": "euclidean"
           },
@@ -1138,7 +1194,7 @@
       }
     }
   },
-  "data_integration": {  
+  "data_integration": {
     "enrichment_analysis": {
       "go_analysis_with_STRING": {
         "name": "GO Analysis with STRING",
@@ -1147,7 +1203,10 @@
           "proteins": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "protein_set_dbs": {
             "name": "Protein Set Libraries",
@@ -1166,18 +1225,15 @@
             "name": "Direction of the analysis",
             "type": "categorical",
             "categories": [
-              "both","up","down"
+              "both",
+              "up",
+              "down"
             ],
             "default": "both"
           },
           "background": {
             "name": "Background set (no upload = entire proteome)",
             "type": "file",
-            "default": null
-          },
-          "run_name": {
-            "type": "empty",
-            "name": "run_name",
             "default": null
           }
         }
@@ -1189,7 +1245,10 @@
           "proteins": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "protein_sets": {
             "name": "Protein Sets",
@@ -1202,16 +1261,15 @@
           "organism": {
             "name": "Enrichr supported organism",
             "type": "categorical",
-            "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
-            "default": "human"
-          },
-          "direction": {
-            "name": "Direction of the analysis",
-            "type": "categorical",
             "categories": [
-              "both","up","down"
+              "human",
+              "mouse",
+              "yeast",
+              "fly",
+              "fish",
+              "worm"
             ],
-            "default": "both"
+            "default": "human"
           }
         }
       },
@@ -1222,7 +1280,10 @@
           "proteins": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "protein_sets_path": {
             "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
@@ -1233,14 +1294,6 @@
             "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
-          },
-          "direction": {
-            "name": "Direction of the analysis",
-            "type": "categorical",
-            "categories": [
-              "both","up","down"
-            ],
-            "default": "both"
           }
         }
       }
@@ -1248,19 +1301,33 @@
     "plot": {
       "go_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",
-        "description":"Creates a bar plot from GO enrichment data",
+        "description": "Creates a bar plot from GO enrichment data",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null],
-            "fill_dynamic": ["categories"]
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "categories"
+            ]
           },
           "categories": {
             "name": "Categories/Sets to be plotted",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
+          },
+          "value": {
+            "name": "Value (bars will be plotted as -log10(value)), fdr only for GO Analysis with STRING, p_value is adjusted if available",
+            "type": "categorical",
+            "categories": [
+              "p_value",
+              "fdr"
+            ],
+            "default": "p_value"
           },
           "top_terms": {
             "name": "Number of top enriched terms per category",
@@ -1291,20 +1358,26 @@
         }
       },
       "go_enrichment_dot_plot": {
-        "name": "Dot plot for GO enrichment analysis (oflline & with Enrichr) ",
-        "description":"Creates a categorical scatter plot from GO enrichment data",
+        "name": "Dot plot for GO enrichment analysis (offline & with Enrichr) ",
+        "description": "Creates a categorical scatter plot from GO enrichment data",
         "parameters": {
           "input_df": {
             "name": "Choose enrichment dataframe to be plotted",
             "type": "named_output",
-            "default": [null, null],
-            "fill_dynamic": ["categories"]
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "categories"
+            ]
           },
           "x_axis_type": {
             "name": "Variable for x-axis: categorical scatter plot for one or multiple gene sets, or display combined score for one gene set",
             "type": "categorical",
             "categories": [
-              "Gene Sets", "Combined Score"
+              "Gene Sets",
+              "Combined Score"
             ],
             "default": "Gene Sets"
           },
