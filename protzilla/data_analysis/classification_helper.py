@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -89,14 +90,32 @@ def perform_cross_validation(
         return LeavePOut(p)
 
 
-def update_raw_evaluation_data(results, params, train_scores, val_scores):
-    for param_name, param_value in params.items():
-        results.update({f"param_{param_name}": param_value})
+# maybe add option to hide or show certain columns
+def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters):
+    columns_names = ["param_" + key for key in clf_parameters.keys()]
+    columns_names.append("mean_test_score")
+    # for multimetrics evaluation
+    # columns_names.append([["mean_test_" + score] for score in scoring])
+    return raw_evaluation_df[columns_names]
+
+
+def create_model_evaluation_df_grid_search_manual(
+    clf_parameters, train_scores, val_scores
+):
+    results = defaultdict(list)
+    for param_name, param_value in clf_parameters.items():
+        results[f"param_{param_name}"].append(param_value)
     results["mean_train_score"].append(np.mean(train_scores))
     results["std_train_score"].append(np.std(train_scores))
     results["mean_test_score"].append(np.mean(val_scores))
     results["std_test_score"].append(np.std(val_scores))
-    return results
+
+    results_df = pd.DataFrame(results)
+    columns_names = ["param_" + key for key in clf_parameters.keys()]
+    columns_names.append("mean_test_score")
+    # for multimetrics evaluation
+    # columns_names.append([["mean_test_" + score] for score in scoring])
+    return results_df[columns_names]
 
 
 @dataclass
@@ -104,14 +123,11 @@ class GridSearchManual:
     model: Pipeline
     param_grid: dict
     train_val_split: tuple = None
-    results: dict = field(
-        default_factory=lambda: {
-            "mean_train_score": [],
-            "mean_test_score": [],
-            "std_train_score": [],
-            "std_test_score": [],
-        }
-    )
+    results: dict = None
+
+    def __post_init__(self):
+        if self.results is None:
+            self.results = defaultdict(list)
 
     def fit(self, train_val_split):
         self.train_val_split = train_val_split
@@ -124,21 +140,14 @@ class GridSearchManual:
             val_scores = model.score(X_val, y_val)
 
             # Store the results for the current parameter combination
-            self.results = update_raw_evaluation_data(
-                self.results, params, train_scores, val_scores
-            )
+            for param_name, param_value in params.items():
+                self.results[f"param_{param_name}"].append(param_value)
+            self.results["mean_train_score"].append(np.mean(train_scores))
+            self.results["std_train_score"].append(np.std(train_scores))
+            self.results["mean_test_score"].append(np.mean(val_scores))
+            self.results["std_test_score"].append(np.std(val_scores))
 
         return self.model
-
-
-# maybe add option to hide or show certain columns
-def create_model_evaluation_df(raw_evaluation_df, clf_parameters):
-    # create model evaluation dataframe
-    columns_names = ["param_" + key for key in clf_parameters.keys()]
-    columns_names.append("mean_test_score")
-    # for multimetrics evaluation
-    # columns_names.append([["mean_test_" + score] for score in scoring])
-    return raw_evaluation_df[columns_names]
 
 
 def create_dict_with_lists_as_values(d):

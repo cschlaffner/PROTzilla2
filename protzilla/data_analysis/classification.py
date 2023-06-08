@@ -7,12 +7,12 @@ from protzilla.data_analysis.classification_helper import (
     perform_grid_search_cv,
     perform_grid_search_manual,
     perform_cross_validation,
-    update_raw_evaluation_data,
-    create_model_evaluation_df,
     create_dict_with_lists_as_values,
     perform_train_test_split,
     encode_labels,
     decode_labels,
+    create_model_evaluation_df_grid_search_manual,
+    create_model_evaluation_df_grid_search,
 )
 
 
@@ -39,20 +39,10 @@ def perform_classification(
         train_scores = model.score(X_train, y_train)
         val_scores = model.score(X_val, y_val)
 
-        results = update_raw_evaluation_data(
-            {
-                "mean_train_score": [],
-                "mean_test_score": [],
-                "std_train_score": [],
-                "std_test_score": [],
-            },
+        model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
             train_scores,
             val_scores,
-        )
-        raw_evaluation_df = pd.DataFrame(results)
-        model_evaluation_df = create_model_evaluation_df(
-            raw_evaluation_df, clf_parameters
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
@@ -67,7 +57,7 @@ def perform_classification(
             scoring,
         )
         model.fit(train_val_split)
-        model_evaluation_df = create_model_evaluation_df(
+        model_evaluation_df = create_model_evaluation_df_grid_search(
             pd.DataFrame(model.results), clf_parameters
         )
         return model, model_evaluation_df
@@ -77,20 +67,10 @@ def perform_classification(
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
-        raw_evaluation_df = update_raw_evaluation_data(
-            {
-                "mean_train_score": [],
-                "mean_test_score": [],
-                "std_train_score": [],
-                "std_test_score": [],
-            },
+        model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
             scores["train_score"],
             scores["test_score"],
-        )
-        raw_evaluation_df = pd.DataFrame(raw_evaluation_df)
-        model_evaluation_df = create_model_evaluation_df(
-            raw_evaluation_df, clf_parameters
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
@@ -102,7 +82,7 @@ def perform_classification(
         model.fit(input_df, labels_df)
 
         # create model evaluation dataframe
-        model_evaluation_df = create_model_evaluation_df(
+        model_evaluation_df = create_model_evaluation_df_grid_search(
             pd.DataFrame(model.cv_results_), clf_parameters
         )
         return model, model_evaluation_df
