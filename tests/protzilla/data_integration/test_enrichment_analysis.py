@@ -17,6 +17,9 @@ from protzilla.data_integration.enrichment_analysis import (
     merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
+from protzilla.data_integration.enrichment_analysis_helper import (
+    uniprot_ids_to_uppercase_gene_symbols,
+)
 
 
 @patch("restring.restring.get_functional_enrichment")
@@ -375,19 +378,35 @@ def test_go_analysis_with_enrichr(mock_gene_mapping):
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
 
-    mock_gene_mapping.return_value = {
-        "ENO1": "Protein1",
-        "ENO2": "Protein2",
-        "ENO3": "Protein3",
-        "HK2": "Protein4",
-        "HK1": "Protein6",
-        "HK3": "Protein7",
-        "IDH3B": "Protein8",
-        "ATP6V1G2": "Protein9",
-        "GPT2": "Protein10",
-        "SDHB": "Protein11",
-        "COX6B1": "Protein12;Protein13",
-    }, ["Protein5"]
+    mock_gene_mapping.return_value = (
+        {
+            "ENO1": "Protein1",
+            "ENO2": "Protein2",
+            "ENO3": "Protein3",
+            "HK2": "Protein4",
+            "HK1": "Protein6",
+            "HK3": "Protein7",
+            "IDH3B": "Protein8",
+            "ATP6V1G2": "Protein9",
+            "GPT2": "Protein10",
+            "SDHB": "Protein11",
+            "COX6B1": "Protein12;Protein13",
+        },
+        {
+            "Protein1": ["ENO1"],
+            "Protein2": ["ENO2"],
+            "Protein3": ["ENO3"],
+            "Protein4": ["HK2"],
+            "Protein6": ["HK1"],
+            "Protein7": ["HK3"],
+            "Protein8": ["IDH3B"],
+            "Protein9": ["ATP6V1G2"],
+            "Protein10": ["GPT2"],
+            "Protein11": ["SDHB"],
+            "Protein12;Protein13": ["COX6B1"],
+        },
+        ["Protein5"],
+    )
     current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
     df = current_out["results"]
 

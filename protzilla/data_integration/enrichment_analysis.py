@@ -14,6 +14,7 @@ from .database_query import biomart_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
+from .enrichment_analysis_helper import uniprot_ids_to_uppercase_gene_symbols
 
 
 # call methods for precommit hook not to delete imports
@@ -250,77 +251,6 @@ def go_analysis_with_STRING(
     return {"enriched_df": merged_df}
 
 
-def uniprot_ids_to_uppercase_gene_symbols(proteins):
-    """
-    A method that converts a list of uniprot ids to uppercase gene symbols.
-    This is done by querying the biomart database. If a protein group is not found
-    in the database, it is added to the filtered_groups list.
-
-    :param proteins: list of uniprot ids
-    :type proteins: list
-    :return: dict with keys uppercase gene symbols and values protein_groups and a list of uniprot ids that were not found
-    :rtype: tuple
-    """
-    proteins_list = []
-    for group in proteins:
-        if ";" not in group:
-            proteins_list.append(group)
-        else:
-            group = group.split(";")
-            # isoforms map to the same gene symbol, that is only found with base protein
-            without_isoforms = set()
-            for protein in group:
-                if "-" in protein:
-                    without_isoforms.add(protein.split("-")[0])
-                elif "_VAR_" in protein:
-                    without_isoforms.add(protein.split("_VAR_")[0])
-                else:
-                    without_isoforms.add(protein)
-            proteins_list.extend(list(without_isoforms))
-
-    q = list(
-        biomart_query(
-            proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
-        )
-    )
-    q += list(
-        biomart_query(
-            proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
-        )
-    )
-    q = dict(set(map(tuple, q)))
-
-    # check per group in proteins if all proteins have the same gene symbol
-    # if yes, use that gene symbol, otherwise use all gene symbols
-    filtered_groups = []
-    gene_mapping = {}
-    for group in proteins:
-        if ";" not in group:
-            symbol = q.get(group, None)
-            if symbol is None:
-                filtered_groups.append(group)
-            else:
-                gene_mapping[symbol.upper()] = group
-        else:
-            # remove duplicate symbols within one group
-            symbols = set()
-            for protein in group.split(";"):
-                if "-" in protein:
-                    protein = protein.split("-")[0]
-                elif "_VAR_" in protein:
-                    protein = protein.split("_VAR_")[0]
-                if result := q.get(protein):
-                    symbols.add(result)
-
-            if not symbols:  # no gene symbol for any protein in group
-                filtered_groups.append(group)
-            else:
-                for symbol in symbols:
-                    gene_mapping[symbol.upper()] = group
-
-    return gene_mapping, filtered_groups
-
-
 def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=False):
     """
     A method that merges the results for up- and down-regulated proteins for the GSEApy
@@ -388,9 +318,21 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :type direction: str
     """
     logging.info("Mapping Uniprot IDs to gene symbols")
-    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_list)
-    logging.info(f"Starting analysis for {direction}-regulated proteins")
+    gene_mapping, _, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+        protein_list
+    )
 
+    if not gene_mapping:
+        return dict(
+            messages=[
+                dict(
+                    level=messages.ERROR,
+                    msg="No gene symbols could be found for the proteins. Please check your input.",
+                )
+            ]
+        )
+
+    logging.info(f"Starting analysis for {direction}-regulated proteins")
     try:
         enriched = gp.enrichr(
             gene_list=list(gene_mapping.keys()),
