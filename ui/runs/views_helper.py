@@ -31,7 +31,7 @@ def convert_str_if_possible(s):
         if s == "checked":
             # s is a checkbox
             return True
-        if re.fullmatch(r"\d+(\.\d+)?(-\d+(\.\d+)?)*", s):
+        if re.fullmatch(r"\d+(\.\d+)?(\|\d+(\.\d+)?)*", s):
             # s is a multi-numeric input e.g. 1-0.12-5
             numbers_str = re.findall(r"\d+(?:\.\d+)?", s)
             numbers = []
