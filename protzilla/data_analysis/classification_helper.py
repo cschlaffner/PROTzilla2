@@ -25,7 +25,14 @@ def encode_labels(input_df_wide, labels_df):
     y = y["Group"]
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
-    return y_encoded
+    return label_encoder, y_encoded
+
+
+def decode_labels(label_encoder, X_df, labels):
+    labels = label_encoder.inverse_transform(labels)
+    labels_df = pd.DataFrame(labels, columns=["Label"])
+    labels_df = pd.concat([X_df["Sample"], labels_df], axis=1)
+    return labels_df
 
 
 def perform_grid_search_cv(

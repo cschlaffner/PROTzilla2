@@ -11,6 +11,7 @@ from protzilla.data_analysis.classification_helper import (
     create_dict_with_lists_as_values,
     perform_train_test_split,
     encode_labels,
+    decode_labels,
 )
 
 
@@ -142,7 +143,7 @@ def random_forest(
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     labels_df = metadata_df[["Sample", labels_column]]
-    y_encoded = encode_labels(input_df_wide, labels_df)
+    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df)
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
@@ -171,11 +172,16 @@ def random_forest(
         scoring,
         **kwargs,
     )
+
+    X_test.reset_index(inplace=True)
+    X_train.reset_index(inplace=True)
+    y_test = decode_labels(label_encoder, X_test, y_test)
+    y_train = decode_labels(label_encoder, X_train, y_train)
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
-        X_test_df=pd.DataFrame(X_test),
-        y_test_df=pd.DataFrame(y_test),
-        X_train_df=pd.DataFrame(X_train),
-        y_train_df=pd.DataFrame(y_train),
+        X_test_df=X_test,
+        y_test_df=y_test,
+        X_train_df=X_test,
+        y_train_df=y_train,
     )
