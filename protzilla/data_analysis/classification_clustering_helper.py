@@ -141,7 +141,7 @@ def create_dict_with_lists_as_values(d):
 
 
 def perform_train_test_split(
-    input_df, labels_df, test_size=None, random_state=None, shuffle=True, stratify=None
+    input_df, labels_df, test_size=None, random_state=42, shuffle=False, stratify=None
 ):
     return train_test_split(
         input_df,

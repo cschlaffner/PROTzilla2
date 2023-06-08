@@ -87,6 +87,7 @@ def random_forest_out(classification_df, meta_df, validation_strategy, model_sel
         test_validate_split=0.20,
         model_selection=model_selection,
         validation_strategy=validation_strategy,
+        random_state=42,
     )
 
 
