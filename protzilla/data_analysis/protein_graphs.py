@@ -494,7 +494,23 @@ def _get_start_end_pos_for_matches(peptide_matches, graph_index):
 
 
 def _modify_graph(graph, contig_positions, longest_paths):
-    def _update_new_node_after(new_node, node, neighbors):
+    """
+    Splits nodes of graph at into new contig nodes defined by the start- and
+    end-positions in contig_positions. Adds `match` attribute to nodes, "true" when
+    contig, "false" if not. Sink (__end__) node will end up without `match`-attribute
+
+    :param graph: Protein Graph to be modified
+    :type: nx.DiGraph
+    :param contig_positions: Dict from node to contig-positions {node: [(start, end)]}.
+    :type: dict(node: [(start, end)])
+    :param longest_paths: mapping from node to the longest path to node
+    (-> _longest_paths())
+    :type: dict
+    :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
+    by node attribute `matched`
+    """
+
+    def _update_new_node_after(node, new_node, neighbors):
         for neighbor in neighbors:
             graph.add_edge(neighbor, new_node)
             graph.remove_edge(neighbor, node)
