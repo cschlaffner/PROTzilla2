@@ -6,6 +6,7 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis import (
@@ -14,6 +15,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_with_enrichr,
     go_analysis_with_STRING,
     merge_restring_dfs,
+    merge_up_down_regulated_proteins_results,
 )
 
 
@@ -262,7 +264,7 @@ def test_go_analysis_with_STRING_proteins_list():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -275,7 +277,7 @@ def test_go_analysis_with_STRING_no_fc_df():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -303,7 +305,7 @@ def test_go_analysis_with_STRING_too_many_col_df():
     )
     assert "messages" in current_out
     assert (
-        "dataframe with Protein ID and numeric ranking column"
+        "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
 
@@ -316,37 +318,61 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
     )
 
     assert "messages" in current_out
-    assert "Invalid input" in current_out["messages"][0]["msg"]
+    assert (
+        "dataframe with Protein ID and direction of expression change column"
+        in current_out["messages"][0]["msg"]
+    )
 
 
 @pytest.mark.internet()
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
-def test_go_analysis_with_enrichr(mock_gene_symbols):
-    proteins = ["Protein1", "Protein2", "Protein3", "Protein4", "Protein5", "Protein6"]
+def test_go_analysis_with_enrichr(mock_gene_mapping):
+    # Check if enrichr API is available
+    api_url = "https://maayanlab.cloud/Enrichr/addList"
+    try:
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            pytest.skip("Enrichr API is currently unavailable")
+    except requests.exceptions.RequestException:
+        pytest.skip("Enrichr API is currently unavailable")
+
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6;Protein7;Protein8",
+        "Protein9;Protein10;Protein11",
+        "Protein12;Protein13",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
     protein_sets = ["Reactome_2013"]
     organism = "human"
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    results = pd.read_csv(f"{test_data_folder}/Reactome_enrichment_enrichr.csv")
+    results = pd.read_csv(
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
+    )
 
-    mock_gene_symbols.return_value = [
-        "ENO1",
-        "ENO2",
-        "ENO3",
-        "HK2",
-        "HK1",
-        "HK3",
-        "IDH3B",
-        "ATP6V1G2",
-        "GPT2",
-        "SDHB",
-        "COX6B1",
-    ], ["Protein5"]
-    current_out = go_analysis_with_enrichr(proteins, protein_sets, organism)
+    mock_gene_mapping.return_value = {
+        "ENO1": "Protein1",
+        "ENO2": "Protein2",
+        "ENO3": "Protein3",
+        "HK2": "Protein4",
+        "HK1": "Protein6",
+        "HK3": "Protein7",
+        "IDH3B": "Protein8",
+        "ATP6V1G2": "Protein9",
+        "GPT2": "Protein10",
+        "SDHB": "Protein11",
+        "COX6B1": "Protein12;Protein13",
+    }, ["Protein5"]
+    current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
     df = current_out["results"]
 
-    column_names = ["Term", "Genes", "Gene_set", "Overlap"]
+    column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
     # Compare all specified columns
     for column in column_names:
         assert df[column].equals(results[column])
@@ -414,17 +440,20 @@ def test_go_analysis_offline_protein_sets(
     protein_sets_path, go_analysis_offline_result_no_bg
 ):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
 
     current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
+        proteins=proteins_df,
         protein_sets_path=protein_sets_path,
+        direction="up",
     )
     df = current_out["results"]
 
@@ -464,18 +493,21 @@ def test_go_analysis_offline_background(
 ):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [-1.0] * 6})
 
     current_out = go_analysis_offline(
-        proteins=[
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein5",
-            "Protein6",
-        ],
+        proteins=proteins_df,
         protein_sets_path=f"{test_data_folder}/protein_sets.txt",
         background=background_path,
+        direction="down",
     )
     df = current_out["results"]
 
@@ -500,10 +532,14 @@ def test_go_analysis_offline_background(
 
 
 def test_go_analysis_offline_no_protein_sets():
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
-        protein_sets_path="",
-        background=None,
+        proteins=proteins_df, protein_sets_path="", background=None, direction="up"
     )
 
     assert "messages" in current_out
@@ -511,10 +547,17 @@ def test_go_analysis_offline_no_protein_sets():
 
 
 def test_go_analysis_offline_invalid_protein_set_file():
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
+        proteins=proteins_df,
         protein_sets_path="an_invalid_filetype.png",
         background="",  # no background
+        direction="up",
     )
 
     assert "messages" in current_out
@@ -523,12 +566,75 @@ def test_go_analysis_offline_invalid_protein_set_file():
 
 
 def test_go_analysis_offline_invalid_background_set_file():
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+    ]
+    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
-        proteins=["Protein1", "Protein2", "Protein3"],
+        proteins=proteins_df,
         protein_sets_path="a_valid_filetype.gmt",
         background="an_invalid_filetype.png",
+        direction="up",
     )
 
     assert "messages" in current_out
     assert "Invalid file type" in current_out["messages"][0]["msg"]
     assert "background" in current_out["messages"][0]["msg"]
+
+
+def test_merge_up_down_regulated_proteins_results():
+    up_enriched = pd.DataFrame(
+        {
+            "Gene_set": ["Set1", "Set2", "Set4"],
+            "Term": ["Term1", "Term2", "Term4"],
+            "Adjusted P-value": [0.01, 0.05, 0.001],
+            "Proteins": ["Protein1", "Protein2", "Protein4;Protein5"],
+            "Genes": ["Gene1", "Gene2", "Gene4;GeneX"],
+            "Overlap": ["1/10", "1/30", "2/40"],
+        }
+    )
+
+    down_enriched = pd.DataFrame(
+        {
+            "Gene_set": ["Set2", "Set3", "Set4"],
+            "Term": ["Term2", "Term3", "Term4"],
+            "Adjusted P-value": [0.02, 0.03, 0.0001],
+            "Proteins": ["Protein3", "Protein4", "Protein3"],
+            "Genes": ["GeneX", "Gene4", "GeneX"],
+            "Overlap": ["1/30", "1/40", "1/40"],
+        }
+    )
+
+    expected_output = pd.DataFrame(
+        {
+            "Gene_set": ["Set1", "Set2", "Set3", "Set4"],
+            "Term": ["Term1", "Term2", "Term3", "Term4"],
+            "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
+            "Proteins": [
+                "Protein1",
+                "Protein2;Protein3",
+                "Protein4",
+                "Protein3;Protein4;Protein5",
+            ],
+            "Genes": ["Gene1", "Gene2;GeneX", "Gene4", "Gene4;GeneX"],
+            "Overlap": ["1/10", "2/30", "1/40", "2/40"],
+        }
+    )
+
+    merged = merge_up_down_regulated_proteins_results(
+        up_enriched, down_enriched, mapped=True
+    )
+    merged.set_index(["Gene_set", "Term"], inplace=True)
+    expected_output.set_index(["Gene_set", "Term"], inplace=True)
+    merged = merged.sort_index()
+    expected_output = expected_output.sort_index()
+
+    for col in ["Genes", "Proteins"]:
+        merged[col] = merged[col].apply(lambda x: set(x.split(";")))
+        expected_output[col] = expected_output[col].apply(lambda x: set(x.split(";")))
+        merged[col] = merged[col].apply(lambda x: sorted(x))
+        expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
+
+    pd.testing.assert_frame_equal(merged, expected_output)

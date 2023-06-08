@@ -8,28 +8,22 @@
           "method": "max_quant_import",
           "parameters": {
             "intensity_name": "iBAQ"
-          }
+          },
+          "output_name": null
         }
       ]
     },
     "data_preprocessing": {
-      "steps": [
-        {
-          "name": "filter_proteins",
-          "method": "samples_missing_filter",
-          "parameters": {
-            "percentage": 0.2
-          },
-          "graphs": [
-            {
-              "graph_type": "Pie chart"
-            }
-          ]
-        }
-      ]
+      "steps": []
     },
     "data_analysis": {
-      "steps": []
+      "steps": [
+        {
+          "name": "dimension_reduction",
+          "method": "method_name1",
+          "parameters": {}
+        }
+      ]
     },
     "data_integration": {
       "steps": []

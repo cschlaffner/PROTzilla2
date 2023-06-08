@@ -98,12 +98,12 @@
   },
   "data_preprocessing": {
     "filter_proteins": {
-      "low_frequency_filter": {
-        "name": "Low Frequency",
-        "description": "This function filters proteins with a low frequency of occurrence from a protein dataframe based on a set threshold. The threshold is defined by the relative amount of samples a protein is detected in.",
+      "samples_missing_filter": {
+        "name": "Samples Missing",
+        "description": "Filters all proteins that are contained in less than a set percentage of samples",
         "parameters": {
-          "threshold": {
-            "name": "Threshold for the relative amount of samples a protein is detected in:",
+          "percentage": {
+            "name": "Percentage of minimum non-missing samples per protein",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -119,7 +119,7 @@
                 "Bar chart",
                 "Pie chart"
               ],
-              "default": "Bar chart"
+              "default": "Pie chart"
             }
           }
         ]
@@ -848,6 +848,69 @@
             "default": null
           }
         }
+      },
+      "linear_model": {
+        "name": "linear model",
+        "description": "A function to fit a linear model using Ordinary Least Squares for each Protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
+        "parameters": {
+          "intensity_df": {
+            "name": "Input Dataframe",
+            "type": "named_output",
+            "default": [null, null]
+          },
+          "multiple_testing_correction_method": {
+            "name": "Multiple Testing Correction Method:",
+            "type": "categorical",
+            "categories": [
+              "Benjamini-Hochberg",
+              "Bonferroni"
+            ],
+            "default": "Benjamini-Hochberg"
+          },
+          "alpha": {
+            "name": "Error Rate (alpha)",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "fc_threshold": {
+            "name": "Fold change threshold",
+            "type": "numeric",
+            "min": 0,
+            "default": 0
+          },
+          "grouping": {
+            "name": "Grouping",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
       }
     },
     "plot": {
@@ -875,20 +938,18 @@
             "type": "named_output",
             "default": [null, null]
           },
-          "proteins_of_interest_wrapper": {
+          "proteins_of_interest_input": {
             "name": "Proteins of Interest",
-            "type": "named_output_with_fields",
-            "fill_dynamic": ["proteins_of_interest"],
-            "default": [null, null, null],
-            "fields": {
-              "proteins_of_interest": {
-                "type": "categorical",
-                "fill": "protein_ids",
-                "categories": [],
-                "default": null,
-                "multiple": true
-              }
-            }
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["proteins_of_interest"]
+          },
+          "proteins_of_interest": {
+            "type": "categorical",
+            "fill": "protein_ids",
+            "categories": [],
+            "default": null,
+            "multiple": true
           }
         }
       },
@@ -1110,7 +1171,7 @@
         "description": "Online GO Analysis using STRING API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1152,7 +1213,7 @@
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
@@ -1169,6 +1230,14 @@
             "type": "categorical",
             "categories": ["human", "mouse", "yeast", "fly", "fish", "worm"],
             "default": "human"
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
           }
         }
       },
@@ -1177,19 +1246,133 @@
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
           "proteins": {
-            "name": "Choose Proteins to run GO Analysis on",
+            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [null,null]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
           "background": {
-            "name": "Background set (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
             "type": "file",
             "default": null
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both","up","down"
+            ],
+            "default": "both"
+          }
+        }
+      }
+    },
+    "plot": {
+      "go_enrichment_bar_plot": {
+        "name": "Bar plot for GO enrichment analysis",
+        "description":"Creates a bar plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 10
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "colors": {
+            "name": "Colors for the plot (optional)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "matplotlib_colors",
+            "default": null
+          }
+        }
+      },
+      "go_enrichment_dot_plot": {
+        "name": "Dot plot for GO enrichment analysis (oflline & with Enrichr) ",
+        "description":"Creates a categorical scatter plot from GO enrichment data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [null, null],
+            "fill_dynamic": ["categories"]
+          },
+          "x_axis_type": {
+            "name": "Variable for x-axis: categorical scatter plot for one or multiple gene sets, or display combined score for one gene set",
+            "type": "categorical",
+            "categories": [
+              "Gene Sets", "Combined Score"
+            ],
+            "default": "Gene Sets"
+          },
+          "categories": {
+            "name": "Categories/Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "enrichment_categories"
+          },
+          "top_terms": {
+            "name": "Number of top enriched terms per category",
+            "type": "numeric",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 5
+          },
+          "cutoff": {
+            "name": "Only terms with Adjusted P-value < cutoff will be shown",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "rotate_x_labels": {
+            "name": "Rotate x-axis labels (if multiple categories are selected)",
+            "type": "boolean",
+            "default": true
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
           }
         }
       }

@@ -4,7 +4,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
-from ..data_integration import enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -41,8 +41,8 @@ method_map = {
     (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency,
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -145,6 +145,11 @@ method_map = {
     ): differential_expression.t_test,
     (
         "data_analysis",
+        "differential_expression",
+        "linear_model",
+    ): differential_expression.linear_model,
+    (
+        "data_analysis",
         "clustering",
         "k_means",
     ): clustering.k_means,
@@ -187,8 +192,8 @@ plot_map = {
     (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency_plot,
+        "samples_missing_filter",
+    ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -294,4 +299,14 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_bar_plot",
+    ): di_plots.go_enrichment_bar_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_dot_plot",
+    ): di_plots.go_enrichment_dot_plot,
 }

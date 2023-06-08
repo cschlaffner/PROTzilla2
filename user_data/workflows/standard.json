@@ -23,9 +23,9 @@
       "steps": [
         {
           "name": "filter_proteins",
-          "method": "low_frequency_filter",
+          "method": "samples_missing_filter",
           "parameters": {
-            "threshold": 0.2
+            "percentage": 0.2
           },
           "graphs": [
             {
@@ -172,7 +172,8 @@
             ],
             "log_base": 2,
             "grouping": "Group"
-          }
+          },
+          "output_name": "ttest"
         },
         {
           "name": "plot",
