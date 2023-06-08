@@ -20,8 +20,8 @@
 | protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        4 |       10 |        2 |     86% |61-66, 94, 165 |
 | protzilla/data\_analysis/plots.py                                       |       77 |        3 |       36 |        4 |     94% |55, 64->66, 106, 255 |
 | protzilla/data\_integration/database\_query.py                          |       13 |       10 |        6 |        0 |     16% |      7-38 |
-| protzilla/data\_integration/di\_plots.py                                |       87 |       34 |       32 |        4 |     58% |65-66, 69, 78, 156-223 |
-| protzilla/data\_integration/enrichment\_analysis.py                     |      321 |       95 |      156 |       24 |     68% |38->40, 133->139, 143->149, 150-152, 154, 205-208, 220-223, 245-246, 255->258, 275-332, 360->367, 367->374, 413-414, 479-489, 491->501, 493-494, 496-499, 501->506, 507, 512-513, 531, 588-589, 597-598, 600-601, 603-606, 610-611, 613-616, 699-700, 722-723, 735 |
+| protzilla/data\_integration/di\_plots.py                                |       85 |       32 |       34 |        4 |     60% |69, 101->104, 105, 166-233 |
+| protzilla/data\_integration/enrichment\_analysis.py                     |      307 |       91 |      160 |       24 |     68% |34->36, 153->159, 163->169, 170-172, 174, 201-205, 219-223, 254-311, 339->346, 346->353, 392-393, 458-468, 470->480, 472-473, 475-478, 480->485, 486, 491-492, 510, 567-568, 576-577, 579-580, 582-585, 589-590, 592-595, 678-679, 701-702, 714 |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                           |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                       |       17 |        2 |        4 |        1 |     76% |     51-52 |
 | protzilla/data\_preprocessing/filter\_samples.py                        |       34 |        0 |        4 |        0 |    100% |           |
@@ -53,8 +53,8 @@
 | tests/protzilla/data\_analysis/test\_differential\_expression.py        |      105 |        3 |       22 |        3 |     95% |91, 135, 333 |
 | tests/protzilla/data\_analysis/test\_dimension\_reduction.py            |       45 |        8 |        0 |        0 |     82% |91-114, 119-143 |
 | tests/protzilla/data\_analysis/test\_plots\_data\_analysis.py           |       66 |        5 |       22 |       11 |     82% |75, 82, 89, 96->exit, 102->exit, 112, 119, 126->exit, 131->exit, 157->exit, 179->exit |
-| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      232 |        3 |       38 |        1 |     99% |   336-338 |
-| tests/protzilla/data\_integration/test\_plots\_data\_integration.py     |       67 |       12 |        8 |        4 |     79% |16-19, 32, 42, 57, 88-96, 146 |
+| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      210 |        3 |       56 |        1 |     98% |   354-356 |
+| tests/protzilla/data\_integration/test\_plots\_data\_integration.py     |       72 |        8 |        8 |        4 |     85% |16-19, 33, 43, 59, 169 |
 | tests/protzilla/data\_preprocessing/\_\_init\_\_.py                     |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py           |       25 |        4 |        2 |        1 |     81% | 13-39, 84 |
 | tests/protzilla/data\_preprocessing/test\_filter\_samples.py            |       42 |        3 |        6 |        3 |     88% |58, 87, 116 |
@@ -79,11 +79,11 @@
 | ui/main/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
 | ui/main/settings.py                                                     |       28 |        0 |        2 |        1 |     97% |    24->32 |
 | ui/runs/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
-| ui/runs/fields.py                                                       |      112 |       95 |       66 |        0 |     10% |15-26, 34-61, 72-82, 86-88, 101-112, 116-121, 134-200, 204-212 |
+| ui/runs/fields.py                                                       |      110 |       93 |       64 |        0 |     10% |15-26, 34-61, 72-82, 86-88, 101-112, 116-121, 134-202, 206-214 |
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      248 |      197 |       72 |        0 |     17% |37, 49-80, 107-123, 140-161, 172-245, 249-256, 260-262, 266-268, 272-274, 278-287, 291-298, 302-310, 314-341, 345-374, 378-380, 384-385, 407-409, 413-427, 435-456, 470-476 |
 | ui/runs/views\_helper.py                                                |       43 |        2 |       18 |        3 |     92% |12->14, 18, 31 |
-|                                                               **TOTAL** | **4363** |  **727** | **1195** |  **182** | **79%** |           |
+|                                                               **TOTAL** | **4328** |  **715** | **1217** |  **182** | **79%** |           |
 
 
 ## Setup coverage badge
