@@ -1,6 +1,5 @@
 import logging
 import math
-import pprint
 import re
 import subprocess
 from pathlib import Path
@@ -12,38 +11,6 @@ from django.contrib import messages
 
 from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
-
-
-def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
-    logger.info(f"Creating graph for protein {protein_id}")
-    run_path = f"{RUNS_PATH}/{run_name}"
-    path_to_protein_file, request = _get_protein_file(protein_id, run_path)
-
-    if request is not None:
-        if request.status_code != 200:
-            msg = f"error while downloading protein file for {protein_id}.\
-                         Statuscode:{request.status_code}, {request.reason}. \
-                         Got: {request.text}. Tip: check if the ID is correct"
-            return dict(
-                graph_path=None,
-                messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
-            )
-
-    output_folder = f"{run_path}/graphs"
-    output_csv = f"{output_folder}/{protein_id}.csv"
-    graph_path = f"{output_folder}/{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder} \
-                --output_csv={output_csv} \
-                -ft VARIANT \
-                -d skip"
-    # -ft VAR_SEQ --no_merge
-
-    subprocess.run(cmd_str, shell=True)
-
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
-    logging.info(msg)
-    return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
 def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
@@ -69,12 +36,14 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     peptides = df["Sequence"].unique().tolist()
 
     if not Path(f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml").exists():
-        graph_path, message = _create_graph(protein_id, run_name)
+        out_dict = _create_graph(protein_id, run_name)
+        graph_path = out_dict["graph_path"]
+        message = out_dict["messages"]
         if graph_path is None:
             return dict(graph_path=None, messages=message)
     else:
         logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
-        graph_path = (f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml",)
+        graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
 
     k = 5
     allowed_mismatches = 2
@@ -247,7 +216,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
 
     logger.info("modifying graph")
     for node, positions_list in node_mod.items():
-        # 'n4': [(302, 308), (325, 349), (353, 359)]
         old_node = protein_graph.nodes[node].copy()
         old_node_starting_pos = longest_paths[node]
         for start, end in positions_list:
@@ -334,19 +302,8 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
             elif end > longest_paths[node] + len(
                 protein_graph.nodes[node]["aminoacid"]
             ):
-                pprint.pprint(protein_graph.__dict__)
-                print(
-                    "end, longest_paths[node] + len(protein_graph.nodes[node]['aminoacid']), node, protein_graph.nodes[node]['aminoacid'], match_node_label"
-                )
-                print(
-                    end,
-                    longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]),
-                    node,
-                    protein_graph.nodes[node]["aminoacid"],
-                    match_node_label,
-                )
                 raise Exception(
-                    "end > longest_paths[node] + len(protein_graph.nodes[node]['aminoacid'])"
+                    "end position is greater than the length of the node aminoacid sequence"
                 )
             else:
                 successors = list(protein_graph.successors(node))
@@ -354,15 +311,50 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                     protein_graph.add_edge(match_node_id, successor)
                     protein_graph.remove_edge(node, successor)
 
+    logger.info(f"writing modified graph at {matched_graph_path}")
     nx.write_graphml(protein_graph, matched_graph_path)
 
+    msg = f"matched peptides graph created at {matched_graph_path}"
     return dict(
         graph_path=graph_path,
         matched_graph_path=matched_graph_path,
         peptide_matches=peptide_matches,
         peptide_mismatches=peptide_mismatches,
-        messages=out_dict["messages"],
+        messages=[dict(level=messages.INFO, msg=msg)],
     )
+
+
+def _create_graph(protein_id: str, run_name: str, queue_size: int = None):
+    logger.info(f"Creating graph for protein {protein_id}")
+    run_path = f"{RUNS_PATH}/{run_name}"
+    path_to_protein_file, request = _get_protein_file(protein_id, run_path)
+
+    if request is not None:
+        if request.status_code != 200:
+            msg = f"error while downloading protein file for {protein_id}.\
+                         Statuscode:{request.status_code}, {request.reason}. \
+                         Got: {request.text}. Tip: check if the ID is correct"
+            logger.error(msg)
+            return dict(
+                graph_path=None,
+                messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+            )
+
+    output_folder = f"{run_path}/graphs"
+    output_csv = f"{output_folder}/{protein_id}.csv"
+    graph_path = f"{output_folder}/{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                --export_output_folder={output_folder} \
+                --output_csv={output_csv} \
+                -ft VARIANT \
+                -d skip"
+    # -ft VAR_SEQ --no_merge
+
+    subprocess.run(cmd_str, shell=True)
+
+    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
+    logging.info(msg)
+    return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
 def _create_graph_index(protein_graph: nx.Graph, seq_len: int):
@@ -473,6 +465,7 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
     else:
         logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
+        r.raise_for_status()
         if r.status_code == 200:
             with open(path_to_protein_file, "wb") as f:
                 f.write(r.content)
@@ -579,6 +572,8 @@ if __name__ == "__main__":
         "/Users/anton/Documents/code/PROTzilla2/user_data/runs/peptide2/history_dfs/simple_P22626.csv"
     )
     peptide_df = peptide_df.drop(columns=["Unnamed: 0"])
+    logger.info("aahhhhhh")
+    logger.warning("aahhhhhh")
 
     out_dict = peptides_to_isoform(
         peptide_df=peptide_df, protein_id="P22626", run_name="peptide3"
