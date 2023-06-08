@@ -63,20 +63,6 @@ html, body {
     transform: rotate(180deg);
 }
 
-/*.__________cytoscape_container {*/
-/*    height: 35%;*/
-/*    margin-top: 10px;*/
-/*    margin-bottom: 10px;*/
-/*    border-width: 3px;*/
-/*    border-style: solid;*/
-/*    border-color: black;*/
-/*}*/
-
-/*#cy {*/
-/*    position: absolute;*/
-/*    left: 0;*/
-/*    top: 0;*/
-/*    bottom: 0;*/
-/*    right: 0;*/
-/*    z-index: 999;*/
-/*}*/
+#go_enrichment_dot_plot_img {
+    width: 700px;
+}

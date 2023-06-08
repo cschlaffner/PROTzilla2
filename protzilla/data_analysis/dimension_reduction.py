@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 from sklearn.manifold import TSNE
-from umap import UMAP
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -136,6 +135,9 @@ def umap(
     :type random_state: int
     """
 
+    # umap import is slow, so it should only get imported when needed
+    from umap import UMAP
+
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         embedded_data_model = UMAP(
@@ -166,8 +168,3 @@ def umap(
             embedded_data=None,
             messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
         )
-
-
-def method_name(*args, **kwargs):
-    print("hurray")
-    return dict()

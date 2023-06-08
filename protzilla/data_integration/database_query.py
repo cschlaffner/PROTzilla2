@@ -4,6 +4,9 @@ import requests
 
 
 def biomart_query(queries, filter_name, attributes):
+    if not queries:
+        return
+
     root = Element(
         "Query",
         attrib={

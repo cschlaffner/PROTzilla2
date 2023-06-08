@@ -170,11 +170,6 @@ method_map = {
         "peptides_to_isoform",
     ): protein_graphs.peptides_to_isoform,
     (
-        "data_analysis",
-        "dimension_reduction",
-        "method_name",
-    ): dimension_reduction.method_name,
-    (
         "data_integration",
         "enrichment_analysis",
         "go_analysis_with_STRING",
@@ -315,4 +310,9 @@ plot_map = {
         "plot",
         "go_enrichment_bar_plot",
     ): di_plots.go_enrichment_bar_plot,
+    (
+        "data_integration",
+        "plot",
+        "go_enrichment_dot_plot",
+    ): di_plots.go_enrichment_dot_plot,
 }
