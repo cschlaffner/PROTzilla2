@@ -84,12 +84,15 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
 def gsea_preranked(
     protein_df,
     ranking_direction,
-    gene_sets_path,
-    gene_sets_enrichr,
-    number_of_permutations,
-    min_size,
-    max_size,
+    gene_sets_path=None,
+    gene_sets_enrichr=None,
+    min_size=15,
+    max_size=500,
+    number_of_permutations=1000,
+    permutation_type="phenotype",
+    weighted_score=1.0,
     seed=123,
+    **kwargs,
 ):
     # TODO: ask Sara if dynamic parameter params should be added to function or not
     # if yes remove it somewhere before because it would be ugly for package usage
@@ -159,8 +162,21 @@ def gsea_preranked(
     )
 
 
-def gsea(protein_df, metadata_df, grouping, gene_sets_path, gene_sets_enrichr, seed=123):
-
+def gsea(
+    protein_df,
+    metadata_df,
+    grouping,
+    gene_sets_path=None,
+    gene_sets_enrichr=None,
+    min_size=15,
+    max_size=500,
+    number_of_permutations=1000,
+    permutation_type="phenotype",
+    ranking_method="log2_ratio_of_classes",
+    weighted_score=1.0,
+    seed=123,
+    **kwargs,
+):
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique()
     logging.info("Mapping Uniprot IDs to uppercase gene symbols")
