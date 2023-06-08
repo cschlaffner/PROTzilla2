@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from protzilla.utilities.transform_dfs import is_long_format, long_to_wide, wide_to_long
+from protzilla.utilities.transform_dfs import *
 
 
 @pytest.fixture
@@ -113,3 +113,18 @@ def test_transform_wide_to_long_to_wide(
         wide_to_long(transform_df_wide, transform_df_long_gene_name_provider)
     )
     pd.testing.assert_frame_equal(w2w, transform_df_wide)
+
+
+def test_is_intensity_df(transform_df_long):
+    assert is_intensity_df(transform_df_long)
+
+    df = transform_df_long.copy()
+    df.rename(columns={"Intensity": "Normalised Intensity"}, inplace=True)
+    assert is_intensity_df(df)
+
+    df.drop(columns=["Normalised Intensity"], inplace=True)
+    assert not is_intensity_df(df)
+
+    assert not is_intensity_df(pd.DataFrame(columns=["Sample", "Protein ID", "Gene"]))
+    assert not is_intensity_df(pd.DataFrame())
+    assert not is_intensity_df(["Protein", "Sample", "Gene", "Intensity"])

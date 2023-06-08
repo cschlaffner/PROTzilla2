@@ -18,6 +18,7 @@ from protzilla.data_integration.enrichment_analysis import (
     merge_up_down_regulated_proteins_results,
 )
 from protzilla.data_integration.enrichment_analysis_helper import (
+    read_protein_or_gene_sets_file,
     uniprot_ids_to_uppercase_gene_symbols,
 )
 
@@ -676,6 +677,63 @@ def test_merge_up_down_regulated_proteins_results():
         expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
     pd.testing.assert_frame_equal(merged, expected_output)
+
+
+@pytest.mark.parametrize(
+    "protein_sets_path",
+    [
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
+        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt",
+    ],
+)
+def test_read_protein_or_gene_sets_file(protein_sets_path):
+    expected_output = {
+        "Set1": [
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein7",
+            "Protein8",
+            "Protein9",
+            "Protein10",
+        ],
+        "Set2": [
+            "Protein1",
+            "Protein3",
+            "Protein5",
+            "Protein6",
+            "Protein7",
+            "Protein8",
+            "Protein9",
+            "Protein10",
+        ],
+    }
+
+    result_dict = read_protein_or_gene_sets_file(protein_sets_path)
+    assert result_dict == expected_output
+
+
+def test_read_protein_or_gene_sets_file_gmt_path():
+    a_made_up_path = "test_data/a_gmt_file.gmt"
+    out_path = read_protein_or_gene_sets_file(a_made_up_path)
+    assert out_path == a_made_up_path
+
+
+def test_read_protein_or_gene_sets_file_no_path():
+    out_dict = read_protein_or_gene_sets_file("")
+    assert "messages" in out_dict
+    assert "No file uploaded for protein sets." in out_dict["messages"][0]["msg"]
+
+
+def test_read_protein_or_gene_sets_file_invalid_filetype():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    a_made_up_path = f"{test_data_folder}/a_made_up_wrong_file.png"
+    out_dict = read_protein_or_gene_sets_file(a_made_up_path)
+
+    assert "messages" in out_dict
+    assert "Invalid file type" in out_dict["messages"][0]["msg"]
 
 
 def test_gsea():

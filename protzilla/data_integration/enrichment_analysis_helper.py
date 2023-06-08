@@ -97,7 +97,7 @@ def read_protein_or_gene_sets_file(path):
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
     :param path: path to file
     :type path: str
-    :return: dict with protein or gene sets or error message
+    :return: dict with protein or gene sets, a path to a gmt file or error message
     :rtype: dict
     """
     if path == "" or path is None:

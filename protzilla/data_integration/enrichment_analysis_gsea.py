@@ -55,7 +55,7 @@ def create_ranked_df(
 
     # sort rank df by score according to ranking direction
     rnk.sort_values(
-        by="Score", ascending=ranking_direction == "ascending", inplace=True
+        by="Ranking value", ascending=ranking_direction == "ascending", inplace=True
     )
     return rnk
 
@@ -115,7 +115,11 @@ def gsea_preranked(
         )
 
     rnk = create_ranked_df(
-        protein_groups, protein_df, ranking_direction, group_to_genes, filtered_groups,
+        protein_groups,
+        protein_df,
+        ranking_direction,
+        group_to_genes,
+        filtered_groups,
     )
 
     logging.info("Running GSEA")
@@ -157,7 +161,9 @@ def gsea_preranked(
     )
 
 
-def create_genes_intensity_wide_df(protein_df, protein_groups, samples, group_to_genes, filtered_groups):
+def create_genes_intensity_wide_df(
+    protein_df, protein_groups, samples, group_to_genes, filtered_groups
+):
     """
     Creates a dataframe with genes in rows and samples in columns with intensity values.
     If multiple proteins map to the same gene, the same intensity value is used for all.

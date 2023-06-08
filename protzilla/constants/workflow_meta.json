@@ -1382,7 +1382,7 @@
         }
       },
       "gsea": {
-        "name": "GSEA Preranked",
+        "name": "GSEA",
         "description": "TODO",
         "parameters": {
           "protein_df": {
@@ -1394,13 +1394,13 @@
             ]
           },
           "gene_sets_field": {
-            "name": "How do you want to provide the gene sets?",
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
             "type": "categorical_dynamic",
             "categories": [
               "Upload a file",
               "Choose from Enrichr Options"
             ],
-            "default": "euclidean",
+            "default": "Choose from Enrichr Options",
             "dynamic_parameters": {
               "Upload a file": [
                 "gene_sets_path"
