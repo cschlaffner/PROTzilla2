@@ -9,6 +9,7 @@ class ProtzillaLoggingHandler(logging.Handler):
                 https://stackoverflow.com/a/56944256/1435167
 
     A logging handler that emits styled log messages to the console.
+    Used by the protzilla app and as the Django logging handler.
     """
 
     def __init__(self, level=logging.NOTSET):
@@ -66,9 +67,11 @@ class ProtzillaLoggingHandler(logging.Handler):
 # the logger used by DJANGO is configured in ui/main/settings.py::LOGGING
 
 # this logger is/can be used by the protzilla app
+# adjust `protzilla_logging_level` to adjust the verbosity of the protzilla logger
+protzilla_logging_level = logging.INFO
 logger = logging.getLogger("protzilla")
-logger.setLevel(logging.INFO)
-logger.addHandler(ProtzillaLoggingHandler(logging.INFO))
+logger.setLevel(protzilla_logging_level)
+logger.addHandler(ProtzillaLoggingHandler(protzilla_logging_level))
 
 MESSAGE_TO_LOGGING_FUNCTION = {
     messages.ERROR: logging.error,
