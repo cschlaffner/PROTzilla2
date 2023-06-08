@@ -9,7 +9,7 @@
 | protzilla/constants/\_\_init\_\_.py                                     |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/colors.py                                           |        2 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/location\_mapping.py                                |        9 |        0 |        2 |        0 |    100% |           |
-| protzilla/constants/logging.py                                          |        3 |        0 |        0 |        0 |    100% |           |
+| protzilla/constants/logging.py                                          |       43 |       15 |       10 |        0 |     53% |38-40, 43-44, 47-48, 51-52, 55-56, 59-60, 63-64 |
 | protzilla/constants/paths.py                                            |        7 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/clustering.py                                  |       20 |        1 |        6 |        1 |     92% |        76 |
 | protzilla/data\_analysis/differential\_expression.py                    |        7 |        3 |        0 |        0 |     57% |      9-11 |
@@ -77,13 +77,13 @@
 | tests/ui/test\_views.py                                                 |       39 |        0 |        0 |        0 |    100% |           |
 | tests/ui/test\_views\_helper.py                                         |       37 |        2 |        2 |        0 |     95% |     16-26 |
 | ui/main/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
-| ui/main/settings.py                                                     |       25 |        0 |        2 |        1 |     96% |    22->30 |
+| ui/main/settings.py                                                     |       28 |        0 |        2 |        1 |     97% |    24->32 |
 | ui/runs/\_\_init\_\_.py                                                 |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/fields.py                                                       |      112 |       95 |       66 |        0 |     10% |15-26, 34-61, 72-82, 86-88, 101-112, 116-121, 134-200, 204-212 |
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      248 |      197 |       72 |        0 |     17% |37, 49-80, 107-123, 140-161, 172-245, 249-256, 260-262, 266-268, 272-274, 278-287, 291-298, 302-310, 314-341, 345-374, 378-380, 384-385, 407-409, 413-427, 435-456, 470-476 |
 | ui/runs/views\_helper.py                                                |       43 |        2 |       18 |        3 |     92% |12->14, 18, 31 |
-|                                                               **TOTAL** | **4342** |  **710** | **1191** |  **183** | **79%** |           |
+|                                                               **TOTAL** | **4385** |  **725** | **1201** |  **183** | **79%** |           |
 
 
 ## Setup coverage badge
