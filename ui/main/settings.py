@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(f"{BASE_DIR}/..")
 
 FILE_UPLOAD_HANDLERS = ["main.upload_handler.CustomFileUploadHandler"]
 
@@ -131,3 +133,23 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "django": {
+            "level": "INFO",
+            "class": "protzilla.constants.logging.ProtzillaLoggingHandler",
+            # 'name': 'django',
+        },
+    },
+    "loggers": {
+        "django": {
+            # 'name': 'django',
+            "handlers": ["django"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
