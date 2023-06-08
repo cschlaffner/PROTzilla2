@@ -1,5 +1,4 @@
 import copy
-from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
@@ -37,8 +36,8 @@ def mock_post():
         "/calculate/",
         {
             "csrfmiddlewaretoken": ["test_token"],
-            "chosen_method": ["low_frequency_filter"],
-            "threshold": ["0.5"],
+            "chosen_method": ["samples_missing_filter"],
+            "percentage": ["0.5"],
         },
     )
     return post_request.POST
@@ -46,8 +45,8 @@ def mock_post():
 
 def test_parameters_from_post(mock_post):
     assert parameters_from_post(mock_post) == {
-        "chosen_method": "low_frequency_filter",
-        "threshold": 0.5,
+        "chosen_method": "samples_missing_filter",
+        "percentage": 0.5,
     }
 
 

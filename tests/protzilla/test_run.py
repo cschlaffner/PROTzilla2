@@ -39,11 +39,11 @@ def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_
         )
     )
     run.perform_current_calculation_step(
-        {"threshold": 0.5},
+        {"percentage": 0.5},
     )
     assert (
         run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
-            "threshold"
+            "percentage"
         ]
         == 0.5
     )
@@ -51,12 +51,12 @@ def test_updated_params_in_workflow_config(example_workflow_short, tests_folder_
     run.perform_calculation_from_location(
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-        {"threshold": 1},
+        "samples_missing_filter",
+        {"percentage": 1},
     )
     assert (
         run.workflow_config["sections"]["data_preprocessing"]["steps"][0]["parameters"][
-            "threshold"
+            "percentage"
         ]
         == 1
     )
@@ -78,7 +78,7 @@ def test_run_create(tests_folder_name):
     run.step_index += 1
 
     run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+        data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     run.calculate_and_next(
         data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
@@ -101,7 +101,7 @@ def test_run_back(tests_folder_name):
     df1 = run.df
     run.step_index += 1
     run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+        data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     df2 = run.df
     assert not df1.equals(df2)
@@ -138,7 +138,7 @@ def test_current_run_location(tests_folder_name):
         intensity_name="Intensity",
     )
     run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_low_frequency, threshold=1
+        data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     assert run.current_run_location() == (
         "data_preprocessing",
@@ -149,7 +149,7 @@ def test_current_run_location(tests_folder_name):
     assert run.current_run_location() == (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
+        "samples_missing_filter",
     )
 
 
@@ -238,10 +238,10 @@ def test_export_plot(tests_folder_name):
     )
     run.step_index += 1
     run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, dict(threshold=1)
+        data_preprocessing.filter_proteins.by_samples_missing, dict(percentage=1)
     )
     run.create_plot(
-        data_preprocessing.filter_proteins.by_low_frequency_plot,
+        data_preprocessing.filter_proteins.by_samples_missing_plot,
         dict(graph_type="Pie chart"),
     )
     for plot in run.export_plots("png"):
@@ -306,10 +306,12 @@ def test_integration_updated_workflow_file(
         file_path=f"{PROJECT_PATH}/tests/combined_protein_method_small_cut.tsv",
         intensity_name="Intensity",
     )
-    run.perform_current_calculation_step({"threshold": 0.1})
+    run.perform_current_calculation_step({"percentage": 0.1})
     run.next_step("output_name1")
 
-    run.insert_step("filter_proteins", "data_preprocessing", "low_frequency_filter", 1)
+    run.insert_step(
+        "filter_proteins", "data_preprocessing", "samples_missing_filter", 1
+    )
     run.insert_step("filter_samples", "data_preprocessing", "protein_count_filter", 2)
     run.insert_step("dimension_reduction", "data_analysis", "umap", 3)
 
@@ -328,7 +330,7 @@ def test_last_step_handling(example_workflow_short):
         intensity_name="Intensity",
     )
     run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, dict(threshold=1)
+        data_preprocessing.filter_proteins.by_samples_missing, dict(percentage=1)
     )
     previous_step_index = run.step_index
     previous_location = (run.section, run.step, run.method)

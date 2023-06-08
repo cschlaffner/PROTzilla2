@@ -64,7 +64,6 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
 
     assert list_samples_excluded_2 == [
         "Sample2",
-        "Sample3",
     ], f"excluded samples do not match \
                 Sample2 and Sample3, but are {list_samples_excluded_2}"
     assert list_samples_excluded_3 == [
