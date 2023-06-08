@@ -99,17 +99,10 @@ def random_forest(
     scoring: list[str] = "accuracy",
     **kwargs,
 ):
-    # TODO add warning to user that data should be to shuffled, give that is being sorted at the beginning!
-    # TODO add parameters for gridsearch and cross validation,in general to sub steps
-    # TODO be able to select multiple scoring methods,this might also change how evaluation tables are created
-    # TODO how to refit
-    # TODO save object model with Pickle done
-    # TODO add parameters for grid search and cross validation
-    # TODO add scoring to workflow meta and also in backend
+    # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    # "Sample" column should not always have header Sample, modify accordingly
     labels_df = metadata_df[["Sample", labels_column]]
     y_encoded = encode_labels(input_df_wide, labels_df)
 

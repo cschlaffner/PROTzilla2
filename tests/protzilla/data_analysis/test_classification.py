@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 
-from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_analysis.classification import random_forest
 
 
@@ -106,7 +105,3 @@ def test_random_forest_score(random_forest_out, validation_strategy, model_selec
     assert (
         model_evaluation_df["mean_test_score"].values[0] > 0.8
     ), f"Failed with validation strategy {validation_strategy} and model selection strategy {model_selection}"
-
-
-def test_random_forest_probability(validation_strategy, model_selection):
-    pass
