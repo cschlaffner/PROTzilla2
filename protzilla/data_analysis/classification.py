@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
-from protzilla.data_analysis.classification_clustering_helper import (
+from protzilla.data_analysis.classification_helper import (
     perform_grid_search_cv,
     perform_grid_search_manual,
     perform_cross_validation,
