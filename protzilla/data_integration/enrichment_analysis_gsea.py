@@ -7,7 +7,10 @@ from django.contrib import messages
 
 from protzilla.utilities.transform_dfs import long_to_wide
 
-from .enrichment_analysis_helper import uniprot_ids_to_uppercase_gene_symbols
+from .enrichment_analysis_helper import (
+    read_protein_or_gene_sets_file,
+    uniprot_ids_to_uppercase_gene_symbols,
+)
 
 
 def gsea_preranked(
@@ -23,9 +26,6 @@ def gsea_preranked(
     seed=123,
     **kwargs,
 ):
-    """
-    Run GSEA on a preranked list of proteins.
-    """
     # TODO 182: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
 
@@ -36,6 +36,20 @@ def gsea_preranked(
         or not protein_df.iloc[:, 1].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    if gene_sets_path is not None and gene_sets_path != "":
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr is not None and gene_sets_enrichr != []:
+        gene_sets = (
+            [gene_sets_enrichr]
+            if not isinstance(gene_sets_enrichr, list)
+            else gene_sets_enrichr
+        )
+    else:
+        msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     protein_groups = protein_df["Protein ID"].unique()
@@ -77,10 +91,12 @@ def gsea_preranked(
     logging.info("Running GSEA")
     pre_res = gp.prerank(
         rnk=rnk,
-        gene_sets=["KEGG_2016"],
+        gene_sets=gene_sets,
         min_size=min_size,
         max_size=max_size,
         permutation_num=number_of_permutations,
+        permutation_type=permutation_type,
+        weighted_score_type=weighted_score,
         outdir=None,
         seed=seed,
         verbose=True,

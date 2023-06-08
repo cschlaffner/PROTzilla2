@@ -1,5 +1,3 @@
-import csv
-import json
 import logging
 import os
 import time
@@ -10,11 +8,12 @@ import pandas as pd
 from django.contrib import messages
 from restring import restring
 
-from .database_query import biomart_query
-
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
-from .enrichment_analysis_helper import uniprot_ids_to_uppercase_gene_symbols
+from .enrichment_analysis_helper import (
+    read_protein_or_gene_sets_file,
+    uniprot_ids_to_uppercase_gene_symbols,
+)
 
 
 # call methods for precommit hook not to delete imports
@@ -323,13 +322,16 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     )
 
     if not gene_mapping:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="No gene symbols could be found for the proteins. Please check your input.",
-                )
-            ]
+        return (
+            dict(
+                messages=[
+                    dict(
+                        level=messages.ERROR,
+                        msg="No gene symbols could be found for the proteins. Please check your input.",
+                    )
+                ]
+            ),
+            None,
         )
 
     logging.info(f"Starting analysis for {direction}-regulated proteins")
@@ -342,14 +344,17 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
             verbose=True,
         ).results
     except ValueError as e:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Something went wrong with the analysis. Please check your inputs.",
-                    trace=str(e),
-                )
-            ]
+        return (
+            dict(
+                messages=[
+                    dict(
+                        level=messages.ERROR,
+                        msg="Something went wrong with the analysis. Please check your inputs.",
+                        trace=str(e),
+                    )
+                ]
+            ),
+            None,
         )
 
     enriched["Proteins"] = enriched["Genes"].apply(
@@ -433,11 +438,15 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         up_enriched, up_filtered_groups = enrichr_helper(
             up_protein_list, protein_sets, organism, "up"
         )
+        if isinstance(up_enriched, dict):  # error occurred
+            return up_enriched
 
     if direction == "down" or direction == "both":
         down_enriched, down_filtered_groups = enrichr_helper(
             down_protein_list, protein_sets, organism, "down"
         )
+        if isinstance(down_enriched, dict):  # error occurred
+            return down_enriched
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
@@ -546,51 +555,11 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if protein_sets_path == "":
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="No file uploaded for protein sets.",
-                )
-            ]
-        )
-
-    file_extension = os.path.splitext(protein_sets_path)[1]
-    if file_extension == ".csv":
-        with open(protein_sets_path, "r") as f:
-            reader = csv.reader(f)
-            protein_sets = {}
-            for row in reader:
-                key = row[0]
-                values = row[1:]
-                protein_sets[key] = values
-
-    elif file_extension == ".txt":
-        with open(protein_sets_path, "r") as f:
-            protein_sets = {}
-            for line in f:
-                key, value_str = line.strip().split(":")
-                values = [v.strip() for v in value_str.split(",")]
-                protein_sets[key] = values
-
-    elif file_extension == ".json":
-        with open(protein_sets_path, "r") as f:
-            protein_sets = json.load(f)
-
-    elif file_extension == ".gmt":
-        # gseapy can handle gmt files
-        protein_sets = protein_sets_path
-
-    else:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt",
-                )
-            ]
-        )
+    protein_sets = read_protein_or_gene_sets_file(protein_sets_path)
+    if (
+        isinstance(protein_sets, dict) and "messages" in protein_sets
+    ):  # file could not be read successfully
+        return protein_sets
 
     if background == "" or background is None:
         logging.info("No background provided, using all proteins in protein sets")
