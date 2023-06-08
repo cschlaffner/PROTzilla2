@@ -37,7 +37,7 @@ def example_workflow_all_steps() -> list[dict[str, str | list[dict[str, str]]]]:
         {
             "section": "data_preprocessing",
             "steps": [
-                {"method": "low_frequency_filter", "name": "filter_proteins"},
+                {"method": "samples_missing_filter", "name": "filter_proteins"},
                 {"method": "protein_intensity_sum_filter", "name": "filter_samples"},
                 {"method": "knn", "name": "imputation"},
                 {"method": "local_outlier_factor", "name": "outlier_detection"},
@@ -123,8 +123,8 @@ def test_get_workflow_default_param_value(example_workflow):
         example_workflow,
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-        "threshold",
+        "samples_missing_filter",
+        "percentage",
     )
     output_name = get_workflow_default_param_value(
         example_workflow,
@@ -164,8 +164,8 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
         example_workflow,
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-        "threshold",
+        "samples_missing_filter",
+        "percentage",
     )
     assert example_workflow == example_workflow_copy
 

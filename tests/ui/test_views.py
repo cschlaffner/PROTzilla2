@@ -67,9 +67,9 @@ def test_all_button_parameters():
         chosen_method=dict(),
     )
 
-    parameters2 = dict(threshold=1)
+    parameters2 = dict(percentage=1)
     run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, parameters2
+        data_preprocessing.filter_proteins.by_samples_missing, parameters2
     )
 
     plot_parameters = dict(graph_type="Pie chart")
@@ -80,12 +80,12 @@ def test_all_button_parameters():
         current_plot_parameters=plot_parameters,
         plotted_for_parameters=parameters2,
         current_parameters=parameters2,
-        chosen_method="low_frequency_filter",
+        chosen_method="samples_missing_filter",
     )
 
-    parameters3 = dict(threshold=2)
+    parameters3 = dict(percentage=2)
     run.perform_calculation(
-        data_preprocessing.filter_proteins.by_low_frequency, parameters3
+        data_preprocessing.filter_proteins.by_samples_missing, parameters3
     )
 
     assert_response(
@@ -93,7 +93,7 @@ def test_all_button_parameters():
         current_plot_parameters=plot_parameters,
         plotted_for_parameters=parameters2,
         current_parameters=parameters3,
-        chosen_method="low_frequency_filter",
+        chosen_method="samples_missing_filter",
     )
 
     run.next_step()
@@ -104,7 +104,7 @@ def test_all_button_parameters():
         current_plot_parameters=dict(),
         plotted_for_parameters=dict(),
         current_parameters=parameters3,
-        chosen_method="low_frequency_filter",
+        chosen_method="samples_missing_filter",
     )
 
     rmtree(RUNS_PATH / run_name)
