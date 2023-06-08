@@ -100,7 +100,7 @@ def random_forest(
     **kwargs,
 ):
     """
-    Perform classification using a random forest algorithm.
+    Perform classification using a random forest classifier from sklearn.
 
     :param input_df: The dataframe that should be classified in wide or long format
     :type input_df: pd.DataFrame
@@ -131,6 +131,10 @@ def random_forest(
     during validation.
     :type scoring: list[str], optional
     :param **kwargs: Additional keyword arguments to be passed to the function.
+    :return: A RandomForestClassifier instance, a dataframe consisting of the model's
+     training parameters and the validation score, along with four dataframes containing
+     the respective test and training samples and labels.
+    :rtype: dict
 
     """
     # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!

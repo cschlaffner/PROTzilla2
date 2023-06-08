@@ -6,7 +6,7 @@ from protzilla.data_analysis.classification import random_forest
 
 @pytest.fixture
 def classification_df():
-    clustering_list = (
+    classification_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
         ["Sample1", "Protein3", "Gene1", 1],
@@ -30,12 +30,12 @@ def classification_df():
         ["Sample7", "Protein3", "Gene1", 3],
     )
 
-    clustering_df = pd.DataFrame(
-        data=clustering_list,
+    classification_df = pd.DataFrame(
+        data=classification_list,
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    return clustering_df
+    return classification_df
 
 
 @pytest.fixture

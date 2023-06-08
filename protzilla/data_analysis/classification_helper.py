@@ -84,7 +84,7 @@ def perform_cross_validation(
 
 def update_raw_evaluation_data(results, params, train_scores, val_scores):
     for param_name, param_value in params.items():
-        results |= {f"param_{param_name}": param_value}
+        results.update({f"param_{param_name}": param_value})
     results["mean_train_score"].append(np.mean(train_scores))
     results["std_train_score"].append(np.std(train_scores))
     results["mean_test_score"].append(np.mean(val_scores))
