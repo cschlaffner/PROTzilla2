@@ -13,6 +13,7 @@ from protzilla.data_analysis.classification_helper import (
     decode_labels,
     create_model_evaluation_df_grid_search_manual,
     create_model_evaluation_df_grid_search,
+    evaluate_with_scoring,
 )
 
 
@@ -36,13 +37,15 @@ def perform_classification(
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
-        train_scores = model.score(X_train, y_train)
-        val_scores = model.score(X_val, y_val)
+        y_pred_train = model.predict(X_train)
+        train_score = evaluate_with_scoring(scoring, y_train, y_pred_train)
+        y_pred_val = model.predict(X_val)
+        val_score = evaluate_with_scoring(scoring, y_val, y_pred_val)
 
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
-            train_scores,
-            val_scores,
+            train_score,
+            val_score,
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
@@ -77,7 +80,11 @@ def perform_classification(
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         cv = perform_cross_validation(validation_strategy, **parameters)
         model = perform_grid_search_cv(
-            grid_search_method, clf, clf_parameters, scoring, cv=cv
+            grid_search_method,
+            clf,
+            clf_parameters,
+            scoring,
+            cv=cv,
         )
         model.fit(input_df, labels_df)
 

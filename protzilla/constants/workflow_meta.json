@@ -1160,10 +1160,15 @@
             "dynamic": true,
             "default": 1
           },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"]
+          },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical",
-            "categories": ["Grid search", "Randomized search"],
+            "categories": ["Grid search", "Randomized search", "Manual"],
             "default": "Grid search"
           },
           "n_estimators": {

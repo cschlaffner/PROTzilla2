@@ -3,6 +3,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+    matthews_corrcoef,
+)
 from sklearn.model_selection import (
     GridSearchCV,
     RandomizedSearchCV,
@@ -62,9 +69,11 @@ def perform_grid_search_manual(
     n_iter=10,
 ):
     if grid_search_model == "Grid search":
-        return GridSearchManual(model=model, param_grid=param_grid)
+        return GridSearchManual(model=model, param_grid=param_grid, scoring=scoring)
     elif grid_search_model == "Randomized search":
-        return RandomizedSearchManual(model=model, param_grid=param_grid, n_iter=10)
+        return RandomizedSearchManual(
+            model=model, param_grid=param_grid, n_iter=n_iter, scoring=scoring
+        )
 
 
 def perform_cross_validation(
@@ -72,8 +81,6 @@ def perform_cross_validation(
     n_splits=5,
     n_repeats=10,
     shuffle=True,
-    random_state=42,
-    p=None,
     random_state_cv=42,
     p_samples=None,
     **parameters,
@@ -92,6 +99,19 @@ def perform_cross_validation(
         return LeaveOneOut()
     elif cross_validation_estimator == "Leave p out":
         return LeavePOut(p_samples)
+
+
+def evaluate_with_scoring(scoring, y_true, y_pred):
+    if scoring == "accuracy":
+        return accuracy_score(y_true=y_true, y_pred=y_pred)
+    elif scoring == "precision":
+        return precision_score(y_true=y_true, y_pred=y_pred)
+    elif scoring == "recall":
+        return recall_score(y_true=y_true, y_pred=y_pred)
+    elif scoring == "matthews_corrcoef":
+        return matthews_corrcoef(y_true=y_true, y_pred=y_pred)
+    else:
+        return "Score not known"
 
 
 # maybe add option to hide or show certain columns
@@ -133,6 +153,7 @@ def create_model_evaluation_df_grid_search_manual(
 class GridSearchManual:
     model: Pipeline
     param_grid: dict
+    scoring: str
     train_val_split: tuple = None
     results: dict = None
 
@@ -147,8 +168,10 @@ class GridSearchManual:
         for params in ParameterGrid(self.param_grid):
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
-            train_score = model.score(X_train, y_train)
-            val_score = model.score(X_val, y_val)
+            y_pred_train = model.predict(X_train)
+            train_score = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
+            y_pred_val = model.predict(X_val)
+            val_score = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
@@ -165,6 +188,7 @@ class GridSearchManual:
 class RandomizedSearchManual:
     model: Pipeline
     param_grid: dict
+    scoring: str
     n_iter: int = 10
     train_val_split: tuple = None
     results: dict = None
@@ -180,8 +204,10 @@ class RandomizedSearchManual:
         for params in ParameterSampler(self.param_grid, self.n_iter):
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
-            train_score = model.score(X_train, y_train)
-            val_score = model.score(X_val, y_val)
+            y_pred_train = model.predict(X_train)
+            train_score = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
+            y_pred_val = model.predict(X_val)
+            val_score = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():

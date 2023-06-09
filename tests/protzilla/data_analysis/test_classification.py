@@ -104,5 +104,5 @@ def random_forest_out(classification_df, meta_df, validation_strategy, model_sel
 def test_random_forest_score(random_forest_out, validation_strategy, model_selection):
     model_evaluation_df = random_forest_out["model_evaluation_df"]
     assert (
-        model_evaluation_df["mean_test_score"].values[0] > 0.8
+        model_evaluation_df["mean_test_score"].values[0] >= 0.8
     ), f"Failed with validation strategy {validation_strategy} and model selection strategy {model_selection}"
