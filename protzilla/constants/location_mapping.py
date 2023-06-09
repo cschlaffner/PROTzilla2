@@ -3,6 +3,7 @@ from ..data_analysis import (
     differential_expression,
     dimension_reduction,
     plots,
+    classification,
 )
 from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -148,6 +149,11 @@ method_map = {
         "clustering",
         "k_means",
     ): clustering.k_means,
+    (
+        "data_analysis",
+        "classification",
+        "random_forest",
+    ): classification.random_forest,
     (
         "data_analysis",
         "dimension_reduction",
