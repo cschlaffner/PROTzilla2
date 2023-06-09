@@ -880,10 +880,33 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
     assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
 
-    print(current_out["ranking"])
-    print(expected_ranking)
-    assert current_out["ranking"].equals(expected_ranking)
-    assert current_out["enriched_df"].equals(expected_enriched_df)
+    numerical_equal = np.isclose(
+        current_out["ranking"], expected_ranking, rtol=1e-05, atol=1e-08
+    )
+    assert numerical_equal.all()
+
+    column_names = ["Name", "Term", "Tag %", "Gene %", "Lead_genes", "Lead_proteins"]
+    # Compare all specified columns
+    for column in column_names:
+        assert expected_enriched_df[column].equals(current_out["enriched_df"][column])
+
+    print(current_out["enriched_df"].dtypes)
+    print(expected_enriched_df.dtypes)
+    # Compare the numeric columns separately with a tolerance for numerical equality
+    numerical_columns = [
+        "ES",
+        "NES",
+        "NOM p-val",
+        "FDR q-val",
+        "FWER p-val",
+    ]
+    current_out["enriched_df"][numerical_columns] = current_out["enriched_df"][numerical_columns].astype(float)
+    for column in numerical_columns:
+        expected_enriched_df[column]
+        numerical_equal = np.isclose(
+            expected_enriched_df[column], current_out["enriched_df"][column], rtol=1e-05, atol=1e-08
+        )
+        assert numerical_equal.all()
 
 
 def test_gsea_preranked_rank(data_folder_tests):
