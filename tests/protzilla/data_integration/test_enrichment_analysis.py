@@ -17,10 +17,19 @@ from protzilla.data_integration.enrichment_analysis import (
     merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
+from protzilla.data_integration.enrichment_analysis_gsea import (
+    create_genes_intensity_wide_df,
+    create_ranked_df,
+)
 from protzilla.data_integration.enrichment_analysis_helper import (
     read_protein_or_gene_sets_file,
     uniprot_ids_to_uppercase_gene_symbols,
 )
+
+
+@pytest.fixture
+def data_folder_tests():
+    return f"{PROJECT_PATH}/tests/test_data/enrichment_data"
 
 
 @patch("restring.restring.get_functional_enrichment")
@@ -151,20 +160,19 @@ def test_merge_up_down_regulated_dfs_restring():
         f"{PROJECT_PATH}/tests/test_data/enrichment_data/background_imported_proteins.csv",
     ],
 )
-def test_go_analysis_with_STRING(mock_enrichment, background):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_go_analysis_with_STRING(mock_enrichment, background, data_folder_tests):
     proteins_df = pd.read_csv(
-        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+        f"{data_folder_tests}/input-t_test-log2_fold_change_df.csv"
     )
 
     up_df = pd.read_csv(
-        f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
+        f"{data_folder_tests}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
     down_df = pd.read_csv(
-        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
+        f"{data_folder_tests}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
 
-    results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
+    results = pd.read_csv(f"{data_folder_tests}/merged_KEGG_process.csv", header=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
     out_df = go_analysis_with_STRING(
@@ -187,17 +195,18 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
 @patch(
     "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
 )
-def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_go_analysis_with_STRING_one_direction_missing(
+    mock_enrichment, data_folder_tests
+):
     proteins_df = pd.read_csv(
-        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+        f"{data_folder_tests}/input-t_test-log2_fold_change_df.csv"
     )
     up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
     down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
 
-    up_df = pd.read_csv(f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0)
+    up_df = pd.read_csv(f"{data_folder_tests}/up_enrichment_KEGG_Process.csv", header=0)
     down_df = pd.read_csv(
-        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
+        f"{data_folder_tests}/down_enrichment_KEGG_Process.csv", header=0
     )
     mock_enrichment.side_effect = [up_df, down_df]
 
@@ -351,7 +360,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
-def test_go_analysis_with_enrichr(mock_gene_mapping):
+def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
     api_url = "https://maayanlab.cloud/Enrichr/addList"
     try:
@@ -374,9 +383,8 @@ def test_go_analysis_with_enrichr(mock_gene_mapping):
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
     protein_sets = ["Reactome_2013"]
     organism = "human"
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
+        f"{data_folder_tests}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
 
     mock_gene_mapping.return_value = (
@@ -528,9 +536,8 @@ def test_go_analysis_offline_protein_sets(
     ],
 )
 def test_go_analysis_offline_background(
-    background_path, go_analysis_offline_result_with_bg
+    background_path, go_analysis_offline_result_with_bg, data_folder_tests
 ):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
     proteins = [
         "Protein1",
@@ -544,7 +551,7 @@ def test_go_analysis_offline_background(
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
-        protein_sets_path=f"{test_data_folder}/protein_sets.txt",
+        protein_sets_path=f"{data_folder_tests}/protein_sets.txt",
         background=background_path,
         direction="down",
     )
@@ -727,19 +734,109 @@ def test_read_protein_or_gene_sets_file_no_path():
     assert "No file uploaded for protein sets." in out_dict["messages"][0]["msg"]
 
 
-def test_read_protein_or_gene_sets_file_invalid_filetype():
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    a_made_up_path = f"{test_data_folder}/a_made_up_wrong_file.png"
+def test_read_protein_or_gene_sets_file_invalid_filetype(data_folder_tests):
+    a_made_up_path = f"{data_folder_tests}/a_made_up_wrong_file.png"
     out_dict = read_protein_or_gene_sets_file(a_made_up_path)
 
     assert "messages" in out_dict
     assert "Invalid file type" in out_dict["messages"][0]["msg"]
 
 
-def test_gsea():
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_create_ranked_df(data_folder_tests):
+    test_p_value_list = (
+        ["Protein1", 0.01],
+        ["Protein2", 0.02],
+        ["Protein3-1;Protein3-2;Protein4", 0.03],
+        ["CON__Protein3-1;CON__Protein3-2;CON__Protein3", 0.035],
+        ["Protein5", 0.04],
+        ["Protein6", 0.001],
+        ["Protein7", 0.0001],
+        ["Protein8", 1],
+    )
+    proteins_df = pd.DataFrame(
+        data=test_p_value_list,
+        columns=["Protein ID", "corrected_p_value"],
+    )
+    group_to_genes = {
+        "Protein1": ["Gene1"],
+        "Protein2": ["Gene2"],
+        "Protein3-1;Protein3-2;Protein4": ["Gene3", "Gene4"],  # multiple genes
+        "CON__Protein3-1;CON__Protein3-2;CON__Protein3": ["Gene3"],  # duplicate gene
+        "Protein5": ["Gene5"],
+        "Protein6": ["Gene6"],
+    }
+    expected_list = [
+        ["Gene6", 0.001],
+        ["Gene1", 0.01],
+        ["Gene2", 0.02],
+        ["Gene4", 0.03],
+        ["Gene3", 0.035],
+        ["Gene5", 0.04],
+    ]
+    expected_df = pd.DataFrame(
+        data=expected_list,  # sorted by pvalue
+        columns=["Gene symbol", "Ranking value"],
+    ).set_index("Gene symbol")
+
+    ranked_df = create_ranked_df(
+        protein_groups=proteins_df["Protein ID"].unique().tolist(),
+        protein_df=proteins_df,
+        ranking_direction="ascending",
+        group_to_genes=group_to_genes,
+        filtered_groups=["Protein7", "Protein8"],  # not in group_to_genes
+    )
+    assert ranked_df.equals(expected_df)
+
+
+def test_create_ranked_df_descending(data_folder_tests):
+    test_log2fc_list = (
+        ["Protein1", -0.01],
+        ["Protein2", -0.02],
+        ["Protein3-1;Protein3-2;Protein4", 0.03],
+        ["CON__Protein3-1;CON__Protein3-2;CON__Protein3", 0.035],
+        ["Protein5", 0.04],
+        ["Protein6", -0.001],
+        ["Protein7", 0.0001],
+        ["Protein8", 1],
+    )
+    proteins_df = pd.DataFrame(
+        data=test_log2fc_list,
+        columns=["Protein ID", "log2fc"],
+    )
+    group_to_genes = {
+        "Protein1": ["Gene1"],
+        "Protein2": ["Gene2"],
+        "Protein3-1;Protein3-2;Protein4": ["Gene3", "Gene4"],  # multiple genes
+        "CON__Protein3-1;CON__Protein3-2;CON__Protein3": ["Gene3"],  # duplicate gene
+        "Protein5": ["Gene5"],
+        "Protein6": ["Gene6"],
+    }
+    expected_list = [
+        ["Gene5", 0.04],
+        ["Gene3", 0.03],
+        ["Gene4", 0.03],
+        ["Gene6", -0.001],
+        ["Gene1", -0.01],
+        ["Gene2", -0.02],
+    ]
+    expected_df = pd.DataFrame(
+        data=expected_list,  # sorted by log2fc
+        columns=["Gene symbol", "Ranking value"],
+    ).set_index("Gene symbol")
+
+    ranked_df = create_ranked_df(
+        protein_groups=proteins_df["Protein ID"].unique().tolist(),
+        protein_df=proteins_df,
+        ranking_direction="descending",
+        group_to_genes=group_to_genes,
+        filtered_groups=["Protein7", "Protein8"],  # not in group_to_genes
+    )
+    assert ranked_df.equals(expected_df)
+
+
+def test_gsea(data_folder_tests):
     proteins = pd.read_csv(
-        f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
         index_col=0,
     )
 
@@ -747,10 +844,24 @@ def test_gsea():
     # result["enriched_df"].to_csv("gsea_result_sig_prot.csv")
 
 
-def test_gsea_preranked():
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_gsea_wrong_protein_df(data_folder_tests):
+    proteins = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        index_col=0,
+    )
+
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+    )
+    assert "messages" in current_out
+    assert "Input must be a dataframe" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_preranked(data_folder_tests):
     proteins_significant = pd.read_csv(
-        f"{test_data_folder}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,
     )
     # current_out = gsea_preranked(proteins_significant, "ascending")
