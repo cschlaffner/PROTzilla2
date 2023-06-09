@@ -7,24 +7,11 @@ import pytest
 import requests
 
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.data_integration.enrichment_analysis import (
-    get_functional_enrichment_with_delay,
-    go_analysis_offline,
-    go_analysis_with_enrichr,
-    go_analysis_with_STRING,
-    gsea,
-    gsea_preranked,
-    merge_up_down_regulated_dfs_restring,
-    merge_up_down_regulated_proteins_results,
-)
-from protzilla.data_integration.enrichment_analysis_gsea import (
-    create_genes_intensity_wide_df,
-    create_ranked_df,
-)
-from protzilla.data_integration.enrichment_analysis_helper import (
-    read_protein_or_gene_sets_file,
-    uniprot_ids_to_uppercase_gene_symbols,
-)
+
+# order is important to ensure correctness of patched functions
+from protzilla.data_integration.enrichment_analysis_helper import *  # isort:skip
+from protzilla.data_integration.enrichment_analysis import *  # isort:skip
+from protzilla.data_integration.enrichment_analysis_gsea import *  # isort:skip
 
 
 @pytest.fixture
@@ -834,6 +821,12 @@ def test_create_ranked_df_descending(data_folder_tests):
     assert ranked_df.equals(expected_df)
 
 
+def test_create_genes_intensity_wide_df(data_folder_tests):
+    # TODO test
+    create_genes_intensity_wide_df(
+        protein_df, protein_groups, samples, group_to_genes, filtered_groups
+    )
+
 def test_gsea(data_folder_tests):
     proteins = pd.read_csv(
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
@@ -848,7 +841,7 @@ def test_gsea_wrong_protein_df(data_folder_tests):
     proteins = pd.read_csv(
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,
-    )
+    )  # not an intensity df
 
     current_out = gsea(
         proteins,
@@ -859,11 +852,124 @@ def test_gsea_wrong_protein_df(data_folder_tests):
     assert "Input must be a dataframe" in current_out["messages"][0]["msg"]
 
 
-def test_gsea_preranked(data_folder_tests):
+@pytest.mark.internet
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_preranked(mock_mapping, data_folder_tests):
     proteins_significant = pd.read_csv(
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,
     )
-    # current_out = gsea_preranked(proteins_significant, "ascending")
-    # current_out["enriched_df"].to_csv("enriched_preranked.csv")
-    # current_out["ranking"].to_csv("ranking_preranked.csv")
+    expected_ranking = pd.read_csv(f"{data_folder_tests}/gsea_preranked_rank.csv", index_col=0)
+    expected_ranking = expected_ranking["prerank"] # convert to series
+    expected_enriched_df = pd.read_csv(f"{data_folder_tests}/gsea_preranked_enriched.csv", index_col=0)
+
+    with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
+        data = json.load(f)
+        gene_symbols = data["gene_symbols"]
+        group_to_genes = data["group_to_genes"]
+        filtered_groups = data["filtered_groups"]
+        mock_mapping.return_value = gene_symbols, group_to_genes, filtered_groups
+
+    current_out = gsea_preranked(
+        proteins_significant,
+        "ascending",
+        gene_sets_enrichr=["KEGG_2019_Human"]
+    )
+    assert "messages" in current_out
+    assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+    print(current_out["ranking"])
+    print(expected_ranking)
+    assert current_out["ranking"].equals(expected_ranking)
+    assert current_out["enriched_df"].equals(expected_enriched_df)
+
+
+def test_gsea_preranked_rank(data_folder_tests):
+    proteins_significant = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        index_col=0,
+    )
+    current_out = gsea_preranked(
+        proteins_significant,
+        "ascending",
+        gene_sets_enrichr=["KEGG_2019_Human"]
+    )
+    current_out["ranking"].to_csv("gsea_preranked_rank.csv")
+    current_out["enriched_df"].to_csv("gsea_preranked_enriched.csv")
+
+
+def test_gsea_preranked_wrong_protein_df():
+    df = pd.DataFrame(
+        {"Protein ID": ["Protein1", "Protein2"], "Sample1": ["Sample1", "Sample2"]}
+    )
+
+    current_out = gsea_preranked(df)
+    assert "messages" in current_out
+    assert "Proteins must be a dataframe" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_preranked_mo_gene_sets(data_folder_tests):
+    proteins_df = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        index_col=0,
+    )
+    current_out = gsea_preranked(proteins_df)
+    assert "messages" in current_out
+    assert "No gene sets provided" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_preranked_wrong_gene_sets(data_folder_tests):
+    proteins_df = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        index_col=0,
+    )
+    current_out = gsea_preranked(proteins_df, gene_sets_path="a_made_up_path.png")
+    assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_preranked_no_gene_symbols(mock_gene_mapping):
+    proteins_df = pd.DataFrame(
+        data=(
+            ["Protein1", 0.01],
+            ["Protein2", 0.02],
+        ),
+        columns=["Protein ID", "corrected_p_value"],
+    )
+    mock_gene_mapping.return_value = ({}, {}, ["Protein1", "Protein2"])
+    current_out = gsea_preranked(
+        proteins_df,
+        gene_sets_enrichr=["KEGG_2019_Human"],
+    )
+
+    assert "messages" in current_out
+    assert "All proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_preranked_catch_fail(mock_mapping):
+    proteins_df = pd.DataFrame(
+        data=(
+            ["Protein1", 0.01],
+            ["Protein2", 0.02],
+        ),
+        columns=["Protein ID", "corrected_p_value"],
+    )
+    mock_mapping.return_value = (
+        {"Gene1": "Protein1", "Gene2": "Protein2"},
+        {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
+        [],
+    )
+    current_out = gsea_preranked(
+        proteins_df,
+        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
+    )  # gp.prerank() function should fail
+
+    assert "messages" in current_out
+    assert "An error occurred while running GSEA" in current_out["messages"][0]["msg"]

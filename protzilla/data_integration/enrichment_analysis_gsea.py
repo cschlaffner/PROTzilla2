@@ -62,7 +62,7 @@ def create_ranked_df(
 
 def gsea_preranked(
     protein_df,
-    ranking_direction,
+    ranking_direction="ascending",
     gene_sets_path=None,
     gene_sets_enrichr=None,
     min_size=15,
@@ -129,6 +129,7 @@ def gsea_preranked(
             gene_sets=gene_sets,
             min_size=min_size,
             max_size=max_size,
+            ascending=ranking_direction == "ascending",
             permutation_num=number_of_permutations,
             permutation_type=permutation_type,
             weighted_score_type=weighted_score,
