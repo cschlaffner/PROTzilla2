@@ -145,16 +145,16 @@ class GridSearchManual:
         for params in ParameterGrid(self.param_grid):
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
-            train_scores = model.score(X_train, y_train)
-            val_scores = model.score(X_val, y_val)
+            train_score = model.score(X_train, y_train)
+            val_score = model.score(X_val, y_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            self.results["mean_train_score"].append(np.mean(train_scores))
-            self.results["std_train_score"].append(np.std(train_scores))
-            self.results["mean_test_score"].append(np.mean(val_scores))
-            self.results["std_test_score"].append(np.std(val_scores))
+            self.results["mean_train_score"].append(np.mean(train_score))
+            self.results["std_train_score"].append(np.std(train_score))
+            self.results["mean_test_score"].append(np.mean(val_score))
+            self.results["std_test_score"].append(np.std(val_score))
 
         return self.model
 
@@ -178,16 +178,16 @@ class RandomizedSearchManual:
         for params in ParameterSampler(self.param_grid, self.n_iter):
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
-            train_scores = model.score(X_train, y_train)
-            val_scores = model.score(X_val, y_val)
+            train_score = model.score(X_train, y_train)
+            val_score = model.score(X_val, y_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            self.results["mean_train_score"].append(np.mean(train_scores))
-            self.results["std_train_score"].append(np.std(train_scores))
-            self.results["mean_test_score"].append(np.mean(val_scores))
-            self.results["std_test_score"].append(np.std(val_scores))
+            self.results["mean_train_score"].append(np.mean(train_score))
+            self.results["std_train_score"].append(np.std(train_score))
+            self.results["mean_test_score"].append(np.mean(val_score))
+            self.results["std_test_score"].append(np.std(val_score))
 
         return self.model
 
