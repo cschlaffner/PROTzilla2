@@ -74,22 +74,24 @@ def perform_cross_validation(
     shuffle=True,
     random_state=42,
     p=None,
+    random_state_cv=42,
+    p_samples=None,
     **parameters,
 ):
     if cross_validation_estimator == "K-Fold":
-        return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
+        return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv)
     elif cross_validation_estimator == "Repeated K-Fold":
         return RepeatedKFold(
-            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
+            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state_cv
         )
     elif cross_validation_estimator == "Stratified K-Fold":
         return StratifiedKFold(
-            n_splits=n_splits, shuffle=shuffle, random_state=random_state
+            n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv
         )
     elif cross_validation_estimator == "Leave one out":
         return LeaveOneOut()
     elif cross_validation_estimator == "Leave p out":
-        return LeavePOut(p)
+        return LeavePOut(p_samples)
 
 
 # maybe add option to hide or show certain columns

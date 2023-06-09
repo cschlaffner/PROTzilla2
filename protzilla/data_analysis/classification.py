@@ -75,7 +75,7 @@ def perform_classification(
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         model = perform_grid_search_cv(
             grid_search_method, clf, clf_parameters, scoring, cv=cv
         )

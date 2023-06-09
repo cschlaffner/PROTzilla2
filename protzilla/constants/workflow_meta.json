@@ -1078,7 +1078,7 @@
     "classification": {
       "random_forest": {
         "name": "Random Forest",
-        "description": "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting.",
+        "description": "",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
@@ -1089,7 +1089,7 @@
             ]
           },
           "labels_column": {
-            "name": "Choose labels column from metadata",
+            "name": "Choose corresponding metadata df",
             "type": "categorical",
             "fill": "metadata_columns",
             "fill_dynamic": [
@@ -1109,6 +1109,10 @@
             "categories": ["K-Fold", "Repeated K-Fold", "Stratified K-Fold", "Leave one out", "Leave p out", "Manual"],
             "default": "K-Fold",
             "dynamic_parameters": {
+              "K-Fold": ["n_splits", "shuffle"],
+              "Stratified K-Fold": ["n_splits", "shuffle"],
+              "Repeated K-Fold": ["n_splits","n_repeats", "random_state_cv"],
+              "Leave p out": ["p_samples"],
               "Manual": ["train_val_split"]
             }
           },
@@ -1118,10 +1122,48 @@
             "dynamic": true,
             "default": 0.20
           },
+          "n_splits": {
+            "name": "Number of folds",
+            "type": "numeric",
+            "min": 2,
+            "dynamic": true,
+            "default": 5
+          },
+          "shuffle": {
+            "name": "Whether to shuffle the data before splitting into batches",
+            "type": "categorical_dynamic",
+            "categories": ["True", "False"],
+            "default": "True",
+            "dynamic": true,
+            "dynamic_parameters": {
+              "True": ["random_state_cv"]
+            }
+          },
+          "n_repeats": {
+            "name": "Number of times cross-validator needs to be repeated",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 10
+          },
+          "random_state_cv": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
+          },
+          "p_samples": {
+            "name": "Size of the test sets",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 1
+          },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical",
-            "categories": ["Grid search", "Randomized search", "Manual"],
+            "categories": ["Grid search", "Randomized search"],
             "default": "Grid search"
           },
           "n_estimators": {
@@ -1153,8 +1195,7 @@
             "min": 0,
             "max": 4294967295,
             "step": 1,
-            "default": 6,
-            "multiple": true
+            "default": 6
           },
           "metadata_df": {
             "type": "empty",
