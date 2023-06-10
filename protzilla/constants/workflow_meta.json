@@ -1132,8 +1132,8 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": ["True", "False"],
-            "default": "True",
+            "categories": [true, false],
+            "default": true,
             "dynamic": true,
             "dynamic_parameters": {
               "True": ["random_state_cv"]
@@ -1163,7 +1163,9 @@
           "scoring": {
             "name": "score",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"]
+            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "default": "accuracy",
+            "multiple": true
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
