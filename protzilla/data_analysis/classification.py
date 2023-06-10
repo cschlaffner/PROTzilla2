@@ -28,24 +28,25 @@ def perform_classification(
     test_validate_split=None,
     **parameters,
 ):
-    # work with function set_params or create param_grid depending on the case
-    # check returns, what to return clf, scores, already fit and predict here? Take
-    # into account that scores are not always called using score() function
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
-        y_pred_train = model.predict(X_train)
-        train_score = evaluate_with_scoring(scoring, y_train, y_pred_train)
-        y_pred_val = model.predict(X_val)
-        val_score = evaluate_with_scoring(scoring, y_val, y_pred_val)
 
+        y_pred_train = model.predict(X_train)
+        train_scores = evaluate_with_scoring(scoring, y_train, y_pred_train)
+        y_pred_val = model.predict(X_val)
+        val_scores = evaluate_with_scoring(scoring, y_val, y_pred_val)
+
+        # create model evaluation dataframe
+        train_scores = {"train_" + key: value for key, value in train_scores.items()}
+        val_scores = {"test_" + key: value for key, value in val_scores.items()}
+        scores = {**train_scores, **val_scores}
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
-            train_score,
-            val_score,
+            scores,
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
@@ -60,20 +61,22 @@ def perform_classification(
             scoring,
         )
         model.fit(train_val_split)
+
+        # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.results), clf_parameters
+            pd.DataFrame(model.results), clf_parameters, scoring
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
+
+        # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
-            clf_parameters,
-            scores["train_score"],
-            scores["test_score"],
+            clf_parameters, scores
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":

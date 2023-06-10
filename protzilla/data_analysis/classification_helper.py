@@ -49,7 +49,7 @@ def perform_grid_search_cv(
 ):
     if grid_search_model == "Grid search":
         return GridSearchCV(
-            model, param_grid=param_grid, scoring=scoring, cv=cv, error_score="raise"
+            model, param_grid=param_grid, scoring=scoring, cv=cv, refit=scoring[0]
         )
     elif grid_search_model == "Randomized search":
         return RandomizedSearchCV(
@@ -57,7 +57,7 @@ def perform_grid_search_cv(
             param_distributions=param_grid,
             scoring=scoring,
             cv=cv,
-            error_score="raise",
+            refit=scoring[0],
         )
 
 
@@ -102,51 +102,50 @@ def perform_cross_validation(
 
 
 def evaluate_with_scoring(scoring, y_true, y_pred):
-    if scoring == "accuracy":
-        return accuracy_score(y_true=y_true, y_pred=y_pred)
-    elif scoring == "precision":
-        return precision_score(y_true=y_true, y_pred=y_pred)
-    elif scoring == "recall":
-        return recall_score(y_true=y_true, y_pred=y_pred)
-    elif scoring == "matthews_corrcoef":
-        return matthews_corrcoef(y_true=y_true, y_pred=y_pred)
-    else:
-        return "Score not known"
+    scores = defaultdict(list)
+    for score in scoring:
+        if score == "accuracy":
+            s = accuracy_score(y_true=y_true, y_pred=y_pred)
+        elif score == "precision":
+            s = precision_score(y_true=y_true, y_pred=y_pred)
+        elif score == "recall":
+            s = recall_score(y_true=y_true, y_pred=y_pred)
+        elif score == "matthews_corrcoef":
+            s = matthews_corrcoef(y_true=y_true, y_pred=y_pred)
+        else:
+            s = "Score not known"
+        scores[score] = s
+    return scores
 
 
 # maybe add option to hide or show certain columns
-def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters):
+def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters, scoring):
     # The function transforms the cv_results_ dictionary obtained from a grid search cv
     # methods into a model_evaluation_df, where each column represents an estimator
     # parameter and its corresponding validation score.
     columns_names = ["param_" + key for key in clf_parameters.keys()]
-    columns_names.append("mean_test_score")
-    # for multimetrics evaluation
-    # columns_names.append([["mean_test_" + score] for score in scoring])
+    if len(scoring) > 1:
+        columns_names.extend([f"mean_test_{score}" for score in scoring])
+    else:
+        columns_names.append("mean_test_score")
     return raw_evaluation_df[columns_names]
 
 
-def create_model_evaluation_df_grid_search_manual(
-    clf_parameters, train_scores, val_scores
-):
+def create_model_evaluation_df_grid_search_manual(clf_parameters, scores):
     # The function mimics the cv_results_ output from the grid search cv methods, but
     # for grid search manual methods. Then transforms it to the  model_evaluation_df
     # format, where each column represents an estimator parameter and its corresponding
     # validation score.
+    scores.pop("fit_time", None)
+    scores.pop("score_time", None)
     results = defaultdict(list)
     for param_name, param_value in clf_parameters.items():
         results[f"param_{param_name}"].append(param_value)
-    results["mean_train_score"].append(np.mean(train_scores))
-    results["std_train_score"].append(np.std(train_scores))
-    results["mean_test_score"].append(np.mean(val_scores))
-    results["std_test_score"].append(np.std(val_scores))
+    for score_name, score_value in scores.items():
+        results[score_name].append(np.mean(score_value))
 
     results_df = pd.DataFrame(results)
-    columns_names = ["param_" + key for key in clf_parameters.keys()]
-    columns_names.append("mean_test_score")
-    # for multimetrics evaluation
-    # columns_names.append([["mean_test_" + score] for score in scoring])
-    return results_df[columns_names]
+    return results_df
 
 
 @dataclass
@@ -169,17 +168,27 @@ class GridSearchManual:
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
             y_pred_train = model.predict(X_train)
-            train_score = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
+            train_scores = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
             y_pred_val = model.predict(X_val)
-            val_score = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
+            val_scores = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            self.results["mean_train_score"].append(np.mean(train_score))
-            self.results["std_train_score"].append(np.std(train_score))
-            self.results["mean_test_score"].append(np.mean(val_score))
-            self.results["std_test_score"].append(np.std(val_score))
+            if len(self.scoring) > 1:
+                for score_name, score_value in train_scores.items():
+                    self.results[f"mean_train_{score_name}"].append(
+                        np.mean(score_value)
+                    )
+                    self.results[f"std_train_{score_name}"].append(np.std(score_value))
+                for score_name, score_value in val_scores.items():
+                    self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
+                    self.results[f"std_test_{score_name}"].append(np.std(score_value))
+            else:
+                self.results["mean_train_score"].append(np.mean(train_scores))
+                self.results["std_train_score"].append(np.std(train_scores))
+                self.results["mean_test_score"].append(np.mean(val_scores))
+                self.results["std_test_score"].append(np.std(val_scores))
 
         return self.model
 
@@ -188,7 +197,7 @@ class GridSearchManual:
 class RandomizedSearchManual:
     model: Pipeline
     param_grid: dict
-    scoring: str
+    scoring: list[str]
     n_iter: int = 10
     train_val_split: tuple = None
     results: dict = None
@@ -205,17 +214,27 @@ class RandomizedSearchManual:
             model = self.model.set_params(**params)
             model.fit(X_train, y_train)
             y_pred_train = model.predict(X_train)
-            train_score = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
+            train_scores = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
             y_pred_val = model.predict(X_val)
-            val_score = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
+            val_scores = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
 
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            self.results["mean_train_score"].append(np.mean(train_score))
-            self.results["std_train_score"].append(np.std(train_score))
-            self.results["mean_test_score"].append(np.mean(val_score))
-            self.results["std_test_score"].append(np.std(val_score))
+            if len(self.scoring) > 1:
+                for score_name, score_value in train_scores.items():
+                    self.results[f"mean_train_{score_name}"].append(
+                        np.mean(score_value)
+                    )
+                    self.results[f"std_train_{score_name}"].append(np.std(score_value))
+                for score_name, score_value in val_scores.items():
+                    self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
+                    self.results[f"std_test_{score_name}"].append(np.std(score_value))
+            else:
+                self.results["mean_train_score"].append(np.mean(train_scores))
+                self.results["std_train_score"].append(np.std(train_scores))
+                self.results["mean_test_score"].append(np.mean(val_scores))
+                self.results["std_test_score"].append(np.std(val_scores))
 
         return self.model
 
