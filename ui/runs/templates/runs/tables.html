@@ -25,7 +25,13 @@
                             columnDefs: [{
                                 targets: "_all",
                                 render: function (data, type, row) {
-                                    if (type !== 'display' || ('' + data).length < 50) {
+                                    if (type !== 'display') {
+                                        return data;
+                                    }
+                                    if (typeof data === 'number') {
+                                        return data.toPrecision(4);
+                                    }
+                                    if (('' + data).length < 50) {
                                         return data;
                                     }
                                     return `<span class="ellipsis" title="${data}">${('' + data).slice(0, 50)}…</span>`
