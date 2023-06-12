@@ -901,6 +901,141 @@ def test_gsea_wrong_protein_df(data_folder_tests):
     assert "Input must be a dataframe" in current_out["messages"][0]["msg"]
 
 
+def test_gsea_no_gene_sets(data_folder_tests):
+    proteins = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        index_col=0,
+    )
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+    )
+    assert "messages" in current_out
+    assert "No gene sets provided" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_wrong_gene_sets(data_folder_tests):
+    proteins = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        index_col=0,
+    )
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+        gene_sets_path="a_made_up_path.png",
+    )
+    assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_no_gene_symbols(mock_gene_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    mock_gene_mapping.return_value = ({}, {}, ["Protein1", "Protein2"])
+    current_out = gsea(
+        protein_df,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2019_Human"],
+    )
+
+    assert "messages" in current_out
+    assert "All proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_wrong_sample_group_amount(mock_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    metadata_df = pd.DataFrame(
+        data=(
+            ["Sample1", "Group1"],
+            ["Sample2", "Group2"],
+            ["Sample3", "Group3"],  # too many groups
+        ),
+        columns=["Sample", "Group"],
+    )
+    mock_mapping.return_value = (
+        {"Gene1": "Protein1", "Gene2": "Protein2"},
+        {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
+        [],
+    )
+    current_out = gsea(
+        protein_df=protein_df,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
+    )
+
+    assert "messages" in current_out
+    assert (
+        "Input samples have to belong to exactly two groups"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_catch_fail(mock_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    metadata_df = pd.DataFrame(
+        data=(
+            ["Sample1", "Group1"],
+            ["Sample2", "Group2"],
+        ),
+        columns=["Sample", "Group"],
+    )
+    mock_mapping.return_value = (
+        {"Gene1": "Protein1", "Gene2": "Protein2"},
+        {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
+        [],
+    )
+    current_out = gsea(
+        protein_df=protein_df,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
+    )  # gp.gsea() should fail
+    assert "messages" in current_out
+    assert "GSEA failed. Please check your input" in current_out["messages"][0]["msg"]
+
+
 @pytest.mark.internet
 @patch(
     "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
@@ -985,7 +1120,7 @@ def test_gsea_preranked_wrong_protein_df():
     assert "Proteins must be a dataframe" in current_out["messages"][0]["msg"]
 
 
-def test_gsea_preranked_mo_gene_sets(data_folder_tests):
+def test_gsea_preranked_no_gene_sets(data_folder_tests):
     proteins_df = pd.read_csv(
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,

@@ -225,6 +225,20 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    if gene_sets_path is not None and gene_sets_path != "":
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr is not None and gene_sets_enrichr != []:
+        gene_sets = (
+            [gene_sets_enrichr]
+            if not isinstance(gene_sets_enrichr, list)
+            else gene_sets_enrichr
+        )
+    else:
+        msg = "No gene sets provided"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique()
     logging.info("Mapping Uniprot IDs to uppercase gene symbols")
@@ -241,21 +255,7 @@ def gsea(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    if gene_sets_path is not None and gene_sets_path != "":
-        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
-        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
-            return gene_sets
-    elif gene_sets_enrichr is not None and gene_sets_enrichr != []:
-        gene_sets = (
-            [gene_sets_enrichr]
-            if not isinstance(gene_sets_enrichr, list)
-            else gene_sets_enrichr
-        )
-    else:
-        msg = "No gene sets provided"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-
-    samples = protein_df["Sample"].unique()
+    samples = protein_df["Sample"].unique().tolist()
     df = create_genes_intensity_wide_df(
         protein_df, protein_groups, samples, group_to_genes, filtered_groups
     )
@@ -264,7 +264,7 @@ def gsea(
     for sample in samples:  # make class label list for samples
         group_value = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
         cls.append(group_value)
-    if set(cls) != 2:
+    if len(set(cls)) != 2:
         msg = "Input samples have to belong to exactly two groups"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
