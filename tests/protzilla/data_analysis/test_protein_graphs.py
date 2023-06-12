@@ -332,3 +332,62 @@ def test_create_ref_seq_index_own_protein():
     }
     assert index == planned
     assert seq_len == 12
+
+
+def test_create_ref_seq_index_own_protein_k_1():
+    index, _, seq_len = _create_ref_seq_index(
+        protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=1
+    )
+
+    planned = {
+        "A": [0, 6],
+        "B": [1, 7],
+        "C": [2, 8],
+        "D": [3, 9],
+        "E": [4, 10],
+        "G": [5],
+        "T": [11],
+    }
+    assert index == planned
+    assert seq_len == 12
+
+
+def test_create_ref_seq_index_own_protein_k_2():
+    index, _, seq_len = _create_ref_seq_index(
+        protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=2
+    )
+
+    planned = {
+        "AB": [0, 6],
+        "BC": [1, 7],
+        "CD": [2, 8],
+        "DE": [3, 9],
+        "EG": [4],
+        "GA": [5],
+        "ET": [10],
+        "T": [11],
+    }
+    assert index == planned
+    assert seq_len == 12
+
+
+def test_create_ref_seq_index_own_protein_k_5():
+    index, _, seq_len = _create_ref_seq_index(
+        protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=5
+    )
+
+    planned = {
+        "ABCDE": [0, 6],
+        "BCDEG": [1],
+        "CDEGA": [2],
+        "DEGAB": [3],
+        "EGABC": [4],
+        "GABCD": [5],
+        "BCDET": [7],
+        "CDET": [8],
+        "DET": [9],
+        "ET": [10],
+        "T": [11],
+    }
+    assert index == planned
+    assert seq_len == 12
