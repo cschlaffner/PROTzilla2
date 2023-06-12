@@ -179,8 +179,8 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             break
     else:
         msg = "No starting point found in the graph. An error in the graph creation is likely."
-        logging.critical(msg)
-        return None, msg
+        logger.critical(msg)
+        return None, msg, None
 
     longest_paths = _longest_paths(protein_graph, starting_point)
 
@@ -189,11 +189,9 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             protein_graph.nodes[node]["aminoacid"] == "__end__"
             and longest_paths[node] < seq_len
         ):
-            msg = f"The longest path to the last node is shorter than the reference \
-            sequence. An error in the graph creation is likely. Node: {node}, \
-            longest path: {longest_paths[node]}, seq_len: {seq_len}"
-            logger.error(msg)
-            return None, msg
+            msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+            logger.critical(msg)
+            return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:
@@ -355,6 +353,9 @@ def _get_ref_seq(protein_path: str):
                 break
             found_lines.append(line)
 
+    if not found_lines:
+        raise ValueError(f"Could not find lines with Sequence in {protein_path}")
+
     ref_seq = ""
     seq_len = None
     for line in found_lines:
@@ -372,7 +373,7 @@ def _get_ref_seq(protein_path: str):
 
     if not ref_seq:
         raise ValueError(f"Could not find sequence for protein at path {protein_path}")
-    if seq_len is None or not isinstance(int, seq_len) or seq_len < 1:
+    if seq_len is None or not isinstance(seq_len, int) or seq_len < 1:
         raise ValueError(
             f"Could not find sequence length for protein file at path {protein_path}"
         )
@@ -402,15 +403,23 @@ def _match_peptides(
     list(peptides without match)
     """
 
+    if not isinstance(k, int) or k < 1:
+        raise ValueError(f"k must be positive integer, but is {k}")
+    if not isinstance(allowed_mismatches, int) or allowed_mismatches < 0:
+        raise ValueError(
+            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"
+        )
+
     logger.debug("Matching peptides to reference sequence")
     peptide_matches = {}
-    peptide_mismatches = []
+    peptide_mismatches = set()
     seq_len = len(ref_seq)
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
         if kmer not in ref_index:
-            peptide_mismatches.append(peptide)
+            peptide_mismatches.add(peptide)
+            # peptide_mismatches.append(peptide)
             continue
         for match_start_pos in ref_index[kmer]:
             mismatch_counter = 0
@@ -419,7 +428,8 @@ def _match_peptides(
                     f"match start + peptide would be out of bounds for reference sequence, peptide {peptide}, end_pos {match_start_pos + len(peptide)} -> talk to chris what to do"
                 )
                 if peptide not in peptide_matches:
-                    peptide_mismatches.append(peptide)
+                    peptide_mismatches.add(peptide)
+                    # peptide_mismatches.append(peptide)
                 continue
             for i in range(match_start_pos, match_start_pos + len(peptide)):
                 if ref_seq[i] != peptide[i - match_start_pos]:
@@ -435,8 +445,10 @@ def _match_peptides(
                 if peptide in peptide_mismatches:
                     peptide_mismatches.remove(peptide)
             else:
-                peptide_mismatches.append(peptide)
-        peptide_matches[peptide] = matched_starts
+                peptide_mismatches.add(peptide)
+                # peptide_mismatches.append(peptide)
+        if matched_starts:
+            peptide_matches[peptide] = matched_starts
 
     logger.debug(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
