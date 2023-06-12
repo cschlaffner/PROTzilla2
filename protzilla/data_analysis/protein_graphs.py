@@ -405,21 +405,35 @@ def _match_peptides(
     logger.debug("Matching peptides to reference sequence")
     peptide_matches = {}
     peptide_mismatches = []
+    seq_len = len(ref_seq)
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
+        if kmer not in ref_index:
+            peptide_mismatches.append(peptide)
+            continue
         for match_start_pos in ref_index[kmer]:
             mismatch_counter = 0
-            for i, aminoacid in enumerate(
-                ref_seq[match_start_pos : match_start_pos + len(peptide)]
-            ):
-                if aminoacid != peptide[i]:
+            if match_start_pos + len(peptide) > seq_len:
+                logger.critical(
+                    f"match start + peptide would be out of bounds for reference sequence, peptide {peptide}, end_pos {match_start_pos + len(peptide)} -> talk to chris what to do"
+                )
+                if peptide not in peptide_matches:
+                    peptide_mismatches.append(peptide)
+                continue
+            for i in range(match_start_pos, match_start_pos + len(peptide)):
+                if ref_seq[i] != peptide[i - match_start_pos]:
                     mismatch_counter += 1
                 if mismatch_counter > allowed_mismatches:
                     break
 
             if mismatch_counter <= allowed_mismatches:
                 matched_starts.append(match_start_pos)
+                # append to easily check for further starting positions if peptide
+                # was previously matched
+                peptide_matches[peptide] = []
+                if peptide in peptide_mismatches:
+                    peptide_mismatches.remove(peptide)
             else:
                 peptide_mismatches.append(peptide)
         peptide_matches[peptide] = matched_starts
