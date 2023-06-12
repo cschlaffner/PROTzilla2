@@ -5,6 +5,7 @@ from protzilla.constants.paths import TEST_DATA_PATH
 from protzilla.data_analysis.protein_graphs import (
     _create_graph_index,
     _create_ref_seq_index,
+    _get_ref_seq,
     _longest_paths,
 )
 
@@ -391,3 +392,43 @@ def test_create_ref_seq_index_own_protein_k_5():
     }
     assert index == planned
     assert seq_len == 12
+
+
+def test_get_ref_seq_PKHUO():
+    ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/PKHUO.txt")
+
+    planned_ref_seq = "MASRGALRRCLSPGLPRLLHLSRGLA"
+    planned_seq_len = 26
+
+    assert ref_seq == planned_ref_seq
+    assert seq_len == planned_seq_len
+
+
+def test_get_ref_seq_test_protein():
+    protein_path = f"{TEST_DATA_PATH}/proteins/test_protein.txt"
+    ref_seq, seq_len = _get_ref_seq(protein_path)
+
+    planned_ref_seq = "ABCDEGABCDET"
+    planned_seq_len = 12
+
+    assert ref_seq == planned_ref_seq
+    assert seq_len == planned_seq_len
+
+
+def test_get_ref_seq_empty_seq():
+    with pytest.raises(ValueError) as e:
+        protein_path = f"{TEST_DATA_PATH}/proteins/empty_seq.txt"
+        ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/empty_seq.txt")
+
+        assert str(e) == f"Could not find sequence for protein at path {protein_path}"
+
+
+def test_get_ref_seq_no_seq_len():
+    with pytest.raises(ValueError) as e:
+        protein_path = f"{TEST_DATA_PATH}/proteins/no_seq_len.txt"
+        ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/no_seq_len.txt")
+
+        assert (
+            str(e)
+            == f"Could not find sequence length for protein file at path {protein_path}"
+        )
