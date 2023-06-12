@@ -28,7 +28,7 @@
                                     if (type !== 'display') {
                                         return data;
                                     }
-                                    if (typeof data === 'number') {
+                                    if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
                                         return data.toPrecision(4);
                                     }
                                     if (('' + data).length < 50) {
