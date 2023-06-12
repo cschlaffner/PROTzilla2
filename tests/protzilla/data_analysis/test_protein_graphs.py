@@ -25,8 +25,9 @@ def simple_graph():
     )
 
     start_node = "0"
+    seq_len = 7
 
-    return G, start_node
+    return G, start_node, seq_len
 
 
 @pytest.fixture
@@ -50,7 +51,8 @@ def shortcut():
     )
 
     start_node = "0"
-    return G, start_node
+    seq_len = 4
+    return G, start_node, seq_len
 
 
 @pytest.fixture
@@ -76,8 +78,8 @@ def multi_route():
     )
 
     start_node = "0"
-
-    return G, start_node
+    seq_len = 6
+    return G, start_node, seq_len
 
 
 @pytest.fixture
@@ -104,7 +106,8 @@ def multi_route_shortcut():
     )
 
     start_node = "0"
-    return G, start_node
+    seq_len = 6
+    return G, start_node, seq_len
 
 
 @pytest.fixture
@@ -140,11 +143,12 @@ def complex_route():
     )
 
     start_node = "0"
-    return G, start_node
+    seq_len = 8
+    return G, start_node, seq_len
 
 
 def test_longest_paths_simple(simple_graph):
-    G, start_node = simple_graph
+    G, start_node, _ = simple_graph
     longest_paths = _longest_paths(G, start_node)
 
     planned = {"0": 0, "1": 0, "2": 7}
@@ -152,7 +156,7 @@ def test_longest_paths_simple(simple_graph):
 
 
 def test_longest_paths_multiple_paths(multi_route):
-    G, start_node = multi_route
+    G, start_node, _ = multi_route
     longest_paths = _longest_paths(G, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 3, "4": 4, "5": 6}
@@ -160,7 +164,7 @@ def test_longest_paths_multiple_paths(multi_route):
 
 
 def test_longest_paths_multiple_shortcut(multi_route_shortcut):
-    G, start_node = multi_route_shortcut
+    G, start_node, _ = multi_route_shortcut
     longest_paths = _longest_paths(G, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 3, "4": 4, "5": 6}
@@ -168,7 +172,7 @@ def test_longest_paths_multiple_shortcut(multi_route_shortcut):
 
 
 def test_longest_paths_shortcut(shortcut):
-    G, start_node = shortcut
+    G, start_node, _ = shortcut
     longest_paths = _longest_paths(G, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 4, "4": 5}
@@ -176,7 +180,7 @@ def test_longest_paths_shortcut(shortcut):
 
 
 def test_longest_paths_multi_route(complex_route):
-    G, start_node = complex_route
+    G, start_node, _ = complex_route
     longest_paths = _longest_paths(G, start_node)
 
     planned = {
@@ -196,8 +200,8 @@ def test_longest_paths_multi_route(complex_route):
 
 # All graph_index tests depend on the longest_paths tests passing
 def test_create_graph_index_simple(simple_graph):
-    G, start_node = simple_graph
-    index = _create_graph_index(G, start_node)
+    G, _, seq_len = simple_graph
+    index, msg, longest_paths = _create_graph_index(G, seq_len)
 
     planned = [
         [("1", "A")],
@@ -209,19 +213,21 @@ def test_create_graph_index_simple(simple_graph):
         [("1", "G")],
     ]
     assert index == planned
+    assert msg == ""
 
 
 def test_create_graph_index_shortcut(shortcut):
-    G, start_node = shortcut
-    index = _create_graph_index(G, start_node)
+    G, _, seq_len = shortcut
+    index, msg, longest_paths = _create_graph_index(G, seq_len)
 
     planned = [[("1", "A")], [("1", "B")], [("1", "C")], [("2", "D")], [("3", "E")]]
     assert index == planned
+    assert msg == ""
 
 
 def test_create_graph_index_multiple(multi_route):
-    G, start_node = multi_route
-    index = _create_graph_index(G, start_node)
+    G, _, seq_len = multi_route
+    index, msg, longest_paths = _create_graph_index(G, seq_len)
 
     planned = [
         [("1", "A")],
@@ -232,11 +238,12 @@ def test_create_graph_index_multiple(multi_route):
         [("4", "G")],
     ]
     assert index == planned
+    assert msg == ""
 
 
 def test_create_graph_index_multiple_shortcut(multi_route_shortcut):
-    G, start_node = multi_route_shortcut
-    index = _create_graph_index(G, start_node)
+    G, _, seq_len = multi_route_shortcut
+    index, msg, longest_paths = _create_graph_index(G, seq_len)
 
     planned = [
         [("1", "A")],
@@ -247,11 +254,12 @@ def test_create_graph_index_multiple_shortcut(multi_route_shortcut):
         [("4", "G")],
     ]
     assert index == planned
+    assert msg == ""
 
 
 def test_create_graph_index_multi_route(complex_route):
-    G, start_node = complex_route
-    index = _create_graph_index(G, start_node)
+    G, _, seq_len = complex_route
+    index, msg, longest_paths = _create_graph_index(G, seq_len)
 
     planned = [
         [("1", "A")],
@@ -264,6 +272,7 @@ def test_create_graph_index_multi_route(complex_route):
         [("8", "S")],
     ]
     assert index == planned
+    assert msg == ""
 
 
 def test_create_ref_seq_index():
