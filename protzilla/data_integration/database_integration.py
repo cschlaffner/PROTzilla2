@@ -41,9 +41,9 @@ def add_uniprot_data(dataframe, fields=None):
                 continue
             result = res.loc[member]
             for col, val in result.to_dict().items():
-                if col == "Gene Names" and not isinstance(val, float):
+                if "Gene Names" in col and not isinstance(val, float):
                     # to remove space seperated groupings
-                    group_dict[col].extend(val.split())
+                    group_dict[col].append(val.split()[0])
                 else:
                     group_dict[col].append(val)
         for field in fields:
@@ -57,7 +57,7 @@ def add_uniprot_data(dataframe, fields=None):
 
 if __name__ == "__main__":
     df = pd.read_csv(
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/PROTzilla2/user_data/runs/adfg/history_dfs/7-data_analysis-differential_expression-t_test-log2_fold_change_df.csv",
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/PROTzilla2/user_data/runs/adfg/history_dfs/8-data_analysis-differential_expression-t_test-log2_fold_change_df.csv",
         index_col=0,
     )
     from time import time
