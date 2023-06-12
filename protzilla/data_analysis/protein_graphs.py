@@ -372,7 +372,7 @@ def _get_ref_seq(protein_path: str):
 
     if not ref_seq:
         raise ValueError(f"Could not find sequence for protein at path {protein_path}")
-    if seq_len is None:
+    if seq_len is None or not isinstance(int, seq_len) or seq_len < 1:
         raise ValueError(
             f"Could not find sequence length for protein file at path {protein_path}"
         )
