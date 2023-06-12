@@ -822,10 +822,59 @@ def test_create_ranked_df_descending(data_folder_tests):
 
 
 def test_create_genes_intensity_wide_df(data_folder_tests):
-    # TODO test
-    create_genes_intensity_wide_df(
-        protein_df, protein_groups, samples, group_to_genes, filtered_groups
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample1", "Protein3", "Gene3", 30],
+        ["Sample1", "Protein4", "Gene4", 40],
+        ["Sample1", "Protein5", "Gene5", 50],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample2", "Protein3", "Gene3", 3],
+        ["Sample2", "Protein4", "Gene4", 4],
+        ["Sample2", "Protein5", "Gene5", 5],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+        ["Sample3", "Protein3", "Gene3", 80],
+        ["Sample3", "Protein4", "Gene4", 70],
+        ["Sample3", "Protein5", "Gene5", 60],
     )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    group_to_genes = {
+        "Protein1": ["Gene1", "Gene1-1"],  # multiple genes per group
+        "Protein2": ["Gene2"],
+        "Protein3": ["Gene3"],
+        "Protein4": ["Gene3"],  # duplicate gene
+    }
+
+    wide_df = create_genes_intensity_wide_df(
+        protein_df=protein_df,
+        protein_groups=protein_df["Protein ID"].unique().tolist(),
+        samples=protein_df["Sample"].unique().tolist(),
+        group_to_genes=group_to_genes,
+        filtered_groups=["Protein5"],  # not in group_to_genes
+    )
+
+    expected_df = pd.DataFrame(
+        np.array(
+            [
+                ["Gene1", 10.0, 1.0, 100.0],
+                ["Gene1-1", 10.0, 1.0, 100.0],
+                ["Gene2", 20.0, 2.0, 90.0],
+                ["Gene3", 35.0, 3.5, 75.0],
+            ]
+        ),
+        columns=["Gene symbol", "Sample1", "Sample2", "Sample3"],
+    )
+    expected_df[["Sample1", "Sample2", "Sample3"]] = expected_df[
+        ["Sample1", "Sample2", "Sample3"]
+    ].astype(float)
+    expected_df = expected_df.set_index("Gene symbol")
+    pd.testing.assert_frame_equal(wide_df, expected_df, check_dtype=False)
+
 
 def test_gsea(data_folder_tests):
     proteins = pd.read_csv(
@@ -861,9 +910,13 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
         index_col=0,
     )
-    expected_ranking = pd.read_csv(f"{data_folder_tests}/gsea_preranked_rank.csv", index_col=0)
-    expected_ranking = expected_ranking["prerank"] # convert to series
-    expected_enriched_df = pd.read_csv(f"{data_folder_tests}/gsea_preranked_enriched.csv", index_col=0)
+    expected_ranking = pd.read_csv(
+        f"{data_folder_tests}/gsea_preranked_rank.csv", index_col=0
+    )
+    expected_ranking = expected_ranking["prerank"]  # convert to series
+    expected_enriched_df = pd.read_csv(
+        f"{data_folder_tests}/gsea_preranked_enriched.csv", index_col=0
+    )
 
     with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
         data = json.load(f)
@@ -873,9 +926,7 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
         mock_mapping.return_value = gene_symbols, group_to_genes, filtered_groups
 
     current_out = gsea_preranked(
-        proteins_significant,
-        "ascending",
-        gene_sets_enrichr=["KEGG_2019_Human"]
+        proteins_significant, "ascending", gene_sets_enrichr=["KEGG_2019_Human"]
     )
     assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
@@ -890,8 +941,6 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
     for column in column_names:
         assert expected_enriched_df[column].equals(current_out["enriched_df"][column])
 
-    print(current_out["enriched_df"].dtypes)
-    print(expected_enriched_df.dtypes)
     # Compare the numeric columns separately with a tolerance for numerical equality
     numerical_columns = [
         "ES",
@@ -900,11 +949,16 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
         "FDR q-val",
         "FWER p-val",
     ]
-    current_out["enriched_df"][numerical_columns] = current_out["enriched_df"][numerical_columns].astype(float)
+    current_out["enriched_df"][numerical_columns] = current_out["enriched_df"][
+        numerical_columns
+    ].astype(float)
     for column in numerical_columns:
         expected_enriched_df[column]
         numerical_equal = np.isclose(
-            expected_enriched_df[column], current_out["enriched_df"][column], rtol=1e-05, atol=1e-08
+            expected_enriched_df[column],
+            current_out["enriched_df"][column],
+            rtol=1e-05,
+            atol=1e-08,
         )
         assert numerical_equal.all()
 
@@ -915,9 +969,7 @@ def test_gsea_preranked_rank(data_folder_tests):
         index_col=0,
     )
     current_out = gsea_preranked(
-        proteins_significant,
-        "ascending",
-        gene_sets_enrichr=["KEGG_2019_Human"]
+        proteins_significant, "ascending", gene_sets_enrichr=["KEGG_2019_Human"]
     )
     current_out["ranking"].to_csv("gsea_preranked_rank.csv")
     current_out["enriched_df"].to_csv("gsea_preranked_enriched.csv")

@@ -168,6 +168,7 @@ def create_genes_intensity_wide_df(
     """
     Creates a dataframe with genes in rows and samples in columns with intensity values.
     If multiple proteins map to the same gene, the same intensity value is used for all.
+    If duplicate genes exist, the mean of intensities is used.
 
     :param protein_df: dataframe with protein IDs and intensities
     :type protein_df: pd.DataFrame
@@ -197,7 +198,10 @@ def create_genes_intensity_wide_df(
             processed_data.append(row_data)
 
     df = pd.DataFrame(processed_data, columns=column_names)
-    return df.set_index("Gene symbol")
+
+    # if duplicate genes exist, use mean of intensities
+    df = df.groupby("Gene symbol").mean()
+    return df
 
 
 def gsea(
