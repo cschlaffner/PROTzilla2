@@ -1408,7 +1408,7 @@
             "default": "ascending"
           },
           "gene_sets_field": {
-            "name": "How do you want to provide the gene sets?",
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
             "type": "categorical_dynamic",
             "categories": [
               "Upload a file",

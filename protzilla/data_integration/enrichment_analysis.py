@@ -8,6 +8,7 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
 from .enrichment_analysis_helper import (
@@ -314,11 +315,11 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :type direction: str
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
-    gene_mapping, _, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+    gene_to_groups, _, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
         protein_list
     )
 
-    if not gene_mapping:
+    if not gene_to_groups:
         return (
             dict(
                 messages=[
@@ -334,7 +335,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     logger.info(f"Starting analysis for {direction}-regulated proteins")
     try:
         enriched = gp.enrichr(
-            gene_list=list(gene_mapping.keys()),
+            gene_list=list(gene_to_groups.keys()),
             gene_sets=protein_sets,
             organism=organism,
             outdir=None,
@@ -355,7 +356,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
         )
 
     enriched["Proteins"] = enriched["Genes"].apply(
-        lambda x: ";".join([gene_mapping[gene] for gene in x.split(";")])
+        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
     logger.info(f"Finished analysis for {direction}-regulated proteins")
     return enriched, filtered_groups

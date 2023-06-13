@@ -144,12 +144,12 @@ def gsea_preranked(
     protein_groups = protein_df["Protein ID"].unique()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
-        gene_symbols,
+        gene_to_groups,
         group_to_genes,
         filtered_groups,
     ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
 
-    if not gene_symbols:
+    if not gene_to_groups:
         msg = "All proteins could not be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
@@ -180,13 +180,13 @@ def gsea_preranked(
             verbose=True,
         )
     except Exception as e:
-        msg = "An error occurred while running GSEA. Please check your input and try again."
+        msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
     enriched_df = pre_res.res2d
     enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
-        lambda x: ";".join([gene_symbols[gene] for gene in x.split(";")])
+        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
     if filtered_groups:
@@ -344,12 +344,12 @@ def gsea(
     protein_groups = protein_df["Protein ID"].unique()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
-        gene_symbols,
+        gene_to_groups,
         group_to_genes,
         filtered_groups,
     ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
 
-    if not gene_symbols:
+    if not gene_to_groups:
         msg = "All proteins could not be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
@@ -390,13 +390,13 @@ def gsea(
             seed=seed,
         )
     except Exception as e:
-        msg = "GSEA failed. Please check your input data and parameters."
+        msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
     enriched_df = gs_res.res2d
     enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
-        lambda x: ";".join([gene_symbols[gene] for gene in x.split(";")])
+        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
     if filtered_groups:

@@ -19,6 +19,63 @@ def data_folder_tests():
     return f"{PROJECT_PATH}/tests/test_data/enrichment_data"
 
 
+@patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
+def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
+    proteins = [
+        "Protein1",
+        "Protein2;ProteinX",
+        "Protein03",
+        "Protein3-1",
+        "Protein4_VAR_A12345",
+        "Protein5",
+        "Protein6",
+        "Protein7;Protein8",
+    ]
+    mock_biomart_query.return_value = [
+        ("Protein1", "GENE1"),
+        ("Protein2", "GENE2"),
+        ("ProteinX", "GENE2"),
+        ("Protein03", "GENE3"),
+        ("Protein3", "GENE3"),
+        ("Protein4", "GENE4"),
+        ("Protein7", "GENE7"),
+        ("Protein8", "GENE8"),
+    ]
+
+    expected_gene_to_groups = {
+        "GENE1": ["Protein1"],
+        "GENE2": ["Protein2;ProteinX"],
+        "GENE3": [
+            "Protein03",
+            "Protein3-1",
+        ],  # this should not happen but is handled in case it does
+        "GENE4": ["Protein4_VAR_A12345"],
+        "GENE7": ["Protein7;Protein8"],
+        "GENE8": ["Protein7;Protein8"],
+    }
+    expected_group_to_genes = {
+        "Protein1": ["GENE1"],
+        "Protein2;ProteinX": ["GENE2"],
+        "Protein03": ["GENE3"],
+        "Protein3-1": ["GENE3"],
+        "Protein4_VAR_A12345": ["GENE4"],
+        "Protein7;Protein8": ["GENE7", "GENE8"],
+    }
+    expected_filtered_groups = ["Protein5", "Protein6"]
+
+    (
+        gene_to_groups,
+        group_to_genes,
+        filtered_groups,
+    ) = uniprot_ids_to_uppercase_gene_symbols(proteins)
+
+    for key in gene_to_groups:
+        assert set(gene_to_groups[key]) == set(expected_gene_to_groups[key])
+    for key in group_to_genes:
+        assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
+    assert filtered_groups == expected_filtered_groups
+
+
 @patch("restring.restring.get_functional_enrichment")
 def test_get_functional_enrichment_with_delay(mock_enrichment):
     MIN_WAIT_TIME = 1
@@ -376,17 +433,17 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
 
     mock_gene_mapping.return_value = (
         {
-            "ENO1": "Protein1",
-            "ENO2": "Protein2",
-            "ENO3": "Protein3",
-            "HK2": "Protein4",
-            "HK1": "Protein6",
-            "HK3": "Protein7",
-            "IDH3B": "Protein8",
-            "ATP6V1G2": "Protein9",
-            "GPT2": "Protein10",
-            "SDHB": "Protein11",
-            "COX6B1": "Protein12;Protein13",
+            "ENO1": ["Protein1"],
+            "ENO2": ["Protein2"],
+            "ENO3": ["Protein3"],
+            "HK2": ["Protein4"],
+            "HK1": ["Protein6"],
+            "HK3": ["Protein7"],
+            "IDH3B": ["Protein8"],
+            "ATP6V1G2": ["Protein9"],
+            "GPT2": ["Protein10"],
+            "SDHB": ["Protein11"],
+            "COX6B1": ["Protein12;Protein13"],
         },
         {
             "Protein1": ["ENO1"],
@@ -915,10 +972,10 @@ def test_gsea(mock_mapping, data_folder_tests):
 
     with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
         data = json.load(f)
-        gene_symbols = data["gene_symbols"]
+        gene_to_groups = data["gene_to_groups"]
         group_to_genes = data["group_to_genes"]
         filtered_groups = data["filtered_groups"]
-        mock_mapping.return_value = gene_symbols, group_to_genes, filtered_groups
+        mock_mapping.return_value = gene_to_groups, group_to_genes, filtered_groups
 
     current_out = gsea(
         protein_df=proteins,
@@ -1054,7 +1111,7 @@ def test_gsea_wrong_sample_group_amount(mock_mapping):
         columns=["Sample", "Group"],
     )
     mock_mapping.return_value = (
-        {"Gene1": "Protein1", "Gene2": "Protein2"},
+        {"Gene1": ["Protein1"], "Gene2": ["Protein2"]},
         {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
         [],
     )
@@ -1094,7 +1151,7 @@ def test_gsea_catch_fail(mock_mapping):
         columns=["Sample", "Group"],
     )
     mock_mapping.return_value = (
-        {"Gene1": "Protein1", "Gene2": "Protein2"},
+        {"Gene1": ["Protein1"], "Gene2": ["Protein2"]},
         {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
         [],
     )
@@ -1127,10 +1184,10 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
 
     with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
         data = json.load(f)
-        gene_symbols = data["gene_symbols"]
+        gene_to_groups = data["gene_to_groups"]
         group_to_genes = data["group_to_genes"]
         filtered_groups = data["filtered_groups"]
-        mock_mapping.return_value = gene_symbols, group_to_genes, filtered_groups
+        mock_mapping.return_value = gene_to_groups, group_to_genes, filtered_groups
 
     current_out = gsea_preranked(
         proteins_significant, "ascending", gene_sets_enrichr=["KEGG_2019_Human"]
