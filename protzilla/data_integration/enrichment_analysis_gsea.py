@@ -73,6 +73,11 @@ def gsea_preranked(
     seed=123,
     **kwargs,
 ):
+    """
+    Ranks proteins by a provided value column according to ranking_direction and
+    runs GSEA on it.
+    """
+
     # TODO 182: set logging level for whole django app in beginning
     logging.basicConfig(level=logging.INFO)
 
@@ -214,7 +219,7 @@ def gsea(
     max_size=500,
     number_of_permutations=1000,
     permutation_type="phenotype",
-    ranking_method="log2_ratio_of_classes",
+    ranking_method="signal_to_noise",
     weighted_score=1.0,
     seed=123,
     **kwargs,
@@ -266,6 +271,11 @@ def gsea(
         cls.append(group_value)
     if len(set(cls)) != 2:
         msg = "Input samples have to belong to exactly two groups"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    # cannot use log2_ratio_of_classes if there are negative values
+    if (df < 0).any().any() and ranking_method == "log2_ratio_of_classes":
+        msg = "Negative values in the dataframe. Please use a different ranking method."
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     logging.info("Running GSEA")

@@ -876,14 +876,86 @@ def test_create_genes_intensity_wide_df(data_folder_tests):
     pd.testing.assert_frame_equal(wide_df, expected_df, check_dtype=False)
 
 
-def test_gsea(data_folder_tests):
+def test_gsea_log2_metric_with_negative_values(data_folder_tests):
     proteins = pd.read_csv(
         f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
         index_col=0,
     )
+    metadata_df = pd.read_csv(f"{data_folder_tests}/_meta.csv")
 
-    # result = gsea(proteins)
-    # result["enriched_df"].to_csv("gsea_result_sig_prot.csv")
+    current_out = gsea(
+        proteins,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2016"],
+        min_size=4,
+        number_of_permutations=500,
+        ranking_method="log2_ratio_of_classes",
+    )
+    assert "messages" in current_out
+    assert "Negative values" in current_out["messages"][0]["msg"]
+    assert "use a different ranking method" in current_out["messages"][0]["msg"]
+
+
+@pytest.mark.internet
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea(mock_mapping, data_folder_tests):
+    proteins = pd.read_csv(
+        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        index_col=0,
+    )
+    metadata_df = pd.read_csv(
+        f"{data_folder_tests}/_meta.csv",
+    )
+    expected_enriched_df = pd.read_csv(
+        f"{data_folder_tests}/gsea_result_sig_prot_pre_mapped.csv", index_col=0
+    )
+
+    with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
+        data = json.load(f)
+        gene_symbols = data["gene_symbols"]
+        group_to_genes = data["group_to_genes"]
+        filtered_groups = data["filtered_groups"]
+        mock_mapping.return_value = gene_symbols, group_to_genes, filtered_groups
+
+    current_out = gsea(
+        protein_df=proteins,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2016"],
+        min_size=7,
+        number_of_permutations=500,
+    )
+    assert "messages" in current_out
+    assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+    column_names = ["Name", "Term", "Tag %", "Gene %", "Lead_genes", "Lead_proteins"]
+    # Compare all specified columns
+    for column in column_names:
+        assert expected_enriched_df[column].equals(current_out["enriched_df"][column])
+
+    # Compare the numeric columns separately with a tolerance for numerical equality
+    numerical_columns = [
+        "ES",
+        "NES",
+        "NOM p-val",
+        "FDR q-val",
+        "FWER p-val",
+    ]
+    current_out["enriched_df"][numerical_columns] = current_out["enriched_df"][
+        numerical_columns
+    ].astype(float)
+    for column in numerical_columns:
+        expected_enriched_df[column]
+        numerical_equal = np.isclose(
+            expected_enriched_df[column],
+            current_out["enriched_df"][column],
+            rtol=1e-05,
+            atol=1e-08,
+        )
+        assert numerical_equal.all()
 
 
 def test_gsea_wrong_protein_df(data_folder_tests):
@@ -1096,18 +1168,6 @@ def test_gsea_preranked(mock_mapping, data_folder_tests):
             atol=1e-08,
         )
         assert numerical_equal.all()
-
-
-def test_gsea_preranked_rank(data_folder_tests):
-    proteins_significant = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
-        index_col=0,
-    )
-    current_out = gsea_preranked(
-        proteins_significant, "ascending", gene_sets_enrichr=["KEGG_2019_Human"]
-    )
-    current_out["ranking"].to_csv("gsea_preranked_rank.csv")
-    current_out["enriched_df"].to_csv("gsea_preranked_enriched.csv")
 
 
 def test_gsea_preranked_wrong_protein_df():
