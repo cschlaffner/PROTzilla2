@@ -53,4 +53,4 @@ def uniprot_query_dataframe(uniprot_ids, fields):
 def uniprot_columns():
     return pandas.read_csv(
         database_path / "uniprot.tsv", sep="\t", nrows=0
-    ).columns.tolist()
+    ).columns.tolist() + ["Links"]

@@ -37,9 +37,23 @@ def add_uniprot_data(dataframe, fields=None):
             all_proteins.add(normalized)
         # this can be done because we make isoforms appear together
         clean_groups.append(list(unique_justseen(cleaned)))
-    res: pd.DataFrame = uniprot_query_dataframe(list(all_proteins), fields)
 
-    new_columns = {k: [] for k in fields}  # data that will be added to input df
+    # add links
+    if "Links" in fields:
+        links = []
+        for group in clean_groups:
+            group_links = [
+                f"https://uniprot.org/uniprotkb/{protein}" for protein in group
+            ]
+            links.append(" ".join(group_links))
+        dataframe["Links"] = links
+    database_fields = [field for field in fields if field != "Links"]
+    if not database_fields:
+        return {"result": dataframe}
+    res: pd.DataFrame = uniprot_query_dataframe(list(all_proteins), database_fields)
+
+    # data that will be added to input df
+    new_columns = {k: [] for k in fields if k != "Links"}
     # is it better to have a for loop for columns and retrive each protein multiple times from res?
 
     for group in clean_groups:
@@ -56,7 +70,7 @@ def add_uniprot_data(dataframe, fields=None):
                     group_dict[col].append(val.split()[0])
                 else:
                     group_dict[col].append(val)
-        for field in fields:
+        for field in database_fields:
             # add unique values to only, join if necessary
             if len(set(group_dict[field])) == 1:
                 new_columns[field].append(group_dict[field][0])
@@ -76,6 +90,6 @@ if __name__ == "__main__":
     from time import time
 
     t = time()
-    a = add_uniprot_data(df, fields=["Gene Names (primary)", "Organism", "Length"])
+    a = add_uniprot_data(df, fields=["Links", "Length"])
     a["result"].to_csv("result.csv")
     print(time() - t)
