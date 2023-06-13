@@ -30,6 +30,7 @@ def get_batch(batch_url, session):
 def download_uniprot_paged():
     """downloads basic info on all human proteins from the uniprot paged rest api.
     this will take very long due to limitations in the api, therefore stream should be used.
+    code taken from https://www.uniprot.org/help/api_queries including get_next_link and get_batch
     """
 
     retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504])
@@ -80,7 +81,8 @@ if __name__ == "__main__":
             print(
                 "\n\nfailed to download Uniprot, you can download it from "
                 "\nhttps://www.uniprot.org/uniprotkb?query=*"
-                "\nor from the protzilla release on github. for more info go to https://github.com/antonneubauer/PROTzilla2/wiki/Databases"
+                "\nor from the protzilla release on github. for more info go to "
+                "\nhttps://github.com/antonneubauer/PROTzilla2/wiki/Databases"
             )
         else:
             print("done downloading")
