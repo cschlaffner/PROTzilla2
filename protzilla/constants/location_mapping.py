@@ -182,11 +182,6 @@ method_map = {
     (
         "data_integration",
         "enrichment_analysis",
-        "gsea_preranked",
-    ): enrichment_analysis.gsea_preranked,
-    (
-        "data_integration",
-        "enrichment_analysis",
         "gsea",
     ): enrichment_analysis.gsea,
 }
