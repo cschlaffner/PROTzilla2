@@ -1,8 +1,5 @@
-import time
 from unittest.mock import patch
 
-import numpy as np
-import pandas as pd
 import pytest
 import requests
 
@@ -967,7 +964,7 @@ def test_gsea(mock_mapping, data_folder_tests):
         f"{data_folder_tests}/metadata_full.csv",
     )
     expected_enriched_df = pd.read_csv(
-        f"{data_folder_tests}/gsea_result_sig_prot_pre_mapped.csv", index_col=0
+        f"{data_folder_tests}/gsea_result_sig_prot.csv", index_col=0
     )
 
     with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
