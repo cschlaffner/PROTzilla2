@@ -69,7 +69,11 @@
                                     {% endif %}
 
                                     <div class="mb-3">
-                                        {% include "runs/fields.html" with fields=step.fields %}
+                                        {% if "Classification" in step.display_name%}
+                                            {% include "runs/fields_classification_methods.html" with fields=step.fields history=True%}
+                                        {% else %}
+                                            {% include "runs/fields.html" with fields=step.fields %}
+                                        {% endif %}
                                         <div class="d-flex flex-nowrap">
                                             {% if step.table_link %}
                                                 <a href="{{ step.table_link }}" target="_blank"
@@ -151,7 +155,11 @@
                                         {% csrf_token %}
                                         {{ method_dropdown }}
                                         <div id="method_parameters" class="mb-2">
-                                            {% include "runs/fields.html" with fields=fields %}
+                                            {% if step == "classification" %}
+                                                {% include "runs/fields_classification_methods.html" with fields=fields history=False%}
+                                            {% else %}
+                                                {% include "runs/fields.html" with fields=fields %}
+                                            {% endif %}
                                         </div>
                                         <div class="form-group">
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
