@@ -65,12 +65,17 @@ def download_uniprot_stream():
 if __name__ == "__main__":
     database_path.mkdir(exist_ok=True)
     if not (database_path / "uniprot.tsv").exists():
-        print("downloading Uniprot (about one minute, 600 iterations)")
+        print("no Uniprot database found, starting to download")
+        print("this will take 1-5 minutes")
         try:
             download_uniprot_stream()
         except Exception as e:
             print(e)
-            print("failed to download")
+            print(
+                "\n\nfailed to download Uniprot, you can download it from "
+                "\nhttps://www.uniprot.org/uniprotkb?query=*"
+                "\nor from the protzilla release on github. for more info go to https://github.com/antonneubauer/PROTzilla2/wiki/Databases"
+            )
         else:
             print("done downloading")
     else:
