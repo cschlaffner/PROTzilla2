@@ -1,10 +1,9 @@
-import logging
-
 import gseapy as gp
 import numpy as np
 import pandas as pd
 from django.contrib import messages
 
+from protzilla.constants.logging import logger
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import (
@@ -35,7 +34,7 @@ def create_ranked_df(
     :return: ranked dataframe of genes
     :rtype: pd.DataFrame
     """
-    logging.info("Ranking input")
+    logger.info("Ranking input")
     rnk = pd.DataFrame(columns=["Gene symbol", "Ranking value"])
     for group in protein_groups:
         if group in filtered_groups:
@@ -119,10 +118,6 @@ def gsea_preranked(
     :return: dictionary with results dataframe, ranking and messages
     :rtype: dict
     """
-
-    # TODO 182: set logging level for whole django app in beginning
-    logging.basicConfig(level=logging.INFO)
-
     if (
         not isinstance(protein_df, pd.DataFrame)
         or protein_df.shape[1] != 2
@@ -147,7 +142,7 @@ def gsea_preranked(
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     protein_groups = protein_df["Protein ID"].unique()
-    logging.info("Mapping Uniprot IDs to uppercase gene symbols")
+    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
         gene_symbols,
         group_to_genes,
@@ -169,7 +164,7 @@ def gsea_preranked(
         filtered_groups,
     )
 
-    logging.info("Running GSEA")
+    logger.info("Running GSEA")
     try:
         pre_res = gp.prerank(
             rnk=rnk,
@@ -347,7 +342,7 @@ def gsea(
 
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique()
-    logging.info("Mapping Uniprot IDs to uppercase gene symbols")
+    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
         gene_symbols,
         group_to_genes,
@@ -379,7 +374,7 @@ def gsea(
         msg = "Negative values in the dataframe. Please use a different ranking method."
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    logging.info("Running GSEA")
+    logger.info("Running GSEA")
     try:
         gs_res = gp.gsea(
             data=df,
