@@ -29,7 +29,7 @@
                                         return data;
                                     }
                                     if (typeof data === 'string' && data.startsWith("https://")) {
-                                        return  data.split(' ').map(url => `<a href="${url}">${url.split('/').pop()}</a>`).join(' ')
+                                        return data.split(' ').map(url => `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`).join(' ')
                                     }
                                     if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
                                         return data.toPrecision(4);
