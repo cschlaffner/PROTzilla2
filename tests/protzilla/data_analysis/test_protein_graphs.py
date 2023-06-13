@@ -329,9 +329,9 @@ def test_create_graph_index_invalid_end_node():
     assert partial_error_msg in msg
 
 
-def test_create_ref_seq_index_PKHUO():
+def test_create_ref_seq_index_C0HM02():
     index, _, seq_len = _create_ref_seq_index(
-        protein_path=f"{TEST_DATA_PATH}/proteins/PKHUO.txt", k=5
+        protein_path=f"{TEST_DATA_PATH}/proteins/C0HM02.txt", k=5
     )
 
     planned = {
@@ -425,8 +425,8 @@ def test_create_ref_seq_index_own_protein_k_5():
     assert seq_len == 12
 
 
-def test_get_ref_seq_PKHUO():
-    ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/PKHUO.txt")
+def test_get_ref_seq_C0HM02():
+    ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/C0HM02.txt")
 
     planned_ref_seq = "MASRGALRRCLSPGLPRLLHLSRGLA"
     planned_seq_len = 26
@@ -593,3 +593,33 @@ def test_match_peptides_allowed_mismatches_negative():
         peptide_matches, peptide_mismatches = _match_peptides(
             allowed_mismatches, k, peptides, ref_seq_index, ref_seq
         )
+
+
+def test_match_peptides_early_mismatch_late_match():
+    peptides = ["BCDXXX"]
+    allowed_mismatches = 2
+    k = 3
+    ref_seq_index = {
+        "ABC": [0, 6],
+        "BCD": [1, 7],
+        "CDE": [2, 8],
+        "DEG": [3],
+        "EGA": [4],
+        "GAB": [5],
+        "DEX": [9],
+        "EXX": [10],
+        "TX": [11],
+        "X": [12],
+    }
+    ref_seq = "ABCDEGABCDEXX"
+    peptide_matches, peptide_mismatches = _match_peptides(
+        allowed_mismatches, k, peptides, ref_seq_index, ref_seq
+    )
+
+    planned_peptide_matches = {
+        "BCDXXX": [7],
+    }
+    planned_peptide_mismatches = set()
+
+    assert peptide_matches == planned_peptide_matches
+    assert peptide_mismatches == planned_peptide_mismatches

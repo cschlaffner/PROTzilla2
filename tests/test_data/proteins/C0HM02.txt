@@ -1,3 +1,6 @@
+## Provided by UniProtKB/Swiss-Prot
+## downloaded from https://www.uniprot.org/uniprot/C0HM02.txt on 2023-06-13 - 11:07
+
 ID   PKHUO_HUMAN             Reviewed;          26 AA.
 AC   C0HM02;
 DT   25-MAY-2022, integrated into UniProtKB/Swiss-Prot.

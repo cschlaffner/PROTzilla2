@@ -329,8 +329,13 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
 
 def _get_ref_seq(protein_path: str):
     """
-    Parses Protein-File in UniProt .txt format. Extracts reference sequence and sequence
-    length
+    Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
+    sequence and sequence length.
+
+    SP-EMBL Description: https://web.expasy.org/docs/userman.html
+
+    :raises ValueError: If no lines were matched to the sequence pattern or if no
+    sequence was found or if no sequence length was found.
 
     :param protein_path: Path to Protein-File in UniProt .txt format.
     :type: str
@@ -419,17 +424,17 @@ def _match_peptides(
         matched_starts = []
         if kmer not in ref_index:
             peptide_mismatches.add(peptide)
-            # peptide_mismatches.append(peptide)
             continue
         for match_start_pos in ref_index[kmer]:
             mismatch_counter = 0
             if match_start_pos + len(peptide) > seq_len:
-                logger.critical(
-                    f"match start + peptide would be out of bounds for reference sequence, peptide {peptide}, end_pos {match_start_pos + len(peptide)} -> talk to chris what to do"
+                # for now potential matches like this will be dismissed even if
+                # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
+                logger.debug(
+                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
                 )
                 if peptide not in peptide_matches:
                     peptide_mismatches.add(peptide)
-                    # peptide_mismatches.append(peptide)
                 continue
             for i in range(match_start_pos, match_start_pos + len(peptide)):
                 if ref_seq[i] != peptide[i - match_start_pos]:
@@ -439,14 +444,13 @@ def _match_peptides(
 
             if mismatch_counter <= allowed_mismatches:
                 matched_starts.append(match_start_pos)
-                # append to easily check for further starting positions if peptide
-                # was previously matched
+                # append to easily check if peptide was previously matched for further
+                # starting positions
                 peptide_matches[peptide] = []
                 if peptide in peptide_mismatches:
                     peptide_mismatches.remove(peptide)
             else:
                 peptide_mismatches.add(peptide)
-                # peptide_mismatches.append(peptide)
         if matched_starts:
             peptide_matches[peptide] = matched_starts
 
