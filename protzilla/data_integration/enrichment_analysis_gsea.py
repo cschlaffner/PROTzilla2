@@ -75,7 +75,49 @@ def gsea_preranked(
 ):
     """
     Ranks proteins by a provided value column according to ranking_direction and
-    runs GSEA on it.
+    maps the Uniprot IDs to uppercase gene symbols.
+    Protein groups that could not be mapped are not included in the ranking.
+    If multiple genes exist per group the same ranking value is used for all genes.
+    If duplicate genes exist the one with the worse score is kept.
+    Then runs GSEA on it.
+    If gene_sets_path is provided, reads in gene sets from file, otherwise uses
+    gene sets libraries provided by Enrichr.
+
+    :param protein_df: dataframe with protein IDs and ranking values
+    :type protein_df: pd.DataFrame
+    :param ranking_direction: direction of ranking for sorting, either ascending or descending
+        (ascending - smaller values are better, descending - larger values are better)
+    :type ranking_direction: str
+    :param gene_sets_path: path to file with gene sets
+        The file can be a .csv, .txt, .json or .gmt file.
+        .gmt files are not parsed because GSEApy can handle them directly.
+        Other files must have one set per line with the set name and the proteins.
+            - .txt:
+                Set_name: Protein1, Protein2, ...
+                Set_name2: Protein2, Protein3, ...
+            - .csv:
+                Set_name, Protein1, Protein2, ...
+                Set_name2, Protein2, Protein3, ...
+            - .json:
+                {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type gene_sets_path: str
+    :param gene_sets_enrichr: list of gene set library names from Enrichr
+    :type gene_sets_enrichr: list
+    :param min_size: Minimum number of genes from gene set also in data set
+    :type min_size: int
+    :param max_size: Maximum number of genes from gene set also in data set
+    :type max_size: int
+    :param number_of_permutations: Number of permutations
+    :type number_of_permutations: int
+    :param permutation_type: Permutation type, either phenotype or gene_set
+         (if samples >=15 set to phenotype)
+    :type permutation_type: str
+    :param weighted_score: Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2
+    :type weighted_score: float
+    :param seed: Random seed
+    :type seed: int
+    :return: dictionary with results dataframe, ranking and messages
+    :rtype: dict
     """
 
     # TODO 182: set logging level for whole django app in beginning
@@ -224,6 +266,65 @@ def gsea(
     seed=123,
     **kwargs,
 ):
+    """
+    Performs Gene Set Enrichment Analysis (GSEA) on a dataframe with protein IDs, samples and intensities.
+    To do this Protein IDs are mapped to uppercase gene symbols.
+    The dataframe is converted to a dataframe with genes in rows and samples in columns with intensity values.
+    If multiple protein groups map to the same gene, the same intensity value is used for all.
+    If duplicate genes exist, the mean of intensities is used.
+
+    :param protein_df: dataframe with protein IDs, samples and intensities
+    :type protein_df: pd.DataFrame
+    :param metadata_df: dataframe with metadata
+    :type metadata_df: pd.DataFrame
+    :param grouping: column name in metadata_df to group samples by
+    :type grouping: str
+    :param gene_sets_path: path to file with gene sets
+         The file can be a .csv, .txt, .json or .gmt file.
+            .gmt files are not parsed because GSEApy can handle them directly.
+            Other files must have one set per line with the set name and the proteins.
+                - .txt:
+                    Set_name: Protein1, Protein2, ...
+                    Set_name2: Protein2, Protein3, ...
+                - .csv:
+                    Set_name, Protein1, Protein2, ...
+                    Set_name2, Protein2, Protein3, ...
+                - .json:
+                    {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type gene_sets_path: str
+    :param gene_sets_enrichr: list of gene set library names to use from Enrichr
+    :type gene_sets_enrichr: list
+    :param min_size: minimum number of proteins from a gene set that must be present in the data
+    :type min_size: int
+    :param max_size: maximum number of proteins from a gene set that must be present in the data
+    :type max_size: int
+    :param number_of_permutations: number of permutations to perform
+    :type number_of_permutations: int
+    :param permutation_type: type of permutations to perform, phenotype or gene_set
+         (if samples >=15 set to phenotype)
+    :type permutation_type: str
+    :param ranking_method: method to rank proteins by, default: 'signal_to_noise'
+        refer to GSEApy documentation for more information
+               1. 'signal_to_noise'
+                    You must have at least three samples for each phenotype to use this metric.
+
+               2. 't_test'
+                    You must have at least three samples for each phenotype to use this metric.
+
+               3. 'ratio_of_classes' (also referred to as fold change).
+
+               4. 'diff_of_classes' (fold change for nature scale data)
+
+               5. 'log2_ratio_of_classes'
+    :type ranking_method: str
+    :param weighted_score: Weighted score for the enrichment score calculation,
+        recommended values: 0, 1, 1.5 or 2
+    :type weighted_score: float
+    :param seed: Random seed
+    :type seed: int
+    :return: dict with enriched dataframe and messages
+    :rtype: dict
+    """
     assert grouping in metadata_df.columns, "Grouping column not in metadata df"
 
     if not is_intensity_df(protein_df):

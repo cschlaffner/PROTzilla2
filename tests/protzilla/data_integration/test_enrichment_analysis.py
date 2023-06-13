@@ -878,10 +878,10 @@ def test_create_genes_intensity_wide_df(data_folder_tests):
 
 def test_gsea_log2_metric_with_negative_values(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
-    metadata_df = pd.read_csv(f"{data_folder_tests}/_meta.csv")
+    metadata_df = pd.read_csv(f"{data_folder_tests}/metadata_full.csv")
 
     current_out = gsea(
         proteins,
@@ -903,11 +903,11 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
 )
 def test_gsea(mock_mapping, data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     metadata_df = pd.read_csv(
-        f"{data_folder_tests}/_meta.csv",
+        f"{data_folder_tests}/metadata_full.csv",
     )
     expected_enriched_df = pd.read_csv(
         f"{data_folder_tests}/gsea_result_sig_prot_pre_mapped.csv", index_col=0
@@ -960,7 +960,7 @@ def test_gsea(mock_mapping, data_folder_tests):
 
 def test_gsea_wrong_protein_df(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_pvalues_df.csv",
         index_col=0,
     )  # not an intensity df
 
@@ -975,7 +975,7 @@ def test_gsea_wrong_protein_df(data_folder_tests):
 
 def test_gsea_no_gene_sets(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     current_out = gsea(
@@ -989,7 +989,7 @@ def test_gsea_no_gene_sets(data_folder_tests):
 
 def test_gsea_wrong_gene_sets(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_proteins_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     current_out = gsea(
@@ -1114,7 +1114,7 @@ def test_gsea_catch_fail(mock_mapping):
 )
 def test_gsea_preranked(mock_mapping, data_folder_tests):
     proteins_significant = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_pvalues_df.csv",
         index_col=0,
     )
     expected_ranking = pd.read_csv(
@@ -1182,7 +1182,7 @@ def test_gsea_preranked_wrong_protein_df():
 
 def test_gsea_preranked_no_gene_sets(data_folder_tests):
     proteins_df = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_pvalues_df.csv",
         index_col=0,
     )
     current_out = gsea_preranked(proteins_df)
@@ -1192,7 +1192,7 @@ def test_gsea_preranked_no_gene_sets(data_folder_tests):
 
 def test_gsea_preranked_wrong_gene_sets(data_folder_tests):
     proteins_df = pd.read_csv(
-        f"{data_folder_tests}/4-data_analysis-differential_expression-t_test-significant_with_pvalues_df.csv",
+        f"{data_folder_tests}/input-t_test-significant_proteins_pvalues_df.csv",
         index_col=0,
     )
     current_out = gsea_preranked(proteins_df, gene_sets_path="a_made_up_path.png")
