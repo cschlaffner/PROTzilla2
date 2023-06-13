@@ -4,7 +4,6 @@ from ..data_analysis import (
     differential_expression,
     dimension_reduction,
     plots,
-    protein_graphs,
 )
 from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -165,11 +164,6 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
-    (
-        "data_analysis",
-        "protein_graphs",
-        "peptides_to_isoform",
-    ): protein_graphs.peptides_to_isoform,
     (
         "data_integration",
         "enrichment_analysis",
