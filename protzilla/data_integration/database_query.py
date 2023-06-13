@@ -3,6 +3,7 @@ import pandas
 import requests
 
 from protzilla.constants.paths import DATABASES_PATH
+from protzilla.constants.logging import logger
 
 
 def biomart_query(queries, filter_name, attributes):
@@ -54,7 +55,9 @@ def read_uniprot(fields):
     try:
         df = pandas.read_csv(DATABASES_PATH / "uniprot.tsv", sep="\t")
     except FileNotFoundError:
-        print(f"Uniprot database not found at {DATABASES_PATH / 'uniprot.tsv'}")
+        logger.error(
+            f"Uniprot database not found at {DATABASES_PATH / 'uniprot.tsv'}\nGo to https://github.com/antonneubauer/PROTzilla2/wiki/Databases for more info."
+        )
         return pandas.DataFrame(columns=["Entry"] + fields)
     df.index = df["Entry"]
     return df
