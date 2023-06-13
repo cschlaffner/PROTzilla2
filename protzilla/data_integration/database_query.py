@@ -61,6 +61,3 @@ def read_uniprot(fields):
         return pandas.DataFrame(columns=["Entry"] + fields)
     df.index = df["Entry"]
     return df
-
-
-print(uniprot_query(["P10636"], fields=["Length"]))
