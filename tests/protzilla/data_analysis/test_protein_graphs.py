@@ -331,7 +331,7 @@ def test_create_graph_index_invalid_end_node():
 
 def test_create_ref_seq_index_PKHUO():
     index, _, seq_len = _create_ref_seq_index(
-        protein_path=f"{TEST_DATA_PATH}/proteins/PKHUO.txt", k=5
+        protein_path=f"{TEST_DATA_PATH}/proteins/C0HM02.txt", k=5
     )
 
     planned = {

@@ -155,8 +155,13 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
 
 def _get_ref_seq(protein_path: str):
     """
-    Parses Protein-File in UniProt .txt format. Extracts reference sequence and sequence
-    length
+    Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
+    sequence and sequence length.
+
+    SP-EMBL Description: https://web.expasy.org/docs/userman.html
+
+    :raises ValueError: If no lines were matched to the sequence pattern or if no
+    sequence was found or if no sequence length was found.
 
     :param protein_path: Path to Protein-File in UniProt .txt format.
     :type: str
