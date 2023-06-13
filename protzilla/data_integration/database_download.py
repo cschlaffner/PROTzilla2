@@ -2,8 +2,10 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 import re
 from tqdm import tqdm
+from pathlib import Path
 
-from protzilla.constants.paths import DATABASES_PATH
+# cannot be imported form constats as package cannot be found
+DATABASES_PATH = Path(__file__).parent / "databases"
 
 
 def get_next_link(headers):
