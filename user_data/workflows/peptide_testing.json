@@ -20,7 +20,21 @@
       ]
     },
     "data_preprocessing": {
-      "steps": []
+      "steps": [
+        {
+          "name": "filter_peptides",
+          "method": "pep_filter",
+          "parameters": {
+            "threshold": 0,
+            "peptide_df": ""
+          },
+          "graphs": [
+            {
+              "graph_type ": "Pie chart"
+            }
+          ]
+        }
+      ]
     },
     "data_analysis": {
       "steps": [

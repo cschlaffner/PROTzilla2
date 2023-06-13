@@ -3,8 +3,6 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.filter_proteins import (
-    by_low_frequency,
-    by_low_frequency_plot,
     by_samples_missing,
     by_samples_missing_plot,
 )
@@ -42,7 +40,7 @@ def filter_proteins_df():
 
 
 @pytest.fixture
-def filter_proteins_by_perentage_df():
+def filter_proteins_by_samples_missing_df():
     df = pd.DataFrame(
         (
             ["Sample1", "Protein1", "Gene1", 1],
@@ -72,26 +70,11 @@ def filter_proteins_by_perentage_df():
     return df
 
 
-def test_filter_proteins_by_low_frequency(filter_proteins_df, show_figures):
-    result_df, dropouts = by_low_frequency(filter_proteins_df, threshold=0.6)
-    list_proteins_excluded = dropouts["filtered_proteins"]
-
-    fig = by_low_frequency_plot(filter_proteins_df, result_df, dropouts, "Pie chart")[0]
-    if show_figures:
-        fig.show()
-
-    assert [
-        "Protein1",
-        "Protein4",
-    ] == list_proteins_excluded, f"excluded proteins do not match \
-            Protein1 and Protein4, but are {list_proteins_excluded}"
-
-
 def test_filter_proteins_by_missing_samples(
-    filter_proteins_by_perentage_df, show_figures
+    filter_proteins_by_samples_missing_df, show_figures
 ):
     result_df, method_output = by_samples_missing(
-        filter_proteins_by_perentage_df, percentage=1.0
+        filter_proteins_by_samples_missing_df, percentage=1.0
     )
 
     fig = by_samples_missing_plot(
@@ -107,14 +90,14 @@ def test_filter_proteins_by_missing_samples(
     ]
 
     result_df, method_output = by_samples_missing(
-        filter_proteins_by_perentage_df, percentage=0.5
+        filter_proteins_by_samples_missing_df, percentage=0.5
     )
     method_output["filtered_proteins"]
 
     assert method_output["filtered_proteins"] == ["Protein4", "Protein5"]
 
     result_df, method_output = by_samples_missing(
-        filter_proteins_by_perentage_df, percentage=0.0
+        filter_proteins_by_samples_missing_df, percentage=0.0
     )
     method_output["filtered_proteins"]
 

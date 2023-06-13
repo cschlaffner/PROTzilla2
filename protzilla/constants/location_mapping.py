@@ -1,4 +1,5 @@
 from ..data_analysis import (
+    classification,
     clustering,
     differential_expression,
     dimension_reduction,
@@ -39,11 +40,6 @@ method_map = {
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -156,6 +152,11 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "classification",
+        "random_forest",
+    ): classification.random_forest,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -198,12 +199,7 @@ plot_map = {
     (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency_plot,
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
+        "samples_missing_filter",
     ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
