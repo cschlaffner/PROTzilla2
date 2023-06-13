@@ -1,10 +1,8 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
 import pandas
-from pathlib import Path
-
-database_path = Path(__file__).parent / "databases"
-
 import requests
+
+from protzilla.constants.paths import DATABASES_PATH
 
 
 def biomart_query(queries, filter_name, attributes):
@@ -40,12 +38,23 @@ def biomart_query(queries, filter_name, attributes):
 
 
 def uniprot_query(uniprot_ids, fields):
-    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
-    df.index = df["Entry"]
+    df = read_uniprot(fields)
     return df[df.Entry.isin(uniprot_ids)][fields].to_dict("index")
 
 
 def uniprot_query_dataframe(uniprot_ids, fields):
-    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
-    df.index = df["Entry"]
+    df = read_uniprot(fields)
     return df[df.Entry.isin(uniprot_ids)][fields]
+
+
+def read_uniprot(fields):
+    try:
+        df = pandas.read_csv(DATABASES_PATH / "uniprot.tsv", sep="\t")
+    except FileNotFoundError:
+        print(f"Uniprot database not found at {DATABASES_PATH / 'uniprot.tsv'}")
+        return pandas.DataFrame(columns=["Entry"] + fields)
+    df.index = df["Entry"]
+    return df
+
+
+print(uniprot_query(["P10636"], fields=["Length"]))

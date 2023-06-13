@@ -1,11 +1,9 @@
 import requests
-from pathlib import Path
 from requests.adapters import HTTPAdapter, Retry
 import re
 from tqdm import tqdm
 
-
-database_path = Path(__file__).parent / "databases"
+from protzilla.constants.paths import DATABASES_PATH
 
 
 def get_next_link(headers):
@@ -39,7 +37,7 @@ def download_uniprot_paged():
 
     url = "https://rest.uniprot.org/uniprotkb/search?fields=accession,id,protein_name,gene_names,organism_name,length&format=tsv&query=%28organism_id:9606%29&size=500"
     progress = 0
-    with open(database_path / "uniprot.tsv", "w") as f:
+    with open(DATABASES_PATH / "uniprot.tsv", "w") as f:
         for batch, total in get_batch(url, session):
             lines = batch.text.splitlines()
             if not progress:
@@ -64,14 +62,14 @@ def download_uniprot_stream():
         stream=True,
     ) as r:
         r.raise_for_status()
-        with open(database_path / "uniprot.tsv", "wb") as f:
+        with open(DATABASES_PATH / "uniprot.tsv", "wb") as f:
             for chunk in tqdm(r.iter_content(chunk_size=8192)):
                 f.write(chunk)
 
 
 if __name__ == "__main__":
-    database_path.mkdir(exist_ok=True)
-    if not (database_path / "uniprot.tsv").exists():
+    DATABASES_PATH.mkdir(exist_ok=True)
+    if not (DATABASES_PATH / "uniprot.tsv").exists():
         print("no Uniprot database found, starting to download")
         print("this will take 1-5 minutes")
         try:
