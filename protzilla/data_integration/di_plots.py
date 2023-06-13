@@ -13,6 +13,7 @@ def go_enrichment_bar_plot(
     input_df,
     top_terms,
     cutoff,
+    value,
     categories=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
@@ -32,6 +33,8 @@ def go_enrichment_bar_plot(
     :param cutoff: Cutoff for the Adjusted p-value or FDR. Only terms with
         Adjusted P-value (or FDR) < cutoff will be shown.
     :type cutoff: float
+    :param value: Value to plot, either "p_value" or "fdr"
+    :type value: str
     :param title: Title of the plot, defaults to ""
     :type title: str, optional
     :param colors: Colors to use for the bars, defaults to PROTZILLA_DISCRETE_COLOR_SEQUENCE
@@ -51,16 +54,13 @@ def go_enrichment_bar_plot(
     # columns with placeholder values (since they are not used in the plot).
     # Example files can be found in the tests/test_data/enrichment_data folder.
     restring_input = False
-    if "score" in input_df.columns and "ID" in input_df.columns:
-        # df is a restring summary file
+    if "term" in input_df.columns:
+        # df is a restring file
         restring_input = True
-        input_df = input_df.rename(columns={"ID": "Term"})
-        fdr_column = "score"
-    elif "term" in input_df.columns and "common" in input_df.columns:
-        # df is a restring results file
-        restring_input = True
-        input_df = input_df.rename(columns={"term": "Term"})
-        fdr_column = input_df.columns[2]
+        input_df = input_df.rename(
+            columns={"description": "Term", "p_value": "P-value"}
+        )
+        input_df["Overlap"] = "0/0"
     elif not "Term" in input_df.columns:
         msg = "Please choose an enrichment result dataframe to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
@@ -74,25 +74,35 @@ def go_enrichment_bar_plot(
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(categories)]
 
+    if value == "fdr":  # only available for restring result
+        if restring_input:
+            # manual cutoff because gseapy does not support cutoffs for fdr
+            # and user expects the supplied cutoff to be applied
+            df = df[df["fdr"] <= cutoff]
+            if len(df) == 0:
+                msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+                return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
+
+            column = "-log10(FDR)"
+            df[column] = -1 * np.log10(df["fdr"])
+            # prevent cutoff from being applied again by bar plot method
+            cutoff = df[column].max()
+        else:
+            return [
+                dict(
+                    messages=[
+                        dict(
+                            level=messages.ERROR,
+                            msg="FDR is not available for this enrichment result.",
+                        )
+                    ]
+                )
+            ]
+    elif value == "p_value":
+        column = "P-value" if restring_input else "Adjusted P-value"
+
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
-
-    if restring_input:
-        # manual cutoff because gseapy does not support cutoffs for restring files
-        # and user expects the supplied cutoff to be applied
-        df = df[df[fdr_column] <= cutoff]
-        if len(df) == 0:
-            msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-            return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
-
-        column = "-log10(FDR)"
-        df[column] = -1 * np.log10(df[fdr_column])
-        df["Overlap"] = "0/0"
-        # prevent cutoff from being applied again by barplot method
-        cutoff = df[column].max()
-    else:
-        column = "Adjusted P-value"
-
     size_y = top_terms * 0.5 * len(categories)
     try:
         ax = gp.barplot(

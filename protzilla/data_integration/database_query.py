@@ -6,6 +6,9 @@ from protzilla.constants.paths import DATABASES_PATH
 
 
 def biomart_query(queries, filter_name, attributes):
+    if not queries:
+        return
+
     root = Element(
         "Query",
         attrib={

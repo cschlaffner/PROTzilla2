@@ -28,3 +28,4 @@ kaleido
 requests==2.28.2
 psutil==5.9.5
 tqdm==4.65.0
+joblib==1.2.0
