@@ -26,12 +26,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 
 
-def encode_labels(input_df_wide, labels_df):
+def encode_labels(input_df_wide, labels_df, labels_column):
     input_df_wide.sort_values(by="Sample", inplace=True)
     samples_input_df = input_df_wide.reset_index(names="Sample")["Sample"]
     y = pd.merge(samples_input_df, labels_df, on="Sample", how="inner")
     y.sort_values(by="Sample", inplace=True)
-    y = y["Group"]
+    y = y[labels_column]
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
     return label_encoder, y_encoded

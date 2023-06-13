@@ -1013,6 +1013,56 @@
             "default": "no"
           }
         }
+      },
+      "precision_recall_curve": {
+        "name": "Precision recall curve",
+        "description": "The precision-recall curve shows the tradeoff between precision and recall for different threshold",
+        "parameters": {
+          "model": {
+            "name": "Choose trained model",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "input_test_df": {
+            "name": "Choose test data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "labels_test_df": {
+            "name": "Choose labels for test data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "plot_title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          }
+        }
+      },
+      "roc_curve": {
+        "name": "ROC curve",
+        "description": "",
+        "parameters": {
+          "model": {
+            "name": "Choose trained model",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "input_test_df": {
+            "name": "Choose test data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "labels_test_df": {
+            "name": "Choose labels for test data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "plot_title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          }
+        }
       }
     },
     "clustering": {
@@ -1208,6 +1258,36 @@
             "type": "empty",
             "name": "metadata_df",
             "default": null
+          }
+        }
+      }
+    },
+    "model_evaluation": {
+      "evaluate_classification_model": {
+        "name": "Evaluation of classification models",
+        "description": "Assessing an already trained classification model on separate testing data using widely used scoring metrics",
+        "parameters": {
+          "model": {
+            "name": "Choose trained model",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "input_test_df": {
+            "name": "Choose testing data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "input_test_df": {
+            "name": "Choose labels for input data",
+            "type": "named_output",
+            "default": [null,null]
+          },
+          "scoring": {
+            "name": "Choose metric to measure the model's performance",
+            "type": "categorical",
+            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "default": "accuracy",
+            "multiple": true
           }
         }
       }

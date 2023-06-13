@@ -93,9 +93,10 @@ def perform_classification(
 
         # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.cv_results_), clf_parameters
+            pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-        return model, model_evaluation_df
+        # shoud the user be able to select the best estimator?
+        return model.best_estimator_, model_evaluation_df
 
 
 def random_forest(
@@ -156,7 +157,7 @@ def random_forest(
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     labels_df = metadata_df[["Sample", labels_column]]
-    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df)
+    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df, labels_column)
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
