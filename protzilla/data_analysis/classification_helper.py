@@ -124,10 +124,7 @@ def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters, sc
     # methods into a model_evaluation_df, where each column represents an estimator
     # parameter and its corresponding validation score.
     columns_names = ["param_" + key for key in clf_parameters.keys()]
-    if len(scoring) > 1:
-        columns_names.extend([f"mean_test_{score}" for score in scoring])
-    else:
-        columns_names.append("mean_test_score")
+    columns_names.extend([f"mean_test_{score}" for score in scoring])
     return raw_evaluation_df[columns_names]
 
 
@@ -175,21 +172,12 @@ class GridSearchManual:
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            if len(self.scoring) > 1:
-                for score_name, score_value in train_scores.items():
-                    self.results[f"mean_train_{score_name}"].append(
-                        np.mean(score_value)
-                    )
-                    self.results[f"std_train_{score_name}"].append(np.std(score_value))
-                for score_name, score_value in val_scores.items():
-                    self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
-                    self.results[f"std_test_{score_name}"].append(np.std(score_value))
-            else:
-                self.results["mean_train_score"].append(np.mean(train_scores))
-                self.results["std_train_score"].append(np.std(train_scores))
-                self.results["mean_test_score"].append(np.mean(val_scores))
-                self.results["std_test_score"].append(np.std(val_scores))
-
+            for score_name, score_value in train_scores.items():
+                self.results[f"mean_train_{score_name}"].append(np.mean(score_value))
+                self.results[f"std_train_{score_name}"].append(np.std(score_value))
+            for score_name, score_value in val_scores.items():
+                self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
+                self.results[f"std_test_{score_name}"].append(np.std(score_value))
         return self.model
 
 
@@ -221,20 +209,12 @@ class RandomizedSearchManual:
             # Store the results for the current parameter combination
             for param_name, param_value in params.items():
                 self.results[f"param_{param_name}"].append(param_value)
-            if len(self.scoring) > 1:
-                for score_name, score_value in train_scores.items():
-                    self.results[f"mean_train_{score_name}"].append(
-                        np.mean(score_value)
-                    )
-                    self.results[f"std_train_{score_name}"].append(np.std(score_value))
-                for score_name, score_value in val_scores.items():
-                    self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
-                    self.results[f"std_test_{score_name}"].append(np.std(score_value))
-            else:
-                self.results["mean_train_score"].append(np.mean(train_scores))
-                self.results["std_train_score"].append(np.std(train_scores))
-                self.results["mean_test_score"].append(np.mean(val_scores))
-                self.results["std_test_score"].append(np.std(val_scores))
+            for score_name, score_value in train_scores.items():
+                self.results[f"mean_train_{score_name}"].append(np.mean(score_value))
+                self.results[f"std_train_{score_name}"].append(np.std(score_value))
+            for score_name, score_value in val_scores.items():
+                self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
+                self.results[f"std_test_{score_name}"].append(np.std(score_value))
 
         return self.model
 

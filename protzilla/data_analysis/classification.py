@@ -111,7 +111,7 @@ def random_forest(
     random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
-    scoring: list[str] = "accuracy",
+    scoring: list[str] = ["accuracy"],
     **kwargs,
 ):
     """
@@ -176,6 +176,9 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
+    # multiselect returns a string when only one value is selected
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
     model, model_evaluation_df = perform_classification(
         X_train,
         y_train,
