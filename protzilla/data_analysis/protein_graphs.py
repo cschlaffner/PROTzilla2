@@ -249,8 +249,8 @@ def _match_peptides(
         for match_start_pos in ref_index[kmer]:
             mismatch_counter = 0
             if match_start_pos + len(peptide) > seq_len:
-                logger.critical(
-                    f"match start + peptide would be out of bounds for reference sequence, peptide {peptide}, end_pos {match_start_pos + len(peptide)} -> talk to chris what to do"
+                logger.debug(
+                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
                 )
                 if peptide not in peptide_matches:
                     peptide_mismatches.add(peptide)
