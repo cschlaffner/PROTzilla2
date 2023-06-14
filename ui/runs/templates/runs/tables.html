@@ -19,7 +19,7 @@
                     response.columns.forEach(element => {
                         tr.append($("<th>").text(element))
                     });
-                    $("#example").html($("<thead>").append(tr))
+                    $("#datatable").html($("<thead>").append(tr))
                         .DataTable({
                             data: response.data,
                             columnDefs: [{
@@ -34,11 +34,7 @@
                                     if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
                                         return data.toPrecision(4);
                                     }
-                                    if (('' + data).length < 50) {
-                                        return data;
-                                    }
-                                    // talk to belana about css solution
-                                    return `<span class="ellipsis" title="${data}">${('' + data).slice(0, 50)}…</span>`
+                                    return `<div style="word-break:break-all">${data}</div>`;
                                 },
                             }],
                         });
@@ -57,6 +53,6 @@
             <span class="input-group-text">Choose table</span>
             {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
         </div>
-        <table id="example" class="display" style="width:100%"></table>
+        <table id="datatable" class="display"></table>
     </div>
 {% endblock %}
