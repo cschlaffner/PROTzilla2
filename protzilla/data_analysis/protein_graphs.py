@@ -203,11 +203,11 @@ def _get_ref_seq(protein_path: str):
     ref_seq = ref_seq.replace(" ", "")
 
     if not ref_seq:
-        # raise ValueError(
-        #     f"Could not find sequence for protein at path {str(protein_path)}"
-        # )
-        path_str = str(protein_path)
-        raise ValueError(f"Could not find sequence for protein at path {path_str}")
+        raise ValueError(
+            f"Could not find sequence for protein at path {str(protein_path)}"
+        )
+        # path_str = str(protein_path)
+        # raise ValueError(f"Could not find sequence for protein at path {path_str}")
     if seq_len is None or not isinstance(seq_len, int) or seq_len < 1:
         raise ValueError(
             f"Could not find sequence length for protein file at path {protein_path}"
