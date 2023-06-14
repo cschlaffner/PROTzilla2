@@ -20,10 +20,6 @@ def add_uniprot_data(dataframe, fields=None):
     if isinstance(fields, str):
         fields = [fields]
     groups = dataframe["Protein ID"].tolist()
-    # group size
-    # [(1, 305), (2, 203), (3, 91), (4, 52), (5, 24), (7, 13), (6, 11), (8, 8), (9, 4), (10, 3), (15, 2), (16, 2), (17, 1), (23, 1), (13, 1), (18, 1), (31, 1), (21, 1)]
-    # after processig
-    # [(1, 597), (2, 85), (3, 24), (4, 9), (5, 3), (6, 1), (8, 1), (31, 1), (10, 1), (16, 1), (15, 1)]
     clean_groups = []
     all_proteins = set()
 
@@ -54,7 +50,8 @@ def add_uniprot_data(dataframe, fields=None):
 
     # data that will be added to input df
     new_columns = {k: [] for k in fields if k != "Links"}
-    # is it better to have a for loop for columns and retrive each protein multiple times from res?
+
+    # @REVIEWER is it better to have a for loop for columns and retrive each protein multiple times from res?
 
     for group in clean_groups:
         group_dict = {k: [] for k in fields}
@@ -80,16 +77,3 @@ def add_uniprot_data(dataframe, fields=None):
     # we can concat because clean groups has the same order as groups
     out = pd.concat([dataframe, pd.DataFrame(new_columns)], axis=1)
     return {"result": out}
-
-
-if __name__ == "__main__":
-    df = pd.read_csv(
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/PROTzilla2/user_data/runs/with_id_sorting/history_dfs/8-data_analysis-differential_expression-t_test-log2_fold_change_df.csv",
-        index_col=0,
-    )
-    from time import time
-
-    t = time()
-    a = add_uniprot_data(df, fields=["Links", "Length"])
-    a["result"].to_csv("result.csv")
-    print(time() - t)
