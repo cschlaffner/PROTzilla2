@@ -534,9 +534,7 @@ def test_match_peptides_k0():
     ref_seq = "ABCDEGABCDET"
     error_msg = f"k must be positive integer, but is {k}"
     with pytest.raises(ValueError, match=error_msg):
-        peptide_matches, peptide_mismatches = _match_peptides(
-            allowed_mismatches, k, peptides, ref_seq_index, ref_seq
-        )
+        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
 
 
 def test_match_peptides_mismatches_k3():
@@ -577,10 +575,8 @@ def test_match_peptides_k_str():
     ref_seq_index = {}
     ref_seq = "ABCDEGABCDET"
     error_msg = f"k must be positive integer, but is {k}"
-    with pytest.raises(ValueError, match=error_msg) as e:
-        peptide_matches, peptide_mismatches = _match_peptides(
-            allowed_mismatches, k, peptides, ref_seq_index, ref_seq
-        )
+    with pytest.raises(ValueError, match=re.escape(error_msg)):
+        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
 
 
 def test_match_peptides_allowed_mismatches_negative():
@@ -592,10 +588,8 @@ def test_match_peptides_allowed_mismatches_negative():
     error_msg = (
         f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"
     )
-    with pytest.raises(ValueError, match=error_msg):
-        peptide_matches, peptide_mismatches = _match_peptides(
-            allowed_mismatches, k, peptides, ref_seq_index, ref_seq
-        )
+    with pytest.raises(ValueError, match=re.escape(error_msg)):
+        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
 
 
 def test_match_peptides_early_mismatch_late_match():
