@@ -5,7 +5,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 # cannot be imported form constats as package cannot be found
-DATABASES_PATH = Path(__file__).parent / "databases"
+DATABASES_PATH = Path(__file__).parent.parent.parent / "user_data" / "external_data"
 
 
 def get_next_link(headers):
