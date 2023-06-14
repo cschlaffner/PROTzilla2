@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.svm import SVC
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_helper import (
@@ -175,6 +176,82 @@ def random_forest(
         max_depth=max_depth,
         bootstrap=bootstrap,
         random_state=random_state,
+    )
+    # multiselect returns a string when only one value is selected
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
+    model, model_evaluation_df = perform_classification(
+        X_train,
+        y_train,
+        validation_strategy,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        **kwargs,
+    )
+
+    X_test.reset_index(inplace=True)
+    X_train.reset_index(inplace=True)
+    y_test = decode_labels(label_encoder, X_test, y_test)
+    y_train = decode_labels(label_encoder, X_train, y_train)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        X_test_df=X_test,
+        y_test_df=y_test,
+        X_train_df=X_test,
+        y_train_df=y_train,
+    )
+
+
+def svm(
+    input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    train_test_split: int = 0.2,
+    train_test_split_stratify: str = "yes",
+    C=1.0,
+    kernel="rbf",
+    gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
+    coef0=0.0,  # relevant for "poly" and "sigmoid"
+    probability=True,
+    tol=0.001,
+    class_weight=None,
+    max_iter=-1,
+    random_state=None,
+    model_selection: str = "Grid search",
+    validation_strategy: str = "Cross Validation",
+    scoring: list[str] = ["accuracy"],
+    **kwargs,
+):
+    # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
+
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    labels_df = metadata_df[["Sample", labels_column]]
+    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df, labels_column)
+
+    X_train, X_test, y_train, y_test = perform_train_test_split(
+        input_df_wide,
+        y_encoded,
+        test_size=train_test_split,
+        random_state=random_state,
+        shuffle=True,
+        stratify=train_test_split_stratify,
+    )
+
+    clf = SVC()
+
+    clf_parameters = dict(
+        C=C,
+        kernel=kernel,
+        gamma=gamma,
+        coef0=coef0,
+        probability=probability,
+        tol=tol,
+        class_weight=class_weight,
+        max_iter=max_iter,
     )
     # multiselect returns a string when only one value is selected
     scoring = [scoring] if isinstance(scoring, str) else scoring

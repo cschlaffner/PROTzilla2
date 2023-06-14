@@ -158,6 +158,11 @@ method_map = {
     ): classification.random_forest,
     (
         "data_analysis",
+        "classification",
+        "svm",
+    ): classification.svm,
+    (
+        "data_analysis",
         "model_evaluation",
         "evaluate_classification_model",
     ): model_evaluation.evaluate_classification_model,
