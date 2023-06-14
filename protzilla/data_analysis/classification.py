@@ -104,8 +104,6 @@ def random_forest(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
-    train_test_split: int = 0.2,
-    train_test_split_stratify: str = "yes",
     positive_label: str = None,
     n_estimators=100,
     criterion="gini",
@@ -173,10 +171,7 @@ def random_forest(
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
         labels_df["Encoded Label"],
-        test_size=train_test_split,
-        random_state=random_state,
-        shuffle=True,
-        stratify=train_test_split_stratify,
+        **kwargs,
     )
 
     clf = RandomForestClassifier()
@@ -221,8 +216,6 @@ def svm(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
-    train_test_split: int = 0.2,
-    train_test_split_stratify: str = "yes",
     positive_label: str = None,
     C=1.0,
     kernel="rbf",
@@ -256,10 +249,7 @@ def svm(
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
         labels_df["Encoded Label"],
-        test_size=train_test_split,
-        random_state=random_state,
-        shuffle=True,
-        stratify=train_test_split_stratify,
+        **kwargs,
     )
 
     clf = SVC()

@@ -236,17 +236,18 @@ def create_dict_with_lists_as_values(d):
 def perform_train_test_split(
     input_df,
     labels_df,
-    test_size=None,
+    test_size=0.2,
     random_state=42,
-    shuffle=False,
-    stratify=None,
+    shuffle=True,
+    split_stratify="yes",
+    **kwargs,
 ):
-    stratify = labels_df if stratify == "yes" else None
+    split_stratify = labels_df if split_stratify == "yes" else None
     return train_test_split(
         input_df,
         labels_df,
         test_size=test_size,
         random_state=random_state,
         shuffle=shuffle,
-        stratify=stratify,
+        stratify=split_stratify,
     )

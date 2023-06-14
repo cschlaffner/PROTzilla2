@@ -1153,12 +1153,12 @@
             "categories": [],
             "default": "None"
           },
-          "train_test_split": {
+          "test_size": {
             "name": "Test size",
             "type": "numeric",
             "default": 0.20
           },
-          "train_test_split_stratify": {
+          "split_stratify": {
             "name": "Split data in a stratified fashion",
             "type": "categorical",
             "categories": ["yes", "no"],
@@ -1305,6 +1305,12 @@
             "categories": ["yes", "no"],
             "default": "yes"
           },
+          "split_stratify": {
+            "name": "Split data in a stratified fashion",
+            "type": "categorical",
+            "categories": ["yes", "no"],
+            "default": "yes"
+          },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
@@ -1325,7 +1331,7 @@
               "Manual": ["train_val_split"]
             }
           },
-          "train_val_split": {
+          "test_size": {
             "name": "Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
             "type": "numeric",
             "dynamic": true,
