@@ -90,7 +90,6 @@ def by_simple_imputer(
 
     index = transformed_df.index
     columns = transformed_df.columns
-
     imputer = SimpleImputer(missing_values=np.nan, strategy=strategy)
     transformed_df = imputer.fit_transform(transformed_df)
     transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
