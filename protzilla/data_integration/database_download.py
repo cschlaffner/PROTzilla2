@@ -37,7 +37,7 @@ def download_uniprot_paged():
     session = requests.Session()
     session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    url = "https://rest.uniprot.org/uniprotkb/search?fields=accession,id,protein_name,gene_names,organism_name,length&format=tsv&query=%28organism_id:9606%29&size=500"
+    url = "https://rest.uniprot.org/uniprotkb/search?fields=accession,id,protein_name,gene_names,organism_name,length&format=tsv&query=%28organism_id:9606%29%20AND%20%28reviewed%3Atrue%29&size=500"
     progress = 0
     with open(DATABASES_PATH / "uniprot.tsv", "w") as f:
         for batch, total in get_batch(url, session):
@@ -57,7 +57,7 @@ def download_uniprot_stream():
         "https://rest.uniprot.org/uniprotkb/stream",
         params=dict(
             format="tsv",
-            query="(organism_id:9606)",
+            query="(organism_id:9606) AND (reviewed:true)",
             fields="accession,id,protein_name,gene_names,organism_name,length",
             compress="true",
         ),
