@@ -59,7 +59,7 @@ def test_runner_imports(
         mock.call({"intensity_name": "iBAQ", "file_path": ms_data_path}),
         mock.call(
             {
-                "feature_orientation": "Rows (features in rows, samples in columns)",
+                "feature_orientation": "Columns (samples in rows, features in columns)",
                 "file_path": metadata_path,
             }
         ),
@@ -120,7 +120,7 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     runner.compute_workflow()
 
-    mock_perform.assert_any_call({"threshold": 0.2})
+    mock_perform.assert_any_call({"percentage": 0.2})
     assert mock_perform.call_count == 2
     mock_plot.assert_not_called()
 

@@ -32,6 +32,7 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     # all_parameters_dict refers to the dictionary that contains all parameters for
     # a method with its corresponding meta information
     if param_dict["type"] == "numeric":
+        param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_number.html"
         if "step" not in param_dict:
             param_dict["step"] = "any"
@@ -148,11 +149,15 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
-                if key.endswith("_wrapper"):
-                    key = key[:-8]
+                if "dynamic" in param_dict:
+                    continue
                 if key == "proteins_of_interest" and key not in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
-                param_dict["default"] = history_step.parameters[key]
+                param_dict["default"] = (
+                    history_step.parameters[key]
+                    if key in history_step.parameters
+                    else None
+                )
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]

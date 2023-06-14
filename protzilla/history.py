@@ -1,9 +1,12 @@
 import json
+import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
+from joblib import dump, load
 
 import pandas as pd
+from sklearn.base import BaseEstimator
 
 from .constants.paths import RUNS_PATH
 from .utilities.random import random_string
@@ -27,7 +30,7 @@ class History:
     def from_disk(cls, run_name: str, df_mode: str):
         instance = cls(run_name, df_mode)
         with open(RUNS_PATH / run_name / "history.json", "r") as f:
-            history_json = json.load(f, object_hook=load_dataframes)
+            history_json = json.load(f, object_hook=load_objects)
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
@@ -167,6 +170,12 @@ class History:
                 path.parent.mkdir(exist_ok=True)
                 value.to_csv(path)
                 cleaned[key] = {"__dataframe__": True, "path": str(path)}
+            elif isinstance(value, BaseEstimator):
+                filename = f"{index}-{section}-{step}-{method}-{key}.joblib"
+                path = RUNS_PATH / self.run_name / "sklearn_estimators" / filename
+                path.parent.mkdir(exist_ok=True)
+                dump(value, path)
+                cleaned[key] = {"__sklearn-estimator__": True, "path": str(path)}
             else:
                 cleaned[key] = value
         return cleaned
@@ -211,7 +220,10 @@ class ExecutedStep:
         return None
 
 
-def load_dataframes(dct):
+def load_objects(dct):
     if dct.get("__dataframe__", False):
         return pd.read_csv(dct["path"], index_col=0)
-    return dct
+    elif dct.get("__sklearn-estimator__", False):
+        return load(dct["path"])
+    else:
+        return dct

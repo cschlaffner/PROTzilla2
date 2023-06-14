@@ -21,22 +21,23 @@ def open_graph_from_base64(encoded_string):
 
 def test_enrichment_bar_plot_restring(show_figures):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    result = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
+    result = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     bar_base64 = go_enrichment_bar_plot(
         input_df=result,
         categories=["KEGG", "Process"],
         top_terms=10,
         cutoff=0.05,
+        value="fdr",
     )
     if show_figures:
         open_graph_from_base64(bar_base64[0])
 
-    summary = pd.read_csv(f"{test_data_folder}/merged_summaries.csv", header=0)
     bar_base64 = go_enrichment_bar_plot(
-        input_df=summary,
+        input_df=result,
         categories=["KEGG", "Process"],
         top_terms=10,
         cutoff=0.05,
+        value="p_value",
     )
     if show_figures:
         open_graph_from_base64(bar_base64[0])
@@ -45,16 +46,33 @@ def test_enrichment_bar_plot_restring(show_figures):
 def test_enrichment_bar_plot(show_figures):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     bar_base64 = go_enrichment_bar_plot(
         input_df=enrichment_df,
         categories=["Reactome_2013"],
         top_terms=10,
         cutoff=0.05,
+        value="p_value",
     )
     if show_figures:
         open_graph_from_base64(bar_base64[0])
+
+
+def test_enrichment_bar_plot_wrong_value():
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    enrichment_df = pd.read_csv(
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
+    )
+    current_out = go_enrichment_bar_plot(
+        input_df=enrichment_df,
+        categories=["Reactome_2013"],
+        top_terms=10,
+        cutoff=0.05,
+        value="fdr",
+    )[0]
+    assert "messages" in current_out
+    assert "FDR is not available" in current_out["messages"][0]["msg"]
 
 
 def test_enrichment_bar_plot_empty_df():
@@ -64,6 +82,7 @@ def test_enrichment_bar_plot_empty_df():
         categories=["Reactome_2013"],
         top_terms=10,
         cutoff=0.05,
+        value="p_value",
     )[0]
     assert "messages" in current_out
     assert "No data to plot" in current_out["messages"][0]["msg"]
@@ -72,13 +91,14 @@ def test_enrichment_bar_plot_empty_df():
 def test_enrichment_bar_plot_no_category():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     current_out = go_enrichment_bar_plot(
         input_df=enrichment_df,
         categories=[],
         top_terms=10,
         cutoff=0.05,
+        value="p_value",
     )[0]
     assert "messages" in current_out
     assert "Please select at least one category" in current_out["messages"][0]["msg"]
@@ -91,6 +111,7 @@ def test_enrichment_bar_plot_wrong_df():
         categories=["KEGG"],
         top_terms=10,
         cutoff=0.05,
+        value="p_value",
     )[0]
     assert "messages" in current_out
     assert (
@@ -101,25 +122,27 @@ def test_enrichment_bar_plot_wrong_df():
 
 def test_enrichment_bar_plot_cutoff():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    result = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
+    result = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     current_out = go_enrichment_bar_plot(
         input_df=result,
         categories=["KEGG", "Process"],
         top_terms=10,
         cutoff=0,
+        value="fdr",
     )[0]
 
     assert "messages" in current_out
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
 
     enrichment_df = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
+        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
     )
     current_out = go_enrichment_bar_plot(
         input_df=enrichment_df,
         categories=["Reactome_2013"],
         top_terms=10,
         cutoff=0,
+        value="p_value",
     )[0]
     assert "messages" in current_out
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
@@ -146,9 +169,9 @@ def test_enrichment_dot_plot(show_figures, x_axis_type):
         open_graph_from_base64(dot_base64[0])
 
 
-def test_enrichment_bar_plot_wrong_df():
+def test_enrichment_dot_plot_wrong_df():
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    result = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
+    result = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     current_out = go_enrichment_dot_plot(
         input_df=result,
         categories=["KEGG", "Process"],

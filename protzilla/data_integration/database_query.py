@@ -1,12 +1,15 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
 import pandas
-from pathlib import Path
 import requests
 
-database_path = Path(__file__).parent / "databases"
+from protzilla.constants.paths import EXTERNAL_DATA_PATH
+from protzilla.constants.logging import logger
 
 
 def biomart_query(queries, filter_name, attributes):
+    if not queries:
+        return
+
     root = Element(
         "Query",
         attrib={
@@ -39,18 +42,28 @@ def biomart_query(queries, filter_name, attributes):
 
 
 def uniprot_query(uniprot_ids, fields):
-    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
-    df.index = df["Entry"]
+    df = read_uniprot(fields)
     return df[df.Entry.isin(uniprot_ids)][fields].to_dict("index")
 
 
 def uniprot_query_dataframe(uniprot_ids, fields):
-    df = pandas.read_csv(database_path / "uniprot.tsv", sep="\t")
-    df.index = df["Entry"]
+    df = read_uniprot(fields)
     return df[df.Entry.isin(uniprot_ids)][fields]
+
+
+def read_uniprot(fields):
+    try:
+        df = pandas.read_csv(EXTERNAL_DATA_PATH / "uniprot.tsv", sep="\t")
+    except FileNotFoundError:
+        logger.error(
+            f"Uniprot database not found at {EXTERNAL_DATA_PATH / 'uniprot.tsv'}\nGo to https://github.com/antonneubauer/PROTzilla2/wiki/Databases for more info."
+        )
+        return pandas.DataFrame(columns=["Entry"] + fields)
+    df.index = df["Entry"]
+    return df
 
 
 def uniprot_columns():
     return pandas.read_csv(
-        database_path / "uniprot.tsv", sep="\t", nrows=0
+        EXTERNAL_DATA_PATH / "uniprot.tsv", sep="\t", nrows=0
     ).columns.tolist() + ["Links"]
