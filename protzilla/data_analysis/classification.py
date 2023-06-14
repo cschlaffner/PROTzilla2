@@ -105,6 +105,8 @@ def random_forest(
     metadata_df: pd.DataFrame,
     labels_column: str,
     train_test_split: int = 0.2,
+    train_test_split_stratify: str = "yes",
+    positive_label: str = None,
     n_estimators=100,
     criterion="gini",
     max_depth=None,
@@ -157,15 +159,24 @@ def random_forest(
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    labels_df = metadata_df[["Sample", labels_column]]
-    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df, labels_column)
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
-        y_encoded,
+        labels_df["Encoded Label"],
         test_size=train_test_split,
         random_state=random_state,
         shuffle=True,
+        stratify=train_test_split_stratify,
     )
 
     clf = RandomForestClassifier()
@@ -177,7 +188,8 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
-    # multiselect returns a string when only one value is selected
+    # Transform scoring to list if scoring is a string
+    # (multiselect returns a string when only one value is selected)
     scoring = [scoring] if isinstance(scoring, str) else scoring
 
     model, model_evaluation_df = perform_classification(
@@ -193,8 +205,8 @@ def random_forest(
 
     X_test.reset_index(inplace=True)
     X_train.reset_index(inplace=True)
-    y_test = decode_labels(label_encoder, X_test, y_test)
-    y_train = decode_labels(label_encoder, X_train, y_train)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
@@ -211,6 +223,7 @@ def svm(
     labels_column: str,
     train_test_split: int = 0.2,
     train_test_split_stratify: str = "yes",
+    positive_label: str = None,
     C=1.0,
     kernel="rbf",
     gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
@@ -229,12 +242,20 @@ def svm(
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    labels_df = metadata_df[["Sample", labels_column]]
-    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df, labels_column)
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
-        y_encoded,
+        labels_df["Encoded Label"],
         test_size=train_test_split,
         random_state=random_state,
         shuffle=True,
@@ -269,8 +290,8 @@ def svm(
 
     X_test.reset_index(inplace=True)
     X_train.reset_index(inplace=True)
-    y_test = decode_labels(label_encoder, X_test, y_test)
-    y_train = decode_labels(label_encoder, X_train, y_train)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,

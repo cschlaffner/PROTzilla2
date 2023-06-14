@@ -21,12 +21,10 @@ def precision_recall_curve(model, input_test_df, labels_test_df, plot_title=None
     :return: Base64 encoded image of the plot
     :rtype: bytes"""
     input_test_df = input_test_df.set_index("Sample")
-    label_encoder, y_test_encoded = encode_labels(
-        input_test_df, labels_test_df, "Label"
-    )
+    _, labels_test_df = encode_labels(labels_test_df, "Label")
 
     display = PrecisionRecallDisplay.from_estimator(
-        model, input_test_df, y_test_encoded
+        model, input_test_df, labels_test_df["Encoded Label"]
     )
     display.plot()
     plt.title(plot_title)
@@ -53,11 +51,11 @@ def roc_curve(model, input_test_df, labels_test_df, plot_title=None):
     :return: Base64 encoded image of the plot
     :rtype: bytes"""
     input_test_df = input_test_df.set_index("Sample")
-    label_encoder, y_test_encoded = encode_labels(
-        input_test_df, labels_test_df, "Label"
-    )
+    _, labels_test_df = encode_labels(labels_test_df, "Label")
 
-    display = RocCurveDisplay.from_estimator(model, input_test_df, y_test_encoded)
+    display = RocCurveDisplay.from_estimator(
+        model, input_test_df, labels_test_df["Encoded Label"]
+    )
     display.plot()
     plt.title(plot_title)
     return [

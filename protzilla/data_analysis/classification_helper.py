@@ -23,24 +23,32 @@ from sklearn.model_selection import (
     ParameterSampler,
 )
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder
 
 
-def encode_labels(input_df_wide, labels_df, labels_column):
-    input_df_wide.sort_values(by="Sample", inplace=True)
-    samples_input_df = input_df_wide.reset_index(names="Sample")["Sample"]
-    y = pd.merge(samples_input_df, labels_df, on="Sample", how="inner")
-    y.sort_values(by="Sample", inplace=True)
-    y = y[labels_column]
-    label_encoder = LabelEncoder()
-    y_encoded = label_encoder.fit_transform(y)
-    return label_encoder, y_encoded
+def encode_labels(labels_df, labels_column, positive_label=None):
+    labels_list = labels_df[labels_column].unique().tolist()
+    if len(labels_list) < 2 and positive_label is not None:
+        return "the data must contain at least 2 different classes"
+    elif len(labels_list) == 2 and positive_label is not None:
+        # if labels are binary let user determine which is the positive label
+        negative_label = (
+            labels_list[0] if labels_list[0] != positive_label else labels_list[1]
+        )
+        encoding_mapping = {1: positive_label, 0: negative_label}
+        labels_df["Encoded Label"] = labels_df[labels_column].map(
+            {positive_label: 1, negative_label: 0}
+        )
+    else:
+        encoded_labels, labels = pd.factorize(labels_df[labels_column])
+        labels_df["Encoded Label"] = encoded_labels
+        encoding_mapping = {index: labels for index, labels in enumerate(labels)}
+    return encoding_mapping, labels_df
 
 
-def decode_labels(label_encoder, X_df, labels):
-    labels = label_encoder.inverse_transform(labels)
-    labels_df = pd.DataFrame(labels, columns=["Label"])
-    labels_df = pd.concat([X_df["Sample"], labels_df], axis=1)
+def decode_labels(encoding_mapping, labels):
+    labels_df = pd.DataFrame(labels, columns=["Encoded Label"])
+    labels_df["Label"] = labels_df["Encoded Label"].map(encoding_mapping)
+    labels_df.reset_index(inplace=True)
     return labels_df
 
 
@@ -226,8 +234,14 @@ def create_dict_with_lists_as_values(d):
 
 
 def perform_train_test_split(
-    input_df, labels_df, test_size=None, random_state=42, shuffle=False, stratify=None
+    input_df,
+    labels_df,
+    test_size=None,
+    random_state=42,
+    shuffle=False,
+    stratify=None,
 ):
+    stratify = labels_df if stratify == "yes" else None
     return train_test_split(
         input_df,
         labels_df,

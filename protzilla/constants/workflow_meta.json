@@ -1142,9 +1142,14 @@
             "name": "Choose corresponding metadata df",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": [
-              "selected_groups"
-            ],
+            "fill_dynamic": ["positive_label"],
+            "categories": [],
+            "default": "None"
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
             "categories": [],
             "default": "None"
           },
@@ -1152,6 +1157,12 @@
             "name": "Test size",
             "type": "numeric",
             "default": 0.20
+          },
+          "train_test_split_stratify": {
+            "name": "Split data in a stratified fashion",
+            "type": "categorical",
+            "categories": ["yes", "no"],
+            "default": "yes"
           },
           "validation_strategy": {
             "name": "Validation Strategy",
@@ -1293,6 +1304,13 @@
             "type": "categorical",
             "categories": ["yes", "no"],
             "default": "yes"
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": "None"
           },
           "validation_strategy": {
             "name": "Validation Strategy",
