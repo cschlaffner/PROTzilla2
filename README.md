@@ -10,7 +10,7 @@
 | protzilla/constants/colors.py                                           |        2 |        0 |        0 |        0 |    100% |           |
 | protzilla/constants/location\_mapping.py                                |        9 |        0 |        2 |        0 |    100% |           |
 | protzilla/constants/logging.py                                          |       43 |       15 |       10 |        0 |     53% |38-40, 43-44, 47-48, 51-52, 55-56, 59-60, 63-64 |
-| protzilla/constants/paths.py                                            |        7 |        0 |        0 |        0 |    100% |           |
+| protzilla/constants/paths.py                                            |        8 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/classification.py                              |       47 |        0 |        8 |        1 |     98% |  76->exit |
 | protzilla/data\_analysis/classification\_helper.py                      |      111 |        8 |       42 |        5 |     86% |47->exit, 66->exit, 81-92, 138->exit, 171->exit |
 | protzilla/data\_analysis/clustering.py                                  |       20 |        1 |        6 |        1 |     92% |        76 |
@@ -21,7 +21,7 @@
 | protzilla/data\_analysis/differential\_expression\_t\_test.py           |       57 |        0 |       18 |        0 |    100% |           |
 | protzilla/data\_analysis/dimension\_reduction.py                        |       33 |        4 |       10 |        2 |     86% |61-66, 94, 165 |
 | protzilla/data\_analysis/plots.py                                       |       77 |        3 |       36 |        4 |     94% |55, 64->66, 106, 255 |
-| protzilla/data\_integration/database\_query.py                          |       13 |       10 |        6 |        0 |     16% |      7-38 |
+| protzilla/data\_integration/database\_query.py                          |       30 |       21 |        6 |        0 |     25% |10-41, 45-46, 50-51, 55-63 |
 | protzilla/data\_integration/di\_plots.py                                |       85 |       32 |       34 |        4 |     60% |69, 101->104, 105, 166-233 |
 | protzilla/data\_integration/enrichment\_analysis.py                     |      307 |       91 |      160 |       24 |     68% |34->36, 153->159, 163->169, 170-172, 174, 201-205, 219-223, 254-311, 339->346, 346->353, 392-393, 458-468, 470->480, 472-473, 475-478, 480->485, 486, 491-492, 510, 567-568, 576-577, 579-580, 582-585, 589-590, 592-595, 678-679, 701-702, 714 |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                           |        0 |        0 |        0 |        0 |    100% |           |
@@ -99,7 +99,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      248 |      197 |       72 |        0 |     17% |37, 49-80, 107-123, 140-161, 172-245, 249-256, 260-262, 266-268, 272-274, 278-287, 291-298, 302-310, 314-341, 345-374, 378-380, 384-385, 407-409, 413-427, 435-456, 470-476 |
 | ui/runs/views\_helper.py                                                |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                               **TOTAL** | **4630** |  **838** | **1289** |  **192** | **78%** |           |
+|                                                               **TOTAL** | **4648** |  **849** | **1289** |  **192** | **78%** |           |
 
 
 ## Setup coverage badge
