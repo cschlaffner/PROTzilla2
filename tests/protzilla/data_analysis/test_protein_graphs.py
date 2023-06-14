@@ -450,7 +450,8 @@ def test_get_ref_seq_test_protein():
 
 def test_get_ref_seq_empty_seq():
     protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
-    error_msg = f"Could not find sequence for protein at path {protein_path}"
+    error_msg = f"Could not find sequence for protein at path {str(protein_path)}"
+    # error_msg = f"Could not find sequence for protein at path"
     with pytest.raises(ValueError, match=error_msg):
         ref_seq, seq_len = _get_ref_seq(str(protein_path))
 
