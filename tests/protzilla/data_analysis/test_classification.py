@@ -28,6 +28,12 @@ def classification_df():
         ["Sample7", "Protein1", "Gene1", 12],
         ["Sample7", "Protein2", "Gene1", 13],
         ["Sample7", "Protein3", "Gene1", 3],
+        ["Sample8", "Protein1", "Gene1", 42],
+        ["Sample8", "Protein2", "Gene1", 33],
+        ["Sample8", "Protein3", "Gene1", 3],
+        ["Sample9", "Protein1", "Gene1", 19],
+        ["Sample9", "Protein2", "Gene1", 1],
+        ["Sample9", "Protein3", "Gene1", 4],
     )
 
     classification_df = pd.DataFrame(
@@ -48,6 +54,8 @@ def meta_df():
         ["Sample5", "CTR"],
         ["Sample6", "CTR"],
         ["Sample7", "CTR"],
+        ["Sample8", "AD"],
+        ["Sample9", "CTR"],
     )
     meta_df = pd.DataFrame(
         data=meta_list,
@@ -60,13 +68,15 @@ def meta_df():
 @pytest.fixture
 def meta_numeric_df():
     meta_list = (
-        ["Sample1", "0"],
-        ["Sample2", "0"],
-        ["Sample3", "0"],
-        ["Sample4", "1"],
-        ["Sample5", "1"],
-        ["Sample6", "1"],
-        ["Sample7", "1"],
+        ["Sample1", "1"],
+        ["Sample2", "1"],
+        ["Sample3", "1"],
+        ["Sample4", "0"],
+        ["Sample5", "0"],
+        ["Sample6", "0"],
+        ["Sample7", "0"],
+        ["Sample8", "1"],
+        ["Sample9", "0"],
     )
     meta_df = pd.DataFrame(
         data=meta_list,
@@ -104,5 +114,5 @@ def random_forest_out(classification_df, meta_df, validation_strategy, model_sel
 def test_random_forest_score(random_forest_out, validation_strategy, model_selection):
     model_evaluation_df = random_forest_out["model_evaluation_df"]
     assert (
-        model_evaluation_df["mean_test_score"].values[0] >= 0.8
+        model_evaluation_df["mean_test_accuracy"].values[0] >= 0.8
     ), f"Failed with validation strategy {validation_strategy} and model selection strategy {model_selection}"

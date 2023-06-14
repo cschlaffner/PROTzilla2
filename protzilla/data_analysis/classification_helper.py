@@ -147,7 +147,7 @@ def create_model_evaluation_df_grid_search_manual(clf_parameters, scores):
     for param_name, param_value in clf_parameters.items():
         results[f"param_{param_name}"].append(param_value)
     for score_name, score_value in scores.items():
-        results[score_name].append(np.mean(score_value))
+        results[f"mean_{score_name}"].append(np.mean(score_value))
 
     results_df = pd.DataFrame(results)
     return results_df

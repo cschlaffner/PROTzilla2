@@ -1294,16 +1294,10 @@
             "categories": [],
             "default": "None"
           },
-          "train_test_split": {
+          "test_size": {
             "name": "Test size",
             "type": "numeric",
             "default": 0.20
-          },
-          "train_test_split_stratify": {
-            "name": "Split data in a stratified fashion",
-            "type": "categorical",
-            "categories": ["yes", "no"],
-            "default": "yes"
           },
           "split_stratify": {
             "name": "Split data in a stratified fashion",
@@ -1328,10 +1322,10 @@
               "Stratified K-Fold": ["n_splits", "shuffle"],
               "Repeated K-Fold": ["n_splits","n_repeats", "random_state_cv"],
               "Leave p out": ["p_samples"],
-              "Manual": ["train_val_split"]
+              "Manual": ["test_size"]
             }
           },
-          "test_size": {
+          "train_val_split": {
             "name": "Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
             "type": "numeric",
             "dynamic": true,
