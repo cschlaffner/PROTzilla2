@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import networkx as nx
 import pytest
 
@@ -447,17 +449,17 @@ def test_get_ref_seq_test_protein():
 
 
 def test_get_ref_seq_empty_seq():
-    protein_path = f"{TEST_DATA_PATH}/proteins/empty_seq.txt"
+    protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=error_msg):
-        ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/empty_seq.txt")
+        ref_seq, seq_len = _get_ref_seq(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
-    protein_path = f"{TEST_DATA_PATH}/proteins/no_seq_len.txt"
+    protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=error_msg):
-        ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/no_seq_len.txt")
+        ref_seq, seq_len = _get_ref_seq(str(protein_path))
 
 
 def test_match_peptides_k5():
