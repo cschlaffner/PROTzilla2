@@ -1,9 +1,9 @@
 from ..data_analysis import (
+    classification,
     clustering,
     differential_expression,
     dimension_reduction,
     plots,
-    classification,
 )
 from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
