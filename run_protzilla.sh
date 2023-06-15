@@ -5,7 +5,7 @@ set -e
 ENV_NAME="protzilla"
 
 if ! [[ "$OSTYPE" == "linux-gnu"* ]] && ! [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "OS not supported, use the install_windows.bat script (to be written)."
+  echo "OS not supported, use the install_windows.bat script."
   exit 1
 fi
 
@@ -48,6 +48,8 @@ cd "$(dirname $0)"
 echo "checking for and installing new requirements..."
 pip install -q -r requirements.txt
 echo "done."
+
+python protzilla/data_integration/database_download.py
 
 echo "starting protzilla..."
 python ui/manage.py runserver
