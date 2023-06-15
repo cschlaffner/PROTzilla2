@@ -1,4 +1,3 @@
-import logging
 import re
 from pathlib import Path
 
@@ -38,7 +37,11 @@ def _create_graph_index(
         logger.error(msg)
         return None, msg, None
 
-    longest_paths = _longest_paths(protein_graph, starting_point)
+    try:
+        longest_paths = _longest_paths(protein_graph, starting_point)
+    except Exception as e:
+        logger.error(f"Error in _longest_paths in _create_graph_index: {e}")
+        return None, str(e), None
 
     for node in protein_graph.nodes:
         if (
@@ -79,10 +82,10 @@ def _create_graph_index(
 
 def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     """
-    Create a dict from node to longest_path to that node. The longest path to a node n
-    is the longest path from the start node (source of the DAG) to the
-    predecessor p of all Predecessors P of n with p having the greatest longest distance
-    of all of q of P + the length of the aminoacid of n.
+    Create a mapping from node to longest_path from source to that node.
+
+    Let n be a node in the graph and P be the set of all predecessors of n.
+    longest_paths[n] = max(longest_paths[p] + len(aminoacid of n)) for p in P
 
     A Variation is assumed to only ever be one aminoacid long.
 
@@ -166,7 +169,7 @@ def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int
     for kmer in kmer_list:
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
-    logging.debug("Finished creating reference sequence index")
+    logger.debug("Finished creating reference sequence index")
     return index, ref_seq, seq_len
 
 
