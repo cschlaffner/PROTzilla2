@@ -197,6 +197,7 @@ def _get_ref_seq(protein_path: str):
         if re.match(sequence_pattern, line):
             matched = True
         if matched:
+            # last line starts with "//"
             if line.startswith("//"):
                 break
             found_lines.append(line)
@@ -207,13 +208,12 @@ def _get_ref_seq(protein_path: str):
     ref_seq = ""
     seq_len = None
     for line in found_lines:
-        # guaranteed to be exactly one line with all following aside from
-        # last line to be ref sequence
+        # exactly one line starts with "SQ" with all following lines until "//" being
+        # part of the sequence
         if line.startswith("SQ"):
             line = line.split()
             seq_len = int(line[2])
             continue
-        # last line starts with "//"
         if line.startswith("//"):
             break
         ref_seq += line.strip()
