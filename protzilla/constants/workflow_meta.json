@@ -1385,6 +1385,104 @@
             "default": null
           }
         }
+      },
+      "gsea": {
+        "name": "GSEA",
+        "description": "Perform Gene Set Enrichment Analysis",
+        "parameters": {
+          "protein_df": {
+            "name": "Dataframe with Protein IDs, Samples and intensities",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "gene_sets_field": {
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose from Enrichr Options"
+            ],
+            "default": "Choose from Enrichr Options",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "gene_sets_path"
+              ],
+              "Choose from Enrichr Options": [
+                "gene_sets_enrichr"
+              ]
+            }
+          },
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "gene_sets_enrichr": {
+            "name": "Gene Sets",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true,
+            "dynamic": true
+          },
+          "grouping": {
+            "name": "Grouping for Samples",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "default": "None"
+          },
+          "min_size": {
+            "name": "Minimum number of genes from gene set also in data",
+            "type": "numeric",
+            "default": 15
+          },
+          "max_size": {
+            "name": "Maximum number of genes from gene set also in data",
+            "type": "numeric",
+            "default": 500
+          },
+          "number_of_permutations": {
+            "name": "Number of permutations",
+            "type": "numeric",
+            "default": 1000
+          },
+          "permutation_type": {
+            "name": "Permutation type (if samples >=15 set to phenotype)",
+            "type": "categorical",
+            "categories": [
+              "phenotype",
+              "gene_set"
+            ],
+            "default": "phenotype"
+          },
+          "ranking_method": {
+            "name": "Method to calculate correlation or ranking",
+            "type": "categorical",
+            "categories": [
+              "log2_ratio_of_classes",
+              "signal_to_noise",
+              "t_test",
+              "ratio_of_classes",
+              "diff_of_classes"
+            ],
+            "default": "signal_to_noise"
+          },
+          "weighted_score": {
+            "name": "Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2",
+            "type": "numeric",
+            "default": 1
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
       }
     },
     "plot": {

@@ -1,7 +1,7 @@
 import base64
 import io
 
-import gseapy as gp
+import gseapy
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -105,7 +105,7 @@ def go_enrichment_bar_plot(
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
     size_y = top_terms * 0.5 * len(categories)
     try:
-        ax = gp.barplot(
+        ax = gseapy.barplot(
             df=df,
             column=column,
             cutoff=cutoff,
@@ -185,7 +185,7 @@ def go_enrichment_dot_plot(
 
     if x_axis_type == "Gene Sets":
         try:
-            ax = gp.dotplot(
+            ax = gseapy.dotplot(
                 df,
                 column="Adjusted P-value",
                 x="Gene_set",
@@ -209,7 +209,7 @@ def go_enrichment_dot_plot(
 
     elif x_axis_type == "Combined Score":
         try:
-            ax = gp.dotplot(
+            ax = gseapy.dotplot(
                 df,
                 size=10,
                 top_term=top_terms,
