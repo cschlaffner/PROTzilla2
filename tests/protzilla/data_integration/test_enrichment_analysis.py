@@ -45,7 +45,7 @@ def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
         "GENE3": [
             "Protein03",
             "Protein3-1",
-        ],  # this should not happen but is handled in case it does
+        ],
         "GENE4": ["Protein4_VAR_A12345"],
         "GENE7": ["Protein7;Protein8"],
         "GENE8": ["Protein7;Protein8"],
@@ -821,15 +821,12 @@ def test_create_genes_intensity_wide_df(data_folder_tests):
     )
 
     expected_df = pd.DataFrame(
-        np.array(
-            [
-                ["Gene1", 10.0, 1.0, 100.0],
-                ["Gene1-1", 10.0, 1.0, 100.0],
-                ["Gene2", 20.0, 2.0, 90.0],
-                ["Gene3", 35.0, 3.5, 75.0],
-            ]
-        ),
-        columns=["Gene symbol", "Sample1", "Sample2", "Sample3"],
+        {
+            "Gene symbol": ["Gene1", "Gene1-1", "Gene2", "Gene3"],
+            "Sample1": [10.0, 10.0, 20.0, 35.0],
+            "Sample2": [1.0, 1.0, 2.0, 3.5],
+            "Sample3": [100.0, 100.0, 90.0, 75.0],
+        }
     )
     expected_df[["Sample1", "Sample2", "Sample3"]] = expected_df[
         ["Sample1", "Sample2", "Sample3"]
@@ -988,7 +985,10 @@ def test_gsea_no_gene_symbols(mock_gene_mapping):
     )
 
     assert "messages" in current_out
-    assert "All proteins could not be mapped" in current_out["messages"][0]["msg"]
+    assert (
+        "No proteins could be mapped to gene symbols"
+        in current_out["messages"][0]["msg"]
+    )
 
 
 @patch(

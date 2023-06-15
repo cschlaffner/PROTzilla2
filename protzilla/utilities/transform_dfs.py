@@ -92,11 +92,8 @@ def is_intensity_df(df: pd.DataFrame):
             if column_basestring in column:
                 has_intensity_column = True
                 break
-        else: # break outer loop if inner loop did
+        else:  # break outer loop if inner loop did
             continue
         break
 
-    return (
-        required_columns.issubset(df.columns)
-        and has_intensity_column
-    )
+    return required_columns.issubset(df.columns) and has_intensity_column

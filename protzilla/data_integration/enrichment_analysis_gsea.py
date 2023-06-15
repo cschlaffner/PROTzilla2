@@ -15,9 +15,12 @@ def create_genes_intensity_wide_df(
     protein_df, protein_groups, samples, group_to_genes, filtered_groups
 ):
     """
-    Creates a dataframe with genes in rows and samples in columns with intensity values.
-    If multiple proteins map to the same gene, the same intensity value is used for all.
-    If duplicate genes exist, the mean of intensities is used.
+    Creates a wide dataframe with genes in rows and samples in columns with intensity values.
+    This is done by transforming the protein_df and using the group_to_genes dict
+    to map the protein IDs to gene names.
+    Protein groups that could not be mapped to gene symbols will not be included in the dataframe.
+    If a protein group maps to multiple genes, the same intensity values are used for all.
+    If multiple groups map to the same gene, the mean of intensities of the respective protein groups is used.
 
     :param protein_df: dataframe with protein IDs and intensities
     :type protein_df: pd.DataFrame
@@ -138,11 +141,10 @@ def gsea(
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
             return gene_sets
     elif gene_sets_enrichr:
-        gene_sets = (
-            [gene_sets_enrichr]
-            if not isinstance(gene_sets_enrichr, list)
-            else gene_sets_enrichr
-        )
+        if not isinstance(gene_sets_enrichr, list):
+            gene_sets = [gene_sets_enrichr]
+        else:
+            gene_sets = gene_sets_enrichr
     else:
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -168,25 +170,25 @@ def gsea(
         protein_df, protein_groups, samples, group_to_genes, filtered_groups
     )
 
-    cls = []
-    for sample in samples:  # make class label list for samples
+    class_labels = []
+    for sample in samples:
         group_value = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
-        cls.append(group_value)
-    if len(set(cls)) != 2:
+        class_labels.append(group_value)
+    if len(set(class_labels)) != 2:
         msg = "Input samples have to belong to exactly two groups"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     # cannot use log2_ratio_of_classes if there are negative values
-    if (df < 0).any().any() and ranking_method == "log2_ratio_of_classes":
+    if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():
         msg = "Negative values in the dataframe. Please use a different ranking method."
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     logger.info("Running GSEA")
     try:
-        gs_res = gseapy.gsea(
+        gsea_result = gseapy.gsea(
             data=df,
             gene_sets=gene_sets,
-            cls=cls,
+            cls=class_labels,
             min_size=min_size,
             max_size=max_size,
             method=ranking_method,
@@ -201,7 +203,7 @@ def gsea(
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = gs_res.res2d
+    enriched_df = gsea_result.res2d
     enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )

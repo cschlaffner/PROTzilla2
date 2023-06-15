@@ -1,7 +1,12 @@
 import pandas as pd
 import pytest
 
-from protzilla.utilities.transform_dfs import is_long_format, long_to_wide, wide_to_long, is_intensity_df
+from protzilla.utilities.transform_dfs import (
+    is_intensity_df,
+    is_long_format,
+    long_to_wide,
+    wide_to_long,
+)
 
 
 @pytest.fixture

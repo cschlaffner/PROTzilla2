@@ -63,7 +63,6 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             filtered_groups.append(group)
         else:
             for symbol in symbols:
-                # duplicates per gene are not expected but handled here
                 if symbol.upper() in gene_to_groups:
                     gene_to_groups[symbol.upper()].append(group)
                 else:
@@ -93,14 +92,8 @@ def read_protein_or_gene_sets_file(path):
     :rtype: dict
     """
     if not path:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="No file uploaded for protein sets.",
-                )
-            ]
-        )
+        msg = "No file uploaded for protein sets."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     file_extension = os.path.splitext(path)[1]
     if file_extension == ".csv":
@@ -128,12 +121,7 @@ def read_protein_or_gene_sets_file(path):
         sets = path
 
     else:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt",
-                )
-            ]
-        )
+        msg = "Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     return sets

@@ -312,6 +312,8 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :type organism: str
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
+    :return: enrichment results and filtered groups
+    :rtype: tuple
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
     gene_to_groups, _, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
@@ -319,17 +321,10 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     )
 
     if not gene_to_groups:
-        return (
-            dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="No gene symbols could be found for the proteins. Please check your input.",
-                    )
-                ]
-            ),
-            None,
+        msg = (
+            "No gene symbols could be found for the proteins. Please check your input."
         )
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)]), None
 
     logger.info(f"Starting analysis for {direction}-regulated proteins")
     try:
@@ -341,18 +336,8 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
             verbose=True,
         ).results
     except ValueError as e:
-        return (
-            dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            ),
-            None,
-        )
+        msg = "Something went wrong with the analysis. Please check your inputs."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]), None
 
     enriched["Proteins"] = enriched["Genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
@@ -562,14 +547,8 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             with open(background, "r") as f:
                 background = [line.strip() for line in f]
         else:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Invalid file type for background. Must be .csv, .txt or no upload",
-                    )
-                ]
-            )
+            msg = "Invalid file type for background. Must be .csv, .txt or no upload"
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     if direction == "up" or direction == "both":
         logger.info("Starting analysis for up-regulated proteins")
@@ -583,19 +562,13 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
                 verbose=True,
             ).results
         except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
+            msg = "Something went wrong with the analysis. Please check your inputs."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+
         logger.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
-        logger.info("Starting analysis for up-regulated proteins")
+        logger.info("Starting analysis for down-regulated proteins")
         # gene set and gene list identifiers need to match
         try:
             down_enriched = gseapy.enrich(
@@ -606,16 +579,10 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
                 verbose=True,
             ).results
         except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-        logger.info("Finished analysis for up-regulated proteins")
+            msg = "Something went wrong with the analysis. Please check your inputs."
+            return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+
+        logger.info("Finished analysis for down-regulated proteins")
 
     if direction == "both":
         enriched = merge_up_down_regulated_proteins_results(
