@@ -20,19 +20,18 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
         a list of uniprot ids that were not found.
     :rtype: tuple
     """
-    proteins_list = []
+    proteins_set = set()
     for group in proteins:
         group = group.split(";")
         # isoforms map to the same gene symbol, that is only found with base protein
-        without_isoforms = set()
         for protein in group:
             if "-" in protein:
-                without_isoforms.add(protein.split("-")[0])
+                proteins_set.add(protein.split("-")[0])
             elif "_VAR_" in protein:
-                without_isoforms.add(protein.split("_VAR_")[0])
+                proteins_set.add(protein.split("_VAR_")[0])
             else:
-                without_isoforms.add(protein)
-        proteins_list.extend(list(without_isoforms))
+                proteins_set.add(protein)
+    proteins_list = list(proteins_set)
     q = list(
         biomart_query(
             proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
@@ -43,7 +42,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
             proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
         )
     )
-    q = dict(set(map(tuple, q)))
+    uniprotID_to_hgnc_symbol = dict(set(map(tuple, q)))
     # check per group in proteins if all proteins have the same gene symbol
     # if yes, use that gene symbol, otherwise use all gene symbols
     filtered_groups = []
@@ -56,7 +55,7 @@ def uniprot_ids_to_uppercase_gene_symbols(proteins):
                 protein = protein.split("-")[0]
             elif "_VAR_" in protein:
                 protein = protein.split("_VAR_")[0]
-            if result := q.get(protein):
+            if result := uniprotID_to_hgnc_symbol.get(protein):
                 symbols.add(result)
 
         if not symbols:  # no gene symbol for any protein in group
