@@ -288,6 +288,7 @@ def _match_peptides(
                 if ref_seq[i] != peptide[i - match_start_pos]:
                     mismatch_counter += 1
                 if mismatch_counter > allowed_mismatches:
+                    peptide_mismatches.add(peptide)
                     break
 
             if mismatch_counter <= allowed_mismatches:
@@ -297,8 +298,7 @@ def _match_peptides(
                 peptide_matches[peptide] = []
                 if peptide in peptide_mismatches:
                     peptide_mismatches.remove(peptide)
-            else:
-                peptide_mismatches.add(peptide)
+
         if matched_starts:
             peptide_matches[peptide] = matched_starts
 
