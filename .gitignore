@@ -3,6 +3,7 @@
 user_data/runs/*
 user_data/debug/*
 ui/static/admin/*
+protzilla/data_integration/databases/*
 .vscode/*
 .flake8
 

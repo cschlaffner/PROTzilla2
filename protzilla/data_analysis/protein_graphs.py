@@ -1,4 +1,3 @@
-import logging
 import math
 import pprint
 import re
@@ -152,14 +151,18 @@ def _create_protein_variation_graph(
     subprocess.run(cmd_str, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
-    logging.info(msg)
+    logger.info(msg)
     return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
 
-def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
+def _create_graph_index(
+    protein_graph: nx.DiGraph, seq_len: int
+) -> tuple[list | None, str, dict | None]:
     """
     create a mapping from the position in the protein (using the longest path) to
     node(s) in the graph
+
+    For information about _longest_path() please see the docstring of that function.
 
     TODO: this might be broken (in conjunction with the ref.-seq index) for versions where a ref.-seq is shorter than the longest path
 
@@ -172,6 +175,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
 
     :return: `index` of structure {aminoacid_pos : [nodes]}, `msg` with potential error
         info, `longest_paths`: {node: longest path counting aminoacids}
+    :rtype: tuple(list, str, dict)
     """
     for node in protein_graph.nodes:
         if protein_graph.nodes[node]["aminoacid"] == "__start__":
@@ -179,10 +183,14 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             break
     else:
         msg = "No starting point found in the graph. An error in the graph creation is likely."
-        logger.critical(msg)
+        logger.error(msg)
         return None, msg, None
 
-    longest_paths = _longest_paths(protein_graph, starting_point)
+    try:
+        longest_paths = _longest_paths(protein_graph, starting_point)
+    except Exception as e:
+        logger.error(f"Error in _longest_paths in _create_graph_index: {e}")
+        return None, str(e), None
 
     for node in protein_graph.nodes:
         if (
@@ -190,7 +198,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             and longest_paths[node] < seq_len
         ):
             msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
-            logger.critical(msg)
+            logger.error(msg)
             return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
@@ -223,18 +231,27 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
 
 def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     """
-    create mapping from node to distance where the distance is the longest path
-    from the starting point to each node
+    Create a mapping from node to longest_path from source to that node.
+
+    Let n be a node in the graph and P be the set of all predecessors of n.
+    longest_paths[n] = max(longest_paths[p] + len(aminoacid of n)) for p in P
 
     A Variation is assumed to only ever be one aminoacid long.
 
+    e.g.:            n1     n2    n3   n5
+        __start__ -> ABC -> DE -> F -> JK -> __end__
+                               \  L  /
+                                  n4
+        longest_paths: {n1: 0, n2: 3, n3: 5, n4: 5, n5: 6, __end__: 8}
+
     :param protein_graph: Protein-Graph as created by ProtGraph \
         (-> _create_protein_variation_graph)
-    :type: nx.DiGraph
+    :type protein_graph: nx.DiGraph
     :param start_node: Source of protein_graph
-    :type: str
+    :type start_node: str
 
-    :return: dict {node: length of the longest path to node}
+    :return: Dict of {node: longest path from start_node to node}
+    :rtype: dict
     """
     topo_order = list(nx.topological_sort(protein_graph))
 
@@ -247,6 +264,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
         else:
             aminoacid_len = len(protein_graph.nodes[node]["aminoacid"])
 
+        # visiting in topological order, so distance to node should be set already
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
                 distances[neighbor] = max(
@@ -259,7 +277,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
 
-    # check for consistent order
+    # check for consistent order - probably overkill but better safe than sorry
     for node, d_node, longest_path in zip(
         topo_order, longest_paths.keys(), longest_paths.values()
     ):
@@ -292,17 +310,18 @@ def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | 
     return path_to_protein_file, r
 
 
-def _create_ref_seq_index(protein_path: str, k: int = 5):
+def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
     """
     Create mapping from kmer of reference_sequence of protein to starting position(s) \
     of kmer in reference_sequence
 
     :param protein_path: Path to protein file from UniProt (.txt)
-    :type: str
+    :type protein_path: str
     :param k: length of kmers
-    :type: int
+    :type k: int
     :return: index {kmer: [starting positions]}, reference sequence, length of reference
         sequence
+    :rtype: tuple(dict, str, int)
     """
 
     logger.debug("Creating reference sequence index")
@@ -323,11 +342,11 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
     for kmer in kmer_list:
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
-    logging.debug("Finished creating reference sequence index")
+    logger.debug("Finished creating reference sequence index")
     return index, ref_seq, seq_len
 
 
-def _get_ref_seq(protein_path: str):
+def _get_ref_seq(protein_path: str) -> (str, int):
     """
     Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
     sequence and sequence length.
@@ -338,10 +357,14 @@ def _get_ref_seq(protein_path: str):
     sequence was found or if no sequence length was found.
 
     :param protein_path: Path to Protein-File in UniProt .txt format.
-    :type: str
+    :type protein_path: str
 
     :return: reference sequence of Protein, sequence length
+    :rtype: str, int
     """
+
+    if not Path(protein_path).exists():
+        raise FileNotFoundError(f"Could not find protein file at {protein_path}")
 
     with open(protein_path, "r") as f:
         lines = f.readlines()
@@ -354,6 +377,7 @@ def _get_ref_seq(protein_path: str):
         if re.match(sequence_pattern, line):
             matched = True
         if matched:
+            # last line starts with "//"
             if line.startswith("//"):
                 break
             found_lines.append(line)
@@ -364,13 +388,12 @@ def _get_ref_seq(protein_path: str):
     ref_seq = ""
     seq_len = None
     for line in found_lines:
-        # guaranteed to be exactly one line with all following aside from
-        # last line to be ref sequence
+        # exactly one line starts with "SQ" with all following lines until "//" being
+        # part of the sequence
         if line.startswith("SQ"):
             line = line.split()
             seq_len = int(line[2])
             continue
-        # last line starts with "//"
         if line.startswith("//"):
             break
         ref_seq += line.strip()
@@ -395,17 +418,18 @@ def _match_peptides(
     allowed per try to match peptide to a potential start position in ref_index
 
     :param allowed_mismatches: number of mismatches allowed per peptide-match try
-    :type: int
+    :type allowed_mismatches: int
     :param k: size of kmer
-    :type int:
+    :type k: int
     :param peptides: list of peptide-strings
-    :type: list
+    :type peptides: list
     :param ref_index: mapping from kmer to match-positions on reference sequence
-    :type: dict(kmer: [starting position]}
+    :type ref_index: dict(kmer: [starting position]}
     :param ref_seq: reference sequence of protein
-    :type: str
+    :type ref_seq: str
     :return: dict(peptide: [match start on reference sequence]),
     list(peptides without match)
+    :rtype: dict, list
     """
 
     if not isinstance(k, int) or k < 1:
@@ -440,6 +464,7 @@ def _match_peptides(
                 if ref_seq[i] != peptide[i - match_start_pos]:
                     mismatch_counter += 1
                 if mismatch_counter > allowed_mismatches:
+                    peptide_mismatches.add(peptide)
                     break
 
             if mismatch_counter <= allowed_mismatches:
@@ -449,8 +474,7 @@ def _match_peptides(
                 peptide_matches[peptide] = []
                 if peptide in peptide_mismatches:
                     peptide_mismatches.remove(peptide)
-            else:
-                peptide_mismatches.add(peptide)
+
         if matched_starts:
             peptide_matches[peptide] = matched_starts
 

@@ -2,18 +2,18 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
 
-from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_helper import (
+    create_dict_with_lists_as_values,
+    create_model_evaluation_df_grid_search,
+    create_model_evaluation_df_grid_search_manual,
+    decode_labels,
+    encode_labels,
+    perform_cross_validation,
     perform_grid_search_cv,
     perform_grid_search_manual,
-    perform_cross_validation,
-    create_dict_with_lists_as_values,
     perform_train_test_split,
-    encode_labels,
-    decode_labels,
-    create_model_evaluation_df_grid_search_manual,
-    create_model_evaluation_df_grid_search,
 )
+from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
 def perform_classification(

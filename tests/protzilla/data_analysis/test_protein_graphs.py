@@ -1,7 +1,7 @@
 import os
 import re
+from pathlib import Path
 from unittest import mock
-from unittest.mock import patch
 
 import networkx as nx
 import pytest
@@ -476,17 +476,17 @@ def test_get_ref_seq_test_protein():
 
 
 def test_get_ref_seq_empty_seq():
-    protein_path = f"{TEST_DATA_PATH}/proteins/empty_seq.txt"
+    protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(f"{TEST_DATA_PATH}/proteins/empty_seq.txt")
+        _get_ref_seq(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
-    protein_path = f"{TEST_DATA_PATH}/proteins/no_seq_len.txt"
+    protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(f"{TEST_DATA_PATH}/proteins/no_seq_len.txt")
+        _get_ref_seq(str(protein_path))
 
 
 def test_match_peptides_k5():
@@ -552,8 +552,19 @@ def test_match_peptides_k3():
     assert peptide_mismatches == planned_peptide_mismatches
 
 
+def test_match_peptides_k0():
+    peptides = [""]
+    allowed_mismatches = 2
+    k = 0
+    ref_seq_index = {}
+    ref_seq = "ABCDEGABCDET"
+    error_msg = f"k must be positive integer, but is {k}"
+    with pytest.raises(ValueError, match=error_msg):
+        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
+
+
 def test_match_peptides_mismatches_k3():
-    peptides = ["ABCDEGA", "BCDET", "BCDETXXX", "CDE", "ABDEF"]
+    peptides = ["ABCDEGA", "BCDET", "BCDETXXX", "BCDETXX", "CDE", "ABDEF"]
     allowed_mismatches = 2
     k = 3
     ref_seq_index = {
@@ -577,7 +588,7 @@ def test_match_peptides_mismatches_k3():
         "BCDET": [1, 7],
         "CDE": [2, 8],
     }
-    planned_peptide_mismatches = {"ABDEF", "BCDETXXX"}
+    planned_peptide_mismatches = {"ABDEF", "BCDETXXX", "BCDETXX"}
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
@@ -648,7 +659,7 @@ def test_match_peptides_early_mismatch_late_match():
     assert peptide_mismatches == planned_peptide_mismatches
 
 
-@patch("protzilla.data_analysis.protein_graphs._get_protein_file")
+@mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
 def test_create_prot_variation_graph(
     mock__get_protein_file, tests_folder_name, test_protein_variation_graph
 ):
