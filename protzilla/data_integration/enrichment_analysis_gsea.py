@@ -1,4 +1,4 @@
-import gseapy as gp
+import gseapy
 import pandas as pd
 from django.contrib import messages
 
@@ -183,7 +183,7 @@ def gsea(
 
     logger.info("Running GSEA")
     try:
-        gs_res = gp.gsea(
+        gs_res = gseapy.gsea(
             data=df,
             gene_sets=gene_sets,
             cls=cls,

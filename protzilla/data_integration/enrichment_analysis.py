@@ -1,7 +1,7 @@
 import os
 import time
 
-import gseapy as gp
+import gseapy
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -333,7 +333,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
 
     logger.info(f"Starting analysis for {direction}-regulated proteins")
     try:
-        enriched = gp.enrichr(
+        enriched = gseapy.enrichr(
             gene_list=list(gene_to_groups.keys()),
             gene_sets=protein_sets,
             organism=organism,
@@ -575,7 +575,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         logger.info("Starting analysis for up-regulated proteins")
         # gene set and gene list identifiers need to match
         try:
-            up_enriched = gp.enrich(
+            up_enriched = gseapy.enrich(
                 gene_list=up_protein_list,
                 gene_sets=protein_sets,
                 background=background,
@@ -598,7 +598,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         logger.info("Starting analysis for up-regulated proteins")
         # gene set and gene list identifiers need to match
         try:
-            down_enriched = gp.enrich(
+            down_enriched = gseapy.enrich(
                 gene_list=down_protein_list,
                 gene_sets=protein_sets,
                 background=background,

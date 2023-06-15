@@ -68,18 +68,35 @@ def is_intensity_df(df: pd.DataFrame):
     :return: returns True if the dataframe is an intensity dataframe
     :rtype: bool
     """
+    if not isinstance(df, pd.DataFrame):
+        return False
+
     required_columns = {"Sample", "Protein ID"}
-    intensity_columns = {
+    intensity_columns = [
         "Intensity",
         "iBAQ",
         "LFQ intensity",
-        "Normalised Intensity",
-        "Normalised iBAQ",
-        "Normalised LFQ intensity",
-    }
+        "MaxLFQ Total Intensity",
+        "MaxLFQ Intensity",
+        "Total Intensity",
+        "MaxLFQ Unique Intensity",
+        "Unique Spectral Count",
+        "Unique Intensity",
+        "Spectral Count",
+        "Total Spectral Count",
+    ]
+
+    has_intensity_column = False
+    for column in df.columns:
+        for column_basestring in intensity_columns:
+            if column_basestring in column:
+                has_intensity_column = True
+                break
+        else: # break outer loop if inner loop did
+            continue
+        break
 
     return (
-        isinstance(df, pd.DataFrame)
-        and required_columns.issubset(df.columns)
-        and intensity_columns.intersection(df.columns)
+        required_columns.issubset(df.columns)
+        and has_intensity_column
     )

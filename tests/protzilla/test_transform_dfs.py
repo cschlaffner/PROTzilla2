@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from protzilla.utilities.transform_dfs import *
+from protzilla.utilities.transform_dfs import is_long_format, long_to_wide, wide_to_long, is_intensity_df
 
 
 @pytest.fixture
@@ -122,7 +122,10 @@ def test_is_intensity_df(transform_df_long):
     df.rename(columns={"Intensity": "Normalised Intensity"}, inplace=True)
     assert is_intensity_df(df)
 
-    df.drop(columns=["Normalised Intensity"], inplace=True)
+    df.rename(columns={"Normalised Intensity": "Unique Spectral Count"}, inplace=True)
+    assert is_intensity_df(df)
+
+    df.drop(columns=["Unique Spectral Count"], inplace=True)
     assert not is_intensity_df(df)
 
     assert not is_intensity_df(pd.DataFrame(columns=["Sample", "Protein ID", "Gene"]))
