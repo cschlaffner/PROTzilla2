@@ -1,5 +1,3 @@
-import os
-import shutil
 import time
 from unittest.mock import patch
 
@@ -14,7 +12,7 @@ from protzilla.data_integration.enrichment_analysis import (
     go_analysis_offline,
     go_analysis_with_enrichr,
     go_analysis_with_STRING,
-    merge_restring_dfs,
+    merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
 
@@ -25,23 +23,43 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     MIN_WAIT_TIME = 1
 
     protein_list = [
-        "P09012,P62306,P62304",
-        "P09668,P43490,P04792,P02649,P60033,P56199,P15259,P02750,O95865,P08294,P0C0L5",
+        "P09972",
+        "P04406",
+        "P21796",
+        "P10515",
+        "P23368",
+        "P07195",
+        "P02746",
+        "P02747",
+        "P02745",
+        "P06132",
+        "P00450",
+        "P07814",
+        "P13716",
     ]
     string_params = {"species": 9606, "caller_ID": "PROTzilla"}
     mock_data = {
-        "term ID": ["GO:0005685", "GO:0070062"],
-        "term description": ["U1 snRNP", "Extracellular exosome"],
-        "observed gene count": [3, 11],
-        "background gene count": [21, 2099],
-        "false discovery rate": [0.00058, 0.00058],
-        "matching proteins in your network (IDs)": [
-            "SNRPA,SNRPF,SNRPE",
-            "CTSH,NAMPT,HSPB1,APOE,CD81,ITGA1,PGAM2,LRG1,DDAH2,SOD3,C4B",
+        "category": ["Process", "Process", "KEGG"],
+        "term": ["GO:0006090", "GO:0098883", "hsa00860"],
+        "number_of_genes": [6, 3, 4],
+        "number_of_genes_in_background": [69, 8, 41],
+        "ncbiTaxonId": [9606, 9606, 9606],
+        "inputGenes": [
+            "P09972,P04406,P21796,P10515,P23368,P07195",
+            "P02746,P02747,P02745",
+            "P06132,P00450,P07814,P13716",
         ],
-        "matching proteins in your network (labels)": [
-            "P09012,P62306,P62304",
-            "P09668,P43490,P04792,P02649,P60033,P56199,P15259,P02750,O95865,P08294,P0C0L5",
+        "preferredNames": [
+            "ALDOC,GAPDH,VDAC1,DLAT,ME2,LDHB",
+            "C1QB,C1QC,C1QA",
+            "UROD,CP,EPRS,ALAD",
+        ],
+        "p_value": [1.38e-05, 5.21e-05, 0.00027],
+        "fdr": [0.0024, 0.0073, 0.0056],
+        "description": [
+            "Pyruvate metabolic process",
+            "Synapse pruning",
+            "Porphyrin and chlorophyll metabolism",
         ],
     }
 
@@ -57,38 +75,65 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
     assert result1.equals(mock_df)
 
 
-def test_merge_restring_dfs():
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
-    KEGG_result = pd.read_csv(
-        f"{test_data_folder}/KEGG_results.csv", header=0, index_col=0
+def test_merge_up_down_regulated_dfs_restring():
+    # columns are simplified for testing purposes
+    # left out columns just get copied over like fdr is here
+    up_df = pd.DataFrame(
+        {
+            "category": ["cat1", "cat2"],
+            "term": ["term1", "term2"],
+            "p_value": [0.1, 0.2],
+            "fdr": [0.5, 0.6],
+            "inputGenes": ["protein1,protein2", "protein3"],
+            "preferredNames": ["gene1,gene2", "gene3"],
+            "number_of_genes": [2, 1],
+            "number_of_genes_in_background": [20, 100],
+            "ncbiTaxonId": [9606, 9606],
+        }
     )
-    KEGG_summary = pd.read_csv(
-        f"{test_data_folder}/KEGG_summary.csv", header=0, index_col=0
-    )
-    Process_result = pd.read_csv(
-        f"{test_data_folder}/Process_results.csv", header=0, index_col=0
-    )
-    Process_summary = pd.read_csv(
-        f"{test_data_folder}/Process_summary.csv", header=0, index_col=0
-    )
-    merged_results = pd.read_csv(f"{test_data_folder}/merged_results.csv", header=0)
-    merged_summaries = pd.read_csv(f"{test_data_folder}/merged_summaries.csv", header=0)
 
-    result = merge_restring_dfs(dict(KEGG=KEGG_result, Process=Process_result))
-    summary = merge_restring_dfs(dict(KEGG=KEGG_summary, Process=Process_summary))
-
-    column_names = ["term", "common", "Gene_set"]
-    for column in column_names:
-        assert result[column].equals(merged_results[column])
-
-    numerical_equal = np.isclose(
-        result["enrichment_details"],
-        merged_results["enrichment_details"],
-        rtol=1e-05,
-        atol=1e-08,
+    down_df = pd.DataFrame(
+        {
+            "category": ["cat1", "cat3"],
+            "term": ["term1", "term3"],
+            "p_value": [0.05, 0.3],
+            "fdr": [0.4, 0.7],
+            "inputGenes": ["protein2,protein4", "protein5"],
+            "preferredNames": ["gene2,gene4", "gene5"],
+            "number_of_genes": [2, 1],
+            "number_of_genes_in_background": [20, 50],
+            "ncbiTaxonId": [9606, 9606],
+        }
     )
-    assert numerical_equal.all()
-    assert summary.equals(merged_summaries)
+
+    expected_output = pd.DataFrame(
+        {
+            "category": ["cat1", "cat2", "cat3"],
+            "term": ["term1", "term2", "term3"],
+            "p_value": [0.05, 0.2, 0.3],
+            "fdr": [0.4, 0.6, 0.7],
+            "inputGenes": ["protein2,protein4,protein1", "protein3", "protein5"],
+            "preferredNames": ["gene2,gene4,gene1", "gene3", "gene5"],
+            "number_of_genes": [3, 1, 1],
+            "number_of_genes_in_background": [20, 100, 50],
+            "ncbiTaxonId": [9606, 9606, 9606],
+        }
+    )
+
+    merged = merge_up_down_regulated_dfs_restring(up_df, down_df)
+    merged.set_index(["category", "term"], inplace=True)
+    expected_output.set_index(["category", "term"], inplace=True)
+    merged = merged.sort_index()
+    expected_output = expected_output.sort_index()
+
+    columns = ["inputGenes", "preferredNames"]
+    for col in columns:
+        merged[col] = merged[col].apply(lambda x: set(x.split(",")))
+        expected_output[col] = expected_output[col].apply(lambda x: set(x.split(",")))
+        merged[col] = merged[col].apply(lambda x: sorted(x))
+        expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
+
+    pd.testing.assert_frame_equal(merged, expected_output, check_dtype=False)
 
 
 @patch(
@@ -107,39 +152,31 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
         f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
     )
 
-    up_path = f"{test_data_folder}/UP_enrichment.KEGG.tsv"
-    up_df = pd.read_csv(up_path, header=0, sep="\t")
-    down_path = f"{test_data_folder}/DOWN_enrichment.KEGG.tsv"
-    down_df = pd.read_csv(down_path, header=0, sep="\t")
-
-    results = pd.read_csv(f"{test_data_folder}/KEGG_results.csv", header=0, index_col=0)
-    summary = pd.read_csv(f"{test_data_folder}/KEGG_summary.csv", header=0, index_col=0)
-    mock_enrichment.side_effect = [up_df, down_df]
-
-    # copy files to test aggregation
-    test_folder = f"{test_data_folder}/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
-    os.makedirs(test_folder, exist_ok=True)
-    shutil.copy(up_path, test_folder)
-    shutil.copy(down_path, test_folder)
-    current_dir = os.getcwd()
-    os.chdir(test_data_folder)
-
-    current_out = go_analysis_with_STRING(
-        proteins=proteins_df,
-        protein_set_dbs=["KEGG"],
-        organism=9606,
-        direction="both",
-        run_name=None,
-        background=background,
-        folder_name="test_go_analysis_with_STRING",
+    up_df = pd.read_csv(
+        f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
+    )
+    down_df = pd.read_csv(
+        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
 
-    os.chdir(current_dir)
-    assert not os.path.exists(
-        f"{test_data_folder}tmp_enrichment_results"
-    ), "tmp_enrichment_results folder was not deleted properly"
-    assert current_out["result"].equals(results)
-    assert current_out["summary"].equals(summary)
+    results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
+    mock_enrichment.side_effect = [up_df, down_df]
+
+    out_df = go_analysis_with_STRING(
+        proteins=proteins_df,
+        protein_set_dbs=["KEGG", "Process"],
+        organism=9606,
+        direction="both",
+        background=background,
+    )["enriched_df"]
+
+    for col in ["inputGenes", "preferredNames"]:
+        out_df[col] = out_df[col].apply(lambda x: set(x.split(",")))
+        results[col] = results[col].apply(lambda x: set(x.split(",")))
+        out_df[col] = out_df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
+
+    pd.testing.assert_frame_equal(results, out_df, check_dtype=False)
 
 
 @patch(
@@ -153,47 +190,28 @@ def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
     up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
     down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
 
-    up_path = f"{test_data_folder}/UP_enrichment.KEGG.tsv"
-    up_df = pd.read_csv(up_path, header=0, sep="\t")
-    down_path = f"{test_data_folder}/DOWN_enrichment.KEGG.tsv"
-    down_df = pd.read_csv(down_path, header=0, sep="\t")
+    up_df = pd.read_csv(f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0)
+    down_df = pd.read_csv(
+        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
+    )
     mock_enrichment.side_effect = [up_df, down_df]
-
-    # copy files to test aggregation
-    test_folder = f"{test_data_folder}/tmp_enrichment_results/test_go_analysis_with_STRING/enrichment_details/"
-    os.makedirs(test_folder, exist_ok=True)
-    shutil.copy(up_path, test_folder)
-    current_dir = os.getcwd()
-    os.chdir(test_data_folder)
 
     current_out = go_analysis_with_STRING(
         proteins=up_proteins_df,
-        protein_set_dbs=["KEGG"],
+        protein_set_dbs=["KEGG", "Process"],
         organism=9606,
         direction="both",
-        run_name=None,
-        folder_name="test_go_analysis_with_STRING",
     )
-
-    os.chdir(current_dir)
     assert "messages" in current_out
     assert "No downregulated proteins" in current_out["messages"][0]["msg"]
 
-    os.makedirs(test_folder, exist_ok=True)
-    shutil.copy(down_path, test_folder)
-    current_dir = os.getcwd()
-    os.chdir(test_data_folder)
-
     current_out = go_analysis_with_STRING(
         proteins=down_proteins_df,
-        protein_set_dbs=["KEGG"],
+        protein_set_dbs=["KEGG", "Process"],
         organism=9606,
         direction="both",
-        run_name=None,
-        folder_name="test_go_analysis_with_STRING",
     )
 
-    os.chdir(current_dir)
     assert "messages" in current_out
     assert "No upregulated proteins" in current_out["messages"][0]["msg"]
 

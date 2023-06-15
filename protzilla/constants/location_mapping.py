@@ -3,6 +3,7 @@ from ..data_analysis import (
     differential_expression,
     dimension_reduction,
     plots,
+    classification,
 )
 from ..data_integration import di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -38,11 +39,6 @@ method_map = {
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -160,6 +156,11 @@ method_map = {
     ): clustering.expectation_maximisation,
     (
         "data_analysis",
+        "classification",
+        "random_forest",
+    ): classification.random_forest,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -197,12 +198,7 @@ plot_map = {
     (
         "data_preprocessing",
         "filter_proteins",
-        "low_frequency_filter",
-    ): filter_proteins.by_low_frequency_plot,
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "low_frequency_filter",
+        "samples_missing_filter",
     ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
