@@ -109,6 +109,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
         else:
             aminoacid_len = len(protein_graph.nodes[node]["aminoacid"])
 
+        # visiting in topological order, so distance to node should be set already
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
                 distances[neighbor] = max(
@@ -121,7 +122,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
 
-    # check for consistent order
+    # check for consistent order - probably overkill but better safe than sorry
     for node, d_node, longest_path in zip(
         topo_order, longest_paths.keys(), longest_paths.values()
     ):
