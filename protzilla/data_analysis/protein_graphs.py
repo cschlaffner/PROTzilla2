@@ -104,12 +104,12 @@ def _create_protein_variation_graph(
     protein_id: str, run_name: str, queue_size: int = None
 ):
     """
-    creates a protein-graph for a given UniProt Protein ID using ProtGraph.
+    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
     Included features are just `Variation`, digestion is skipped.
     The Graph is saved in .graphml-Format.
 
     This is designed, so it can be used for peptides_to_isoform but works independently
-        as well
+    as well
 
     ProtGraph: https://github.com/mpc-bioinformatics/ProtGraph/
 

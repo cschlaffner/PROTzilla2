@@ -1,16 +1,22 @@
+import os
 import re
+from unittest import mock
+from unittest.mock import patch
 
 import networkx as nx
 import pytest
+from django.contrib import messages
 
-from protzilla.constants.paths import TEST_DATA_PATH
+from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
 from protzilla.data_analysis.protein_graphs import (
     _create_graph_index,
+    _create_protein_variation_graph,
     _create_ref_seq_index,
     _get_ref_seq,
     _longest_paths,
     _match_peptides,
 )
+from protzilla.utilities.random import random_string
 
 
 # TODO: add markdown pictures of the graphs
@@ -149,6 +155,27 @@ def complex_route():
     start_node = "0"
     seq_len = 8
     return G, start_node, seq_len
+
+
+@pytest.fixture
+def test_protein_variation_graph():
+    g = nx.DiGraph()
+
+    g.add_node("n0", aminoacid="__start__", accession="PROTZILLA_TEST", position=0.0)
+    g.add_node("n1", aminoacid="D", accession="PROTZILLA_TEST", position=4.0)
+    g.add_node("n2", aminoacid="__end__", accession="PROTZILLA_TEST", position=13.0)
+    g.add_node("n3", aminoacid="V", accession="PROTZILLA_TEST")
+    g.add_node("n4", aminoacid="EGABCDET", accession="PROTZILLA_TEST", position=5.0)
+    g.add_node("n5", aminoacid="ABC", accession="PROTZILLA_TEST", position=1.0)
+
+    g.add_edge("n0", "n5")
+    g.add_edge("n1", "n4")
+    g.add_edge("n3", "n4")
+    g.add_edge("n4", "n2")
+    g.add_edge("n5", "n1")
+    g.add_edge("n5", "n3")
+
+    return g
 
 
 def test_longest_paths_simple(simple_graph):
@@ -619,3 +646,39 @@ def test_match_peptides_early_mismatch_late_match():
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
+
+
+@patch("protzilla.data_analysis.protein_graphs._get_protein_file")
+def test_create_prot_variation_graph(
+    mock__get_protein_file, tests_folder_name, test_protein_variation_graph
+):
+    protein_id = "test_protein_variation"
+    protein_path = f"/Users/anton/Documents/code/PROTzilla2/tests/test_data/proteins/{protein_id}.txt"
+    mock_request = mock.MagicMock()
+    mock_request.status_code = 200
+
+    run_name = (
+        tests_folder_name + "/_test_create_prot_variation_graph_" + random_string()
+    )
+    os.mkdir(f"{RUNS_PATH}/{run_name}")
+
+    output_folder = f"{RUNS_PATH}/{run_name}/graphs"
+    graph_path = f"{output_folder}/{protein_id}.graphml"
+    planned_msg = (
+        f"Graph created for protein {protein_id} at {graph_path} using {protein_path}"
+    )
+
+    mock__get_protein_file.return_value = (protein_path, mock_request)
+    out_dict = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
+
+    planned_out_dict = {
+        "graph_path": f"{output_folder}/{protein_id}.graphml",
+        "messages": [dict(level=messages.INFO, msg=planned_msg)],
+    }
+    assert out_dict == planned_out_dict
+
+    print("graph_path")
+    print(graph_path)
+
+    created_graph = nx.read_graphml(graph_path)
+    assert created_graph == test_protein_variation_graph
