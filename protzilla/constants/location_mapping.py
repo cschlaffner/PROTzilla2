@@ -1,20 +1,10 @@
-from ..data_analysis import (
-    classification,
-    clustering,
-    differential_expression,
-    dimension_reduction,
-    plots,
-)
+from ..data_analysis import (classification, clustering,
+                             differential_expression, dimension_reduction,
+                             plots)
 from ..data_integration import di_plots, enrichment_analysis
-from ..data_preprocessing import (
-    filter_proteins,
-    filter_samples,
-    imputation,
-    normalisation,
-    outlier_detection,
-    peptide_filter,
-    transformation,
-)
+from ..data_preprocessing import (filter_proteins, filter_samples, imputation,
+                                  normalisation, outlier_detection,
+                                  peptide_filter, transformation)
 from ..importing import metadata_import, ms_data_import, peptide_import
 
 """
@@ -184,6 +174,11 @@ method_map = {
         "enrichment_analysis",
         "gsea",
     ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
 }
 
 # reversed mapping of method callable and location
