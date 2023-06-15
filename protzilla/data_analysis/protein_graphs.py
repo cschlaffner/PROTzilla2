@@ -1,5 +1,6 @@
 import logging
 import re
+from pathlib import Path
 
 import networkx as nx
 
@@ -181,6 +182,9 @@ def _get_ref_seq(protein_path: str):
 
     :return: reference sequence of Protein, sequence length
     """
+
+    if not Path(protein_path).exists():
+        raise FileNotFoundError(f"Could not find protein file at {protein_path}")
 
     with open(protein_path, "r") as f:
         lines = f.readlines()
