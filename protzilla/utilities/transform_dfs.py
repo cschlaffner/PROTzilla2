@@ -72,7 +72,10 @@ def is_intensity_df(df: pd.DataFrame):
         return False
 
     required_columns = {"Sample", "Protein ID"}
-    intensity_columns = [
+    if not required_columns.issubset(df.columns):
+        return False
+
+    intensity_names = [
         "Intensity",
         "iBAQ",
         "LFQ intensity",
@@ -86,14 +89,8 @@ def is_intensity_df(df: pd.DataFrame):
         "Total Spectral Count",
     ]
 
-    has_intensity_column = False
-    for column in df.columns:
-        for column_basestring in intensity_columns:
-            if column_basestring in column:
-                has_intensity_column = True
-                break
-        else:  # break outer loop if inner loop did
-            continue
-        break
+    for column_name in df.columns:
+        if any(intensity_name in column_name for intensity_name in intensity_names):
+            return True
 
-    return required_columns.issubset(df.columns) and has_intensity_column
+    return False

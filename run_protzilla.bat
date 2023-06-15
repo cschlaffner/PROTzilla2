@@ -50,5 +50,9 @@ call activate protzilla_win
 pip install wheel
 pip install -r requirements.txt
 echo installed all requirements
+
+REM downloading uniprot if necessary
+python protzilla/data_integration/database_download.py
+
 REM Run Django server
 python ui/manage.py runserver

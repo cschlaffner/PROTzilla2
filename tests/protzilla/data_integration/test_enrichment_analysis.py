@@ -94,6 +94,70 @@ def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
         assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
     assert filtered_groups == expected_filtered_groups
 
+# isort:end_skip_file
+
+
+@pytest.fixture
+def data_folder_tests():
+    return PROJECT_PATH / "tests/test_data/enrichment_data"
+
+
+@patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
+def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
+    proteins = [
+        "Protein1",
+        "Protein2;ProteinX",
+        "Protein03",
+        "Protein3-1",
+        "Protein4_VAR_A12345",
+        "Protein5",
+        "Protein6",
+        "Protein7;Protein8",
+    ]
+    mock_biomart_query.return_value = [
+        ("Protein1", "GENE1"),
+        ("Protein2", "GENE2"),
+        ("ProteinX", "GENE2"),
+        ("Protein03", "GENE3"),
+        ("Protein3", "GENE3"),
+        ("Protein4", "GENE4"),
+        ("Protein7", "GENE7"),
+        ("Protein8", "GENE8"),
+    ]
+
+    expected_gene_to_groups = {
+        "GENE1": ["Protein1"],
+        "GENE2": ["Protein2;ProteinX"],
+        "GENE3": [
+            "Protein03",
+            "Protein3-1",
+        ],
+        "GENE4": ["Protein4_VAR_A12345"],
+        "GENE7": ["Protein7;Protein8"],
+        "GENE8": ["Protein7;Protein8"],
+    }
+    expected_group_to_genes = {
+        "Protein1": ["GENE1"],
+        "Protein2;ProteinX": ["GENE2"],
+        "Protein03": ["GENE3"],
+        "Protein3-1": ["GENE3"],
+        "Protein4_VAR_A12345": ["GENE4"],
+        "Protein7;Protein8": ["GENE7", "GENE8"],
+    }
+    expected_filtered_groups = ["Protein5", "Protein6"]
+
+    (
+        gene_to_groups,
+        group_to_genes,
+        filtered_groups,
+    ) = uniprot_ids_to_uppercase_gene_symbols(proteins)
+
+    for key in gene_to_groups:
+        assert set(gene_to_groups[key]) == set(expected_gene_to_groups[key])
+    for key in group_to_genes:
+        assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
+    assert filtered_groups == expected_filtered_groups
+
 
 @patch("restring.restring.get_functional_enrichment")
 def test_get_functional_enrichment_with_delay(mock_enrichment):
