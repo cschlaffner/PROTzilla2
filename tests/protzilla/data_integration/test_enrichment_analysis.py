@@ -1,19 +1,39 @@
 from unittest.mock import patch
 
+import time
+import json
+import pandas as pd
+import numpy as np
 import pytest
 import requests
 
 from protzilla.constants.paths import PROJECT_PATH
 
 # order is important to ensure correctness of patched functions
-from protzilla.data_integration.enrichment_analysis_helper import *  # isort:skip
-from protzilla.data_integration.enrichment_analysis import *  # isort:skip
-from protzilla.data_integration.enrichment_analysis_gsea import *  # isort:skip
+# isort:skip_file
+from protzilla.data_integration.enrichment_analysis_helper import (
+    uniprot_ids_to_uppercase_gene_symbols,
+    read_protein_or_gene_sets_file,
+)
+from protzilla.data_integration.enrichment_analysis import (
+    get_functional_enrichment_with_delay,
+    go_analysis_offline,
+    go_analysis_with_enrichr,
+    go_analysis_with_STRING,
+    merge_up_down_regulated_dfs_restring,
+    merge_up_down_regulated_proteins_results,
+)
+from protzilla.data_integration.enrichment_analysis_gsea import (
+    create_genes_intensity_wide_df,
+    gsea,
+)
+
+# isort:end_skip_file
 
 
 @pytest.fixture
 def data_folder_tests():
-    return f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    return PROJECT_PATH / "tests/test_data/enrichment_data"
 
 
 @patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
@@ -198,22 +218,23 @@ def test_merge_up_down_regulated_dfs_restring():
     "background",
     [
         None,
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/background_imported_proteins.csv",
+        PROJECT_PATH
+        / "tests/test_data/enrichment_data/background_imported_proteins.csv",
     ],
 )
 def test_go_analysis_with_STRING(mock_enrichment, background, data_folder_tests):
     proteins_df = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-log2_fold_change_df.csv"
+        data_folder_tests / "input-t_test-log2_fold_change_df.csv"
     )
 
     up_df = pd.read_csv(
-        f"{data_folder_tests}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
+        data_folder_tests / "up_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
     down_df = pd.read_csv(
-        f"{data_folder_tests}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
+        data_folder_tests / "down_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
 
-    results = pd.read_csv(f"{data_folder_tests}/merged_KEGG_process.csv", header=0)
+    results = pd.read_csv(data_folder_tests / "merged_KEGG_process.csv", header=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
     out_df = go_analysis_with_STRING(
@@ -240,14 +261,14 @@ def test_go_analysis_with_STRING_one_direction_missing(
     mock_enrichment, data_folder_tests
 ):
     proteins_df = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-log2_fold_change_df.csv"
+        data_folder_tests / "input-t_test-log2_fold_change_df.csv"
     )
     up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
     down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
 
-    up_df = pd.read_csv(f"{data_folder_tests}/up_enrichment_KEGG_Process.csv", header=0)
+    up_df = pd.read_csv(data_folder_tests / "up_enrichment_KEGG_Process.csv", header=0)
     down_df = pd.read_csv(
-        f"{data_folder_tests}/down_enrichment_KEGG_Process.csv", header=0
+        data_folder_tests / "down_enrichment_KEGG_Process.csv", header=0
     )
     mock_enrichment.side_effect = [up_df, down_df]
 
@@ -425,7 +446,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     protein_sets = ["Reactome_2013"]
     organism = "human"
     results = pd.read_csv(
-        f"{data_folder_tests}/Reactome_enrichment_enrichr.csv", sep="\t"
+        data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
     )
 
     mock_gene_mapping.return_value = (
@@ -519,9 +540,9 @@ def go_analysis_offline_result_with_bg():
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
     ],
 )
 def test_go_analysis_offline_protein_sets(
@@ -572,8 +593,8 @@ def test_go_analysis_offline_protein_sets(
 @pytest.mark.parametrize(
     "background_path",
     [
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.txt",
     ],
 )
 def test_go_analysis_offline_background(
@@ -592,7 +613,7 @@ def test_go_analysis_offline_background(
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
-        protein_sets_path=f"{data_folder_tests}/protein_sets.txt",
+        protein_sets_path=data_folder_tests / "protein_sets.txt",
         background=background_path,
         direction="down",
     )
@@ -730,9 +751,9 @@ def test_merge_up_down_regulated_proteins_results():
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
     ],
 )
 def test_read_protein_or_gene_sets_file(protein_sets_path):
@@ -776,7 +797,7 @@ def test_read_protein_or_gene_sets_file_no_path():
 
 
 def test_read_protein_or_gene_sets_file_invalid_filetype(data_folder_tests):
-    a_made_up_path = f"{data_folder_tests}/a_made_up_wrong_file.png"
+    a_made_up_path = data_folder_tests / "a_made_up_wrong_file.png"
     out_dict = read_protein_or_gene_sets_file(a_made_up_path)
 
     assert "messages" in out_dict
@@ -837,10 +858,10 @@ def test_create_genes_intensity_wide_df(data_folder_tests):
 
 def test_gsea_log2_metric_with_negative_values(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
-    metadata_df = pd.read_csv(f"{data_folder_tests}/metadata_full.csv")
+    metadata_df = pd.read_csv(data_folder_tests / "metadata_full.csv")
 
     current_out = gsea(
         proteins,
@@ -862,17 +883,17 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
 )
 def test_gsea(mock_mapping, data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     metadata_df = pd.read_csv(
-        f"{data_folder_tests}/metadata_full.csv",
+        data_folder_tests / "metadata_full.csv",
     )
     expected_enriched_df = pd.read_csv(
-        f"{data_folder_tests}/gsea_result_sig_prot.csv", index_col=0
+        data_folder_tests / "gsea_result_sig_prot.csv", index_col=0
     )
 
-    with open(f"{data_folder_tests}/gene_mapping.json", "r") as f:
+    with open(data_folder_tests / "gene_mapping.json", "r") as f:
         data = json.load(f)
         gene_to_groups = data["gene_to_groups"]
         group_to_genes = data["group_to_genes"]
@@ -919,7 +940,7 @@ def test_gsea(mock_mapping, data_folder_tests):
 
 def test_gsea_wrong_protein_df(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-significant_proteins_pvalues_df.csv",
+        data_folder_tests / "input-t_test-significant_proteins_pvalues_df.csv",
         index_col=0,
     )  # not an intensity df
 
@@ -934,7 +955,7 @@ def test_gsea_wrong_protein_df(data_folder_tests):
 
 def test_gsea_no_gene_sets(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     current_out = gsea(
@@ -948,7 +969,7 @@ def test_gsea_no_gene_sets(data_folder_tests):
 
 def test_gsea_wrong_gene_sets(data_folder_tests):
     proteins = pd.read_csv(
-        f"{data_folder_tests}/input-t_test-significant_proteins_intensity_df.csv",
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
         index_col=0,
     )
     current_out = gsea(

@@ -1,6 +1,6 @@
 import csv
 import json
-import os
+from pathlib import Path
 
 from django.contrib import messages
 
@@ -95,7 +95,7 @@ def read_protein_or_gene_sets_file(path):
         msg = "No file uploaded for protein sets."
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    file_extension = os.path.splitext(path)[1]
+    file_extension = Path(path).suffix
     if file_extension == ".csv":
         with open(path, "r") as f:
             reader = csv.reader(f)
