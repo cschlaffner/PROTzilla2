@@ -7,7 +7,9 @@ import networkx as nx
 from protzilla.constants.logging import logger
 
 
-def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
+def _create_graph_index(
+    protein_graph: nx.DiGraph, seq_len: int
+) -> tuple[list | None, str, dict | None]:
     """
     create a mapping from the position in the protein (using the longest path) to
     node(s) in the graph
@@ -25,7 +27,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
 
     :return: `index` of structure {aminoacid_pos : [nodes]}, `msg` with potential error
         info, `longest_paths`: {node: longest path counting aminoacids}
-    :rtype: tuple
+    :rtype: tuple(list, str, dict)
     """
     for node in protein_graph.nodes:
         if protein_graph.nodes[node]["aminoacid"] == "__start__":
@@ -92,9 +94,9 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
     :param protein_graph: Protein-Graph as created by ProtGraph \
         (-> _create_protein_variation_graph)
-    :type: nx.DiGraph
+    :type protein_graph: nx.DiGraph
     :param start_node: Source of protein_graph
-    :type: str
+    :type start_node: str
 
     :return: Dict of {node: longest path from start_node to node}
     :rtype: dict
@@ -132,17 +134,18 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     return longest_paths
 
 
-def _create_ref_seq_index(protein_path: str, k: int = 5):
+def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
     """
     Create mapping from kmer of reference_sequence of protein to starting position(s) \
     of kmer in reference_sequence
 
     :param protein_path: Path to protein file from UniProt (.txt)
-    :type: str
+    :type protein_path: str
     :param k: length of kmers
-    :type: int
+    :type k: int
     :return: index {kmer: [starting positions]}, reference sequence, length of reference
         sequence
+    :rtype: tuple(dict, str, int)
     """
 
     logger.debug("Creating reference sequence index")
@@ -167,7 +170,7 @@ def _create_ref_seq_index(protein_path: str, k: int = 5):
     return index, ref_seq, seq_len
 
 
-def _get_ref_seq(protein_path: str):
+def _get_ref_seq(protein_path: str) -> (str, int):
     """
     Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
     sequence and sequence length.
@@ -178,9 +181,10 @@ def _get_ref_seq(protein_path: str):
     sequence was found or if no sequence length was found.
 
     :param protein_path: Path to Protein-File in UniProt .txt format.
-    :type: str
+    :type protein_path: str
 
     :return: reference sequence of Protein, sequence length
+    :rtype: str, int
     """
 
     if not Path(protein_path).exists():
@@ -238,17 +242,18 @@ def _match_peptides(
     allowed per try to match peptide to a potential start position in ref_index
 
     :param allowed_mismatches: number of mismatches allowed per peptide-match try
-    :type: int
+    :type allowed_mismatches: int
     :param k: size of kmer
-    :type int:
+    :type k: int
     :param peptides: list of peptide-strings
-    :type: list
+    :type peptides: list
     :param ref_index: mapping from kmer to match-positions on reference sequence
-    :type: dict(kmer: [starting position]}
+    :type ref_index: dict(kmer: [starting position]}
     :param ref_seq: reference sequence of protein
-    :type: str
+    :type ref_seq: str
     :return: dict(peptide: [match start on reference sequence]),
     list(peptides without match)
+    :rtype: dict, list
     """
 
     if not isinstance(k, int) or k < 1:
