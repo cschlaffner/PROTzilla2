@@ -11,6 +11,8 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
     create a mapping from the position in the protein (using the longest path) to
     node(s) in the graph
 
+    For information about _longest_path() please see the docstring of that function.
+
     TODO: this might be broken (in conjunction with the ref.-seq index) for versions where a ref.-seq is shorter than the longest path
 
     :param protein_graph: Protein-Graph as created by ProtGraph. Expected to have at
@@ -22,6 +24,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
 
     :return: `index` of structure {aminoacid_pos : [nodes]}, `msg` with potential error
         info, `longest_paths`: {node: longest path counting aminoacids}
+    :rtype: tuple
     """
     for node in protein_graph.nodes:
         if protein_graph.nodes[node]["aminoacid"] == "__start__":
@@ -29,7 +32,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             break
     else:
         msg = "No starting point found in the graph. An error in the graph creation is likely."
-        logger.critical(msg)
+        logger.error(msg)
         return None, msg, None
 
     longest_paths = _longest_paths(protein_graph, starting_point)
@@ -40,7 +43,7 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
             and longest_paths[node] < seq_len
         ):
             msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
-            logger.critical(msg)
+            logger.error(msg)
             return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
@@ -73,10 +76,18 @@ def _create_graph_index(protein_graph: nx.DiGraph, seq_len: int):
 
 def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     """
-    create mapping from node to distance where the distance is the longest path
-    from the starting point to each node
+    Create a dict from node to longest_path to that node. The longest path to a node n
+    is the longest path from the start node (source of the DAG) to the
+    predecessor p of all Predecessors P of n with p having the greatest longest distance
+    of all of q of P + the length of the aminoacid of n.
 
     A Variation is assumed to only ever be one aminoacid long.
+
+    e.g.:            n1     n2    n3   n5
+        __start__ -> ABC -> DE -> F -> JK -> __end__
+                               \  L  /
+                                  n4
+        longest_paths: {n1: 0, n2: 3, n3: 5, n4: 5, n5: 6, __end__: 8}
 
     :param protein_graph: Protein-Graph as created by ProtGraph \
         (-> _create_protein_variation_graph)
@@ -84,7 +95,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     :param start_node: Source of protein_graph
     :type: str
 
-    :return: dict {node: length of the longest path to node}
+    :return: Dict of {node: longest path from start_node to node}
+    :rtype: dict
     """
     topo_order = list(nx.topological_sort(protein_graph))
 
