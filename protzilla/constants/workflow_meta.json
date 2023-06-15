@@ -1488,7 +1488,7 @@
           "weighted_score": {
             "name": "Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2",
             "type": "numeric",
-            "default": "1.0"
+            "default": 1
           },
           "metadata_df": {
             "type": "empty",
@@ -1577,7 +1577,7 @@
           "weighted_score": {
             "name": "Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2",
             "type": "numeric",
-            "default": "1.0"
+            "default": 1
           }
         }
       }
