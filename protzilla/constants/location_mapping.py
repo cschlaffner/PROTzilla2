@@ -6,9 +6,15 @@ from ..data_analysis import (
     plots,
 )
 from ..data_integration import di_plots, enrichment_analysis
-from ..data_preprocessing import (filter_proteins, filter_samples, imputation,
-                                  normalisation, outlier_detection,
-                                  peptide_filter, transformation)
+from ..data_preprocessing import (
+    filter_proteins,
+    filter_samples,
+    imputation,
+    normalisation,
+    outlier_detection,
+    peptide_filter,
+    transformation,
+)
 from ..importing import metadata_import, ms_data_import, peptide_import
 
 """

@@ -389,6 +389,7 @@ def gsea(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
+            verbose=True,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"

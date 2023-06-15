@@ -94,6 +94,7 @@ def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
         assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
     assert filtered_groups == expected_filtered_groups
 
+
 # isort:end_skip_file
 
 
