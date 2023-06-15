@@ -92,7 +92,7 @@ def read_protein_or_gene_sets_file(path):
     :return: dict with protein or gene sets, a path to a gmt file or error message
     :rtype: dict
     """
-    if path == "" or path is None:
+    if not path:
         return dict(
             messages=[
                 dict(
@@ -108,8 +108,7 @@ def read_protein_or_gene_sets_file(path):
             reader = csv.reader(f)
             sets = {}
             for row in reader:
-                key = row[0]
-                values = row[1:]
+                key, *values = row
                 sets[key] = values
 
     elif file_extension == ".txt":

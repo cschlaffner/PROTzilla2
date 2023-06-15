@@ -133,11 +133,11 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    if gene_sets_path is not None and gene_sets_path != "":
+    if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
             return gene_sets
-    elif gene_sets_enrichr is not None and gene_sets_enrichr != []:
+    elif gene_sets_enrichr:
         gene_sets = (
             [gene_sets_enrichr]
             if not isinstance(gene_sets_enrichr, list)
@@ -157,7 +157,7 @@ def gsea(
     ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
 
     if not gene_to_groups:
-        msg = "All proteins could not be mapped to gene symbols"
+        msg = "No proteins could be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
             messages=[dict(level=messages.ERROR, msg=msg)],
