@@ -97,6 +97,33 @@ def multi_route():
 
 
 @pytest.fixture
+def multi_route_long_nodes():
+    G = nx.DiGraph()
+    G.add_edge("0", "1")
+    G.add_edge("1", "2")
+    G.add_edge("1", "3")
+    G.add_edge("2", "4")
+    G.add_edge("3", "4")
+    G.add_edge("4", "5")
+
+    nx.set_node_attributes(
+        G,
+        {
+            "0": {"aminoacid": "__start__"},
+            "1": {"aminoacid": "ABCDEFG"},
+            "2": {"aminoacid": "H"},
+            "3": {"aminoacid": "I"},
+            "4": {"aminoacid": "JKABCDLMNOP"},
+            "5": {"aminoacid": "__end__"},
+        },
+    )
+
+    start_node = "0"
+    seq_len = 6
+    return G, start_node, seq_len
+
+
+@pytest.fixture
 def multi_route_shortcut():
     G = nx.DiGraph()
     G.add_edge("0", "1")
@@ -528,7 +555,7 @@ def test_match_peptides_k5():
         "ABCDEGA": [0],
         "BCDET": [7],
     }
-    planned_peptide_mismatches = {"CDE"}
+    planned_peptide_mismatches = ["CDE"]
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
@@ -559,7 +586,7 @@ def test_match_peptides_k3():
         "BCDET": [1, 7],
         "CDE": [2, 8],
     }
-    planned_peptide_mismatches = set()
+    planned_peptide_mismatches = []
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
@@ -590,7 +617,7 @@ def test_match_peptides_mismatches_k3():
         "BCDET": [1, 7],
         "CDE": [2, 8],
     }
-    planned_peptide_mismatches = {"ABDEF", "BCDETXXX", "BCDETXX"}
+    planned_peptide_mismatches = ["ABDEF", "BCDETXX", "BCDETXXX"]
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
@@ -655,7 +682,7 @@ def test_match_peptides_early_mismatch_late_match():
     planned_peptide_matches = {
         "BCDXXX": [7],
     }
-    planned_peptide_mismatches = set()
+    planned_peptide_mismatches = []
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
@@ -879,7 +906,7 @@ def test_create_contigs_dict_2_pep_multi_match():
     assert contigs == planned_contigs
 
 
-def test_modify_graph_simple_1_pep_start_match(simple_graph):
+def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     # peptide: ABC
     longest_paths = {"1": 0}
     contigs = {"1": [(0, 2)]}
@@ -902,7 +929,7 @@ def test_modify_graph_simple_1_pep_start_match(simple_graph):
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
-def test_modify_graph_simple_1_pep_end_match(simple_graph):
+def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
     # "0": {"aminoacid": "__start__"},
     # "1": {"aminoacid": "ABCDEFG"},
     # "2": {"aminoacid": "__end__"},
@@ -916,16 +943,80 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph):
     planned_graph.add_edge("0", "n3")
     planned_graph.add_edge("n3", "1")
     planned_graph.remove_edge("0", "1")
-
     nx.set_node_attributes(planned_graph, {"1": {"aminoacid": "EFG", "match": "true"}})
 
     graph = _modify_graph(graph, contigs, longest_paths)
+    assert nx.utils.graphs_equal(graph, planned_graph)
 
+
+def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
+    # peptide: ABCDEFG
+    longest_paths = {"1": 0}
+    contigs = {"1": [(0, 6)]}
+    graph, _, _ = simple_graph
+    planned_graph = graph.copy()
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "1": {"aminoacid": "ABCDEFG", "match": "true"},
+        },
+    )
+
+    graph = _modify_graph(graph, contigs, longest_paths)
+    assert nx.utils.graphs_equal(graph, planned_graph)
+
+
+def test_modify_graph_simple_1_pep_2_nodes_middle_match(multi_route_long_nodes):
+    # "0": {"aminoacid": "__start__"},
+    # "1": {"aminoacid": "ABCDEFG"},
+    #                     0   4
+    # "2": {"aminoacid": "H"},
+    # "3": {"aminoacid": "I"},
+    #                     7
+    # "4": {"aminoacid": "JKABCDLMNOP"},
+    #                     8 10    15
+    # "5": {"aminoacid": "__end__"},
+    # peptides: ABCD, NOP
+
+    longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
+    contigs = {"1": [(0, 3)], "4": [(10, 13), (16, 18)]}
+
+    graph, _, _ = multi_route_long_nodes
+    planned_graph = graph.copy()
+    planned_graph.add_node("n6", aminoacid="ABCD", match="true")
+    planned_graph.add_edge("0", "n6")
+    planned_graph.add_edge("n6", "1")
+    planned_graph.remove_edge("0", "1")
+    planned_graph.add_node("n7", aminoacid="JK", match="false")
+    planned_graph.add_edge("2", "n7")
+    planned_graph.add_edge("3", "n7")
+    planned_graph.remove_edge("2", "4")
+    planned_graph.remove_edge("3", "4")
+    planned_graph.add_node("n8", aminoacid="ABCD", match="true")
+    planned_graph.add_edge("n7", "n8")
+    planned_graph.add_node("n9", aminoacid="LM", match="false")
+    planned_graph.add_edge("n8", "n9")
+    planned_graph.add_edge("n9", "4")
+
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "1": {"aminoacid": "EFG", "match": "false"},
+            "2": {"aminoacid": "H"},
+            "3": {"aminoacid": "I"},
+            "4": {"aminoacid": "NOP", "match": "true"},
+        },
+    )
+
+    graph = _modify_graph(graph, contigs, longest_paths)
+    assert nx.utils.graphs_equal(graph, planned_graph)
+
+
+def pprint_graphs(graph, planned_graph):
+    # for debugging
     import pprint
 
     print("planned_graph")
     pprint.pprint(planned_graph.__dict__)
     print("graph")
     pprint.pprint(graph.__dict__)
-
-    assert nx.utils.graphs_equal(graph, planned_graph)
