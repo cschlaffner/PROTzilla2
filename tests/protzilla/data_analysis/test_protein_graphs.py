@@ -9,10 +9,12 @@ from django.contrib import messages
 
 from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
 from protzilla.data_analysis.protein_graphs import (
+    _create_contigs_dict,
     _create_graph_index,
     _create_protein_variation_graph,
     _create_ref_seq_index,
     _get_ref_seq,
+    _get_start_end_pos_for_matches,
     _longest_paths,
     _match_peptides,
 )
@@ -42,6 +44,7 @@ def simple_graph():
 
 @pytest.fixture
 def shortcut():
+    # in theory, with just ft VARIANT (-> graph generation), this should never happen
     G = nx.DiGraph()
     G.add_edge("0", "1")
     G.add_edge("1", "2")
@@ -720,3 +723,147 @@ def test_create_protein_variation_graph_bad_request(
         _create_protein_variation_graph(protein_id=protein_id, run_name="test_run")
         == planned_out
     )
+
+
+def test_get_start_end_pos_for_matches_simple():
+    graph_index_simple = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+        [("1", "E")],
+        [("1", "F")],
+        [("1", "G")],
+    ]
+    peptide_matches = {"ABC": [0], "EFG": [4]}
+    planned_s_e = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
+
+    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index_simple)
+    assert planned_s_e == node_start_end
+
+
+def test_get_start_end_pos_for_matches_1_pep_2_match():
+    graph_index_mulitroute = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
+        [("4", "A")],
+        [("4", "B")],
+    ]
+    peptide_matches = {"AB": [0, 4]}
+    planned_s_e = {"1": {"AB": {0: 1}}, "4": {"AB": {4: 5}}}
+
+    node_start_end = _get_start_end_pos_for_matches(
+        peptide_matches, graph_index_mulitroute
+    )
+    assert planned_s_e == node_start_end
+
+
+def test_get_start_end_pos_for_matches_1_pep_2_match_same_node():
+    graph_index = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+        [("1", "E")],
+        [("1", "F")],
+        [("1", "G")],
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+    ]
+    peptide_matches = {"ABCD": [0, 7]}
+    planned_s_e = {"1": {"ABCD": {0: 3, 7: 10}}}
+
+    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
+    assert planned_s_e == node_start_end
+
+
+def test_get_start_end_pos_for_matches_2_pep_multi_match():
+    graph_index = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+        [("1", "E")],
+        [("1", "F")],
+        [("1", "G")],
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("1", "D")],
+        [("2", "D"), ("3", "E")],
+        [("4", "A")],
+        [("4", "B")],
+        [("4", "C")],
+        [("4", "D")],
+        [("4", "E")],
+        [("4", "F")],
+        [("4", "G")],
+        [("4", "A")],
+        [("4", "B")],
+        [("4", "C")],
+        [("4", "D")],
+    ]
+    peptide_matches = {"ABCD": [0, 7, 12, 19], "FGA": [5, 17]}
+    planned_s_e = {
+        "1": {"ABCD": {0: 3, 7: 10}, "FGA": {5: 7}},
+        "4": {"ABCD": {12: 15, 19: 22}, "FGA": {17: 19}},
+    }
+
+    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
+    assert planned_s_e == node_start_end
+
+
+def test_get_start_end_pos_for_matches_variation_matching():
+    graph_index = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
+        [("4", "A")],
+        [("4", "B")],
+    ]
+    peptide_matches = {"ABCD": [0]}
+
+    with pytest.raises(
+        NotImplementedError, match="Variation matching not implemented yet"
+    ):
+        _get_start_end_pos_for_matches(peptide_matches, graph_index)
+
+
+def test_create_contigs_dict_simple():
+    node_start_end = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
+    planned_contigs = {"1": [(0, 2), (4, 6)]}
+
+    contigs = _create_contigs_dict(node_start_end)
+    assert planned_contigs == contigs
+
+
+def test_create_contigs_dict_1_pep_2_match():
+    node_start_end = {"1": {"AB": {0: 1}}, "4": {"AB": {4: 5}}}
+    planned_contigs = {"1": [(0, 1)], "4": [(4, 5)]}
+
+    contigs = _create_contigs_dict(node_start_end)
+    assert contigs == planned_contigs
+
+
+def test_create_contigs_dict_1_pep_2_match_same_node():
+    node_start_end = {"1": {"ABCD": {0: 3, 7: 10}}}
+    planned_contigs = {"1": [(0, 3), (7, 10)]}
+
+    contigs = _create_contigs_dict(node_start_end)
+    assert contigs == planned_contigs
+
+
+def test_create_contigs_dict_2_pep_multi_match():
+    node_start_end = {
+        "1": {"ABCD": {0: 3, 7: 10}, "FGA": {5: 7}},
+        "4": {"ABCD": {12: 15, 19: 22}, "FGA": {17: 19}},
+    }
+    planned_contigs = {"1": [(0, 3), (5, 10)], "4": [(12, 15), (17, 22)]}
+
+    contigs = _create_contigs_dict(node_start_end)
+    assert contigs == planned_contigs
