@@ -700,7 +700,7 @@ def test_create_prot_variation_graph(
     # that
 
     protein_id = "test_protein_variation"
-    protein_path = f"/Users/anton/Documents/code/PROTzilla2/tests/test_data/proteins/{protein_id}.txt"
+    protein_path = f"{TEST_DATA_PATH}/proteins/{protein_id}.txt"
     mock_request = mock.MagicMock()
     mock_request.status_code = 200
 
@@ -974,7 +974,7 @@ def test_modify_graph_simple_1_pep_2_nodes_middle_match(multi_route_long_nodes):
     # "3": {"aminoacid": "I"},
     #                     7
     # "4": {"aminoacid": "JKABCDLMNOP"},
-    #                     8 10    15
+    #                     8 10    16
     # "5": {"aminoacid": "__end__"},
     # peptides: ABCD, NOP
 
@@ -1010,6 +1010,9 @@ def test_modify_graph_simple_1_pep_2_nodes_middle_match(multi_route_long_nodes):
 
     graph = _modify_graph(graph, contigs, longest_paths)
     assert nx.utils.graphs_equal(graph, planned_graph)
+
+
+# def test_get_peptides
 
 
 def pprint_graphs(graph, planned_graph):

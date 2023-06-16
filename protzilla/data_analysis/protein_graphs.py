@@ -12,16 +12,9 @@ from protzilla.constants.paths import RUNS_PATH
 
 
 def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
-    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
-    pattern = rf"^({protein_id}-\d+)$"
-    filter = df["Protein ID"].str.contains(pattern)
-    df = df[~filter]
+    peptides = _get_peptides(peptide_df=peptide_df, protein_id=protein_id)
 
-    intensity_name = [col for col in df.columns if "intensity" in col][0]
-    df = df.dropna(subset=[intensity_name])
-    df = df[df[intensity_name] != 0]
-
-    if df.empty:
+    if not peptides:
         msg = f"No peptides found for isoform {protein_id} in Peptide Dataframe"
         logger.error(msg)
         return dict(
@@ -33,7 +26,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
                 )
             ],
         )
-    peptides = df["Sequence"].unique().tolist()
 
     potential_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
     if not Path(potential_graph_path).exists():
@@ -653,3 +645,15 @@ def _modify_graph(graph, contig_positions, longest_paths):
                         graph.remove_edge(node, successor)
 
     return graph
+
+
+def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None:
+    df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
+    pattern = rf"^({protein_id}-\d+)$"
+    filter = df["Protein ID"].str.contains(pattern)
+    df = df[~filter]
+
+    intensity_name = [col for col in df.columns if "intensity" in col][0]
+    df = df.dropna(subset=[intensity_name])
+    df = df[df[intensity_name] != 0]
+    return df["Sequence"].unique().tolist()
