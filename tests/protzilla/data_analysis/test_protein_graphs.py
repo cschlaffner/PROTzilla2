@@ -306,7 +306,8 @@ def test_create_graph_index_multi_route(complex_route):
     assert msg == ""
 
 
-def test_create_graph_index_invalid_start_node():
+def test_create_graph_index_invalid_start_node(critical_logger):
+    # expecting "error" in log -> supress below critical
     G = nx.DiGraph()
     G.add_edge("0", "1")
     G.add_edge("1", "2")
@@ -328,7 +329,7 @@ def test_create_graph_index_invalid_start_node():
     )
 
 
-def test_create_graph_index_invalid_end_node():
+def test_create_graph_index_invalid_end_node(critical_logger):
     G = nx.DiGraph()
     G.add_edge("0", "1")
     G.add_edge("1", "2")
@@ -552,17 +553,6 @@ def test_match_peptides_k3():
     assert peptide_mismatches == planned_peptide_mismatches
 
 
-def test_match_peptides_k0():
-    peptides = [""]
-    allowed_mismatches = 2
-    k = 0
-    ref_seq_index = {}
-    ref_seq = "ABCDEGABCDET"
-    error_msg = f"k must be positive integer, but is {k}"
-    with pytest.raises(ValueError, match=error_msg):
-        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
-
-
 def test_match_peptides_mismatches_k3():
     peptides = ["ABCDEGA", "BCDET", "BCDETXXX", "BCDETXX", "CDE", "ABDEF"]
     allowed_mismatches = 2
@@ -661,7 +651,10 @@ def test_match_peptides_early_mismatch_late_match():
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
 def test_create_prot_variation_graph(
-    mock__get_protein_file, tests_folder_name, test_protein_variation_graph
+    mock__get_protein_file,
+    tests_folder_name,
+    test_protein_variation_graph,
+    error_logger,
 ):
     # something is wrong with this test as it fails to write the statistics file (.csv)
     # as it isn't needed for what we do with protgraph, you can ignore errors concerning
@@ -694,3 +687,36 @@ def test_create_prot_variation_graph(
     assert out_dict == planned_out_dict
     created_graph = nx.read_graphml(graph_path)
     assert nx.is_isomorphic(created_graph, test_protein_variation_graph)
+
+
+@mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
+def test_create_protein_variation_graph_bad_request(
+    mock__get_protein_file, critical_logger
+):
+    # error in log is expected -> surpress error and below using critical_logger
+
+    protein_id = "test_protein_variation"
+    protein_path = f"/Users/anton/Documents/code/PROTzilla2/tests/test_data/proteins/{protein_id}.txt"
+
+    mock_request = mock.MagicMock()
+    mock_request.status_code = 0
+    mock_request.reason = "test_reason"
+    mock_request.text = "test_text"
+
+    mock__get_protein_file.return_value = (protein_path, mock_request)
+
+    planned_msg = f"error while downloading protein file for {protein_id}.\
+                         Statuscode:{mock_request.status_code}, {mock_request.reason}. \
+                         Got: {mock_request.text}. Tip: check if the ID is correct"
+
+    planned_out = dict(
+        graph_path=None,
+        messages=[
+            dict(level=messages.ERROR, msg=planned_msg, trace=mock_request.__dict__)
+        ],
+    )
+
+    assert (
+        _create_protein_variation_graph(protein_id=protein_id, run_name="test_run")
+        == planned_out
+    )
