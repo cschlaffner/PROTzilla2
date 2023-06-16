@@ -470,7 +470,7 @@ def _match_peptides(
     logger.debug(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
-    return peptide_matches, peptide_mismatches
+    return peptide_matches, list(peptide_mismatches)
 
 
 def _create_contigs_dict(node_start_end: dict):

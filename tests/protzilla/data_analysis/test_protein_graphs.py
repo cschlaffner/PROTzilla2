@@ -17,6 +17,7 @@ from protzilla.data_analysis.protein_graphs import (
     _get_start_end_pos_for_matches,
     _longest_paths,
     _match_peptides,
+    _modify_graph,
 )
 from protzilla.utilities.random import random_string
 
@@ -876,3 +877,55 @@ def test_create_contigs_dict_2_pep_multi_match():
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
+
+
+def test_modify_graph_simple_1_pep_start_match(simple_graph):
+    # peptide: ABC
+    longest_paths = {"1": 0}
+    contigs = {"1": [(0, 2)]}
+    graph, _, _ = simple_graph
+    planned_graph = graph.copy()
+    planned_graph.add_node("n3", aminoacid="ABC")
+    planned_graph.add_edge("0", "n3")
+    planned_graph.add_edge("n3", "1")
+    planned_graph.remove_edge("0", "1")
+
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "1": {"aminoacid": "DEFG", "match": "false"},
+            "n3": {"aminoacid": "ABC", "match": "true"},
+        },
+    )
+
+    graph = _modify_graph(graph, contigs, longest_paths)
+    assert nx.utils.graphs_equal(graph, planned_graph)
+
+
+def test_modify_graph_simple_1_pep_end_match(simple_graph):
+    # "0": {"aminoacid": "__start__"},
+    # "1": {"aminoacid": "ABCDEFG"},
+    # "2": {"aminoacid": "__end__"},
+
+    # peptide EFG, ref_seq: ABCDEFG
+    longest_paths = {"1": 0}
+    contigs = {"1": [(4, 6)]}
+    graph, _, _ = simple_graph
+    planned_graph = graph.copy()
+    planned_graph.add_node("n3", aminoacid="ABCD", match="false")
+    planned_graph.add_edge("0", "n3")
+    planned_graph.add_edge("n3", "1")
+    planned_graph.remove_edge("0", "1")
+
+    nx.set_node_attributes(planned_graph, {"1": {"aminoacid": "EFG", "match": "true"}})
+
+    graph = _modify_graph(graph, contigs, longest_paths)
+
+    import pprint
+
+    print("planned_graph")
+    pprint.pprint(planned_graph.__dict__)
+    print("graph")
+    pprint.pprint(graph.__dict__)
+
+    assert nx.utils.graphs_equal(graph, planned_graph)
