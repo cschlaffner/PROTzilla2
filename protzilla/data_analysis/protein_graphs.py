@@ -1,5 +1,3 @@
-import math
-import pprint
 import re
 import subprocess
 from pathlib import Path
@@ -78,13 +76,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     )
 
     node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
-    print(node_start_end)
-
     contigs = _create_contigs_dict(node_start_end)
-
-    print("contigs by myself")
-    print(contigs)
-
     modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
 
     logger.info(f"writing modified graph at {matched_graph_path}")
@@ -411,7 +403,6 @@ def _match_peptides(
     allowed_mismatches: int, k: int, peptides: list, ref_index: dict, ref_seq: str
 ):
     """
-    # TODO peptides aren't yet matched if a mismatch occurs within the first k chars
     Match peptides to reference sequence. `allowed_mismatches` many mismatches are
     allowed per try to match peptide to a potential start position in ref_index
 
@@ -647,119 +638,6 @@ def _modify_graph(graph, contig_positions, longest_paths):
                     graph.remove_edge(node, successor)
 
     return graph
-
-
-def _outdated_map_matches_to_node(peptide_matches, graph_index):
-    """
-    to be used in conjunction with _outdated_node_start_end
-    """
-
-    peptide_to_node = {}
-    for peptide, indices in peptide_matches.items():
-        for start_index in indices:
-            for i in range(start_index, start_index + len(peptide)):
-                # TODO: when match is part of variation:
-                #  lookup in which of the possible nodes the aa is present
-                #  -> adopt graph index
-
-                if peptide in peptide_to_node:
-                    peptide_to_node[peptide].append((graph_index[i], i))
-                else:
-                    peptide_to_node[peptide] = [(graph_index[i], i)]
-
-    return peptide_to_node
-
-
-def _outdated_node_start_end(peptide_to_node, peptide_matches):
-    logger.critical("this shouldn't be used anymore")
-    node_start_end = {}
-    for peptide, values in peptide_to_node.items():
-        peptide_len = len(peptide)
-
-        for i, match_start_pos in enumerate(peptide_matches[peptide]):
-            for aa_match_values in values:
-                if i < len(peptide_matches[peptide]) - 1:
-                    next_start = peptide_matches[peptide][i + 1]
-                elif aa_match_values[1] < match_start_pos:
-                    continue
-                else:
-                    next_start = math.inf
-
-                if aa_match_values[1] < match_start_pos:
-                    logger.debug(
-                        "found 'less than match start'", peptide, aa_match_values[1]
-                    )
-                    continue
-                if aa_match_values[1] > match_start_pos + peptide_len:
-                    logger.debug(
-                        "should probably be skipped as likely part of next match"
-                    )
-                if aa_match_values[1] >= next_start:
-                    logger.debug(
-                        "found 'greater than next start'", peptide, aa_match_values[1]
-                    )
-                    continue
-                pos_aa = aa_match_values[1]
-
-                for node, aa in aa_match_values[0]:
-                    # TODO: what happens when ref_seq < longest path?
-                    aa_pos_in_node = pos_aa
-
-                    if node in node_start_end:
-                        if peptide not in node_start_end[node]:
-                            node_start_end[node][peptide] = {
-                                match_start_pos: {
-                                    "start": (aa_pos_in_node, aa),
-                                    "end": (aa_pos_in_node, aa),
-                                }
-                            }
-                            continue
-                        if match_start_pos not in node_start_end[node][peptide]:
-                            node_start_end[node][peptide][match_start_pos] = {
-                                "start": (aa_pos_in_node, aa),
-                                "end": (aa_pos_in_node, aa),
-                            }
-                            continue
-                        if (
-                            aa_pos_in_node
-                            < node_start_end[node][peptide][match_start_pos]["start"][0]
-                        ):
-                            node_start_end[node][peptide][match_start_pos]["start"] = (
-                                aa_pos_in_node,
-                                aa,
-                            )
-
-                        elif (
-                            aa_pos_in_node
-                            > node_start_end[node][peptide][match_start_pos]["end"][0]
-                        ):
-                            node_start_end[node][peptide][match_start_pos]["end"] = (
-                                aa_pos_in_node,
-                                aa,
-                            )
-
-                        elif (
-                            aa_pos_in_node
-                            == node_start_end[node][peptide][match_start_pos]["start"][
-                                0
-                            ]
-                        ):
-                            logger.debug(
-                                f"match_start_pos already exists for node {node}, peptide {peptide}, aa_pos_in_node {aa_pos_in_node}, aa {aa}"
-                            )
-
-                    else:
-                        node_start_end[node] = {
-                            peptide: {
-                                match_start_pos: {
-                                    "start": (aa_pos_in_node, aa),
-                                    "end": (aa_pos_in_node, aa),
-                                }
-                            }
-                        }
-
-    print("node_start_end by me")
-    pprint.pprint(node_start_end)
 
 
 if __name__ == "__main__":
