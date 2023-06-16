@@ -74,7 +74,8 @@ logger.setLevel(protzilla_logging_level)
 logger.addHandler(ProtzillaLoggingHandler(protzilla_logging_level))
 
 MESSAGE_TO_LOGGING_FUNCTION = {
-    messages.ERROR: logging.error,
-    messages.WARNING: logging.warning,
-    messages.INFO: logging.info,
+    messages.ERROR: logger.error,
+    messages.WARNING: logger.warning,
+    messages.INFO: logger.info,
+    messages.DEBUG: logger.debug,
 }
