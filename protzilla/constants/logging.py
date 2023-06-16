@@ -77,5 +77,4 @@ MESSAGE_TO_LOGGING_FUNCTION = {
     messages.ERROR: logger.error,
     messages.WARNING: logger.warning,
     messages.INFO: logger.info,
-    messages.DEBUG: logger.debug,
 }
