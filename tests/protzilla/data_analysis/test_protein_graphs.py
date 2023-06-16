@@ -164,12 +164,18 @@ def complex_route():
 def test_protein_variation_graph():
     g = nx.DiGraph()
 
-    g.add_node("n0", aminoacid="__start__", accession="PROTZILLA_TEST", position=0.0)
-    g.add_node("n1", aminoacid="D", accession="PROTZILLA_TEST", position=4.0)
-    g.add_node("n2", aminoacid="__end__", accession="PROTZILLA_TEST", position=13.0)
-    g.add_node("n3", aminoacid="V", accession="PROTZILLA_TEST")
-    g.add_node("n4", aminoacid="EGABCDET", accession="PROTZILLA_TEST", position=5.0)
-    g.add_node("n5", aminoacid="ABC", accession="PROTZILLA_TEST", position=1.0)
+    g.add_node(
+        "n0", aminoacid="__start__", accession="test_protein_variation", position=0.0
+    )
+    g.add_node("n1", aminoacid="D", accession="test_protein_variation", position=4.0)
+    g.add_node(
+        "n2", aminoacid="__end__", accession="test_protein_variation", position=13.0
+    )
+    g.add_node("n3", aminoacid="V", accession="test_protein_variation")
+    g.add_node(
+        "n4", aminoacid="EGABCDET", accession="test_protein_variation", position=5.0
+    )
+    g.add_node("n5", aminoacid="ABC", accession="test_protein_variation", position=1.0)
 
     g.add_edge("n0", "n5")
     g.add_edge("n1", "n4")
@@ -177,6 +183,8 @@ def test_protein_variation_graph():
     g.add_edge("n4", "n2")
     g.add_edge("n5", "n1")
     g.add_edge("n5", "n3")
+
+    g.graph = {"edge_default": {}, "node_default": {}}
 
     return g
 
@@ -690,6 +698,7 @@ def test_create_prot_variation_graph(
     assert out_dict == planned_out_dict
     created_graph = nx.read_graphml(graph_path)
     assert nx.is_isomorphic(created_graph, test_protein_variation_graph)
+    assert nx.utils.graphs_equal(created_graph, test_protein_variation_graph)
 
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
