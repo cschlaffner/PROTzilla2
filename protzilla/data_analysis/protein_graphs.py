@@ -99,9 +99,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     )
 
 
-def _create_protein_variation_graph(
-    protein_id: str, run_name: str, queue_size: int = None
-):
+def _create_protein_variation_graph(protein_id: str, run_name: str):
     """
     Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
     Included features are just `Variation`, digestion is skipped.

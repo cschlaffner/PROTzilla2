@@ -1,5 +1,5 @@
-ID   PROTZILLA_TEST        Unreviewed;         12 AA.
-AC   PROTZILLA_TEST
+ID   test_protein_variation        Unreviewed;         12 AA.
+AC   test_protein_variation
 DE   RecName: Full=Protzillas Made up Test Protein;
 DE            Short=hnRNP A2/B1;
 FT   VARIANT         4

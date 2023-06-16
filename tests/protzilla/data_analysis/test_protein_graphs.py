@@ -663,13 +663,17 @@ def test_match_peptides_early_mismatch_late_match():
 def test_create_prot_variation_graph(
     mock__get_protein_file, tests_folder_name, test_protein_variation_graph
 ):
+    # something is wrong with this test as it fails to write the statistics file (.csv)
+    # as it isn't needed for what we do with protgraph, you can ignore errors concerning
+    # that
+
     protein_id = "test_protein_variation"
     protein_path = f"/Users/anton/Documents/code/PROTzilla2/tests/test_data/proteins/{protein_id}.txt"
     mock_request = mock.MagicMock()
     mock_request.status_code = 200
 
     run_name = (
-        tests_folder_name + "/_test_create_prot_variation_graph_" + random_string()
+        tests_folder_name + "/test_create_prot_variation_graph_" + random_string()
     )
     os.mkdir(f"{RUNS_PATH}/{run_name}")
 
@@ -686,10 +690,7 @@ def test_create_prot_variation_graph(
         "graph_path": f"{output_folder}/{protein_id}.graphml",
         "messages": [dict(level=messages.INFO, msg=planned_msg)],
     }
+
     assert out_dict == planned_out_dict
-
-    print("graph_path")
-    print(graph_path)
-
     created_graph = nx.read_graphml(graph_path)
-    assert created_graph == test_protein_variation_graph
+    assert nx.is_isomorphic(created_graph, test_protein_variation_graph)
