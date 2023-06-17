@@ -51,23 +51,8 @@ def perform_classification(
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
-        train_val_split = perform_train_test_split(
-            input_df, labels_df, test_size=test_validate_split
-        )
-        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model = perform_grid_search_manual(
-            grid_search_method,
-            clf,
-            clf_parameters,
-            scoring,
-        )
-        model.fit(train_val_split)
-
-        # create model evaluation dataframe
-        model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.results), clf_parameters, scoring
-        )
-        return model, model_evaluation_df
+        # Error: not possible
+        pass
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
         cv = perform_cross_validation(validation_strategy, **parameters)
@@ -263,6 +248,7 @@ def svm(
         tol=tol,
         class_weight=class_weight,
         max_iter=max_iter,
+        random_state=random_state,
     )
     # multiselect returns a string when only one value is selected
     scoring = [scoring] if isinstance(scoring, str) else scoring

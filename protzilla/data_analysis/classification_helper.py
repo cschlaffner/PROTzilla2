@@ -7,7 +7,6 @@ from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
-    roc_auc_score,
     matthews_corrcoef,
 )
 from sklearn.model_selection import (
@@ -66,21 +65,6 @@ def perform_grid_search_cv(
             scoring=scoring,
             cv=cv,
             refit=scoring[0],
-        )
-
-
-def perform_grid_search_manual(
-    grid_search_model,
-    model,
-    param_grid: dict,
-    scoring,
-    n_iter=10,
-):
-    if grid_search_model == "Grid search":
-        return GridSearchManual(model=model, param_grid=param_grid, scoring=scoring)
-    elif grid_search_model == "Randomized search":
-        return RandomizedSearchManual(
-            model=model, param_grid=param_grid, n_iter=n_iter, scoring=scoring
         )
 
 
@@ -151,80 +135,6 @@ def create_model_evaluation_df_grid_search_manual(clf_parameters, scores):
 
     results_df = pd.DataFrame(results)
     return results_df
-
-
-@dataclass
-class GridSearchManual:
-    model: Pipeline
-    param_grid: dict
-    scoring: str
-    train_val_split: tuple = None
-    results: dict = None
-
-    def __post_init__(self):
-        if self.results is None:
-            self.results = defaultdict(list)
-
-    def fit(self, train_val_split):
-        self.train_val_split = train_val_split
-        X_train, X_val, y_train, y_val = self.train_val_split
-        # Iterate over the parameter grid
-        for params in ParameterGrid(self.param_grid):
-            model = self.model.set_params(**params)
-            model.fit(X_train, y_train)
-            y_pred_train = model.predict(X_train)
-            train_scores = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
-            y_pred_val = model.predict(X_val)
-            val_scores = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
-
-            # Store the results for the current parameter combination
-            for param_name, param_value in params.items():
-                self.results[f"param_{param_name}"].append(param_value)
-            for score_name, score_value in train_scores.items():
-                self.results[f"mean_train_{score_name}"].append(np.mean(score_value))
-                self.results[f"std_train_{score_name}"].append(np.std(score_value))
-            for score_name, score_value in val_scores.items():
-                self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
-                self.results[f"std_test_{score_name}"].append(np.std(score_value))
-        return self.model
-
-
-@dataclass
-class RandomizedSearchManual:
-    model: Pipeline
-    param_grid: dict
-    scoring: list[str]
-    n_iter: int = 10
-    train_val_split: tuple = None
-    results: dict = None
-
-    def __post_init__(self):
-        if self.results is None:
-            self.results = defaultdict(list)
-
-    def fit(self, train_val_split):
-        self.train_val_split = train_val_split
-        X_train, X_val, y_train, y_val = self.train_val_split
-        # Iterate over the parameter grid
-        for params in ParameterSampler(self.param_grid, self.n_iter):
-            model = self.model.set_params(**params)
-            model.fit(X_train, y_train)
-            y_pred_train = model.predict(X_train)
-            train_scores = evaluate_with_scoring(self.scoring, y_train, y_pred_train)
-            y_pred_val = model.predict(X_val)
-            val_scores = evaluate_with_scoring(self.scoring, y_val, y_pred_val)
-
-            # Store the results for the current parameter combination
-            for param_name, param_value in params.items():
-                self.results[f"param_{param_name}"].append(param_value)
-            for score_name, score_value in train_scores.items():
-                self.results[f"mean_train_{score_name}"].append(np.mean(score_value))
-                self.results[f"std_train_{score_name}"].append(np.std(score_value))
-            for score_name, score_value in val_scores.items():
-                self.results[f"mean_test_{score_name}"].append(np.mean(score_value))
-                self.results[f"std_test_{score_name}"].append(np.std(score_value))
-
-        return self.model
 
 
 def create_dict_with_lists_as_values(d):
