@@ -1,9 +1,19 @@
 import pandas as pd
 from django.contrib import messages
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
+from protzilla.data_analysis.classification_helper import (
+    perform_grid_search_cv,
+    create_dict_with_lists_as_values,
+    create_model_evaluation_df_grid_search,
+    evaluate_clustering_with_scoring,
+    create_model_evaluation_df_grid_search_manual,
+    encode_labels,
+    evaluate_with_scoring,
+)
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 
@@ -83,14 +93,6 @@ def k_means(
         )
 
 
-def perform_grid_search(grid_search_model, model, param_grid: dict, scoring, cv=None):
-    if grid_search_model == "Grid search":
-        clf = GridSearchCV(model, param_grid=param_grid, scoring=scoring)
-    elif grid_search_model == "Randomized search":
-        clf = RandomizedSearchCV(model, param_distributions=param_grid, scoring=scoring)
-    return clf
-
-
 def gmm_bic_score(estimator, X):
     """Callable to pass to GridSearchCV that will use the BIC score."""
     # Make it negative since GridSearchCV expects a score to maximize
@@ -99,86 +101,159 @@ def gmm_bic_score(estimator, X):
 
 def expectation_maximisation(
     input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
     model_selection: str = "Grid search",
+    scoring: list[str] = "completeness_score",
     n_components: int = 1,
     covariance_type: str = "full",
     init_params: str = "kmeans",
     max_iter: int = 100,
 ):
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
-    try:
-        if model_selection == "Manual":
-            clf = GaussianMixture(
-                n_components=n_components,
-                covariance_type=covariance_type,
-                init_params=init_params,
-                max_iter=max_iter,
-            )
-            clf.fit(input_df_wide)
-            model_parameters = clf.get_params()
-            model_evaluation_df = pd.DataFrame(model_parameters, index=[0])
-            model_evaluation_df = model_evaluation_df[
-                ["n_components", "covariance_type", "init_params", "max_iter"]
-            ]
-            model_evaluation_df = model_evaluation_df.rename(
-                columns={
-                    "n_components": "Number of components",
-                    "covariance_type": "Type of covariance",
-                    "init_params": "Initialisation parameters",
-                    "max_iter": "Maximum Number of Iterations",
-                }
-            )
-            model_evaluation_df.insert(4, "BIC Score", [clf.bic(input_df_wide)], True)
-        else:
-            param_grid = {
-                "n_components": [n_components, 3],
-                "covariance_type": [covariance_type],
-                "init_params": [init_params],
-                "max_iter": [max_iter],
-            }
-            clf = perform_grid_search(
-                model_selection,
-                GaussianMixture(),
-                param_grid=param_grid,
-                scoring=gmm_bic_score,
-            )
-            clf.fit(input_df_wide)
-            model_evaluation_df = pd.DataFrame(clf.cv_results_)[
-                [
-                    "param_n_components",
-                    "param_covariance_type",
-                    "param_init_params",
-                    "param_max_iter",
-                    "mean_test_score",
-                ]
-            ]
-            model_evaluation_df["mean_test_score"] = -model_evaluation_df[
-                "mean_test_score"
-            ]
-            model_evaluation_df = model_evaluation_df.rename(
-                columns={
-                    "param_n_components": "Number of components",
-                    "param_covariance_type": "Type of covariance",
-                    "param_init_params": "Initialisation parameters",
-                    "param_max_iter": "Maximum Number of Iterations",
-                    "mean_test_score": "BIC Score",
-                }
-            )
-            model_evaluation_df.sort_values(by="BIC Score").head()
-            model_parameters = clf.best_params_
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(labels_df, labels_column)
 
-        class_probabilities = pd.DataFrame(
-            data=clf.predict_proba(input_df_wide), index=input_df_wide.index
+    clf = GaussianMixture()
+
+    clf_parameters = dict(
+        n_components=n_components,
+        covariance_type=covariance_type,
+        init_params=init_params,
+        max_iter=max_iter,
+    )
+
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
+    model, model_evaluation_df = perform_clustering(
+        input_df_wide,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        labels_df["Encoded Label"],
+    )
+    return dict(model=model, model_evaluation_df=model_evaluation_df)
+    # try:
+    #     if model_selection == "Manual":
+    #         clf = GaussianMixture(
+    #             n_components=n_components,
+    #             covariance_type=covariance_type,
+    #             init_params=init_params,
+    #             max_iter=max_iter,
+    #         )
+    #         clf.fit(input_df_wide)
+    #         model_parameters = clf.get_params()
+    #         model_evaluation_df = pd.DataFrame(model_parameters, index=[0])
+    #         model_evaluation_df = model_evaluation_df[
+    #             ["n_components", "covariance_type", "init_params", "max_iter"]
+    #         ]
+    #         model_evaluation_df = model_evaluation_df.rename(
+    #             columns={
+    #                 "n_components": "Number of components",
+    #                 "covariance_type": "Type of covariance",
+    #                 "init_params": "Initialisation parameters",
+    #                 "max_iter": "Maximum Number of Iterations",
+    #             }
+    #         )
+    #         model_evaluation_df.insert(4, "BIC Score", [clf.bic(input_df_wide)], True)
+    #     else:
+    #         param_grid = {
+    #             "n_components": [n_components, 3],
+    #             "covariance_type": [covariance_type],
+    #             "init_params": [init_params],
+    #             "max_iter": [max_iter],
+    #         }
+    #         clf = perform_grid_search(
+    #             model_selection,
+    #             GaussianMixture(),
+    #             param_grid=param_grid,
+    #             scoring=gmm_bic_score,
+    #         )
+    #         clf.fit(input_df_wide)
+    #         model_evaluation_df = pd.DataFrame(clf.cv_results_)[
+    #             [
+    #                 "param_n_components",
+    #                 "param_covariance_type",
+    #                 "param_init_params",
+    #                 "param_max_iter",
+    #                 "mean_test_score",
+    #             ]
+    #         ]
+    #         model_evaluation_df["mean_test_score"] = -model_evaluation_df[
+    #             "mean_test_score"
+    #         ]
+    #         model_evaluation_df = model_evaluation_df.rename(
+    #             columns={
+    #                 "param_n_components": "Number of components",
+    #                 "param_covariance_type": "Type of covariance",
+    #                 "param_init_params": "Initialisation parameters",
+    #                 "param_max_iter": "Maximum Number of Iterations",
+    #                 "mean_test_score": "BIC Score",
+    #             }
+    #         )
+    #         model_evaluation_df.sort_values(by="BIC Score").head()
+    #         model_parameters = clf.best_params_
+    #
+    #     class_probabilities = pd.DataFrame(
+    #         data=clf.predict_proba(input_df_wide), index=input_df_wide.index
+    #     )
+    #     labels = pd.DataFrame(
+    #         data=clf.predict(input_df_wide),
+    #         index=input_df_wide.index,
+    #         columns=["Cluster Labels"],
+    #     )
+    #     return dict(
+    #         model_parameters=model_parameters,
+    #         class_probabilities_df=class_probabilities,
+    #         labels=labels,
+    #     )
+    # except Exception as e:
+    #     return dict(messages="")
+
+
+def perform_clustering(
+    input_df,
+    model_selection,
+    clf,
+    clf_parameters,
+    scoring,
+    labels_df=None,  # optional
+    **parameters,
+):
+    if model_selection == "Manual":
+        model = clf.set_params(**clf_parameters)
+        labels_pred = model.fit_predict(input_df)
+        scores = evaluate_clustering_with_scoring(scoring, labels_df, labels_pred)
+        model_evaluation_df = create_model_evaluation_df_grid_search_manual(
+            clf_parameters,
+            scores,
         )
-        labels = pd.DataFrame(
-            data=clf.predict(input_df_wide),
-            index=input_df_wide.index,
-            columns=["Cluster Labels"],
+        # clf.bic(input_df)
+    else:
+        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
+        model = perform_grid_search_cv(
+            model_selection,
+            clf,
+            clf_parameters,
+            scorer(scoring),
         )
-        return dict(
-            model_parameters=model_parameters,
-            class_probabilities_df=class_probabilities,
-            labels=labels,
+        model.fit(input_df, labels_df)
+        model_evaluation_df = create_model_evaluation_df_grid_search(
+            pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-    except Exception as e:
-        return dict(messages="")
+
+    return model, model_evaluation_df
+
+
+def scorer(scoring):
+    def _scorer(estimator, X, y=None):
+        y_pred = estimator.fit_predict(X)
+        return evaluate_clustering_with_scoring(scoring, y, y_pred)
+
+    return _scorer
