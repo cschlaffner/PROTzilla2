@@ -48,11 +48,20 @@ def decode_labels(encoding_mapping, labels):
 
 
 def perform_grid_search_cv(
-    grid_search_model, model, param_grid: dict, scoring, cv=None
+    grid_search_model,
+    model,
+    param_grid: dict,
+    scoring,
+    model_selection_scoring,
+    cv=None,
 ):
     if grid_search_model == "Grid search":
         return GridSearchCV(
-            model, param_grid=param_grid, scoring=scoring, cv=cv, refit=scoring[0]
+            model,
+            param_grid=param_grid,
+            scoring=scoring,
+            cv=cv,
+            refit=model_selection_scoring,
         )
     elif grid_search_model == "Randomized search":
         return RandomizedSearchCV(
@@ -60,7 +69,7 @@ def perform_grid_search_cv(
             param_distributions=param_grid,
             scoring=scoring,
             cv=cv,
-            refit=scoring[0],
+            refit=model_selection_scoring,
         )
 
 

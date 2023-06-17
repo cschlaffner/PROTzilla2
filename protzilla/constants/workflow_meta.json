@@ -1193,8 +1193,8 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": [true, false],
-            "default": true,
+            "categories": ["True", "False"],
+            "default": "True",
             "dynamic": true,
             "dynamic_parameters": {
               "True": ["random_state_cv"]
@@ -1230,9 +1230,20 @@
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
-            "type": "categorical",
+            "type": "categorical_dynamic",
             "categories": ["Grid search", "Randomized search", "Manual"],
-            "default": "Grid search"
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": ["model_selection_scoring"],
+              "Randomized search": ["model_selection_scoring"]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "default": "accuracy",
+            "dynamic": true
           },
           "n_estimators": {
             "name": "The number of trees in the forest.",
@@ -1378,9 +1389,20 @@
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
-            "type": "categorical",
+            "type": "categorical_dynamic",
             "categories": ["Grid search", "Randomized search", "Manual"],
-            "default": "Grid search"
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": ["model_selection_scoring"],
+              "Randomized search": ["model_selection_scoring"]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "default": "accuracy",
+            "dynamic": true
           },
           "C": {
             "name": "C: Regularization parameter (the strength of the regularization is inversely proportional to C)",

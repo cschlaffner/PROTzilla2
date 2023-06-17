@@ -25,6 +25,7 @@ def perform_classification(
     clf,
     clf_parameters,
     scoring,
+    model_selection_scoring="accuracy",
     test_validate_split=None,
     **parameters,
 ):
@@ -72,6 +73,7 @@ def perform_classification(
             clf,
             clf_parameters,
             scoring,
+            model_selection_scoring,
             cv=cv,
         )
         model.fit(input_df, labels_df)
