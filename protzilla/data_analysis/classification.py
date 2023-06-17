@@ -6,7 +6,6 @@ from sklearn.svm import SVC
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from protzilla.data_analysis.classification_helper import (
     perform_grid_search_cv,
-    perform_grid_search_manual,
     perform_cross_validation,
     create_dict_with_lists_as_values,
     perform_train_test_split,
@@ -81,7 +80,6 @@ def perform_classification(
         model_evaluation_df = create_model_evaluation_df_grid_search(
             pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-        # shoud the user be able to select the best estimator?
         return model.best_estimator_, model_evaluation_df
 
 

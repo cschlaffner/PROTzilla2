@@ -1,5 +1,4 @@
 from collections import defaultdict
-from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -18,10 +17,7 @@ from sklearn.model_selection import (
     LeavePOut,
     StratifiedKFold,
     train_test_split,
-    ParameterGrid,
-    ParameterSampler,
 )
-from sklearn.pipeline import Pipeline
 
 
 def encode_labels(labels_df, labels_column, positive_label=None):

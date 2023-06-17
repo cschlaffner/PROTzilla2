@@ -104,8 +104,6 @@ def random_forest_out(classification_df, meta_df, validation_strategy, model_sel
     "validation_strategy,model_selection",
     [
         ("Manual", "Manual"),
-        ("Manual", "Grid search"),
-        ("Manual", "Randomized search"),
         ("K-Fold", "Manual"),
         ("K-Fold", "Grid search"),
         ("K-Fold", "Randomized search"),
