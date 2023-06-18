@@ -239,6 +239,27 @@ def change_field(request, run_name):
                 param_dict["categories"] = []
             else:
                 param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
+        elif param_dict["fill"] == "gsea_enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
+
+            try:
+                protein_itr = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_itr = None
+
+            if (
+                not isinstance(protein_itr, pd.DataFrame)
+                or not "NES" in protein_itr.columns
+            ):
+                param_dict["categories"] = []
+            else:
+                # categories are all prefixes for Term column in gsea output
+                param_dict["categories"] = [
+                    term.split("__")[0] for term in protein_itr["Term"].unique()
+                ]
 
         fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 

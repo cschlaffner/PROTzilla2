@@ -9,6 +9,7 @@ from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.di_plots import (
     go_enrichment_bar_plot,
     go_enrichment_dot_plot,
+    gsea_dot_plot,
 )
 
 
@@ -181,3 +182,40 @@ def test_enrichment_dot_plot_wrong_df():
 
     assert "messages" in current_out
     assert "Please input a dataframe from" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_dot_plot(show_figures):
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    enrichment_df = pd.read_csv(
+        f"{test_data_folder}/gsea_result_sig_prot.csv", header=0
+    )
+    dot_base64 = gsea_dot_plot(
+        input_df=enrichment_df,
+        gene_sets=["KEGG_2016"],
+        top_terms=10,
+        cutoff=0.25,
+        dot_size=3,
+        title="KEGG GSEA dotplot test",
+        show_ring=False,
+    )[0]
+    if show_figures:
+        open_graph_from_base64(dot_base64["plot_base64"])
+
+
+def test_gsea_dot_plot_remove_names(show_figures):
+    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+    enrichment_df = pd.read_csv(
+        f"{test_data_folder}/gsea_result_sig_prot.csv", header=0
+    )
+    dot_base64 = gsea_dot_plot(
+        input_df=enrichment_df,
+        gene_sets=["KEGG_2016"],
+        top_terms=10,
+        cutoff=0.25,
+        dot_size=3,
+        title="KEGG GSEA dotplot test",
+        show_ring=False,
+        remove_library_names=True,
+    )[0]
+    if show_figures:
+        open_graph_from_base64(dot_base64["plot_base64"])

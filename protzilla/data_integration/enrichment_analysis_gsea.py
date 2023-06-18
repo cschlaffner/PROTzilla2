@@ -343,7 +343,7 @@ def gsea(
 
     # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    mylen=len(protein_groups)
+    mylen = len(protein_groups)
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
         gene_to_groups,
