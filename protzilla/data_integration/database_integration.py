@@ -3,7 +3,7 @@ from itertools import groupby
 import operator
 from django.contrib import messages
 
-from protzilla.data_integration.database_query import uniprot_query_dataframe
+from protzilla.data_integration import database_query
 from protzilla.importing.ms_data_import import clean_uniprot_id
 
 
@@ -19,7 +19,7 @@ def add_uniprot_data(dataframe, fields=None):
     if not fields:
         msg = "No fields that should be added specified."
         return dict(
-            result=dataframe,
+            results_df=dataframe,
             messages=[dict(level=messages.INFO, msg=msg)],
         )
     if isinstance(fields, str):
@@ -51,7 +51,9 @@ def add_uniprot_data(dataframe, fields=None):
     database_fields = [field for field in fields if field != "Links"]
     if not database_fields:
         return {"results_df": dataframe}
-    res: pd.DataFrame = uniprot_query_dataframe(list(all_proteins), database_fields)
+    res: pd.DataFrame = database_query.uniprot_query_dataframe(
+        list(all_proteins), database_fields
+    )
 
     for field in database_fields:
         new_column = []
