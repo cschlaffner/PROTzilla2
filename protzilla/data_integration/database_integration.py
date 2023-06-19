@@ -1,9 +1,10 @@
 import pandas as pd
 from itertools import groupby
 import operator
+from django.contrib import messages
 
 from protzilla.data_integration.database_query import uniprot_query_dataframe
-from protzilla.importing.ms_data_import import normalize_uniprot_id
+from protzilla.importing.ms_data_import import clean_uniprot_id
 
 
 # recipie from https://docs.python.org/3/library/itertools.html
@@ -16,7 +17,11 @@ def unique_justseen(iterable, key=None):
 
 def add_uniprot_data(dataframe, fields=None):
     if not fields:
-        return {"result": dataframe}
+        msg = "No fields that should be added specified."
+        return dict(
+            result=dataframe,
+            messages=[dict(level=messages.INFO, msg=msg)],
+        )
     if isinstance(fields, str):
         fields = [fields]
     groups = dataframe["Protein ID"].tolist()
@@ -28,9 +33,9 @@ def add_uniprot_data(dataframe, fields=None):
         proteins = group.split(";")
         cleaned = []
         for protein in proteins:
-            normalized = normalize_uniprot_id(protein)
-            cleaned.append(normalized)
-            all_proteins.add(normalized)
+            clean = clean_uniprot_id(protein)
+            cleaned.append(clean)
+            all_proteins.add(clean)
         # this can be done because we make isoforms appear together
         clean_groups.append(list(unique_justseen(cleaned)))
 

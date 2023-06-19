@@ -95,12 +95,12 @@ def ms_fragger_import(_, file_path, intensity_name):
 def handle_protein_ids(protein_group):
     # todo add mapping to uniprot here
     def by_normalized_id(protein_id):
-        return (norm := normalize_uniprot_id(protein_id)), norm != protein_id
+        return (clean := clean_uniprot_id(protein_id)), clean != protein_id
 
     return ";".join(sorted(protein_group.split(";"), key=by_normalized_id))
 
 
-def normalize_uniprot_id(uniprot_id):
+def clean_uniprot_id(uniprot_id):
     if "-" in uniprot_id:
         uniprot_id = uniprot_id.split("-")[0]
     if uniprot_id.startswith("CON__") or uniprot_id.startswith("REV__"):
