@@ -256,15 +256,16 @@ def change_field(request, run_name):
             ):
                 param_dict["categories"] = []
             else:
-                # categories are all prefixes for Term column in gsea output
-                gene_set_libraries = set(
-                    term.split("__")[0] for term in protein_itr["Term"].unique()
-                )
+                # gene_set_libraries are all prefixes for Term column in gsea output
+                # if no prefix is found, a single gmt file was used
+                gene_set_libraries = set()
+                for term in protein_itr["Term"].unique():
+                    if "__" in term:
+                        gene_set_lib = term.split("__")[0]
+                        gene_set_libraries.add(gene_set_lib)
+                    else:
+                        gene_set_libraries.add("all")
                 param_dict["categories"] = list(gene_set_libraries)
-                print("categories", param_dict["categories"])
-                if len(param_dict["categories"]) == 0:
-                    # no prefixes indicates preranked gsea df but empty field could be confusing
-                    param_dict["categories"] = "all"
 
         fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 

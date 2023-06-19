@@ -290,7 +290,7 @@ def gsea_dot_plot(
     if remove_library_names:
         input_df["Term"] = input_df["Term"].apply(lambda x: x.split("__")[1])
 
-    size_y = len(input_df[dot_color_value])
+    size_y = len(input_df[dot_color_value] < cutoff) * 1.5
     try:
         ax = gseapy.dotplot(
             input_df,
