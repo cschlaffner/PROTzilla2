@@ -162,7 +162,7 @@ def t_test(
 
     t_statistic_df = pd.DataFrame(
         list(zip(proteins, t_statistic)),
-        columns=["Protein ID", "fold_change"],
+        columns=["Protein ID", "t_statistic"],
     )
 
     proteins_filtered = len(filtered_proteins) > 0

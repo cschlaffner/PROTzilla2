@@ -48,6 +48,7 @@ def peptide_import(ms_df, file_path, intensity_name):
     ordered = molten[
         ["Sample", "Protein ID", "Sequence", peptide_intensity_name, "PEP"]
     ]
+    ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return ms_df, dict(peptide_df=ordered)

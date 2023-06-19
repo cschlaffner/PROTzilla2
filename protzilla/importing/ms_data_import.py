@@ -20,7 +20,7 @@ def max_quant_import(_, file_path, intensity_name):
         na_values=["", 0],
         keep_default_na=True,
     )
-    df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"])
+    df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]

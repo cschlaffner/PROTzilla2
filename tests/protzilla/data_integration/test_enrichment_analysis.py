@@ -1,12 +1,20 @@
-import time
 from unittest.mock import patch
 
-import numpy as np
+import time
+import json
 import pandas as pd
+import numpy as np
 import pytest
 import requests
 
 from protzilla.constants.paths import PROJECT_PATH
+
+# order is important to ensure correctness of patched functions
+# isort:skip_file
+from protzilla.data_integration.enrichment_analysis_helper import (
+    uniprot_ids_to_uppercase_gene_symbols,
+    read_protein_or_gene_sets_file,
+)
 from protzilla.data_integration.enrichment_analysis import (
     get_functional_enrichment_with_delay,
     go_analysis_offline,
@@ -15,11 +23,78 @@ from protzilla.data_integration.enrichment_analysis import (
     merge_up_down_regulated_dfs_restring,
     merge_up_down_regulated_proteins_results,
 )
+from protzilla.data_integration.enrichment_analysis_gsea import (
+    create_genes_intensity_wide_df,
+    gsea,
+)
+
+# isort:end_skip_file
+
+
+@pytest.fixture
+def data_folder_tests():
+    return PROJECT_PATH / "tests/test_data/enrichment_data"
+
+
+@patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
+def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
+    proteins = [
+        "Protein1",
+        "Protein2;ProteinX",
+        "Protein03",
+        "Protein3-1",
+        "Protein4_VAR_A12345",
+        "Protein5",
+        "Protein6",
+        "Protein7;Protein8",
+    ]
+    mock_biomart_query.return_value = [
+        ("Protein1", "GENE1"),
+        ("Protein2", "GENE2"),
+        ("ProteinX", "GENE2"),
+        ("Protein03", "GENE3"),
+        ("Protein3", "GENE3"),
+        ("Protein4", "GENE4"),
+        ("Protein7", "GENE7"),
+        ("Protein8", "GENE8"),
+    ]
+
+    expected_gene_to_groups = {
+        "GENE1": ["Protein1"],
+        "GENE2": ["Protein2;ProteinX"],
+        "GENE3": [
+            "Protein03",
+            "Protein3-1",
+        ],
+        "GENE4": ["Protein4_VAR_A12345"],
+        "GENE7": ["Protein7;Protein8"],
+        "GENE8": ["Protein7;Protein8"],
+    }
+    expected_group_to_genes = {
+        "Protein1": ["GENE1"],
+        "Protein2;ProteinX": ["GENE2"],
+        "Protein03": ["GENE3"],
+        "Protein3-1": ["GENE3"],
+        "Protein4_VAR_A12345": ["GENE4"],
+        "Protein7;Protein8": ["GENE7", "GENE8"],
+    }
+    expected_filtered_groups = ["Protein5", "Protein6"]
+
+    (
+        gene_to_groups,
+        group_to_genes,
+        filtered_groups,
+    ) = uniprot_ids_to_uppercase_gene_symbols(proteins)
+
+    for key in gene_to_groups:
+        assert set(gene_to_groups[key]) == set(expected_gene_to_groups[key])
+    for key in group_to_genes:
+        assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
+    assert filtered_groups == expected_filtered_groups
 
 
 @patch("restring.restring.get_functional_enrichment")
 def test_get_functional_enrichment_with_delay(mock_enrichment):
-    last_call_time = None
     MIN_WAIT_TIME = 1
 
     protein_list = [
@@ -143,23 +218,23 @@ def test_merge_up_down_regulated_dfs_restring():
     "background",
     [
         None,
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/background_imported_proteins.csv",
+        PROJECT_PATH
+        / "tests/test_data/enrichment_data/background_imported_proteins.csv",
     ],
 )
-def test_go_analysis_with_STRING(mock_enrichment, background):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_go_analysis_with_STRING(mock_enrichment, background, data_folder_tests):
     proteins_df = pd.read_csv(
-        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+        data_folder_tests / "input-t_test-log2_fold_change_df.csv"
     )
 
     up_df = pd.read_csv(
-        f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0, index_col=0
+        data_folder_tests / "up_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
     down_df = pd.read_csv(
-        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0, index_col=0
+        data_folder_tests / "down_enrichment_KEGG_Process.csv", header=0, index_col=0
     )
 
-    results = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
+    results = pd.read_csv(data_folder_tests / "merged_KEGG_process.csv", header=0)
     mock_enrichment.side_effect = [up_df, down_df]
 
     out_df = go_analysis_with_STRING(
@@ -182,17 +257,18 @@ def test_go_analysis_with_STRING(mock_enrichment, background):
 @patch(
     "protzilla.data_integration.enrichment_analysis.get_functional_enrichment_with_delay"
 )
-def test_go_analysis_with_STRING_one_direction_missing(mock_enrichment):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
+def test_go_analysis_with_STRING_one_direction_missing(
+    mock_enrichment, data_folder_tests
+):
     proteins_df = pd.read_csv(
-        f"{test_data_folder}/input-t_test-log2_fold_change_df.csv"
+        data_folder_tests / "input-t_test-log2_fold_change_df.csv"
     )
     up_proteins_df = proteins_df[proteins_df["log2_fold_change"] > 0]
     down_proteins_df = proteins_df[proteins_df["log2_fold_change"] < 0]
 
-    up_df = pd.read_csv(f"{test_data_folder}/up_enrichment_KEGG_Process.csv", header=0)
+    up_df = pd.read_csv(data_folder_tests / "up_enrichment_KEGG_Process.csv", header=0)
     down_df = pd.read_csv(
-        f"{test_data_folder}/down_enrichment_KEGG_Process.csv", header=0
+        data_folder_tests / "down_enrichment_KEGG_Process.csv", header=0
     )
     mock_enrichment.side_effect = [up_df, down_df]
 
@@ -346,7 +422,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
 @patch(
     "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
 )
-def test_go_analysis_with_enrichr(mock_gene_mapping):
+def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
     api_url = "https://maayanlab.cloud/Enrichr/addList"
     try:
@@ -369,24 +445,39 @@ def test_go_analysis_with_enrichr(mock_gene_mapping):
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
     protein_sets = ["Reactome_2013"]
     organism = "human"
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.read_csv(
-        f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
+        data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
     )
 
-    mock_gene_mapping.return_value = {
-        "ENO1": "Protein1",
-        "ENO2": "Protein2",
-        "ENO3": "Protein3",
-        "HK2": "Protein4",
-        "HK1": "Protein6",
-        "HK3": "Protein7",
-        "IDH3B": "Protein8",
-        "ATP6V1G2": "Protein9",
-        "GPT2": "Protein10",
-        "SDHB": "Protein11",
-        "COX6B1": "Protein12;Protein13",
-    }, ["Protein5"]
+    mock_gene_mapping.return_value = (
+        {
+            "ENO1": ["Protein1"],
+            "ENO2": ["Protein2"],
+            "ENO3": ["Protein3"],
+            "HK2": ["Protein4"],
+            "HK1": ["Protein6"],
+            "HK3": ["Protein7"],
+            "IDH3B": ["Protein8"],
+            "ATP6V1G2": ["Protein9"],
+            "GPT2": ["Protein10"],
+            "SDHB": ["Protein11"],
+            "COX6B1": ["Protein12;Protein13"],
+        },
+        {
+            "Protein1": ["ENO1"],
+            "Protein2": ["ENO2"],
+            "Protein3": ["ENO3"],
+            "Protein4": ["HK2"],
+            "Protein6": ["HK1"],
+            "Protein7": ["HK3"],
+            "Protein8": ["IDH3B"],
+            "Protein9": ["ATP6V1G2"],
+            "Protein10": ["GPT2"],
+            "Protein11": ["SDHB"],
+            "Protein12;Protein13": ["COX6B1"],
+        },
+        ["Protein5"],
+    )
     current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
     df = current_out["results"]
 
@@ -449,9 +540,9 @@ def go_analysis_offline_result_with_bg():
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.json",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
     ],
 )
 def test_go_analysis_offline_protein_sets(
@@ -502,14 +593,13 @@ def test_go_analysis_offline_protein_sets(
 @pytest.mark.parametrize(
     "background_path",
     [
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.csv",
-        f"{PROJECT_PATH}/tests/test_data/enrichment_data//background_test_proteins.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.txt",
     ],
 )
 def test_go_analysis_offline_background(
-    background_path, go_analysis_offline_result_with_bg
+    background_path, go_analysis_offline_result_with_bg, data_folder_tests
 ):
-    test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
     proteins = [
         "Protein1",
@@ -523,7 +613,7 @@ def test_go_analysis_offline_background(
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
-        protein_sets_path=f"{test_data_folder}/protein_sets.txt",
+        protein_sets_path=data_folder_tests / "protein_sets.txt",
         background=background_path,
         direction="down",
     )
@@ -656,3 +746,346 @@ def test_merge_up_down_regulated_proteins_results():
         expected_output[col] = expected_output[col].apply(lambda x: sorted(x))
 
     pd.testing.assert_frame_equal(merged, expected_output)
+
+
+@pytest.mark.parametrize(
+    "protein_sets_path",
+    [
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
+    ],
+)
+def test_read_protein_or_gene_sets_file(protein_sets_path):
+    expected_output = {
+        "Set1": [
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein7",
+            "Protein8",
+            "Protein9",
+            "Protein10",
+        ],
+        "Set2": [
+            "Protein1",
+            "Protein3",
+            "Protein5",
+            "Protein6",
+            "Protein7",
+            "Protein8",
+            "Protein9",
+            "Protein10",
+        ],
+    }
+
+    result_dict = read_protein_or_gene_sets_file(protein_sets_path)
+    assert result_dict == expected_output
+
+
+def test_read_protein_or_gene_sets_file_gmt_path():
+    a_made_up_path = "test_data/a_gmt_file.gmt"
+    out_path = read_protein_or_gene_sets_file(a_made_up_path)
+    assert out_path == a_made_up_path
+
+
+def test_read_protein_or_gene_sets_file_no_path():
+    out_dict = read_protein_or_gene_sets_file("")
+    assert "messages" in out_dict
+    assert "No file uploaded for protein sets." in out_dict["messages"][0]["msg"]
+
+
+def test_read_protein_or_gene_sets_file_invalid_filetype(data_folder_tests):
+    a_made_up_path = data_folder_tests / "a_made_up_wrong_file.png"
+    out_dict = read_protein_or_gene_sets_file(a_made_up_path)
+
+    assert "messages" in out_dict
+    assert "Invalid file type" in out_dict["messages"][0]["msg"]
+
+
+def test_create_genes_intensity_wide_df(data_folder_tests):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample1", "Protein3", "Gene3", 30],
+        ["Sample1", "Protein4", "Gene4", 40],
+        ["Sample1", "Protein5", "Gene5", 50],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample2", "Protein3", "Gene3", 3],
+        ["Sample2", "Protein4", "Gene4", 4],
+        ["Sample2", "Protein5", "Gene5", 5],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+        ["Sample3", "Protein3", "Gene3", 80],
+        ["Sample3", "Protein4", "Gene4", 70],
+        ["Sample3", "Protein5", "Gene5", 60],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    group_to_genes = {
+        "Protein1": ["Gene1", "Gene1-1"],  # multiple genes per group
+        "Protein2": ["Gene2"],
+        "Protein3": ["Gene3"],
+        "Protein4": ["Gene3"],  # duplicate gene
+    }
+
+    wide_df = create_genes_intensity_wide_df(
+        protein_df=protein_df,
+        protein_groups=protein_df["Protein ID"].unique().tolist(),
+        samples=protein_df["Sample"].unique().tolist(),
+        group_to_genes=group_to_genes,
+        filtered_groups=["Protein5"],  # not in group_to_genes
+    )
+
+    expected_df = pd.DataFrame(
+        {
+            "Gene symbol": ["Gene1", "Gene1-1", "Gene2", "Gene3"],
+            "Sample1": [10.0, 10.0, 20.0, 35.0],
+            "Sample2": [1.0, 1.0, 2.0, 3.5],
+            "Sample3": [100.0, 100.0, 90.0, 75.0],
+        }
+    )
+    expected_df[["Sample1", "Sample2", "Sample3"]] = expected_df[
+        ["Sample1", "Sample2", "Sample3"]
+    ].astype(float)
+    expected_df = expected_df.set_index("Gene symbol")
+    pd.testing.assert_frame_equal(wide_df, expected_df, check_dtype=False)
+
+
+def test_gsea_log2_metric_with_negative_values(data_folder_tests):
+    proteins = pd.read_csv(
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
+        index_col=0,
+    )
+    metadata_df = pd.read_csv(data_folder_tests / "metadata_full.csv")
+
+    current_out = gsea(
+        proteins,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2016"],
+        min_size=4,
+        number_of_permutations=500,
+        ranking_method="log2_ratio_of_classes",
+    )
+    assert "messages" in current_out
+    assert "Negative values" in current_out["messages"][0]["msg"]
+    assert "use a different ranking method" in current_out["messages"][0]["msg"]
+
+
+@pytest.mark.internet
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea(mock_mapping, data_folder_tests):
+    proteins = pd.read_csv(
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
+        index_col=0,
+    )
+    metadata_df = pd.read_csv(
+        data_folder_tests / "metadata_full.csv",
+    )
+    expected_enriched_df = pd.read_csv(
+        data_folder_tests / "gsea_result_sig_prot.csv", index_col=0
+    )
+
+    with open(data_folder_tests / "gene_mapping.json", "r") as f:
+        data = json.load(f)
+        gene_to_groups = data["gene_to_groups"]
+        group_to_genes = data["group_to_genes"]
+        filtered_groups = data["filtered_groups"]
+        mock_mapping.return_value = gene_to_groups, group_to_genes, filtered_groups
+
+    current_out = gsea(
+        protein_df=proteins,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2016"],
+        min_size=7,
+        number_of_permutations=500,
+    )
+    assert "messages" in current_out
+    assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+    column_names = ["Name", "Term", "Tag %", "Gene %", "Lead_genes", "Lead_proteins"]
+    # Compare all specified columns
+    for column in column_names:
+        assert expected_enriched_df[column].equals(current_out["enriched_df"][column])
+
+    # Compare the numeric columns separately with a tolerance for numerical equality
+    numerical_columns = [
+        "ES",
+        "NES",
+        "NOM p-val",
+        "FDR q-val",
+        "FWER p-val",
+    ]
+    current_out["enriched_df"][numerical_columns] = current_out["enriched_df"][
+        numerical_columns
+    ].astype(float)
+    for column in numerical_columns:
+        expected_enriched_df[column]
+        numerical_equal = np.isclose(
+            expected_enriched_df[column],
+            current_out["enriched_df"][column],
+            rtol=1e-05,
+            atol=1e-08,
+        )
+        assert numerical_equal.all()
+
+
+def test_gsea_wrong_protein_df(data_folder_tests):
+    proteins = pd.read_csv(
+        data_folder_tests / "input-t_test-significant_proteins_pvalues_df.csv",
+        index_col=0,
+    )  # not an intensity df
+
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+    )
+    assert "messages" in current_out
+    assert "Input must be a dataframe" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_no_gene_sets(data_folder_tests):
+    proteins = pd.read_csv(
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
+        index_col=0,
+    )
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+    )
+    assert "messages" in current_out
+    assert "No gene sets provided" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_wrong_gene_sets(data_folder_tests):
+    proteins = pd.read_csv(
+        data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
+        index_col=0,
+    )
+    current_out = gsea(
+        proteins,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+        gene_sets_path="a_made_up_path.png",
+    )
+    assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_no_gene_symbols(mock_gene_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    mock_gene_mapping.return_value = ({}, {}, ["Protein1", "Protein2"])
+    current_out = gsea(
+        protein_df,
+        metadata_df=pd.DataFrame(columns=["Group"]),
+        grouping="Group",
+        gene_sets_enrichr=["KEGG_2019_Human"],
+    )
+
+    assert "messages" in current_out
+    assert (
+        "No proteins could be mapped to gene symbols"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_wrong_sample_group_amount(mock_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+        ["Sample3", "Protein1", "Gene1", 100],
+        ["Sample3", "Protein2", "Gene2", 90],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    metadata_df = pd.DataFrame(
+        data=(
+            ["Sample1", "Group1"],
+            ["Sample2", "Group2"],
+            ["Sample3", "Group3"],  # too many groups
+        ),
+        columns=["Sample", "Group"],
+    )
+    mock_mapping.return_value = (
+        {"Gene1": ["Protein1"], "Gene2": ["Protein2"]},
+        {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
+        [],
+    )
+    current_out = gsea(
+        protein_df=protein_df,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
+    )
+
+    assert "messages" in current_out
+    assert (
+        "Input samples have to belong to exactly two groups"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+@patch(
+    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_gsea_catch_fail(mock_mapping):
+    test_intensity_list = (
+        ["Sample1", "Protein1", "Gene1", 10],
+        ["Sample1", "Protein2", "Gene2", 20],
+        ["Sample2", "Protein1", "Gene1", 1],
+        ["Sample2", "Protein2", "Gene2", 2],
+    )
+    protein_df = pd.DataFrame(
+        data=test_intensity_list,
+        columns=["Sample", "Protein ID", "Gene", "Intensity"],
+    )
+    metadata_df = pd.DataFrame(
+        data=(
+            ["Sample1", "Group1"],
+            ["Sample2", "Group2"],
+        ),
+        columns=["Sample", "Group"],
+    )
+    mock_mapping.return_value = (
+        {"Gene1": ["Protein1"], "Gene2": ["Protein2"]},
+        {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
+        [],
+    )
+    current_out = gsea(
+        protein_df=protein_df,
+        metadata_df=metadata_df,
+        grouping="Group",
+        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
+    )  # gp.gsea() should fail
+    assert "messages" in current_out
+    assert "GSEA failed. Please check your input" in current_out["messages"][0]["msg"]

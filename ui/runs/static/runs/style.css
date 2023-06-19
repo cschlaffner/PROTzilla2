@@ -36,6 +36,7 @@ html, body {
     #sidebar {
         margin-right: -400px;
     }
+
     #sidebar.active {
         margin-right: 0;
     }
@@ -47,7 +48,7 @@ html, body {
 }
 
 #header_toggle {
-    margin-top:-0.25rem
+    margin-top: -0.25rem
 }
 
 .plot-wrapper div:nth-child(2) {
@@ -57,7 +58,7 @@ html, body {
 .form-select[multiple] {
     max-width: 800px !important;
 }
-  
+
 .rotate-icon {
     transform: rotate(180deg);
 }

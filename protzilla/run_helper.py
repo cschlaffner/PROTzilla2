@@ -1,6 +1,6 @@
 import copy
 
-import gseapy as gp
+import gseapy
 import matplotlib.colors as mcolors
 import restring
 
@@ -32,7 +32,7 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "dbs_restring":
             param_dict["categories"] = restring.settings.file_types
         elif param_dict["fill"] == "dbs_gseapy":
-            param_dict["categories"] = gp.get_library_name()
+            param_dict["categories"] = gseapy.get_library_name()
         elif param_dict["fill"] == "matplotlib_colors":
             param_dict["categories"] = mcolors.CSS4_COLORS
         elif param_dict["fill"] == "uniprot_fields":

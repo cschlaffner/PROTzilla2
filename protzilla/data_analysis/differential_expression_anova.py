@@ -49,8 +49,8 @@ def anova(
 
     # Select the first two groups if none or an empty list is provided
     if not selected_groups:
-        selected_groups = metadata_df[grouping].unique()[:2]
-        logging.warning("auto-selected first two groups in anova")
+        selected_groups = metadata_df[grouping].unique()
+        logging.warning("auto-selected all groups in anova")
 
     # Merge the intensity and metadata dataframes in order to assign to each Sample
     # their corresponding group
