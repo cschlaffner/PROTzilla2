@@ -189,7 +189,6 @@ def test_gsea_dot_plot(show_figures, data_folder_tests):
     dot_base64 = gsea_dot_plot(
         input_df=enrichment_df,
         gene_sets=["KEGG_2016"],
-        top_terms=10,
         cutoff=0.25,
         dot_size=3,
         title="KEGG GSEA dotplot test",
@@ -206,7 +205,6 @@ def test_gsea_dot_plot_remove_names(show_figures, data_folder_tests):
     dot_base64 = gsea_dot_plot(
         input_df=enrichment_df,
         gene_sets=["KEGG_2016"],
-        top_terms=10,
         cutoff=0.25,
         dot_size=3,
         title="KEGG GSEA dotplot test",
@@ -223,7 +221,6 @@ def test_gsea_dot_plot_wrong_df(data_folder_tests):
     )
     current_out = gsea_dot_plot(
         input_df=enrichment_df,
-        top_terms=10,
         cutoff=0.25,
     )[0]
 
@@ -235,7 +232,6 @@ def test_gsea_dot_plot_empty_df():
     df = pd.DataFrame({"NES": [], "FDR q-val": [], "lead_genes": []})
     current_out = gsea_dot_plot(
         input_df=df,
-        top_terms=10,
         cutoff=0.25,
     )[0]
 
@@ -248,10 +244,31 @@ def test_gsea_dot_plot_cutoff(data_folder_tests):
     current_out = gsea_dot_plot(
         input_df=df,
         gene_sets=["KEGG_2016"],
-        top_terms=10,
         cutoff=0,
         dot_size=3,
         title="KEGG GSEA dotplot test",
     )[0]
     assert "messages" in current_out
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_dot_plot_gene_sets(data_folder_tests, show_figures):
+    df = pd.read_csv(data_folder_tests / "gsea_result_sig_prot.csv", header=0)
+    dot_base64 = gsea_dot_plot(
+        input_df=df,
+        gene_sets="KEGG_2016",
+        cutoff=0.25,
+        dot_size=3,
+        title="KEGG GSEA dotplot test",
+    )[0]
+    if show_figures:
+        open_graph_from_base64(dot_base64["plot_base64"])
+    dot_base64 = gsea_dot_plot(
+        input_df=df,
+        gene_sets="all",
+        cutoff=0.25,
+        dot_size=3,
+        title="KEGG GSEA dotplot test",
+    )[0]
+    if show_figures:
+        open_graph_from_base64(dot_base64["plot_base64"])

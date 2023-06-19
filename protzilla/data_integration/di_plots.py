@@ -237,7 +237,6 @@ def go_enrichment_dot_plot(
 
 def gsea_dot_plot(
     input_df,
-    top_terms,
     cutoff,
     gene_sets=[],
     dot_color_value="FDR q-val",
@@ -253,10 +252,8 @@ def gsea_dot_plot(
 
     :param input_df: GO enrichment results (offline or Enrichr)
     :type input_df: pandas.DataFrame
-    :param top_terms: Number of top enriched terms per category
-    :type top_terms: int
-    :param cutoff: Cutoff for the Adjusted p-value. Only terms with
-        Adjusted P-value < cutoff will be shown.
+    :param cutoff: Cutoff for the dot_color_value. Only terms with
+        dot_color_value < cutoff will be shown.
     :type cutoff: float
     :param gene_sets: Gene Set Libraries from enrichment to plot
     :type gene_sets: list
@@ -275,7 +272,6 @@ def gsea_dot_plot(
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
-    # TODO check if top terms really is per category, otherwise fix meta file
     if not isinstance(input_df, pd.DataFrame) or not "NES" in input_df.columns:
         msg = "Please input a dataframe from GSEA or preranked GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
@@ -286,25 +282,23 @@ def gsea_dot_plot(
 
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
-    if not gene_sets:
-        msg = "Plotting for all gene set libraries."
-        logger.info(msg)
+    if not gene_sets or "all" in gene_sets:
+        logger.info("Plotting for all gene set libraries.")
     else:  # remove all Gene_sets that were not selected
         input_df = input_df[input_df["Term"].str.startswith(tuple(gene_sets))]
 
     if remove_library_names:
         input_df["Term"] = input_df["Term"].apply(lambda x: x.split("__")[1])
 
-    size_y = top_terms * len(gene_sets)
+    size_y = len(input_df[dot_color_value])
     try:
         ax = gseapy.dotplot(
             input_df,
             column=dot_color_value,
             x=x_axis_value,
             cutoff=cutoff,
-            top_term=top_terms,
             size=dot_size,
-            figsize=(3, size_y),
+            figsize=(5, size_y),
             title=title,
             show_ring=show_ring,
         )

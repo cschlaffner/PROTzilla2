@@ -315,4 +315,9 @@ plot_map = {
         "plot",
         "go_enrichment_dot_plot",
     ): di_plots.go_enrichment_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_dot_plot",
+    ): di_plots.gsea_dot_plot,
 }

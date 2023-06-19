@@ -1708,7 +1708,7 @@
         }
       },
       "gsea_dot_plot": {
-        "name": "Dot plot for GSEA and preranked GSEA results",
+        "name": "Dot plot for (preranked) GSEA",
         "description": "Creates a categorical scatter plot from GSEA data",
         "parameters": {
           "input_df": {
@@ -1746,14 +1746,6 @@
             ],
             "default": "NES"
           },
-          "top_terms": {
-            "name": "Number of top enriched terms per category",
-            "type": "numeric",
-            "min": 1,
-            "max": 100,
-            "step": 1,
-            "default": 5
-          },
           "cutoff": {
             "name": "Only terms with Adjusted P-value < cutoff will be shown",
             "type": "numeric",
@@ -1765,15 +1757,15 @@
             "name": "Title of the plot (optional)",
             "type": "text"
           },
-          "show_ring": {
-            "name": "Show ring around the dots",
-            "type": "boolean",
-            "default": false
-          },
           "dot_size": {
             "name": "Scale the size of the dots",
             "type": "numeric",
             "default": 5
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
           },
           "remove_library_names": {
             "name": "Remove library names from gene sets",
