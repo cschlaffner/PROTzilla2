@@ -163,7 +163,7 @@ class History:
     def serialize(self, d, index, section, step, method):
         cleaned = {}
         for key, value in d.items():
-            if isinstance(value, pd.DataFrame):
+            if isinstance(value, pd.DataFrame) or isinstance(value, pd.Series):
                 filename = f"{index}-{section}-{step}-{method}-{key}.csv"
 
                 path = RUNS_PATH / self.run_name / "history_dfs" / filename
