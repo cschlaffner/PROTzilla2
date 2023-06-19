@@ -19,7 +19,6 @@ def get_next_link(headers):
 
 def get_batch(batch_url, session):
     while batch_url:
-        print(batch_url)
         response = session.get(batch_url)
         response.raise_for_status()
         total = response.headers["x-total-results"]
@@ -58,7 +57,7 @@ def download_uniprot_stream():
         params=dict(
             format="tsv",
             query="(organism_id:9606) AND (reviewed:true)",
-            fields="accession,id,protein_name,gene_names,organism_name,length",
+            fields="accession,id,protein_name,gene_primary,organism_name,length",
             compress="true",
         ),
         stream=True,
