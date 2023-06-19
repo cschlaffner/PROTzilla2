@@ -50,35 +50,26 @@ def add_uniprot_data(dataframe, fields=None):
         dataframe["Links"] = links
     database_fields = [field for field in fields if field != "Links"]
     if not database_fields:
-        return {"result": dataframe}
+        return {"results_df": dataframe}
     res: pd.DataFrame = uniprot_query_dataframe(list(all_proteins), database_fields)
 
-    # data that will be added to input df
-    new_columns = {k: [] for k in fields if k != "Links"}
-
-    # @REVIEWER is it better to have a for loop for columns and retrive each protein multiple times from res?
-
-    for group in clean_groups:
-        group_dict = {k: [] for k in fields}
-        # data that different members of group have
-        for member in group:
-            if member not in res.index:
-                result = {k: None for k in fields}
-            else:
-                result = res.loc[member].to_dict()
-            for col, val in result.items():
-                if "Gene Names" in col and isinstance(val, str):
+    for field in database_fields:
+        new_column = []
+        for group in clean_groups:
+            group_values = []
+            for member in group:
+                if member not in res.index:
+                    group_values.append(None)
+                    continue
+                result = res.loc[member][field]
+                if "Gene Names" in field and isinstance(result, str):
                     # to remove space seperated groupings
-                    group_dict[col].append(val.split()[0])
+                    group_values.append(result.split()[0])
                 else:
-                    group_dict[col].append(val)
-        for field in database_fields:
-            # add unique values to only, join if necessary
-            if len(set(group_dict[field])) == 1:
-                new_columns[field].append(group_dict[field][0])
+                    group_values.append(result)
+            if len(set(group_values)) == 1:
+                new_column.append(group_values[0])
             else:
-                new_columns[field].append(";".join(map(str, group_dict[field])))
-
-    # we can concat because clean groups has the same order as groups
-    out = pd.concat([dataframe, pd.DataFrame(new_columns)], axis=1)
-    return {"result": out}
+                new_column.append(";".join(map(str, group_values)))
+        dataframe[field] = new_column
+    return {"results_df": dataframe}
