@@ -9,7 +9,6 @@ from joblib import dump, load
 from sklearn.base import BaseEstimator
 
 from .constants.paths import RUNS_PATH
-from .utilities.random import random_string
 
 
 class History:

@@ -5,7 +5,7 @@ import pandas as pd
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import
 from protzilla.run import Run
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 
 
 def test_metadata_import():
