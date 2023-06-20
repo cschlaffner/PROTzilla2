@@ -11,7 +11,13 @@ from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
 
 
-def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str):
+def peptides_to_isoform(
+    peptide_df: pd.DataFrame, protein_id: str, run_name: str, k: int = 5
+):
+    assert k > 0, "k must be greater than 0"
+    assert isinstance(k, int), "k must be an integer"
+    allowed_mismatches = 2
+
     peptides = _get_peptides(peptide_df=peptide_df, protein_id=protein_id)
 
     if not peptides:
@@ -38,9 +44,6 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
         logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
         graph_path = potential_graph_path
 
-    k = 5
-    allowed_mismatches = 2
-
     protein_graph = nx.read_graphml(graph_path)
     protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
     matched_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}_modified.graphml"
@@ -51,12 +54,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     if msg:
         return dict(
             graph_path=graph_path,
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg=msg,
-                )
-            ],
+            messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
     peptide_matches, peptide_mismatches = _match_peptides(
@@ -77,7 +75,7 @@ def peptides_to_isoform(peptide_df: pd.DataFrame, protein_id: str, run_name: str
     msg = f"matched-peptides-graph created at {matched_graph_path}"
     return dict(
         matched_graph_path=matched_graph_path,
-        peptide_matches=peptide_matches,
+        peptide_matches=peptide_matches.keys(),
         peptide_mismatches=peptide_mismatches,
         messages=[dict(level=messages.INFO, msg=msg)],
     )
@@ -111,9 +109,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
 
     if request is not None:
         if request.status_code != 200:
-            msg = f"error while downloading protein file for {protein_id}.\
-                         Statuscode:{request.status_code}, {request.reason}. \
-                         Got: {request.text}. Tip: check if the ID is correct"
+            msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
             logger.error(msg)
             return dict(
                 graph_path=None,
