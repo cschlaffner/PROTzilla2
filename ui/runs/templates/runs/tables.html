@@ -49,9 +49,12 @@
 
 {% block content %}
     <div class="p-3">
+        Index {{ index|add:1 }}, Section {{ section }}, step {{ step }}, method {{ method }}
+        <br>
+        {% if name %} <p>Name: {{ name }}</p> {% endif %}
         <div class="input-group mb-3 w-50">
             <span class="input-group-text">Choose table</span>
-            {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
+            {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options only %}
         </div>
         <table id="datatable" class="display"></table>
     </div>

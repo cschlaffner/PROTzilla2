@@ -1,18 +1,8 @@
 import pandas as pd
-from itertools import groupby
-import operator
 from django.contrib import messages
 
 from protzilla.data_integration import database_query
-from protzilla.importing.ms_data_import import clean_uniprot_id
-
-
-# recipie from https://docs.python.org/3/library/itertools.html
-def unique_justseen(iterable, key=None):
-    """List unique elements, preserving order. Remember only the element just seen."""
-    # unique_justseen('AAAABBBCCDAABBB') --> A B C D A B
-    # unique_justseen('ABBcCAD', str.lower) --> A B c A D
-    return map(next, map(operator.itemgetter(1), groupby(iterable, key)))
+from protzilla.utilities import clean_uniprot_id, unique_justseen
 
 
 def add_uniprot_data(dataframe, fields=None):

@@ -1,9 +1,10 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
+
 import pandas
 import requests
 
-from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.constants.logging import logger
+from protzilla.constants.paths import EXTERNAL_DATA_PATH
 
 
 def biomart_query(queries, filter_name, attributes):

@@ -16,7 +16,7 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities.memory import get_memory_usage
+from protzilla.utilities import get_memory_usage
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -439,8 +439,10 @@ def tables(request, run_name, index, key=None):
     # use current output when applicable (not yet in history)
     if index < len(run.history.steps):
         outputs = run.history.steps[index].outputs
+        name = run.history.step_names[index]
     else:
         outputs = run.current_out
+        name = None
 
     options = []
     for k, value in outputs.items():
@@ -462,6 +464,10 @@ def tables(request, run_name, index, key=None):
             # put key as first option to make selected
             options=[(opt, opt) for opt in [key] + options],
             key=key,
+            section=run.section,
+            step=run.step,
+            method=run.method,
+            name=name,
         ),
     )
 

@@ -956,8 +956,7 @@
       "heatmap": {
         "name": "Heatmap",
         "description": "",
-        "parameters": {
-        }
+        "parameters": {}
       },
       "scatter_plot": {
         "name": "Scatter plot",
@@ -1021,17 +1020,26 @@
           "model": {
             "name": "Choose trained model",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "input_test_df": {
             "name": "Choose test data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "labels_test_df": {
             "name": "Choose labels for test data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "plot_title": {
             "name": "Title of the plot (optional)",
@@ -1046,17 +1054,26 @@
           "model": {
             "name": "Choose trained model",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "input_test_df": {
             "name": "Choose test data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "labels_test_df": {
             "name": "Choose labels for test data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "plot_title": {
             "name": "Title of the plot (optional)",
@@ -1142,7 +1159,9 @@
             "name": "Choose labels column from metadata",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": ["positive_label"],
+            "fill_dynamic": [
+              "positive_label"
+            ],
             "categories": [],
             "default": "None"
           },
@@ -1161,20 +1180,44 @@
           "split_stratify": {
             "name": "Split data in a stratified fashion",
             "type": "categorical",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "yes"
           },
           "validation_strategy": {
             "name": "Validation Strategy",
             "type": "categorical_dynamic",
-            "categories": ["K-Fold", "Repeated K-Fold", "Stratified K-Fold", "Leave one out", "Leave p out", "Manual"],
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Leave one out",
+              "Leave p out",
+              "Manual"
+            ],
             "default": "K-Fold",
             "dynamic_parameters": {
-              "K-Fold": ["n_splits", "shuffle"],
-              "Stratified K-Fold": ["n_splits", "shuffle"],
-              "Repeated K-Fold": ["n_splits","n_repeats", "random_state_cv"],
-              "Leave p out": ["p_samples"],
-              "Manual": ["train_val_split"]
+              "K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Stratified K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats",
+                "random_state_cv"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ],
+              "Manual": [
+                "train_val_split"
+              ]
             }
           },
           "train_val_split": {
@@ -1193,11 +1236,16 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "yes",
             "dynamic": true,
             "dynamic_parameters": {
-              "yes": ["random_state_cv"]
+              "yes": [
+                "random_state_cv"
+              ]
             }
           },
           "n_repeats": {
@@ -1224,24 +1272,42 @@
           "scoring": {
             "name": "score",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
             "default": "accuracy",
             "multiple": true
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical_dynamic",
-            "categories": ["Grid search", "Randomized search", "Manual"],
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
             "default": "Grid search",
             "dynamic_parameters": {
-              "Grid search": ["model_selection_scoring"],
-              "Randomized search": ["model_selection_scoring"]
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
             }
           },
           "model_selection_scoring": {
             "name": "Select a scoring for identifying the best estimator following a grid search",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
             "default": "accuracy",
             "dynamic": true
           },
@@ -1310,7 +1376,10 @@
           "split_stratify": {
             "name": "Split data in a stratified fashion",
             "type": "categorical",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "yes"
           },
           "positive_label": {
@@ -1323,14 +1392,35 @@
           "validation_strategy": {
             "name": "Validation Strategy",
             "type": "categorical_dynamic",
-            "categories": ["K-Fold", "Repeated K-Fold", "Stratified K-Fold", "Leave one out", "Leave p out", "Manual"],
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Leave one out",
+              "Leave p out",
+              "Manual"
+            ],
             "default": "K-Fold",
             "dynamic_parameters": {
-              "K-Fold": ["n_splits", "shuffle"],
-              "Stratified K-Fold": ["n_splits", "shuffle"],
-              "Repeated K-Fold": ["n_splits","n_repeats", "random_state_cv"],
-              "Leave p out": ["p_samples"],
-              "Manual": ["test_size"]
+              "K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Stratified K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats",
+                "random_state_cv"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ],
+              "Manual": [
+                "test_size"
+              ]
             }
           },
           "train_val_split": {
@@ -1349,11 +1439,16 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": ["yes", "no"],
+            "categories": [
+              "yes",
+              "no"
+            ],
             "default": "yes",
             "dynamic": true,
             "dynamic_parameters": {
-              "True": ["random_state_cv"]
+              "True": [
+                "random_state_cv"
+              ]
             }
           },
           "n_repeats": {
@@ -1380,24 +1475,42 @@
           "scoring": {
             "name": "score",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
             "default": "accuracy",
             "multiple": true
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical_dynamic",
-            "categories": ["Grid search", "Randomized search", "Manual"],
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
             "default": "Grid search",
             "dynamic_parameters": {
-              "Grid search": ["model_selection_scoring"],
-              "Randomized search": ["model_selection_scoring"]
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
             }
           },
           "model_selection_scoring": {
             "name": "Select a scoring for identifying the best estimator following a grid search",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
             "default": "accuracy",
             "dynamic": true
           },
@@ -1412,12 +1525,16 @@
             "name": "Kernel type",
             "type": "categorical",
             "categories": [
-              "linear", "poly", "rbf", "sigmoid", "precomputed"
+              "linear",
+              "poly",
+              "rbf",
+              "sigmoid",
+              "precomputed"
             ],
             "default": "linear",
             "multiple": true
           },
-           "tolerance": {
+          "tolerance": {
             "name": "Tolerance for stopping criterion",
             "type": "numeric",
             "min": 0,
@@ -1447,22 +1564,36 @@
           "model": {
             "name": "Choose trained model",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "input_test_df": {
             "name": "Choose testing data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "labels_test_df": {
             "name": "Choose labels for input data",
             "type": "named_output",
-            "default": [null,null]
+            "default": [
+              null,
+              null
+            ]
           },
           "scoring": {
             "name": "Choose metric to measure the model's performance",
             "type": "categorical",
-            "categories": ["accuracy", "precision", "recall", "matthews_corrcoef"],
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
             "default": "accuracy",
             "multiple": true
           }
@@ -1786,6 +1917,90 @@
             "type": "empty",
             "name": "metadata_df",
             "default": null
+          }
+        }
+      },
+      "gsea_preranked": {
+        "name": "GSEA Preranked",
+        "description": "Maps proteins to genes and performs GSEA according using provided numerical column for ranking",
+        "parameters": {
+          "protein_df": {
+            "name": "Dataframe with Protein IDs and a column to use for ranking (e.g. p values)",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "ranking_direction": {
+            "name": "Sort the ranking column (ascending - smaller values are better, descending - larger values are better)",
+            "type": "categorical",
+            "categories": [
+              "ascending",
+              "descending"
+            ],
+            "default": "ascending"
+          },
+          "gene_sets_field": {
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose from Enrichr Options"
+            ],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "gene_sets_path"
+              ],
+              "Choose from Enrichr Options": [
+                "gene_sets_enrichr"
+              ]
+            }
+          },
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "gene_sets_enrichr": {
+            "name": "Gene Set Libraries",
+            "type": "categorical",
+            "fill": "dbs_gseapy",
+            "categories": [],
+            "default": null,
+            "multiple": true,
+            "dynamic": true
+          },
+          "min_size": {
+            "name": "Minimum number of genes from gene set also in data",
+            "type": "numeric",
+            "default": 15
+          },
+          "max_size": {
+            "name": "Maximum number of genes from gene set also in data",
+            "type": "numeric",
+            "default": 500
+          },
+          "number_of_permutations": {
+            "name": "Number of permutations",
+            "type": "numeric",
+            "default": 1000
+          },
+          "permutation_type": {
+            "name": "Permutation type (if samples >=15 set to phenotype)",
+            "type": "categorical",
+            "categories": [
+              "phenotype",
+              "gene_set"
+            ],
+            "default": "phenotype"
+          },
+          "weighted_score": {
+            "name": "Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2",
+            "type": "numeric",
+            "default": 1
           }
         }
       }

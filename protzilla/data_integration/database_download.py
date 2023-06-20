@@ -1,8 +1,9 @@
+import re
+from pathlib import Path
+
 import requests
 from requests.adapters import HTTPAdapter, Retry
-import re
 from tqdm import tqdm
-from pathlib import Path
 
 # cannot be imported form constats as package cannot be found
 DATABASES_PATH = Path(__file__).parent.parent.parent / "user_data" / "external_data"

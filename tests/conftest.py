@@ -10,8 +10,8 @@ import pandas as pd
 import pytest
 import requests
 
-from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.utilities.random import random_string
+from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from ..protzilla.utilities import random_string
 
 
 def check_internet_connection():

@@ -8,7 +8,7 @@ from ..data_analysis import (
     model_evaluation,
     model_evaluation_plots,
 )
-from ..data_integration import di_plots, enrichment_analysis, database_integration
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -197,6 +197,11 @@ method_map = {
         "enrichment_analysis",
         "gsea",
     ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
     (
         "data_integration",
         "database_integration",
