@@ -62,3 +62,9 @@ def read_uniprot(fields):
         return pandas.DataFrame(columns=["Entry"] + fields)
     df.index = df["Entry"]
     return df
+
+
+def uniprot_columns():
+    return pandas.read_csv(
+        EXTERNAL_DATA_PATH / "uniprot.tsv", sep="\t", nrows=0
+    ).columns.tolist() + ["Links"]

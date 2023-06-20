@@ -19,16 +19,22 @@
                     response.columns.forEach(element => {
                         tr.append($("<th>").text(element))
                     });
-                    $("#example").html($("<thead>").append(tr))
+                    $("#datatable").html($("<thead>").append(tr))
                         .DataTable({
                             data: response.data,
                             columnDefs: [{
                                 targets: "_all",
                                 render: function (data, type, row) {
-                                    if (type !== 'display' || ('' + data).length < 50) {
+                                    if (type !== 'display') {
                                         return data;
                                     }
-                                    return `<span class="ellipsis" title="${data}">${('' + data).slice(0, 50)}…</span>`
+                                    if (typeof data === 'string' && data.startsWith("https://")) {
+                                        return data.split(' ').map(url => `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`).join(' ')
+                                    }
+                                    if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
+                                        return data.toPrecision(4);
+                                    }
+                                    return `<div style="word-break:break-all">${data}</div>`;
                                 },
                             }],
                         });
@@ -47,6 +53,6 @@
             <span class="input-group-text">Choose table</span>
             {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options selected="" %}
         </div>
-        <table id="example" class="display" style="width:100%"></table>
+        <table id="datatable" class="display"></table>
     </div>
 {% endblock %}
