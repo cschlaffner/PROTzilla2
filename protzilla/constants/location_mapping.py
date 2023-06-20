@@ -5,7 +5,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
-from ..data_integration import di_plots, enrichment_analysis
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -189,6 +189,11 @@ method_map = {
         "enrichment_analysis",
         "gsea_preranked",
     ): enrichment_analysis.gsea_preranked,
+    (
+        "data_integration",
+        "database_integration",
+        "uniprot",
+    ): database_integration.add_uniprot_data,
 }
 
 # reversed mapping of method callable and location

@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 
 sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")

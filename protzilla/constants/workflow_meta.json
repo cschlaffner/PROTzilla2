@@ -1582,6 +1582,28 @@
         }
       }
     },
+    "database_integration": {
+      "uniprot": {
+        "name": "Uniprot",
+        "description": "Add Uniprot data to a dataframe",
+        "parameters": {
+          "dataframe": {
+            "name": "Dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "fields": {
+            "name": "Fields",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "uniprot_fields"
+          }
+        }
+      }
+    },
     "plot": {
       "go_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",

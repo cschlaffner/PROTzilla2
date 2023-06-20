@@ -8,7 +8,7 @@ from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import ms_data_import
 from protzilla.run import Run
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
