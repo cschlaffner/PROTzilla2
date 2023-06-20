@@ -290,6 +290,7 @@ class Run:
             self.df = self.result_df
             self.result_df = None
             self.calculated_method = None
+            self.current_out = {}
             self.current_parameters = {}
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None
