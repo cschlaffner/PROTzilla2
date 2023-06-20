@@ -1227,12 +1227,46 @@ def test_peptides_to_isoform_integration_test(
     assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
     assert out_dict["peptide_mismatches"] == ["DETYYY"]
 
+    created_graph = nx.read_graphml(out_dict["matched_graph_path"])
+
+    # up next: use test_protein_variation_graph to create planned_graph
+
+    import pprint
+
+    pprint.pprint(created_graph.__dict__)
+    # ABC D EG ABC DET
+    #     V
+    planned_graph = nx.DiGraph()
+    planned_graph.add_node("n0", aminoacid="__start__")
+    planned_graph.add_node("n1", aminoacid="D")
+    planned_graph.add_node("n2", aminoacid="__end__")
+    planned_graph.add_node("n3", aminoacid="V")
+    planned_graph.add_node("n4", aminoacid="DET", match="true")
+    planned_graph.add_node("n5", aminoacid="ABC", match="true")
+    planned_graph.add_node("n6", aminoacid="EG", match="false")
+    planned_graph.add_node("n7", aminoacid="ABC", match="true")
+
+    planned_graph.add_edge("n0", "n5")
+    planned_graph.add_edge("n5", "n1")
+    planned_graph.add_edge("n5", "n3")
+    planned_graph.add_edge("n1", "n6")
+    planned_graph.add_edge("n3", "n6")
+    planned_graph.add_edge("n6", "n7")
+    planned_graph.add_edge("n7", "n4")
+
+    planned_graph.graph = {"edge_default": {}, "node_default": {}}
+
+    pprint_graphs(created_graph, planned_graph)
+
+    assert created_graph.nodes == planned_graph.nodes
+    assert nx.utils.graphs_equal(created_graph, planned_graph)
+
 
 def pprint_graphs(graph, planned_graph):
     # for debugging
     import pprint
 
-    print("planned_graph")
-    pprint.pprint(planned_graph.__dict__)
     print("graph")
     pprint.pprint(graph.__dict__)
+    print("planned_graph")
+    pprint.pprint(planned_graph.__dict__)
