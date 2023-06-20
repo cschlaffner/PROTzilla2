@@ -1,14 +1,17 @@
+import base64
+import io
 import json
 from pathlib import Path
 from shutil import rmtree
+from PIL import Image
 
 import numpy as np
 import pandas as pd
 import pytest
 import requests
 
-from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from ..protzilla.utilities.random import random_string
+from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from protzilla.utilities.random import random_string
 
 
 def check_internet_connection():
@@ -44,6 +47,13 @@ def pytest_addoption(parser):
         default=False,
         help="If 'True', tests will open figures using the default renderer",
     )
+
+
+def open_graph_from_base64(encoded_string):
+    decoded_bytes = base64.b64decode(encoded_string)
+    image_stream = io.BytesIO(decoded_bytes)
+    image = Image.open(image_stream)
+    image.show()
 
 
 @pytest.fixture(scope="session")

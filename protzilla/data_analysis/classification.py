@@ -190,10 +190,10 @@ def random_forest(
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
         X_test_df=X_test,
-        y_test_df=y_test,
-        X_train_df=X_test,
         y_train_df=y_train,
+        y_test_df=y_test,
     )
 
 
@@ -271,8 +271,8 @@ def svm(
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
         X_test_df=X_test,
-        y_test_df=y_test,
-        X_train_df=X_test,
         y_train_df=y_train,
+        y_test_df=y_test,
     )

@@ -6,7 +6,7 @@ from protzilla.data_analysis.classification_helper import encode_labels
 from protzilla.utilities.transform_figure import fig_to_base64
 
 
-def precision_recall_curve(model, input_test_df, labels_test_df, plot_title=None):
+def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the precision-recall curve for a classification model.
     :param model: The trained classification model instance to be evaluated.
@@ -28,15 +28,10 @@ def precision_recall_curve(model, input_test_df, labels_test_df, plot_title=None
     )
     display.plot()
     plt.title(plot_title)
-    return [
-        dict(
-            plot_base64=fig_to_base64(display.figure_),
-            key="precision_recall_curve_img",
-        )
-    ]
+    return [fig_to_base64(display.figure_)]
 
 
-def roc_curve(model, input_test_df, labels_test_df, plot_title=None):
+def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the roc curve for a classification model.
     :param model: The trained classification model instance to be evaluated.
@@ -58,9 +53,4 @@ def roc_curve(model, input_test_df, labels_test_df, plot_title=None):
     )
     display.plot()
     plt.title(plot_title)
-    return [
-        dict(
-            plot_base64=fig_to_base64(display.figure_),
-            key="roc_curve_img",
-        )
-    ]
+    return [fig_to_base64(display.figure_)]

@@ -1,22 +1,12 @@
-import base64
-import io
-
 import pandas as pd
 import pytest
-from PIL import Image
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.di_plots import (
     go_enrichment_bar_plot,
     go_enrichment_dot_plot,
 )
-
-
-def open_graph_from_base64(encoded_string):
-    decoded_bytes = base64.b64decode(encoded_string)
-    image_stream = io.BytesIO(decoded_bytes)
-    image = Image.open(image_stream)
-    image.show()
+from tests.conftest import open_graph_from_base64
 
 
 def test_enrichment_bar_plot_restring(show_figures):

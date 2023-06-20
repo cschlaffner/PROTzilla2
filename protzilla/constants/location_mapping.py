@@ -311,12 +311,12 @@ plot_map = {
         "data_analysis",
         "plot",
         "precision_recall_curve",
-    ): model_evaluation_plots.precision_recall_curve,
+    ): model_evaluation_plots.precision_recall_curve_plot,
     (
         "data_analysis",
         "plot",
         "roc_curve",
-    ): model_evaluation_plots.roc_curve,
+    ): model_evaluation_plots.roc_curve_plot,
     (
         "data_integration",
         "plot",
