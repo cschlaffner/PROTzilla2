@@ -1,5 +1,4 @@
 import gseapy
-import gseapy as gp
 import numpy as np
 import pandas as pd
 from django.contrib import messages
