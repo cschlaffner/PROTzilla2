@@ -468,6 +468,7 @@ def tables(request, run_name, index, key=None):
             step=run.step,
             method=run.method,
             name=name,
+            clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
     )
 
