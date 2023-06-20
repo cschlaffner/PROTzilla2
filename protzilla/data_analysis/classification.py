@@ -1,17 +1,18 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.svm import SVC
 
 from protzilla.data_analysis.classification_helper import (
-    create_dict_with_lists_as_values,
-    create_model_evaluation_df_grid_search,
-    create_model_evaluation_df_grid_search_manual,
-    decode_labels,
-    encode_labels,
-    perform_cross_validation,
     perform_grid_search_cv,
-    perform_grid_search_manual,
+    perform_cross_validation,
+    create_dict_with_lists_as_values,
     perform_train_test_split,
+    encode_labels,
+    decode_labels,
+    create_model_evaluation_df_grid_search_manual,
+    create_model_evaluation_df_grid_search,
+    evaluate_with_scoring,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -24,75 +25,70 @@ def perform_classification(
     clf,
     clf_parameters,
     scoring,
+    model_selection_scoring="accuracy",
     test_validate_split=None,
     **parameters,
 ):
-    # work with function set_params or create param_grid depending on the case
-    # check returns, what to return clf, scores, already fit and predict here? Take
-    # into account that scores are not always called using score() function
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
-        train_scores = model.score(X_train, y_train)
-        val_scores = model.score(X_val, y_val)
 
+        y_pred_train = model.predict(X_train)
+        train_scores = evaluate_with_scoring(scoring, y_train, y_pred_train)
+        y_pred_val = model.predict(X_val)
+        val_scores = evaluate_with_scoring(scoring, y_val, y_pred_val)
+
+        # create model evaluation dataframe
+        train_scores = {"train_" + key: value for key, value in train_scores.items()}
+        val_scores = {"test_" + key: value for key, value in val_scores.items()}
+        scores = {**train_scores, **val_scores}
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
-            train_scores,
-            val_scores,
+            scores,
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
-        train_val_split = perform_train_test_split(
-            input_df, labels_df, test_size=test_validate_split
-        )
-        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model = perform_grid_search_manual(
-            grid_search_method,
-            clf,
-            clf_parameters,
-            scoring,
-        )
-        model.fit(train_val_split)
-        model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.results), clf_parameters
-        )
-        return model, model_evaluation_df
+        return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
+
+        # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
-            clf_parameters,
-            scores["train_score"],
-            scores["test_score"],
+            clf_parameters, scores
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         model = perform_grid_search_cv(
-            grid_search_method, clf, clf_parameters, scoring, cv=cv
+            grid_search_method,
+            clf,
+            clf_parameters,
+            scoring,
+            model_selection_scoring,
+            cv=cv,
         )
         model.fit(input_df, labels_df)
 
         # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.cv_results_), clf_parameters
+            pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-        return model, model_evaluation_df
+        return model.best_estimator_, model_evaluation_df
 
 
 def random_forest(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
-    train_test_split: int = 0.2,
+    positive_label: str = None,
     n_estimators=100,
     criterion="gini",
     max_depth=None,
@@ -100,7 +96,7 @@ def random_forest(
     random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
-    scoring: list[str] = "accuracy",
+    scoring: list[str] = ["accuracy"],
     **kwargs,
 ):
     """
@@ -145,15 +141,21 @@ def random_forest(
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    labels_df = metadata_df[["Sample", labels_column]]
-    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df)
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
-        y_encoded,
-        test_size=train_test_split,
-        random_state=random_state,
-        shuffle=True,
+        labels_df["Encoded Label"],
+        **kwargs,
     )
 
     clf = RandomForestClassifier()
@@ -165,6 +167,10 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
+    # Transform scoring to list if scoring is a string
+    # (multiselect returns a string when only one value is selected)
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
     model, model_evaluation_df = perform_classification(
         X_train,
         y_train,
@@ -178,13 +184,94 @@ def random_forest(
 
     X_test.reset_index(inplace=True)
     X_train.reset_index(inplace=True)
-    y_test = decode_labels(label_encoder, X_test, y_test)
-    y_train = decode_labels(label_encoder, X_train, y_train)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
         X_test_df=X_test,
-        y_test_df=y_test,
-        X_train_df=X_test,
         y_train_df=y_train,
+        y_test_df=y_test,
+    )
+
+
+def svm(
+    input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    positive_label: str = None,
+    C=1.0,
+    kernel="rbf",
+    gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
+    coef0=0.0,  # relevant for "poly" and "sigmoid"
+    probability=True,
+    tol=0.001,
+    class_weight=None,
+    max_iter=-1,
+    random_state=42,
+    model_selection: str = "Grid search",
+    validation_strategy: str = "Cross Validation",
+    scoring: list[str] = ["accuracy"],
+    **kwargs,
+):
+    # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
+
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
+
+    X_train, X_test, y_train, y_test = perform_train_test_split(
+        input_df_wide,
+        labels_df["Encoded Label"],
+        **kwargs,
+    )
+
+    clf = SVC()
+
+    clf_parameters = dict(
+        C=C,
+        kernel=kernel,
+        gamma=gamma,
+        coef0=coef0,
+        probability=probability,
+        tol=tol,
+        class_weight=class_weight,
+        max_iter=max_iter,
+        random_state=random_state,
+    )
+    # multiselect returns a string when only one value is selected
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
+    model, model_evaluation_df = perform_classification(
+        X_train,
+        y_train,
+        validation_strategy,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        **kwargs,
+    )
+
+    X_test.reset_index(inplace=True)
+    X_train.reset_index(inplace=True)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
+        X_test_df=X_test,
+        y_train_df=y_train,
+        y_test_df=y_test,
     )

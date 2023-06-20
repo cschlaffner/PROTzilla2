@@ -4,6 +4,9 @@ from ..data_analysis import (
     differential_expression,
     dimension_reduction,
     plots,
+    classification,
+    model_evaluation,
+    model_evaluation_plots,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -154,6 +157,16 @@ method_map = {
         "classification",
         "random_forest",
     ): classification.random_forest,
+    (
+        "data_analysis",
+        "classification",
+        "svm",
+    ): classification.svm,
+    (
+        "data_analysis",
+        "model_evaluation",
+        "evaluate_classification_model",
+    ): model_evaluation.evaluate_classification_model,
     (
         "data_analysis",
         "dimension_reduction",
@@ -310,6 +323,16 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_analysis",
+        "plot",
+        "precision_recall_curve",
+    ): model_evaluation_plots.precision_recall_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "roc_curve",
+    ): model_evaluation_plots.roc_curve_plot,
     (
         "data_integration",
         "plot",
