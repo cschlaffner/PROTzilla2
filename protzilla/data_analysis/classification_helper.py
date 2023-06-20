@@ -77,11 +77,12 @@ def perform_cross_validation(
     cross_validation_estimator,
     n_splits=5,
     n_repeats=10,
-    shuffle=True,
+    shuffle="yes",
     random_state_cv=42,
     p_samples=None,
     **parameters,
 ):
+    shuffle = True if shuffle == "yes" else False
     if cross_validation_estimator == "K-Fold":
         return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv)
     elif cross_validation_estimator == "Repeated K-Fold":
