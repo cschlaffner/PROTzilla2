@@ -4,7 +4,7 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 
 
 def metadata_import_method(df, file_path, feature_orientation):

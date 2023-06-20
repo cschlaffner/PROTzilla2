@@ -1,7 +1,8 @@
 from pathlib import Path
-
 import pandas as pd
 from django.contrib import messages
+
+from protzilla.utilities import clean_uniprot_id
 
 
 def max_quant_import(_, file_path, intensity_name):
@@ -98,13 +99,3 @@ def handle_protein_ids(protein_group):
         return (clean := clean_uniprot_id(protein_id)), clean != protein_id
 
     return ";".join(sorted(protein_group.split(";"), key=by_normalized_id))
-
-
-def clean_uniprot_id(uniprot_id):
-    if "-" in uniprot_id:
-        uniprot_id = uniprot_id.split("-")[0]
-    if uniprot_id.startswith("CON__") or uniprot_id.startswith("REV__"):
-        uniprot_id = uniprot_id[5:]
-    if "_" in uniprot_id:
-        uniprot_id = uniprot_id.split("_")[0]
-    return uniprot_id
