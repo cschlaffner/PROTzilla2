@@ -1730,7 +1730,7 @@
         }
       },
       "gsea_dot_plot": {
-        "name": "Dot plot for (preranked) GSEA",
+        "name": "Dot plot for (pre-ranked) GSEA",
         "description": "Creates a categorical scatter plot from GSEA data",
         "parameters": {
           "input_df": {
@@ -1769,7 +1769,7 @@
             "default": "NES"
           },
           "cutoff": {
-            "name": "Only terms with Adjusted P-value < cutoff will be shown",
+            "name": "Only terms with dot_color_value < cutoff will be shown",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -1790,7 +1790,7 @@
             "default": false
           },
           "remove_library_names": {
-            "name": "Remove library names from gene sets",
+            "name": "Remove library names from gene sets (e.g. 'KEGG_2013__')",
             "type": "boolean",
             "default": false
           }
