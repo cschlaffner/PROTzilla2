@@ -49,13 +49,6 @@ def pytest_addoption(parser):
     )
 
 
-def open_graph_from_base64(encoded_string):
-    decoded_bytes = base64.b64decode(encoded_string)
-    image_stream = io.BytesIO(decoded_bytes)
-    image = Image.open(image_stream)
-    image.show()
-
-
 @pytest.fixture(scope="session")
 def show_figures(request):
     return request.config.getoption("--show-figures")
@@ -110,3 +103,17 @@ def df_with_nan():
     )
 
     return df_with_nan
+
+
+class Helpers:
+    @staticmethod
+    def open_graph_from_base64(encoded_string):
+        decoded_bytes = base64.b64decode(encoded_string)
+        image_stream = io.BytesIO(decoded_bytes)
+        image = Image.open(image_stream)
+        image.show()
+
+
+@pytest.fixture
+def helpers():
+    return Helpers

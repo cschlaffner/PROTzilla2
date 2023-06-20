@@ -99,19 +99,21 @@ def perform_cross_validation(
 
 
 def evaluate_with_scoring(scoring, y_true, y_pred):
+    scoring_functions = {
+        "accuracy": accuracy_score,
+        "precision": precision_score,
+        "recall": recall_score,
+        "matthews_corrcoef": matthews_corrcoef,
+    }
+
     scores = defaultdict(list)
     for score in scoring:
-        if score == "accuracy":
-            s = accuracy_score(y_true=y_true, y_pred=y_pred)
-        elif score == "precision":
-            s = precision_score(y_true=y_true, y_pred=y_pred)
-        elif score == "recall":
-            s = recall_score(y_true=y_true, y_pred=y_pred)
-        elif score == "matthews_corrcoef":
-            s = matthews_corrcoef(y_true=y_true, y_pred=y_pred)
+        if score in scoring_functions:
+            s = scoring_functions[score](y_true=y_true, y_pred=y_pred)
         else:
             s = "Score not known"
         scores[score] = s
+
     return scores
 
 

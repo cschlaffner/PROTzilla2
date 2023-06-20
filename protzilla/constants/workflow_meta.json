@@ -1128,7 +1128,7 @@
     "classification": {
       "random_forest": {
         "name": "Random Forest",
-        "description": "",
+        "description": "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting.",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",
@@ -1139,7 +1139,7 @@
             ]
           },
           "labels_column": {
-            "name": "Choose corresponding metadata df",
+            "name": "Choose labels column from metadata",
             "type": "categorical",
             "fill": "metadata_columns",
             "fill_dynamic": ["positive_label"],
@@ -1296,12 +1296,9 @@
             ]
           },
           "labels_column": {
-            "name": "Choose corresponding metadata df",
+            "name": "Choose labels column from metadata",
             "type": "categorical",
             "fill": "metadata_columns",
-            "fill_dynamic": [
-              "selected_groups"
-            ],
             "categories": [],
             "default": "None"
           },

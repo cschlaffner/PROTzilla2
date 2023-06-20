@@ -215,7 +215,7 @@ def svm(
     tol=0.001,
     class_weight=None,
     max_iter=-1,
-    random_state=None,
+    random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
     scoring: list[str] = ["accuracy"],
