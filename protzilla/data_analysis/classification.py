@@ -57,8 +57,7 @@ def perform_classification(
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
-        # Error: not possible
-        pass
+        return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
         cv = perform_cross_validation(validation_strategy, **parameters)
