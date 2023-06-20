@@ -19,7 +19,7 @@ from protzilla.data_analysis.protein_graphs import (
     _match_peptides,
     _modify_graph,
 )
-from protzilla.utilities.random import random_string
+from protzilla.utilities.utilities import random_string
 
 
 # TODO: add markdown pictures of the graphs
