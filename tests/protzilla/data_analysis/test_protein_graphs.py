@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 from pathlib import Path
 from unittest import mock
 
@@ -244,6 +245,56 @@ def test_peptide_df() -> pd.DataFrame:
         columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
     )
 
+    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
+    peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+
+    return peptide_df
+
+
+@pytest.fixture()
+def integration_test_peptides() -> pd.DataFrame:
+    # Protein Seq: ABCDEGABCDET
+    # Variation:      V
+    peptide_protein_list = (
+        ["Sample01", "test_protein_variation", "ABC", 123123.0, 0.87452],
+        ["Sample02", "test_protein_variation", "ABC", 234, 0.87452],
+        ["Sample03", "test_protein_variation", "ABC", 234234.0, 0.87452],
+        ["Sample01", "test_protein_variation", "DETYYY", 253840.0, 0.98734],
+        ["Sample02", "test_protein_variation", "DETYYY", np.NaN, 0.98734],
+        ["Sample03", "test_protein_variation", "DETYYY", 0, 0.98734],
+        ["Sample01", "test_protein_variation-2", "DETXXX", 253840.0, 0.98734],
+        ["Sample02", "test_protein_variation-2", "DETXXX", np.NaN, 0.98734],
+        ["Sample03", "test_protein_variation-2", "DETXXX", 0, 0.98734],
+        [
+            "Sample01",
+            "test_protein_variation-1;test_protein_variation",
+            "DET",
+            253840.0,
+            0.98734,
+        ],
+        [
+            "Sample02",
+            "test_protein_variation-1;test_protein_variation",
+            "DET",
+            np.NaN,
+            0.98734,
+        ],
+        [
+            "Sample03",
+            "test_protein_variation-1;test_protein_variation",
+            "DET",
+            0,
+            0.98734,
+        ],
+        ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
+        ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
+        ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
+    )
+
+    peptide_df = pd.DataFrame(
+        data=peptide_protein_list,
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+    )
     peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
     peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
@@ -1132,22 +1183,49 @@ def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
     )
 
 
-@mock.patch(
-    "protzilla.data_analysis.protein_graphs._create_protein_variation_graph",
-    "protzilla.data_analysis.protein_graphs._get_peptides",
+@mock.patch.multiple(
+    "protzilla.data_analysis.protein_graphs",
+    _get_peptides=mock.MagicMock(return_value=["not_falsey_list"]),
+    _create_protein_variation_graph=mock.MagicMock(
+        return_value=dict(
+            graph_path=None,
+            messages=[{"level": messages.ERROR, "msg": "No graph found"}],
+        )
+    ),
 )
-def test_peptides_to_isoform_no_graph(
-    mock_create_variation_graph, mock_get_peptides, critical_logger
-):
-    mock_get_peptides.return_value = ["testPeptide"]
+def test_peptides_to_isoform_no_graph(critical_logger, tests_folder_name):
+    run_name = f"{tests_folder_name}/test_peptides_to_isoform_no_graph"
 
     protein_id = "SomeID"
-    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, "run_name")
-    assert out_dict["graph_path"] == None
-    assert (
-        out_dict["messages"][0]["msg"]
-        == f"No graph found for isoform {protein_id} in Protein Graphs"
+    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, run_name)
+    assert out_dict["graph_path"] is None
+    assert out_dict["messages"][0]["msg"] == "No graph found"
+
+
+def test_peptides_to_isoform_integration_test(
+    integration_test_peptides, critical_logger, tests_folder_name
+):
+    run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
+    run_path = Path(RUNS_PATH / run_name)
+    os.mkdir(run_path)
+    os.mkdir(run_path / "graphs")
+    test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
+    test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
+    shutil.copy(test_protein_path, test_protein_destination)
+
+    protein_id = "test_protein_variation"
+    out_dict = peptides_to_isoform(
+        peptide_df=integration_test_peptides,
+        protein_id=protein_id,
+        run_name=run_name,
+        k=3,  # k = 3 for easier test data creation
     )
+
+    planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
+    assert out_dict["matched_graph_path"] == str(planned_modified_graph_path)
+    assert Path(planned_modified_graph_path).exists()
+    assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
+    assert out_dict["peptide_mismatches"] == ["DETYYY"]
 
 
 def pprint_graphs(graph, planned_graph):
