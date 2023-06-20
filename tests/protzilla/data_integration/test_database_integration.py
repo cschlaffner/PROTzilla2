@@ -1,6 +1,7 @@
-import pandas as pd
-import numpy as np
 from unittest.mock import patch
+
+import numpy as np
+import pandas as pd
 import pytest
 
 from protzilla.data_integration.database_integration import add_uniprot_data
