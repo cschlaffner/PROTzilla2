@@ -7,6 +7,15 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     matthews_corrcoef,
+    adjusted_mutual_info_score,
+    adjusted_rand_score,
+    fowlkes_mallows_score,
+    homogeneity_score,
+    completeness_score,
+    mutual_info_score,
+    normalized_mutual_info_score,
+    v_measure_score,
+    rand_score,
 )
 from sklearn.model_selection import (
     GridSearchCV,
@@ -115,6 +124,37 @@ def evaluate_with_scoring(scoring, y_true, y_pred):
             s = "Score not known"
         scores[score] = s
 
+    return scores
+
+
+def evaluate_clustering_with_scoring(scoring, labels_true, labels_pred):
+    scores = defaultdict(list)
+    for score in scoring:
+        if score == "adjusted_mutual_info_score":
+            s = adjusted_mutual_info_score(
+                labels_true=labels_true, labels_pred=labels_pred
+            )
+        elif score == "adjusted_rand_score":
+            s = adjusted_rand_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "completeness_score":
+            s = completeness_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "fowlkes_mallows_score":
+            s = fowlkes_mallows_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "homogeneity_score":
+            s = homogeneity_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "mutual_info_score":
+            s = mutual_info_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "normalized_mutual_info_score":
+            s = normalized_mutual_info_score(
+                labels_true=labels_true, labels_pred=labels_pred
+            )
+        elif score == "rand_score":
+            s = rand_score(labels_true=labels_true, labels_pred=labels_pred)
+        elif score == "v_measure_score":
+            s = v_measure_score(labels_true=labels_true, labels_pred=labels_pred)
+        else:
+            s = "Score not known"
+        scores[score] = s
     return scores
 
 
