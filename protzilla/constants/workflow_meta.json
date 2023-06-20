@@ -1193,11 +1193,11 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": ["True", "False"],
-            "default": "True",
+            "categories": ["yes", "no"],
+            "default": "yes",
             "dynamic": true,
             "dynamic_parameters": {
-              "True": ["random_state_cv"]
+              "yes": ["random_state_cv"]
             }
           },
           "n_repeats": {
@@ -1349,8 +1349,8 @@
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
             "type": "categorical_dynamic",
-            "categories": [true, false],
-            "default": true,
+            "categories": ["yes", "no"],
+            "default": "yes",
             "dynamic": true,
             "dynamic_parameters": {
               "True": ["random_state_cv"]
