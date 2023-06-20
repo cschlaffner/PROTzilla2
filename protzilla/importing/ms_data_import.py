@@ -1,7 +1,8 @@
 from pathlib import Path
-
 import pandas as pd
 from django.contrib import messages
+
+from protzilla.utilities import clean_uniprot_id
 
 
 def max_quant_import(_, file_path, intensity_name):
@@ -33,6 +34,7 @@ def max_quant_import(_, file_path, intensity_name):
     molten = molten.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    ordered["Protein ID"] = ordered["Protein ID"].map(handle_protein_ids)
     return ordered, {}
 
 
@@ -87,4 +89,13 @@ def ms_fragger_import(_, file_path, intensity_name):
     )
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    ordered["Protein ID"] = ordered["Protein ID"].map(handle_protein_ids)
     return ordered, {}
+
+
+def handle_protein_ids(protein_group):
+    # todo add mapping to uniprot here
+    def by_normalized_id(protein_id):
+        return (clean := clean_uniprot_id(protein_id)), clean != protein_id
+
+    return ";".join(sorted(protein_group.split(";"), key=by_normalized_id))
