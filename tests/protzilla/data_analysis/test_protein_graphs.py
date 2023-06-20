@@ -4,6 +4,8 @@ from pathlib import Path
 from unittest import mock
 
 import networkx as nx
+import numpy as np
+import pandas as pd
 import pytest
 from django.contrib import messages
 
@@ -215,6 +217,35 @@ def test_protein_variation_graph():
     g.graph = {"edge_default": {}, "node_default": {}}
 
     return g
+
+
+@pytest.fixture
+def test_peptide_df() -> pd.DataFrame:
+    # sample, protein groups, sequence, intensity, pep
+    peptide_protein_list = (
+        ["Sample01", "MadeUp", "COOLSEQ", 123123.0, 0.87452],
+        ["Sample02", "MadeUp-2", "SHOUDLNTAPPEAR", 234234.0, 0.86723],
+        ["Sample03", "MadeUp-1;MadeUp", "SHOULDAPPEAR", 234234.0, 0.57263],
+        ["Sample01", "MadeDown", "VCOOLSEQ1", 253840.0, 0.98734],
+        ["Sample02", "MadeDown", "VCOOLSEQ2", np.NaN, 0.86723],
+        ["Sample03", "MadeDown", "VCOOLSEQ3", 0, 0.87643],
+        ["Sample01", "MadeLeft", "LCOOLSEQ1", np.NaN, 0.2876],
+        ["Sample02", "MadeLeft-2;MadeLeft", "LCOOLSEQ2", 13200.0, 0.549078],
+        ["Sample03", "MadeLeft", "LCOOLSEQ3", 7100.0, 0.726354],
+        ["Sample01", "MadeRight", "RCOOLSEQ", np.NaN, 0.75498],
+        ["Sample02", "MadeRight", "RCOOLSEQ", np.NaN, 0.87423],
+        ["Sample03", "MadeRight", "RCOOLSEQ", np.NaN, 0.01922],
+    )
+
+    peptide_df = pd.DataFrame(
+        data=peptide_protein_list,
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+    )
+
+    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
+    peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+
+    return peptide_df
 
 
 def test_longest_paths_simple(simple_graph):
@@ -966,7 +997,9 @@ def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
-def test_modify_graph_simple_1_pep_2_nodes_middle_match(multi_route_long_nodes):
+def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
+    multi_route_long_nodes,
+):
     # "0": {"aminoacid": "__start__"},
     # "1": {"aminoacid": "ABCDEFG"},
     #                     0   4
@@ -1012,7 +1045,77 @@ def test_modify_graph_simple_1_pep_2_nodes_middle_match(multi_route_long_nodes):
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
-# def test_get_peptides
+def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
+    # despite variation matching not yet being implemented when getting start and end
+    # position of matches in the graph, once you have correct contigs, variation matches
+    # are correctly added to the graph
+
+    # "0": {"aminoacid": "__start__"},
+    # "1": {"aminoacid": "ABCDEFG"},
+    #                     0   4
+    # "2": {"aminoacid": "H"},
+    # "3": {"aminoacid": "I"},
+    #                     7
+    # "4": {"aminoacid": "JKABCDLMNOP"},
+    #                     8 10    16
+    # "5": {"aminoacid": "__end__"},
+    # peptides: EFGHJK
+
+    graph, _, _ = multi_route_long_nodes
+    longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
+    contigs = {"1": [(4, 6)], "2": [(7, 7)], "4": [(8, 9)]}
+
+    planned_graph = graph.copy()
+    planned_graph.add_node("n6", aminoacid="ABCD", match="false")
+    planned_graph.add_edge("0", "n6")
+    planned_graph.add_edge("n6", "1")
+    planned_graph.remove_edge("0", "1")
+    planned_graph.add_node("n7", aminoacid="JK", match="true")
+    planned_graph.add_edge("2", "n7")
+    planned_graph.add_edge("3", "n7")
+    planned_graph.add_edge("n7", "4")
+    planned_graph.remove_edge("2", "4")
+    planned_graph.remove_edge("3", "4")
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "1": {"aminoacid": "EFG", "match": "true"},
+            "2": {"aminoacid": "H", "match": "true"},
+            "3": {"aminoacid": "I"},  # _modify_graph doesn't touch node->mo match value
+            "4": {"aminoacid": "ABCDLMNOP", "match": "false"},
+        },
+    )
+
+    graph = _modify_graph(graph, contigs, longest_paths)
+    assert nx.utils.graphs_equal(graph, planned_graph)
+
+
+def test_get_peptides_all_0(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id)
+    assert peptides == ["COOLSEQ", "SHOULDAPPEAR"]
+
+
+def test_get_peptides_nan_0(test_peptide_df):
+    protein_id = "MadeDown"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id)
+    assert peptides == ["VCOOLSEQ1"]
+
+
+def test_get_peptides_all_nan(test_peptide_df):
+    protein_id = "MadeRight"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id)
+    assert peptides == []
+
+
+def test_get_peptides_one_nan(test_peptide_df):
+    protein_id = "MadeLeft"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id)
+    assert peptides == ["LCOOLSEQ2", "LCOOLSEQ3"]
 
 
 def pprint_graphs(graph, planned_graph):
