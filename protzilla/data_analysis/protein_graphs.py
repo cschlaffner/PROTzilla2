@@ -653,7 +653,7 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     filter = df["Protein ID"].str.contains(pattern)
     df = df[~filter]
 
-    intensity_name = [col for col in df.columns if "intensity" in col][0]
+    intensity_name = [col for col in df.columns if "intensity" in col.lower()][0]
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
     return df["Sequence"].unique().tolist()
