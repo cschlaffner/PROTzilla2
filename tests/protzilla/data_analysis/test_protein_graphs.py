@@ -21,6 +21,7 @@ from protzilla.data_analysis.protein_graphs import (
     _longest_paths,
     _match_peptides,
     _modify_graph,
+    peptides_to_isoform,
 )
 from protzilla.utilities.utilities import random_string
 
@@ -1117,6 +1118,36 @@ def test_get_peptides_one_nan(test_peptide_df):
     peptide_df = test_peptide_df
     peptides = _get_peptides(peptide_df, protein_id)
     assert peptides == ["LCOOLSEQ2", "LCOOLSEQ3"]
+
+
+@mock.patch("protzilla.data_analysis.protein_graphs._get_peptides")
+def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
+    mock_get_peptides.return_value = []
+    protein_id = "SomeID"
+    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, "run_name")
+    assert out_dict["graph_path"] == None
+    assert (
+        out_dict["messages"][0]["msg"]
+        == f"No peptides found for isoform {protein_id} in Peptide Dataframe"
+    )
+
+
+@mock.patch(
+    "protzilla.data_analysis.protein_graphs._create_protein_variation_graph",
+    "protzilla.data_analysis.protein_graphs._get_peptides",
+)
+def test_peptides_to_isoform_no_graph(
+    mock_create_variation_graph, mock_get_peptides, critical_logger
+):
+    mock_get_peptides.return_value = ["testPeptide"]
+
+    protein_id = "SomeID"
+    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, "run_name")
+    assert out_dict["graph_path"] == None
+    assert (
+        out_dict["messages"][0]["msg"]
+        == f"No graph found for isoform {protein_id} in Protein Graphs"
+    )
 
 
 def pprint_graphs(graph, planned_graph):
