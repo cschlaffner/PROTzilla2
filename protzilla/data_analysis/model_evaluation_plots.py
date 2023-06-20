@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from protzilla.data_analysis.classification_helper import encode_labels
-from protzilla.utilities.transform_figure import fig_to_base64
+from protzilla.utilities.utilities import fig_to_base64
 
 
 def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None):
