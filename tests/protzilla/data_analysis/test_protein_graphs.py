@@ -15,6 +15,7 @@ from protzilla.data_analysis.protein_graphs import (
     _create_graph_index,
     _create_protein_variation_graph,
     _create_ref_seq_index,
+    _get_peptides,
     _get_ref_seq,
     _get_start_end_pos_for_matches,
     _longest_paths,
