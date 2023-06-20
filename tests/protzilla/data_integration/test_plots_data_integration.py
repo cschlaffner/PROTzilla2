@@ -1,9 +1,5 @@
-import base64
-import io
-
 import pandas as pd
 import pytest
-from PIL import Image
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.di_plots import (
@@ -12,14 +8,7 @@ from protzilla.data_integration.di_plots import (
 )
 
 
-def open_graph_from_base64(encoded_string):
-    decoded_bytes = base64.b64decode(encoded_string)
-    image_stream = io.BytesIO(decoded_bytes)
-    image = Image.open(image_stream)
-    image.show()
-
-
-def test_enrichment_bar_plot_restring(show_figures):
+def test_enrichment_bar_plot_restring(show_figures, helpers):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     result = pd.read_csv(f"{test_data_folder}/merged_KEGG_process.csv", header=0)
     bar_base64 = go_enrichment_bar_plot(
@@ -30,7 +19,7 @@ def test_enrichment_bar_plot_restring(show_figures):
         value="fdr",
     )
     if show_figures:
-        open_graph_from_base64(bar_base64[0])
+        helpers.open_graph_from_base64(bar_base64[0])
 
     bar_base64 = go_enrichment_bar_plot(
         input_df=result,
@@ -40,10 +29,10 @@ def test_enrichment_bar_plot_restring(show_figures):
         value="p_value",
     )
     if show_figures:
-        open_graph_from_base64(bar_base64[0])
+        helpers.open_graph_from_base64(bar_base64[0])
 
 
-def test_enrichment_bar_plot(show_figures):
+def test_enrichment_bar_plot(show_figures, helpers):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", sep="\t"
@@ -56,7 +45,7 @@ def test_enrichment_bar_plot(show_figures):
         value="p_value",
     )
     if show_figures:
-        open_graph_from_base64(bar_base64[0])
+        helpers.open_graph_from_base64(bar_base64[0])
 
 
 def test_enrichment_bar_plot_wrong_value():
@@ -149,7 +138,11 @@ def test_enrichment_bar_plot_cutoff():
 
 
 @pytest.mark.parametrize("x_axis_type", ["Gene Sets", "Combined Score"])
-def test_enrichment_dot_plot(show_figures, x_axis_type):
+def test_enrichment_dot_plot(
+    helpers,
+    show_figures,
+    x_axis_type,
+):
     test_data_folder = f"{PROJECT_PATH}/tests/test_data/enrichment_data"
     enrichment_df = pd.read_csv(
         f"{test_data_folder}/Reactome_enrichment_enrichr.csv", header=0
@@ -166,7 +159,7 @@ def test_enrichment_dot_plot(show_figures, x_axis_type):
         show_ring=False,
     )
     if show_figures:
-        open_graph_from_base64(dot_base64[0])
+        helpers.open_graph_from_base64(dot_base64[0])
 
 
 def test_enrichment_dot_plot_wrong_df():
