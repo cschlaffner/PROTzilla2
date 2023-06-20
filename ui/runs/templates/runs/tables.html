@@ -13,6 +13,7 @@
         $(document).ready(function () {
             $.ajax({
                 url: "{% url 'runs:tables_content' run_name index key %}",
+                data: "clean-ids",
                 type: "GET",
                 success: function (response) {
                     let tr = $("<tr>");

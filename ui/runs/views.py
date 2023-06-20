@@ -16,7 +16,7 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import get_memory_usage
+from protzilla.utilities import get_memory_usage, unique_justseen, clean_uniprot_id
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -479,6 +479,13 @@ def tables_content(request, run_name, index, key):
     else:
         outputs = run.current_out[key]
     out = outputs.replace(np.nan, None)
+
+    if "clean-ids" in request.GET and "Protein ID" in out.columns:
+        out["Protein ID"] = out["Protein ID"].map(
+            lambda group: ";".join(
+                unique_justseen(map(clean_uniprot_id, group.split(";")))
+            )
+        )
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
