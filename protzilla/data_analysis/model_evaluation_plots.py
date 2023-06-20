@@ -19,7 +19,8 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
      parameter.
     :type title: str, optional
     :return: Base64 encoded image of the plot
-    :rtype: bytes"""
+    :rtype: bytes
+    """
     input_test_df = input_test_df.set_index("Sample")
     _, labels_test_df = encode_labels(labels_test_df, "Label")
 
@@ -44,7 +45,8 @@ def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
      parameter.
     :type title: str, optional
     :return: Base64 encoded image of the plot
-    :rtype: bytes"""
+    :rtype: bytes
+    """
     input_test_df = input_test_df.set_index("Sample")
     _, labels_test_df = encode_labels(labels_test_df, "Label")
 

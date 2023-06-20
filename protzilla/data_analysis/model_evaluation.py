@@ -7,7 +7,8 @@ from protzilla.data_analysis.classification_helper import (
 
 
 def evaluate_classification_model(model, input_test_df, labels_test_df, scoring):
-    """Function that asseses an already trained classification model on separate testing
+    """
+    Function that asseses an already trained classification model on separate testing
     data using widely used scoring metrics
 
     :param model: The trained classification model instance to be evaluated.
