@@ -172,7 +172,7 @@ def test_enrichment_dot_plot_wrong_df(data_folder_tests):
     assert "Please input a dataframe from" in current_out["messages"][0]["msg"]
 
 
-def test_gsea_dot_plot(show_figures, data_folder_tests):
+def test_gsea_dot_plot(show_figures, data_folder_tests, helpers):
     enrichment_df = pd.read_csv(
         data_folder_tests / "gsea_result_sig_prot.csv", header=0
     )
@@ -185,10 +185,10 @@ def test_gsea_dot_plot(show_figures, data_folder_tests):
         show_ring=False,
     )[0]
     if show_figures:
-        open_graph_from_base64(dot_base64["plot_base64"])
+        helpers.open_graph_from_base64(dot_base64["plot_base64"])
 
 
-def test_gsea_dot_plot_remove_names(show_figures, data_folder_tests):
+def test_gsea_dot_plot_remove_names(show_figures, data_folder_tests, helpers):
     enrichment_df = pd.read_csv(
         data_folder_tests / "gsea_preranked_enriched.csv", header=0
     )
@@ -202,7 +202,7 @@ def test_gsea_dot_plot_remove_names(show_figures, data_folder_tests):
         remove_library_names=True,
     )[0]
     if show_figures:
-        open_graph_from_base64(dot_base64["plot_base64"])
+        helpers.open_graph_from_base64(dot_base64["plot_base64"])
 
 
 def test_gsea_dot_plot_wrong_df(data_folder_tests):
@@ -242,7 +242,7 @@ def test_gsea_dot_plot_cutoff(data_folder_tests):
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
 
 
-def test_gsea_dot_plot_gene_sets(data_folder_tests, show_figures):
+def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
     df = pd.read_csv(data_folder_tests / "gsea_result_sig_prot.csv", header=0)
     dot_base64 = gsea_dot_plot(
         input_df=df,
@@ -252,7 +252,7 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, show_figures):
         title="KEGG GSEA dotplot test",
     )[0]
     if show_figures:
-        open_graph_from_base64(dot_base64["plot_base64"])
+        helpers.open_graph_from_base64(dot_base64["plot_base64"])
     dot_base64 = gsea_dot_plot(
         input_df=df,
         gene_sets="all",
@@ -261,4 +261,4 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, show_figures):
         title="KEGG GSEA dotplot test",
     )[0]
     if show_figures:
-        open_graph_from_base64(dot_base64["plot_base64"])
+        helpers.open_graph_from_base64(dot_base64["plot_base64"])

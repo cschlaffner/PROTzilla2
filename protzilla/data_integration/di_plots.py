@@ -4,9 +4,9 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
+from protzilla.utilities.utilities import fig_to_base64
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
-from protzilla.utilities.utilities import fig_to_base64
 
 
 def go_enrichment_bar_plot(
@@ -309,18 +309,3 @@ def gsea_dot_plot(
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
-
-
-def fig_to_base64(fig):
-    """
-    Convert a matplotlib figure to base64. This is used to display the figure in the browser.
-
-    :param fig: matplotlib figure
-    :type fig: matplotlib.figure.Figure
-    :return: base64 encoded image
-    :rtype: bytes
-    """
-    img = io.BytesIO()
-    fig.savefig(img, format="png", bbox_inches="tight")
-    img.seek(0)
-    return base64.b64encode(img.getvalue())
