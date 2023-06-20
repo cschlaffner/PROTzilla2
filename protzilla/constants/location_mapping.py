@@ -5,7 +5,7 @@ from ..data_analysis import (
     dimension_reduction,
     plots,
 )
-from ..data_integration import di_plots, enrichment_analysis, database_integration
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,

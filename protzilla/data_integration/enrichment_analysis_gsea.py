@@ -35,7 +35,7 @@ def create_ranked_df(
     :rtype: pd.DataFrame
     """
     logger.info("Ranking input")
-    rnk = pd.DataFrame(columns=["Gene symbol", "Ranking value"])
+    gene_values = {"Gene symbol": [], "Ranking value": []}
     for group in protein_groups:
         if group in filtered_groups:
             continue
@@ -44,19 +44,20 @@ def create_ranked_df(
             ranking_value = protein_df.loc[
                 protein_df["Protein ID"] == group, protein_df.columns[1]
             ].values[0]
-            rnk.loc[len(rnk)] = [gene, ranking_value]
-
+            gene_values["Gene symbol"].append(gene)
+            gene_values["Ranking value"].append(ranking_value)
+    ranked_df = pd.DataFrame(gene_values)
     # if duplicate genes only keep the one with the worse score
     if ranking_direction == "ascending":
-        rnk = rnk.groupby("Gene symbol").max()
+        ranked_df = ranked_df.groupby("Gene symbol").max()
     else:
-        rnk = rnk.groupby("Gene symbol").min()
+        ranked_df = ranked_df.groupby("Gene symbol").min()
 
     # sort rank df by score according to ranking direction
-    rnk.sort_values(
+    ranked_df.sort_values(
         by="Ranking value", ascending=ranking_direction == "ascending", inplace=True
     )
-    return rnk
+    return ranked_df
 
 
 def gsea_preranked(
@@ -155,7 +156,7 @@ def gsea_preranked(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    rnk = create_ranked_df(
+    ranked_df = create_ranked_df(
         protein_groups,
         protein_df,
         ranking_direction,
@@ -166,7 +167,7 @@ def gsea_preranked(
     logger.info("Running GSEA")
     try:
         preranked_result = gseapy.prerank(
-            rnk=rnk,
+            rnk=ranked_df,
             gene_sets=gene_sets,
             min_size=min_size,
             max_size=max_size,
@@ -185,7 +186,7 @@ def gsea_preranked(
     # add proteins to output df
     enriched_df = preranked_result.res2d
     enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
-        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
+        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
     if filtered_groups:
@@ -341,9 +342,7 @@ def gsea(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    # input example is significant proteins df for now
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    mylen=len(protein_groups)
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
         gene_to_groups,

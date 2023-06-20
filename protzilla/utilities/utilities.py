@@ -1,8 +1,9 @@
-from itertools import groupby
 import operator
+import os
+from itertools import groupby
 from random import choices
 from string import ascii_letters
-import os
+
 import psutil
 
 
