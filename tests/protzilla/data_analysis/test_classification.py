@@ -6,6 +6,7 @@ from protzilla.data_analysis.classification import random_forest
 from protzilla.data_analysis.model_evaluation_plots import (
     precision_recall_curve_plot,
     roc_curve_plot,
+    permutation_testing_plot,
 )
 
 
@@ -152,3 +153,17 @@ def test_evaluate_classification_model(show_figures, random_forest_out):
     )
     scores_df = evaluation_out["scores_df"]
     assert (scores_df["Score"] == 1).all()
+
+
+def test_permutation_testing_plot(show_figures, random_forest_out, helpers):
+    hist_base64 = permutation_testing_plot(
+        random_forest_out["model"],
+        random_forest_out["X_train_df"],
+        random_forest_out["y_train_df"],
+        "K-Fold",
+        "accuracy",
+        100,
+        42,
+    )
+    if True:
+        helpers.open_graph_from_base64(hist_base64[0])
