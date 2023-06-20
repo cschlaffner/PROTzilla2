@@ -1,0 +1,140 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "Intensity"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_samples",
+          "method": "protein_count_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        },
+        {
+          "name": "normalisation",
+          "method": "totalsum",
+          "parameters": {
+            "percentile": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "shrinking_value": 1,
+            "strategy": "most_frequent",
+            "number_of_neighbours": 5
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "log_base": 2,
+            "grouping": "Group",
+            "group1": "CTR",
+            "group2": "AD"
+          },
+          "output_name": "ttest_result"
+        },
+        {
+          "name": "plot",
+          "method": "volcano",
+          "parameters": {
+            "p_values": [
+              "ttest_result",
+              "corrected_p_values_df"
+            ],
+            "log2_fc": [
+              "ttest_result",
+              "log2_fold_change_df"
+            ],
+            "fc_threshold": [
+              "ttest_result",
+              "fc_threshold"
+            ],
+            "alpha": [
+              "ttest_result",
+              "corrected_alpha"
+            ]
+          }
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}

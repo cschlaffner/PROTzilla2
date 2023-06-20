@@ -123,32 +123,6 @@
             }
           }
         ]
-      },
-      "samples_missing_filter": {
-        "name": "Samples Missing",
-        "description": "Filters all proteins that are contained in less than a set percentage samples",
-        "parameters": {
-          "percentage": {
-            "name": "Percentage of minimum non-missing samples per protein",
-            "type": "numeric",
-            "min": 0,
-            "max": 1,
-            "default": 0.5
-          }
-        },
-        "graphs": [
-          {
-            "graph_type": {
-              "name": "Graph type:",
-              "type": "categorical",
-              "categories": [
-                "Bar chart",
-                "Pie chart"
-              ],
-              "default": "Pie chart"
-            }
-          }
-        ]
       }
     },
     "filter_samples": {
