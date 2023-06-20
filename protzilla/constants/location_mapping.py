@@ -1,4 +1,5 @@
 from ..data_analysis import (
+    classification,
     clustering,
     differential_expression,
     dimension_reduction,
@@ -7,7 +8,7 @@ from ..data_analysis import (
     model_evaluation,
     model_evaluation_plots,
 )
-from ..data_integration import di_plots, enrichment_analysis
+from ..data_integration import di_plots, enrichment_analysis, database_integration
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -191,6 +192,16 @@ method_map = {
         "enrichment_analysis",
         "go_analysis_offline",
     ): enrichment_analysis.go_analysis_offline,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea",
+    ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "database_integration",
+        "uniprot",
+    ): database_integration.add_uniprot_data,
 }
 
 # reversed mapping of method callable and location

@@ -10,11 +10,11 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import (
     GridSearchCV,
-    RandomizedSearchCV,
     KFold,
-    RepeatedKFold,
     LeaveOneOut,
     LeavePOut,
+    RandomizedSearchCV,
+    RepeatedKFold,
     StratifiedKFold,
     train_test_split,
 )
