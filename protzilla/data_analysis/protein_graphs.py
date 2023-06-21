@@ -59,8 +59,10 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    potential_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
-    if not Path(potential_graph_path).exists():
+    potential_graph_path = Path(
+        RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
+    )
+    if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
         message = out_dict["messages"]
@@ -71,8 +73,10 @@ def peptides_to_isoform(
         graph_path = potential_graph_path
 
     protein_graph = nx.read_graphml(graph_path)
-    protein_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.txt"
-    matched_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}_modified.graphml"
+    protein_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.txt"
+    matched_graph_path = (
+        RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
+    )
 
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
 
@@ -95,12 +99,12 @@ def peptides_to_isoform(
     contigs = _create_contigs_dict(node_start_end)
     modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
 
-    logger.info(f"writing modified graph at {matched_graph_path}")
+    logger.info(f"writing modified graph at {str(matched_graph_path)}")
     nx.write_graphml(modified_graph, matched_graph_path)
 
-    msg = f"matched-peptides-graph created at {matched_graph_path}"
+    msg = f"matched-peptides-graph created at {str(matched_graph_path)}"
     return dict(
-        graph_path=matched_graph_path,
+        graph_path=str(matched_graph_path),
         peptide_matches=list(peptide_matches.keys()),
         peptide_mismatches=peptide_mismatches,
         messages=[dict(level=messages.INFO, msg=msg)],
@@ -130,7 +134,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
     """
 
     logger.info(f"Creating graph for protein {protein_id}")
-    run_path = f"{RUNS_PATH}/{run_name}"
+    run_path = RUNS_PATH / run_name
     path_to_protein_file, request = _get_protein_file(protein_id, run_path)
 
     if request is not None:
@@ -142,10 +146,10 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
                 messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
             )
 
-    output_folder = f"{run_path}/graphs"
+    output_folder = run_path / "graphs"
     output_csv = f"{output_folder}/{protein_id}.csv"
     graph_path = f"{output_folder}/{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+    cmd_str = f"protgraph -egraphml {str(path_to_protein_file)} \
                 --export_output_folder={output_folder} \
                 --output_csv={output_csv} \
                 -ft VARIANT \
@@ -154,7 +158,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
 
     subprocess.run(cmd_str, shell=True)
 
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
+    msg = f"Graph created for protein {protein_id} at {graph_path} using {str(path_to_protein_file)}"
     logger.info(msg)
     return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
@@ -290,15 +294,16 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     return longest_paths
 
 
-def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | None):
-    # protein_id = protein_id.upper()
-    path_to_graphs = Path(Path(run_path) / "graphs")
-    path_to_protein_file = Path(path_to_graphs / f"{protein_id}.txt")
+def _get_protein_file(
+    protein_id: str, run_path: Path
+) -> (Path, requests.models.Response | None):
+    path_to_graphs = run_path / "graphs"
+    path_to_protein_file = path_to_graphs / f"{protein_id}.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
     r = None
 
-    if not path_to_graphs.exists():
-        Path(path_to_graphs).mkdir(parents=True, exist_ok=True)
+    path_to_graphs.mkdir(parents=True, exist_ok=True)
+
     if path_to_protein_file.exists():
         logger.info(
             f"Protein file {path_to_protein_file} already exists. Skipping download."
