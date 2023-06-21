@@ -1,4 +1,3 @@
-import os
 import pprint
 import re
 import shutil
@@ -778,7 +777,7 @@ def test_match_peptides_early_mismatch_late_match():
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
 def test_create_prot_variation_graph(
-    mock__get_protein_file,
+    mock_get_protein_file,
     tests_folder_name,
     test_protein_variation_graph,
     error_logger,
@@ -788,26 +787,26 @@ def test_create_prot_variation_graph(
     # that
 
     protein_id = "test_protein_variation"
-    protein_path = f"{TEST_DATA_PATH}/proteins/{protein_id}.txt"
+    protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
     mock_request = mock.MagicMock()
     mock_request.status_code = 200
 
     run_name = (
         tests_folder_name + "/test_create_prot_variation_graph_" + random_string()
     )
-    os.mkdir(f"{RUNS_PATH}/{run_name}")
+    (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
-    output_folder = f"{RUNS_PATH}/{run_name}/graphs"
-    graph_path = f"{output_folder}/{protein_id}.graphml"
+    output_folder = RUNS_PATH / run_name / f"graphs"
+    graph_path = output_folder / f"{protein_id}.graphml"
     planned_msg = (
         f"Graph created for protein {protein_id} at {graph_path} using {protein_path}"
     )
 
-    mock__get_protein_file.return_value = (protein_path, mock_request)
+    mock_get_protein_file.return_value = (protein_path, mock_request)
     out_dict = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
 
     planned_out_dict = {
-        "graph_path": f"{output_folder}/{protein_id}.graphml",
+        "graph_path": str(output_folder / f"{protein_id}.graphml"),
         "messages": [dict(level=messages.INFO, msg=planned_msg)],
     }
 
@@ -819,7 +818,7 @@ def test_create_prot_variation_graph(
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
 def test_create_protein_variation_graph_bad_request(
-    mock__get_protein_file, critical_logger
+    mock_get_protein_file, critical_logger
 ):
     # error in log is expected -> surpress error and below using critical_logger
 
@@ -831,7 +830,7 @@ def test_create_protein_variation_graph_bad_request(
     mock_request.reason = "test_reason"
     mock_request.text = "test_text"
 
-    mock__get_protein_file.return_value = (protein_path, mock_request)
+    mock_get_protein_file.return_value = (protein_path, mock_request)
 
     planned_msg = f"error while downloading protein file for {protein_id}. Statuscode:{mock_request.status_code}, {mock_request.reason}. Got: {mock_request.text}. Tip: check if the ID is correct"
 
@@ -1216,8 +1215,6 @@ def test_peptides_to_isoform_integration_test(
     test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
     test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
     shutil.copy(test_protein_path, test_protein_destination)
-
-    assert test_protein_destination.exists()
 
     protein_id = "test_protein_variation"
     out_dict = peptides_to_isoform(

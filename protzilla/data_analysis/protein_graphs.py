@@ -160,7 +160,9 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
     logger.info(msg)
-    return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
+    return dict(
+        graph_path=str(graph_path), messages=[dict(level=messages.INFO, msg=msg)]
+    )
 
 
 def _create_graph_index(
