@@ -292,14 +292,14 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
 def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | None):
     protein_id = protein_id.upper()
-    path_to_graphs = run_path / "graphs"
-    path_to_protein_file = path_to_graphs / f"{protein_id}.txt"
+    path_to_graphs = Path(Path(run_path) / "graphs")
+    path_to_protein_file = Path(path_to_graphs / f"{protein_id}.txt")
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
     r = None
 
-    if not Path(path_to_graphs).exists():
+    if not path_to_graphs.exists():
         Path(path_to_graphs).mkdir(parents=True, exist_ok=True)
-    if Path(path_to_protein_file).exists():
+    if path_to_protein_file.exists():
         logger.info(
             f"Protein file {path_to_protein_file} already exists. Skipping download."
         )
