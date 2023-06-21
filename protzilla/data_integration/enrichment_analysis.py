@@ -347,7 +347,14 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     return enriched, filtered_groups
 
 
-def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both"):
+def go_analysis_with_enrichr(
+    proteins,
+    organism,
+    direction="both",
+    gene_sets_path=None,
+    gene_sets_enrichr=None,
+    **kwargs,
+):
     """
     A method that performs online overrepresentation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package which accesses
@@ -357,9 +364,21 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
-    :param protein_sets: list of Enrichr Library name(s) to use as sets for the enrichment
-        (e.g. ['KEGG_2016','KEGG_2013'])
-    :type protein_sets: list of str
+    :param gene_sets_path: path to file with gene sets
+         The file can be a .csv, .txt, .json or .gmt file.
+        .gmt files are not parsed because GSEApy can handle them directly.
+        Other files must have one set per line with the set name and the proteins.
+            - .txt: Setname or identifier followed by a tab-separated list of genes
+                Set_name    Protein1    Protein2...
+                Set_name    Protein1    Protein2...
+            - .csv: Setname or identifier followed by a comma-separated list of genes
+                Set_name, Protein1, Protein2, ...
+                Set_name2, Protein2, Protein3, ...
+            - .json:
+                {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type gene_sets_path: str
+    :param gene_sets_enrichr: list of gene set library names to use from Enrichr
+    :type gene_sets_enrichr: list
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
@@ -384,6 +403,20 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         or not proteins.iloc[:, 1].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    if gene_sets_path:
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr:
+        gene_sets = (
+            [gene_sets_enrichr]
+            if isinstance(gene_sets_enrichr, str)
+            else gene_sets_enrichr
+        )
+    else:
+        msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
@@ -415,14 +448,14 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups = enrichr_helper(
-            up_protein_list, protein_sets, organism, "up"
+            up_protein_list, gene_sets, organism, "up"
         )
         if isinstance(up_enriched, dict):  # error occurred
             return up_enriched
 
     if direction == "down" or direction == "both":
         down_enriched, down_filtered_groups = enrichr_helper(
-            down_protein_list, protein_sets, organism, "down"
+            down_protein_list, gene_sets, organism, "down"
         )
         if isinstance(down_enriched, dict):  # error occurred
             return down_enriched

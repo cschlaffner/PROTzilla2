@@ -474,7 +474,7 @@ def test_go_analysis_with_STRING_too_many_col_df():
 def test_go_analysis_with_enrichr_wrong_proteins_input():
     current_out = go_analysis_with_enrichr(
         proteins="Protein1;Protein2;aStringOfProteins",
-        protein_sets=["KEGG"],
+        gene_sets_enrichr=["KEGG"],
         organism="human",
     )
 
@@ -483,6 +483,28 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
         "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
+
+
+def test_go_analysis_with_enrichr_wrong_gene_sets_input():
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
+        gene_sets_path="aMadeUpInputFormat.abc",
+        organism="human",
+    )
+
+    assert "messages" in current_out
+
+
+def test_go_analysis_with_no_gene_sets_input():
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
+        gene_sets_enrichr=None,
+        gene_sets_path=None,
+        organism="human",
+    )
+
+    assert "messages" in current_out
+    assert "No gene sets provided" in current_out["messages"][0]["msg"]
 
 
 @pytest.mark.internet()
@@ -509,9 +531,6 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         "Protein9;Protein10;Protein11",
         "Protein12;Protein13",
     ]
-    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
-    protein_sets = ["Reactome_2013"]
-    organism = "human"
     results = pd.read_csv(
         data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
     )
@@ -545,7 +564,12 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         },
         ["Protein5"],
     )
-    current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8}),
+        gene_sets_enrichr=["Reactome_2013"],
+        organism="human",
+        direction="up",
+    )
     df = current_out["results"]
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]

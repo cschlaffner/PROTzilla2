@@ -1775,13 +1775,37 @@
               null
             ]
           },
-          "protein_sets": {
-            "name": "Protein Sets",
+          "gene_sets_field": {
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose from Enrichr Options"
+            ],
+            "default": "euclidean",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "gene_sets_path"
+              ],
+              "Choose from Enrichr Options": [
+                "gene_sets_enrichr"
+              ]
+            }
+          },
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "gene_sets_enrichr": {
+            "name": "Gene Set Libraries",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
             "default": null,
-            "multiple": true
+            "multiple": true,
+            "dynamic": true
           },
           "direction": {
             "name": "Direction of the analysis",
@@ -1805,7 +1829,7 @@
               "worm"
             ],
             "default": "human"
-          }
+          },
         }
       },
       "go_analysis_offline": {
@@ -1968,7 +1992,7 @@
               "Upload a file",
               "Choose from Enrichr Options"
             ],
-            "default": "euclidean",
+            "default": "Choose from Enrichr Options",
             "dynamic_parameters": {
               "Upload a file": [
                 "gene_sets_path"
