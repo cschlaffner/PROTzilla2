@@ -1014,9 +1014,9 @@
           }
         }
       },
-      "isoform_graph": {
+      "peptides_isoform_graph": {
         "name": "Peptide to Isoforms Graph",
-        "description": "Visualises a Protein-Variation-Graph",
+        "description": "Map peptides to a Protein-Variation-Graph to later visualize peptide coverage",
         "parameters": {
           "graph_file_path":{
             "name": "Graph File Path from previous graph generation",
@@ -1025,6 +1025,13 @@
               null,
               null
             ]
+          },
+          "k": {
+            "name": "k-mer length",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 5
           }
         }
       }
