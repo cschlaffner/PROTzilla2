@@ -1211,12 +1211,13 @@ def test_peptides_to_isoform_integration_test(
     tests_folder_name,
 ):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
-    run_path = Path(RUNS_PATH / run_name)
-    os.mkdir(run_path)
-    os.mkdir(Path(run_path / "graphs"))
+    run_path = RUNS_PATH / run_name
+    (run_path / "graphs").mkdir(parents=True, exist_ok=True)
     test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
     test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
     shutil.copy(test_protein_path, test_protein_destination)
+
+    assert test_protein_destination.exists()
 
     protein_id = "test_protein_variation"
     out_dict = peptides_to_isoform(
