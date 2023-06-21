@@ -368,7 +368,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         - up: Log2FC is > 0
         - down: Log2FC is < 0
         - both: functional enrichment info is retrieved for upregulated and downregulated
-        proteins separately, but the terms are aggregated for the summary and results
+        proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
     :return: dictionary with results and filtered groups
     :rtype: dict
@@ -483,7 +483,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
         - up: Log2FC is > 0
         - down: Log2FC is < 0
         - both: functional enrichment info is retrieved for upregulated and downregulated
-        proteins separately, but the terms are aggregated for the summary and results
+        proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
     :return: dictionary with results dataframe
     :rtype: dict

@@ -1783,6 +1783,16 @@
             "default": null,
             "multiple": true
           },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
+          },
           "organism": {
             "name": "Enrichr supported organism",
             "type": "categorical",
@@ -1814,6 +1824,16 @@
             "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
           },
           "background": {
             "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
