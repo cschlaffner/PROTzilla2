@@ -1255,15 +1255,12 @@ def test_peptides_to_isoform_integration_test(
         },
     )
 
-    pprint_graphs(created_graph, planned_graph)
-
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)
 
 
 def pprint_graphs(graph, planned_graph):
     # for debugging
-
     print("graph")
     pprint.pprint(graph.__dict__)
     print("planned_graph")

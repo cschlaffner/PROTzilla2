@@ -292,8 +292,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
 def _get_protein_file(protein_id, run_path) -> (str, requests.models.Response | None):
     protein_id = protein_id.upper()
-    path_to_graphs = f"{run_path}/graphs"
-    path_to_protein_file = f"{path_to_graphs}/{protein_id}.txt"
+    path_to_graphs = run_path / "graphs"
+    path_to_protein_file = path_to_graphs / f"{protein_id}.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
     r = None
 
