@@ -14,6 +14,31 @@ from protzilla.constants.paths import RUNS_PATH
 def peptides_to_isoform(
     peptide_df: pd.DataFrame, protein_id: str, run_name: str, k: int = 5
 ):
+    """
+    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph and
+    matches the peptides from the given peptide_df to the graph. The graph is modified
+    to include the matched peptides. Matches are indicated by red node-labels.
+
+    Matches are not necessarily individual peptides but can be peptide-contigs when
+    matching peptides overlap.
+
+    ProtGraph Source: https://github.com/mpc-bioinformatics/ProtGraph/
+    Used ProtGraph Version: https://github.com/antonneubauer/ProtGraph@master
+
+    :param peptide_df: Peptide Dataframe with columns "sequence", "protein_id"
+    :type peptide_df: pd.DataFrame
+    :param protein_id: UniProt Protein-ID
+    :type protein_id: str
+    :param run_name: name of the run this is executed from. Used for saving the protein
+        file, graph
+    :type run_name: str
+    :param k: k-mer size to build necessary indices for matching peptides, defaults to 5
+    :type k: int, optional
+
+    :return: dict(graph_path, peptide_matches, peptide_mismatches, messages)
+    :rtype: dict[str, list, list, list]
+    """
+
     assert k > 0, "k must be greater than 0"
     assert isinstance(k, int), "k must be an integer"
     allowed_mismatches = 2
