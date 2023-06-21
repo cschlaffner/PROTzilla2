@@ -1016,7 +1016,7 @@
       },
       "peptides_isoform_graph": {
         "name": "Peptide to Isoforms Graph",
-        "description": "Map peptides to a Protein-Variation-Graph to later visualize peptide coverage",
+        "description": "Visualize peptide coverage on isoform graph",
         "parameters": {
           "graph_file_path":{
             "name": "Graph File Path from previous graph generation",
@@ -1025,13 +1025,6 @@
               null,
               null
             ]
-          },
-          "k": {
-            "name": "k-mer length",
-            "type": "numeric",
-            "min": 1,
-            "step": 1,
-            "default": 5
           }
         }
       }
@@ -1306,7 +1299,7 @@
     "protein_graphs": {
       "peptides_to_isoform": {
         "name": "Peptide to Isoform",
-        "description": "Create a variation graph (.graphml) for a Protein. The data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the generation. This, currently, only works with Uniport-IDs and while you are online.",
+        "description": "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
@@ -1323,6 +1316,13 @@
             "type": "empty",
             "name": "peptide_df",
             "default": null
+          },
+          "k": {
+            "name": "k-mer length",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 5
           }
         }
       }
