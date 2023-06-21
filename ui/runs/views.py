@@ -438,10 +438,17 @@ def tables(request, run_name, index, key=None):
 
     # use current output when applicable (not yet in history)
     if index < len(run.history.steps):
-        outputs = run.history.steps[index].outputs
+        history_step = run.history.steps[index]
+        outputs = history_step.outputs
+        section = history_step.section
+        step = history_step.step
+        method = history_step.method
         name = run.history.step_names[index]
     else:
         outputs = run.current_out
+        section = run.section
+        step = run.step
+        method = run.method
         name = None
 
     options = []
@@ -464,9 +471,9 @@ def tables(request, run_name, index, key=None):
             # put key as first option to make selected
             options=[(opt, opt) for opt in [key] + options],
             key=key,
-            section=run.section,
-            step=run.step,
-            method=run.method,
+            section=section,
+            step=step,
+            method=method,
             name=name,
             clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
