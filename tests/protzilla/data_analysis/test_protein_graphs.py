@@ -1227,12 +1227,12 @@ def test_peptides_to_isoform_integration_test(
     )
 
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
-    assert out_dict["matched_graph_path"] == str(planned_modified_graph_path)
+    assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
     assert out_dict["peptide_mismatches"] == ["DETYYY"]
 
-    created_graph = nx.read_graphml(out_dict["matched_graph_path"])
+    created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
     planned_graph.add_node("n6", aminoacid="EG", match="true")
