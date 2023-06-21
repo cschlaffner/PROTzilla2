@@ -1,4 +1,5 @@
 import os
+import pprint
 import re
 import shutil
 from pathlib import Path
@@ -832,9 +833,7 @@ def test_create_protein_variation_graph_bad_request(
 
     mock__get_protein_file.return_value = (protein_path, mock_request)
 
-    planned_msg = f"error while downloading protein file for {protein_id}.\
-                         Statuscode:{mock_request.status_code}, {mock_request.reason}. \
-                         Got: {mock_request.text}. Tip: check if the ID is correct"
+    planned_msg = f"error while downloading protein file for {protein_id}. Statuscode:{mock_request.status_code}, {mock_request.reason}. Got: {mock_request.text}. Tip: check if the ID is correct"
 
     planned_out = dict(
         graph_path=None,
@@ -1264,7 +1263,6 @@ def test_peptides_to_isoform_integration_test(
 
 def pprint_graphs(graph, planned_graph):
     # for debugging
-    import pprint
 
     print("graph")
     pprint.pprint(graph.__dict__)
