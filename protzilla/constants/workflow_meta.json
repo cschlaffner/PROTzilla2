@@ -1018,7 +1018,7 @@
         "name": "Peptide to Isoforms Graph",
         "description": "Visualize peptide coverage on isoform graph",
         "parameters": {
-          "graph_file_path":{
+          "graph_file_path": {
             "name": "Graph File Path from previous graph generation",
             "type": "named_output",
             "default": [
@@ -1120,10 +1120,19 @@
           "validation_strategy": {
             "name": "Validation Strategy",
             "type": "categorical_dynamic",
-            "categories": ["K-Fold", "Repeated K-Fold", "Stratified K-Fold", "Leave one out", "Leave p out", "Manual"],
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Leave one out",
+              "Leave p out",
+              "Manual"
+            ],
             "default": "K-Fold",
             "dynamic_parameters": {
-              "Manual": ["train_val_split"]
+              "Manual": [
+                "train_val_split"
+              ]
             }
           },
           "train_val_split": {
@@ -1135,7 +1144,11 @@
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
             "type": "categorical",
-            "categories": ["Grid search", "Randomized search", "Manual"],
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
             "default": "Grid search"
           },
           "n_estimators": {
