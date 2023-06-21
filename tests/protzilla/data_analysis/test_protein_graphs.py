@@ -195,6 +195,9 @@ def complex_route():
 
 @pytest.fixture
 def test_protein_variation_graph():
+    # specific node names are usd because that is exactly the way ProtGraph generates
+    # the graph for this specific protein. This is not the most stable way
+
     g = nx.DiGraph()
 
     g.add_node(
@@ -1203,7 +1206,10 @@ def test_peptides_to_isoform_no_graph(critical_logger, tests_folder_name):
 
 
 def test_peptides_to_isoform_integration_test(
-    integration_test_peptides, critical_logger, tests_folder_name
+    integration_test_peptides,
+    test_protein_variation_graph,
+    critical_logger,
+    tests_folder_name,
 ):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
     run_path = Path(RUNS_PATH / run_name)
@@ -1229,32 +1235,26 @@ def test_peptides_to_isoform_integration_test(
 
     created_graph = nx.read_graphml(out_dict["matched_graph_path"])
 
-    # up next: use test_protein_variation_graph to create planned_graph
-
-    import pprint
-
-    pprint.pprint(created_graph.__dict__)
-    # ABC D EG ABC DET
-    #     V
-    planned_graph = nx.DiGraph()
-    planned_graph.add_node("n0", aminoacid="__start__")
-    planned_graph.add_node("n1", aminoacid="D")
-    planned_graph.add_node("n2", aminoacid="__end__")
-    planned_graph.add_node("n3", aminoacid="V")
-    planned_graph.add_node("n4", aminoacid="DET", match="true")
-    planned_graph.add_node("n5", aminoacid="ABC", match="true")
-    planned_graph.add_node("n6", aminoacid="EG", match="false")
+    planned_graph = test_protein_variation_graph.copy()
+    planned_graph.add_node("n6", aminoacid="EG", match="true")
     planned_graph.add_node("n7", aminoacid="ABC", match="true")
 
-    planned_graph.add_edge("n0", "n5")
-    planned_graph.add_edge("n5", "n1")
-    planned_graph.add_edge("n5", "n3")
     planned_graph.add_edge("n1", "n6")
     planned_graph.add_edge("n3", "n6")
     planned_graph.add_edge("n6", "n7")
     planned_graph.add_edge("n7", "n4")
+    planned_graph.remove_edge("n1", "n4")
+    planned_graph.remove_edge("n3", "n4")
 
-    planned_graph.graph = {"edge_default": {}, "node_default": {}}
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "n4": {"aminoacid": "DET", "match": "true"},
+            "n5": {"match": "true"},
+            "n6": {"match": "false"},
+            "n7": {"match": "true"},
+        },
+    )
 
     pprint_graphs(created_graph, planned_graph)
 
