@@ -158,12 +158,7 @@ def change_dynamic_fields(request, run_name):
         "runs/fields.html",
         context=dict(fields=dynamic_fields),
     )
-    return JsonResponse(
-        dict(
-            parameters=parameters,
-        ),
-        safe=False,
-    )
+    return JsonResponse(dict(parameters=parameters), safe=False)
 
 
 def change_field(request, run_name):
@@ -194,7 +189,7 @@ def change_field(request, run_name):
         param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
-            param_dict["categories"] = run.metadata[selected].unique()
+            param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
