@@ -1013,20 +1013,6 @@
             "default": "no"
           }
         }
-      },
-      "peptides_isoform_graph": {
-        "name": "Peptide to Isoforms Graph",
-        "description": "Visualize peptide coverage on isoform graph",
-        "parameters": {
-          "graph_file_path": {
-            "name": "Graph File Path from previous graph generation",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
-          }
-        }
       }
     },
     "clustering": {

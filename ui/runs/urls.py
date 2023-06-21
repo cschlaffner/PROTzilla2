@@ -39,7 +39,11 @@ urlpatterns = [
         "<str:run_name>/export_workflow", views.export_workflow, name="export_workflow"
     ),
     path("<str:run_name>/download_plots", views.download_plots, name="download_plots"),
-    path("<str:run_name>/protein_plot", views.protein_plot, name="protein_plot"),
+    path(
+        "<str:run_name>/protein_graph/<int:index>",
+        views.protein_graph,
+        name="protein_graph",
+    ),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),
     path("<str:run_name>/tables/<int:index>/<str:key>", views.tables, name="tables"),
     path(

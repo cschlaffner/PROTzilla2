@@ -80,6 +80,10 @@
                                                 <a href="{{ step.table_link }}" target="_blank"
                                                    class="col-4 btn btn-grey me-2">View table</a>
                                             {% endif %}
+                                            {%  if step.protein_graph_link %}
+                                                <a href="{{ step.protein_graph_link }}" target="_blank"
+                                                   class=" btn btn-grey me-2">View Protein Graph</a>
+                                            {% endif %}
                                             {% if not step.name %}
                                                 {% include "runs/form_add_name.html" with index=step.index %}
                                             {% endif %}
@@ -172,6 +176,10 @@
                                                 <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
                                                    target="_blank"
                                                    class="col btn btn-grey me-2">View table</a>
+                                            {% endif %}
+                                            {% if show_protein_graph %}
+                                                <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
+                                                   class="btn btn-grey" target="_blank">View Protein Graph</a>
                                             {% endif %}
                                         </div>
                                     </form>

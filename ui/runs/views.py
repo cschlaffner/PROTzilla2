@@ -2,12 +2,18 @@ import sys
 import tempfile
 import traceback
 import zipfile
+from pathlib import Path
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 from django.contrib import messages
-from django.http import FileResponse, HttpResponseRedirect, JsonResponse
+from django.http import (
+    FileResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -78,6 +84,14 @@ def detail(request, run_name):
     show_table = run.current_out and any(
         isinstance(v, pd.DataFrame) for v in run.current_out.values()
     )
+
+    show_protein_graph = (
+        run.current_out
+        and "graph_path" in run.current_out
+        and run.current_out["graph_path"] is not None
+        and Path(run.current_out["graph_path"]).exists()
+    )
+
     return render(
         request,
         "runs/details.html",
@@ -99,6 +113,7 @@ def detail(request, run_name):
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),
+            show_protein_graph=show_protein_graph,
         ),
     )
 
@@ -485,13 +500,25 @@ def tables_content(request, run_name, index, key):
     )
 
 
-def protein_plot(request, run_name):
+def protein_graph(request, run_name, index: int):
     run = active_runs[run_name]
 
-    parameters = dict(request.POST)
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
 
-    call_params = run.exchange_named_outputs_with_data(parameters)
-    graph = nx.read_graphml(call_params["graph_file_path"])
+    if "graph_path" not in outputs:
+        return HttpResponseBadRequest(
+            f"No Graph Path found in output of step with index {index}"
+        )
+
+    graph_path = outputs["graph_path"]
+
+    if not Path(graph_path).exists():
+        return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
+
+    graph = nx.read_graphml(graph_path)
 
     nodes = [
         {

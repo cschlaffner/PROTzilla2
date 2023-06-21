@@ -47,7 +47,7 @@
         },
         {
           "name": "plot",
-          "method": "peptide_isoform_graph",
+          "method": "peptides_isoform_graph",
           "parameters": {
             "input_df": [null, null],
             "k": 5

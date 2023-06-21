@@ -18,6 +18,12 @@ def peptides_to_isoform(
     assert isinstance(k, int), "k must be an integer"
     allowed_mismatches = 2
 
+    if not protein_id:
+        return dict(
+            graph_path=None,
+            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+        )
+
     peptides = _get_peptides(peptide_df=peptide_df, protein_id=protein_id)
 
     if not peptides:
@@ -25,12 +31,7 @@ def peptides_to_isoform(
         logger.error(msg)
         return dict(
             graph_path=None,
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg=msg,
-                )
-            ],
+            messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
     potential_graph_path = f"{RUNS_PATH}/{run_name}/graphs/{protein_id}.graphml"
@@ -74,8 +75,8 @@ def peptides_to_isoform(
 
     msg = f"matched-peptides-graph created at {matched_graph_path}"
     return dict(
-        matched_graph_path=matched_graph_path,
-        peptide_matches=peptide_matches.keys(),
+        graph_path=matched_graph_path,
+        peptide_matches=list(peptide_matches.keys()),
         peptide_mismatches=peptide_mismatches,
         messages=[dict(level=messages.INFO, msg=msg)],
     )
