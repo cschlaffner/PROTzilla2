@@ -3,10 +3,12 @@ from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
+    model_evaluation,
+    model_evaluation_plots,
     plots,
     protein_graphs,
 )
-from ..data_integration import di_plots, enrichment_analysis, database_integration
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -157,6 +159,16 @@ method_map = {
     ): classification.random_forest,
     (
         "data_analysis",
+        "classification",
+        "svm",
+    ): classification.svm,
+    (
+        "data_analysis",
+        "model_evaluation",
+        "evaluate_classification_model",
+    ): model_evaluation.evaluate_classification_model,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -190,6 +202,11 @@ method_map = {
         "enrichment_analysis",
         "gsea",
     ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
     (
         "data_integration",
         "database_integration",
@@ -311,6 +328,16 @@ plot_map = {
         "plot",
         "clustergram",
     ): plots.clustergram_plot,
+    (
+        "data_analysis",
+        "plot",
+        "precision_recall_curve",
+    ): model_evaluation_plots.precision_recall_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "roc_curve",
+    ): model_evaluation_plots.roc_curve_plot,
     (
         "data_integration",
         "plot",

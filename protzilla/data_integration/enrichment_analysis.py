@@ -10,7 +10,7 @@ from restring import restring
 from protzilla.constants.logging import logger
 
 # Import enrichment analysis gsea methods to remove redundant function definition
-from .enrichment_analysis_gsea import gsea
+from .enrichment_analysis_gsea import gsea, gsea_preranked
 from .enrichment_analysis_helper import (
     read_protein_or_gene_sets_file,
     uniprot_ids_to_uppercase_gene_symbols,
@@ -19,6 +19,7 @@ from .enrichment_analysis_helper import (
 
 # call methods for precommit hook not to delete imports
 def unused():
+    gsea_preranked(**{})
     gsea(**{})
 
 

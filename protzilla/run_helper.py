@@ -4,8 +4,8 @@ import gseapy
 import matplotlib.colors as mcolors
 import restring
 
-from protzilla.workflow_helper import get_workflow_default_param_value
 from protzilla.data_integration.database_query import uniprot_columns
+from protzilla.workflow_helper import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):

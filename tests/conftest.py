@@ -1,3 +1,5 @@
+import base64
+import io
 import json
 import logging
 from pathlib import Path
@@ -7,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import requests
+from PIL import Image
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities import random_string
@@ -129,3 +132,17 @@ def df_with_nan():
     )
 
     return df_with_nan
+
+
+class Helpers:
+    @staticmethod
+    def open_graph_from_base64(encoded_string):
+        decoded_bytes = base64.b64decode(encoded_string)
+        image_stream = io.BytesIO(decoded_bytes)
+        image = Image.open(image_stream)
+        image.show()
+
+
+@pytest.fixture
+def helpers():
+    return Helpers

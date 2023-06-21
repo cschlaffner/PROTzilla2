@@ -1,4 +1,5 @@
 import gseapy
+import numpy as np
 import pandas as pd
 from django.contrib import messages
 
@@ -9,6 +10,198 @@ from .enrichment_analysis_helper import (
     read_protein_or_gene_sets_file,
     uniprot_ids_to_uppercase_gene_symbols,
 )
+
+
+def create_ranked_df(
+    protein_groups, protein_df, ranking_direction, group_to_genes, filtered_groups
+):
+    """
+    Creates a ranked dataframe of genes according to values in protein_df and ranking_direction.
+    Groups that were filtered out are not included in the ranking.
+    If multiple genes exist per group the same ranking value is used for all genes. If duplicate genes
+    exist the one with the worse score is kept, so for example for p values the one with the higher p value.
+
+    :param protein_groups: list of protein groups
+    :type protein_groups: list
+    :param protein_df: dataframe with protein groups and ranking values
+    :type protein_df: pd.DataFrame
+    :param ranking_direction: direction of ranking, either ascending or descending
+    :type ranking_direction: str
+    :param group_to_genes: dictionary mapping protein groups to list of genes
+    :type group_to_genes: dict
+    :param filtered_groups: list of protein groups that were filtered out
+    :type filtered_groups: list
+    :return: ranked dataframe of genes
+    :rtype: pd.DataFrame
+    """
+    logger.info("Ranking input")
+    gene_values = {"Gene symbol": [], "Ranking value": []}
+    for group in protein_groups:
+        if group in filtered_groups:
+            continue
+        for gene in group_to_genes[group]:
+            # if multiple genes per group, use same score value
+            ranking_value = protein_df.loc[
+                protein_df["Protein ID"] == group, protein_df.columns[1]
+            ].values[0]
+            gene_values["Gene symbol"].append(gene)
+            gene_values["Ranking value"].append(ranking_value)
+    ranked_df = pd.DataFrame(gene_values)
+    # if duplicate genes only keep the one with the worse score
+    if ranking_direction == "ascending":
+        ranked_df = ranked_df.groupby("Gene symbol").max()
+    else:
+        ranked_df = ranked_df.groupby("Gene symbol").min()
+
+    # sort rank df by score according to ranking direction
+    ranked_df.sort_values(
+        by="Ranking value", ascending=ranking_direction == "ascending", inplace=True
+    )
+    return ranked_df
+
+
+def gsea_preranked(
+    protein_df,
+    ranking_direction="ascending",
+    gene_sets_path=None,
+    gene_sets_enrichr=None,
+    min_size=15,
+    max_size=500,
+    number_of_permutations=1000,
+    permutation_type="phenotype",
+    weighted_score=1.0,
+    seed=123,
+    **kwargs,
+):
+    """
+    Ranks proteins by a provided value column according to ranking_direction and
+    maps the Uniprot IDs to uppercase gene symbols.
+    Protein groups that could not be mapped are not included in the ranking.
+    If multiple genes exist per group the same ranking value is used for all genes.
+    If duplicate genes exist the one with the worse score is kept.
+    Then runs GSEA on it.
+    If gene_sets_path is provided, reads in gene sets from file, otherwise uses
+    gene sets libraries provided by Enrichr.
+
+    :param protein_df: dataframe with protein IDs and ranking values
+    :type protein_df: pd.DataFrame
+    :param ranking_direction: direction of ranking for sorting, either ascending or descending
+        (ascending - smaller values are better, descending - larger values are better)
+    :type ranking_direction: str
+    :param gene_sets_path: path to file with gene sets
+        The file can be a .csv, .txt, .json or .gmt file.
+        .gmt files are not parsed because GSEApy can handle them directly.
+        Other files must have one set per line with the set name and the proteins.
+            - .txt:
+                Set_name: Protein1, Protein2, ...
+                Set_name2: Protein2, Protein3, ...
+            - .csv:
+                Set_name, Protein1, Protein2, ...
+                Set_name2, Protein2, Protein3, ...
+            - .json:
+                {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type gene_sets_path: str
+    :param gene_sets_enrichr: list of gene set library names from Enrichr
+    :type gene_sets_enrichr: list
+    :param min_size: Minimum number of genes from gene set also in data set
+    :type min_size: int
+    :param max_size: Maximum number of genes from gene set also in data set
+    :type max_size: int
+    :param number_of_permutations: Number of permutations
+    :type number_of_permutations: int
+    :param permutation_type: Permutation type, either phenotype or gene_set
+         (if samples >=15 set to phenotype)
+    :type permutation_type: str
+    :param weighted_score: Weighted score for the enrichment score calculation, recommended values: 0, 1, 1.5 or 2
+    :type weighted_score: float
+    :param seed: Random seed
+    :type seed: int
+    :return: dictionary with results dataframe, ranking and messages
+    :rtype: dict
+    """
+    if (
+        not isinstance(protein_df, pd.DataFrame)
+        or protein_df.shape[1] != 2
+        or not "Protein ID" in protein_df.columns
+        or not protein_df.iloc[:, 1].dtype == np.number
+    ):
+        msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    if gene_sets_path:
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr:
+        if not isinstance(gene_sets_enrichr, list):
+            gene_sets = [gene_sets_enrichr]
+        else:
+            gene_sets = gene_sets_enrichr
+    else:
+        msg = "No gene sets provided"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    protein_groups = protein_df["Protein ID"].unique().tolist()
+    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
+    (
+        gene_to_groups,
+        group_to_genes,
+        filtered_groups,
+    ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+
+    if not gene_to_groups:
+        msg = "No proteins could be mapped to gene symbols"
+        return dict(
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+
+    ranked_df = create_ranked_df(
+        protein_groups,
+        protein_df,
+        ranking_direction,
+        group_to_genes,
+        filtered_groups,
+    )
+
+    logger.info("Running GSEA")
+    try:
+        preranked_result = gseapy.prerank(
+            rnk=ranked_df,
+            gene_sets=gene_sets,
+            min_size=min_size,
+            max_size=max_size,
+            ascending=ranking_direction == "ascending",
+            permutation_num=number_of_permutations,
+            permutation_type=permutation_type,
+            weighted_score_type=weighted_score,
+            outdir=None,
+            seed=seed,
+            verbose=True,
+        )
+    except Exception as e:
+        msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+
+    # add proteins to output df
+    enriched_df = preranked_result.res2d
+    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
+    )
+
+    if filtered_groups:
+        msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
+        return dict(
+            enriched_df=enriched_df,
+            ranking=preranked_result.ranking,
+            filtered_groups=filtered_groups,
+            messages=[dict(level=messages.WARNING, msg=msg)],
+        )
+
+    return dict(
+        enriched_df=enriched_df,
+        ranking=preranked_result.ranking,
+    )
 
 
 def create_genes_intensity_wide_df(
@@ -196,6 +389,7 @@ def gsea(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
+            verbose=True,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"
