@@ -99,10 +99,10 @@ def peptides_to_isoform(
     contigs = _create_contigs_dict(node_start_end)
     modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
 
-    logger.info(f"writing modified graph at {str(matched_graph_path)}")
+    logger.info(f"writing modified graph at {matched_graph_path}")
     nx.write_graphml(modified_graph, matched_graph_path)
 
-    msg = f"matched-peptides-graph created at {str(matched_graph_path)}"
+    msg = f"matched-peptides-graph created at {matched_graph_path}"
     return dict(
         graph_path=str(matched_graph_path),
         peptide_matches=list(peptide_matches.keys()),
@@ -146,11 +146,11 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
                 messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
             )
 
-    output_folder = run_path / "graphs"
-    output_csv = f"{output_folder}/{protein_id}.csv"
-    graph_path = f"{output_folder}/{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {str(path_to_protein_file)} \
-                --export_output_folder={output_folder} \
+    output_folder_path = run_path / "graphs"
+    output_csv = output_folder_path / f"{protein_id}.csv"
+    graph_path = output_folder_path / f"{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                --export_output_folder={output_folder_path} \
                 --output_csv={output_csv} \
                 -ft VARIANT \
                 -d skip"
@@ -158,7 +158,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
 
     subprocess.run(cmd_str, shell=True)
 
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {str(path_to_protein_file)}"
+    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
     logger.info(msg)
     return dict(graph_path=graph_path, messages=[dict(level=messages.INFO, msg=msg)])
 
