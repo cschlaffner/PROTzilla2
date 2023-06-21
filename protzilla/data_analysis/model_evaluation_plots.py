@@ -1,5 +1,5 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from protzilla.data_analysis.classification_helper import encode_labels

@@ -77,10 +77,10 @@ def read_protein_or_gene_sets_file(path):
     The file can be a .csv, .txt, .json or .gmt file.
     The file must have one set per line with the set name and the proteins or genes.
     .gmt files are not parsed because GSEApy can handle them directly.
-        - .txt:
-            Set_name: Protein1, Protein2, ...
-            Set_name2: Protein2, Protein3, ...
-        - .csv:
+        - .txt: Setname or identifier followed by a tab-separated list of genes
+            Set_name    Protein1    Protein2...
+            Set_name    Protein1    Protein2...
+        - .csv: Setname or identifier followed by a comma-separated list of genes
             Set_name, Protein1, Protein2, ...
             Set_name2, Protein2, Protein3, ...
         - .json:
@@ -106,9 +106,8 @@ def read_protein_or_gene_sets_file(path):
     elif file_extension == ".txt":
         with open(path, "r") as f:
             sets = {}
-            for line in f:
-                key, value_str = line.strip().split(":")
-                values = [v.strip() for v in value_str.split(",")]
+            for line in f.readlines():
+                key, *values = line.strip().split("\t")
                 sets[key] = values
 
     elif file_extension == ".json":
