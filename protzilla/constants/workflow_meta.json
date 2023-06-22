@@ -1782,7 +1782,7 @@
               "Upload a file",
               "Choose from Enrichr Options"
             ],
-            "default": "euclidean",
+            "default": "Choose from Enrichr Options",
             "dynamic_parameters": {
               "Upload a file": [
                 "gene_sets_path"
@@ -1793,7 +1793,7 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
@@ -1830,6 +1830,51 @@
             ],
             "default": "human"
           },
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose biomart dataset",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene_sets"
+            ],
+            "default": "Use all genes in the gene_sets",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ],
+              "Choose biomart dataset": [
+                "background_biomart"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with uppercase gene symbols (one gene per line, csv or txt)",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
+          },
+          "background_biomart": {
+            "name": "Biomart dataset",
+            "type": "categorical",
+            "fill": "biomart_datasets",
+            "categories": [],
+            "default": null,
+            "dynamic": true
+          }
         }
       },
       "go_analysis_offline": {

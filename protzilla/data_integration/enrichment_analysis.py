@@ -12,6 +12,7 @@ from protzilla.constants.logging import logger
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
 from .enrichment_analysis_helper import (
+    read_background_file,
     read_protein_or_gene_sets_file,
     uniprot_ids_to_uppercase_gene_symbols,
 )
@@ -181,18 +182,14 @@ def go_analysis_with_STRING(
     elif not isinstance(protein_set_dbs, list):
         protein_set_dbs = [protein_set_dbs]
 
-    if background == "" or background is None:
+    statistical_background = read_background_file(background)
+    if (
+        isinstance(statistical_background, dict)
+        and "messages" in statistical_background
+    ):
+        return statistical_background
+    if statistical_background is None:
         logger.info("No background provided, using entire proteome")
-        statistical_background = None
-    else:
-        # assuming headerless one column file, tab separated
-        read = pd.read_csv(
-            background,
-            sep="\t",
-            low_memory=False,
-            header=None,
-        )
-        statistical_background = read.iloc[:, 0].tolist()
 
     string_params = {
         "species": organism,
@@ -299,7 +296,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     return enriched.reset_index()
 
 
-def enrichr_helper(protein_list, protein_sets, organism, direction):
+def enrichr_helper(protein_list, protein_sets, organism, direction, background=None):
     """
     A helper method for the enrichment analysis with Enrichr. It maps the proteins to uppercase gene symbols
     and performs the enrichment analysis with GSEApy. It returns the enrichment results and the groups that
@@ -313,6 +310,8 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :type organism: str
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
+    :param background: background for the enrichment analysis
+    :type background: list or None
     :return: enrichment results and filtered groups
     :rtype: tuple
     """
@@ -332,6 +331,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
         enriched = gseapy.enrichr(
             gene_list=list(gene_to_groups.keys()),
             gene_sets=protein_sets,
+            background=background,
             organism=organism,
             outdir=None,
             verbose=True,
@@ -353,6 +353,9 @@ def go_analysis_with_enrichr(
     direction="both",
     gene_sets_path=None,
     gene_sets_enrichr=None,
+    background_path=None,
+    background_number=None,
+    background_biomart=None,
     **kwargs,
 ):
     """
@@ -410,14 +413,35 @@ def go_analysis_with_enrichr(
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
             return gene_sets
     elif gene_sets_enrichr:
-        gene_sets = (
-            [gene_sets_enrichr]
-            if isinstance(gene_sets_enrichr, str)
-            else gene_sets_enrichr
-        )
+        if isinstance(gene_sets_enrichr, str):
+            gene_sets = [gene_sets_enrichr]
+        else:
+            gene_sets = gene_sets_enrichr
     else:
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    if gene_sets_enrichr and (
+        background_path or background_number or background_biomart
+    ):
+        msg = "Background parameter is not supported when using Enrichr gene sets and will be ignored"
+        out_messages.append(dict(level=messages.INFO, msg=msg))
+        background = background_path = background_number = background_biomart = None
+
+    if background_path:
+        background = read_background_file(background_path)
+        if (
+            isinstance(background, dict) and "messages" in background
+        ):  # an error occurred
+            return background
+    elif background_number:
+        background = background_number
+    elif background_biomart:
+        background = background_biomart
+    else:
+        background = None
+        msg = "No background provided, using all genes in gene sets"
+        out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
@@ -448,14 +472,14 @@ def go_analysis_with_enrichr(
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups = enrichr_helper(
-            up_protein_list, gene_sets, organism, "up"
+            up_protein_list, gene_sets, organism, "up", background
         )
         if isinstance(up_enriched, dict):  # error occurred
             return up_enriched
 
     if direction == "down" or direction == "both":
         down_enriched, down_filtered_groups = enrichr_helper(
-            down_protein_list, gene_sets, organism, "down"
+            down_protein_list, gene_sets, organism, "down", background
         )
         if isinstance(down_enriched, dict):  # error occurred
             return down_enriched
@@ -566,23 +590,11 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     ):  # file could not be read successfully
         return protein_sets
 
-    if background == "" or background is None:
+    background = read_background_file(background)
+    if isinstance(background, dict) and "messages" in background:
+        return background
+    if background is None:
         logger.info("No background provided, using all proteins in protein sets")
-        background = None
-    else:
-        file_extension = os.path.splitext(background)[1]
-        if file_extension == ".csv":
-            background = pd.read_csv(
-                background, sep="\t", low_memory=False, header=None
-            )
-            # if multiple columns, use first
-            background = background.iloc[:, 0].tolist()
-        elif file_extension == ".txt":
-            with open(background, "r") as f:
-                background = [line.strip() for line in f]
-        else:
-            msg = "Invalid file type for background. Must be .csv, .txt or no upload"
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     if direction == "up" or direction == "both":
         logger.info("Starting analysis for up-regulated proteins")

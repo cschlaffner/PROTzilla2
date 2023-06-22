@@ -2,6 +2,7 @@ import csv
 import json
 from pathlib import Path
 
+import pandas as pd
 from django.contrib import messages
 
 from .database_query import biomart_query
@@ -123,3 +124,22 @@ def read_protein_or_gene_sets_file(path):
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     return sets
+
+
+def read_background_file(path):
+    if not path:
+        return None
+    else:
+        file_extension = Path(path).suffix
+        if file_extension == ".csv":
+            background = pd.read_csv(path, low_memory=False, header=None)
+            # if multiple columns, use first
+            background = background.iloc[:, 0].tolist()
+        elif file_extension == ".txt":
+            with open(path, "r") as f:
+                background = [line.strip() for line in f]
+        else:
+            msg = "Invalid file type for background. Must be .csv, .txt or no upload"
+            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+        return background

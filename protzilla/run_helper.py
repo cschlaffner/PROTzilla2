@@ -37,6 +37,8 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = mcolors.CSS4_COLORS
         elif param_dict["fill"] == "uniprot_fields":
             param_dict["categories"] = uniprot_columns()
+        elif param_dict["fill"] == "biomart_datasets":
+            param_dict["categories"] = ["test1", "test2"]
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
