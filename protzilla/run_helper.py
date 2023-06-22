@@ -1,6 +1,7 @@
 import copy
 
 import gseapy
+from biomart import BiomartServer
 import matplotlib.colors as mcolors
 import restring
 
@@ -38,7 +39,10 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "uniprot_fields":
             param_dict["categories"] = uniprot_columns()
         elif param_dict["fill"] == "biomart_datasets":
-            param_dict["categories"] = ["test1", "test2"]
+            # retrieve datasets from BioMart server
+            server = BiomartServer("http://www.ensembl.org/biomart")
+            database = server.databases['ENSEMBL_MART_ENSEMBL']
+            param_dict["categories"] = database.datasets
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
