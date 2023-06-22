@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from matplotlib import pyplot as plt
 
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.classification import random_forest
@@ -8,6 +9,7 @@ from protzilla.data_analysis.model_evaluation_plots import (
     roc_curve_plot,
     permutation_testing_plot,
 )
+from protzilla.data_analysis.model_selection_plots import learning_curve_plot
 
 
 @pytest.fixture
@@ -144,6 +146,24 @@ def test_model_evaluation_plots(show_figures, random_forest_out, helpers):
         helpers.open_graph_from_base64(roc_curve_base64[0])
 
 
+def test_model_selection_plots(show_figures, classification_df, meta_df, helpers):
+    curve_base64 = learning_curve_plot(
+        "Random Forest",
+        classification_df,
+        meta_df,
+        "Group",
+        "AD",
+        [3, 4, 6],
+        cv="K-Fold",
+        n_splits=3,
+        shuffle="yes",
+        scoring="accuracy",
+        random_state=42,
+    )
+    if True:
+        helpers.open_graph_from_base64(curve_base64[0])
+
+
 def test_evaluate_classification_model(show_figures, random_forest_out):
     evaluation_out = evaluate_classification_model(
         random_forest_out["model"],
@@ -165,5 +185,5 @@ def test_permutation_testing_plot(show_figures, random_forest_out, helpers):
         100,
         42,
     )
-    if True:
+    if show_figures:
         helpers.open_graph_from_base64(hist_base64[0])
