@@ -5,7 +5,7 @@ from protzilla.data_integration import database_query
 from protzilla.utilities import clean_uniprot_id, unique_justseen
 
 
-def add_uniprot_data(dataframe, fields=None):
+def add_uniprot_data(dataframe, database_name, fields=None):
     if not fields:
         msg = "No fields that should be added specified."
         return dict(
@@ -42,7 +42,7 @@ def add_uniprot_data(dataframe, fields=None):
     if not database_fields:
         return {"results_df": dataframe}
     res: pd.DataFrame = database_query.uniprot_query_dataframe(
-        list(all_proteins), database_fields
+        database_name, list(all_proteins), database_fields
     )
 
     for field in database_fields:
