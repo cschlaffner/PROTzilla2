@@ -70,4 +70,4 @@ def uniprot_databases():
     for path in uniprot_path.iterdir():
         if path.suffix == ".tsv":
             databases.append(path.stem)
-    return databases
+    return sorted(databases)

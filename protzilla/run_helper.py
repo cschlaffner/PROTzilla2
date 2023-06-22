@@ -4,7 +4,7 @@ import gseapy
 import matplotlib.colors as mcolors
 import restring
 
-from protzilla.data_integration.database_query import uniprot_columns
+from protzilla.data_integration.database_query import uniprot_databases, uniprot_columns
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -36,7 +36,10 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "matplotlib_colors":
             param_dict["categories"] = mcolors.CSS4_COLORS
         elif param_dict["fill"] == "uniprot_fields":
-            param_dict["categories"] = uniprot_columns()
+            param_dict["categories"] = uniprot_columns(uniprot_databases()[0])
+        elif param_dict["fill"] == "uniprot_databases":
+            param_dict["default"] = uniprot_databases()[0]
+            param_dict["categories"] = uniprot_databases()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
