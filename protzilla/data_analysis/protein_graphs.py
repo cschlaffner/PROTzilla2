@@ -502,13 +502,12 @@ def _create_contigs_dict(node_start_end: dict):
     """
 
     node_mod = {}
-    for node, peptides_dict in node_start_end.items():
-        for peptide, start_pos_dict in peptides_dict.items():
-            for match_start_pos, match_end_pos in start_pos_dict.items():
-                if node not in node_mod:
-                    node_mod[node] = [(match_start_pos, match_end_pos)]
-                else:
-                    node_mod[node].append((match_start_pos, match_end_pos))
+    for node, start_pos_dict in node_start_end.items():
+        for match_start_pos, match_end_pos in start_pos_dict.items():
+            if node not in node_mod:
+                node_mod[node] = [(match_start_pos, match_end_pos)]
+            else:
+                node_mod[node].append((match_start_pos, match_end_pos))
         node_mod[node] = sorted(node_mod[node])
 
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
@@ -538,17 +537,25 @@ def _get_start_end_pos_for_matches(peptide_matches, graph_index):
                     raise NotImplementedError("Variation matching not implemented yet")
                 for node, aa in graph_index[i]:  # aa is Amino Acid
                     # TODO what happens when ref_seq < longest_path?
+                    # if node in node_start_end:
+                    #     if peptide in node_start_end[node]:
+                    #         if match_start_index in node_start_end[node][peptide]:
+                    #             if i > node_start_end[node][peptide][match_start_index]:
+                    #                 node_start_end[node][peptide][match_start_index] = i
+                    #         else:
+                    #             node_start_end[node][peptide][match_start_index] = i
+                    #     else:
+                    #         node_start_end[node][peptide] = {match_start_index: i}
+                    # else:
+                    #     node_start_end[node] = {peptide: {match_start_index: i}}
                     if node in node_start_end:
-                        if peptide in node_start_end[node]:
-                            if match_start_index in node_start_end[node][peptide]:
-                                if i > node_start_end[node][peptide][match_start_index]:
-                                    node_start_end[node][peptide][match_start_index] = i
-                            else:
-                                node_start_end[node][peptide][match_start_index] = i
+                        if match_start_index in node_start_end[node]:
+                            if i > node_start_end[node][match_start_index]:
+                                node_start_end[node][match_start_index] = i
                         else:
-                            node_start_end[node][peptide] = {match_start_index: i}
+                            node_start_end[node][match_start_index] = i
                     else:
-                        node_start_end[node] = {peptide: {match_start_index: i}}
+                        node_start_end[node] = {match_start_index: i}
 
     return node_start_end
 

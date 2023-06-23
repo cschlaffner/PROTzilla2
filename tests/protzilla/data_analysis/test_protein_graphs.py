@@ -864,7 +864,7 @@ def test_get_start_end_pos_for_matches_simple():
         [("1", "G")],
     ]
     peptide_matches = {"ABC": [0], "EFG": [4]}
-    planned_start_end = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
+    planned_start_end = {"1": {0: 2, 4: 6}}
 
     node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index_simple)
     assert planned_start_end == node_start_end
@@ -880,7 +880,7 @@ def test_get_start_end_pos_for_matches_1_pep_2_match():
         [("4", "B")],
     ]
     peptide_matches = {"AB": [0, 4]}
-    planned_s_e = {"1": {"AB": {0: 1}}, "4": {"AB": {4: 5}}}
+    planned_s_e = {"1": {0: 1}, "4": {4: 5}}
 
     node_start_end = _get_start_end_pos_for_matches(
         peptide_matches, graph_index_mulitroute
@@ -903,7 +903,7 @@ def test_get_start_end_pos_for_matches_1_pep_2_match_same_node():
         [("1", "D")],
     ]
     peptide_matches = {"ABCD": [0, 7]}
-    planned_s_e = {"1": {"ABCD": {0: 3, 7: 10}}}
+    planned_s_e = {"1": {0: 3, 7: 10}}
 
     node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
     assert planned_s_e == node_start_end
@@ -937,8 +937,8 @@ def test_get_start_end_pos_for_matches_2_pep_multi_match():
     ]
     peptide_matches = {"ABCD": [0, 7, 12, 19], "FGA": [5, 17]}
     planned_s_e = {
-        "1": {"ABCD": {0: 3, 7: 10}, "FGA": {5: 7}},
-        "4": {"ABCD": {12: 15, 19: 22}, "FGA": {17: 19}},
+        "1": {0: 3, 7: 10, 5: 7},
+        "4": {12: 15, 19: 22, 17: 19},
     }
 
     node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
@@ -963,7 +963,7 @@ def test_get_start_end_pos_for_matches_variation_matching():
 
 
 def test_create_contigs_dict_simple():
-    node_start_end = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
+    node_start_end = {"1": {0: 2, 4: 6}}
     planned_contigs = {"1": [(0, 2), (4, 6)]}
 
     contigs = _create_contigs_dict(node_start_end)
@@ -971,7 +971,7 @@ def test_create_contigs_dict_simple():
 
 
 def test_create_contigs_dict_1_pep_2_match():
-    node_start_end = {"1": {"AB": {0: 1}}, "4": {"AB": {4: 5}}}
+    node_start_end = {"1": {0: 1}, "4": {4: 5}}
     planned_contigs = {"1": [(0, 1)], "4": [(4, 5)]}
 
     contigs = _create_contigs_dict(node_start_end)
@@ -979,7 +979,7 @@ def test_create_contigs_dict_1_pep_2_match():
 
 
 def test_create_contigs_dict_1_pep_2_match_same_node():
-    node_start_end = {"1": {"ABCD": {0: 3, 7: 10}}}
+    node_start_end = {"1": {0: 3, 7: 10}}
     planned_contigs = {"1": [(0, 3), (7, 10)]}
 
     contigs = _create_contigs_dict(node_start_end)
@@ -988,8 +988,8 @@ def test_create_contigs_dict_1_pep_2_match_same_node():
 
 def test_create_contigs_dict_2_pep_multi_match():
     node_start_end = {
-        "1": {"ABCD": {0: 3, 7: 10}, "FGA": {5: 7}},
-        "4": {"ABCD": {12: 15, 19: 22}, "FGA": {17: 19}},
+        "1": {0: 3, 7: 10, 5: 7},
+        "4": {12: 15, 19: 22, 17: 19},
     }
     planned_contigs = {"1": [(0, 3), (5, 10)], "4": [(12, 15), (17, 22)]}
 
