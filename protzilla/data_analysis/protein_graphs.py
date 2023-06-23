@@ -137,6 +137,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
     run_path = RUNS_PATH / run_name
     path_to_protein_file, request = _get_protein_file(protein_id, run_path)
 
+    path_to_protein_file = Path(path_to_protein_file)
     if not path_to_protein_file.exists() and request.status_code != 200:
         msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
         logger.error(msg)
@@ -471,22 +472,19 @@ def _match_peptides(
                     peptide_mismatches.add(peptide)
                 continue
             for i in range(match_start_pos, match_start_pos + len(peptide)):
+                # TODO variation matching: check if variation present in grpah index,
+                #  check for current amino acid
                 if ref_seq[i] != peptide[i - match_start_pos]:
                     mismatch_counter += 1
                 if mismatch_counter > allowed_mismatches:
-                    peptide_mismatches.add(peptide)
                     break
-
-            if mismatch_counter <= allowed_mismatches:
+            else:
                 matched_starts.append(match_start_pos)
-                # append to easily check if peptide was previously matched for further
-                # starting positions
-                peptide_matches[peptide] = []
-                if peptide in peptide_mismatches:
-                    peptide_mismatches.remove(peptide)
 
         if matched_starts:
             peptide_matches[peptide] = matched_starts
+        else:
+            peptide_mismatches.add(peptide)
 
     logger.debug(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
     logger.debug(f"peptide mismatches: {peptide_mismatches}")

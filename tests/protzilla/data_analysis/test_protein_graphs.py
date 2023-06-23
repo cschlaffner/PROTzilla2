@@ -715,11 +715,12 @@ def test_match_peptides_mismatches_k3():
 
 
 def test_match_peptides_k0():
+    k = 0
     error_msg = f"k must be positive integer, but is {k}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _match_peptides(
             allowed_mismatches=2,
-            k=0,
+            k=k,
             peptides=[""],
             ref_index={},
             ref_seq="ABCDEGABCDET",
@@ -828,7 +829,7 @@ def test_create_protein_variation_graph_bad_request(
     # error in log is expected -> surpress error and below using critical_logger
 
     protein_id = "test_protein_variation"
-    protein_path = f"/Users/anton/Documents/code/PROTzilla2/tests/test_data/proteins/{protein_id}.txt"
+    protein_path = f"/non/existing/path/{protein_id}.txt"
 
     mock_request = mock.MagicMock()
     mock_request.status_code = 0
