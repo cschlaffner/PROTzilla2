@@ -205,13 +205,15 @@ def _create_graph_index(
         return None, str(e), None
 
     for node in protein_graph.nodes:
-        if (
-            protein_graph.nodes[node]["aminoacid"] == "__end__"
-            and longest_paths[node] < seq_len
-        ):
-            msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
-            logger.error(msg)
-            return None, msg, longest_paths
+        if protein_graph.nodes[node]["aminoacid"] == "__end__":
+            if longest_paths[node] < seq_len:
+                msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                logger.error(msg)
+                return None, msg, longest_paths
+            elif longest_paths[node] > seq_len:
+                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a Variation is longer than just one Amino Acid. This is unexpected behaviour. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                logger.warning(msg)
+                return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
     for node in longest_paths:

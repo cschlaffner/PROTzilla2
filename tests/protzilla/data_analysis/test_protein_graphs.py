@@ -50,11 +50,10 @@ def simple_graph():
 
 @pytest.fixture
 def shortcut():
-    # in theory, with just ft VARIANT (-> graph generation), this should never happen
     graph = nx.DiGraph()
     graph.add_edge("0", "1")
     graph.add_edge("1", "2")
-    graph.add_edge("1", "4")
+    graph.add_edge("1", "3")
     graph.add_edge("2", "3")
     graph.add_edge("3", "4")
 
@@ -70,7 +69,7 @@ def shortcut():
     )
 
     start_node = "0"
-    seq_len = 4
+    seq_len = 5
     return graph, start_node, seq_len
 
 
