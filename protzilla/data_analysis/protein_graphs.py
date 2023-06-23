@@ -589,6 +589,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
     for node, positions_list in contig_positions.items():
         old_node = graph.nodes[node].copy()
         old_node_start = longest_paths[node]
+        old_node_aminoacids = old_node["aminoacid"]
         for start, end in positions_list:
             if (
                 longest_paths[node] == start
@@ -611,7 +612,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
             if start > longest_paths[node]:
                 s = longest_paths[node] - old_node_start
                 e = start - old_node_start
-                before_label = old_node["aminoacid"][s:e]
+                before_label = old_node_aminoacids[s:e]
                 before_node_id = f"n{len(graph.nodes)}"
                 graph.add_node(before_node_id, aminoacid=before_label, match="false")
 
@@ -621,17 +622,16 @@ def _modify_graph(graph, contig_positions, longest_paths):
                 longest_paths[node] = longest_paths[before_node_id] + len(before_label)
 
             # create match node
-            after_node = True
-            if (
+            after_node = not (
                 before_node_id
                 and end
                 == longest_paths[node] + _node_length(node) - len(before_label) - 1
-            ):
+            )
+            if not after_node:
                 # match node is rest of node
-                after_node = False
                 s = longest_paths[node] - old_node_start
                 e = end - old_node_start + 1
-                match_label = old_node["aminoacid"][s:e]
+                match_label = old_node_aminoacids[s:e]
                 match_node_id = node
                 nx.set_node_attributes(
                     graph,
@@ -640,7 +640,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
             else:
                 s = longest_paths[node] - old_node_start
                 e = end - old_node_start + 1
-                match_label = old_node["aminoacid"][s:e]
+                match_label = old_node_aminoacids[s:e]
                 match_node_id = f"n{len(graph.nodes)}"
                 graph.add_node(match_node_id, aminoacid=match_label, match="true")
 
@@ -660,7 +660,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
             if after_node:
                 if end < longest_paths[node] + _node_length(node) - 1:
                     s = longest_paths[match_node_id] - old_node_start + len(match_label)
-                    after_label = old_node["aminoacid"][s:]
+                    after_label = old_node_aminoacids[s:]
 
                     nx.set_node_attributes(
                         graph,
