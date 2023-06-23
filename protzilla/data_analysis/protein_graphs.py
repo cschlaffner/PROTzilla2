@@ -468,8 +468,6 @@ def _match_peptides(
                 logger.debug(
                     f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
                 )
-                if peptide not in peptide_matches:
-                    peptide_mismatches.add(peptide)
                 continue
             for i in range(match_start_pos, match_start_pos + len(peptide)):
                 # TODO variation matching: check if variation present in grpah index,
