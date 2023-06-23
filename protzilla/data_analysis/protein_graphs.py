@@ -174,7 +174,9 @@ def _create_graph_index(
 
     For information about _longest_path() please see the docstring of that function.
 
-    TODO: this might be broken (in conjunction with the ref.-seq index) for versions where a ref.-seq is shorter than the longest path
+    TODO: this might be broken (in conjunction with the ref.-seq index) for versions
+    where a ref.-seq is shorter than the longest path. This would indicate additions to
+    the reference sequence
 
     :param protein_graph: Protein-Graph as created by ProtGraph. Expected to have at
         least three nodes; one source, one sink, labeled by `__start__` and `__end__`.
