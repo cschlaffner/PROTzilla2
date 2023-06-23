@@ -87,7 +87,7 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    peptide_matches, peptide_mismatches = _match_peptides(
+    potential_peptide_matches, peptide_mismatches = _match_peptides(
         allowed_mismatches=allowed_mismatches,
         k=k,
         peptides=peptides,
@@ -95,8 +95,13 @@ def peptides_to_isoform(
         ref_seq=ref_seq,
     )
 
-    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
-    contigs = _create_contigs_dict(node_start_end)
+    peptide_match_node_start_end, peptide_mismatches = _get_start_end_pos_for_matches(
+        potential_peptide_matches=potential_peptide_matches,
+        graph_index=graph_index,
+        peptide_mismatches=peptide_mismatches,
+        allowed_mismatches=allowed_mismatches,
+    )
+    contigs = _create_contigs_dict(peptide_match_node_start_end)
     modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
 
     logger.info(f"writing modified graph at {matched_graph_path}")
@@ -105,7 +110,7 @@ def peptides_to_isoform(
     msg = f"matched-peptides-graph created at {matched_graph_path}"
     return dict(
         graph_path=str(matched_graph_path),
-        peptide_matches=list(peptide_matches.keys()),
+        peptide_matches=list(peptide_match_node_start_end.keys()),
         peptide_mismatches=peptide_mismatches,
         messages=[dict(level=messages.INFO, msg=msg)],
     )
@@ -427,6 +432,7 @@ def _match_peptides(
     allowed_mismatches: int, k: int, peptides: list, ref_index: dict, ref_seq: str
 ):
     """
+    TODO: out of date! -> update
     Match peptides to reference sequence. `allowed_mismatches` many mismatches are
     allowed per try to match peptide to a potential start position in ref_index
 
@@ -453,7 +459,7 @@ def _match_peptides(
         )
 
     logger.debug("Matching peptides to reference sequence")
-    peptide_matches = {}
+    potential_peptide_matches = {}
     peptide_mismatches = set()
     seq_len = len(ref_seq)
     for peptide in peptides:
@@ -463,7 +469,6 @@ def _match_peptides(
             peptide_mismatches.add(peptide)
             continue
         for match_start_pos in ref_index[kmer]:
-            mismatch_counter = 0
             if match_start_pos + len(peptide) > seq_len:
                 # for now potential matches like this will be dismissed even if
                 # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
@@ -471,25 +476,19 @@ def _match_peptides(
                     f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
                 )
                 continue
-            for i in range(match_start_pos, match_start_pos + len(peptide)):
-                # TODO variation matching: check if variation present in grpah index,
-                #  check for current amino acid
-                if ref_seq[i] != peptide[i - match_start_pos]:
-                    mismatch_counter += 1
-                if mismatch_counter > allowed_mismatches:
-                    break
-            else:
-                matched_starts.append(match_start_pos)
+            matched_starts.append(match_start_pos)
 
         if matched_starts:
-            peptide_matches[peptide] = matched_starts
+            potential_peptide_matches[peptide] = matched_starts
         else:
             peptide_mismatches.add(peptide)
 
-    logger.debug(f"peptide matches - peptide:[starting_pos] :: {peptide_matches}")
+    logger.debug(
+        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"
+    )
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
-    return peptide_matches, sorted(list(peptide_mismatches))
+    return potential_peptide_matches, sorted(list(peptide_mismatches))
 
 
 def _create_contigs_dict(node_start_end: dict):
@@ -503,19 +502,33 @@ def _create_contigs_dict(node_start_end: dict):
     :return: dict of node to list of tuples of start and end positions of contigs
     """
 
-    node_mod = {}
-    for node, start_pos_dict in node_start_end.items():
-        for match_start_pos, match_end_pos in start_pos_dict.items():
-            if node not in node_mod:
-                node_mod[node] = [(match_start_pos, match_end_pos)]
-            else:
-                node_mod[node].append((match_start_pos, match_end_pos))
-        node_mod[node] = sorted(node_mod[node])
+    node_match_data = {}
+    for peptide, start_pos_dict in node_start_end.items():
+        for start_index, node_dict in start_pos_dict.items():
+            for node, start_end in node_dict.items():
+                if node not in node_match_data:
+                    node_match_data[node] = {
+                        "match_locations": [(start_end[0], start_end[1])],
+                        "peptides": [peptide],
+                    }
+                else:
+                    node_match_data[node]["match_locations"].append(
+                        (start_end[0], start_end[1])
+                    )
+                    if peptide not in node_match_data[node]["peptides"]:
+                        node_match_data[node]["peptides"].append(peptide)
+
+    for node in node_match_data:
+        node_match_data[node]["match_locations"] = sorted(
+            node_match_data[node]["match_locations"]
+        )
+        node_match_data[node]["peptides"] = sorted(node_match_data[node]["peptides"])
 
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
-    for node, positions_list in node_mod.items():
+    node_mod = {}
+    for node, node_dict in node_match_data.items():
         new_positions_list = []
-        for start, end in positions_list:
+        for start, end in node_dict["match_locations"]:
             if not len(new_positions_list):
                 new_positions_list.append((start, end))
                 continue
@@ -523,43 +536,48 @@ def _create_contigs_dict(node_start_end: dict):
                 new_positions_list[-1] = (new_positions_list[-1][0], end)
             else:
                 new_positions_list.append((start, end))
-        node_mod[node] = new_positions_list
+        node_mod[node] = {
+            "contigs": new_positions_list,
+            "peptides": node_dict["peptides"],
+        }
 
     return node_mod
 
 
-def _get_start_end_pos_for_matches(peptide_matches, graph_index):
-    node_start_end = {}
-    for peptide, indices in peptide_matches.items():
-        for match_start_index in indices:
+def _get_start_end_pos_for_matches(
+    potential_peptide_matches, graph_index, peptide_mismatches, allowed_mismatches
+):
+    peptide_mismatches = set(peptide_mismatches)
+    peptide_match_node_start_end = {}
+    for peptide, indices in potential_peptide_matches.items():
+        peptide_match_nodes = {}  # store positions of matches for each node
+        for match_start_index in indices:  # start index is of ref_index
+            mismatch_counter = 0
+            position_match = {}  # store start and end position of match for each node
             for i in range(match_start_index, match_start_index + len(peptide)):
-                # if match is over Variation: check which node is actually hit by
-                # checking which amino acid matches
-                if len(graph_index[i]) > 1:
-                    raise NotImplementedError("Variation matching not implemented yet")
                 for node, aa in graph_index[i]:  # aa is Amino Acid
-                    # TODO what happens when ref_seq < longest_path?
-                    # if node in node_start_end:
-                    #     if peptide in node_start_end[node]:
-                    #         if match_start_index in node_start_end[node][peptide]:
-                    #             if i > node_start_end[node][peptide][match_start_index]:
-                    #                 node_start_end[node][peptide][match_start_index] = i
-                    #         else:
-                    #             node_start_end[node][peptide][match_start_index] = i
-                    #     else:
-                    #         node_start_end[node][peptide] = {match_start_index: i}
-                    # else:
-                    #     node_start_end[node] = {peptide: {match_start_index: i}}
-                    if node in node_start_end:
-                        if match_start_index in node_start_end[node]:
-                            if i > node_start_end[node][match_start_index]:
-                                node_start_end[node][match_start_index] = i
+                    if aa == peptide[i - match_start_index]:
+                        if node in position_match:
+                            if i > position_match[node][1]:
+                                position_match[node][1] = i
                         else:
-                            node_start_end[node][match_start_index] = i
-                    else:
-                        node_start_end[node] = {match_start_index: i}
+                            position_match[node] = [i, i]
+                        break
+                else:  # if aa of peptide wasn't matched to any node
+                    mismatch_counter += 1
+                if mismatch_counter > allowed_mismatches:
+                    break
+            else:
+                # if mismatch_counter <= allowed_mismatches after full peptide
+                # was checked
+                peptide_match_nodes[match_start_index] = position_match
 
-    return node_start_end
+        if peptide_match_nodes:  # might not be robust enough
+            peptide_match_node_start_end[peptide] = peptide_match_nodes
+        else:
+            peptide_mismatches.add(peptide)
+
+    return peptide_match_node_start_end, list(peptide_mismatches)
 
 
 def _modify_graph(graph, contig_positions, longest_paths):
@@ -588,7 +606,8 @@ def _modify_graph(graph, contig_positions, longest_paths):
         return len(graph.nodes[node]["aminoacid"])
 
     logger.info("updating graph to visualise peptide matches")
-    for node, positions_list in contig_positions.items():
+    for node, node_dict in contig_positions.items():
+        positions_list = node_dict["contigs"]
         old_node = graph.nodes[node].copy()
         old_node_start = longest_paths[node]
         old_node_aminoacids = old_node["aminoacid"]
