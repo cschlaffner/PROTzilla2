@@ -547,6 +547,5 @@ def protein_graph(request, run_name, index: int):
     ]
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
-    context = {"elements": elements}
 
-    return render(request, "runs/protein_graph.html", context)
+    return render(request, "runs/protein_graph.html", context={"elements": elements})

@@ -30,11 +30,11 @@ from protzilla.utilities.utilities import random_string
 # TODO: add markdown pictures of the graphs
 @pytest.fixture
 def simple_graph():
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABCDEFG"},
@@ -45,21 +45,21 @@ def simple_graph():
     start_node = "0"
     seq_len = 7
 
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
 def shortcut():
     # in theory, with just ft VARIANT (-> graph generation), this should never happen
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "4")
-    G.add_edge("2", "3")
-    G.add_edge("3", "4")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "4")
+    graph.add_edge("2", "3")
+    graph.add_edge("3", "4")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABC"},
@@ -71,21 +71,21 @@ def shortcut():
 
     start_node = "0"
     seq_len = 4
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
 def multi_route():
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "3")
-    G.add_edge("2", "4")
-    G.add_edge("3", "4")
-    G.add_edge("4", "5")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "3")
+    graph.add_edge("2", "4")
+    graph.add_edge("3", "4")
+    graph.add_edge("4", "5")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABC"},
@@ -98,21 +98,21 @@ def multi_route():
 
     start_node = "0"
     seq_len = 6
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
 def multi_route_long_nodes():
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "3")
-    G.add_edge("2", "4")
-    G.add_edge("3", "4")
-    G.add_edge("4", "5")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "3")
+    graph.add_edge("2", "4")
+    graph.add_edge("3", "4")
+    graph.add_edge("4", "5")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABCDEFG"},
@@ -125,22 +125,22 @@ def multi_route_long_nodes():
 
     start_node = "0"
     seq_len = 6
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
 def multi_route_shortcut():
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "3")
-    G.add_edge("1", "4")
-    G.add_edge("2", "4")
-    G.add_edge("3", "4")
-    G.add_edge("4", "5")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "3")
+    graph.add_edge("1", "4")
+    graph.add_edge("2", "4")
+    graph.add_edge("3", "4")
+    graph.add_edge("4", "5")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABC"},
@@ -153,27 +153,27 @@ def multi_route_shortcut():
 
     start_node = "0"
     seq_len = 6
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
 def complex_route():
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "3")
-    G.add_edge("2", "4")
-    G.add_edge("2", "5")
-    G.add_edge("3", "5")
-    G.add_edge("3", "6")
-    G.add_edge("6", "7")
-    G.add_edge("4", "8")
-    G.add_edge("5", "8")
-    G.add_edge("7", "8")
-    G.add_edge("8", "9")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "3")
+    graph.add_edge("2", "4")
+    graph.add_edge("2", "5")
+    graph.add_edge("3", "5")
+    graph.add_edge("3", "6")
+    graph.add_edge("6", "7")
+    graph.add_edge("4", "8")
+    graph.add_edge("5", "8")
+    graph.add_edge("7", "8")
+    graph.add_edge("8", "9")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABC"},
@@ -190,7 +190,7 @@ def complex_route():
 
     start_node = "0"
     seq_len = 8
-    return G, start_node, seq_len
+    return graph, start_node, seq_len
 
 
 @pytest.fixture
@@ -198,31 +198,35 @@ def test_protein_variation_graph():
     # specific node names are usd because that is exactly the way ProtGraph generates
     # the graph for this specific protein. This is not the most stable way
 
-    g = nx.DiGraph()
+    graph = nx.DiGraph()
 
-    g.add_node(
+    graph.add_node(
         "n0", aminoacid="__start__", accession="test_protein_variation", position=0.0
     )
-    g.add_node("n1", aminoacid="D", accession="test_protein_variation", position=4.0)
-    g.add_node(
+    graph.add_node(
+        "n1", aminoacid="D", accession="test_protein_variation", position=4.0
+    )
+    graph.add_node(
         "n2", aminoacid="__end__", accession="test_protein_variation", position=13.0
     )
-    g.add_node("n3", aminoacid="V", accession="test_protein_variation")
-    g.add_node(
+    graph.add_node("n3", aminoacid="V", accession="test_protein_variation")
+    graph.add_node(
         "n4", aminoacid="EGABCDET", accession="test_protein_variation", position=5.0
     )
-    g.add_node("n5", aminoacid="ABC", accession="test_protein_variation", position=1.0)
+    graph.add_node(
+        "n5", aminoacid="ABC", accession="test_protein_variation", position=1.0
+    )
 
-    g.add_edge("n0", "n5")
-    g.add_edge("n1", "n4")
-    g.add_edge("n3", "n4")
-    g.add_edge("n4", "n2")
-    g.add_edge("n5", "n1")
-    g.add_edge("n5", "n3")
+    graph.add_edge("n0", "n5")
+    graph.add_edge("n1", "n4")
+    graph.add_edge("n3", "n4")
+    graph.add_edge("n4", "n2")
+    graph.add_edge("n5", "n1")
+    graph.add_edge("n5", "n3")
 
-    g.graph = {"edge_default": {}, "node_default": {}}
+    graph.graph = {"edge_default": {}, "node_default": {}}
 
-    return g
+    return graph
 
 
 @pytest.fixture
@@ -305,40 +309,40 @@ def integration_test_peptides() -> pd.DataFrame:
 
 
 def test_longest_paths_simple(simple_graph):
-    G, start_node, _ = simple_graph
-    longest_paths = _longest_paths(G, start_node)
+    graph, start_node, _ = simple_graph
+    longest_paths = _longest_paths(graph, start_node)
 
     planned = {"0": 0, "1": 0, "2": 7}
     assert longest_paths == planned
 
 
 def test_longest_paths_multiple_paths(multi_route):
-    G, start_node, _ = multi_route
-    longest_paths = _longest_paths(G, start_node)
+    graph, start_node, _ = multi_route
+    longest_paths = _longest_paths(graph, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 3, "4": 4, "5": 6}
     assert longest_paths == planned
 
 
 def test_longest_paths_multiple_shortcut(multi_route_shortcut):
-    G, start_node, _ = multi_route_shortcut
-    longest_paths = _longest_paths(G, start_node)
+    graph, start_node, _ = multi_route_shortcut
+    longest_paths = _longest_paths(graph, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 3, "4": 4, "5": 6}
     assert longest_paths == planned
 
 
 def test_longest_paths_shortcut(shortcut):
-    G, start_node, _ = shortcut
-    longest_paths = _longest_paths(G, start_node)
+    graph, start_node, _ = shortcut
+    longest_paths = _longest_paths(graph, start_node)
 
     planned = {"0": 0, "1": 0, "2": 3, "3": 4, "4": 5}
     assert longest_paths == planned
 
 
 def test_longest_paths_multi_route(complex_route):
-    G, start_node, _ = complex_route
-    longest_paths = _longest_paths(G, start_node)
+    graph, start_node, _ = complex_route
+    longest_paths = _longest_paths(graph, start_node)
 
     planned = {
         "0": 0,
@@ -357,8 +361,8 @@ def test_longest_paths_multi_route(complex_route):
 
 # All graph_index tests depend on the longest_paths tests passing
 def test_create_graph_index_simple(simple_graph):
-    G, _, seq_len = simple_graph
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    graph, _, seq_len = simple_graph
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
 
     planned = [
         [("1", "A")],
@@ -374,8 +378,8 @@ def test_create_graph_index_simple(simple_graph):
 
 
 def test_create_graph_index_shortcut(shortcut):
-    G, _, seq_len = shortcut
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    graph, _, seq_len = shortcut
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
 
     planned = [[("1", "A")], [("1", "B")], [("1", "C")], [("2", "D")], [("3", "E")]]
     assert index == planned
@@ -383,8 +387,8 @@ def test_create_graph_index_shortcut(shortcut):
 
 
 def test_create_graph_index_multiple(multi_route):
-    G, _, seq_len = multi_route
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    graph, _, seq_len = multi_route
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
 
     planned = [
         [("1", "A")],
@@ -399,8 +403,8 @@ def test_create_graph_index_multiple(multi_route):
 
 
 def test_create_graph_index_multiple_shortcut(multi_route_shortcut):
-    G, _, seq_len = multi_route_shortcut
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    graph, _, seq_len = multi_route_shortcut
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
 
     planned = [
         [("1", "A")],
@@ -415,8 +419,8 @@ def test_create_graph_index_multiple_shortcut(multi_route_shortcut):
 
 
 def test_create_graph_index_multi_route(complex_route):
-    G, _, seq_len = complex_route
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    graph, _, seq_len = complex_route
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
 
     planned = [
         [("1", "A")],
@@ -434,11 +438,11 @@ def test_create_graph_index_multi_route(complex_route):
 
 def test_create_graph_index_invalid_start_node(critical_logger):
     # expecting "error" in log -> supress below critical
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "unexpected_label"},
             "1": {"aminoacid": "ABCDEFG"},
@@ -447,7 +451,7 @@ def test_create_graph_index_invalid_start_node(critical_logger):
     )
     seq_len = 7
 
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
     assert index is None
     assert (
         msg
@@ -456,16 +460,16 @@ def test_create_graph_index_invalid_start_node(critical_logger):
 
 
 def test_create_graph_index_invalid_end_node(critical_logger):
-    G = nx.DiGraph()
-    G.add_edge("0", "1")
-    G.add_edge("1", "2")
-    G.add_edge("1", "3")
-    G.add_edge("2", "4")
-    G.add_edge("3", "4")
-    G.add_edge("4", "5")
+    graph = nx.DiGraph()
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+    graph.add_edge("1", "3")
+    graph.add_edge("2", "4")
+    graph.add_edge("3", "4")
+    graph.add_edge("4", "5")
 
     nx.set_node_attributes(
-        G,
+        graph,
         {
             "0": {"aminoacid": "__start__"},
             "1": {"aminoacid": "ABC"},
@@ -479,7 +483,7 @@ def test_create_graph_index_invalid_end_node(critical_logger):
     # should be 7, but the graph is invalid
     seq_len = 8
 
-    index, msg, longest_paths = _create_graph_index(G, seq_len)
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
     assert index is None
     partial_error_msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: "
     assert partial_error_msg in msg
@@ -711,14 +715,15 @@ def test_match_peptides_mismatches_k3():
 
 
 def test_match_peptides_k0():
-    peptides = [""]
-    allowed_mismatches = 2
-    k = 0
-    ref_seq_index = {}
-    ref_seq = "ABCDEGABCDET"
     error_msg = f"k must be positive integer, but is {k}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
+        _match_peptides(
+            allowed_mismatches=2,
+            k=0,
+            peptides=[""],
+            ref_index={},
+            ref_seq="ABCDEGABCDET",
+        )
 
 
 def test_match_peptides_k_str():
@@ -858,10 +863,10 @@ def test_get_start_end_pos_for_matches_simple():
         [("1", "G")],
     ]
     peptide_matches = {"ABC": [0], "EFG": [4]}
-    planned_s_e = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
+    planned_start_end = {"1": {"ABC": {0: 2}, "EFG": {4: 6}}}
 
     node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index_simple)
-    assert planned_s_e == node_start_end
+    assert planned_start_end == node_start_end
 
 
 def test_get_start_end_pos_for_matches_1_pep_2_match():
@@ -1177,7 +1182,7 @@ def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
     mock_get_peptides.return_value = []
     protein_id = "SomeID"
     out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, "run_name")
-    assert out_dict["graph_path"] == None
+    assert out_dict["graph_path"] is None
     assert (
         out_dict["messages"][0]["msg"]
         == f"No peptides found for isoform {protein_id} in Peptide Dataframe"

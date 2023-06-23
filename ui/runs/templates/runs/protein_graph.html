@@ -37,9 +37,9 @@
         function getWidth(node) {
             // curtesy to Simon Moe -> https://github.com/cytoscape/cytoscape.js/issues/2713#issuecomment-1062746258
             /**
-             Calculate the width of a node given its text label `node.data('lbl')`
+             Calculate the width of a node given its text label `node.data('label')`
              */
-                // Create element with attributes needed to calculate text size
+
             const ctx = document.createElement('canvas').getContext("2d");
             const fStyle = node.pstyle('font-style').strValue;
             const size = node.pstyle('font-size').pfValue + 'px';
@@ -52,9 +52,8 @@
             const lengths = lines.map(a => a.length);
             const max_line = lengths.indexOf(Math.max(...lengths));
 
-            // User-defined padding
             const padding = 20
-            return ctx.measureText(lines[max_line]).width + padding; // + padding;
+            return ctx.measureText(lines[max_line]).width + padding;
         }
 
 
@@ -79,7 +78,7 @@
                             'background-color': 'lightblue',
                             'horizontal-text-margin': '10px',
                             'color': function (node) {
-                                return node.data('match') === "true" ? 'red' : 'black';
+                                return node.data('match') === 'true' ? 'red' : 'black';
                             }
                         }
                     },

@@ -35,7 +35,9 @@ def peptides_to_isoform(
     :param k: k-mer size to build necessary indices for matching peptides, defaults to 5
     :type k: int, optional
 
-    :return: dict(graph_path, peptide_matches, peptide_mismatches, messages)
+    :return: dict of path to graph - either the modified graph or the original graph if
+    the modification failed, list of matched peptides, list of unmatched peptides,
+    messages passed to the frontend
     :rtype: dict[str, list, list, list]
     """
 
@@ -59,9 +61,7 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    potential_graph_path = Path(
-        RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
-    )
+    potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
@@ -137,14 +137,13 @@ def _create_protein_variation_graph(protein_id: str, run_name: str):
     run_path = RUNS_PATH / run_name
     path_to_protein_file, request = _get_protein_file(protein_id, run_path)
 
-    if request is not None:
-        if request.status_code != 200:
-            msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
-            logger.error(msg)
-            return dict(
-                graph_path=None,
-                messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
-            )
+    if not path_to_protein_file.exists() and request.status_code != 200:
+        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
+        logger.error(msg)
+        return dict(
+            graph_path=None,
+            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+        )
 
     output_folder_path = run_path / "graphs"
     output_csv = output_folder_path / f"{protein_id}.csv"
@@ -317,8 +316,7 @@ def _get_protein_file(
         r = requests.get(url)
         r.raise_for_status()
 
-        with open(path_to_protein_file, "wb") as f:
-            f.write(r.content)
+        path_to_protein_file.write_bytes(r.content)
 
     return path_to_protein_file, r
 
@@ -521,7 +519,7 @@ def _create_contigs_dict(node_start_end: dict):
     for node, positions_list in node_mod.items():
         new_positions_list = []
         for start, end in positions_list:
-            if len(new_positions_list) == 0:
+            if not len(new_positions_list):
                 new_positions_list.append((start, end))
                 continue
             if start <= new_positions_list[-1][1]:
@@ -542,7 +540,7 @@ def _get_start_end_pos_for_matches(peptide_matches, graph_index):
                 # checking which amino acid matches
                 if len(graph_index[i]) > 1:
                     raise NotImplementedError("Variation matching not implemented yet")
-                for node, aa in graph_index[i]:
+                for node, aa in graph_index[i]:  # aa is Amino Acid
                     # TODO what happens when ref_seq < longest_path?
                     if node in node_start_end:
                         if peptide in node_start_end[node]:
@@ -568,7 +566,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
     :param graph: Protein Graph to be modified
     :type: nx.DiGraph
     :param contig_positions: Dict from node to contig-positions {node: [(start, end)]}.
-    :type: dict(node: [(start, end)])
+    :type: dict(list[tuple])
     :param longest_paths: mapping from node to the longest path to node
     (-> _longest_paths())
     :type: dict
