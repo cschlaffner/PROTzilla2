@@ -44,14 +44,6 @@
           "parameters": {
             "protein_id": ""
           }
-        },
-        {
-          "name": "plot",
-          "method": "peptides_isoform_graph",
-          "parameters": {
-            "input_df": [null, null],
-            "k": 5
-          }
         }
       ]
     },
