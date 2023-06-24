@@ -66,13 +66,20 @@ def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
 
 
 def permutation_testing_plot(
-    model, input_df, labels_df, cv, scoring, n_permutations, random_state, **cv_params
+    model,
+    input_df,
+    labels_df,
+    cross_validation_strategy,
+    scoring,
+    n_permutations,
+    random_state,
+    **cv_params,
 ):
     # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
     input_df = input_df.set_index("Sample")
     _, labels_df = encode_labels(labels_df, "Label")
 
-    cv_callable = perform_cross_validation(cv, **cv_params)
+    cv_callable = perform_cross_validation(cross_validation_strategy, **cv_params)
     score, permutation_scores, pvalue = permutation_test_score(
         model,
         input_df,

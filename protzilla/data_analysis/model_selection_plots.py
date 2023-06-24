@@ -14,7 +14,10 @@ from protzilla.constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE as COLORS,
 )
 
-estimator_mapping = {"Random Forest": RandomForestClassifier(), "svm": SVC()}
+estimator_mapping = {
+    "Random Forest": RandomForestClassifier(),
+    "Support Vector Machine": SVC(),
+}
 
 
 def learning_curve_plot(
@@ -24,7 +27,7 @@ def learning_curve_plot(
     labels_column: str,
     positive_label: str,
     train_sizes,
-    cv,
+    cross_validation_strategy,
     scoring,
     random_state,
     **cv_params
@@ -41,7 +44,7 @@ def learning_curve_plot(
     )
     clf = estimator_mapping[clf_str]
     cv_callable = perform_cross_validation(
-        cv, random_state_cv=random_state, **cv_params
+        cross_validation_strategy, random_state_cv=random_state, **cv_params
     )
 
     display = LearningCurveDisplay.from_estimator(

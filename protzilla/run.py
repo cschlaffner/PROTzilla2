@@ -206,6 +206,8 @@ class Run:
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "proteins_of_interest_input" in call_parameters:
             del call_parameters["proteins_of_interest_input"]
+        if "metadata_df" in call_parameters:
+            call_parameters["metadata_df"] = self.metadata
         self.plots = method_callable(**call_parameters)
         self.result_df = self.df
         self.current_out = {}

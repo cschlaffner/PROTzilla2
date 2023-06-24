@@ -7,6 +7,7 @@ from ..data_analysis import (
     classification,
     model_evaluation,
     model_evaluation_plots,
+    model_selection_plots,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -326,13 +327,18 @@ plot_map = {
     (
         "data_analysis",
         "plot",
-        "precision_recall_curve",
+        "precision_recall_curve_plot",
     ): model_evaluation_plots.precision_recall_curve_plot,
     (
         "data_analysis",
         "plot",
-        "roc_curve",
+        "roc_curve_plot",
     ): model_evaluation_plots.roc_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "learning_curve_plot",
+    ): model_selection_plots.learning_curve_plot,
     (
         "data_integration",
         "plot",
