@@ -405,9 +405,11 @@ def gsea(
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         return dict(
             enriched_df=enriched_df,
+            ranking = gsea_result.ranking,
             filtered_groups=filtered_groups,
             messages=[dict(level=messages.WARNING, msg=msg)],
         )
     return dict(
         enriched_df=enriched_df,
+        ranking=gsea_result.ranking,
     )

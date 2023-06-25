@@ -309,3 +309,61 @@ def gsea_dot_plot(
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+
+
+def gsea_enrichment_plot(
+        input_df,
+        ranking,
+        term=None,
+):
+    """
+    normal
+    """
+    # gseapy.gseaplot(rank_metric=pre_res.ranking, term=terms[0], **pre_res.results[terms[0]])
+    # results is a dict of dataframes per term
+    # TODO: save detailed results from dict (does that work with history?)
+
+    terms = input_df.Term
+    # Filter the DataFrame based on the "Term" column
+    filtered_df = input_df[input_df['Term'] == terms[0]]
+
+
+    #enrichment_plot = gseapy.gseaplot(rank_metric=ranking, term=terms[0], **input_df[terms[0]])
+    enrichment_plot = gseapy.gseaplot(
+        rank_metric=ranking,
+        term=terms[0],
+        hits=filtered_df['hits'], # how? from where?
+        nes=filtered_df['NES'],
+        pval=filtered_df['NOM p-val'],
+        fdr=filtered_df['FDR q-val'],
+        RES=filtered_df['RES'], # running enrichment score, from where?
+    )
+    return [
+        dict(
+            plot_base64=fig_to_base64(enrichment_plot),
+            key="gsea_enrichment_plot_img",
+        )
+    ]
+
+    # multipathway
+    # gseapy.gseaplot2()
+    # preranked
+    # terms = pre_res.res2d.Term[1:5]
+    # hits = [pre_res.results[t]['hits'] for t in terms]
+    # runes = [pre_res.results[t]['RES'] for t in terms]
+    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
+    #               rank_metric=gs_res.ranking,
+    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
+    #               figsize=(4,5)) # rank_metric=pre_res.ranking
+
+    # gsea
+    # # multi in one
+    # terms = gs_res.res2d.Term[:5]
+    # hits = [gs_res.results[t]['hits'] for t in terms]
+    # runes = [gs_res.results[t]['RES'] for t in terms]
+    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
+    #               rank_metric=gs_res.ranking,
+    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
+    #               figsize=(4,5)) # rank_metric=pre_res.ranking
+
+    pass

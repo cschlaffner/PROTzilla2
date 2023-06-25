@@ -6,6 +6,7 @@ from protzilla.data_integration.di_plots import (
     go_enrichment_bar_plot,
     go_enrichment_dot_plot,
     gsea_dot_plot,
+    gsea_enrichment_plot,
 )
 
 
@@ -262,3 +263,14 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
     )[0]
     if show_figures:
         helpers.open_graph_from_base64(dot_base64["plot_base64"])
+
+
+def test_gsea_enrichment_plot(data_folder_tests, helpers):
+    df = pd.read_csv(data_folder_tests / "gsea_preranked_enriched.csv", header=0)
+    ranking = pd.read_csv(data_folder_tests / "gsea_preranked_rank.csv", header=0)
+
+    enrichment_plot = gsea_enrichment_plot(
+        input_df=df,
+        ranking=ranking,
+    )[0]
+    helpers.open_graph_from_base64(enrichment_plot["plot_base64"])
