@@ -242,7 +242,7 @@ def go_analysis_with_STRING(
     if len(out_messages) > 0:
         return dict(messages=out_messages, results=merged_df)
 
-    return {"enriched_df": merged_df}
+    return {"enrichment_results": merged_df}
 
 
 def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=False):
@@ -499,18 +499,25 @@ def go_analysis_with_enrichr(
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
-            results=enriched,
+            enrichment_results=enriched,
             filtered_groups=filtered_groups,
             messages=out_messages,
         )
 
     return {
-        "results": enriched,
+        "enrichment_results": enriched,
         "messages": out_messages,
     }
 
 
-def go_analysis_offline(proteins, protein_sets_path, background=None, direction="both"):
+def go_analysis_offline(
+        proteins,
+        protein_sets_path,
+        direction="both",
+        background_path=None,
+        background_number=None,
+        **kwargs,
+):
     """
     A method that performs offline overrepresentation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package.
@@ -590,11 +597,18 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     ):  # file could not be read successfully
         return protein_sets
 
-    background = read_background_file(background)
-    if isinstance(background, dict) and "messages" in background:
-        return background
+    if background_path:
+        background = read_background_file(background_path)
+        if (isinstance(background, dict)):  # an error occurred
+            return background
+    elif background_number:
+        background = background_number
+    else:
+        background = None
+
     if background is None:
-        logger.info("No background provided, using all proteins in protein sets")
+        msg = "No valid background provided, using all proteins in protein sets"
+        out_messages.append(dict(level=messages.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
         logger.info("Starting analysis for up-regulated proteins")
@@ -609,8 +623,8 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             ).results
         except ValueError as e:
             msg = "Something went wrong with the analysis. Please check your inputs."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
-
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
         logger.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
@@ -626,7 +640,8 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             ).results
         except ValueError as e:
             msg = "Something went wrong with the analysis. Please check your inputs."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
 
         logger.info("Finished analysis for down-regulated proteins")
 
@@ -637,4 +652,6 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     else:
         enriched = up_enriched if direction == "up" else down_enriched
 
-    return {"results": enriched}
+    if out_messages:
+        return {"enrichment_results": enriched, "messages": out_messages}
+    return {"enrichment_results": enriched}

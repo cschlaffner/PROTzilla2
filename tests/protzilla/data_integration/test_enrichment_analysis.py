@@ -311,7 +311,7 @@ def test_go_analysis_with_STRING(mock_enrichment, background, data_folder_tests)
         organism=9606,
         direction="both",
         background=background,
-    )["enriched_df"]
+    )["enrichment_results"]
 
     for col in ["inputGenes", "preferredNames"]:
         out_df[col] = out_df[col].apply(lambda x: set(x.split(",")))
@@ -571,7 +571,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         organism="human",
         direction="up",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
     # Compare all specified columns
@@ -752,7 +752,7 @@ def test_go_analysis_offline_protein_sets(
         protein_sets_path=protein_sets_path,
         direction="up",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
     df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
@@ -802,10 +802,10 @@ def test_go_analysis_offline_background(
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path=data_folder_tests / "protein_sets.txt",
-        background=background_path,
+        background_path=background_path,
         direction="down",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
     df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))

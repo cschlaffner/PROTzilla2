@@ -1834,12 +1834,12 @@
             "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
             "type": "categorical_dynamic",
             "categories": [
-              "Upload a file",
+              "Upload a file (recommended)",
               "Choose biomart dataset",
               "Specify number of expressed genes (not recommended)",
               "Use all genes in the gene_sets"
             ],
-            "default": "Use all genes in the gene_sets",
+            "default": "Upload a file (recommended)",
             "dynamic_parameters": {
               "Upload a file": [
                 "background_path"
@@ -1904,10 +1904,38 @@
             ],
             "default": "both"
           },
-          "background": {
-            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file (recommended)",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene_sets"
+            ],
+            "default": "Upload a file (recommended)",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt)",
             "type": "file",
-            "default": null
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
           }
         }
       },
