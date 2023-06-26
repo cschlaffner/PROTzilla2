@@ -314,27 +314,15 @@ def gsea_dot_plot(
 
 def gsea_enrichment_plot(
         term_dict=None,
-        input_df=None,
-        ranking=None,
         term=None,
+        ranking=None,
 ):
     """
     normal
     """
-
-
-    # terms = input_df.Term
-    # # Filter the DataFrame based on the "Term" column
-    # filtered_df = input_df[input_df['Term'] == terms[0]]
-
-    # terms = pre_res.res2d.Term[1:5]
-    # hits = [pre_res.results[t]['hits'] for t in terms]
-    # runes = [pre_res.results[t]['RES'] for t in terms]
-    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
-    #               rank_metric=gs_res.ranking,
-    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
-    #               figsize=(4,5)) # rank_metric=pre_res.ranking
-
+    if not isinstance(term_dict, dict) and not "nes" in term_dict.keys():
+        msg = "Please input a dictionary with enrichment details for a gene set from GSEA."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
     try:
         enrichment_plot_axes = gseapy.gseaplot(
             rank_metric=ranking,
@@ -351,7 +339,17 @@ def gsea_enrichment_plot(
         msg = f"Could not plot enrichment plot for term {term}."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
+    # terms = input_df.Term
+    # # Filter the DataFrame based on the "Term" column
+    # filtered_df = input_df[input_df['Term'] == terms[0]]
 
+    # terms = pre_res.res2d.Term[1:5]
+    # hits = [pre_res.results[t]['hits'] for t in terms]
+    # runes = [pre_res.results[t]['RES'] for t in terms]
+    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
+    #               rank_metric=gs_res.ranking,
+    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
+    #               figsize=(4,5)) # rank_metric=pre_res.ranking
 
     # multipathway
     # gseapy.gseaplot2()

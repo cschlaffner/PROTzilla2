@@ -2218,6 +2218,38 @@
             "default": false
           }
         }
+      },
+      "gsea_enrichment_plot": {
+        "name": "Enrichment Plot for (pre-ranked) GSEA",
+        "description": "Creates an enrichment plot from (pre-ranked) GSEA data with the enrichment score, ranked_metric, gene rank and hits",
+        "parameters": {
+          "term_dict": {
+            "name": "Enrichment details gene set to be plotted",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "term"
+            ]
+          },
+          "term": {
+            "name": "name of the term_dict for title",
+            "type": "text",
+            "fill": "term_dict_name",
+            "hidden": true,
+            "default": null
+          },
+          "ranking": {
+            "name": "Ranking from GSEA",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          }
+        }
       }
     }
   }
