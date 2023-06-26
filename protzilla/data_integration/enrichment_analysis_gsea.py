@@ -71,6 +71,7 @@ def gsea_preranked(
     permutation_type="phenotype",
     weighted_score=1.0,
     seed=123,
+    threads=4,
     **kwargs,
 ):
     """
@@ -116,6 +117,8 @@ def gsea_preranked(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
+    :param threads: Number of threads
+    :type threads: int
     :return: dictionary with results dataframe, ranking and messages
     :rtype: dict
     """
@@ -178,6 +181,7 @@ def gsea_preranked(
             outdir=None,
             seed=seed,
             verbose=True,
+            threads=4,
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
@@ -262,6 +266,7 @@ def gsea(
     ranking_method="signal_to_noise",
     weighted_score=1.0,
     seed=123,
+    threads=4,
     **kwargs,
 ):
     """
@@ -320,6 +325,8 @@ def gsea(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
+    :param threads: Number of threads to use
+    :type threads: int
     :return: dict with enriched dataframe and messages
     :rtype: dict
     """
@@ -390,6 +397,7 @@ def gsea(
             outdir=None,
             seed=seed,
             verbose=True,
+            threads=threads,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"

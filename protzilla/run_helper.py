@@ -1,9 +1,9 @@
 import copy
 
 import gseapy
-from biomart import BiomartServer
 import matplotlib.colors as mcolors
 import restring
+from biomart import BiomartServer
 
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.workflow_helper import get_workflow_default_param_value
@@ -41,7 +41,7 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "biomart_datasets":
             # retrieve datasets from BioMart server
             server = BiomartServer("http://www.ensembl.org/biomart")
-            database = server.databases['ENSEMBL_MART_ENSEMBL']
+            database = server.databases["ENSEMBL_MART_ENSEMBL"]
             param_dict["categories"] = database.datasets
 
     if "fill_dynamic" in param_dict:

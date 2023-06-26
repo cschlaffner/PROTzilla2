@@ -359,11 +359,14 @@ def go_analysis_with_enrichr(
     **kwargs,
 ):
     """
-    A method that performs online overrepresentation analysis for a given set of proteins
-    against a given set of protein sets using the GSEApy package which accesses
-    the Enrichr API. Uniprot Protein IDs are converted to uppercase HGNC gene symbols.
+    A method that performs online over-representation analysis for a given set of proteins
+    against a given set of gene sets using the GSEApy package which accesses
+    the Enrichr API.Uniprot Protein IDs in proteins are converted to uppercase HGNC gene symbols.
     If no match is found, the protein is excluded from the analysis. All excluded proteins
     are returned in a list.
+    The enrichment is performed against a background provided as a path (recommended), number or
+    name of a biomart dataset. If no background is provided, all genes in the gene sets are used as
+    the background.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
@@ -392,6 +395,13 @@ def go_analysis_with_enrichr(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
+    :param background_path: path to file with background proteins, .csv or .txt, one protein per line
+    :type background_path: str or None
+    :param background_number: number of background genes to use (not recommended),
+        assumes that all genes could be found in background
+    :type background_number: int or None
+    :param background_biomart: name of biomart dataset to use as background
+    :type background_biomart: str or None
     :return: dictionary with results and filtered groups
     :rtype: dict
     """
@@ -511,17 +521,19 @@ def go_analysis_with_enrichr(
 
 
 def go_analysis_offline(
-        proteins,
-        protein_sets_path,
-        direction="both",
-        background_path=None,
-        background_number=None,
-        **kwargs,
+    proteins,
+    protein_sets_path,
+    direction="both",
+    background_path=None,
+    background_number=None,
+    **kwargs,
 ):
     """
-    A method that performs offline overrepresentation analysis for a given set of proteins
+    A method that performs offline over-representation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package.
-    For the analysis a hypergeometric test is used.
+    For the analysis a hypergeometric test is used against a background provided as a
+    path (recommended) or a number of proteins. If no background is provided, all proteins in
+    the protein_sets are used as the background.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
@@ -538,21 +550,22 @@ def go_analysis_offline(
         - .json:
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
     :type protein_sets_path: str
-    :param background: background proteins to be used for the analysis. If no
+    :param background_path: background proteins to be used for the analysis. If no
         background is provided, all proteins in protein sets are used.
         The background is defined by your experiment.
-    :type background: str or None
+    :type background_path: str or None
+    :param background_number: number of background proteins to be used for the analysis (not recommended)
+        assumes that all your genes could be found in background.
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
-        - both: functional enrichment info is retrieved for upregulated and downregulated
+        - both: functional enrichment info is retrieved for up-regulated and down-regulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
     :return: dictionary with results dataframe
     :rtype: dict
     """
-    # enhancement: proteins could also be a number input (or an uploaded file)
     # enhancement: make sure ID type for all inputs match
     out_messages = []
     if (
@@ -599,7 +612,7 @@ def go_analysis_offline(
 
     if background_path:
         background = read_background_file(background_path)
-        if (isinstance(background, dict)):  # an error occurred
+        if isinstance(background, dict):  # an error occurred
             return background
     elif background_number:
         background = background_number
