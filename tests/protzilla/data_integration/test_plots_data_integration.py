@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import pytest
 
@@ -267,10 +269,17 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
 
 def test_gsea_enrichment_plot(data_folder_tests, helpers):
     df = pd.read_csv(data_folder_tests / "gsea_preranked_enriched.csv", header=0)
-    ranking = pd.read_csv(data_folder_tests / "gsea_preranked_rank.csv", header=0)
+    # ranking = pd.read_csv(data_folder_tests / "gsea_preranked_rank.csv", header=0)
+    ranking = pd.Series(sorted([i / 41 for i in range(42)]))
+    # read json file
+    with open(data_folder_tests / "KEGG_2015__alzheimers disease_base.json") as json_file:
+        enrichment_details = json.load(json_file)
 
     enrichment_plot = gsea_enrichment_plot(
         input_df=df,
-        ranking=ranking,
-    )[0]
+        ranking=ranking,#ranking["prerank"],
+        term_dict=enrichment_details,
+        term="KEGG_2015__alzheimers disease",
+    )
+    enrichment_plot = enrichment_plot[0]
     helpers.open_graph_from_base64(enrichment_plot["plot_base64"])

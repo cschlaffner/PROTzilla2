@@ -116,7 +116,7 @@ def gsea_preranked(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
-    :return: dictionary with results dataframe, ranking and messages
+    :return: dictionary with results dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
     if (
@@ -189,19 +189,19 @@ def gsea_preranked(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
+    out_dict = {
+        "enriched_df": enriched_df,
+        "ranking": preranked_result.ranking,
+    }
+    out_dict.update(preranked_result.results)
+
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return dict(
-            enriched_df=enriched_df,
-            ranking=preranked_result.ranking,
-            filtered_groups=filtered_groups,
-            messages=[dict(level=messages.WARNING, msg=msg)],
-        )
-
-    return dict(
-        enriched_df=enriched_df,
-        ranking=preranked_result.ranking,
-    )
+        return out_dict.update({
+            "filtered_groups": filtered_groups,
+            "messages": [dict(level=messages.WARNING, msg=msg)],
+        })
+    return out_dict
 
 
 def create_genes_intensity_wide_df(
@@ -320,7 +320,7 @@ def gsea(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
-    :return: dict with enriched dataframe and messages
+    :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
     assert grouping in metadata_df.columns, "Grouping column not in metadata df"
@@ -401,15 +401,16 @@ def gsea(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
+    out_dict = {
+        "enriched_df": enriched_df,
+        "ranking": gsea_result.ranking,
+    }
+    out_dict.update(gsea_result.results)
+
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return dict(
-            enriched_df=enriched_df,
-            ranking = gsea_result.ranking,
-            filtered_groups=filtered_groups,
-            messages=[dict(level=messages.WARNING, msg=msg)],
-        )
-    return dict(
-        enriched_df=enriched_df,
-        ranking=gsea_result.ranking,
-    )
+        return out_dict.update({
+            "filtered_groups": filtered_groups,
+            "messages": [dict(level=messages.WARNING, msg=msg)],
+        })
+    return out_dict

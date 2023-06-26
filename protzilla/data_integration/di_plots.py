@@ -1,6 +1,7 @@
 import gseapy
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
@@ -312,38 +313,45 @@ def gsea_dot_plot(
 
 
 def gsea_enrichment_plot(
-        input_df,
-        ranking,
+        term_dict=None,
+        input_df=None,
+        ranking=None,
         term=None,
 ):
     """
     normal
     """
-    # gseapy.gseaplot(rank_metric=pre_res.ranking, term=terms[0], **pre_res.results[terms[0]])
-    # results is a dict of dataframes per term
-    # TODO: save detailed results from dict (does that work with history?)
-
-    terms = input_df.Term
-    # Filter the DataFrame based on the "Term" column
-    filtered_df = input_df[input_df['Term'] == terms[0]]
 
 
-    #enrichment_plot = gseapy.gseaplot(rank_metric=ranking, term=terms[0], **input_df[terms[0]])
-    enrichment_plot = gseapy.gseaplot(
-        rank_metric=ranking,
-        term=terms[0],
-        hits=filtered_df['hits'], # how? from where?
-        nes=filtered_df['NES'],
-        pval=filtered_df['NOM p-val'],
-        fdr=filtered_df['FDR q-val'],
-        RES=filtered_df['RES'], # running enrichment score, from where?
-    )
-    return [
-        dict(
-            plot_base64=fig_to_base64(enrichment_plot),
-            key="gsea_enrichment_plot_img",
+    # terms = input_df.Term
+    # # Filter the DataFrame based on the "Term" column
+    # filtered_df = input_df[input_df['Term'] == terms[0]]
+
+    # terms = pre_res.res2d.Term[1:5]
+    # hits = [pre_res.results[t]['hits'] for t in terms]
+    # runes = [pre_res.results[t]['RES'] for t in terms]
+    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
+    #               rank_metric=gs_res.ranking,
+    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
+    #               figsize=(4,5)) # rank_metric=pre_res.ranking
+
+    try:
+        enrichment_plot_axes = gseapy.gseaplot(
+            rank_metric=ranking,
+            term=term,
+            **term_dict,
         )
-    ]
+        return [
+            dict(
+                plot_base64=fig_to_base64(enrichment_plot_axes[0].get_figure()),
+                key="gsea_enrichment_plot_img",
+            )
+        ]
+    except Exception as e:
+        msg = f"Could not plot enrichment plot for term {term}."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+
+
 
     # multipathway
     # gseapy.gseaplot2()
@@ -365,5 +373,3 @@ def gsea_enrichment_plot(
     #               rank_metric=gs_res.ranking,
     #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
     #               figsize=(4,5)) # rank_metric=pre_res.ranking
-
-    pass
