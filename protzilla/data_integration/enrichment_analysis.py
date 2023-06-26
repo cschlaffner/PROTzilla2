@@ -366,7 +366,7 @@ def go_analysis_with_enrichr(
     are returned in a list.
     The enrichment is performed against a background provided as a path (recommended), number or
     name of a biomart dataset. If no background is provided, all genes in the gene sets are used as
-    the background.
+    the background. Up- and down-regulated proteins are analyzed separately and the results are merged.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
@@ -534,6 +534,7 @@ def go_analysis_offline(
     For the analysis a hypergeometric test is used against a background provided as a
     path (recommended) or a number of proteins. If no background is provided, all proteins in
     the protein_sets are used as the background.
+    Up- and down-regulated proteins are analyzed separately and the results are merged.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe

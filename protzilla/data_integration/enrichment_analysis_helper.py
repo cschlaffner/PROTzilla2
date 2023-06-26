@@ -127,6 +127,14 @@ def read_protein_or_gene_sets_file(path):
 
 
 def read_background_file(path):
+    """
+    Reads a file of background proteins or genes.
+    Accepts .csv and .txt files with one protein or gene per line.
+    :param path: path to file
+    :type path: str or None
+    :return: list of background proteins or genes or error message
+    :rtype: list
+    """
     if not path:
         return None
     else:
