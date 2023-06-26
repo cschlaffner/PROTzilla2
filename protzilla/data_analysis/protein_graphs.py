@@ -560,10 +560,12 @@ def _get_start_end_pos_for_matches(
     graph,
     longest_paths,
 ):
-    """
-    DISCLAIMER: Does not account for Variations that skip an AA
-    """
     peptide_mismatches = set(peptide_mismatches)
+
+    import pprint
+
+    print("graph pre matching")
+    pprint.pprint(graph.__dict__)
 
     def _match_on_graph(
         mismatches,
@@ -573,6 +575,7 @@ def _get_start_end_pos_for_matches(
         left_over_peptide,
         node_match_data,
         current_index,
+        match_start_pos,
     ):
         if mismatches > allowed_mismatches:
             return False, {}, mismatches
@@ -584,45 +587,27 @@ def _get_start_end_pos_for_matches(
         # return True, node_match_data, mismatches
         last_index = current_index
         for i, label_aa in enumerate(
-            graph.nodes[current_node]["aminoacid"][current_index:]
+            graph.nodes[current_node]["aminoacid"][match_start_pos:]
         ):
-            print("check node til end")
             if i > len(left_over_peptide) - 1:
                 return True, node_match_data, mismatches
-            print(
-                "i, last index, current_node, left_over_peptide, label_aa, left_over_peptide[i], node_match_data"
-            )
-            print(
-                i,
-                last_index,
-                current_node,
-                left_over_peptide,
-                label_aa,
-                left_over_peptide[i],
-                node_match_data,
-            )
             if label_aa == left_over_peptide[i]:
                 if current_node in node_match_data:
                     node_match_data[current_node] = (
                         node_match_data[current_node][0],
-                        i + current_index,
+                        i,
                     )
                 else:
-                    node_match_data[current_node] = (current_index, current_index)
+                    node_match_data[current_node] = (0, 0)
             else:
                 mismatches += 1
                 if mismatches > allowed_mismatches:
                     return False, {}, mismatches
             last_index = i
-            print("node_match_data post node check")
-            print(node_match_data)
 
         # node is matched til end, peptide not done
         data_from_succ = {}
         for succ in graph.successors(current_node):
-            # if longest_paths[succ] > longest_paths[current_node] + len(
-            #         graph.nodes[current_node]["aminoacid"]
-            # ):
             match, node_match_data, mismatches = _match_on_graph(
                 mismatches,
                 allowed_mismatches,
@@ -631,6 +616,7 @@ def _get_start_end_pos_for_matches(
                 left_over_peptide[last_index + 1 :],
                 node_match_data,
                 current_index + last_index + 1,
+                0,  # match continues (if at all) at start of next node
             )
             if match:
                 data_from_succ[succ] = (match, node_match_data, mismatches)
@@ -653,6 +639,7 @@ def _get_start_end_pos_for_matches(
                 node_match_data={},
                 current_index=match_start_index
                 - longest_paths[graph_index[match_start_index][0][0]],
+                match_start_pos=match_start_index,
             )
             if matched:
                 logger.info(f"matched {peptide} at {match_start_index}")
@@ -676,103 +663,139 @@ def _modify_graph(graph, contig_positions, longest_paths):
     """
     Splits nodes of graph at into new contig nodes defined by the start- and
     end-positions in contig_positions. Adds `match` attribute to nodes, "true" when
-    contig, "false" if not. Sink (__end__) node will end up without `match`-attribute
+    contig, "false" if not. Sink (__end__) current_node will end up without `match`-attribute
 
     :param graph: Protein Graph to be modified
     :type: nx.DiGraph
-    :param contig_positions: Dict from node to contig-positions {node: [(start, end)]}.
+    :param contig_positions: Dict from current_node to contig-positions {current_node: [(start, end)]}.
     :type: dict(list[tuple])
-    :param longest_paths: mapping from node to the longest path to node
+    :param longest_paths: mapping from current_node to the longest path to current_node
     (-> _longest_paths())
     :type: dict
     :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
-    by node attribute `matched`
+    by current_node attribute `matched`
     """
 
-    def _update_new_node_after(node, new_node, neighbors):
-        for neighbor in neighbors:
-            graph.remove_edge(neighbor, node)
-            graph.add_edge(neighbor, new_node)
+    import pprint
+
+    print("contig_positions")
+    pprint.pprint(contig_positions)
 
     def _node_length(node):
         return len(graph.nodes[node]["aminoacid"])
 
     logger.info("updating graph to visualise peptide matches")
-    for node, node_dict in contig_positions.items():
-        positions_list = node_dict["contigs"]
-        old_node = graph.nodes[node].copy()
-        old_node_aminoacids = old_node["aminoacid"]
-        for start, end in positions_list:
-            if start == 0 and _node_length(node) - 1 == end:
-                logger.debug(f"matched full node {node}")
+    for current_node, node_dict in contig_positions.items():
+        contigs = node_dict["contigs"]
+        chars_removed = 0
+        for start, end in contigs:
+            start = start - chars_removed
+            end = end - chars_removed
+            first_node = None
+            second_node = None
+            third_node = None
+            if start == 0 and end == _node_length(current_node) - 1:
+                logger.debug(
+                    f"matched whole current_node {current_node}, contig: ({start, end})"
+                )
                 nx.set_node_attributes(
                     graph,
-                    {
-                        node: {
-                            "aminoacid": graph.nodes[node]["aminoacid"],
-                            "match": "true",
-                        }
-                    },
+                    {current_node: {"match": "true"}},
                 )
                 continue
 
             before_node_id = None
-            before_label = None
-
-            # the start
-            if _node_length(node) > start:
-                before_label = old_node_aminoacids[:start]
+            # check if contig starts at beginning of current_node, if not create before_node
+            if start != 0:
                 before_node_id = f"n{len(graph.nodes)}"
-                graph.add_node(before_node_id, aminoacid=before_label, match="false")
+                before_node_label = graph.nodes[current_node]["aminoacid"][:start]
+                graph.add_node(
+                    before_node_id,
+                    aminoacid=before_node_label,
+                    match="false",
+                )
+                first_node = before_node_id
 
-                predecessors = list(graph.predecessors(node))
-                _update_new_node_after(node, before_node_id, predecessors)
-                longest_paths[before_node_id] = longest_paths[node]
-                longest_paths[node] = longest_paths[before_node_id] + len(before_label)
+            match_node_id = None
+            after_node_label = None
+            # check if after_node is needed, if yes create match current_node
+            if end != _node_length(current_node) - 1:
+                if before_node_id:  # before_node, match_node and after_node
+                    match_node_id = f"n{len(graph.nodes)}"
+                    match_node_label = graph.nodes[current_node]["aminoacid"][
+                        start : end + 1
+                    ]
+                    graph.add_node(
+                        match_node_id,
+                        aminoacid=match_node_label,
+                        match="true",
+                    )
+                    # adopt current_node to be after_node
+                    after_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                    nx.set_node_attributes(
+                        graph,
+                        {
+                            current_node: {
+                                "aminoacid": after_node_label,
+                                "match": "false",
+                            }
+                        },
+                    )
+                    first_node = before_node_id
+                    second_node = match_node_id
+                    third_node = current_node
 
-            # create match node
-            after_node = end < _node_length(node) - 1
-            if not after_node:
-                # no after node -> before node must exist
-                match_label = old_node_aminoacids[start:]
-                match_node_id = node
+                else:  # match_node and after_node
+                    match_node_id = f"n{len(graph.nodes)}"
+                    match_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
+                    graph.add_node(
+                        match_node_id, aminoacid=match_node_label, match="true"
+                    )
+
+                    # adopt current_node to be match/after_node
+                    after_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                    nx.set_node_attributes(
+                        graph,
+                        {
+                            current_node: {
+                                "aminoacid": after_node_label,
+                                "match": "false",
+                            }
+                        },
+                    )
+                    first_node = match_node_id
+                    second_node = None
+                    third_node = current_node
+
+            else:  # before_node and match_node
+                # make current_node match_node
+                match_node_label = graph.nodes[current_node]["aminoacid"][start:]
+
                 nx.set_node_attributes(
                     graph,
-                    {node: {"aminoacid": match_label, "match": "true"}},
+                    {current_node: {"aminoacid": match_node_label, "match": "true"}},
                 )
-            else:
-                match_label = old_node_aminoacids[start : end + 1]
-                match_node_id = f"n{len(graph.nodes)}"
-                graph.add_node(match_node_id, aminoacid=match_label, match="true")
+                first_node = before_node_id
+                second_node = None
+                third_node = current_node
 
-            # adopt edges from predecessors of old node to before or match node
-            # push old node back, position new nodes in front
-            if before_node_id:
-                graph.add_edge(before_node_id, match_node_id)
-                longest_paths[match_node_id] = longest_paths[before_node_id] + len(
-                    before_label
-                )
+            # add edges
+            predecessors = list(graph.predecessors(current_node))
+            for pre in predecessors:
+                graph.remove_edge(pre, current_node)
+                graph.add_edge(pre, first_node)
+            if second_node:
+                graph.add_edge(first_node, second_node)
+                graph.add_edge(second_node, third_node)
             else:
-                predecessors = list(graph.predecessors(node))
-                _update_new_node_after(node, match_node_id, predecessors)
-                longest_paths[match_node_id] = longest_paths[node]
-                longest_paths[node] = longest_paths[match_node_id] + len(match_label)
+                graph.add_edge(first_node, third_node)
 
-            if after_node:
-                after_label = old_node_aminoacids[end + 1 :]
+            chars_removed += len(graph.nodes[first_node]["aminoacid"])
+            if second_node:
+                chars_removed += len(graph.nodes[second_node]["aminoacid"])
 
-                nx.set_node_attributes(
-                    graph,
-                    {node: {"aminoacid": after_label, "match": "false"}},
-                )
-                graph.add_edge(match_node_id, node)
-                longest_paths[node] = longest_paths[match_node_id] + len(match_label)
-            else:
-                # elif match_node_id != node:
-                successors = list(graph.successors(node))
-                for successor in successors:
-                    graph.remove_edge(node, successor)
-                    graph.add_edge(match_node_id, successor)
+            print("chars removed")
+            print(chars_removed)
 
     return graph
 

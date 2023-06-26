@@ -3,7 +3,6 @@ import io
 import json
 import logging
 from pathlib import Path
-from shutil import rmtree
 
 import numpy as np
 import pandas as pd
@@ -70,7 +69,7 @@ def tests_folder_name():
 def run_test_folder(tests_folder_name):
     Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
     yield
-    rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
+    # rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
 
 
 @pytest.fixture
@@ -97,6 +96,15 @@ def error_logger():
     from ..protzilla.constants.logging import logger
 
     logger.setLevel(logging.ERROR)
+    yield
+    logger.setLevel(logging.INFO)
+
+
+@pytest.fixture(scope="function")
+def debug_logger():
+    from ..protzilla.constants.logging import logger
+
+    logger.setLevel(logging.DEBUG)
     yield
     logger.setLevel(logging.INFO)
 

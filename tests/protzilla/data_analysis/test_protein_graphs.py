@@ -259,8 +259,10 @@ def test_peptide_df() -> pd.DataFrame:
 
 @pytest.fixture()
 def integration_test_peptides() -> pd.DataFrame:
+    #              0  3  6
     # Protein Seq: ABCDEGABCDET
     # Variation:      V
+    # Missing:        _
     peptide_protein_list = (
         ["Sample01", "test_protein_variation", "ABC", 123123.0, 0.87452],
         ["Sample02", "test_protein_variation", "ABC", 234, 0.87452],
@@ -295,7 +297,7 @@ def integration_test_peptides() -> pd.DataFrame:
         ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
         ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
         ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
-        [""],
+        ["Sample01", "test_protein_variation_shortcut", "ABCEGA", 93478.0, 0.98734],
     )
 
     peptide_df = pd.DataFrame(
@@ -1000,7 +1002,7 @@ def test_create_contigs_dict_2_pep_multi_match():
 def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     # peptide: ABC
     longest_paths = {"1": 0}
-    contigs = {"1": [(0, 2)]}
+    contigs = {"1": {"contigs": [(0, 2)]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABC")
@@ -1017,6 +1019,10 @@ def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     )
 
     graph = _modify_graph(graph, contigs, longest_paths)
+
+    pprint_graphs(graph, planned_graph)
+
+    assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1027,7 +1033,7 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
 
     # peptide EFG, ref_seq: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": [(4, 6)]}
+    contigs = {"1": {"contigs": [(4, 6)]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABCD", match="false")
@@ -1037,13 +1043,16 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
     nx.set_node_attributes(planned_graph, {"1": {"aminoacid": "EFG", "match": "true"}})
 
     graph = _modify_graph(graph, contigs, longest_paths)
+
+    pprint_graphs(graph, planned_graph)
+    assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
 def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
     # peptide: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": [(0, 6)]}
+    contigs = {"1": {"contigs": [(0, 6)]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     nx.set_node_attributes(
@@ -1065,14 +1074,14 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
     #                     0   4
     # "2": {"aminoacid": "H"},
     # "3": {"aminoacid": "I"},
-    #                     7
+    #                     0
     # "4": {"aminoacid": "JKABCDLMNOP"},
-    #                     8 10    16
+    #                     0 2   6 8
     # "5": {"aminoacid": "__end__"},
     # peptides: ABCD, NOP
 
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
-    contigs = {"1": [(0, 3)], "4": [(10, 13), (16, 18)]}
+    contigs = {"1": {"contigs": [(0, 3)]}, "4": {"contigs": [(2, 5), (8, 10)]}}
 
     graph, _, _ = multi_route_long_nodes
     planned_graph = graph.copy()
@@ -1102,6 +1111,10 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
     )
 
     graph = _modify_graph(graph, contigs, longest_paths)
+
+    pprint_graphs(graph, planned_graph)
+
+    assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1123,7 +1136,11 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
 
     graph, _, _ = multi_route_long_nodes
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
-    contigs = {"1": [(4, 6)], "2": [(7, 7)], "4": [(8, 9)]}
+    contigs = {
+        "1": {"contigs": [(4, 6)]},
+        "2": {"contigs": [(0, 0)]},
+        "4": {"contigs": [(0, 1)]},
+    }
 
     planned_graph = graph.copy()
     planned_graph.add_node("n6", aminoacid="ABCD", match="false")
@@ -1234,7 +1251,7 @@ def test_peptides_to_isoform_integration_test(
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
-    assert out_dict["peptide_mismatches"] == ["DETYYY"]
+    assert out_dict["peptide_mismatches"] == ["DETYYY", "ABCEGA"]
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
@@ -1268,17 +1285,18 @@ def test_peptides_to_isoform_integration_test(
 def test_peptides_to_isoform_integration_test_shortcut(
     integration_test_peptides,
     test_protein_variation_graph,
-    critical_logger,
+    debug_logger,
     tests_folder_name,
 ):
-    run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
+    run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_shortcut"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
-    test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
+
+    protein_id = "test_protein_variation_shortcut"
+    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
+    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
     shutil.copy(test_protein_path, test_protein_destination)
 
-    protein_id = "test_protein_variation"
     out_dict = peptides_to_isoform(
         peptide_df=integration_test_peptides,
         protein_id=protein_id,
@@ -1289,36 +1307,42 @@ def test_peptides_to_isoform_integration_test_shortcut(
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
-    assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
-    assert out_dict["peptide_mismatches"] == ["DETYYY"]
+    assert list(out_dict["peptide_matches"]) == ["ABCEGA"]
+    assert out_dict["peptide_mismatches"] == []
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EG", match="true")
-    planned_graph.add_node("n7", aminoacid="ABC", match="true")
+    planned_graph.add_node("n6", aminoacid="EGA", match="true")
 
     planned_graph.add_edge("n1", "n6")
     planned_graph.add_edge("n3", "n6")
-    planned_graph.add_edge("n6", "n7")
-    planned_graph.add_edge("n7", "n4")
+    planned_graph.add_edge("n5", "n6")
+    planned_graph.add_edge("n6", "n4")
     planned_graph.remove_edge("n1", "n4")
     planned_graph.remove_edge("n3", "n4")
 
     nx.set_node_attributes(
         planned_graph,
         {
-            "n4": {"aminoacid": "DET", "match": "true"},
-            "n5": {"match": "true"},
-            "n6": {"match": "false"},
-            "n7": {"match": "true"},
+            "n0": {"accession": "test_protein_variation_shortcut"},
+            "n1": {"accession": "test_protein_variation_shortcut"},
+            "n2": {"accession": "test_protein_variation_shortcut"},
+            "n3": {"accession": "test_protein_variation_shortcut"},
+            "n4": {
+                "aminoacid": "BCDET",
+                "match": "false",
+                "accession": "test_protein_variation_shortcut",
+            },
+            "n5": {"match": "true", "accession": "test_protein_variation_shortcut"},
+            "n6": {"match": "true"},
         },
     )
 
     pprint_graphs(created_graph, planned_graph)
 
-    assert created_graph.nodes == planned_graph.nodes
-    assert nx.utils.graphs_equal(created_graph, planned_graph)
+    assert planned_graph.nodes == created_graph.nodes
+    assert nx.utils.graphs_equal(planned_graph, created_graph)
 
 
 def pprint_graphs(graph, planned_graph):
