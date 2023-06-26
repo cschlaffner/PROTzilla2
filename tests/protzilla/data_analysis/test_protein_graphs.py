@@ -295,6 +295,7 @@ def integration_test_peptides() -> pd.DataFrame:
         ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
         ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
         ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
+        [""],
     )
 
     peptide_df = pd.DataFrame(
@@ -1257,6 +1258,64 @@ def test_peptides_to_isoform_integration_test(
             "n7": {"match": "true"},
         },
     )
+
+    pprint_graphs(created_graph, planned_graph)
+
+    assert created_graph.nodes == planned_graph.nodes
+    assert nx.utils.graphs_equal(created_graph, planned_graph)
+
+
+def test_peptides_to_isoform_integration_test_shortcut(
+    integration_test_peptides,
+    test_protein_variation_graph,
+    critical_logger,
+    tests_folder_name,
+):
+    run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
+    run_path = RUNS_PATH / run_name
+    (run_path / "graphs").mkdir(parents=True, exist_ok=True)
+    test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
+    test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
+    shutil.copy(test_protein_path, test_protein_destination)
+
+    protein_id = "test_protein_variation"
+    out_dict = peptides_to_isoform(
+        peptide_df=integration_test_peptides,
+        protein_id=protein_id,
+        run_name=run_name,
+        k=3,  # k = 3 for easier test data creation
+    )
+
+    planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
+    assert out_dict["graph_path"] == str(planned_modified_graph_path)
+    assert Path(planned_modified_graph_path).exists()
+    assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
+    assert out_dict["peptide_mismatches"] == ["DETYYY"]
+
+    created_graph = nx.read_graphml(out_dict["graph_path"])
+
+    planned_graph = test_protein_variation_graph.copy()
+    planned_graph.add_node("n6", aminoacid="EG", match="true")
+    planned_graph.add_node("n7", aminoacid="ABC", match="true")
+
+    planned_graph.add_edge("n1", "n6")
+    planned_graph.add_edge("n3", "n6")
+    planned_graph.add_edge("n6", "n7")
+    planned_graph.add_edge("n7", "n4")
+    planned_graph.remove_edge("n1", "n4")
+    planned_graph.remove_edge("n3", "n4")
+
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "n4": {"aminoacid": "DET", "match": "true"},
+            "n5": {"match": "true"},
+            "n6": {"match": "false"},
+            "n7": {"match": "true"},
+        },
+    )
+
+    pprint_graphs(created_graph, planned_graph)
 
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)

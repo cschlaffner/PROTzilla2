@@ -100,6 +100,8 @@ def peptides_to_isoform(
         graph_index=graph_index,
         peptide_mismatches=peptide_mismatches,
         allowed_mismatches=allowed_mismatches,
+        graph=protein_graph,
+        longest_paths=longest_paths,
     )
     contigs = _create_contigs_dict(peptide_match_node_start_end)
     modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
@@ -518,6 +520,9 @@ def _create_contigs_dict(node_start_end: dict):
                     if peptide not in node_match_data[node]["peptides"]:
                         node_match_data[node]["peptides"].append(peptide)
 
+    print("node_match_data in contigs")
+    print(node_match_data)
+
     for node in node_match_data:
         node_match_data[node]["match_locations"] = sorted(
             node_match_data[node]["match_locations"]
@@ -541,43 +546,130 @@ def _create_contigs_dict(node_start_end: dict):
             "peptides": node_dict["peptides"],
         }
 
+    print("node_mod in contigs")
+    print(node_mod)
+
     return node_mod
 
 
 def _get_start_end_pos_for_matches(
-    potential_peptide_matches, graph_index, peptide_mismatches, allowed_mismatches
+    potential_peptide_matches,
+    graph_index,
+    peptide_mismatches,
+    allowed_mismatches,
+    graph,
+    longest_paths,
 ):
+    """
+    DISCLAIMER: Does not account for Variations that skip an AA
+    """
     peptide_mismatches = set(peptide_mismatches)
-    peptide_match_node_start_end = {}
+
+    def _match_on_graph(
+        mismatches,
+        allowed_mismatches,
+        graph,
+        current_node,
+        left_over_peptide,
+        node_match_data,
+        current_index,
+    ):
+        if mismatches > allowed_mismatches:
+            return False, {}, mismatches
+        if not left_over_peptide:
+            return True, node_match_data, mismatches
+
+        # check if leftover peptide and rest of aminoacids in current node match
+        # if so, add node and start and end position to node_match_data,
+        # return True, node_match_data, mismatches
+        last_index = current_index
+        for i, label_aa in enumerate(
+            graph.nodes[current_node]["aminoacid"][current_index:]
+        ):
+            print("check node til end")
+            if i > len(left_over_peptide) - 1:
+                return True, node_match_data, mismatches
+            print(
+                "i, last index, current_node, left_over_peptide, label_aa, left_over_peptide[i], node_match_data"
+            )
+            print(
+                i,
+                last_index,
+                current_node,
+                left_over_peptide,
+                label_aa,
+                left_over_peptide[i],
+                node_match_data,
+            )
+            if label_aa == left_over_peptide[i]:
+                if current_node in node_match_data:
+                    node_match_data[current_node] = (
+                        node_match_data[current_node][0],
+                        i + current_index,
+                    )
+                else:
+                    node_match_data[current_node] = (current_index, current_index)
+            else:
+                mismatches += 1
+                if mismatches > allowed_mismatches:
+                    return False, {}, mismatches
+            last_index = i
+            print("node_match_data post node check")
+            print(node_match_data)
+
+        # node is matched til end, peptide not done
+        data_from_succ = {}
+        for succ in graph.successors(current_node):
+            # if longest_paths[succ] > longest_paths[current_node] + len(
+            #         graph.nodes[current_node]["aminoacid"]
+            # ):
+            match, node_match_data, mismatches = _match_on_graph(
+                mismatches,
+                allowed_mismatches,
+                graph,
+                succ,
+                left_over_peptide[last_index + 1 :],
+                node_match_data,
+                current_index + last_index + 1,
+            )
+            if match:
+                data_from_succ[succ] = (match, node_match_data, mismatches)
+        if data_from_succ:
+            return min(data_from_succ.items(), key=lambda item: item[1][2])[1]
+        else:
+            return False, {}, mismatches
+
+    peptide_match_info = {}
     for peptide, indices in potential_peptide_matches.items():
         peptide_match_nodes = {}  # store positions of matches for each node
         for match_start_index in indices:  # start index is of ref_index
-            mismatch_counter = 0
-            position_match = {}  # store start and end position of match for each node
-            for i in range(match_start_index, match_start_index + len(peptide)):
-                for node, aa in graph_index[i]:  # aa is Amino Acid
-                    if aa == peptide[i - match_start_index]:
-                        if node in position_match:
-                            if i > position_match[node][1]:
-                                position_match[node][1] = i
-                        else:
-                            position_match[node] = [i, i]
-                        break
-                else:  # if aa of peptide wasn't matched to any node
-                    mismatch_counter += 1
-                if mismatch_counter > allowed_mismatches:
-                    break
+            # len(graph_index[match_start_index]) must be 1 -> match never starts on VAR
+            matched, node_match_data, mismatches = _match_on_graph(
+                mismatches=0,
+                allowed_mismatches=allowed_mismatches,
+                graph=graph,
+                current_node=graph_index[match_start_index][0][0],
+                left_over_peptide=peptide,
+                node_match_data={},
+                current_index=match_start_index
+                - longest_paths[graph_index[match_start_index][0][0]],
+            )
+            if matched:
+                logger.info(f"matched {peptide} at {match_start_index}")
+                logger.info(f"match data: {node_match_data}")
+                peptide_match_nodes[match_start_index] = node_match_data
             else:
-                # if mismatch_counter <= allowed_mismatches after full peptide
-                # was checked
-                peptide_match_nodes[match_start_index] = position_match
-
-        if peptide_match_nodes:  # might not be robust enough
-            peptide_match_node_start_end[peptide] = peptide_match_nodes
+                logger.info(f"mismatched start pos {match_start_index} for {peptide}")
+        if peptide_match_nodes:
+            peptide_match_info[peptide] = peptide_match_nodes
         else:
             peptide_mismatches.add(peptide)
 
-    return peptide_match_node_start_end, list(peptide_mismatches)
+    print("#############")
+    print("peptide_match_info")
+    print(peptide_match_info)
+
+    return peptide_match_info, list(peptide_mismatches)
 
 
 def _modify_graph(graph, contig_positions, longest_paths):
@@ -599,8 +691,8 @@ def _modify_graph(graph, contig_positions, longest_paths):
 
     def _update_new_node_after(node, new_node, neighbors):
         for neighbor in neighbors:
-            graph.add_edge(neighbor, new_node)
             graph.remove_edge(neighbor, node)
+            graph.add_edge(neighbor, new_node)
 
     def _node_length(node):
         return len(graph.nodes[node]["aminoacid"])
@@ -609,13 +701,9 @@ def _modify_graph(graph, contig_positions, longest_paths):
     for node, node_dict in contig_positions.items():
         positions_list = node_dict["contigs"]
         old_node = graph.nodes[node].copy()
-        old_node_start = longest_paths[node]
         old_node_aminoacids = old_node["aminoacid"]
         for start, end in positions_list:
-            if (
-                longest_paths[node] == start
-                and longest_paths[node] + _node_length(node) - 1 == end
-            ):
+            if start == 0 and _node_length(node) - 1 == end:
                 logger.debug(f"matched full node {node}")
                 nx.set_node_attributes(
                     graph,
@@ -630,10 +718,10 @@ def _modify_graph(graph, contig_positions, longest_paths):
 
             before_node_id = None
             before_label = None
-            if start > longest_paths[node]:
-                s = longest_paths[node] - old_node_start
-                e = start - old_node_start
-                before_label = old_node_aminoacids[s:e]
+
+            # the start
+            if _node_length(node) > start:
+                before_label = old_node_aminoacids[:start]
                 before_node_id = f"n{len(graph.nodes)}"
                 graph.add_node(before_node_id, aminoacid=before_label, match="false")
 
@@ -643,25 +731,17 @@ def _modify_graph(graph, contig_positions, longest_paths):
                 longest_paths[node] = longest_paths[before_node_id] + len(before_label)
 
             # create match node
-            after_node = not (
-                before_node_id
-                and end
-                == longest_paths[node] + _node_length(node) - len(before_label) - 1
-            )
+            after_node = end < _node_length(node) - 1
             if not after_node:
-                # match node is rest of node
-                s = longest_paths[node] - old_node_start
-                e = end - old_node_start + 1
-                match_label = old_node_aminoacids[s:e]
+                # no after node -> before node must exist
+                match_label = old_node_aminoacids[start:]
                 match_node_id = node
                 nx.set_node_attributes(
                     graph,
                     {node: {"aminoacid": match_label, "match": "true"}},
                 )
             else:
-                s = longest_paths[node] - old_node_start
-                e = end - old_node_start + 1
-                match_label = old_node_aminoacids[s:e]
+                match_label = old_node_aminoacids[start : end + 1]
                 match_node_id = f"n{len(graph.nodes)}"
                 graph.add_node(match_node_id, aminoacid=match_label, match="true")
 
@@ -679,23 +759,20 @@ def _modify_graph(graph, contig_positions, longest_paths):
                 longest_paths[node] = longest_paths[match_node_id] + len(match_label)
 
             if after_node:
-                if end < longest_paths[node] + _node_length(node) - 1:
-                    s = longest_paths[match_node_id] - old_node_start + len(match_label)
-                    after_label = old_node_aminoacids[s:]
+                after_label = old_node_aminoacids[end + 1 :]
 
-                    nx.set_node_attributes(
-                        graph,
-                        {node: {"aminoacid": after_label, "match": "false"}},
-                    )
-                    graph.add_edge(match_node_id, node)
-                    longest_paths[node] = longest_paths[match_node_id] + len(
-                        match_label
-                    )
-                else:
-                    successors = list(graph.successors(node))
-                    for successor in successors:
-                        graph.add_edge(match_node_id, successor)
-                        graph.remove_edge(node, successor)
+                nx.set_node_attributes(
+                    graph,
+                    {node: {"aminoacid": after_label, "match": "false"}},
+                )
+                graph.add_edge(match_node_id, node)
+                longest_paths[node] = longest_paths[match_node_id] + len(match_label)
+            else:
+                # elif match_node_id != node:
+                successors = list(graph.successors(node))
+                for successor in successors:
+                    graph.remove_edge(node, successor)
+                    graph.add_edge(match_node_id, successor)
 
     return graph
 
