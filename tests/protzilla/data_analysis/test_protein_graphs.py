@@ -17,11 +17,11 @@ from protzilla.data_analysis.protein_graphs import (
     _create_protein_variation_graph,
     _create_ref_seq_index,
     _get_peptides,
+    _get_pos_potential_matches,
     _get_ref_seq,
-    _get_start_end_pos_for_matches,
     _longest_paths,
-    _match_peptides,
     _modify_graph,
+    _potential_peptide_matches,
     peptides_to_isoform,
 )
 from protzilla.utilities.utilities import random_string
@@ -622,7 +622,7 @@ def test_get_ref_seq_no_seq_len():
         _get_ref_seq(str(protein_path))
 
 
-def test_match_peptides_k5():
+def test_potential_peptide_matches_k5():
     peptides = ["ABCDEGA", "BCDET", "CDE"]
     allowed_mismatches = 2
     k = 5
@@ -640,8 +640,8 @@ def test_match_peptides_k5():
         "T": [11],
     }
     ref_seq = "ABCDEGABCDET"
-    peptide_matches, peptide_mismatches = _match_peptides(
-        allowed_mismatches, k, peptides, ref_seq_index, ref_seq
+    peptide_matches, peptide_mismatches = _potential_peptide_matches(
+        allowed_mismatches, k, peptides, ref_seq_index, len(ref_seq)
     )
 
     planned_peptide_matches = {
@@ -654,7 +654,7 @@ def test_match_peptides_k5():
     assert peptide_mismatches == planned_peptide_mismatches
 
 
-def test_match_peptides_k3():
+def test_potential_peptide_matches_k3():
     peptides = ["ABCDEGA", "BCDET", "CDE"]
     allowed_mismatches = 2
     k = 3
@@ -670,8 +670,8 @@ def test_match_peptides_k3():
         "T": [11],
     }
     ref_seq = "ABCDEGABCDET"
-    peptide_matches, peptide_mismatches = _match_peptides(
-        allowed_mismatches, k, peptides, ref_seq_index, ref_seq
+    peptide_matches, peptide_mismatches = _potential_peptide_matches(
+        allowed_mismatches, k, peptides, ref_seq_index, len(ref_seq)
     )
 
     planned_peptide_matches = {
@@ -685,8 +685,8 @@ def test_match_peptides_k3():
     assert peptide_mismatches == planned_peptide_mismatches
 
 
-def test_match_peptides_mismatches_k3():
-    peptides = ["ABCDEGA", "BCDET", "BCDETXXX", "BCDETXX", "CDE", "ABDEF"]
+def test_potential_peptide_matches_mismatches_k3():
+    peptides = ["ABCDEGA", "BCDET", "CDE", "ABDEF"]
     allowed_mismatches = 2
     k = 3
     ref_seq_index = {
@@ -701,8 +701,8 @@ def test_match_peptides_mismatches_k3():
         "T": [11],
     }
     ref_seq = "ABCDEGABCDET"
-    peptide_matches, peptide_mismatches = _match_peptides(
-        allowed_mismatches, k, peptides, ref_seq_index, ref_seq
+    peptide_matches, peptide_mismatches = _potential_peptide_matches(
+        allowed_mismatches, k, peptides, ref_seq_index, len(ref_seq)
     )
 
     planned_peptide_matches = {
@@ -710,26 +710,26 @@ def test_match_peptides_mismatches_k3():
         "BCDET": [1, 7],
         "CDE": [2, 8],
     }
-    planned_peptide_mismatches = ["ABDEF", "BCDETXX", "BCDETXXX"]
+    planned_peptide_mismatches = ["ABDEF"]
 
     assert peptide_matches == planned_peptide_matches
     assert peptide_mismatches == planned_peptide_mismatches
 
 
-def test_match_peptides_k0():
+def test_potential_peptide_matches_k0():
     k = 0
     error_msg = f"k must be positive integer, but is {k}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _match_peptides(
+        _potential_peptide_matches(
             allowed_mismatches=2,
             k=k,
             peptides=[""],
             ref_index={},
-            ref_seq="ABCDEGABCDET",
+            seq_len=len("ABCDEGABCDET"),
         )
 
 
-def test_match_peptides_k_str():
+def test_potential_peptide_matches_k_str():
     peptides = [""]
     allowed_mismatches = 2
     k = "test_str"
@@ -737,10 +737,12 @@ def test_match_peptides_k_str():
     ref_seq = "ABCDEGABCDET"
     error_msg = f"k must be positive integer, but is {k}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
+        _potential_peptide_matches(
+            allowed_mismatches, k, peptides, ref_seq_index, len(ref_seq)
+        )
 
 
-def test_match_peptides_allowed_mismatches_negative():
+def test_potential_peptide_matches_allowed_mismatches_negative():
     peptides = [""]
     allowed_mismatches = -1
     k = 5
@@ -750,37 +752,9 @@ def test_match_peptides_allowed_mismatches_negative():
         f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"
     )
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _match_peptides(allowed_mismatches, k, peptides, ref_seq_index, ref_seq)
-
-
-def test_match_peptides_early_mismatch_late_match():
-    peptides = ["BCDXXX"]
-    allowed_mismatches = 2
-    k = 3
-    ref_seq_index = {
-        "ABC": [0, 6],
-        "BCD": [1, 7],
-        "CDE": [2, 8],
-        "DEG": [3],
-        "EGA": [4],
-        "GAB": [5],
-        "DEX": [9],
-        "EXX": [10],
-        "TX": [11],
-        "X": [12],
-    }
-    ref_seq = "ABCDEGABCDEXX"
-    peptide_matches, peptide_mismatches = _match_peptides(
-        allowed_mismatches, k, peptides, ref_seq_index, ref_seq
-    )
-
-    planned_peptide_matches = {
-        "BCDXXX": [7],
-    }
-    planned_peptide_mismatches = []
-
-    assert peptide_matches == planned_peptide_matches
-    assert peptide_mismatches == planned_peptide_mismatches
+        _potential_peptide_matches(
+            allowed_mismatches, k, peptides, ref_seq_index, len(ref_seq)
+        )
 
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
@@ -855,7 +829,8 @@ def test_create_protein_variation_graph_bad_request(
     )
 
 
-def test_get_start_end_pos_for_matches_simple():
+def test_get_pos_potential_matches_simple(simple_graph):
+    graph, _, _ = simple_graph
     graph_index_simple = [
         [("1", "A")],
         [("1", "B")],
@@ -865,14 +840,24 @@ def test_get_start_end_pos_for_matches_simple():
         [("1", "F")],
         [("1", "G")],
     ]
-    peptide_matches = {"ABC": [0], "EFG": [4]}
-    planned_start_end = {"1": {0: 2, 4: 6}}
+    potential_matches = {"ABC": [0], "EFG": [4]}
+    planned_match_info = {"ABC": {0: {"1": (0, 2)}}, "EFG": {4: {"1": (4, 6)}}}
 
-    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index_simple)
-    assert planned_start_end == node_start_end
+    match_info, peptide_mismatches = _get_pos_potential_matches(
+        potential_peptide_matches=potential_matches,
+        graph_index=graph_index_simple,
+        peptide_mismatches=[],
+        allowed_mismatches=2,
+        graph=graph,
+        longest_paths={"1": 0},
+    )
+    assert planned_match_info == match_info
+    assert peptide_mismatches == []
 
 
-def test_get_start_end_pos_for_matches_1_pep_2_match():
+def test_get_pos_potential_matches_1_pep_2_match(multi_route):
+    graph, _, _ = multi_route
+    graph.nodes["4"]["aminoacid"] = "AB"
     graph_index_mulitroute = [
         [("1", "A")],
         [("1", "B")],
@@ -881,16 +866,29 @@ def test_get_start_end_pos_for_matches_1_pep_2_match():
         [("4", "A")],
         [("4", "B")],
     ]
-    peptide_matches = {"AB": [0, 4]}
-    planned_s_e = {"1": {0: 1}, "4": {4: 5}}
+    potential_matches = {"AB": [0, 4]}
+    planned_match_info = {"AB": {0: {"1": (0, 1)}, 4: {"4": (0, 1)}}}
 
-    node_start_end = _get_start_end_pos_for_matches(
-        peptide_matches, graph_index_mulitroute
+    match_info, peptide_mismatches = _get_pos_potential_matches(
+        potential_peptide_matches=potential_matches,
+        graph_index=graph_index_mulitroute,
+        peptide_mismatches=[],
+        allowed_mismatches=2,
+        graph=graph,
+        longest_paths={"1": 0, "2": 3, "3": 3, "4": 4},
     )
-    assert planned_s_e == node_start_end
+    assert planned_match_info == match_info
+    assert peptide_mismatches == []
 
 
-def test_get_start_end_pos_for_matches_1_pep_2_match_same_node():
+def test_get_pos_potential_matches_1_pep_2_match_same_node():
+    graph = nx.DiGraph()
+    graph.add_node("0", aminoacid="__start__")
+    graph.add_node("1", aminoacid="ABCDEFGABCD")
+    graph.add_node("2", aminoacid="__end__")
+    graph.add_edge("0", "1")
+    graph.add_edge("1", "2")
+
     graph_index = [
         [("1", "A")],
         [("1", "B")],
@@ -904,64 +902,72 @@ def test_get_start_end_pos_for_matches_1_pep_2_match_same_node():
         [("1", "C")],
         [("1", "D")],
     ]
-    peptide_matches = {"ABCD": [0, 7]}
-    planned_s_e = {"1": {0: 3, 7: 10}}
+    potential_matches = {"ABCD": [0, 7]}
+    planned_match_info = {"ABCD": {0: {"1": (0, 3)}, 7: {"1": (7, 10)}}}
 
-    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
-    assert planned_s_e == node_start_end
+    match_info, peptide_mismatches = _get_pos_potential_matches(
+        potential_peptide_matches=potential_matches,
+        graph_index=graph_index,
+        peptide_mismatches=[],
+        allowed_mismatches=2,
+        graph=graph,
+        longest_paths={"1": 0},
+    )
+    assert planned_match_info == match_info
+    assert peptide_mismatches == []
 
 
-def test_get_start_end_pos_for_matches_2_pep_multi_match():
+def test_get_pos_potential_matches_variation_matching(multi_route):
+    graph, _, _ = multi_route
+    graph.nodes["4"]["aminoacid"] = "AB"
     graph_index = [
         [("1", "A")],
         [("1", "B")],
         [("1", "C")],
-        [("1", "D")],
-        [("1", "E")],
-        [("1", "F")],
-        [("1", "G")],
-        [("1", "A")],
-        [("1", "B")],
-        [("1", "C")],
-        [("1", "D")],
         [("2", "D"), ("3", "E")],
         [("4", "A")],
         [("4", "B")],
-        [("4", "C")],
-        [("4", "D")],
-        [("4", "E")],
+    ]
+    potential_matches = {"ABCDA": [0]}
+    planned_match_info = {"ABCDA": {0: {"1": (0, 2), "2": (0, 0), "4": (0, 0)}}}
+
+    match_info, peptide_mismatches = _get_pos_potential_matches(
+        potential_peptide_matches=potential_matches,
+        graph_index=graph_index,
+        peptide_mismatches=[],
+        allowed_mismatches=2,
+        graph=graph,
+        longest_paths={"1": 0, "2": 3, "3": 3, "4": 4},
+    )
+    assert planned_match_info == match_info
+    assert peptide_mismatches == []
+
+
+def test_get_pos_potential_matches_shortcut(multi_route_shortcut):
+    graph, _, _ = multi_route_shortcut
+    graph.nodes["4"]["aminoacid"] = "FGH"
+    graph_index = [
+        [("1", "A")],
+        [("1", "B")],
+        [("1", "C")],
+        [("2", "D"), ("3", "E")],
         [("4", "F")],
         [("4", "G")],
-        [("4", "A")],
-        [("4", "B")],
-        [("4", "C")],
-        [("4", "D")],
+        [("4", "H")],
     ]
-    peptide_matches = {"ABCD": [0, 7, 12, 19], "FGA": [5, 17]}
-    planned_s_e = {
-        "1": {0: 3, 7: 10, 5: 7},
-        "4": {12: 15, 19: 22, 17: 19},
-    }
+    potential_matches = {"ABCFG": [0]}
+    planned_match_info = {"ABCFG": {0: {"1": (0, 2), "4": (0, 1)}}}
 
-    node_start_end = _get_start_end_pos_for_matches(peptide_matches, graph_index)
-    assert planned_s_e == node_start_end
-
-
-def test_get_start_end_pos_for_matches_variation_matching():
-    graph_index = [
-        [("1", "A")],
-        [("1", "B")],
-        [("1", "C")],
-        [("2", "D"), ("3", "E")],
-        [("4", "A")],
-        [("4", "B")],
-    ]
-    peptide_matches = {"ABCD": [0]}
-
-    with pytest.raises(
-        NotImplementedError, match="Variation matching not implemented yet"
-    ):
-        _get_start_end_pos_for_matches(peptide_matches, graph_index)
+    match_info, peptide_mismatches = _get_pos_potential_matches(
+        potential_peptide_matches=potential_matches,
+        graph_index=graph_index,
+        peptide_mismatches=[],
+        allowed_mismatches=2,
+        graph=graph,
+        longest_paths={"1": 0, "2": 3, "3": 3, "4": 4},
+    )
+    assert planned_match_info == match_info
+    assert peptide_mismatches == []
 
 
 def test_create_contigs_dict_simple():
@@ -1286,7 +1292,7 @@ def test_peptides_to_isoform_integration_test(
 def test_peptides_to_isoform_integration_test_shortcut(
     integration_test_peptides,
     test_protein_variation_graph,
-    debug_logger,
+    critical_logger,
     tests_folder_name,
 ):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_shortcut"

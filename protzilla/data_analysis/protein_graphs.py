@@ -87,15 +87,15 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    potential_peptide_matches, peptide_mismatches = _match_peptides(
+    potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
         allowed_mismatches=allowed_mismatches,
         k=k,
         peptides=peptides,
         ref_index=ref_index,
-        ref_seq=ref_seq,
+        seq_len=seq_len,
     )
 
-    peptide_match_node_start_end, peptide_mismatches = _get_start_end_pos_for_matches(
+    peptide_match_node_start_end, peptide_mismatches = _get_pos_potential_matches(
         potential_peptide_matches=potential_peptide_matches,
         graph_index=graph_index,
         peptide_mismatches=peptide_mismatches,
@@ -430,8 +430,8 @@ def _get_ref_seq(protein_path: str) -> (str, int):
     return ref_seq, seq_len
 
 
-def _match_peptides(
-    allowed_mismatches: int, k: int, peptides: list, ref_index: dict, ref_seq: str
+def _potential_peptide_matches(
+    allowed_mismatches: int, k: int, peptides: list, ref_index: dict, seq_len: int
 ):
     """
     TODO: out of date! -> update
@@ -463,7 +463,6 @@ def _match_peptides(
     logger.debug("Matching peptides to reference sequence")
     potential_peptide_matches = {}
     peptide_mismatches = set()
-    seq_len = len(ref_seq)
     for peptide in peptides:
         kmer = peptide[:k]
         matched_starts = []
@@ -520,9 +519,6 @@ def _create_contigs_dict(node_start_end: dict):
                     if peptide not in node_match_data[node]["peptides"]:
                         node_match_data[node]["peptides"].append(peptide)
 
-    print("node_match_data in contigs")
-    print(node_match_data)
-
     for node in node_match_data:
         node_match_data[node]["match_locations"] = sorted(
             node_match_data[node]["match_locations"]
@@ -546,13 +542,10 @@ def _create_contigs_dict(node_start_end: dict):
             "peptides": node_dict["peptides"],
         }
 
-    print("node_mod in contigs")
-    print(node_mod)
-
     return node_mod
 
 
-def _get_start_end_pos_for_matches(
+def _get_pos_potential_matches(
     potential_peptide_matches,
     graph_index,
     peptide_mismatches,
@@ -562,11 +555,6 @@ def _get_start_end_pos_for_matches(
 ):
     peptide_mismatches = set(peptide_mismatches)
 
-    import pprint
-
-    print("graph pre matching")
-    pprint.pprint(graph.__dict__)
-
     def _match_on_graph(
         mismatches,
         allowed_mismatches,
@@ -575,7 +563,6 @@ def _get_start_end_pos_for_matches(
         left_over_peptide,
         node_match_data,
         current_index,
-        match_start_pos,
     ):
         if mismatches > allowed_mismatches:
             return False, {}, mismatches
@@ -586,19 +573,21 @@ def _get_start_end_pos_for_matches(
         # if so, add node and start and end position to node_match_data,
         # return True, node_match_data, mismatches
         last_index = current_index
+        added_nodes = []
         for i, label_aa in enumerate(
             graph.nodes[current_node]["aminoacid"][current_index:]
         ):
             if i > len(left_over_peptide) - 1:
                 return True, node_match_data, mismatches
             if label_aa == left_over_peptide[i]:
-                if current_node in node_match_data:
+                if current_node in added_nodes:
                     node_match_data[current_node] = (
                         node_match_data[current_node][0],
                         node_match_data[current_node][1] + 1,
                     )
                 else:
                     node_match_data[current_node] = (current_index, current_index)
+                    added_nodes.append(current_node)
             else:
                 mismatches += 1
                 if mismatches > allowed_mismatches:
@@ -616,7 +605,6 @@ def _get_start_end_pos_for_matches(
                 left_over_peptide[last_index + 1 :],
                 node_match_data,
                 0,
-                0,  # match continues (if at all) at start of next node
             )
             if match:
                 data_from_succ[succ] = (match, node_match_data, mismatches)
@@ -639,22 +627,17 @@ def _get_start_end_pos_for_matches(
                 node_match_data={},
                 current_index=match_start_index
                 - longest_paths[graph_index[match_start_index][0][0]],
-                match_start_pos=match_start_index,
             )
             if matched:
-                logger.info(f"matched {peptide} at {match_start_index}")
-                logger.info(f"match data: {node_match_data}")
+                logger.debug(f"matched {peptide} at {match_start_index}")
+                logger.debug(f"match data: {node_match_data}")
                 peptide_match_nodes[match_start_index] = node_match_data
             else:
-                logger.info(f"mismatched start pos {match_start_index} for {peptide}")
+                logger.debug(f"mismatched start pos {match_start_index} for {peptide}")
         if peptide_match_nodes:
             peptide_match_info[peptide] = peptide_match_nodes
         else:
             peptide_mismatches.add(peptide)
-
-    print("#############")
-    print("peptide_match_info")
-    print(peptide_match_info)
 
     return peptide_match_info, list(peptide_mismatches)
 
@@ -675,11 +658,6 @@ def _modify_graph(graph, contig_positions, longest_paths):
     :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
     by current_node attribute `matched`
     """
-
-    import pprint
-
-    print("contig_positions")
-    pprint.pprint(contig_positions)
 
     def _node_length(node):
         return len(graph.nodes[node]["aminoacid"])
@@ -714,7 +692,6 @@ def _modify_graph(graph, contig_positions, longest_paths):
                     aminoacid=before_node_label,
                     match="false",
                 )
-                first_node = before_node_id
 
             match_node_id = None
             after_node_label = None
@@ -793,9 +770,6 @@ def _modify_graph(graph, contig_positions, longest_paths):
             chars_removed += len(graph.nodes[first_node]["aminoacid"])
             if second_node:
                 chars_removed += len(graph.nodes[second_node]["aminoacid"])
-
-            print("chars removed")
-            print(chars_removed)
 
     return graph
 
