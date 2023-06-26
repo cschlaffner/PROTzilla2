@@ -22,6 +22,30 @@
     "data_preprocessing": {
       "steps": [
         {
+          "name": "filter_samples",
+          "method": "protein_count_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 1
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
           "name": "transformation",
           "method": "log_transformation",
           "parameters": {
@@ -32,37 +56,6 @@
               "graph_type": "Boxplot",
               "group_by": "Sample"
             }
-          ]
-        },
-        {
-          "name": "normalisation",
-          "method": "totalsum",
-          "parameters": {
-            "percentile": 0.5
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            }
-          ]
-        },
-        {
-          "name": "imputation",
-          "method": "knn",
-          "parameters": {
-            "shrinking_value": 1,
-            "strategy": "most_frequent",
-            "number_of_neighbours": 5
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            },
-            {
-              "graph_type_quantites": "Pie chart"
-            }
           ],
           "output_name": "preprocessed_data"
         }
@@ -70,6 +63,7 @@
     },
     "data_analysis": {
       "steps": [
+        
         {
           "name": "differential_expression",
           "method": "t_test",
@@ -78,9 +72,10 @@
               "preprocessed_data",
               "dataframe"
             ],
+            
             "log_base": 2,
             "grouping": "Group",
-            "group1": "CTR",
+            "group1": "CTR", 
             "group2": "AD"
           },
           "output_name": "ttest_result"
@@ -110,7 +105,8 @@
       ]
     },
     "data_integration": {
-      "steps": []
+      "steps": [
+      ]
     }
   }
 }
