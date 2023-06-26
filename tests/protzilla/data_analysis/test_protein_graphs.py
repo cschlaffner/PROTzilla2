@@ -1251,7 +1251,7 @@ def test_peptides_to_isoform_integration_test(
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
-    assert out_dict["peptide_mismatches"] == ["DETYYY", "ABCEGA"]
+    assert out_dict["peptide_mismatches"] == ["ABCEGA", "DETYYY"]
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
@@ -1276,6 +1276,7 @@ def test_peptides_to_isoform_integration_test(
         },
     )
 
+    print("tolle dinge ####################")
     pprint_graphs(created_graph, planned_graph)
 
     assert created_graph.nodes == planned_graph.nodes

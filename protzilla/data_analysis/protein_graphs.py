@@ -113,7 +113,7 @@ def peptides_to_isoform(
     return dict(
         graph_path=str(matched_graph_path),
         peptide_matches=list(peptide_match_node_start_end.keys()),
-        peptide_mismatches=peptide_mismatches,
+        peptide_mismatches=sorted(peptide_mismatches),
         messages=[dict(level=messages.INFO, msg=msg)],
     )
 
@@ -587,7 +587,7 @@ def _get_start_end_pos_for_matches(
         # return True, node_match_data, mismatches
         last_index = current_index
         for i, label_aa in enumerate(
-            graph.nodes[current_node]["aminoacid"][match_start_pos:]
+            graph.nodes[current_node]["aminoacid"][current_index:]
         ):
             if i > len(left_over_peptide) - 1:
                 return True, node_match_data, mismatches
@@ -595,10 +595,10 @@ def _get_start_end_pos_for_matches(
                 if current_node in node_match_data:
                     node_match_data[current_node] = (
                         node_match_data[current_node][0],
-                        i,
+                        node_match_data[current_node][1] + 1,
                     )
                 else:
-                    node_match_data[current_node] = (0, 0)
+                    node_match_data[current_node] = (current_index, current_index)
             else:
                 mismatches += 1
                 if mismatches > allowed_mismatches:
@@ -615,7 +615,7 @@ def _get_start_end_pos_for_matches(
                 succ,
                 left_over_peptide[last_index + 1 :],
                 node_match_data,
-                current_index + last_index + 1,
+                0,
                 0,  # match continues (if at all) at start of next node
             )
             if match:
