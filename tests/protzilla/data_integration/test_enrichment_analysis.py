@@ -657,7 +657,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         direction="up",
         background_biomart="hsapiens_gene_ensembl",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     for col in ["Proteins", "Genes"]:
         df[col] = df[col].apply(lambda x: set(x.split(";")))
@@ -671,7 +671,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         assert df[column].equals(results[column])
 
     # Compare the numeric columns separately with a tolerance for numerical equality
-    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value"]
+    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value", "Combined Score"]
     for column in numerical_columns:
         numerical_equal = np.isclose(
             df[column], results[column], rtol=1e-05, atol=1e-08
@@ -702,6 +702,7 @@ def go_analysis_offline_result_no_bg():
         "P-value": [1.000000e00, 1.000000e00],
         "Adjusted P-value": [1.000000e00, 1.000000e00],
         "Odds Ratio": [5.294118e-01, 5.294118e-01],
+        "Combined Score": [0.000000e00, 0.000000e00],
         "Genes": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
@@ -871,7 +872,7 @@ def test_go_analysis_offline_invalid_background_set_file():
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path="a_valid_filetype.gmt",
-        background="an_invalid_filetype.png",
+        background_path="an_invalid_filetype.png",
         direction="up",
     )
 
