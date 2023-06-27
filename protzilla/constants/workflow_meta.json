@@ -1746,6 +1746,13 @@
             "min": 1,
             "step": 1,
             "default": 5
+          },
+          "allowed_mismatches": {
+            "name": "Number of allowed mismatched Amino Acids per Peptide. For many allowed mismatches, this can take a long time.",
+            "type": "numeric",
+            "min": 0,
+            "step": 1,
+            "default": 2
           }
         }
       }

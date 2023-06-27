@@ -12,7 +12,11 @@ from protzilla.constants.paths import RUNS_PATH
 
 
 def peptides_to_isoform(
-    peptide_df: pd.DataFrame, protein_id: str, run_name: str, k: int = 5
+    peptide_df: pd.DataFrame,
+    protein_id: str,
+    run_name: str,
+    k: int = 5,
+    allowed_mismatches: int = 2,
 ):
     """
     Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph and
@@ -36,14 +40,20 @@ def peptides_to_isoform(
     :type k: int, optional
 
     :return: dict of path to graph - either the modified graph or the original graph if
-    the modification failed, list of matched peptides, list of unmatched peptides,
-    messages passed to the frontend
-    :rtype: dict[str, list, list, list]
+    the modification failed, the protein id, list of matched peptides, list of unmatched
+    peptides, messages passed to the frontend
+    :rtype: dict[str, str, list, list, list]
     """
 
-    assert k > 0, "k must be greater than 0"
-    assert isinstance(k, int), "k must be an integer"
-    allowed_mismatches = 2
+    assert isinstance(
+        allowed_mismatches, int
+    ), f"allowed_mismatches must be int, is {type(allowed_mismatches)}"
+    assert (
+        allowed_mismatches > 0
+    ), f"allowed mismatches must be > 0, is {allowed_mismatches}"
+
+    assert isinstance(k, int), f"k must be an integer, is {type(k)}"
+    assert k > 0, f"k must be > 0, is {k}"
 
     if not protein_id:
         return dict(
