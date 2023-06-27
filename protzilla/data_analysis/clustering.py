@@ -1,7 +1,6 @@
 import pandas as pd
 from django.contrib import messages
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 
 from protzilla.data_analysis.classification_helper import (
@@ -136,6 +135,47 @@ def expectation_maximisation(
         labels_df=labels_df["Encoded Label"],
         **kwargs,
     )
+    return dict(model=model, model_evaluation_df=model_evaluation_df)
+
+
+def hierarchical_agglomerative_clustering(
+    input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    model_selection: str = "Grid search",
+    scoring: list[str] = ["completeness_score"],
+    n_clusters: int = 2,
+    metric: str = "euclidean",
+    linkage: str = "ward",
+    **kwargs,
+):
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(labels_df, labels_column)
+
+    clf = AgglomerativeClustering()
+
+    clf_parameters = dict(
+        n_clusters=n_clusters,
+        metric=metric,
+        linkage=linkage,
+    )
+
+    model, model_evaluation_df = perform_clustering(
+        input_df_wide,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        labels_df=labels_df["Encoded Label"],
+        **kwargs,
+    )
+
     return dict(model=model, model_evaluation_df=model_evaluation_df)
 
 
