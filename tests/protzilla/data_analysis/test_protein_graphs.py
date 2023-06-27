@@ -971,24 +971,27 @@ def test_get_pos_potential_matches_shortcut(multi_route_shortcut):
 
 
 def test_create_contigs_dict_simple():
-    node_start_end = {"1": {0: 2, 4: 6}}
-    planned_contigs = {"1": [(0, 2), (4, 6)]}
+    node_start_end = {"ABC": {0: {"1": (0, 2)}, 4: {"1": (4, 6)}}}
+    planned_contigs = {"1": {"contigs": [(0, 2), (4, 6)], "peptides": ["ABC"]}}
 
     contigs = _create_contigs_dict(node_start_end)
     assert planned_contigs == contigs
 
 
 def test_create_contigs_dict_1_pep_2_match():
-    node_start_end = {"1": {0: 1}, "4": {4: 5}}
-    planned_contigs = {"1": [(0, 1)], "4": [(4, 5)]}
+    node_start_end = {"ABCD": {0: {"1": (0, 1), "2": (0, 1)}}}
+    planned_contigs = {
+        "1": {"contigs": [(0, 1)], "peptides": ["ABCD"]},
+        "2": {"contigs": [(0, 1)], "peptides": ["ABCD"]},
+    }
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
 
 
 def test_create_contigs_dict_1_pep_2_match_same_node():
-    node_start_end = {"1": {0: 3, 7: 10}}
-    planned_contigs = {"1": [(0, 3), (7, 10)]}
+    node_start_end = {"ABCD": {0: {"1": (0, 3)}, 7: {"1": (7, 10)}}}
+    planned_contigs = {"1": {"contigs": [(0, 3), (7, 10)], "peptides": ["ABCD"]}}
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
@@ -996,10 +999,19 @@ def test_create_contigs_dict_1_pep_2_match_same_node():
 
 def test_create_contigs_dict_2_pep_multi_match():
     node_start_end = {
-        "1": {0: 3, 7: 10, 5: 7},
-        "4": {12: 15, 19: 22, 17: 19},
+        "ABCD": {
+            0: {"1": (0, 3)},
+            7: {"1": (7, 10)},
+            12: {"4": (12, 15)},
+            19: {"4": (19, 22)},
+        },
+        "EFA": {5: {"1": (5, 7)}, 17: {"4": (17, 19)}},
     }
-    planned_contigs = {"1": [(0, 3), (5, 10)], "4": [(12, 15), (17, 22)]}
+
+    planned_contigs = {
+        "1": {"contigs": [(0, 3), (5, 10)], "peptides": ["ABCD", "EFA"]},
+        "4": {"contigs": [(12, 15), (17, 22)], "peptides": ["ABCD", "EFA"]},
+    }
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
@@ -1258,6 +1270,7 @@ def test_peptides_to_isoform_integration_test(
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
     assert out_dict["peptide_mismatches"] == ["ABCEGA", "DETYYY"]
+    assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
@@ -1316,6 +1329,7 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABCEGA"]
     assert out_dict["peptide_mismatches"] == []
+    assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 

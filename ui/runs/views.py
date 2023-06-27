@@ -516,6 +516,11 @@ def tables_content(request, run_name, index, key):
 
 
 def protein_graph(request, run_name, index: int):
+    # graph_path=str(matched_graph_path),
+    # peptide_matches=list(peptide_match_node_start_end.keys()),
+    # peptide_mismatches=sorted(peptide_mismatches),
+    # messages=[dict(level=messages.INFO, msg=msg)],
+
     run = active_runs[run_name]
 
     if index < len(run.history.steps):
@@ -529,6 +534,9 @@ def protein_graph(request, run_name, index: int):
         )
 
     graph_path = outputs["graph_path"]
+    peptide_matches = outputs["peptide_matches"]
+    peptide_mismatches = outputs["peptide_mismatches"]
+    protein_id = outputs["protein_id"]
 
     if not Path(graph_path).exists():
         return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
@@ -548,4 +556,13 @@ def protein_graph(request, run_name, index: int):
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
 
-    return render(request, "runs/protein_graph.html", context={"elements": elements})
+    return render(
+        request,
+        "runs/protein_graph.html",
+        context={
+            "elements": elements,
+            "peptide_matches": peptide_matches,
+            "peptide_mismatches": peptide_mismatches,
+            "protein_id": protein_id,
+        },
+    )

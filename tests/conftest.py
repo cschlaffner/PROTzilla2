@@ -3,6 +3,7 @@ import io
 import json
 import logging
 from pathlib import Path
+from shutil import rmtree
 
 import numpy as np
 import pandas as pd
@@ -69,7 +70,7 @@ def tests_folder_name():
 def run_test_folder(tests_folder_name):
     Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
     yield
-    # rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
+    rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
 
 
 @pytest.fixture

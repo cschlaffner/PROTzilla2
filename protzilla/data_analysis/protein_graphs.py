@@ -112,7 +112,8 @@ def peptides_to_isoform(
     msg = f"matched-peptides-graph created at {matched_graph_path}"
     return dict(
         graph_path=str(matched_graph_path),
-        peptide_matches=list(peptide_match_node_start_end.keys()),
+        protein_id=protein_id,
+        peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
         messages=[dict(level=messages.INFO, msg=msg)],
     )
@@ -747,7 +748,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
                     third_node = current_node
 
             else:  # before_node and match_node
-                # make current_node match_node
+                # turn current_node into match_node
                 match_node_label = graph.nodes[current_node]["aminoacid"][start:]
 
                 nx.set_node_attributes(

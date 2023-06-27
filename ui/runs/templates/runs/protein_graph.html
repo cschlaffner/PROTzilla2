@@ -4,24 +4,34 @@
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
     <style>
-        body {
+        .body {
             font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
             font-size: 14px;
         }
 
-        #cy {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            z-index: 999;
+        .container {
+            display: flex;
         }
 
-        h1 {
-            opacity: 0.5;
-            font-size: 1em;
-            font-weight: bold;
+        #protein_graph_sidebar {
+            width: auto;
+            max-height: 94vh; /* Set a maximum height equal to the viewport height */
+            overflow-y: auto;
+            /* Add other sidebar styles */
+        }
+
+        .collapsible-content {
+            display: none;
+            /* Add other collapsible content styles */
+        }
+
+        .collapsible-content.collapsed {
+            display: none; /* Hide content for collapsed sections */
+        }
+
+        #cy {
+            flex: 1;
+            /* Add other Cytoscape container styles */
         }
     </style>
 {% endblock %}
@@ -56,8 +66,12 @@
             return ctx.measureText(lines[max_line]).width + padding;
         }
 
-
         document.addEventListener('DOMContentLoaded', function () {
+            $('.collapsible-trigger').click(function () {
+                $(this).toggleClass('active');
+                $(this).next('.collapsible-content').slideToggle('fast');
+            });
+
             var cy = window.cy = cytoscape({
                 container: document.getElementById('cy'),
                 layout: {
@@ -98,11 +112,34 @@
                 elements: {{ elements|safe }}
             });
         });
+
     </script>
 {% endblock %}
 
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
 {% block content %}
-    <div id="cy"></div>
+    <div class="container">
+        <div id="cy"></div>
+        <div id="protein_graph_sidebar">
+            <!-- Sidebar content -->
+            <h2>Protein: {{ protein_id }}</h2>
+            <div class="collapsible">
+                <h3 class="collapsible-trigger">Peptide Matches</h3>
+                <ul class="collapsible-content collapsed">
+                    {% for match in peptide_matches %}
+                        <li>{{ match }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="collapsible">
+                <h3 class="collapsible-trigger">Peptide Mismatches</h3>
+                <ul class="collapsible-content collapsed">
+                    {% for mismatch in peptide_mismatches %}
+                        <li>{{ mismatch }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 {% endblock %}
