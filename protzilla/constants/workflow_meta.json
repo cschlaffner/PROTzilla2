@@ -2229,16 +2229,11 @@
             "default": [
               null,
               null
-            ],
-            "fill_dynamic": [
-              "term"
             ]
           },
-          "term": {
+          "term_name": {
             "name": "name of the term_dict for title",
-            "type": "text",
-            "fill": "term_dict_name",
-            "hidden": true,
+            "type": "empty",
             "default": null
           },
           "ranking": {

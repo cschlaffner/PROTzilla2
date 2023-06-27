@@ -275,11 +275,7 @@ def test_gsea_enrichment_plot(data_folder_tests, helpers):
     with open(data_folder_tests / "KEGG_2015__alzheimers disease_base.json") as json_file:
         enrichment_details = json.load(json_file)
 
-    enrichment_plot = gsea_enrichment_plot(
-        input_df=df,
-        ranking=ranking,#ranking["prerank"],
-        term_dict=enrichment_details,
-        term="KEGG_2015__alzheimers disease",
-    )
+    enrichment_plot = gsea_enrichment_plot(term_dict=enrichment_details, term_name="KEGG_2015__alzheimers disease",
+                                           ranking=ranking)
     enrichment_plot = enrichment_plot[0]
     helpers.open_graph_from_base64(enrichment_plot["plot_base64"])

@@ -314,7 +314,7 @@ def gsea_dot_plot(
 
 def gsea_enrichment_plot(
         term_dict=None,
-        term=None,
+        term_name=None,
         ranking=None,
 ):
     """
@@ -323,10 +323,20 @@ def gsea_enrichment_plot(
     if not isinstance(term_dict, dict) and not "nes" in term_dict.keys():
         msg = "Please input a dictionary with enrichment details for a gene set from GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not term_name:
+        msg = "Please input a term name."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not (isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)) or not ranking.index.name == "Gene symbol":
+        msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if isinstance(ranking, pd.DataFrame):
+        ranking = ranking.iloc[:, 0]
+
     try:
+        print(term_dict)
         enrichment_plot_axes = gseapy.gseaplot(
             rank_metric=ranking,
-            term=term,
+            term=term_name,
             **term_dict,
         )
         return [
@@ -336,7 +346,7 @@ def gsea_enrichment_plot(
             )
         ]
     except Exception as e:
-        msg = f"Could not plot enrichment plot for term {term}."
+        msg = f"Could not plot enrichment plot for term {term_name}."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
 
     # terms = input_df.Term

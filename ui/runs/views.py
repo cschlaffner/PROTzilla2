@@ -211,19 +211,6 @@ def change_field(request, run_name):
                 print(
                     f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
                 )
-        elif param_dict["fill"] == "term_dict_name":
-            named_output = selected[0]
-            output_item = selected[1]
-            print("output_item: ", output_item)
-            try:
-                protein_itr = run.history.output_of_named_step(
-                    named_output, output_item
-                )
-            except KeyError:
-                protein_itr = None
-            if isinstance(protein_itr, dict):
-                print(param_dict)
-                param_dict["default"]=str(output_item)
 
         elif param_dict["fill"] == "enrichment_categories":
             named_output = selected[0]
@@ -380,7 +367,6 @@ def plot(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
-    print("parameters", parameters)
 
     if run.step == "plot":
         del parameters["chosen_method"]

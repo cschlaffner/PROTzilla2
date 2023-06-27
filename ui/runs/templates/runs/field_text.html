@@ -6,7 +6,7 @@
 {# hidden: if the input is hidden #}
 {# form: the name of the form #}
 
-<label for="{{ key }}" {% if hidden %}class="d-none"{% endif %}>{{ name }}</label>
+<label for="{{ key }}">{{ name }}</label>
 <input name="{{ key }}" type="text" id="{{ key }}" value="{{ default }}"
-    class="form-control {{ class }}{% if hidden %}d-none{% endif %}" {% if disabled %} disabled {% endif %}
+    class="form-control {{ class }}" {% if disabled %} disabled {% endif %}
     placeholder="{{ placeholder }}">
