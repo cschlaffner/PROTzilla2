@@ -337,7 +337,7 @@ def gsea_enrichment_plot(
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
     if (
         not (isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series))
-        or not ranking.index.name == "Gene symbol"
+        or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name")
     ):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
