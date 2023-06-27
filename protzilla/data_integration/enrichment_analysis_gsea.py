@@ -197,10 +197,12 @@ def gsea_preranked(
 
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return out_dict.update({
-            "filtered_groups": filtered_groups,
-            "messages": [dict(level=messages.WARNING, msg=msg)],
-        })
+        return out_dict.update(
+            {
+                "filtered_groups": filtered_groups,
+                "messages": [dict(level=messages.WARNING, msg=msg)],
+            }
+        )
     return out_dict
 
 
@@ -409,8 +411,10 @@ def gsea(
 
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return out_dict.update({
-            "filtered_groups": filtered_groups,
-            "messages": [dict(level=messages.WARNING, msg=msg)],
-        })
+        return out_dict.update(
+            {
+                "filtered_groups": filtered_groups,
+                "messages": [dict(level=messages.WARNING, msg=msg)],
+            }
+        )
     return out_dict

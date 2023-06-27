@@ -1,7 +1,7 @@
 import gseapy
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
@@ -313,9 +313,9 @@ def gsea_dot_plot(
 
 
 def gsea_enrichment_plot(
-        term_dict=None,
-        term_name=None,
-        ranking=None,
+    term_dict=None,
+    term_name=None,
+    ranking=None,
 ):
     """
     normal
@@ -326,7 +326,10 @@ def gsea_enrichment_plot(
     if not term_name:
         msg = "Please input a term name."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
-    if not (isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)) or not ranking.index.name == "Gene symbol":
+    if (
+        not (isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series))
+        or not ranking.index.name == "Gene symbol"
+    ):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
     if isinstance(ranking, pd.DataFrame):
