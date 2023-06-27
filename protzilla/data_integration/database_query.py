@@ -59,7 +59,7 @@ def uniprot_query_dataframe(filename, uniprot_ids, fields):
 def uniprot_columns(filename):
     return pandas.read_csv(
         EXTERNAL_DATA_PATH / "uniprot" / f"{filename}.tsv", sep="\t", nrows=0
-    ).columns.tolist() + ["Links"]
+    ).columns.tolist()
 
 
 def uniprot_databases():
@@ -71,3 +71,48 @@ def uniprot_databases():
         if path.suffix == ".tsv":
             databases.append(path.stem)
     return sorted(databases)
+
+
+def uniprot_to_genes(uniprot_ids):
+    """Takes a list of uniprot IDs and maps them to genes"""
+    available_databases = uniprot_databases()
+    out_dict = {}
+    ids_to_search = uniprot_ids
+    for db_name in available_databases:
+        cols = uniprot_columns(db_name)
+        if "Gene Names (primary)" in cols:
+            df = uniprot_query_dataframe(
+                db_name, ids_to_search, ["Gene Names (primary)"]
+            )
+            mapping = df.to_dict()["Gene Names (primary)"]
+            out_dict.update(mapping)
+            ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
+        elif "Gene Names" in cols:
+            df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"])
+            mapping = df.to_dict()["Gene Names"]
+            out_dict.update((k, v and v.split()[0]) for k, v in mapping.items())
+            ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
+
+        if not ids_to_search:
+            return out_dict, []
+    biomart_results = list(
+        biomart_query(
+            ids_to_search, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
+        )
+    )
+    biomart_results += list(
+        biomart_query(
+            ids_to_search, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
+        )
+    )
+    uniprot_id_to_hgnc_symbol = dict(set(map(tuple, biomart_results)))
+    out_dict.update(uniprot_id_to_hgnc_symbol)
+    not_found = [id_ for id_ in ids_to_search if id_ not in uniprot_id_to_hgnc_symbol]
+    return out_dict, not_found
+
+
+from time import time
+
+t = time()
+print(uniprot_to_genes(["P10636", "aa"]))
+print(time() - t)
