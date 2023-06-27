@@ -235,7 +235,7 @@ def go_enrichment_dot_plot(
 
 def gsea_dot_plot(
     input_df,
-    cutoff,
+    cutoff=0.05,
     gene_sets=[],
     dot_color_value="FDR q-val",
     x_axis_value="NES",

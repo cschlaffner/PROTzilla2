@@ -2192,7 +2192,7 @@
             "default": "NES"
           },
           "cutoff": {
-            "name": "Only terms with dot_color_value < cutoff will be shown",
+            "name": "Cutoff value for fdr q-value or nominal p-value",
             "type": "numeric",
             "min": 0,
             "max": 1,
