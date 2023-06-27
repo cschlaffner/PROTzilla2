@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+from sklearn import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
 from sklearn.svm import SVC
@@ -13,6 +15,7 @@ from protzilla.data_analysis.classification_helper import (
     create_model_evaluation_df_grid_search_manual,
     create_model_evaluation_df_grid_search,
     evaluate_with_scoring,
+    perform_nested_cross_validation,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -27,6 +30,7 @@ def perform_classification(
     scoring,
     model_selection_scoring="accuracy",
     test_validate_split=None,
+    random_state=42,
     **parameters,
 ):
     if validation_strategy == "Manual" and grid_search_method == "Manual":
@@ -50,11 +54,19 @@ def perform_classification(
             scores,
         )
         return model, model_evaluation_df
+    elif validation_strategy == "Nested CV":
+        cv = perform_nested_cross_validation(
+            "K-Fold",
+            input_df,
+            labels_df,
+            clf,
+            scoring,
+        )
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
         return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, **parameters)
+        cv = perform_cross_validation(validation_strategy, random_state, **parameters)
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
@@ -66,7 +78,7 @@ def perform_classification(
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, **parameters)
+        cv = perform_cross_validation(validation_strategy, random_state, **parameters)
         model = perform_grid_search_cv(
             grid_search_method,
             clf,
@@ -179,6 +191,7 @@ def random_forest(
         clf,
         clf_parameters,
         scoring,
+        random_state=random_state,
         **kwargs,
     )
 
@@ -260,6 +273,7 @@ def svm(
         clf,
         clf_parameters,
         scoring,
+        random_state=random_state,
         **kwargs,
     )
 

@@ -2,11 +2,13 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
+from sklearn import clone
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
     matthews_corrcoef,
+    mean_squared_error,
 )
 from sklearn.model_selection import (
     GridSearchCV,
@@ -15,8 +17,11 @@ from sklearn.model_selection import (
     LeavePOut,
     RandomizedSearchCV,
     RepeatedKFold,
+    RepeatedStratifiedKFold,
     StratifiedKFold,
     train_test_split,
+    cross_validate,
+    BaseCrossValidator,
 )
 
 
@@ -77,26 +82,75 @@ def perform_cross_validation(
     cross_validation_estimator,
     n_splits=5,
     n_repeats=10,
-    shuffle="yes",
-    random_state_cv=42,
+    shuffle="no",
+    random_state=42,
     p_samples=None,
     **parameters,
 ):
     shuffle = True if shuffle == "yes" else False
+    random_state = random_state if shuffle == "yes" else None
     if cross_validation_estimator == "K-Fold":
-        return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv)
+        return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
     elif cross_validation_estimator == "Repeated K-Fold":
         return RepeatedKFold(
-            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state_cv
+            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
         )
     elif cross_validation_estimator == "Stratified K-Fold":
         return StratifiedKFold(
-            n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv
+            n_splits=n_splits, shuffle=shuffle, random_state=random_state
+        )
+    elif cross_validation_estimator == "Repeated Stratified K-Fold":
+        return RepeatedStratifiedKFold(
+            n_splits=n_splits, n_repeats=n_repeats, random_state=random_state
         )
     elif cross_validation_estimator == "Leave one out":
         return LeaveOneOut()
     elif cross_validation_estimator == "Leave p out":
         return LeavePOut(p_samples)
+
+
+def perform_nested_cross_validation(
+    input_df,
+    labels_df,
+    clf,
+    scoring,
+    outer_cv="K-Fold",
+    inner_cv="K-Fold",
+    random_state=42,
+    **parameters,
+):
+    outer_cv = perform_cross_validation(
+        outer_cv, random_state=random_state, **parameters
+    )
+    outer_test_scores = list()
+    outer_train_scores = list()
+    for train_index, test_index in outer_cv.split(input_df, labels_df):
+        X_train, X_test = input_df.iloc[train_index], input_df.iloc[test_index]
+        y_train, y_test = labels_df.iloc[train_index], labels_df.iloc[test_index]
+
+        inner_cv = perform_cross_validation(
+            inner_cv, random_state=random_state, **parameters
+        )
+        model = clone(clf)
+        inner_scores = cross_validate(
+            model,
+            X_train,
+            y_train,
+            scoring=scoring,
+            cv=inner_cv,
+            return_train_score=True,
+            return_estimator=True,
+        )
+
+        max_index, max_value = max(
+            enumerate(inner_scores["test_score"]), key=lambda x: x[1]
+        )
+        best_model = inner_scores["estimator"][max_index]
+        y_pred = best_model.predict(X_test)
+        score = evaluate_with_scoring(scoring, y_test, y_pred)[scoring]
+        outer_test_scores.append(score)
+        outer_train_scores.append(np.mean(inner_scores["train_score"]))
+    return outer_test_scores, outer_train_scores
 
 
 def evaluate_with_scoring(scoring, y_true, y_pred):
@@ -105,8 +159,9 @@ def evaluate_with_scoring(scoring, y_true, y_pred):
         "precision": precision_score,
         "recall": recall_score,
         "matthews_corrcoef": matthews_corrcoef,
+        "mean_squared_error": mean_squared_error,
     }
-
+    scoring = [scoring] if isinstance(scoring, str) else scoring
     scores = defaultdict(list)
     for score in scoring:
         if score in scoring_functions:
