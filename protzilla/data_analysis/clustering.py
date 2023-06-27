@@ -34,8 +34,19 @@ def k_means(
     function returns a dataframe with the corresponding cluster of each point and \
     another dataframe with the coordinates of the cluster centers.
 
-    :param input_df: the dataframe that should be clustered in wide or long format
+    :param input_df: The dataframe that should be classified in wide or long format
     :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+     the target variable (labels) for classification.
+    :type labels_column: str
+    :param positive_label: The positive label for classification.
+    :type positive_label: str
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str
+    :param scoring: The scoring metric(s) used for model evaluation.
+    :type scoring: list[str]
     :param n_clusters: the number of clusters to form as well as the number of \
     centroids to generate.
     :type n_clusters: int
@@ -54,6 +65,12 @@ def k_means(
     difference in the cluster centers of two consecutive iterations to declare\
      convergence.
     :type tolerance: float
+    :returns: A dictionary containing the following elements:
+        - model: The trained Gaussian Mixture Model.
+        - model_evaluation_df:  dataframe consisting of the model's parameters and the
+        evaluation metrics
+        - cluster_labels_df: The dataframe with sample IDs and assigned cluster labels.
+    :rtype: dict
     """
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
@@ -141,6 +158,47 @@ def expectation_maximisation(
     random_state=42,
     **kwargs,
 ):
+    """
+    Performs expectation maximization clustering.
+
+    :param input_df: The dataframe that should be classified in wide or long format
+    :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+     the target variable (labels) for classification.
+    :type labels_column: str
+    :param positive_label: The positive label for classification.
+    :type positive_label: str
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str
+    :param scoring: The scoring metric(s) used for model evaluation.
+    :type scoring: list[str]
+    :param n_components: The number of mixture components in the Gaussian Mixture Model.
+    :type n_components: int, optional
+    :param covariance_type: The covariance type for the Gaussian Mixture Model.
+    :type covariance_type: str, optional
+    :param reg_covar: Non-negative regularization added to the diagonal of covariance
+     matrices.
+    :type reg_covar: float
+    :param init_params: The method used to initialize the weights, the means and
+     the precisions.
+    :type init_params: str
+    :param max_iter: The number of EM iterations to perform.
+    :type max_iter: int, optional
+    :param random_state: The random seed for reproducibility.
+    :type random_state: int
+    :param **kwargs: Additional keyword arguments to be passed to the
+     `perform_clustering` function.
+    :returns: A dictionary containing the following elements:
+        - model: The trained Gaussian Mixture Model.
+        - model_evaluation_df:  dataframe consisting of the model's parameters and the
+        evaluation metrics
+        - cluster_labels_df: The dataframe with sample IDs and assigned cluster labels.
+        - cluster_labels_probabilities_df: The dataframe with sample IDs and predicted
+          cluster probabilities.
+    :rtype: dict
+    """
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     labels_df = (
@@ -201,6 +259,34 @@ def hierarchical_agglomerative_clustering(
     linkage: str = "ward",
     **kwargs,
 ):
+    """
+    :param input_df: The dataframe that should be classified in wide or long format
+    :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+     the target variable (labels) for classification.
+    :type labels_column: str
+    :param positive_label: The positive label for classification.
+    :type positive_label: str
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str
+    :param scoring: The scoring metric(s) used for model evaluation.
+    :type scoring: list[str]
+    :param n_clusters: the number of clusters to find
+    :type n_clusters: int
+    :param metric: Metric used to compute the linkage.
+    :type metric: str
+    :param linkage: Which linkage criterion to use. The linkage criterion determines
+     which distance to use between sets of observation
+    :type linkage: str
+    :returns: A dictionary containing the following elements:
+        - model: The trained Gaussian Mixture Model.
+        - model_evaluation_df:  dataframe consisting of the model's parameters and the
+        evaluation metrics
+        - cluster_labels_df: The dataframe with sample IDs and assigned cluster labels.
+    :rtype: dict
+    """
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     labels_df = (
