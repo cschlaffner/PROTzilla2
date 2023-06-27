@@ -532,9 +532,9 @@ def protein_graph(request, run_name, index: int):
         )
 
     graph_path = outputs["graph_path"]
-    peptide_matches = outputs["peptide_matches"]
-    peptide_mismatches = outputs["peptide_mismatches"]
-    protein_id = outputs["protein_id"]
+    peptide_matches = outputs.get("peptide_matches", [])
+    peptide_mismatches = outputs.get("peptide_mismatches", [])
+    protein_id = outputs.get("protein_id", "")
 
     if not Path(graph_path).exists():
         return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")

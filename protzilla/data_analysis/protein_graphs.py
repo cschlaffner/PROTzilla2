@@ -11,6 +11,18 @@ from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
 
 
+def variation_graph(protein_id: str, run_name: str):
+    if not protein_id:
+        return dict(
+            graph_path=None,
+            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+        )
+
+    out = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
+    out["protein_id"] = protein_id
+    return out
+
+
 def peptides_to_isoform(
     peptide_df: pd.DataFrame,
     protein_id: str,
@@ -129,7 +141,7 @@ def peptides_to_isoform(
     )
 
 
-def _create_protein_variation_graph(protein_id: str, run_name: str):
+def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     """
     Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
     Included features are just `Variation`, digestion is skipped.

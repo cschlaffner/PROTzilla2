@@ -183,6 +183,11 @@ method_map = {
         "peptides_to_isoform",
     ): protein_graphs.peptides_to_isoform,
     (
+        "data_analysis",
+        "protein_graphs",
+        "variation_graph",
+    ): protein_graphs.variation_graph,
+    (
         "data_integration",
         "enrichment_analysis",
         "go_analysis_with_STRING",
