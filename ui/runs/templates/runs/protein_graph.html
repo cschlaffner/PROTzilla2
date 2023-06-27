@@ -4,34 +4,22 @@
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
     <style>
-        .body {
-            font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-            font-size: 14px;
-        }
-
-        .container {
+        #peptides_page {
             display: flex;
+            width: 100%;
+            align-items: stretch;
         }
-
         #protein_graph_sidebar {
-            width: auto;
-            max-height: 94vh; /* Set a maximum height equal to the viewport height */
+            flex-basis: 400px;
+            order: 2;
+            max-width: 500px;
             overflow-y: auto;
-            /* Add other sidebar styles */
+            flex-grow: 1;
         }
-
-        .collapsible-content {
-            display: none;
-            /* Add other collapsible content styles */
-        }
-
-        .collapsible-content.collapsed {
-            display: none; /* Hide content for collapsed sections */
-        }
-
         #cy {
-            flex: 1;
-            /* Add other Cytoscape container styles */
+            order: 1;
+            padding: 20px;
+            flex-grow:1;
         }
     </style>
 {% endblock %}
@@ -119,26 +107,40 @@
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
 {% block content %}
-    <div class="container">
-        <div id="cy"></div>
-        <div id="protein_graph_sidebar">
-            <!-- Sidebar content -->
-            <h2>Protein: {{ protein_id }}</h2>
-            <div class="collapsible">
-                <h3 class="collapsible-trigger">Peptide Matches</h3>
-                <ul class="collapsible-content collapsed">
+    <div class="h-100 d-flex m-0" id="peptides_page">
+    <div id="cy" class="pe-0"></div>
+    <div id="protein_graph_sidebar" class="border-start">
+    <!-- Sidebar content -->
+    <div class="card-header d-flex p-3 align-items-center bg-white border-bottom">
+        <h5 class="ms-3 mb-0 fw-bold">Protein: {{ protein_id }}</h5>
+    </div>
+    <div id="accordion" class="">
+        <div class="border-top">
+            <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom"
+                 data-bs-toggle="collapse"
+                 href="#collapse_matches">
+                {#  could add icon here #}
+                <div class="ms-3">Peptide Matches</div>
+            </div>
+            <div id="collapse_matches" class="collapse">
+                <div class="card-body my-2 ps-5 pe-2">
                     {% for match in peptide_matches %}
                         <li>{{ match }}</li>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
-            <div class="collapsible">
-                <h3 class="collapsible-trigger">Peptide Mismatches</h3>
-                <ul class="collapsible-content collapsed">
+            <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom border-top"
+                 data-bs-toggle="collapse"
+                 href="#collapse_mismatches">
+                {#  could add icon here #}
+                <div class="ms-3">Peptide Mismatches</div>
+            </div>
+            <div id="collapse_mismatches" class="collapse">
+                <div class="card-body my-2 ps-5 pe-2">
                     {% for mismatch in peptide_mismatches %}
                         <li>{{ mismatch }}</li>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
     </div>
