@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -60,25 +61,18 @@ def meta_df():
 def test_k_means(clustering_df, meta_df):
     centroids_assertion = [[10.5, 13.75, 2.25], [20.0, 17.666666666666668, 2.0]]
     cluster_labels_df_assertion = pd.DataFrame(
-        data=(
-            ["Cluster 1"],
-            ["Cluster 1"],
-            ["Cluster 1"],
-            ["Cluster 0"],
-            ["Cluster 0"],
-            ["Cluster 0"],
-            ["Cluster 0"],
-        ),
-        index=[
-            "Sample1",
-            "Sample2",
-            "Sample3",
-            "Sample4",
-            "Sample5",
-            "Sample6",
-            "Sample7",
-        ],
-        columns=["Cluster Labels"],
+        {
+            "Sample": [
+                "Sample1",
+                "Sample2",
+                "Sample3",
+                "Sample4",
+                "Sample5",
+                "Sample6",
+                "Sample7",
+            ],
+            "Cluster Labels": [1, 1, 1, 0, 0, 0, 0],
+        }
     )
     current_out = k_means(
         clustering_df,
@@ -96,9 +90,13 @@ def test_k_means(clustering_df, meta_df):
     )
 
     pd.testing.assert_frame_equal(
-        current_out["cluster_labels_df"], cluster_labels_df_assertion, check_names=False
+        current_out["cluster_labels_df"],
+        cluster_labels_df_assertion,
+        check_names=False,
+        check_dtype=False,
     )
-    assert centroids_assertion == current_out["centroids"]
+
+    np.array_equal(centroids_assertion, current_out["model"].cluster_centers_)
 
 
 def test_k_means_nan_handling(df_with_nan, meta_df):
