@@ -1140,7 +1140,106 @@
             "default": 1e-4
           }
         }
-      }
+      },
+      "expectation_maximisation": {
+         "name": "Expectation maximisation",
+         "description": "",
+         "parameters": {
+           "input_df": {
+             "name": "Choose input dataframe",
+             "type": "named_output",
+             "default": [null, null]
+           },
+           "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": "None"
+           },
+           "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": "None"
+           },
+           "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": ["adjusted_rand_score", "completeness_score", "fowlkes_mallows_score", "homogeneity_score", "mutual_info_score", "normalized_mutual_info_score", "rand_score", "v_measure_score"],
+            "default": "accuracy",
+            "dynamic": true
+          },
+           "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": ["adjusted_rand_score", "completeness_score", "fowlkes_mallows_score", "homogeneity_score", "mutual_info_score", "normalized_mutual_info_score", "rand_score", "v_measure_score"],
+            "default": "accuracy",
+            "multiple": true
+          },
+           "n_components": {
+             "name": "The number of mixture components",
+             "type": "numeric",
+             "default": 1,
+             "multiple": true
+           },
+           "covariance_type": {
+             "name": "Type of covariance",
+             "type": "categorical",
+             "categories": ["full", "tied", "diag", "spherical"],
+             "default": "full",
+             "multiple": true
+           },
+           "init_params": {
+             "name": "The method used to initialize the weights, the means and the precisions.",
+             "type": "categorical",
+             "categories": ["kmeans", "k-means++", "random", "random_from_data"],
+             "default": "kmeans",
+             "multiple": true
+           },
+           "max_iter": {
+             "name": "The number of iterations tu perform",
+             "type": "numeric",
+             "default": 100,
+             "multiple": true
+           },
+           "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+           "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+           }
+         }
+       }
     },
     "classification": {
       "random_forest": {
