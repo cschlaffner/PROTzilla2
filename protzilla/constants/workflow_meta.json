@@ -1124,19 +1124,71 @@
               "Repeated K-Fold",
               "Stratified K-Fold",
               "Leave one out",
-              "Leave p out"
+              "Leave p out",
+              "Repeated Stratified K-Fold",
+              "Nested CV"
             ],
             "default": "K-Fold",
             "dynamic_parameters": {
               "K-Fold": [
-                "n_splits",
-                "shuffle"
+                "n_splits"
               ],
               "Stratified K-Fold": [
-                "n_splits",
-                "shuffle"
+                "n_splits"
               ],
               "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ],
+              "Nested CV": ["inner_cv", "outer_cv"]
+            }
+          },
+          "inner_cv": {
+            "name": "Inner Cross Validation Strategy",
+            "type": "categorical",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
+              "Leave one out",
+              "Leave p out"
+            ],
+            "default": "K-Fold",
+            "dynamic": true
+          },
+          "outer_cv": {
+            "name": "Outer Cross Validation Strategy",
+            "type": "categorical_dynamic",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
+              "Leave one out",
+              "Leave p out"
+            ],
+            "default": "K-Fold",
+            "dynamic": true,
+            "dynamic_parameters": {
+              "K-Fold": [
+                "n_splits"
+              ],
+              "Stratified K-Fold": [
+                "n_splits"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
                 "n_splits",
                 "n_repeats"
               ],
@@ -1151,16 +1203,6 @@
             "min": 2,
             "dynamic": true,
             "default": 5
-          },
-          "shuffle": {
-            "name": "Whether to shuffle the data before splitting into batches",
-            "type": "categorical",
-            "categories": [
-              "yes",
-              "no"
-            ],
-            "default": "yes",
-            "dynamic": true
           },
           "n_repeats": {
             "name": "Number of times cross-validator needs to be repeated",
@@ -1187,10 +1229,19 @@
               "accuracy",
               "precision",
               "recall",
-              "matthews_corrcoef"
+              "matthews_corrcoef", "mean_squared_error"
             ],
             "default": "accuracy",
             "multiple": true
+          },
+          "shuffle": {
+            "name": "Whether to shuffle the data before splitting into batches",
+            "type": "categorical",
+            "categories": [
+              "yes",
+              "no"
+            ],
+            "default": "yes"
           },
           "random_state": {
             "name": "Seed for random number generation",
@@ -1402,7 +1453,7 @@
               "accuracy",
               "precision",
               "recall",
-              "matthews_corrcoef"
+              "matthews_corrcoef", "mean_squared_error"
             ],
             "default": "accuracy",
             "multiple": true
@@ -1605,7 +1656,7 @@
               "accuracy",
               "precision",
               "recall",
-              "matthews_corrcoef"
+              "matthews_corrcoef", "mean_squared_error"
             ],
             "default": "accuracy",
             "multiple": true
