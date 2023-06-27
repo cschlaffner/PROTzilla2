@@ -16,7 +16,7 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import get_memory_usage, unique_justseen, clean_uniprot_id
+from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -233,7 +233,9 @@ def change_field(request, run_name):
             ):
                 param_dict["categories"] = []
             else:
-                param_dict["categories"] = protein_iterable["Gene_set"].unique().tolist()
+                param_dict["categories"] = (
+                    protein_iterable["Gene_set"].unique().tolist()
+                )
         elif param_dict["fill"] == "gsea_enrichment_categories":
             named_output = selected[0]
             output_item = selected[1]

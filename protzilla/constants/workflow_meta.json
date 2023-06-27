@@ -2168,7 +2168,7 @@
             ]
           },
           "gene_sets": {
-            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "gsea_enrichment_categories"
