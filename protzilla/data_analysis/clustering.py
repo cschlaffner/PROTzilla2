@@ -91,25 +91,20 @@ def k_means(
             labels_df=labels_df["Encoded Label"],
             **kwargs,
         )
-        return dict(model=model, model_evaluation_df=model_evaluation_df)
-        # kmeans = KMeans(
-        #     n_clusters=n_clusters,
-        #     random_state=random_state,
-        #     init=init_centroid_strategy,
-        #     n_init=n_init,
-        #     max_iter=max_iter,
-        #     tol=tolerance,
-        # )
-        # labels = kmeans.fit_predict(input_df_wide)
-        # cluster_labels_df = pd.DataFrame(
-        #     labels, index=input_df_wide.index, columns=["Cluster Labels"]
-        # )
-        # cluster_labels_df["Cluster Labels"] = cluster_labels_df["Cluster Labels"].apply(
-        #     lambda x: f"Cluster {x}"
-        # )
-        # centroids = kmeans.cluster_centers_.tolist()
-        # return dict(centroids=centroids, cluster_labels_df=cluster_labels_df)
-
+        cluster_labels_df = pd.DataFrame(
+            {"Sample": input_df_wide.index, "Cluster Labels": model.labels_}
+        )
+        cluster_centers_df = (
+            pd.DataFrame(data=model.cluster_centers_, columns=input_df_wide.columns)
+            .transpose()
+            .reset_index()
+        )
+        return dict(
+            model=model,
+            model_evaluation_df=model_evaluation_df,
+            cluster_labels_df=cluster_labels_df,
+            cluster_centers_df=cluster_centers_df,
+        )
     except ValueError as e:
         if input_df_wide.isnull().sum().any():
             msg = (
@@ -179,7 +174,19 @@ def expectation_maximisation(
         labels_df=labels_df["Encoded Label"],
         **kwargs,
     )
-    return dict(model=model, model_evaluation_df=model_evaluation_df)
+    cluster_labels_df = pd.DataFrame(
+        {"Sample": input_df_wide.index, "Cluster Labels": model.predict(input_df_wide)}
+    )
+    cluster_labels_probabilities_df = pd.DataFrame(
+        model.predict_proba(input_df_wide),
+    )
+    cluster_labels_probabilities_df.insert(0, "Sample", input_df_wide.index)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        cluster_labels_df=cluster_labels_df,
+        cluster_labels_probabilities_df=cluster_labels_probabilities_df,
+    )
 
 
 def hierarchical_agglomerative_clustering(
@@ -222,8 +229,14 @@ def hierarchical_agglomerative_clustering(
         labels_df=labels_df["Encoded Label"],
         **kwargs,
     )
-
-    return dict(model=model, model_evaluation_df=model_evaluation_df)
+    cluster_labels_df = pd.DataFrame(
+        {"Sample": input_df_wide.index, "Cluster Labels": model.labels_}
+    )
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        cluster_labels_df=cluster_labels_df,
+    )
 
 
 def perform_clustering(
@@ -246,6 +259,7 @@ def perform_clustering(
             clf_parameters,
             scores,
         )
+        return model, model_evaluation_df
     else:
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         model = perform_grid_search_cv(
@@ -261,8 +275,8 @@ def perform_clustering(
             clf_parameters,
             scoring,
         )
-
-    return model, model_evaluation_df
+        best_estimator = model.best_estimator_
+        return best_estimator, model_evaluation_df
 
 
 def scorer(scoring):
