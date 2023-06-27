@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -39,7 +38,26 @@ def clustering_df():
     return clustering_df
 
 
-def test_k_means(clustering_df):
+@pytest.fixture
+def meta_df():
+    meta_list = (
+        ["Sample1", "AD"],
+        ["Sample2", "AD"],
+        ["Sample3", "AD"],
+        ["Sample4", "CTR"],
+        ["Sample5", "CTR"],
+        ["Sample6", "CTR"],
+        ["Sample7", "CTR"],
+    )
+    meta_df = pd.DataFrame(
+        data=meta_list,
+        columns=["Sample", "Group"],
+    )
+
+    return meta_df
+
+
+def test_k_means(clustering_df, meta_df):
     centroids_assertion = [[10.5, 13.75, 2.25], [20.0, 17.666666666666668, 2.0]]
     cluster_labels_df_assertion = pd.DataFrame(
         data=(
@@ -64,6 +82,11 @@ def test_k_means(clustering_df):
     )
     current_out = k_means(
         clustering_df,
+        meta_df,
+        "Group",
+        "AD",
+        "Manual",
+        ["completeness_score"],
         n_clusters=2,
         random_state=6,
         init_centroid_strategy="random",
@@ -78,9 +101,14 @@ def test_k_means(clustering_df):
     assert centroids_assertion == current_out["centroids"]
 
 
-def test_k_means_nan_handling(df_with_nan):
+def test_k_means_nan_handling(df_with_nan, meta_df):
     current_out = k_means(
         df_with_nan,
+        meta_df,
+        "Group",
+        "AD",
+        "Manual",
+        ["completeness_score"],
         n_clusters=4,
         init_centroid_strategy="k-means++",
     )
@@ -88,9 +116,14 @@ def test_k_means_nan_handling(df_with_nan):
     assert "NaN values" in current_out["messages"][0]["msg"]
 
 
-def test_k_means_n_clusters(clustering_df):
+def test_k_means_n_clusters(clustering_df, meta_df):
     current_out = k_means(
         clustering_df,
+        meta_df,
+        "Group",
+        "AD",
+        "Manual",
+        ["completeness_score"],
         n_clusters=10,
         init_centroid_strategy="k-means++",
     )

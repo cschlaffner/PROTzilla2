@@ -16,12 +16,18 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 def k_means(
     input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    positive_label: str = None,
+    model_selection: str = "Grid search",
+    scoring: list[str] = ["completeness_score"],
     n_clusters: int = 8,
     random_state: int = 6,
     init_centroid_strategy: str = "random",
     n_init: int = 10,
     max_iter: int = 300,
     tolerance: float = 1e-4,
+    **kwargs,
 ):
     """
     A method that uses k-means to partition a number of samples in k clusters. The \
@@ -51,7 +57,21 @@ def k_means(
     """
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
-        kmeans = KMeans(
+        input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+        input_df_wide.sort_values(by="Sample", inplace=True)
+        labels_df = (
+            metadata_df[["Sample", labels_column]]
+            .set_index("Sample")
+            .sort_values(by="Sample")
+        )
+
+        encoding_mapping, labels_df = encode_labels(
+            labels_df, labels_column, positive_label
+        )
+
+        clf = KMeans()
+
+        clf_parameters = dict(
             n_clusters=n_clusters,
             random_state=random_state,
             init=init_centroid_strategy,
@@ -59,15 +79,36 @@ def k_means(
             max_iter=max_iter,
             tol=tolerance,
         )
-        labels = kmeans.fit_predict(input_df_wide)
-        cluster_labels_df = pd.DataFrame(
-            labels, index=input_df_wide.index, columns=["Cluster Labels"]
+
+        scoring = [scoring] if isinstance(scoring, str) else scoring
+
+        model, model_evaluation_df = perform_clustering(
+            input_df_wide,
+            model_selection,
+            clf,
+            clf_parameters,
+            scoring,
+            labels_df=labels_df["Encoded Label"],
+            **kwargs,
         )
-        cluster_labels_df["Cluster Labels"] = cluster_labels_df["Cluster Labels"].apply(
-            lambda x: f"Cluster {x}"
-        )
-        centroids = kmeans.cluster_centers_.tolist()
-        return dict(centroids=centroids, cluster_labels_df=cluster_labels_df)
+        return dict(model=model, model_evaluation_df=model_evaluation_df)
+        # kmeans = KMeans(
+        #     n_clusters=n_clusters,
+        #     random_state=random_state,
+        #     init=init_centroid_strategy,
+        #     n_init=n_init,
+        #     max_iter=max_iter,
+        #     tol=tolerance,
+        # )
+        # labels = kmeans.fit_predict(input_df_wide)
+        # cluster_labels_df = pd.DataFrame(
+        #     labels, index=input_df_wide.index, columns=["Cluster Labels"]
+        # )
+        # cluster_labels_df["Cluster Labels"] = cluster_labels_df["Cluster Labels"].apply(
+        #     lambda x: f"Cluster {x}"
+        # )
+        # centroids = kmeans.cluster_centers_.tolist()
+        # return dict(centroids=centroids, cluster_labels_df=cluster_labels_df)
 
     except ValueError as e:
         if input_df_wide.isnull().sum().any():
@@ -94,6 +135,7 @@ def expectation_maximisation(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
+    positive_label: str = None,
     model_selection: str = "Grid search",
     scoring: list[str] = ["completeness_score"],
     n_components: int = 1,
@@ -111,7 +153,9 @@ def expectation_maximisation(
         .set_index("Sample")
         .sort_values(by="Sample")
     )
-    encoding_mapping, labels_df = encode_labels(labels_df, labels_column)
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     clf = GaussianMixture()
 
@@ -142,6 +186,7 @@ def hierarchical_agglomerative_clustering(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
+    positive_label: str = None,
     model_selection: str = "Grid search",
     scoring: list[str] = ["completeness_score"],
     n_clusters: int = 2,
@@ -156,7 +201,9 @@ def hierarchical_agglomerative_clustering(
         .set_index("Sample")
         .sort_values(by="Sample")
     )
-    encoding_mapping, labels_df = encode_labels(labels_df, labels_column)
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     clf = AgglomerativeClustering()
 
