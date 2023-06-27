@@ -122,48 +122,58 @@
 
 {% block content %}
     <div class="h-100 d-flex m-0" id="peptides_page">
-    <div id="cy" class="pe-0"></div>
-    <div id="protein_graph_sidebar" class="border-start">
-    <!-- Sidebar content -->
-    <div class="card-header d-flex p-3 align-items-center bg-white border-bottom">
-        <h5 class="ms-3 mb-0 fw-bold">Protein: {{ protein_id }}</h5>
-    </div>
-    <div id="accordion" class="">
-        <div class="border-top">
-            <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom"
-                 data-bs-toggle="collapse"
-                 href="#collapse_matches">
-                {#  could add icon here #}
-                <div class="ms-3">Peptide Matches</div>
+        <div id="cy" class="pe-0"></div>
+        <div id="protein_graph_sidebar" class="border-start">
+            <!-- Sidebar content -->
+            <div class="card-header d-flex p-3 align-items-center bg-white border-bottom">
+                <h5 class="ms-3 mb-0 fw-bold">Protein: {{ protein_id }}</h5>
             </div>
-            <div id="collapse_matches" class="collapse">
-                <div class="card-body my-2 ps-5 pe-2">
-                    {% for match in peptide_matches %}
-                        <li>{{ match }}</li>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom border-top"
-                 data-bs-toggle="collapse"
-                 href="#collapse_mismatches">
-                {#  could add icon here #}
-                <div class="ms-3">Peptide Mismatches</div>
-            </div>
-            <div id="collapse_mismatches" class="collapse">
-                <div class="card-body my-2 ps-5 pe-2">
-                    {% for mismatch in peptide_mismatches %}
-                        <li>{{ mismatch }}</li>
-                    {% endfor %}
-                </div>
-            </div>
-            <div id="save-svg-button" class="card-body">
-                <div class="row">
-                    <button class="btn btn-grey col-4 col-md-offset-2"
-                            onclick="saveAsSvg()">Save as SVG
-                    </button>
-                    <button class="btn btn-grey col-4 col-md-offset-4"
-                            onclick="window.location=getSvgUrl()">View SVG
-                    </button>
+            <div id="accordion" class="">
+                <div class="border-top">
+                    <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom"
+                         data-bs-toggle="collapse"
+                         href="#collapse_matches">
+                        {#  could add icon here #}
+                        <div class="ms-3">Peptide Matches</div>
+                    </div>
+                    <div id="collapse_matches" class="collapse">
+                        <div class="card-body my-2 ps-5 pe-2">
+                            {% if peptide_matches %}
+                                {% for match in peptide_matches %}
+                                    <li>{{ match }}</li>
+                                {% endfor %}
+                            {% else %}
+                                <li>No matches found</li>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-header d-flex btn p-3 align-items-center bg-white border-bottom border-top"
+                         data-bs-toggle="collapse"
+                         href="#collapse_mismatches">
+                        {#  could add icon here #}
+                        <div class="ms-3">Peptide Mismatches</div>
+                    </div>
+                    <div id="collapse_mismatches" class="collapse">
+                        <div class="card-body my-2 ps-5 pe-2">
+                            {% if peptide_mismatches %}
+                                {% for mismatch in peptide_mismatches %}
+                                    <li>{{ mismatch }}</li>
+                                {% endfor %}
+                            {% else %}
+                                <li>No mismatches found</li>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="save-svg-button" class="card-body">
+                        <div class="row">
+                            <button class="btn btn-grey col-4 my-2 mx-5"
+                                    onclick="saveAsSvg()">Save as SVG
+                            </button>
+                            <button class="btn btn-grey col-4 my-2 mx-2"
+                                    onclick="window.location=getSvgUrl()">View SVG
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
