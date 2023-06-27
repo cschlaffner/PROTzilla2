@@ -48,3 +48,12 @@ def fig_to_base64(fig):
     fig.savefig(img, format="png", bbox_inches="tight")
     img.seek(0)
     return base64.b64encode(img.getvalue())
+
+
+def isBaseEncoded64(base64_string):
+    # soruce https://stackoverflow.com/questions/12315398/check-if-a-string-is-encoded-in-base64-using-python#:~:text=All%20you%20need%20to%20do,then%20it%20is%20base64%20encoded.&text=That's%20it!
+    try:
+        base64.b64decode(base64_string)
+        return True
+    except (TypeError, ValueError):
+        return False

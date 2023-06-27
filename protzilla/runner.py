@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 from pathlib import Path
@@ -5,7 +6,7 @@ from pathlib import Path
 from .constants.paths import RUNS_PATH
 from .run import Run
 from .run_helper import get_parameters
-from .utilities import random_string
+from .utilities import random_string, isBaseEncoded64
 from .workflow_helper import get_defaults
 
 
@@ -138,8 +139,13 @@ class Runner:
             parameters=params,
         )
         for i, plot in enumerate(self.run.plots):
-            plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
-            if not isinstance(plot, dict):
+            if isBaseEncoded64(plot):
+                plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.png"
+                image_data = base64.b64decode(plot)
+                with open(plot_path, "wb") as file:
+                    file.write(image_data)
+            elif not isinstance(plot, dict):
+                plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
                 plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
