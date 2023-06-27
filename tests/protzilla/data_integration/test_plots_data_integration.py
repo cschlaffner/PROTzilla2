@@ -267,7 +267,7 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
         helpers.open_graph_from_base64(dot_base64["plot_base64"])
 
 
-def test_gsea_enrichment_plot(data_folder_tests, helpers):
+def test_gsea_enrichment_plot(data_folder_tests, helpers, show_figures):
     ranking = pd.Series(
         sorted([i / 41 for i in range(42)], reverse=True)
     )  # mock ranking
@@ -280,7 +280,8 @@ def test_gsea_enrichment_plot(data_folder_tests, helpers):
         term_name="KEGG_2015__alzheimers disease",
         ranking=ranking,
     )[0]
-    helpers.open_graph_from_base64(enrichment_plot["plot_base64"])
+    if show_figures:
+        helpers.open_graph_from_base64(enrichment_plot["plot_base64"])
 
 
 def test_gsea_enrichment_plot_wrong_term_dict():
