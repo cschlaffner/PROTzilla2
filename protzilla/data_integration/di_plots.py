@@ -318,9 +318,18 @@ def gsea_enrichment_plot(
     ranking=None,
 ):
     """
-    normal
+    Creates a typical enrichment plot from GSEA or pre-ranked GSEA details. The plot is created using the gseapy library.
+
+    :param term_dict: Enrichment details for a gene set from GSEA
+    :type term_dict: dict
+    :param term_name: Name of the gene set, used as a title for the plot
+    :type term_name: str
+    :param ranking: Ranking output dataframe from GSEA or pre-ranked GSEA
+    :type ranking: pandas.DataFrame or pandas.Series
+    :return: Base64 encoded image of the plot
+    :rtype: bytes
     """
-    if not isinstance(term_dict, dict) and not "nes" in term_dict.keys():
+    if not isinstance(term_dict, dict) or not "nes" in term_dict.keys():
         msg = "Please input a dictionary with enrichment details for a gene set from GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
     if not term_name:
@@ -336,7 +345,6 @@ def gsea_enrichment_plot(
         ranking = ranking.iloc[:, 0]
 
     try:
-        print(term_dict)
         enrichment_plot_axes = gseapy.gseaplot(
             rank_metric=ranking,
             term=term_name,
@@ -351,36 +359,3 @@ def gsea_enrichment_plot(
     except Exception as e:
         msg = f"Could not plot enrichment plot for term {term_name}."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
-
-    # terms = input_df.Term
-    # # Filter the DataFrame based on the "Term" column
-    # filtered_df = input_df[input_df['Term'] == terms[0]]
-
-    # terms = pre_res.res2d.Term[1:5]
-    # hits = [pre_res.results[t]['hits'] for t in terms]
-    # runes = [pre_res.results[t]['RES'] for t in terms]
-    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
-    #               rank_metric=gs_res.ranking,
-    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
-    #               figsize=(4,5)) # rank_metric=pre_res.ranking
-
-    # multipathway
-    # gseapy.gseaplot2()
-    # preranked
-    # terms = pre_res.res2d.Term[1:5]
-    # hits = [pre_res.results[t]['hits'] for t in terms]
-    # runes = [pre_res.results[t]['RES'] for t in terms]
-    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
-    #               rank_metric=gs_res.ranking,
-    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
-    #               figsize=(4,5)) # rank_metric=pre_res.ranking
-
-    # gsea
-    # # multi in one
-    # terms = gs_res.res2d.Term[:5]
-    # hits = [gs_res.results[t]['hits'] for t in terms]
-    # runes = [gs_res.results[t]['RES'] for t in terms]
-    # fig = gseaplot2(terms=terms, ress=runes, hits=hits,
-    #               rank_metric=gs_res.ranking,
-    #               legend_kws={'loc': (1.2, 0)}, # set the legend loc
-    #               figsize=(4,5)) # rank_metric=pre_res.ranking

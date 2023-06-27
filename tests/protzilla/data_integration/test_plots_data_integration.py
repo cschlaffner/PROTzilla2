@@ -268,19 +268,71 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
 
 
 def test_gsea_enrichment_plot(data_folder_tests, helpers):
-    df = pd.read_csv(data_folder_tests / "gsea_preranked_enriched.csv", header=0)
-    # ranking = pd.read_csv(data_folder_tests / "gsea_preranked_rank.csv", header=0)
-    ranking = pd.Series(sorted([i / 41 for i in range(42)]))
-    # read json file
-    with open(
-        data_folder_tests / "KEGG_2015__alzheimers disease_base.json"
-    ) as json_file:
+    ranking = pd.Series(
+        sorted([i / 41 for i in range(42)], reverse=True)
+    )  # mock ranking
+    ranking.index.name = "Gene symbol"
+    with open(data_folder_tests / "KEGG_2015__alzheimers disease.json") as json_file:
         enrichment_details = json.load(json_file)
 
     enrichment_plot = gsea_enrichment_plot(
         term_dict=enrichment_details,
         term_name="KEGG_2015__alzheimers disease",
         ranking=ranking,
-    )
-    enrichment_plot = enrichment_plot[0]
+    )[0]
     helpers.open_graph_from_base64(enrichment_plot["plot_base64"])
+
+
+def test_gsea_enrichment_plot_wrong_term_dict():
+    current_out = gsea_enrichment_plot(
+        term_dict=dict(awrongdictkey="wrongdictvalue"),
+    )[0]
+    assert "messages" in current_out
+    assert (
+        "Please input a dictionary with enrichment details"
+        in current_out["messages"][0]["msg"]
+    )
+
+
+def test_gsea_enrichment_plot_no_term_name():
+    current_out = gsea_enrichment_plot(
+        term_dict=dict(nes=0),
+        term_name="",
+    )[0]
+    assert "messages" in current_out
+    assert "Please input a term name" in current_out["messages"][0]["msg"]
+
+
+def test_gsea_enrichment_plot_wrong_ranking(data_folder_tests):
+    ranking = pd.Series(sorted([i / 41 for i in range(42)]))  # mock ranking
+    ranking.index.name = "wrongindexname"
+    with open(data_folder_tests / "KEGG_2015__alzheimers disease.json") as json_file:
+        enrichment_details = json.load(json_file)
+
+    current_out = gsea_enrichment_plot(
+        term_dict=enrichment_details,
+        term_name="KEGG_2015__alzheimers disease",
+        ranking=ranking,
+    )[0]
+    assert "messages" in current_out
+    assert (
+        "Please input a ranking output dataframe" in current_out["messages"][0]["msg"]
+    )
+
+
+def test_gsea_enrichment_plot_fails(data_folder_tests):
+    ranking = pd.Series(
+        sorted([i / 41 for i in range(42)], reverse=True)
+    )  # mock ranking
+    ranking.index.name = "Gene symbol"
+    ranking = ranking[:-1]  # drop last row to make it fail because of size mismatch
+    with open(data_folder_tests / "KEGG_2015__alzheimers disease.json") as json_file:
+        enrichment_details = json.load(json_file)
+
+    current_out = gsea_enrichment_plot(
+        term_dict=enrichment_details,
+        term_name="KEGG_2015__alzheimers disease",
+        ranking=ranking,
+    )[0]
+    assert "messages" in current_out
+    assert "Could not plot enrichment" in current_out["messages"][0]["msg"]
