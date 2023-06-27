@@ -579,37 +579,40 @@ def _get_pos_potential_matches(
         ):
             if i > len(left_over_peptide) - 1:
                 return True, node_match_data, mismatches
-            if label_aa == left_over_peptide[i]:
-                if current_node in added_nodes:
-                    node_match_data[current_node] = (
-                        node_match_data[current_node][0],
-                        node_match_data[current_node][1] + 1,
-                    )
-                else:
-                    node_match_data[current_node] = (current_index, current_index)
-                    added_nodes.append(current_node)
-            else:
+            if label_aa != left_over_peptide[i]:
                 mismatches += 1
-                if mismatches > allowed_mismatches:
-                    return False, {}, mismatches
+            if mismatches > allowed_mismatches:
+                return False, {}, mismatches
+            if current_node in added_nodes:
+                node_match_data[current_node] = (
+                    node_match_data[current_node][0],
+                    node_match_data[current_node][1] + 1,
+                )
+            else:
+                node_match_data[current_node] = (current_index, current_index)
+                added_nodes.append(current_node)
+
             last_index = i
 
         # node is matched til end, peptide not done
         data_from_succ = {}
+        recursion_start_mismatches = mismatches
         for succ in graph.successors(current_node):
-            match, node_match_data, mismatches = _match_on_graph(
-                mismatches,
+            recursion_start_data = node_match_data.copy()
+            match, match_data_from_succ, mismatches = _match_on_graph(
+                recursion_start_mismatches,
                 allowed_mismatches,
                 graph,
                 succ,
                 left_over_peptide[last_index + 1 :],
-                node_match_data,
+                recursion_start_data,
                 0,
             )
             if match:
-                data_from_succ[succ] = (match, node_match_data, mismatches)
+                data_from_succ[succ] = (match, match_data_from_succ, mismatches)
         if data_from_succ:
-            return min(data_from_succ.items(), key=lambda item: item[1][2])[1]
+            return_val = min(data_from_succ.values(), key=lambda item: item[2])
+            return return_val
         else:
             return False, {}, mismatches
 
@@ -617,7 +620,6 @@ def _get_pos_potential_matches(
     for peptide, indices in potential_peptide_matches.items():
         peptide_match_nodes = {}  # store positions of matches for each node
         for match_start_index in indices:  # start index is of ref_index
-            # len(graph_index[match_start_index]) must be 1 -> match never starts on VAR
             matched, node_match_data, mismatches = _match_on_graph(
                 mismatches=0,
                 allowed_mismatches=allowed_mismatches,
