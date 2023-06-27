@@ -5,7 +5,7 @@ from protzilla.data_integration import database_query
 from protzilla.utilities import clean_uniprot_id, unique_justseen
 
 
-def add_uniprot_data(dataframe, database_name, fields=None):
+def add_uniprot_data(dataframe, database_name=None, fields=None):
     if not fields:
         msg = "No fields that should be added specified."
         return dict(
