@@ -16,7 +16,8 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
+from protzilla.utilities import get_memory_usage, unique_justseen, clean_uniprot_id
+from protzilla.data_integration.database_query import uniprot_columns
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -190,6 +191,8 @@ def change_field(request, run_name):
 
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
+        elif param_dict["fill"] == "uniprot_fields":
+            param_dict["categories"] = uniprot_columns(selected[0])
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
