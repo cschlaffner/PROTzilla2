@@ -2,7 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.clustering import k_means
+from protzilla.data_analysis.clustering import (
+    k_means,
+    expectation_maximisation,
+    hierarchical_agglomerative_clustering,
+)
 
 
 @pytest.fixture
@@ -129,4 +133,77 @@ def test_k_means_n_clusters(clustering_df, meta_df):
     assert (
         "The number of clusters should be less or equal than the number of samples."
         in current_out["messages"][0]["msg"]
+    )
+
+
+def test_expectation_maximisation(clustering_df, meta_df):
+    cluster_labels_df_assertion = pd.DataFrame(
+        {
+            "Sample": [
+                "Sample1",
+                "Sample2",
+                "Sample3",
+                "Sample4",
+                "Sample5",
+                "Sample6",
+                "Sample7",
+            ],
+            "Cluster Labels": [0, 0, 0, 0, 0, 0, 0],
+        }
+    )
+    cluster_labels_probabilities_df_assertion = pd.DataFrame(
+        {
+            "Sample": [
+                "Sample1",
+                "Sample2",
+                "Sample3",
+                "Sample4",
+                "Sample5",
+                "Sample6",
+                "Sample7",
+            ],
+            0: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        }
+    )
+    current_out = expectation_maximisation(
+        clustering_df, meta_df, "Group", "AD", "Manual"
+    )
+
+    pd.testing.assert_frame_equal(
+        current_out["cluster_labels_df"],
+        cluster_labels_df_assertion,
+        check_names=False,
+        check_dtype=False,
+    )
+    pd.testing.assert_frame_equal(
+        current_out["cluster_labels_probabilities_df"],
+        cluster_labels_probabilities_df_assertion,
+        check_names=False,
+        check_dtype=False,
+    )
+
+
+def test_hierarchical_agglomerative_clustering(clustering_df, meta_df):
+    current_out = hierarchical_agglomerative_clustering(
+        clustering_df, meta_df, "Group", "AD", "Manual"
+    )
+    cluster_labels_df_assertion = pd.DataFrame(
+        {
+            "Sample": [
+                "Sample1",
+                "Sample2",
+                "Sample3",
+                "Sample4",
+                "Sample5",
+                "Sample6",
+                "Sample7",
+            ],
+            "Cluster Labels": [1, 1, 1, 0, 0, 0, 0],
+        }
+    )
+    pd.testing.assert_frame_equal(
+        current_out["cluster_labels_df"],
+        cluster_labels_df_assertion,
+        check_names=False,
+        check_dtype=False,
     )
