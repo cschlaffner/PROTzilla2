@@ -1,3 +1,4 @@
+import pprint
 import re
 import subprocess
 from pathlib import Path
@@ -527,43 +528,54 @@ def _create_contigs_dict(node_start_end: dict):
     """
 
     node_match_data = {}
+    pprint.pprint(node_start_end)
+
     for peptide, start_pos_dict in node_start_end.items():
         for start_index, node_dict in start_pos_dict.items():
             for node, start_end in node_dict.items():
                 if node not in node_match_data:
                     node_match_data[node] = {
-                        "match_locations": [(start_end[0], start_end[1])],
-                        "peptides": [peptide],
+                        "match_locations": [(start_end[0], start_end[1], peptide)],
                     }
                 else:
                     node_match_data[node]["match_locations"].append(
-                        (start_end[0], start_end[1])
+                        (start_end[0], start_end[1], peptide)
                     )
-                    if peptide not in node_match_data[node]["peptides"]:
-                        node_match_data[node]["peptides"].append(peptide)
 
     for node in node_match_data:
         node_match_data[node]["match_locations"] = sorted(
             node_match_data[node]["match_locations"]
         )
-        node_match_data[node]["peptides"] = sorted(node_match_data[node]["peptides"])
+
+    pprint.pprint(node_match_data)
 
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
     node_mod = {}
     for node, node_dict in node_match_data.items():
+        print("node", node)
+        print("node_dict", node_dict)
         new_positions_list = []
-        for start, end in node_dict["match_locations"]:
+        for start, end, peptide in node_dict["match_locations"]:
+            print(start, end, peptide)
             if not len(new_positions_list):
-                new_positions_list.append((start, end))
+                new_positions_list.append((start, end, peptide))
                 continue
+            print("new_positions_list[-1][1]", new_positions_list[-1][1])
             if start <= new_positions_list[-1][1]:
-                new_positions_list[-1] = (new_positions_list[-1][0], end)
+                new_positions_list[-1] = (
+                    new_positions_list[-1][0],
+                    end,
+                    new_positions_list[-1][2] + ";" + peptide,
+                )
             else:
-                new_positions_list.append((start, end))
+                new_positions_list.append((start, end, peptide))
+
         node_mod[node] = {
             "contigs": new_positions_list,
-            "peptides": node_dict["peptides"],
         }
+
+    print("node_mod")
+    pprint.pprint(node_mod)
 
     return node_mod
 
@@ -683,6 +695,9 @@ def _modify_graph(graph, contig_positions, longest_paths):
     :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
     by current_node attribute `matched`
     """
+    import pprint
+
+    pprint.pprint(contig_positions)
 
     def _node_length(node):
         return len(graph.nodes[node]["aminoacid"])
@@ -691,7 +706,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
     for current_node, node_dict in contig_positions.items():
         contigs = node_dict["contigs"]
         chars_removed = 0
-        for start, end in contigs:
+        for start, end, peptide in contigs:
             start = start - chars_removed
             end = end - chars_removed
             first_node = None
@@ -703,7 +718,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
                 )
                 nx.set_node_attributes(
                     graph,
-                    {current_node: {"match": "true"}},
+                    {current_node: {"match": "true", "peptides": peptide}},
                 )
                 continue
 
@@ -731,6 +746,7 @@ def _modify_graph(graph, contig_positions, longest_paths):
                         match_node_id,
                         aminoacid=match_node_label,
                         match="true",
+                        peptides=peptide,
                     )
                     # adopt current_node to be after_node
                     after_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
@@ -751,7 +767,10 @@ def _modify_graph(graph, contig_positions, longest_paths):
                     match_node_id = f"n{len(graph.nodes)}"
                     match_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
                     graph.add_node(
-                        match_node_id, aminoacid=match_node_label, match="true"
+                        match_node_id,
+                        aminoacid=match_node_label,
+                        match="true",
+                        peptides=peptide,
                     )
 
                     # adopt current_node to be match/after_node
@@ -775,7 +794,13 @@ def _modify_graph(graph, contig_positions, longest_paths):
 
                 nx.set_node_attributes(
                     graph,
-                    {current_node: {"aminoacid": match_node_label, "match": "true"}},
+                    {
+                        current_node: {
+                            "aminoacid": match_node_label,
+                            "match": "true",
+                            "peptides": peptide,
+                        }
+                    },
                 )
                 first_node = before_node_id
                 second_node = None
@@ -809,3 +834,30 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
     return df["Sequence"].unique().tolist()
+
+
+if __name__ == "__main__":
+    nse = {
+        "DYFEEYGK": {129: {"n5": (129, 136)}},
+        "DYFEEYGKIDTIEIITDR": {129: {"n5": (129, 146)}},
+        "EDTEEHHLR": {120: {"n5": (120, 128)}},
+        "EESGKPGAHVTVK": {99: {"n5": (99, 111)}},
+        "GFGFVTFDDHDPVDK": {153: {"n5": (153, 167)}},
+        "GFGFVTFDDHDPVDKIVLQK": {153: {"n5": (153, 172)}},
+        "GFGFVTFSSMAEVDAAMAARPHSIDGR": {62: {"n5": (62, 88)}},
+        "GGGGNFGPGPGSNFR": {213: {"n5": (213, 227)}},
+        "GGNFGFGDSR": {203: {"n5": (203, 212)}},
+        "IDTIEIITDR": {137: {"n5": (137, 146)}},
+        "KLFIGGLSFETTEESLR": {21: {"n5": (21, 37)}},
+        "KLFVGGIKEDTEEHHLR": {112: {"n5": (112, 128)}},
+        "LFIGGLSFETTEESLR": {22: {"n5": (22, 37)}},
+        "LFVGGIKEDTEEHHLR": {113: {"n5": (113, 128)}},
+        "LTDCVVMR": {46: {"n5": (46, 53)}},
+        "NMGGPYGGGNYGPGGSGGSGGYGGR": {325: {"n4": (23, 47)}},
+        "NYYEQWGK": {38: {"n5": (38, 45)}},
+        "QEMQEVQSSR": {190: {"n5": (190, 199)}},
+        "TLETVPLER": {3: {"n5": (3, 11)}},
+        "YHTINGHNAEVR": {173: {"n5": (173, 184)}},
+    }
+
+    print(_create_contigs_dict(nse))

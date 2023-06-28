@@ -547,6 +547,7 @@ def protein_graph(request, run_name, index: int):
                 "id": node,
                 "label": graph.nodes[node].get("aminoacid", "####### BAAAAD #######"),
                 "match": graph.nodes[node].get("match", "false"),
+                "peptides": graph.nodes[node].get("peptides", ""),
             }
         }
         for node in graph.nodes()
