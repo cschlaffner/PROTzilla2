@@ -1220,7 +1220,7 @@
         }
       },
       "expectation_maximisation": {
-        "name": "Expectation maximisation",
+        "name": "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models",
         "description": "",
         "parameters": {
           "input_df": {
@@ -1357,7 +1357,7 @@
       },
       "hierarchical_agglomerative_clustering": {
         "name": "Hierarchical agglomerative clustering",
-        "description": "",
+        "description": "Performs hierarchical clustering utilizing a bottom-up approach",
         "parameters": {
           "input_df": {
             "name": "Choose input dataframe",

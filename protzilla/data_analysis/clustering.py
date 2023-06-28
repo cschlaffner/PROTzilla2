@@ -31,7 +31,7 @@ def k_means(
 ):
     """
     A method that uses k-means to partition a number of samples in k clusters. The \
-    function returns a dataframe with the corresponding cluster of each point and \
+    function returns a dataframe with the corresponding cluster of each sample and \
     another dataframe with the coordinates of the cluster centers.
 
     :param input_df: The dataframe that should be classified in wide or long format
@@ -74,6 +74,7 @@ def k_means(
     """
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
+        # prepare input_df and labels_df dataframes for clustering
         input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
         input_df_wide.sort_values(by="Sample", inplace=True)
         labels_df = (
@@ -81,7 +82,6 @@ def k_means(
             .set_index("Sample")
             .sort_values(by="Sample")
         )
-
         encoding_mapping, labels_df = encode_labels(
             labels_df, labels_column, positive_label
         )
@@ -108,6 +108,8 @@ def k_means(
             labels_df=labels_df["Encoded Label"],
             **kwargs,
         )
+
+        # create dataframes for ouput dict
         cluster_labels_df = pd.DataFrame(
             {"Sample": input_df_wide.index, "Cluster Labels": model.labels_}
         )
@@ -159,7 +161,11 @@ def expectation_maximisation(
     **kwargs,
 ):
     """
-    Performs expectation maximization clustering.
+    Performs expectation maximization clustering by using the GaussianMixture estimator
+    from the sklearn package, which implements the expectation-maximization (EM)
+    algorithm a mixture of Gaussian models. It returns a dataframe with the
+    assigned Gaussian for each sample and a dataframe with the component's density for
+    each sample.
 
     :param input_df: The dataframe that should be classified in wide or long format
     :type input_df: pd.DataFrame
@@ -199,6 +205,7 @@ def expectation_maximisation(
           cluster probabilities.
     :rtype: dict
     """
+    # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     labels_df = (
@@ -220,7 +227,6 @@ def expectation_maximisation(
         reg_covar=reg_covar,
         random_state=random_state,
     )
-
     scoring = [scoring] if isinstance(scoring, str) else scoring
 
     model, model_evaluation_df = perform_clustering(
@@ -232,6 +238,8 @@ def expectation_maximisation(
         labels_df=labels_df["Encoded Label"],
         **kwargs,
     )
+
+    # create dataframes for ouput dict
     cluster_labels_df = pd.DataFrame(
         {"Sample": input_df_wide.index, "Cluster Labels": model.predict(input_df_wide)}
     )
@@ -260,6 +268,10 @@ def hierarchical_agglomerative_clustering(
     **kwargs,
 ):
     """
+    Performs Agglomerative Clustering by recursively merging a pair of clusters of
+    sample data and using linkage distance. The function returns a dataframe with the
+    corresponding cluster of each sample.
+
     :param input_df: The dataframe that should be classified in wide or long format
     :type input_df: pd.DataFrame
     :param metadata_df: A separate dataframe containing additional metadata information.
@@ -287,6 +299,7 @@ def hierarchical_agglomerative_clustering(
         - cluster_labels_df: The dataframe with sample IDs and assigned cluster labels.
     :rtype: dict
     """
+    # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     labels_df = (
@@ -305,6 +318,7 @@ def hierarchical_agglomerative_clustering(
         metric=metric,
         linkage=linkage,
     )
+    scoring = [scoring] if isinstance(scoring, str) else scoring
 
     model, model_evaluation_df = perform_clustering(
         input_df_wide,
@@ -315,6 +329,8 @@ def hierarchical_agglomerative_clustering(
         labels_df=labels_df["Encoded Label"],
         **kwargs,
     )
+
+    # create dataframes for ouput dict
     cluster_labels_df = pd.DataFrame(
         {"Sample": input_df_wide.index, "Cluster Labels": model.labels_}
     )
