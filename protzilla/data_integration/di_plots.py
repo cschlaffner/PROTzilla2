@@ -283,7 +283,7 @@ def gsea_dot_plot(
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     if not dot_size:
-        dot_size = 5    
+        dot_size = 5
 
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
@@ -295,7 +295,7 @@ def gsea_dot_plot(
     if remove_library_names:
         input_df["Term"] = input_df["Term"].apply(lambda x: x.split("__")[1])
 
-    size_y = max((input_df[dot_color_value] < cutoff).sum(), 2.5)
+    size_y = max((input_df[dot_color_value] < cutoff).sum(), 5)
     try:
         ax = gseapy.dotplot(
             input_df,
