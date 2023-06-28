@@ -514,11 +514,6 @@ def tables_content(request, run_name, index, key):
 
 
 def protein_graph(request, run_name, index: int):
-    # graph_path=str(matched_graph_path),
-    # peptide_matches=list(peptide_match_node_start_end.keys()),
-    # peptide_mismatches=sorted(peptide_mismatches),
-    # messages=[dict(level=messages.INFO, msg=msg)],
-
     run = active_runs[run_name]
 
     if index < len(run.history.steps):

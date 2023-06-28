@@ -17,9 +17,9 @@ from protzilla.data_analysis.protein_graphs import (
     _create_protein_variation_graph,
     _create_ref_seq_index,
     _get_peptides,
-    _get_pos_potential_matches,
     _get_ref_seq,
     _longest_paths,
+    _match_potential_matches,
     _modify_graph,
     _potential_peptide_matches,
     peptides_to_isoform,
@@ -843,7 +843,7 @@ def test_get_pos_potential_matches_simple(simple_graph):
     potential_matches = {"ABC": [0], "EFG": [4]}
     planned_match_info = {"ABC": {0: {"1": (0, 2)}}, "EFG": {4: {"1": (4, 6)}}}
 
-    match_info, peptide_mismatches = _get_pos_potential_matches(
+    match_info, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_matches,
         graph_index=graph_index_simple,
         peptide_mismatches=[],
@@ -869,7 +869,7 @@ def test_get_pos_potential_matches_1_pep_2_match(multi_route):
     potential_matches = {"AB": [0, 4]}
     planned_match_info = {"AB": {0: {"1": (0, 1)}, 4: {"4": (0, 1)}}}
 
-    match_info, peptide_mismatches = _get_pos_potential_matches(
+    match_info, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_matches,
         graph_index=graph_index_mulitroute,
         peptide_mismatches=[],
@@ -905,7 +905,7 @@ def test_get_pos_potential_matches_1_pep_2_match_same_node():
     potential_matches = {"ABCD": [0, 7]}
     planned_match_info = {"ABCD": {0: {"1": (0, 3)}, 7: {"1": (7, 10)}}}
 
-    match_info, peptide_mismatches = _get_pos_potential_matches(
+    match_info, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_matches,
         graph_index=graph_index,
         peptide_mismatches=[],
@@ -931,7 +931,7 @@ def test_get_pos_potential_matches_variation_matching(multi_route):
     potential_matches = {"ABCDA": [0]}
     planned_match_info = {"ABCDA": {0: {"1": (0, 2), "2": (0, 0), "4": (0, 0)}}}
 
-    match_info, peptide_mismatches = _get_pos_potential_matches(
+    match_info, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_matches,
         graph_index=graph_index,
         peptide_mismatches=[],
@@ -958,7 +958,7 @@ def test_get_pos_potential_matches_shortcut(multi_route_shortcut):
     potential_matches = {"ABCFG": [0]}
     planned_match_info = {"ABCFG": {0: {"1": (0, 2), "4": (0, 1)}}}
 
-    match_info, peptide_mismatches = _get_pos_potential_matches(
+    match_info, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_matches,
         graph_index=graph_index,
         peptide_mismatches=[],
@@ -1039,7 +1039,7 @@ def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
         },
     )
 
-    graph = _modify_graph(graph, contigs, longest_paths)
+    graph = _modify_graph(graph, contigs)
 
     assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
@@ -1063,7 +1063,7 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
         planned_graph, {"1": {"aminoacid": "EFG", "match": "true", "peptides": "EFG"}}
     )
 
-    graph = _modify_graph(graph, contigs, longest_paths)
+    graph = _modify_graph(graph, contigs)
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1080,7 +1080,7 @@ def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
         },
     )
 
-    graph = _modify_graph(graph, contigs, longest_paths)
+    graph = _modify_graph(graph, contigs)
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1131,7 +1131,7 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
         },
     )
 
-    graph = _modify_graph(graph, contigs, longest_paths)
+    graph = _modify_graph(graph, contigs)
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1180,7 +1180,7 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
         },
     )
 
-    graph = _modify_graph(graph, contigs, longest_paths)
+    graph = _modify_graph(graph, contigs)
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 

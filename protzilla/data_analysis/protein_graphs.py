@@ -12,6 +12,21 @@ from protzilla.constants.paths import RUNS_PATH
 
 
 def variation_graph(protein_id: str, run_name: str):
+    """
+    Wrapper function for creating a Protein-Variation-Graph for a given UniProt Protein.
+
+    For functionality see _create_protein_variation_graph
+
+    :param protein_id: UniProt Protein-ID
+    :type protein_id: str
+    :param run_name: name of the run this is executed from. Used for saving the protein
+        file, graph
+    :type run_name: str
+
+    :return: dict of path to graph, protein id, messages passed to the frontend
+    :rtype: dict[str, str, list]
+    """
+
     if not protein_id:
         return dict(
             graph_path=None,
@@ -101,8 +116,8 @@ def peptides_to_isoform(
     )
 
     ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
-
     graph_index, msg, longest_paths = _create_graph_index(protein_graph, seq_len)
+
     if msg:
         return dict(
             graph_path=graph_path,
@@ -117,7 +132,7 @@ def peptides_to_isoform(
         seq_len=seq_len,
     )
 
-    peptide_match_node_start_end, peptide_mismatches = _get_pos_potential_matches(
+    peptide_match_node_start_end, peptide_mismatches = _match_potential_matches(
         potential_peptide_matches=potential_peptide_matches,
         graph_index=graph_index,
         peptide_mismatches=peptide_mismatches,
@@ -125,8 +140,9 @@ def peptides_to_isoform(
         graph=protein_graph,
         longest_paths=longest_paths,
     )
+
     contigs = _create_contigs_dict(peptide_match_node_start_end)
-    modified_graph = _modify_graph(protein_graph, contigs, longest_paths)
+    modified_graph = _modify_graph(protein_graph, contigs)
 
     logger.info(f"writing modified graph at {matched_graph_path}")
     nx.write_graphml(modified_graph, matched_graph_path)
@@ -205,8 +221,8 @@ def _create_graph_index(
     For information about _longest_path() please see the docstring of that function.
 
     TODO: this might be broken (in conjunction with the ref.-seq index) for versions
-    where a ref.-seq is shorter than the longest path. This would indicate additions to
-    the reference sequence
+     where a ref.-seq is shorter than the longest path. This would indicate additions to
+     the reference sequence
 
     :param protein_graph: Protein-Graph as created by ProtGraph. Expected to have at
         least three nodes; one source, one sink, labeled by `__start__` and `__end__`.
@@ -280,8 +296,6 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     Let n be a node in the graph and P be the set of all predecessors of n.
     longest_paths[n] = max(longest_paths[p] + len(aminoacid of n)) for p in P
 
-    A Variation is assumed to only ever be one aminoacid long.
-
     e.g.:            n1     n2    n3   n5
         __start__ -> ABC -> DE -> F -> JK -> __end__
                                \  L  /
@@ -304,15 +318,15 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
     for node in topo_order:
         if node == start_node:
-            aminoacid_len = 0
+            node_len = 0
         else:
-            aminoacid_len = len(protein_graph.nodes[node]["aminoacid"])
+            node_len = len(protein_graph.nodes[node]["aminoacid"])
 
         # visiting in topological order, so distance to node should be set already
         if distances[node] != -1:
             for neighbor in protein_graph.neighbors(node):
                 distances[neighbor] = max(
-                    distances[neighbor], distances[node] + aminoacid_len
+                    distances[neighbor], distances[node] + node_len
                 )
         else:
             raise Exception(
@@ -457,9 +471,8 @@ def _potential_peptide_matches(
     allowed_mismatches: int, k: int, peptides: list, ref_index: dict, seq_len: int
 ):
     """
-    TODO: out of date! -> update
-    Match peptides to reference sequence. `allowed_mismatches` many mismatches are
-    allowed per try to match peptide to a potential start position in ref_index
+    Get potential start positions for peptides on reference sequence. This is done by
+    looking up the k-mers of the peptide in the reference sequence index.
 
     :param allowed_mismatches: number of mismatches allowed per peptide-match try
     :type allowed_mismatches: int
@@ -517,13 +530,15 @@ def _potential_peptide_matches(
 
 def _create_contigs_dict(node_start_end: dict):
     """
-    Create a start and end points of contigs for each node with a match.
+    Creates mapping from node to start and end position of contigs as well as the
+    peptide(s) that is responsible for the match.
 
-    :param node_start_end: dict of node to list of tuples of
-        start and end positions of matches within the node
-    :type node_start_end: dict
+    :param node_start_end: dict of peptide to dict of start index of peptide match to
+    dict of node to tuple of start and end positions of matches within the node
+    :type node_start_end: dict[str, dict[int, dict[str, tuple[int, int]]]]
 
-    :return: dict of node to list of tuples of start and end positions of contigs
+    :return: dict of node to list of triple of start position, end position and
+    peptide(s) responsible for match
     """
 
     node_match_data = {}
@@ -568,7 +583,7 @@ def _create_contigs_dict(node_start_end: dict):
     return node_mod
 
 
-def _get_pos_potential_matches(
+def _match_potential_matches(
     potential_peptide_matches,
     graph_index,
     peptide_mismatches,
@@ -576,6 +591,37 @@ def _get_pos_potential_matches(
     graph,
     longest_paths,
 ):
+    """
+    Matches the potential peptide matches to the graph. This function utilizes a
+    recursive matching method that branches off at the end of each node that is matches
+    to the end while there is still amino acids left over in the peptide. A new
+    recursion is opened for each successor of a node, given the scenario above.
+    A recursion is closed if the end of the peptide is reached or if the number of mismatches
+    exceeds the allowed number of mismatches. This leads to potential run time problems
+    for many allowed mismatches and long peptides in graphs with frequent Variations.
+
+    For the recursive method, see below.
+
+    :param potential_peptide_matches: dict of peptide to list of starting positions
+    :type potential_peptide_matches: dict[str, list[int]]
+    :param graph_index: list of lists, each list contains the nodes and AAs at that
+    given index along the longest path through the graph
+    :type graph_index: list[list[tuple[str, str]]]
+    :param peptide_mismatches: list of peptides that did not match to the reference
+    sequence
+    :type peptide_mismatches: list[str]
+    :param allowed_mismatches: number of mismatches allowed for a peptide to be
+    considered a match
+    :type allowed_mismatches: int
+    :param graph: protein variation graph, as created by ProtGraph
+    (-> _create_protein_variation_graph)
+    :type graph: networkx.DiGraph
+    :param longest_paths: length of longest path through the graph to each node
+    :type longest_paths: dict[str, int]
+
+    return: dict of peptide to dict of start index of peptide match to dict of node
+    """
+
     peptide_mismatches = set(peptide_mismatches)
 
     def _match_on_graph(
@@ -587,6 +633,39 @@ def _get_pos_potential_matches(
         node_match_data,
         current_index,
     ):
+        """
+        Recursive function that matches a peptide to the graph. The function branches
+        off at the end of each node that is matches to the end while there is still
+        amino acids left over in the peptide. A new recursion is opened for each
+        successor of a node, given the scenario above. A recursion is closed if the end
+        of the peptide is reached or if the number of mismatches exceeds the allowed
+        number of mismatches.
+        For cases where multiple paths through the graph are possible to match to a
+        given peptide from a starting position, the function will return the path with
+        the least number of mismatches. If the number of mismatches is equal,
+        the first of the equal options will be returned.
+
+        :param mismatches: number of mismatches so far
+        :type mismatches: int
+        :param allowed_mismatches: number of mismatches allowed per start position
+        :type allowed_mismatches: int
+        :param graph: protein variation graph, as created by ProtGraph
+        (-> _create_protein_variation_graph)
+        :type graph: networkx.DiGraph
+        :param current_node: current node in the graph, starting with the node of the match start
+        :type current_node: str
+        :param left_over_peptide: peptide that still needs to be matched to the graph
+        :type left_over_peptide: str
+        :param node_match_data: dict of node to tuple of start position, end position
+        :param current_index: index of the amino acid in the current node that is being
+        matched to the peptide
+        :type current_index: int
+
+        :return: tuple of bool, dict of node to tuple of start position, end position,
+        number of mismatches
+        :rtype: tuple[bool, dict[str, tuple[int, int]], int]
+        """
+
         if mismatches > allowed_mismatches:
             return False, {}, mismatches
         if not left_over_peptide:
@@ -667,11 +746,13 @@ def _get_pos_potential_matches(
     return peptide_match_info, list(peptide_mismatches)
 
 
-def _modify_graph(graph, contig_positions, longest_paths):
+def _modify_graph(graph, contig_positions):
     """
     Splits nodes of graph at into new contig nodes defined by the start- and
     end-positions in contig_positions. Adds `match` attribute to nodes, "true" when
-    contig, "false" if not. Sink (__end__) current_node will end up without `match`-attribute
+    contig, "false" if not. Adds `peptide` attribute to match nodes with a string of ';'
+    separated peptides that are responsible for the matchSink (__end__) current_node
+    will end up without `match`-attribute.
 
     :param graph: Protein Graph to be modified
     :type: nx.DiGraph
@@ -810,6 +891,20 @@ def _modify_graph(graph, contig_positions, longest_paths):
 
 
 def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None:
+    """
+    Get peptides for a protein ID from a peptide dataframe.
+    Includes all peptides where either just the protein ID occurs or it is in the group
+    of proteins associated with a given peptide
+
+    :param peptide_df: Peptide dataframe
+    :type peptide_df: pd.DataFrame
+    :param protein_id: (UniProt) Protein ID
+    :type protein_id: str
+
+    :return: List of peptides
+    :rtype: list[str]
+    """
+
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     pattern = rf"^({protein_id}-\d+)$"
     filter = df["Protein ID"].str.contains(pattern)
@@ -818,4 +913,5 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     intensity_name = [col for col in df.columns if "intensity" in col.lower()][0]
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
+
     return df["Sequence"].unique().tolist()
