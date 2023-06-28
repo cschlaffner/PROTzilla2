@@ -278,7 +278,7 @@ def gsea_dot_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not cutoff:
+    if cutoff is None or cutoff == "":
         msg = "Please enter a cutoff value."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
