@@ -123,6 +123,9 @@
               "umap",
               "embedded_data"
             ],
+            "labels_column": "Group",
+            "positive_label": "AD",
+            "model_selection": "Manual",
             "n_clusters": 8,
             "random_state": 6,
             "init_centroid_strategy": "random",
