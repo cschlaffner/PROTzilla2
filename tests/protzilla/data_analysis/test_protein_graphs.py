@@ -972,7 +972,7 @@ def test_get_pos_potential_matches_shortcut(multi_route_shortcut):
 
 def test_create_contigs_dict_simple():
     node_start_end = {"ABC": {0: {"1": (0, 2)}, 4: {"1": (4, 6)}}}
-    planned_contigs = {"1": {"contigs": [(0, 2), (4, 6)], "peptides": ["ABC"]}}
+    planned_contigs = {"1": {"contigs": [(0, 2, "ABC"), (4, 6, "ABC")]}}
 
     contigs = _create_contigs_dict(node_start_end)
     assert planned_contigs == contigs
@@ -981,8 +981,8 @@ def test_create_contigs_dict_simple():
 def test_create_contigs_dict_1_pep_2_match():
     node_start_end = {"ABCD": {0: {"1": (0, 1), "2": (0, 1)}}}
     planned_contigs = {
-        "1": {"contigs": [(0, 1)], "peptides": ["ABCD"]},
-        "2": {"contigs": [(0, 1)], "peptides": ["ABCD"]},
+        "1": {"contigs": [(0, 1, "ABCD")]},
+        "2": {"contigs": [(0, 1, "ABCD")]},
     }
 
     contigs = _create_contigs_dict(node_start_end)
@@ -991,7 +991,7 @@ def test_create_contigs_dict_1_pep_2_match():
 
 def test_create_contigs_dict_1_pep_2_match_same_node():
     node_start_end = {"ABCD": {0: {"1": (0, 3)}, 7: {"1": (7, 10)}}}
-    planned_contigs = {"1": {"contigs": [(0, 3), (7, 10)], "peptides": ["ABCD"]}}
+    planned_contigs = {"1": {"contigs": [(0, 3, "ABCD"), (7, 10, "ABCD")]}}
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
@@ -1009,8 +1009,8 @@ def test_create_contigs_dict_2_pep_multi_match():
     }
 
     planned_contigs = {
-        "1": {"contigs": [(0, 3), (5, 10)], "peptides": ["ABCD", "EFA"]},
-        "4": {"contigs": [(12, 15), (17, 22)], "peptides": ["ABCD", "EFA"]},
+        "1": {"contigs": [(0, 3, "ABCD"), (5, 10, "EFA;ABCD")]},
+        "4": {"contigs": [(12, 15, "ABCD"), (17, 22, "EFA;ABCD")]},
     }
 
     contigs = _create_contigs_dict(node_start_end)
@@ -1020,7 +1020,7 @@ def test_create_contigs_dict_2_pep_multi_match():
 def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     # peptide: ABC
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(0, 2)]}}
+    contigs = {"1": {"contigs": [(0, 2, "ABC")]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABC")
@@ -1028,17 +1028,18 @@ def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     planned_graph.add_edge("n3", "1")
     planned_graph.remove_edge("0", "1")
 
+    # for node in planned_graph.nodes:
+    #     planned_graph.nodes[node]["peptide"] = ""
+
     nx.set_node_attributes(
         planned_graph,
         {
             "1": {"aminoacid": "DEFG", "match": "false"},
-            "n3": {"aminoacid": "ABC", "match": "true"},
+            "n3": {"aminoacid": "ABC", "match": "true", "peptides": "ABC"},
         },
     )
 
     graph = _modify_graph(graph, contigs, longest_paths)
-
-    pprint_graphs(graph, planned_graph)
 
     assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
@@ -1051,32 +1052,31 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
 
     # peptide EFG, ref_seq: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(4, 6)]}}
+    contigs = {"1": {"contigs": [(4, 6, "EFG")]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABCD", match="false")
     planned_graph.add_edge("0", "n3")
     planned_graph.add_edge("n3", "1")
     planned_graph.remove_edge("0", "1")
-    nx.set_node_attributes(planned_graph, {"1": {"aminoacid": "EFG", "match": "true"}})
+    nx.set_node_attributes(
+        planned_graph, {"1": {"aminoacid": "EFG", "match": "true", "peptides": "EFG"}}
+    )
 
     graph = _modify_graph(graph, contigs, longest_paths)
-
-    pprint_graphs(graph, planned_graph)
-    assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
 def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
     # peptide: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(0, 6)]}}
+    contigs = {"1": {"contigs": [(0, 6, "ABCDEFG")]}}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     nx.set_node_attributes(
         planned_graph,
         {
-            "1": {"aminoacid": "ABCDEFG", "match": "true"},
+            "1": {"aminoacid": "ABCDEFG", "match": "true", "peptides": "ABCDEFG"},
         },
     )
 
@@ -1099,11 +1099,14 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
     # peptides: ABCD, NOP
 
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
-    contigs = {"1": {"contigs": [(0, 3)]}, "4": {"contigs": [(2, 5), (8, 10)]}}
+    contigs = {
+        "1": {"contigs": [(0, 3, "ABCD")]},
+        "4": {"contigs": [(2, 5, "ABCD"), (8, 10, "NOP")]},
+    }
 
     graph, _, _ = multi_route_long_nodes
     planned_graph = graph.copy()
-    planned_graph.add_node("n6", aminoacid="ABCD", match="true")
+    planned_graph.add_node("n6", aminoacid="ABCD", match="true", peptides="ABCD")
     planned_graph.add_edge("0", "n6")
     planned_graph.add_edge("n6", "1")
     planned_graph.remove_edge("0", "1")
@@ -1112,7 +1115,7 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
     planned_graph.add_edge("3", "n7")
     planned_graph.remove_edge("2", "4")
     planned_graph.remove_edge("3", "4")
-    planned_graph.add_node("n8", aminoacid="ABCD", match="true")
+    planned_graph.add_node("n8", aminoacid="ABCD", match="true", peptides="ABCD")
     planned_graph.add_edge("n7", "n8")
     planned_graph.add_node("n9", aminoacid="LM", match="false")
     planned_graph.add_edge("n8", "n9")
@@ -1124,15 +1127,11 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
             "1": {"aminoacid": "EFG", "match": "false"},
             "2": {"aminoacid": "H"},
             "3": {"aminoacid": "I"},
-            "4": {"aminoacid": "NOP", "match": "true"},
+            "4": {"aminoacid": "NOP", "match": "true", "peptides": "NOP"},
         },
     )
 
     graph = _modify_graph(graph, contigs, longest_paths)
-
-    pprint_graphs(graph, planned_graph)
-
-    assert planned_graph.nodes == graph.nodes
     assert nx.utils.graphs_equal(graph, planned_graph)
 
 
@@ -1155,9 +1154,9 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
     graph, _, _ = multi_route_long_nodes
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
     contigs = {
-        "1": {"contigs": [(4, 6)]},
-        "2": {"contigs": [(0, 0)]},
-        "4": {"contigs": [(0, 1)]},
+        "1": {"contigs": [(4, 6, "EFGHJK")]},
+        "2": {"contigs": [(0, 0, "EFGHJK")]},
+        "4": {"contigs": [(0, 1, "EFGHJK")]},
     }
 
     planned_graph = graph.copy()
@@ -1165,7 +1164,7 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
     planned_graph.add_edge("0", "n6")
     planned_graph.add_edge("n6", "1")
     planned_graph.remove_edge("0", "1")
-    planned_graph.add_node("n7", aminoacid="JK", match="true")
+    planned_graph.add_node("n7", aminoacid="JK", match="true", peptides="EFGHJK")
     planned_graph.add_edge("2", "n7")
     planned_graph.add_edge("3", "n7")
     planned_graph.add_edge("n7", "4")
@@ -1174,9 +1173,9 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
     nx.set_node_attributes(
         planned_graph,
         {
-            "1": {"aminoacid": "EFG", "match": "true"},
-            "2": {"aminoacid": "H", "match": "true"},
-            "3": {"aminoacid": "I"},  # _modify_graph doesn't touch node->mo match value
+            "1": {"aminoacid": "EFG", "match": "true", "peptides": "EFGHJK"},
+            "2": {"aminoacid": "H", "match": "true", "peptides": "EFGHJK"},
+            "3": {"aminoacid": "I"},  # _modify_graph doesn't touch node->no match value
             "4": {"aminoacid": "ABCDLMNOP", "match": "false"},
         },
     )
@@ -1275,8 +1274,8 @@ def test_peptides_to_isoform_integration_test(
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EG", match="true")
-    planned_graph.add_node("n7", aminoacid="ABC", match="true")
+    planned_graph.add_node("n6", aminoacid="EG", match="false")
+    planned_graph.add_node("n7", aminoacid="ABC", match="true", peptides="ABC")
 
     planned_graph.add_edge("n1", "n6")
     planned_graph.add_edge("n3", "n6")
@@ -1288,15 +1287,11 @@ def test_peptides_to_isoform_integration_test(
     nx.set_node_attributes(
         planned_graph,
         {
-            "n4": {"aminoacid": "DET", "match": "true"},
-            "n5": {"match": "true"},
-            "n6": {"match": "false"},
+            "n4": {"aminoacid": "DET", "match": "true", "peptides": "DET"},
+            "n5": {"match": "true", "peptides": "ABC"},
             "n7": {"match": "true"},
         },
     )
-
-    print("tolle dinge ####################")
-    pprint_graphs(created_graph, planned_graph)
 
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)
@@ -1355,12 +1350,14 @@ def test_peptides_to_isoform_integration_test_shortcut(
                 "match": "false",
                 "accession": "test_protein_variation_shortcut",
             },
-            "n5": {"match": "true", "accession": "test_protein_variation_shortcut"},
-            "n6": {"match": "true"},
+            "n5": {
+                "match": "true",
+                "accession": "test_protein_variation_shortcut",
+                "peptides": "ABCEGA",
+            },
+            "n6": {"match": "true", "peptides": "ABCEGA"},
         },
     )
-
-    pprint_graphs(created_graph, planned_graph)
 
     assert planned_graph.nodes == created_graph.nodes
     assert nx.utils.graphs_equal(planned_graph, created_graph)

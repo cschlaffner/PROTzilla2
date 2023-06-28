@@ -1,4 +1,3 @@
-import pprint
 import re
 import subprocess
 from pathlib import Path
@@ -528,8 +527,6 @@ def _create_contigs_dict(node_start_end: dict):
     """
 
     node_match_data = {}
-    pprint.pprint(node_start_end)
-
     for peptide, start_pos_dict in node_start_end.items():
         for start_index, node_dict in start_pos_dict.items():
             for node, start_end in node_dict.items():
@@ -547,20 +544,14 @@ def _create_contigs_dict(node_start_end: dict):
             node_match_data[node]["match_locations"]
         )
 
-    pprint.pprint(node_match_data)
-
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
     node_mod = {}
     for node, node_dict in node_match_data.items():
-        print("node", node)
-        print("node_dict", node_dict)
         new_positions_list = []
         for start, end, peptide in node_dict["match_locations"]:
-            print(start, end, peptide)
             if not len(new_positions_list):
                 new_positions_list.append((start, end, peptide))
                 continue
-            print("new_positions_list[-1][1]", new_positions_list[-1][1])
             if start <= new_positions_list[-1][1]:
                 new_positions_list[-1] = (
                     new_positions_list[-1][0],
@@ -573,9 +564,6 @@ def _create_contigs_dict(node_start_end: dict):
         node_mod[node] = {
             "contigs": new_positions_list,
         }
-
-    print("node_mod")
-    pprint.pprint(node_mod)
 
     return node_mod
 
@@ -695,9 +683,6 @@ def _modify_graph(graph, contig_positions, longest_paths):
     :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
     by current_node attribute `matched`
     """
-    import pprint
-
-    pprint.pprint(contig_positions)
 
     def _node_length(node):
         return len(graph.nodes[node]["aminoacid"])
@@ -834,30 +819,3 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
     return df["Sequence"].unique().tolist()
-
-
-if __name__ == "__main__":
-    nse = {
-        "DYFEEYGK": {129: {"n5": (129, 136)}},
-        "DYFEEYGKIDTIEIITDR": {129: {"n5": (129, 146)}},
-        "EDTEEHHLR": {120: {"n5": (120, 128)}},
-        "EESGKPGAHVTVK": {99: {"n5": (99, 111)}},
-        "GFGFVTFDDHDPVDK": {153: {"n5": (153, 167)}},
-        "GFGFVTFDDHDPVDKIVLQK": {153: {"n5": (153, 172)}},
-        "GFGFVTFSSMAEVDAAMAARPHSIDGR": {62: {"n5": (62, 88)}},
-        "GGGGNFGPGPGSNFR": {213: {"n5": (213, 227)}},
-        "GGNFGFGDSR": {203: {"n5": (203, 212)}},
-        "IDTIEIITDR": {137: {"n5": (137, 146)}},
-        "KLFIGGLSFETTEESLR": {21: {"n5": (21, 37)}},
-        "KLFVGGIKEDTEEHHLR": {112: {"n5": (112, 128)}},
-        "LFIGGLSFETTEESLR": {22: {"n5": (22, 37)}},
-        "LFVGGIKEDTEEHHLR": {113: {"n5": (113, 128)}},
-        "LTDCVVMR": {46: {"n5": (46, 53)}},
-        "NMGGPYGGGNYGPGGSGGSGGYGGR": {325: {"n4": (23, 47)}},
-        "NYYEQWGK": {38: {"n5": (38, 45)}},
-        "QEMQEVQSSR": {190: {"n5": (190, 199)}},
-        "TLETVPLER": {3: {"n5": (3, 11)}},
-        "YHTINGHNAEVR": {173: {"n5": (173, 184)}},
-    }
-
-    print(_create_contigs_dict(nse))

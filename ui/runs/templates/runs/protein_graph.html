@@ -113,7 +113,7 @@
             cy.nodes().forEach(function (node) {
                 let popper;
                 node.on('mouseover', (event) => {
-                    let peptides_string = node.data('peptides').replace(';', '<br>');
+                    let peptides_string = node.data('peptides').split(';').join('<br>');
                     popper = node.popper({
                         content: () => {
                             let div = document.createElement('div');
@@ -145,7 +145,6 @@
             var url = URL.createObjectURL(blob);
             return url;
         };
-
     </script>
 {% endblock %}
 
