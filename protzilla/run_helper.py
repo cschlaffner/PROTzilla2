@@ -43,15 +43,6 @@ def insert_special_params(param_dict, run):
 
     if param_dict.get("default_select_all", False):
         param_dict["default"] = list(param_dict.get("categories", []))
-    # this should be done in the frontend
-    # if (
-    #     param_dict["type"] == "numeric"
-    #     and ("multiple" in param_dict and param_dict["multiple"])
-    #     and isinstance(param_dict["default"], list)
-    # ):
-    #     # The default value of a multiselect numeric input is saved as a list of
-    #     # numbers, but it needs to be shown in the frontend in the format "1|2|0.12"
-    #     param_dict["default"] = "|".join(str(num) for num in param_dict["default"])
 
 
 def get_parameters(run, section, step, method):

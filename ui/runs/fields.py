@@ -33,6 +33,10 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     # a method with its corresponding meta information
     if param_dict["type"] == "numeric":
         param_dict["multiple"] = param_dict.get("multiple", False)
+        if param_dict["multiple"]:
+            # The default value of a multiselect numeric input is saved as a list of
+            # numbers, but it needs to be shown in the frontend in the format "1|2|0.12"
+            param_dict["default"] = "|".join(str(num) for num in param_dict["default"])
         template = "runs/field_number.html"
         if "step" not in param_dict:
             param_dict["step"] = "any"
