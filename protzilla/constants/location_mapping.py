@@ -3,10 +3,9 @@ from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
-    plots,
-    classification,
     model_evaluation,
     model_evaluation_plots,
+    plots,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -343,4 +342,9 @@ plot_map = {
         "plot",
         "go_enrichment_dot_plot",
     ): di_plots.go_enrichment_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_dot_plot",
+    ): di_plots.gsea_dot_plot,
 }

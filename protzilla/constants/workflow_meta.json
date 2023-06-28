@@ -2159,6 +2159,73 @@
             "default": 5
           }
         }
+      },
+      "gsea_dot_plot": {
+        "name": "Dot plot for (pre-ranked) GSEA",
+        "description": "Creates a categorical scatter plot from GSEA data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "gene_sets"
+            ]
+          },
+          "gene_sets": {
+            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "gsea_enrichment_categories"
+          },
+          "dot_color_value": {
+            "name": "Color the dots by value",
+            "type": "categorical",
+            "categories": [
+              "FDR q-val",
+              "NOM p-val"
+            ],
+            "default": "FDR q-val"
+          },
+          "x_axis_value": {
+            "name": "Value to display on x axis",
+            "type": "categorical",
+            "categories": [
+              "ES",
+              "NES"
+            ],
+            "default": "NES"
+          },
+          "cutoff": {
+            "name": "Cutoff value for fdr q-value or nominal p-value",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          },
+          "remove_library_names": {
+            "name": "Remove library names from gene sets (e.g. 'KEGG_2013__')",
+            "type": "boolean",
+            "default": false
+          }
+        }
       }
     }
   }
