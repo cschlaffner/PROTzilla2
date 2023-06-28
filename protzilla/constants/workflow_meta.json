@@ -2351,6 +2351,14 @@
               null
             ]
           },
+          "database_name": {
+            "name": "Database Name",
+            "type": "categorical",
+            "fill": "uniprot_databases",
+            "fill_dynamic": [
+              "fields"
+            ]
+          },
           "fields": {
             "name": "Fields",
             "type": "categorical",
