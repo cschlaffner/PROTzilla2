@@ -1,0 +1,152 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "filter_samples",
+          "method": "proteins_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "imputation",
+          "method": "min_value_per_protein",
+          "parameters": {
+            "shrinking_value": 1
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "fc_threshold": 0,
+            "log_base": 2,
+            "grouping": "Group",
+            "group1": "CTR",
+            "group2": "AD",
+            "metadata_df": ""
+          },
+          "output_name": "ttest"
+        },
+        {
+          "name": "plot",
+          "method": "volcano",
+          "parameters": {
+            "p_values": [
+              "ttest",
+              "corrected_p_values_df"
+            ],
+            "log2_fc": [
+              "ttest",
+              "log2_fold_change_df"
+            ],
+            "fc_threshold": [
+              "ttest",
+              "fc_threshold"
+            ],
+            "alpha": [
+              "ttest",
+              "corrected_alpha"
+            ],
+            "proteins_of_interest_input": [
+              "ttest",
+              "de_proteins_df"
+            ]
+          }
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}

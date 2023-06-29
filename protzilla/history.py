@@ -52,7 +52,7 @@ class History:
         return instance
 
     def __init__(self, run_name: str, df_mode: str):
-        assert df_mode in ("disk", "memory", "disk_memory")
+        assert df_mode in ("disk", "memory", "disk_memory"), f"df mode is {df_mode}"
 
         self.df_mode = df_mode
         self.run_name = run_name
