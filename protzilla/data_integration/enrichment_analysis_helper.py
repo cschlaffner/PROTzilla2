@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 from django.contrib import messages
 
+from protzilla.constants.logging import logger
+
 from .database_query import biomart_query
 
 
@@ -143,6 +145,9 @@ def read_background_file(path):
             background = pd.read_csv(path, low_memory=False, header=None)
             # if multiple columns, use first
             background = background.iloc[:, 0].tolist()
+            logger.warning(
+                "You provided a background file with multiple columns. Only the first will be used."
+            )
         elif file_extension == ".txt":
             with open(path, "r") as f:
                 background = [line.strip() for line in f]
