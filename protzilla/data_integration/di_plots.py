@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 
+from protzilla.constants.logging import logger
 from protzilla.utilities.utilities import fig_to_base64
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
@@ -230,3 +231,88 @@ def go_enrichment_dot_plot(
     else:
         msg = "Invalid x_axis_type value"
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+
+def gsea_dot_plot(
+    input_df,
+    cutoff=0.05,
+    gene_sets=[],
+    dot_color_value="FDR q-val",
+    x_axis_value="NES",
+    title="",
+    show_ring=False,
+    dot_size=5,
+    remove_library_names=False,
+):
+    """
+    Creates a dot plot from GSEA and preranked GSEA results. The plot is created using the gseapy library.
+    Only the top_terms that meet the cutoff are shown.
+
+    :param input_df: GO enrichment results (offline or Enrichr)
+    :type input_df: pandas.DataFrame
+    :param cutoff: Cutoff for the dot_color_value. Only terms with
+        dot_color_value < cutoff will be shown.
+    :type cutoff: float
+    :param gene_sets: Gene Set Libraries from enrichment to plot
+    :type gene_sets: list
+    :param dot_color_value: What to display as color of the dots: "FDR q-val" or "NOM p-val", defaults to "FDR q-val"
+    :type dot_color_value: str
+    :param x_axis_value: What to display on the x-axis: "ES"(Enrichment Score) or "NES"(Normalised ES), defaults to "NES"
+    :type x_axis_value: str
+    :param title: Title of the plot, defaults to ""
+    :type title: str, optional
+    :param show_ring: Show a ring around the dots, defaults to False
+    :type show_ring: bool
+    :param dot_size: Size of the dots, defaults to 5
+    :type dot_size: int
+    :param remove_library_names: Remove the library names from the displayed gene sets, defaults to False
+    :type remove_library_names: bool
+    :return: Base64 encoded image of the plot
+    :rtype: bytes
+    """
+    if not isinstance(input_df, pd.DataFrame) or not "NES" in input_df.columns:
+        msg = "Please input a dataframe from GSEA or preranked GSEA."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    if input_df is None or len(input_df) == 0 or input_df.empty:
+        msg = "No data to plot. Please check your input data or run enrichment again."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    if cutoff is None or cutoff == "":
+        msg = "Please enter a cutoff value."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    if not dot_size:
+        dot_size = 5
+
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
+    if not gene_sets or "all" in gene_sets:
+        logger.info("Plotting for all gene set libraries.")
+    else:  # remove all Gene_sets that were not selected
+        input_df = input_df[input_df["Term"].str.startswith(tuple(gene_sets))]
+
+    if remove_library_names:
+        input_df["Term"] = input_df["Term"].apply(lambda x: x.split("__")[1])
+
+    size_y = max((input_df[dot_color_value] < cutoff).sum(), 5)
+    try:
+        ax = gseapy.dotplot(
+            input_df,
+            column=dot_color_value,
+            x=x_axis_value,
+            cutoff=cutoff,
+            size=dot_size,
+            figsize=(5, size_y),
+            title=title,
+            show_ring=show_ring,
+        )
+        return [
+            dict(
+                plot_base64=fig_to_base64(ax.get_figure()),
+                key="gsea_dot_plot_img",
+            )
+        ]
+    except ValueError as e:
+        msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
