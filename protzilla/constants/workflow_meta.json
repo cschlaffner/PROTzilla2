@@ -1731,6 +1731,193 @@
             "default": null
           }
         }
+      },
+      "naive_bayes": {
+        "name": "Gaussian Naives Bayes",
+        "description": "",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "categories": [],
+            "default": "None"
+          },
+          "test_size": {
+            "name": "Test size",
+            "type": "numeric",
+            "default": 0.20
+          },
+          "split_stratify": {
+            "name": "Split data in a stratified fashion",
+            "type": "categorical",
+            "categories": [
+              "yes",
+              "no"
+            ],
+            "default": "yes"
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": "None"
+          },
+          "validation_strategy": {
+            "name": "Validation Strategy",
+            "type": "categorical_dynamic",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Leave one out",
+              "Leave p out",
+              "Manual"
+            ],
+            "default": "K-Fold",
+            "dynamic_parameters": {
+              "K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Stratified K-Fold": [
+                "n_splits",
+                "shuffle"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats",
+                "random_state_cv"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ],
+              "Manual": [
+                "test_size"
+              ]
+            }
+          },
+          "train_val_split": {
+            "name": "Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 0.20
+          },
+          "n_splits": {
+            "name": "Number of folds",
+            "type": "numeric",
+            "min": 2,
+            "dynamic": true,
+            "default": 5
+          },
+          "shuffle": {
+            "name": "Whether to shuffle the data before splitting into batches",
+            "type": "categorical_dynamic",
+            "categories": [
+              "yes",
+              "no"
+            ],
+            "default": "yes",
+            "dynamic": true,
+            "dynamic_parameters": {
+              "True": [
+                "random_state_cv"
+              ]
+            }
+          },
+          "n_repeats": {
+            "name": "Number of times cross-validator needs to be repeated",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 10
+          },
+          "random_state_cv": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 42,
+            "dynamic": true
+          },
+          "p_samples": {
+            "name": "Size of the test sets",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 1
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef", "mean_squared_error"
+            ],
+            "default": "accuracy",
+            "multiple": true
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
+            "default": "accuracy",
+            "dynamic": true
+          },
+          "var_smoothing": {
+            "name": "Portion of the largest variance of all features that is added to variances for calculation stability",
+            "type": "numeric",
+            "min": 0.0,
+            "default": 0.000000001,
+            "multiple": true
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
       }
     },
     "model_evaluation": {

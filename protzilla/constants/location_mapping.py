@@ -165,6 +165,11 @@ method_map = {
     ): classification.svm,
     (
         "data_analysis",
+        "classification",
+        "naive_bayes",
+    ): classification.naive_bayes,
+    (
+        "data_analysis",
         "model_evaluation",
         "evaluate_classification_model",
     ): model_evaluation.evaluate_classification_model,

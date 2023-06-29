@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 
 from protzilla.data_analysis.classification_helper import (
@@ -66,7 +67,9 @@ def perform_classification(
         return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, random_state, **parameters)
+        cv = perform_cross_validation(
+            validation_strategy, random_state=random_state, **parameters
+        )
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
@@ -78,7 +81,9 @@ def perform_classification(
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, random_state, **parameters)
+        cv = perform_cross_validation(
+            validation_strategy, random_state=random_state, **parameters
+        )
         model = perform_grid_search_cv(
             grid_search_method,
             clf,
@@ -160,6 +165,8 @@ def random_forest(
         .set_index("Sample")
         .sort_values(by="Sample")
     )
+    common_indices = input_df_wide.index.intersection(labels_df.index)
+    labels_df = labels_df.loc[common_indices]
     encoding_mapping, labels_df = encode_labels(
         labels_df, labels_column, positive_label
     )
@@ -239,6 +246,8 @@ def svm(
         .set_index("Sample")
         .sort_values(by="Sample")
     )
+    common_indices = input_df_wide.index.intersection(labels_df.index)
+    labels_df = labels_df.loc[common_indices]
     encoding_mapping, labels_df = encode_labels(
         labels_df, labels_column, positive_label
     )
@@ -262,6 +271,73 @@ def svm(
         max_iter=max_iter,
         random_state=random_state,
     )
+    # multiselect returns a string when only one value is selected
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
+    model, model_evaluation_df = perform_classification(
+        X_train,
+        y_train,
+        validation_strategy,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        random_state=random_state,
+        **kwargs,
+    )
+
+    X_test.reset_index(inplace=True)
+    X_train.reset_index(inplace=True)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
+        X_test_df=X_test,
+        y_train_df=y_train,
+        y_test_df=y_test,
+    )
+
+
+def naive_bayes(
+    input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    positive_label: str = None,
+    var_smoothing: float = 1e-9,
+    random_state=42,
+    model_selection: str = "Grid search",
+    validation_strategy: str = "Cross Validation",
+    scoring: list[str] = ["accuracy"],
+    **kwargs,
+):
+    # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
+
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    common_indices = input_df_wide.index.intersection(labels_df.index)
+    labels_df = labels_df.loc[common_indices]
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
+
+    X_train, X_test, y_train, y_test = perform_train_test_split(
+        input_df_wide,
+        labels_df["Encoded Label"],
+        **kwargs,
+    )
+
+    clf = GaussianNB()
+
+    clf_parameters = dict(var_smoothing=var_smoothing)
     # multiselect returns a string when only one value is selected
     scoring = [scoring] if isinstance(scoring, str) else scoring
 
