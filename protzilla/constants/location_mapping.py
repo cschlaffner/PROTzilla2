@@ -8,6 +8,7 @@ from ..data_analysis import (
     model_evaluation,
     model_evaluation_plots,
     model_selection_plots,
+    model_selection,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -173,6 +174,11 @@ method_map = {
         "model_evaluation",
         "evaluate_classification_model",
     ): model_evaluation.evaluate_classification_model,
+    (
+        "data_analysis",
+        "model_selection",
+        "compute_learning_curve",
+    ): model_selection.compute_learning_curve,
     (
         "data_analysis",
         "dimension_reduction",

@@ -1085,176 +1085,33 @@
         "name": "Learning curve",
         "description": "Learning curve",
         "parameters": {
-          "clf_str": {
-            "name": "Choose classification method",
-            "type": "categorical",
-            "categories": ["Random Forest", "Support Vector Machine"],
-            "default": "Random Forest"
-          },
-          "input_df": {
-            "name": "Choose input dataframe",
+          "train_sizes": {
+            "name": "Training sizes",
             "type": "named_output",
             "default": [
               null,
               null
             ]
           },
-          "labels_column": {
-            "name": "Choose labels column from metadata",
-            "type": "categorical",
-            "fill": "metadata_columns",
-            "fill_dynamic": [
-              "positive_label"
-            ],
-            "categories": [],
-            "default": "None"
+          "test_scores": {
+            "name": "Test scores",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           },
-          "positive_label": {
-            "name": "Choose positive class",
-            "type": "categorical",
-            "fill": "metadata_column_data",
-            "categories": [],
-            "default": "None"
+          "train_scores": {
+            "name": "Train scores",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           },
-          "cross_validation_strategy": {
-            "name": "Cross Validation Strategy",
-            "type": "categorical_dynamic",
-            "categories": [
-              "K-Fold",
-              "Repeated K-Fold",
-              "Stratified K-Fold",
-              "Leave one out",
-              "Leave p out",
-              "Repeated Stratified K-Fold",
-              "Nested CV"
-            ],
-            "default": "K-Fold",
-            "dynamic_parameters": {
-              "K-Fold": [
-                "n_splits"
-              ],
-              "Stratified K-Fold": [
-                "n_splits"
-              ],
-              "Repeated K-Fold": [
-                "n_splits",
-                "n_repeats"
-              ],
-              "Repeated Stratified K-Fold": [
-                "n_splits",
-                "n_repeats"
-              ],
-              "Leave p out": [
-                "p_samples"
-              ],
-              "Nested CV": ["inner_cv", "outer_cv"]
-            }
-          },
-          "inner_cv": {
-            "name": "Inner Cross Validation Strategy",
-            "type": "categorical",
-            "categories": [
-              "K-Fold",
-              "Repeated K-Fold",
-              "Stratified K-Fold",
-              "Repeated Stratified K-Fold",
-              "Leave one out",
-              "Leave p out"
-            ],
-            "default": "K-Fold",
-            "dynamic": true
-          },
-          "outer_cv": {
-            "name": "Outer Cross Validation Strategy",
-            "type": "categorical_dynamic",
-            "categories": [
-              "K-Fold",
-              "Repeated K-Fold",
-              "Stratified K-Fold",
-              "Repeated Stratified K-Fold",
-              "Leave one out",
-              "Leave p out"
-            ],
-            "default": "K-Fold",
-            "dynamic": true,
-            "dynamic_parameters": {
-              "K-Fold": [
-                "n_splits"
-              ],
-              "Stratified K-Fold": [
-                "n_splits"
-              ],
-              "Repeated K-Fold": [
-                "n_splits",
-                "n_repeats"
-              ],
-              "Repeated Stratified K-Fold": [
-                "n_splits",
-                "n_repeats"
-              ],
-              "Leave p out": [
-                "p_samples"
-              ]
-            }
-          },
-          "n_splits": {
-            "name": "Number of folds",
-            "type": "numeric",
-            "min": 2,
-            "dynamic": true,
-            "default": 5
-          },
-          "n_repeats": {
-            "name": "Number of times cross-validator needs to be repeated",
-            "type": "numeric",
-            "dynamic": true,
-            "default": 10
-          },
-          "p_samples": {
-            "name": "Size of the test sets",
-            "type": "numeric",
-            "dynamic": true,
-            "default": 1
-          },
-          "train_sizes": {
-            "name": "Relative or absolute numbers of training examples that will be used to generate the learning curve",
-            "type": "numeric",
-            "multiple": true,
-            "default": null
-          },
-          "scoring": {
-            "name": "score",
-            "type": "categorical",
-            "categories": [
-              "accuracy",
-              "precision",
-              "recall",
-              "matthews_corrcoef", "mean_squared_error"
-            ],
-            "default": "accuracy",
-            "multiple": true
-          },
-          "shuffle": {
-            "name": "Whether to shuffle the data before splitting into batches",
-            "type": "categorical",
-            "categories": [
-              "yes",
-              "no"
-            ],
-            "default": "yes"
-          },
-          "random_state": {
-            "name": "Seed for random number generation",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 6
-          },
-          "metadata_df": {
-            "type": "empty",
-            "name": "metadata_df",
-            "default": null
+          "score_name": {
+            "name": "Score name",
+            "type": "text"
           }
         }
       }
@@ -1903,6 +1760,185 @@
             "min": 0.0,
             "default": 0.000000001,
             "multiple": true
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      }
+    },
+    "model_selection": {
+      "compute_learning_curve": {
+        "name": "Learning curve",
+        "description": "Learning curve",
+        "parameters": {
+          "clf_str": {
+            "name": "Choose classification method",
+            "type": "categorical",
+            "categories": ["Random Forest", "Support Vector Machine"],
+            "default": "Random Forest"
+          },
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": "None"
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": "None"
+          },
+          "cross_validation_strategy": {
+            "name": "Cross Validation Strategy",
+            "type": "categorical_dynamic",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Leave one out",
+              "Leave p out",
+              "Repeated Stratified K-Fold",
+              "Nested CV"
+            ],
+            "default": "K-Fold",
+            "dynamic_parameters": {
+              "K-Fold": [
+                "n_splits"
+              ],
+              "Stratified K-Fold": [
+                "n_splits"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ],
+              "Nested CV": ["inner_cv", "outer_cv"]
+            }
+          },
+          "inner_cv": {
+            "name": "Inner Cross Validation Strategy",
+            "type": "categorical",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
+              "Leave one out",
+              "Leave p out"
+            ],
+            "default": "K-Fold",
+            "dynamic": true
+          },
+          "outer_cv": {
+            "name": "Outer Cross Validation Strategy",
+            "type": "categorical_dynamic",
+            "categories": [
+              "K-Fold",
+              "Repeated K-Fold",
+              "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
+              "Leave one out",
+              "Leave p out"
+            ],
+            "default": "K-Fold",
+            "dynamic": true,
+            "dynamic_parameters": {
+              "K-Fold": [
+                "n_splits"
+              ],
+              "Stratified K-Fold": [
+                "n_splits"
+              ],
+              "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Leave p out": [
+                "p_samples"
+              ]
+            }
+          },
+          "n_splits": {
+            "name": "Number of folds",
+            "type": "numeric",
+            "min": 2,
+            "dynamic": true,
+            "default": 5
+          },
+          "n_repeats": {
+            "name": "Number of times cross-validator needs to be repeated",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 10
+          },
+          "p_samples": {
+            "name": "Size of the test sets",
+            "type": "numeric",
+            "dynamic": true,
+            "default": 1
+          },
+          "train_sizes": {
+            "name": "Relative or absolute numbers of training examples that will be used to generate the learning curve",
+            "type": "numeric",
+            "multiple": true,
+            "default": null
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef", "mean_squared_error"
+            ],
+            "default": "accuracy",
+            "multiple": true
+          },
+          "shuffle": {
+            "name": "Whether to shuffle the data before splitting into batches",
+            "type": "categorical",
+            "categories": [
+              "yes",
+              "no"
+            ],
+            "default": "yes"
           },
           "random_state": {
             "name": "Seed for random number generation",
