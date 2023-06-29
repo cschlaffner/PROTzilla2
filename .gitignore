@@ -1,5 +1,7 @@
 .DS_Store
 .idea/
+Miniconda3-latest-Linux-x86_64.sh
+Miniconda3-latest-MacOSX-x86_64.sh
 user_data/runs/*
 user_data/external_data/*
 user_data/debug/*
