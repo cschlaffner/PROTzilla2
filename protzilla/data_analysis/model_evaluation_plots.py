@@ -13,7 +13,7 @@ from protzilla.constants.colors import (
 )
 
 
-def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None):
+def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the precision-recall curve for a classification model.
     :param model: The trained classification model instance to be evaluated.
@@ -35,11 +35,11 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
         model, input_test_df, labels_test_df["Encoded Label"]
     )
     display.plot()
-    plt.title(title)
+    plt.title(plot_title)
     return [fig_to_base64(display.figure_)]
 
 
-def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
+def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the roc curve for a classification model.
     :param model: The trained classification model instance to be evaluated.
@@ -61,7 +61,7 @@ def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
         model, input_test_df, labels_test_df["Encoded Label"]
     )
     display.plot()
-    plt.title(title)
+    plt.title(plot_title)
     return [fig_to_base64(display.figure_)]
 
 
