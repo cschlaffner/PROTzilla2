@@ -361,12 +361,14 @@ def go_analysis_with_enrichr(
     """
     A method that performs online over-representation analysis for a given set of proteins
     against a given set of gene sets using the GSEApy package which accesses
-    the Enrichr API.Uniprot Protein IDs in proteins are converted to uppercase HGNC gene symbols.
+    the Enrichr API. Uniprot Protein IDs in proteins are converted to uppercase HGNC gene symbols.
     If no match is found, the protein is excluded from the analysis. All excluded proteins
     are returned in a list.
     The enrichment is performed against a background provided as a path (recommended), number or
     name of a biomart dataset. If no background is provided, all genes in the gene sets are used as
     the background. Up- and down-regulated proteins are analyzed separately and the results are merged.
+    When gene sets from Enrichr are used, the background parameters are ignored. All genes in the gene sets
+    will be used instead.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
@@ -405,9 +407,6 @@ def go_analysis_with_enrichr(
     :return: dictionary with results and filtered groups
     :rtype: dict
     """
-    # enhancement: protein_sets are categorical for now, could also be custom file upload later
-    #       background parameter would work then (with uploaded file)
-
     out_messages = []
     if (
         not isinstance(proteins, pd.DataFrame)
@@ -431,6 +430,7 @@ def go_analysis_with_enrichr(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    # if gene sets from Enrichr are used, ignore background parameter because gseapy does not support it
     if gene_sets_enrichr and (
         background_path or background_number or background_biomart
     ):

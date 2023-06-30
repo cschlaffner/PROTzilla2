@@ -236,7 +236,7 @@ def go_enrichment_dot_plot(
 
 def gsea_dot_plot(
     input_df,
-    cutoff,
+    cutoff=0.05,
     gene_sets=[],
     dot_color_value="FDR q-val",
     x_axis_value="NES",
@@ -279,6 +279,13 @@ def gsea_dot_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
+    if cutoff is None or cutoff == "":
+        msg = "Please enter a cutoff value."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+    if not dot_size:
+        dot_size = 5
+
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
     if not gene_sets or "all" in gene_sets:
@@ -289,7 +296,7 @@ def gsea_dot_plot(
     if remove_library_names:
         input_df["Term"] = input_df["Term"].apply(lambda x: x.split("__")[1])
 
-    size_y = len(input_df[dot_color_value] < cutoff) * 1.5
+    size_y = max((input_df[dot_color_value] < cutoff).sum(), 5)
     try:
         ax = gseapy.dotplot(
             input_df,

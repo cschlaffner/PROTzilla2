@@ -2135,6 +2135,14 @@
               null
             ]
           },
+          "database_name": {
+            "name": "Database Name",
+            "type": "categorical",
+            "fill": "uniprot_databases",
+            "fill_dynamic": [
+              "fields"
+            ]
+          },
           "fields": {
             "name": "Fields",
             "type": "categorical",
@@ -2285,7 +2293,7 @@
             ]
           },
           "gene_sets": {
-            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "gsea_enrichment_categories"
@@ -2309,7 +2317,7 @@
             "default": "NES"
           },
           "cutoff": {
-            "name": "Only terms with dot_color_value < cutoff will be shown",
+            "name": "Cutoff value for fdr q-value or nominal p-value",
             "type": "numeric",
             "min": 0,
             "max": 1,
