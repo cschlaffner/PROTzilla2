@@ -28,9 +28,9 @@
 | protzilla/data\_integration/database\_integration.py                    |       48 |        1 |       30 |        1 |     97% |        59 |
 | protzilla/data\_integration/database\_query.py                          |       35 |       17 |       12 |        1 |     49% |12, 46-56, 60, 66-73 |
 | protzilla/data\_integration/di\_plots.py                                |      106 |       35 |       50 |        7 |     65% |69, 101->104, 105, 166-233, 282-283, 286, 296->exit |
-| protzilla/data\_integration/enrichment\_analysis.py                     |      258 |       64 |      118 |       26 |     74% |22-23, 45->47, 161->167, 171->177, 178-180, 182, 209-213, 227-231, 276->283, 283->290, 325-328, 339-341, 394-404, 406->416, 408-409, 411-414, 416->423, 421, 424-428, 431-432, 450, 500-501, 509-510, 512-513, 515-518, 522-523, 525-528, 565-567, 582-584, 589 |
-| protzilla/data\_integration/enrichment\_analysis\_gsea.py               |      115 |        4 |       52 |        4 |     95% |137, 201, 338, 411 |
-| protzilla/data\_integration/enrichment\_analysis\_helper.py             |       66 |        0 |       46 |        0 |    100% |           |
+| protzilla/data\_integration/enrichment\_analysis.py                     |      284 |       66 |      138 |       28 |     75% |22-23, 45->47, 161->167, 171->177, 178-180, 182, 189, 205-209, 223-227, 272->279, 279->286, 338-340, 425, 441-445, 447, 460-470, 472->482, 474-475, 482->489, 490-494, 497-498, 516, 577-578, 586-587, 589-590, 592-595, 599-600, 602-605, 618, 637-640, 654-657, 662 |
+| protzilla/data\_integration/enrichment\_analysis\_gsea.py               |      115 |        4 |       52 |        4 |     95% |140, 205, 345, 419 |
+| protzilla/data\_integration/enrichment\_analysis\_helper.py             |       81 |        0 |       54 |        0 |    100% |           |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                           |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                       |       17 |        2 |        4 |        1 |     76% |     51-52 |
 | protzilla/data\_preprocessing/filter\_samples.py                        |       34 |        0 |        4 |        0 |    100% |           |
@@ -45,7 +45,7 @@
 | protzilla/importing/ms\_data\_import.py                                 |       42 |        4 |        8 |        2 |     88% |12-13, 55-56 |
 | protzilla/importing/peptide\_import.py                                  |       22 |        2 |        2 |        0 |     92% |     15-16 |
 | protzilla/run.py                                                        |      266 |       28 |       90 |        8 |     85% |46-52, 56-62, 120->131, 152, 154, 171->169, 208, 252-253, 282-285, 328, 361, 365-368, 373->372 |
-| protzilla/run\_helper.py                                                |       53 |       17 |       40 |        3 |     63% |32-48, 54, 63 |
+| protzilla/run\_helper.py                                                |       58 |       21 |       42 |        3 |     60% |33-54, 60, 69 |
 | protzilla/runner.py                                                     |       89 |        4 |       38 |        3 |     94% |115, 124, 156-157 |
 | protzilla/utilities/\_\_init\_\_.py                                     |        1 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/clustergram.py                                      |      375 |       99 |      194 |       55 |     67% |69, 84, 86, 93, 137-138, 140, 142, 148->151, 151->158, 177, 192, 196, 200, 204, 214, 218-223, 228->230, 231, 233, 235, 239->241, 241->245, 246-257, 260, 262, 264-283, 302-305, 308->310, 315->317, 318, 370-371, 373-374, 389-390, 392-393, 461->467, 473, 490, 510, 513->536, 518->521, 555->561, 561->574, 649->654, 662->666, 683, 685, 715-722, 731-744, 754-758, 812->829, 829->849, 881->889, 889->898, 916-928, 931-943, 969-985, 999-1015 |
@@ -64,7 +64,7 @@
 | tests/protzilla/data\_analysis/test\_plots\_data\_analysis.py           |       66 |        5 |       22 |       11 |     82% |75, 82, 89, 96->exit, 102->exit, 112, 119, 126->exit, 131->exit, 157->exit, 179->exit |
 | tests/protzilla/data\_analysis/test\_protein\_graphs.py                 |      265 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/data\_integration/test\_database\_integration.py        |       25 |        0 |        2 |        0 |    100% |           |
-| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      410 |       15 |       76 |        1 |     96% |38, 43-95, 498-500 |
+| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      459 |       37 |       92 |        1 |     91% |39, 44-96, 517-598, 611-613 |
 | tests/protzilla/data\_integration/test\_plots\_data\_integration.py     |       94 |        8 |       16 |        8 |     85% |28, 38, 53, 159, 188, 205, 255, 266 |
 | tests/protzilla/data\_preprocessing/\_\_init\_\_.py                     |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py           |       25 |        4 |        2 |        1 |     81% | 13-39, 84 |
@@ -107,7 +107,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      278 |      226 |       86 |        0 |     15% |38, 50-81, 108-124, 141-162, 168-272, 276-283, 287-289, 293-295, 299-301, 305-314, 318-325, 329-337, 341-368, 372-401, 405-407, 411-412, 434-436, 440-454, 462-492, 511-524 |
 | ui/runs/views\_helper.py                                                |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                               **TOTAL** | **5621** |  **933** | **1560** |  **217** | **80%** |           |
+|                                                               **TOTAL** | **5716** |  **961** | **1606** |  **219** | **80%** |           |
 
 
 ## Setup coverage badge
