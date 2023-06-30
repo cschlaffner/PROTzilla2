@@ -5,7 +5,7 @@ import matplotlib.colors as mcolors
 import restring
 from biomart import BiomartServer
 
-from protzilla.data_integration.database_query import uniprot_databases, uniprot_columns
+from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 

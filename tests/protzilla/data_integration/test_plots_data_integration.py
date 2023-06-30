@@ -256,7 +256,7 @@ def test_gsea_dot_plot_gene_sets(data_folder_tests, helpers, show_figures):
     )[0]
     if show_figures:
         helpers.open_graph_from_base64(dot_base64["plot_base64"])
-        
+
     dot_base64 = gsea_dot_plot(
         input_df=df,
         gene_sets="all",

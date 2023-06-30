@@ -246,7 +246,7 @@ def gsea_dot_plot(
     remove_library_names=False,
 ):
     """
-    Creates a dot plot from GSEA and preranked GSEA results. The plot is created using the gseapy library.
+    Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
     Only the top_terms that meet the cutoff are shown.
 
     :param input_df: GO enrichment results (offline or Enrichr)
@@ -342,13 +342,12 @@ def gsea_enrichment_plot(
     if not term_name:
         msg = "Please input a term name."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
-    if (
-        not (isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series))
-        or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name")
-    ):
+    if not (
+        isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)
+    ) or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name"):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
-    if isinstance(ranking, pd.DataFrame):
+    if isinstance(ranking, pd.DataFrame): # ensure that ranking is a series
         ranking = ranking.iloc[:, 0]
 
     try:

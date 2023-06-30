@@ -14,10 +14,10 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
+from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import get_memory_usage, unique_justseen, clean_uniprot_id
-from protzilla.data_integration.database_query import uniprot_columns
+from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
