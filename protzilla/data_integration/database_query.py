@@ -1,7 +1,6 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
 from collections import defaultdict
 
-import numpy as np
 import pandas
 import requests
 
