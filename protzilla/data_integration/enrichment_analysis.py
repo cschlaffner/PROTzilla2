@@ -11,10 +11,8 @@ from protzilla.constants.logging import logger
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
-from .enrichment_analysis_helper import (
-    read_protein_or_gene_sets_file,
-    uniprot_ids_to_uppercase_gene_symbols,
-)
+from .enrichment_analysis_helper import read_protein_or_gene_sets_file
+from protzilla.data_integration import database_query
 
 
 # call methods for precommit hook not to delete imports
@@ -317,7 +315,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :rtype: tuple
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
-    gene_to_groups, _, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(
+    gene_to_groups, _, filtered_groups = database_query.uniprot_groups_to_genes(
         protein_list
     )
 

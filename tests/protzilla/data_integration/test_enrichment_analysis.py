@@ -12,7 +12,6 @@ from protzilla.constants.paths import PROJECT_PATH
 # order is important to ensure correctness of patched functions
 # isort:skip_file
 from protzilla.data_integration.enrichment_analysis_helper import (
-    uniprot_ids_to_uppercase_gene_symbols,
     read_protein_or_gene_sets_file,
 )
 from protzilla.data_integration.enrichment_analysis import (
@@ -36,128 +35,6 @@ from protzilla.data_integration.enrichment_analysis_gsea import (
 @pytest.fixture
 def data_folder_tests():
     return PROJECT_PATH / "tests/test_data/enrichment_data"
-
-
-@patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
-def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
-    proteins = [
-        "Protein1",
-        "Protein2;ProteinX",
-        "Protein03",
-        "Protein3-1",
-        "Protein4_VAR_A12345",
-        "Protein5",
-        "Protein6",
-        "Protein7;Protein8",
-    ]
-    mock_biomart_query.return_value = [
-        ("Protein1", "GENE1"),
-        ("Protein2", "GENE2"),
-        ("ProteinX", "GENE2"),
-        ("Protein03", "GENE3"),
-        ("Protein3", "GENE3"),
-        ("Protein4", "GENE4"),
-        ("Protein7", "GENE7"),
-        ("Protein8", "GENE8"),
-    ]
-
-    expected_gene_to_groups = {
-        "GENE1": ["Protein1"],
-        "GENE2": ["Protein2;ProteinX"],
-        "GENE3": [
-            "Protein03",
-            "Protein3-1",
-        ],
-        "GENE4": ["Protein4_VAR_A12345"],
-        "GENE7": ["Protein7;Protein8"],
-        "GENE8": ["Protein7;Protein8"],
-    }
-    expected_group_to_genes = {
-        "Protein1": ["GENE1"],
-        "Protein2;ProteinX": ["GENE2"],
-        "Protein03": ["GENE3"],
-        "Protein3-1": ["GENE3"],
-        "Protein4_VAR_A12345": ["GENE4"],
-        "Protein7;Protein8": ["GENE7", "GENE8"],
-    }
-    expected_filtered_groups = ["Protein5", "Protein6"]
-
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(proteins)
-
-    for key in gene_to_groups:
-        assert set(gene_to_groups[key]) == set(expected_gene_to_groups[key])
-    for key in group_to_genes:
-        assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
-    assert filtered_groups == expected_filtered_groups
-
-
-# isort:end_skip_file
-
-
-@pytest.fixture
-def data_folder_tests():
-    return PROJECT_PATH / "tests/test_data/enrichment_data"
-
-
-@patch("protzilla.data_integration.enrichment_analysis_helper.biomart_query")
-def test_uniprot_ids_to_uppercase_gene_symbols(mock_biomart_query):
-    proteins = [
-        "Protein1",
-        "Protein2;ProteinX",
-        "Protein03",
-        "Protein3-1",
-        "Protein4_VAR_A12345",
-        "Protein5",
-        "Protein6",
-        "Protein7;Protein8",
-    ]
-    mock_biomart_query.return_value = [
-        ("Protein1", "GENE1"),
-        ("Protein2", "GENE2"),
-        ("ProteinX", "GENE2"),
-        ("Protein03", "GENE3"),
-        ("Protein3", "GENE3"),
-        ("Protein4", "GENE4"),
-        ("Protein7", "GENE7"),
-        ("Protein8", "GENE8"),
-    ]
-
-    expected_gene_to_groups = {
-        "GENE1": ["Protein1"],
-        "GENE2": ["Protein2;ProteinX"],
-        "GENE3": [
-            "Protein03",
-            "Protein3-1",
-        ],
-        "GENE4": ["Protein4_VAR_A12345"],
-        "GENE7": ["Protein7;Protein8"],
-        "GENE8": ["Protein7;Protein8"],
-    }
-    expected_group_to_genes = {
-        "Protein1": ["GENE1"],
-        "Protein2;ProteinX": ["GENE2"],
-        "Protein03": ["GENE3"],
-        "Protein3-1": ["GENE3"],
-        "Protein4_VAR_A12345": ["GENE4"],
-        "Protein7;Protein8": ["GENE7", "GENE8"],
-    }
-    expected_filtered_groups = ["Protein5", "Protein6"]
-
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(proteins)
-
-    for key in gene_to_groups:
-        assert set(gene_to_groups[key]) == set(expected_gene_to_groups[key])
-    for key in group_to_genes:
-        assert set(group_to_genes[key]) == set(expected_group_to_genes[key])
-    assert filtered_groups == expected_filtered_groups
 
 
 @patch("restring.restring.get_functional_enrichment")
@@ -486,9 +363,7 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
 
 
 @pytest.mark.internet()
-@patch(
-    "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
     api_url = "https://maayanlab.cloud/Enrichr/addList"
@@ -945,9 +820,7 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
 
 
 @pytest.mark.internet
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea(mock_mapping, data_folder_tests):
     proteins = pd.read_csv(
         data_folder_tests / "input-t_test-significant_proteins_intensity_df.csv",
@@ -1048,9 +921,7 @@ def test_gsea_wrong_gene_sets(data_folder_tests):
     assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
 
 
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_no_gene_symbols(mock_gene_mapping):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 10],
@@ -1079,9 +950,7 @@ def test_gsea_no_gene_symbols(mock_gene_mapping):
     )
 
 
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_wrong_sample_group_amount(mock_mapping):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 10],
@@ -1122,9 +991,7 @@ def test_gsea_wrong_sample_group_amount(mock_mapping):
     )
 
 
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_catch_fail(mock_mapping):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 10],
@@ -1251,9 +1118,7 @@ def test_create_ranked_df_descending():
 
 
 @pytest.mark.internet
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_preranked(mock_mapping, data_folder_tests):
     proteins_significant = pd.read_csv(
         data_folder_tests / "input-t_test-significant_proteins_pvalues_df.csv",
@@ -1341,9 +1206,7 @@ def test_gsea_preranked_wrong_gene_sets(data_folder_tests):
     assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
 
 
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_preranked_no_gene_symbols(mock_gene_mapping):
     proteins_df = pd.DataFrame(
         data=(
@@ -1362,9 +1225,7 @@ def test_gsea_preranked_no_gene_symbols(mock_gene_mapping):
     assert "No proteins could be mapped" in current_out["messages"][0]["msg"]
 
 
-@patch(
-    "protzilla.data_integration.enrichment_analysis_gsea.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_preranked_catch_fail(mock_mapping):
     proteins_df = pd.DataFrame(
         data=(
