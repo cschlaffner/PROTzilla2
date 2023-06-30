@@ -474,9 +474,7 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
 
 
 @pytest.mark.internet()
-@patch(
-    "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
-)
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
     api_url = "https://maayanlab.cloud/Enrichr/addList"
