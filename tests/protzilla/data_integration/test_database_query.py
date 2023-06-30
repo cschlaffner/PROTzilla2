@@ -11,11 +11,26 @@ from unittest.mock import patch
 def test_uniprot_groups_to_genes(mock):
     mock.return_value = dict(a="ABS", b="HKL", c="NNF"), ["d"]
     gene_to_groups, group_to_genes, filtered = uniprot_groups_to_genes(
-        ["a;b;c", "a-1;b-1_4", "c;d", "d-4"]
+        ["a;b;c", "a-1;b-1_4", "c;d", "d-4;d-8"]
     )
-    assert filtered == ["d-4"]
-    assert gene_to_groups == {}
-    assert group_to_genes == {}
+    assert filtered == ["d-4;d-8"]
+    expected_gene_map = {
+        "ABS": ["a;b;c", "a-1;b-1_4"],
+        "HKL": ["a;b;c", "a-1;b-1_4"],
+        "NNF": ["a;b;c", "c;d"],
+    }
+    assert set(gene_to_groups.keys()) == set(expected_gene_map.keys())
+    for key in gene_to_groups:
+        assert set(gene_to_groups[key]) == set(expected_gene_map[key])
+
+    expected_group_map = {
+        "a-1;b-1_4": ["ABS", "HKL"],
+        "a;b;c": ["ABS", "NNF", "HKL"],
+        "c;d": ["NNF"],
+    }
+    assert set(group_to_genes.keys()) == set(expected_group_map.keys())
+    for key in group_to_genes:
+        assert set(group_to_genes[key]) == set(expected_group_map[key])
 
 
 @patch("protzilla.data_integration.database_query.uniprot_databases")
