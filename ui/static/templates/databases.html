@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {% for database in uniprot_databases %}
+        {{ database }} <br>
+    {% endfor %}
+{% endblock %}
