@@ -47,15 +47,7 @@ def biomart_query(queries, filter_name, attributes):
 
 
 def uniprot_query_dataframe(filename, uniprot_ids, fields):
-    try:
-        df = pandas.read_csv(
-            EXTERNAL_DATA_PATH / "uniprot" / f"{filename}.tsv", sep="\t"
-        )
-    except FileNotFoundError:
-        logger.error(
-            f"Uniprot database not found at {EXTERNAL_DATA_PATH / 'uniprot.tsv'}\nGo to https://github.com/antonneubauer/PROTzilla2/wiki/Databases for more info."
-        )
-        return pandas.DataFrame(columns=["Entry"] + fields)
+    df = pandas.read_csv(EXTERNAL_DATA_PATH / "uniprot" / f"{filename}.tsv", sep="\t")
     df.index = df["Entry"]
     return df[df.Entry.isin(uniprot_ids)][fields]
 
@@ -78,7 +70,7 @@ def uniprot_databases():
 
 
 def uniprot_to_genes(uniprot_ids):
-    """Takes a list of uniprot IDs and maps them to genes. also returns IDs that could not not be mapped"""
+    """Takes a list of uniprot IDs and maps them to genes. also returns IDs that could not be mapped"""
     available_databases = uniprot_databases()
     out_dict = {}
     ids_to_search = uniprot_ids
@@ -134,4 +126,4 @@ def uniprot_groups_to_genes(uniprot_groups):
             group_to_genes[group] = results
             for result in results:
                 gene_to_groups[result].append(group)
-    return group_to_genes, dict(gene_to_groups), filtered
+    return dict(gene_to_groups), group_to_genes, filtered
