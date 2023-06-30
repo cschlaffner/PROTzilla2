@@ -540,7 +540,7 @@ def protein_graph(request, run_name, index: int):
         {
             "data": {
                 "id": node,
-                "label": graph.nodes[node].get("aminoacid", "####### BAAAAD #######"),
+                "label": graph.nodes[node].get("aminoacid", "####### ERROR #######"),
                 "match": graph.nodes[node].get("match", "false"),
                 "peptides": graph.nodes[node].get("peptides", ""),
             }
@@ -558,5 +558,7 @@ def protein_graph(request, run_name, index: int):
             "peptide_matches": peptide_matches,
             "peptide_mismatches": peptide_mismatches,
             "protein_id": protein_id,
+            "run_name": run_name,
+            "used_memory": get_memory_usage(),
         },
     )
