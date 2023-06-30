@@ -71,7 +71,9 @@ def uniprot_databases():
 
 def uniprot_to_genes(uniprot_ids):
     """Takes a list of uniprot IDs and maps them to genes. also returns IDs that could not be mapped"""
+    logger.info("Starting to map uniprot IDs to genes.")
     available_databases = uniprot_databases()
+    logger.info(f"Found {len(available_databases)} uniprot databases.")
     out_dict = {}
     ids_to_search = uniprot_ids
     for db_name in available_databases:
@@ -90,7 +92,9 @@ def uniprot_to_genes(uniprot_ids):
             ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
 
         if not ids_to_search:
+            logger.info("All proteins mapped, no biomart mapping will be performed.")
             return out_dict, []
+    logger.info("Starting with biomart mapping.")
     biomart_results = list(
         biomart_query(
             ids_to_search, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
@@ -105,6 +109,7 @@ def uniprot_to_genes(uniprot_ids):
     # should not overwrite anything as ids_to_search not in out_dict yet
     out_dict.update(uniprot_id_to_hgnc_symbol)
     not_found = [id_ for id_ in ids_to_search if id_ not in uniprot_id_to_hgnc_symbol]
+    logger.info("Done with mapping uniprot IDs to genes.")
     return out_dict, not_found
 
 
