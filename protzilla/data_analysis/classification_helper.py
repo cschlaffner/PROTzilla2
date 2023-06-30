@@ -165,7 +165,7 @@ def evaluate_clustering_with_scoring(
         elif score in external_indices:
             s = external_indices[score](X=input_df, labels=labels_pred)
         else:
-            s = "Score not known"
+            s = None
         scores[score] = s
     return scores
 

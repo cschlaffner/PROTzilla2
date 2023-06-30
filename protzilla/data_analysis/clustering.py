@@ -347,7 +347,7 @@ def perform_clustering(
     clf,
     clf_parameters,
     scoring,
-    labels_df=None,  # optional
+    labels_df=None,
     model_selection_scoring=None,
     **parameters,
 ):

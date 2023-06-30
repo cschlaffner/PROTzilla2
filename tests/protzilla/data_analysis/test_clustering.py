@@ -79,12 +79,12 @@ def test_k_means(clustering_df, meta_df):
         }
     )
     current_out = k_means(
-        clustering_df,
-        meta_df,
-        "Group",
-        "AD",
-        "Manual",
-        ["completeness_score"],
+        input_df=clustering_df,
+        metadata_df=meta_df,
+        labels_column="Group",
+        positive_label="AD",
+        model_selection="Manual",
+        scoring=["completeness_score"],
         n_clusters=2,
         random_state=6,
         init_centroid_strategy="random",
@@ -105,12 +105,12 @@ def test_k_means(clustering_df, meta_df):
 
 def test_k_means_nan_handling(df_with_nan, meta_df):
     current_out = k_means(
-        df_with_nan,
-        meta_df,
-        "Group",
-        "AD",
-        "Manual",
-        ["completeness_score"],
+        input_df=df_with_nan,
+        metadata_df=meta_df,
+        labels_column="Group",
+        positive_label="AD",
+        model_selection="Manual",
+        scoring=["completeness_score"],
         n_clusters=4,
         init_centroid_strategy="k-means++",
     )
@@ -120,12 +120,12 @@ def test_k_means_nan_handling(df_with_nan, meta_df):
 
 def test_k_means_n_clusters(clustering_df, meta_df):
     current_out = k_means(
-        clustering_df,
-        meta_df,
-        "Group",
-        "AD",
-        "Manual",
-        ["completeness_score"],
+        input_df=clustering_df,
+        metadata_df=meta_df,
+        labels_column="Group",
+        positive_label="AD",
+        model_selection="Manual",
+        scoring=["completeness_score"],
         n_clusters=10,
         init_centroid_strategy="k-means++",
     )
@@ -185,7 +185,11 @@ def test_expectation_maximisation(clustering_df, meta_df):
 
 def test_hierarchical_agglomerative_clustering(clustering_df, meta_df):
     current_out = hierarchical_agglomerative_clustering(
-        clustering_df, meta_df, "Group", "AD", "Manual"
+        input_df=clustering_df,
+        metadata_df=meta_df,
+        labels_column="Group",
+        positive_label="AD",
+        model_selection="Manual",
     )
     cluster_labels_df_assertion = pd.DataFrame(
         {

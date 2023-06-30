@@ -1103,14 +1103,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
@@ -1239,14 +1239,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
@@ -1375,14 +1375,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "model_selection": {
             "name": "Choose strategy to perform parameter fine-tuning",
@@ -1456,7 +1456,7 @@
             "multiple": true
           },
           "linkage": {
-            "name": "Distance metric",
+            "name": "The linkage criterion to use in order to to determine the distance to use between sets of observation",
             "type": "categorical",
             "categories": [
               "ward",
@@ -1496,14 +1496,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1699,7 +1699,7 @@
             "type": "categorical",
             "fill": "metadata_columns",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1720,7 +1720,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "validation_strategy": {
             "name": "Validation Strategy",
@@ -2203,7 +2203,7 @@
             "name": "Grouping for Samples",
             "type": "categorical",
             "fill": "metadata_columns",
-            "default": "None"
+            "default": null
           },
           "min_size": {
             "name": "Minimum number of genes from gene set also in data",
