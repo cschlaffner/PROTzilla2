@@ -1,5 +1,7 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
 from collections import defaultdict
+
+import numpy as np
 import pandas
 import requests
 
@@ -71,6 +73,13 @@ def uniprot_databases():
 
 def uniprot_to_genes(uniprot_ids):
     """Takes a list of uniprot IDs and maps them to genes. also returns IDs that could not be mapped"""
+
+    def merge_dict(gene_mapping, new_gene_mapping):
+        for key, value in new_gene_mapping.items():
+            if value and isinstance(value, str):
+                gene_mapping[key] = value
+        return gene_mapping
+
     logger.info("Starting to map uniprot IDs to genes.")
     available_databases = uniprot_databases()
     logger.info(f"Found {len(available_databases)} uniprot databases.")
@@ -83,12 +92,13 @@ def uniprot_to_genes(uniprot_ids):
                 db_name, ids_to_search, ["Gene Names (primary)"]
             )
             mapping = df.to_dict()["Gene Names (primary)"]
-            out_dict.update(mapping)
+            out_dict = merge_dict(out_dict, mapping)
             ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
         elif "Gene Names" in cols:
             df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"])
             mapping = df.to_dict()["Gene Names"]
-            out_dict.update((k, v and v.split()[0]) for k, v in mapping.items())
+            first_gene_dict = {k: v and v.split()[0] for k, v in mapping.items()}
+            out_dict = merge_dict(out_dict, first_gene_dict)
             ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
 
         if not ids_to_search:
@@ -107,7 +117,7 @@ def uniprot_to_genes(uniprot_ids):
     )
     uniprot_id_to_hgnc_symbol = dict(set(map(tuple, biomart_results)))
     # should not overwrite anything as ids_to_search not in out_dict yet
-    out_dict.update(uniprot_id_to_hgnc_symbol)
+    out_dict = merge_dict(out_dict, uniprot_id_to_hgnc_symbol)
     not_found = [id_ for id_ in ids_to_search if id_ not in uniprot_id_to_hgnc_symbol]
     logger.info("Done with mapping uniprot IDs to genes.")
     return out_dict, not_found
