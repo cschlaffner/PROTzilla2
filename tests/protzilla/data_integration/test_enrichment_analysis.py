@@ -14,6 +14,7 @@ from protzilla.constants.paths import PROJECT_PATH
 from protzilla.data_integration.enrichment_analysis_helper import (
     uniprot_ids_to_uppercase_gene_symbols,
     read_protein_or_gene_sets_file,
+    read_background_file,
 )
 from protzilla.data_integration.enrichment_analysis import (
     get_functional_enrichment_with_delay,
@@ -310,7 +311,7 @@ def test_go_analysis_with_STRING(mock_enrichment, background, data_folder_tests)
         organism=9606,
         direction="both",
         background=background,
-    )["enriched_df"]
+    )["enrichment_results"]
 
     for col in ["inputGenes", "preferredNames"]:
         out_df[col] = out_df[col].apply(lambda x: set(x.split(",")))
@@ -474,7 +475,7 @@ def test_go_analysis_with_STRING_too_many_col_df():
 def test_go_analysis_with_enrichr_wrong_proteins_input():
     current_out = go_analysis_with_enrichr(
         proteins="Protein1;Protein2;aStringOfProteins",
-        protein_sets=["KEGG"],
+        gene_sets_enrichr=["KEGG"],
         organism="human",
     )
 
@@ -483,6 +484,28 @@ def test_go_analysis_with_enrichr_wrong_proteins_input():
         "dataframe with Protein ID and direction of expression change column"
         in current_out["messages"][0]["msg"]
     )
+
+
+def test_go_analysis_with_enrichr_wrong_gene_sets_input():
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
+        gene_sets_path="aMadeUpInputFormat.abc",
+        organism="human",
+    )
+
+    assert "messages" in current_out
+
+
+def test_go_analysis_with_no_gene_sets_input():
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
+        gene_sets_enrichr=None,
+        gene_sets_path=None,
+        organism="human",
+    )
+
+    assert "messages" in current_out
+    assert "No gene sets provided" in current_out["messages"][0]["msg"]
 
 
 @pytest.mark.internet()
@@ -509,9 +532,6 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         "Protein9;Protein10;Protein11",
         "Protein12;Protein13",
     ]
-    proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8})
-    protein_sets = ["Reactome_2013"]
-    organism = "human"
     results = pd.read_csv(
         data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
     )
@@ -545,8 +565,13 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         },
         ["Protein5"],
     )
-    current_out = go_analysis_with_enrichr(proteins_df, protein_sets, organism, "up")
-    df = current_out["results"]
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8}),
+        gene_sets_enrichr=["Reactome_2013"],
+        organism="human",
+        direction="up",
+    )
+    df = current_out["enrichment_results"]
 
     column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
     # Compare all specified columns
@@ -569,7 +594,103 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
         assert numerical_equal.all()
 
     assert "messages" in current_out
+    assert "No background provided" in current_out["messages"][0]["msg"]
+    assert "Some proteins could not be mapped" in current_out["messages"][1]["msg"]
+
+
+@pytest.mark.internet()
+@patch(
+    "protzilla.data_integration.enrichment_analysis.uniprot_ids_to_uppercase_gene_symbols"
+)
+def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
+    # Check if enrichr API is available
+    api_url = "https://maayanlab.cloud/Enrichr/addList"
+    try:
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            pytest.skip("Enrichr API is currently unavailable")
+    except requests.exceptions.RequestException:
+        pytest.skip("Enrichr API is currently unavailable")
+
+    proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6;Protein7;Protein8",
+        "Protein9;Protein10;Protein11",
+        "Protein12;Protein13",
+    ]
+    results = pd.read_csv(
+        data_folder_tests / "Reactome_enrichment_enrichr_background2022.csv",
+        index_col=0,
+    )
+
+    mock_gene_mapping.return_value = (
+        {
+            "ENO2": ["Protein2"],
+            "ENO3": ["Protein3"],
+            "HK2": ["Protein4"],
+            "HK1": ["Protein6"],
+            "HK3": ["Protein7"],
+            "IDH3B": ["Protein8"],
+            "GPT2": ["Protein10"],
+            "SDHB": ["Protein11"],
+        },
+        {
+            "Protein2": ["ENO2"],
+            "Protein3": ["ENO3"],
+            "Protein4": ["HK2"],
+            "Protein6": ["HK1"],
+            "Protein7": ["HK3"],
+            "Protein8": ["IDH3B"],
+            "Protein10": ["GPT2"],
+            "Protein11": ["SDHB"],
+        },
+        ["Protein1", "Protein5", "Protein12;Protein13"],
+    )
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8}),
+        gene_sets_path=data_folder_tests / "Reactome_2022.txt",
+        organism="human",
+        direction="up",
+        background_biomart="hsapiens_gene_ensembl",
+    )
+    df = current_out["enrichment_results"]
+
+    for col in ["Proteins", "Genes"]:
+        df[col] = df[col].apply(lambda x: set(x.split(";")))
+        results[col] = results[col].apply(lambda x: set(x.split(";")))
+        df[col] = df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
+
+    column_names = ["Term", "Gene_set", "Overlap", "Proteins", "Genes"]
+    # Compare all specified columns
+    for column in column_names:
+        assert df[column].equals(results[column])
+
+    # Compare the numeric columns separately with a tolerance for numerical equality
+    numerical_columns = ["Odds Ratio", "P-value", "Adjusted P-value", "Combined Score"]
+    for column in numerical_columns:
+        numerical_equal = np.isclose(
+            df[column], results[column], rtol=1e-05, atol=1e-08
+        )
+        assert numerical_equal.all()
+
+    assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+
+
+def test_go_analysis_enrichr_wrong_background_file():
+    current_out = go_analysis_with_enrichr(
+        proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
+        gene_sets_enrichr=["Reactome_2013"],
+        organism="human",
+        direction="both",
+        background_path="aMadeUpInputFormat.abc",
+    )
+    assert "messages" in current_out
 
 
 @pytest.fixture
@@ -581,6 +702,7 @@ def go_analysis_offline_result_no_bg():
         "P-value": [1.000000e00, 1.000000e00],
         "Adjusted P-value": [1.000000e00, 1.000000e00],
         "Odds Ratio": [5.294118e-01, 5.294118e-01],
+        "Combined Score": [0.000000e00, 0.000000e00],
         "Genes": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
@@ -631,7 +753,7 @@ def test_go_analysis_offline_protein_sets(
         protein_sets_path=protein_sets_path,
         direction="up",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
     df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
@@ -681,10 +803,10 @@ def test_go_analysis_offline_background(
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path=data_folder_tests / "protein_sets.txt",
-        background=background_path,
+        background_path=background_path,
         direction="down",
     )
-    df = current_out["results"]
+    df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
     df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
@@ -750,7 +872,7 @@ def test_go_analysis_offline_invalid_background_set_file():
     current_out = go_analysis_offline(
         proteins=proteins_df,
         protein_sets_path="a_valid_filetype.gmt",
-        background="an_invalid_filetype.png",
+        background_path="an_invalid_filetype.png",
         direction="up",
     )
 
@@ -866,6 +988,45 @@ def test_read_protein_or_gene_sets_file_no_path():
 def test_read_protein_or_gene_sets_file_invalid_filetype(data_folder_tests):
     a_made_up_path = data_folder_tests / "a_made_up_wrong_file.png"
     out_dict = read_protein_or_gene_sets_file(a_made_up_path)
+
+    assert "messages" in out_dict
+    assert "Invalid file type" in out_dict["messages"][0]["msg"]
+
+
+@pytest.mark.parametrize(
+    "background_path",
+    [
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.txt",
+    ],
+)
+def test_read_background_file(background_path):
+    expected_output = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+        "Protein5",
+        "Protein6",
+        "Protein7",
+        "Protein8",
+        "Protein9",
+        "Protein10",
+        "Protein11",
+        "Protein12",
+    ]
+
+    result_list = read_background_file(background_path)
+    assert result_list == expected_output
+
+
+def test_read_background_file_no_path():
+    assert read_background_file("") is None
+    assert read_background_file(None) is None
+
+
+def test_read_background_file_invalid_filetype():
+    out_dict = read_background_file("a_made_up_wrong_file.png")
 
     assert "messages" in out_dict
     assert "Invalid file type" in out_dict["messages"][0]["msg"]
