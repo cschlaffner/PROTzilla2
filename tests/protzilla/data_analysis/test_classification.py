@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.classification import random_forest
+from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.model_evaluation_plots import (
     precision_recall_curve_plot,
     roc_curve_plot,

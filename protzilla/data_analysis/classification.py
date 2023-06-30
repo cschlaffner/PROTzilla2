@@ -4,15 +4,15 @@ from sklearn.model_selection import cross_validate
 from sklearn.svm import SVC
 
 from protzilla.data_analysis.classification_helper import (
-    perform_grid_search_cv,
-    perform_cross_validation,
     create_dict_with_lists_as_values,
-    perform_train_test_split,
-    encode_labels,
-    decode_labels,
-    create_model_evaluation_df_grid_search_manual,
     create_model_evaluation_df_grid_search,
+    create_model_evaluation_df_grid_search_manual,
+    decode_labels,
+    encode_labels,
     evaluate_with_scoring,
+    perform_cross_validation,
+    perform_grid_search_cv,
+    perform_train_test_split,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 

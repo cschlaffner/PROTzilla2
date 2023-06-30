@@ -69,6 +69,7 @@ def gsea_preranked(
     permutation_type="phenotype",
     weighted_score=1.0,
     seed=123,
+    threads=4,
     **kwargs,
 ):
     """
@@ -90,10 +91,10 @@ def gsea_preranked(
         The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
         Other files must have one set per line with the set name and the proteins.
-            - .txt:
-                Set_name: Protein1, Protein2, ...
-                Set_name2: Protein2, Protein3, ...
-            - .csv:
+            - .txt: Setname or identifier followed by a tab-separated list of genes
+                Set_name    Protein1    Protein2...
+                Set_name    Protein1    Protein2...
+            - .csv: Setname or identifier followed by a comma-separated list of genes
                 Set_name, Protein1, Protein2, ...
                 Set_name2, Protein2, Protein3, ...
             - .json:
@@ -114,6 +115,8 @@ def gsea_preranked(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
+    :param threads: Number of threads
+    :type threads: int
     :return: dictionary with results dataframe, ranking and messages
     :rtype: dict
     """
@@ -176,6 +179,7 @@ def gsea_preranked(
             outdir=None,
             seed=seed,
             verbose=True,
+            threads=4,
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
@@ -260,6 +264,7 @@ def gsea(
     ranking_method="signal_to_noise",
     weighted_score=1.0,
     seed=123,
+    threads=4,
     **kwargs,
 ):
     """
@@ -277,16 +282,16 @@ def gsea(
     :type grouping: str
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
-            .gmt files are not parsed because GSEApy can handle them directly.
-            Other files must have one set per line with the set name and the proteins.
-                - .txt:
-                    Set_name: Protein1, Protein2, ...
-                    Set_name2: Protein2, Protein3, ...
-                - .csv:
-                    Set_name, Protein1, Protein2, ...
-                    Set_name2, Protein2, Protein3, ...
-                - .json:
-                    {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+        .gmt files are not parsed because GSEApy can handle them directly.
+        Other files must have one set per line with the set name and the proteins.
+            - .txt: Setname or identifier followed by a tab-separated list of genes
+                Set_name    Protein1    Protein2...
+                Set_name    Protein1    Protein2...
+            - .csv: Setname or identifier followed by a comma-separated list of genes
+                Set_name, Protein1, Protein2, ...
+                Set_name2, Protein2, Protein3, ...
+            - .json:
+                {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
     :type gene_sets_path: str
     :param gene_sets_enrichr: list of gene set library names to use from Enrichr
     :type gene_sets_enrichr: list
@@ -318,6 +323,8 @@ def gsea(
     :type weighted_score: float
     :param seed: Random seed
     :type seed: int
+    :param threads: Number of threads to use
+    :type threads: int
     :return: dict with enriched dataframe and messages
     :rtype: dict
     """
@@ -388,6 +395,7 @@ def gsea(
             outdir=None,
             seed=seed,
             verbose=True,
+            threads=threads,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"

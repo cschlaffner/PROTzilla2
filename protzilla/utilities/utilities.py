@@ -1,10 +1,11 @@
+import base64
+import io
 import operator
 import os
 from itertools import groupby
 from random import choices
 from string import ascii_letters
-import base64
-import io
+
 import psutil
 
 

@@ -1775,13 +1775,47 @@
               null
             ]
           },
-          "protein_sets": {
-            "name": "Protein Sets",
+          "gene_sets_field": {
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose from Enrichr Options"
+            ],
+            "default": "Choose from Enrichr Options",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "gene_sets_path"
+              ],
+              "Choose from Enrichr Options": [
+                "gene_sets_enrichr"
+              ]
+            }
+          },
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "gene_sets_enrichr": {
+            "name": "Gene Set Libraries",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
             "default": null,
-            "multiple": true
+            "multiple": true,
+            "dynamic": true
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
           },
           "organism": {
             "name": "Enrichr supported organism",
@@ -1795,6 +1829,51 @@
               "worm"
             ],
             "default": "human"
+          },
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file (recommended)",
+              "Choose biomart dataset",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene_sets"
+            ],
+            "default": "Upload a file (recommended)",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ],
+              "Choose biomart dataset": [
+                "background_biomart"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with uppercase gene symbols (one gene per line, csv or txt)",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
+          },
+          "background_biomart": {
+            "name": "Biomart dataset",
+            "type": "categorical",
+            "fill": "biomart_datasets",
+            "categories": [],
+            "default": null,
+            "dynamic": true
           }
         }
       },
@@ -1811,14 +1890,52 @@
             ]
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
-          "background": {
-            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
+          },
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file (recommended)",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene_sets"
+            ],
+            "default": "Upload a file (recommended)",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt)",
             "type": "file",
-            "default": null
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
           }
         }
       },
@@ -1852,7 +1969,7 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
@@ -1948,7 +2065,7 @@
               "Upload a file",
               "Choose from Enrichr Options"
             ],
-            "default": "euclidean",
+            "default": "Choose from Enrichr Options",
             "dynamic_parameters": {
               "Upload a file": [
                 "gene_sets_path"
@@ -1959,7 +2076,7 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
@@ -2157,6 +2274,73 @@
             "name": "Scale the size of the dots",
             "type": "numeric",
             "default": 5
+          }
+        }
+      },
+      "gsea_dot_plot": {
+        "name": "Dot plot for (pre-ranked) GSEA",
+        "description": "Creates a categorical scatter plot from GSEA data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "gene_sets"
+            ]
+          },
+          "gene_sets": {
+            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "gsea_enrichment_categories"
+          },
+          "dot_color_value": {
+            "name": "Color the dots by value",
+            "type": "categorical",
+            "categories": [
+              "FDR q-val",
+              "NOM p-val"
+            ],
+            "default": "FDR q-val"
+          },
+          "x_axis_value": {
+            "name": "Value to display on x axis",
+            "type": "categorical",
+            "categories": [
+              "ES",
+              "NES"
+            ],
+            "default": "NES"
+          },
+          "cutoff": {
+            "name": "Cutoff value for fdr q-value or nominal p-value",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          },
+          "remove_library_names": {
+            "name": "Remove library names from gene sets (e.g. 'KEGG_2013__')",
+            "type": "boolean",
+            "default": false
           }
         }
       }
