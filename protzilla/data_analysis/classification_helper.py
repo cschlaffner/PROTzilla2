@@ -59,6 +59,7 @@ def perform_grid_search_cv(
     scoring,
     model_selection_scoring,
     cv=None,
+    n_jobs=1,
 ):
     if grid_search_model == "Grid search":
         return GridSearchCV(
@@ -67,6 +68,7 @@ def perform_grid_search_cv(
             scoring=scoring,
             cv=cv,
             refit=model_selection_scoring,
+            n_jobs=n_jobs,
         )
     elif grid_search_model == "Randomized search":
         return RandomizedSearchCV(
@@ -75,6 +77,7 @@ def perform_grid_search_cv(
             scoring=scoring,
             cv=cv,
             refit=model_selection_scoring,
+            n_jobs=n_jobs,
         )
 
 

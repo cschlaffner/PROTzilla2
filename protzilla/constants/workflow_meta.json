@@ -1277,8 +1277,7 @@
               ],
               "Repeated K-Fold": [
                 "n_splits",
-                "n_repeats",
-                "random_state_cv"
+                "n_repeats"
               ],
               "Leave p out": [
                 "p_samples"
@@ -1303,33 +1302,19 @@
           },
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
-            "type": "categorical_dynamic",
+            "type": "categorical",
             "categories": [
               "yes",
               "no"
             ],
             "default": "yes",
-            "dynamic": true,
-            "dynamic_parameters": {
-              "yes": [
-                "random_state_cv"
-              ]
-            }
+            "dynamic": true
           },
           "n_repeats": {
             "name": "Number of times cross-validator needs to be repeated",
             "type": "numeric",
             "dynamic": true,
             "default": 10
-          },
-          "random_state_cv": {
-            "name": "Seed for random number generation",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 42,
-            "dynamic": true
           },
           "p_samples": {
             "name": "Size of the test sets",
@@ -1480,8 +1465,7 @@
               ],
               "Repeated K-Fold": [
                 "n_splits",
-                "n_repeats",
-                "random_state_cv"
+                "n_repeats"
               ],
               "Leave p out": [
                 "p_samples"
@@ -1506,33 +1490,19 @@
           },
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
-            "type": "categorical_dynamic",
+            "type": "categorical",
             "categories": [
               "yes",
               "no"
             ],
             "default": "yes",
-            "dynamic": true,
-            "dynamic_parameters": {
-              "True": [
-                "random_state_cv"
-              ]
-            }
+            "dynamic": true
           },
           "n_repeats": {
             "name": "Number of times cross-validator needs to be repeated",
             "type": "numeric",
             "dynamic": true,
             "default": 10
-          },
-          "random_state_cv": {
-            "name": "Seed for random number generation",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 42,
-            "dynamic": true
           },
           "p_samples": {
             "name": "Size of the test sets",
@@ -1686,8 +1656,7 @@
               ],
               "Repeated K-Fold": [
                 "n_splits",
-                "n_repeats",
-                "random_state_cv"
+                "n_repeats"
               ],
               "Leave p out": [
                 "p_samples"
@@ -1712,33 +1681,19 @@
           },
           "shuffle": {
             "name": "Whether to shuffle the data before splitting into batches",
-            "type": "categorical_dynamic",
+            "type": "categorical",
             "categories": [
               "yes",
               "no"
             ],
             "default": "yes",
-            "dynamic": true,
-            "dynamic_parameters": {
-              "True": [
-                "random_state_cv"
-              ]
-            }
+            "dynamic": true
           },
           "n_repeats": {
             "name": "Number of times cross-validator needs to be repeated",
             "type": "numeric",
             "dynamic": true,
             "default": 10
-          },
-          "random_state_cv": {
-            "name": "Seed for random number generation",
-            "type": "numeric",
-            "min": 0,
-            "max": 4294967295,
-            "step": 1,
-            "default": 42,
-            "dynamic": true
           },
           "p_samples": {
             "name": "Size of the test sets",
@@ -2084,8 +2039,7 @@
               ],
               "Repeated K-Fold": [
                 "n_splits",
-                "n_repeats",
-                "random_state_cv"
+                "n_repeats"
               ],
               "Leave p out": [
                 "p_samples"

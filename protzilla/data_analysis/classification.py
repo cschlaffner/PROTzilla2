@@ -32,6 +32,7 @@ def perform_classification(
     model_selection_scoring="accuracy",
     test_validate_split=None,
     random_state=42,
+    n_jobs=1,
     **parameters,
 ):
     if validation_strategy == "Manual" and grid_search_method == "Manual":
@@ -91,6 +92,7 @@ def perform_classification(
             scoring,
             model_selection_scoring,
             cv=cv,
+            n_jobs=n_jobs,
         )
         model.fit(input_df, labels_df)
 
@@ -107,6 +109,7 @@ def random_forest(
     labels_column: str,
     positive_label: str = None,
     n_estimators=100,
+    max_features="sqrt",
     criterion="gini",
     max_depth=None,
     bootstrap=True,
@@ -181,6 +184,7 @@ def random_forest(
 
     clf_parameters = dict(
         n_estimators=n_estimators,
+        max_features=max_features,
         criterion=criterion,
         max_depth=max_depth,
         bootstrap=bootstrap,
@@ -223,12 +227,9 @@ def svm(
     positive_label: str = None,
     C=1.0,
     kernel="rbf",
-    gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
-    coef0=0.0,  # relevant for "poly" and "sigmoid"
+    gamma="scale",
     probability=True,
     tol=0.001,
-    class_weight=None,
-    max_iter=-1,
     random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
@@ -264,11 +265,8 @@ def svm(
         C=C,
         kernel=kernel,
         gamma=gamma,
-        coef0=coef0,
         probability=probability,
         tol=tol,
-        class_weight=class_weight,
-        max_iter=max_iter,
         random_state=random_state,
     )
     # multiselect returns a string when only one value is selected

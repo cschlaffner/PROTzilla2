@@ -48,6 +48,7 @@ def permutation_testing(
     cross_validation_strategy,
     scoring,
     n_permutations,
+    n_jobs,
     random_state,
     **cv_params,
 ):
@@ -63,6 +64,7 @@ def permutation_testing(
         scoring=scoring,
         cv=cv_callable,
         n_permutations=n_permutations,
+        n_jobs=n_jobs,
         random_state=random_state,
     )
     return dict(
