@@ -65,30 +65,8 @@ def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     return [fig_to_base64(display.figure_)]
 
 
-def permutation_testing_plot(
-    model,
-    input_df,
-    labels_df,
-    cross_validation_strategy,
-    scoring,
-    n_permutations,
-    random_state,
-    **cv_params,
-):
+def permutation_testing_plot(score, permutation_scores, pvalue, score_name):
     # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
-    input_df = input_df.set_index("Sample")
-    _, labels_df = encode_labels(labels_df, "Label")
-
-    cv_callable = perform_cross_validation(cross_validation_strategy, **cv_params)
-    score, permutation_scores, pvalue = permutation_test_score(
-        model,
-        input_df,
-        labels_df["Encoded Label"],
-        scoring=scoring,
-        cv=cv_callable,
-        n_permutations=n_permutations,
-        random_state=random_state,
-    )
     fig, ax = plt.subplots()
 
     ax.hist(permutation_scores, bins=20, density=True, color=COLORS[0])
@@ -99,6 +77,6 @@ def permutation_testing_plot(
         loc="upper right",
         bbox_to_anchor=(1.4, 1),
     )
-    ax.set_xlabel(f"{scoring} score")
+    ax.set_xlabel(f"{score_name} score")
     _ = ax.set_ylabel("Probability")
     return [fig_to_base64(fig)]

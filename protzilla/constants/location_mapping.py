@@ -176,6 +176,11 @@ method_map = {
     ): model_evaluation.evaluate_classification_model,
     (
         "data_analysis",
+        "model_evaluation",
+        "permutation_testing",
+    ): model_evaluation.permutation_testing,
+    (
+        "data_analysis",
         "model_selection",
         "compute_learning_curve",
     ): model_selection.compute_learning_curve,
@@ -350,6 +355,11 @@ plot_map = {
         "plot",
         "learning_curve_plot",
     ): model_selection_plots.learning_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "permutation_testing_plot",
+    ): model_evaluation_plots.permutation_testing_plot,
     (
         "data_integration",
         "plot",

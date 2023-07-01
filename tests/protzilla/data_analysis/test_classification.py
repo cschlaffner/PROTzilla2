@@ -2,7 +2,10 @@ import pandas as pd
 import pytest
 from matplotlib import pyplot as plt
 
-from protzilla.data_analysis.model_evaluation import evaluate_classification_model
+from protzilla.data_analysis.model_evaluation import (
+    evaluate_classification_model,
+    permutation_testing,
+)
 from protzilla.data_analysis.classification import random_forest
 from protzilla.data_analysis.model_evaluation_plots import (
     precision_recall_curve_plot,
@@ -176,7 +179,7 @@ def test_evaluate_classification_model(show_figures, random_forest_out):
 
 
 def test_permutation_testing_plot(show_figures, random_forest_out, helpers):
-    hist_base64 = permutation_testing_plot(
+    current_out = permutation_testing(
         random_forest_out["model"],
         random_forest_out["X_train_df"],
         random_forest_out["y_train_df"],
@@ -184,6 +187,12 @@ def test_permutation_testing_plot(show_figures, random_forest_out, helpers):
         "accuracy",
         100,
         42,
+    )
+    hist_base64 = permutation_testing_plot(
+        score=current_out["score"],
+        permutation_scores=current_out["permutation_scores"],
+        pvalue=current_out["pvalue"],
+        score_name="Accuracy",
     )
     if show_figures:
         helpers.open_graph_from_base64(hist_base64[0])
