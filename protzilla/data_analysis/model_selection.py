@@ -35,7 +35,6 @@ def compute_learning_curve(
     shuffle=True,
     **cv_params,
 ):
-    # train_sizes = np.linspace(0.1, 1.0, 10)
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
     labels_df = (

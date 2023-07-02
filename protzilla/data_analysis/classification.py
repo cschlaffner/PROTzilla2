@@ -19,6 +19,7 @@ from protzilla.data_analysis.classification_helper import (
     perform_nested_cross_validation,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
+from protzilla.constants.logging import logger
 
 
 def perform_classification(
@@ -35,6 +36,7 @@ def perform_classification(
     n_jobs=1,
     **parameters,
 ):
+    logger.info(f"Number of jobs: {n_jobs}")
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
