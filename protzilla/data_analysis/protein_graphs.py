@@ -124,6 +124,10 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
+    print("ref_index", ref_index)
+    print("graph_index", graph_index)
+    print("longest_paths", longest_paths)
+
     potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
         allowed_mismatches=allowed_mismatches,
         k=k,
@@ -181,7 +185,9 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
 
     logger.info(f"Creating graph for protein {protein_id}")
     run_path = RUNS_PATH / run_name
-    path_to_protein_file, request = _get_protein_file(protein_id, run_path)
+    path_to_protein_file, filtered_blocks, request = _get_protein_file(
+        protein_id, run_path
+    )
 
     path_to_protein_file = Path(path_to_protein_file)
     if not path_to_protein_file.exists() and request.status_code != 200:
@@ -341,24 +347,99 @@ def _get_protein_file(
     protein_id: str, run_path: Path
 ) -> (Path, requests.models.Response | None):
     path_to_graphs = run_path / "graphs"
-    path_to_protein_file = path_to_graphs / f"{protein_id}.txt"
+    protein_file_path = path_to_graphs / f"{protein_id}.txt"
+    filtered_protein_file_path = path_to_graphs / f"{protein_id}.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
     r = None
 
     path_to_graphs.mkdir(parents=True, exist_ok=True)
 
-    if path_to_protein_file.exists():
+    if protein_file_path.exists():
         logger.info(
-            f"Protein file {path_to_protein_file} already exists. Skipping download."
+            f"Protein file {protein_file_path} already exists. Skipping download."
         )
     else:
         logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
         r.raise_for_status()
 
-        path_to_protein_file.write_bytes(r.content)
+        protein_file_path.write_bytes(r.content)
 
-    return path_to_protein_file, r
+    filtered_lines, filtered_blocks = _parse_file(protein_file_path)
+    with open(filtered_protein_file_path, "w") as file:
+        file.writelines(filtered_lines)
+
+    return filtered_protein_file_path, filtered_blocks, r
+
+
+def _parse_file(file_path):
+    """
+    The current implementation of the matching algorithm relies on the longest path
+    through the graph to be exactly as long as the reference sequence. This needs to be
+    the case because otherwise the potential peptide match positions from
+    `_potential_peptide_matches` will not be useful.
+    For this reason, we filter out all "VARIANT" features that cause the length of the
+    longest path to be longer than the reference sequence.
+    """
+
+    def is_valid_block(block_lines):
+        """
+        valid "VARIANT" blocks are those that don't substitute more amino acids than
+        they replace
+        """
+        pre_aa = None
+        post_line = None
+
+        for line in block_lines:
+            if "/note" in line:
+                if "Missing" in line:
+                    return True
+                pre_aa = line.split("->")[0].split()[1].replace('/note="', "").strip()
+                post_line = line.split("->")[1].split(" (")[0].strip()
+
+        if (
+            pre_aa is not None
+            and post_line is not None
+            and len(pre_aa) >= len(post_line)
+        ):
+            return True
+        return False
+
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+
+    filtered_lines = []
+    block_lines = []
+    filtered_blocks = []
+    in_variant_block = False
+
+    for line in lines:
+        line_seg = line.split()
+        if len(line_seg) == 3 and line_seg[0] == "FT" and line_seg[1].isupper():
+            block_start = True
+        else:
+            block_start = False
+
+        if block_start:
+            if in_variant_block and len(block_lines) > 0:
+                if not is_valid_block(block_lines):
+                    filtered_lines = filtered_lines[: -len(block_lines)]
+                    filtered_blocks.append((block_lines,))
+                block_lines = []
+            if "VARIANT" in line:
+                in_variant_block = True
+            else:
+                in_variant_block = False
+
+        if in_variant_block:
+            block_lines.append(line)
+        filtered_lines.append(line)
+
+    if in_variant_block and len(block_lines) > 0:
+        if not is_valid_block(block_lines):
+            filtered_lines = filtered_lines[: -len(block_lines)]
+
+    return filtered_lines, filtered_blocks
 
 
 def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
