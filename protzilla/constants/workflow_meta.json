@@ -2351,6 +2351,7 @@
           "term_dict": {
             "name": "Enrichment details gene set to be plotted",
             "type": "named_output",
+            "sorted": true,
             "default": [
               null,
               null
