@@ -347,7 +347,7 @@ def gsea_enrichment_plot(
     ) or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name"):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
-    if isinstance(ranking, pd.DataFrame): # ensure that ranking is a series
+    if isinstance(ranking, pd.DataFrame):  # ensure that ranking is a series
         ranking = ranking.iloc[:, 0]
 
     try:
