@@ -1261,6 +1261,7 @@
               "K-Fold",
               "Repeated K-Fold",
               "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
               "Leave one out",
               "Leave p out",
               "Manual"
@@ -1276,6 +1277,10 @@
                 "shuffle"
               ],
               "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
                 "n_splits",
                 "n_repeats"
               ],
@@ -1456,6 +1461,7 @@
               "K-Fold",
               "Repeated K-Fold",
               "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
               "Leave one out",
               "Leave p out",
               "Manual"
@@ -1471,6 +1477,10 @@
                 "shuffle"
               ],
               "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
                 "n_splits",
                 "n_repeats"
               ],
@@ -1654,6 +1664,7 @@
               "K-Fold",
               "Repeated K-Fold",
               "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
               "Leave one out",
               "Leave p out",
               "Manual"
@@ -1669,6 +1680,10 @@
                 "shuffle"
               ],
               "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
                 "n_splits",
                 "n_repeats"
               ],
@@ -2044,6 +2059,7 @@
               "K-Fold",
               "Repeated K-Fold",
               "Stratified K-Fold",
+              "Repeated Stratified K-Fold",
               "Leave one out",
               "Leave p out",
               "Manual"
@@ -2059,6 +2075,10 @@
                 "shuffle"
               ],
               "Repeated K-Fold": [
+                "n_splits",
+                "n_repeats"
+              ],
+              "Repeated Stratified K-Fold": [
                 "n_splits",
                 "n_repeats"
               ],
