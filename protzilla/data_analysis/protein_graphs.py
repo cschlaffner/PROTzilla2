@@ -221,7 +221,7 @@ def _create_graph_index(
     For information about _longest_path() please see the docstring of that function.
 
     This is intended to be used with graphs that include the VARIANT feature. Features
-    that can change the length of the protein are not supported.
+    that lengthen the protein are not supported.
 
     :param protein_graph: Protein-Graph as created by ProtGraph. Expected to have at
         least three nodes; one source, one sink, labeled by `__start__` and `__end__`.
