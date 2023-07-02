@@ -784,7 +784,7 @@ def test_create_prot_variation_graph(
         f"Graph created for protein {protein_id} at {graph_path} using {protein_path}"
     )
 
-    mock_get_protein_file.return_value = (protein_path, mock_request)
+    mock_get_protein_file.return_value = (protein_path, [], mock_request)
     out_dict = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
 
     planned_out_dict = {
@@ -812,7 +812,7 @@ def test_create_protein_variation_graph_bad_request(
     mock_request.reason = "test_reason"
     mock_request.text = "test_text"
 
-    mock_get_protein_file.return_value = (protein_path, mock_request)
+    mock_get_protein_file.return_value = (protein_path, [], mock_request)
 
     planned_msg = f"error while downloading protein file for {protein_id}. Statuscode:{mock_request.status_code}, {mock_request.reason}. Got: {mock_request.text}. Tip: check if the ID is correct"
 
@@ -972,7 +972,7 @@ def test_get_pos_potential_matches_shortcut(multi_route_shortcut):
 
 def test_create_contigs_dict_simple():
     node_start_end = {"ABC": {0: {"1": (0, 2)}, 4: {"1": (4, 6)}}}
-    planned_contigs = {"1": {"contigs": [(0, 2, "ABC"), (4, 6, "ABC")]}}
+    planned_contigs = {"1": [(0, 2, "ABC"), (4, 6, "ABC")]}
 
     contigs = _create_contigs_dict(node_start_end)
     assert planned_contigs == contigs
@@ -981,8 +981,8 @@ def test_create_contigs_dict_simple():
 def test_create_contigs_dict_1_pep_2_match():
     node_start_end = {"ABCD": {0: {"1": (0, 1), "2": (0, 1)}}}
     planned_contigs = {
-        "1": {"contigs": [(0, 1, "ABCD")]},
-        "2": {"contigs": [(0, 1, "ABCD")]},
+        "1": [(0, 1, "ABCD")],
+        "2": [(0, 1, "ABCD")],
     }
 
     contigs = _create_contigs_dict(node_start_end)
@@ -991,7 +991,7 @@ def test_create_contigs_dict_1_pep_2_match():
 
 def test_create_contigs_dict_1_pep_2_match_same_node():
     node_start_end = {"ABCD": {0: {"1": (0, 3)}, 7: {"1": (7, 10)}}}
-    planned_contigs = {"1": {"contigs": [(0, 3, "ABCD"), (7, 10, "ABCD")]}}
+    planned_contigs = {"1": [(0, 3, "ABCD"), (7, 10, "ABCD")]}
 
     contigs = _create_contigs_dict(node_start_end)
     assert contigs == planned_contigs
@@ -1009,8 +1009,8 @@ def test_create_contigs_dict_2_pep_multi_match():
     }
 
     planned_contigs = {
-        "1": {"contigs": [(0, 3, "ABCD"), (5, 10, "EFA;ABCD")]},
-        "4": {"contigs": [(12, 15, "ABCD"), (17, 22, "EFA;ABCD")]},
+        "1": [(0, 3, "ABCD"), (5, 10, "EFA;ABCD")],
+        "4": [(12, 15, "ABCD"), (17, 22, "EFA;ABCD")],
     }
 
     contigs = _create_contigs_dict(node_start_end)
@@ -1020,7 +1020,7 @@ def test_create_contigs_dict_2_pep_multi_match():
 def test_modify_graph_simple_1_pep_start_match(simple_graph, critical_logger):
     # peptide: ABC
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(0, 2, "ABC")]}}
+    contigs = {"1": [(0, 2, "ABC")]}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABC")
@@ -1052,7 +1052,7 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
 
     # peptide EFG, ref_seq: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(4, 6, "EFG")]}}
+    contigs = {"1": [(4, 6, "EFG")]}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     planned_graph.add_node("n3", aminoacid="ABCD", match="false")
@@ -1070,7 +1070,7 @@ def test_modify_graph_simple_1_pep_end_match(simple_graph, critical_logger):
 def test_modify_graph_simple_1_pep_full_match(simple_graph, critical_logger):
     # peptide: ABCDEFG
     longest_paths = {"1": 0}
-    contigs = {"1": {"contigs": [(0, 6, "ABCDEFG")]}}
+    contigs = {"1": [(0, 6, "ABCDEFG")]}
     graph, _, _ = simple_graph
     planned_graph = graph.copy()
     nx.set_node_attributes(
@@ -1100,8 +1100,8 @@ def test_modify_graph_simple_2_pep_2_nodes_start_middle_end_match(
 
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
     contigs = {
-        "1": {"contigs": [(0, 3, "ABCD")]},
-        "4": {"contigs": [(2, 5, "ABCD"), (8, 10, "NOP")]},
+        "1": [(0, 3, "ABCD")],
+        "4": [(2, 5, "ABCD"), (8, 10, "NOP")],
     }
 
     graph, _, _ = multi_route_long_nodes
@@ -1154,9 +1154,9 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
     graph, _, _ = multi_route_long_nodes
     longest_paths = {"1": 0, "2": 7, "3": 7, "4": 8}
     contigs = {
-        "1": {"contigs": [(4, 6, "EFGHJK")]},
-        "2": {"contigs": [(0, 0, "EFGHJK")]},
-        "4": {"contigs": [(0, 1, "EFGHJK")]},
+        "1": [(4, 6, "EFGHJK")],
+        "2": [(0, 0, "EFGHJK")],
+        "4": [(0, 1, "EFGHJK")],
     }
 
     planned_graph = graph.copy()

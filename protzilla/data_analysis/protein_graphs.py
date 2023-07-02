@@ -1,5 +1,6 @@
 import re
 import subprocess
+from collections import defaultdict
 from pathlib import Path
 
 import networkx as nx
@@ -345,7 +346,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
 def _get_protein_file(
     protein_id: str, run_path: Path
-) -> (Path, requests.models.Response | None):
+) -> (Path, list, requests.models.Response | None):
     path_to_graphs = run_path / "graphs"
     protein_file_path = path_to_graphs / f"{protein_id}.txt"
     filtered_protein_file_path = path_to_graphs / f"{protein_id}.txt"
@@ -615,30 +616,23 @@ def _create_contigs_dict(node_start_end: dict):
     peptide(s) responsible for match
     """
 
-    node_match_data = {}
+    node_match_data = defaultdict(lambda: {"match_locations": []})
     for peptide, start_pos_dict in node_start_end.items():
         for start_index, node_dict in start_pos_dict.items():
             for node, start_end in node_dict.items():
-                if node not in node_match_data:
-                    node_match_data[node] = {
-                        "match_locations": [(start_end[0], start_end[1], peptide)],
-                    }
-                else:
-                    node_match_data[node]["match_locations"].append(
-                        (start_end[0], start_end[1], peptide)
-                    )
+                node_match_data[node]["match_locations"].append(
+                    (start_end[0], start_end[1], peptide)
+                )
 
     for node in node_match_data:
-        node_match_data[node]["match_locations"] = sorted(
-            node_match_data[node]["match_locations"]
-        )
+        node_match_data[node]["match_locations"].sort()
 
     # merge tuples where start of second tuple is smaller or equal to end of first tuple
     node_mod = {}
     for node, node_dict in node_match_data.items():
         new_positions_list = []
         for start, end, peptide in node_dict["match_locations"]:
-            if not len(new_positions_list):
+            if not new_positions_list:
                 new_positions_list.append((start, end, peptide))
                 continue
             if start <= new_positions_list[-1][1]:
@@ -650,9 +644,7 @@ def _create_contigs_dict(node_start_end: dict):
             else:
                 new_positions_list.append((start, end, peptide))
 
-        node_mod[node] = {
-            "contigs": new_positions_list,
-        }
+        node_mod[node] = new_positions_list
 
     return node_mod
 
@@ -771,23 +763,23 @@ def _match_potential_matches(
             last_index = i
 
         # node is matched til end, peptide not done
-        data_from_succ = {}
+        data_from_succ = []
         recursion_start_mismatches = mismatches
         for succ in graph.successors(current_node):
             recursion_start_data = node_match_data.copy()
             match, match_data_from_succ, mismatches = _match_on_graph(
-                recursion_start_mismatches,
-                allowed_mismatches,
-                graph,
-                succ,
-                left_over_peptide[last_index + 1 :],
-                recursion_start_data,
-                0,
+                mismatches=recursion_start_mismatches,
+                allowed_mismatches=allowed_mismatches,
+                graph=graph,
+                current_node=succ,
+                left_over_peptide=left_over_peptide[last_index + 1 :],
+                node_match_data=recursion_start_data,
+                current_index=0,
             )
             if match:
-                data_from_succ[succ] = (match, match_data_from_succ, mismatches)
+                data_from_succ.append((match, match_data_from_succ, mismatches))
         if data_from_succ:
-            return_val = min(data_from_succ.values(), key=lambda item: item[2])
+            return_val = min(data_from_succ, key=lambda item: item[2])
             return return_val
         else:
             return False, {}, mismatches
@@ -843,8 +835,7 @@ def _modify_graph(graph, contig_positions):
         return len(graph.nodes[node]["aminoacid"])
 
     logger.info("updating graph to visualise peptide matches")
-    for current_node, node_dict in contig_positions.items():
-        contigs = node_dict["contigs"]
+    for current_node, contigs in contig_positions.items():
         chars_removed = 0
         for start, end, peptide in contigs:
             start = start - chars_removed
