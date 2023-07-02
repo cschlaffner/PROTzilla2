@@ -634,8 +634,7 @@ def _create_contigs_dict(node_start_end: dict):
         for start, end, peptide in node_dict["match_locations"]:
             if not new_positions_list:
                 new_positions_list.append((start, end, peptide))
-                continue
-            if start <= new_positions_list[-1][1]:
+            elif start <= new_positions_list[-1][1]:
                 new_positions_list[-1] = (
                     new_positions_list[-1][0],
                     end,
@@ -742,6 +741,7 @@ def _match_potential_matches(
         # return True, node_match_data, mismatches
         last_index = current_index
         added_nodes = []
+        # enumerating because of index, would use zip_longest otherwise
         for i, label_aa in enumerate(
             graph.nodes[current_node]["aminoacid"][current_index:]
         ):
@@ -759,7 +759,6 @@ def _match_potential_matches(
             else:
                 node_match_data[current_node] = (current_index, current_index)
                 added_nodes.append(current_node)
-
             last_index = i
 
         # node is matched til end, peptide not done
@@ -853,65 +852,66 @@ def _modify_graph(graph, contig_positions):
                 )
                 continue
 
-            # check if contig starts at beginning of current_node, if not create before_node
+            # check if contig starts at beginning of current_node,
+            # if not create before_node
             if start != 0:
                 first_node = f"n{len(graph.nodes)}"
-                before_node_label = graph.nodes[current_node]["aminoacid"][:start]
+                first_node_label = graph.nodes[current_node]["aminoacid"][:start]
                 graph.add_node(
                     first_node,
-                    aminoacid=before_node_label,
+                    aminoacid=first_node_label,
                     match="false",
                 )
 
-            # check if after_node is needed, if yes create match current_node
-            if end != _node_length(current_node) - 1:
-                if first_node:  # before_node, match_node and after_node
-                    second_node = f"n{len(graph.nodes)}"
-                    second_node_label = graph.nodes[current_node]["aminoacid"][
-                        start : end + 1
-                    ]
-                    graph.add_node(
-                        second_node,
-                        aminoacid=second_node_label,
-                        match="true",
-                        peptides=peptide,
-                    )
-                    # adopt current_node to be after_node
-                    third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
-                    third_node = current_node
-                    nx.set_node_attributes(
-                        graph,
-                        {
-                            third_node: {
-                                "aminoacid": third_node_label,
-                                "match": "false",
-                            }
-                        },
-                    )
+            if end != _node_length(current_node) - 1 and first_node:
+                # before_node, match_node and after_node
+                second_node = f"n{len(graph.nodes)}"
+                second_node_label = graph.nodes[current_node]["aminoacid"][
+                    start : end + 1
+                ]
+                graph.add_node(
+                    second_node,
+                    aminoacid=second_node_label,
+                    match="true",
+                    peptides=peptide,
+                )
+                # adopt current_node to be after_node
+                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                third_node = current_node
+                nx.set_node_attributes(
+                    graph,
+                    {
+                        third_node: {
+                            "aminoacid": third_node_label,
+                            "match": "false",
+                        }
+                    },
+                )
 
-                else:  # match_node and after_node
-                    first_node = f"n{len(graph.nodes)}"
-                    first_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
-                    graph.add_node(
-                        first_node,
-                        aminoacid=first_node_label,
-                        match="true",
-                        peptides=peptide,
-                    )
+            elif end != _node_length(current_node) - 1 and not first_node:
+                # match_node and after_node, no second node
+                first_node = f"n{len(graph.nodes)}"
+                first_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
+                graph.add_node(
+                    first_node,
+                    aminoacid=first_node_label,
+                    match="true",
+                    peptides=peptide,
+                )
 
-                    # adopt current_node to be match/after_node
-                    third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
-                    third_node = current_node
-                    nx.set_node_attributes(
-                        graph,
-                        {
-                            third_node: {
-                                "aminoacid": third_node_label,
-                                "match": "false",
-                            }
-                        },
-                    )
-                    second_node = None
+                # adopt current_node to be match/after_node
+                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                third_node = current_node
+                nx.set_node_attributes(
+                    graph,
+                    {
+                        third_node: {
+                            "aminoacid": third_node_label,
+                            "match": "false",
+                        }
+                    },
+                )
+                second_node = None
 
             else:  # before_node and match_node
                 # turn current_node into match_node
