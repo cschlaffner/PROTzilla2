@@ -1363,8 +1363,114 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert nx.utils.graphs_equal(planned_graph, created_graph)
 
 
-def test_longer_variations():
-    pass
+def test_graph_index_longer_variations():
+    planned_index = [
+        [("n11", "A")],
+        [("n11", "B")],
+        [("n11", "C")],
+        [("n1", "D"), ("n5", "V"), ("n7", "F")],
+        [("n2", "E"), ("n6", "T"), ("n8", "L"), ("n10", "Q")],
+        [("n10", "W"), ("n3", "G")],
+        [("n9", "A")],
+        [("n9", "B")],
+        [("n9", "C")],
+        [("n9", "D")],
+        [("n9", "E")],
+        [("n9", "T")],
+    ]
+    planned_longest_paths = {
+        "n0": 0,
+        "n11": 0,
+        "n1": 3,
+        "n5": 3,
+        "n7": 3,
+        "n2": 4,
+        "n6": 4,
+        "n8": 4,
+        "n10": 4,
+        "n3": 5,
+        "n9": 6,
+        "n4": 12,
+    }
+
+    graph = nx.read_graphml(
+        TEST_DATA_PATH / "graphs" / "test_protein_variation_long.graphml"
+    )
+    graph_index, msg, longest_paths = _create_graph_index(graph, 12)
+    assert graph_index == planned_index
+    assert longest_paths == planned_longest_paths
+    assert msg == ""
+
+
+def test_peptides_to_isoform_integration_test_longer_variations(
+    test_protein_variation_graph,
+    critical_logger,
+    tests_folder_name,
+):
+    run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_longer_variations"
+    run_path = RUNS_PATH / run_name
+    (run_path / "graphs").mkdir(parents=True, exist_ok=True)
+
+    protein_id = "test_protein_variation_long"
+    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
+    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
+    shutil.copy(test_protein_path, test_protein_destination)
+
+    peptide_protein_list = (
+        ["Sample01", "test_protein_variation_long", "DEG", 123123.0, 0.87452],
+        ["Sample01", "test_protein_variation_long", "ABCFQ", 234, 0.87452],
+        ["Sample01", "test_protein_variation_long", "ABCVTG", 234234.0, 0.87452],
+        ["Sample01", "test_protein_variation_long", "ABCFLA", 234, 0.87452],
+        ["Sample01", "test_protein_variation_long", "FLA", 234, 0.87452],
+    )
+    peptide_df = pd.DataFrame(
+        data=peptide_protein_list,
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+    )
+    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
+    peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+
+    out_dict = peptides_to_isoform(
+        peptide_df=peptide_df,
+        protein_id=protein_id,
+        run_name=run_name,
+        k=3,  # for easier test data creation
+        allowed_mismatches=0,  # for easier test data creation
+    )
+
+    planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
+    assert out_dict["graph_path"] == str(planned_modified_graph_path)
+    assert Path(planned_modified_graph_path).exists()
+    assert list(out_dict["peptide_matches"]) == ["ABCFQ", "ABCVTG", "DEG"]
+    assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLA"]
+    assert out_dict["protein_id"] == protein_id
+
+    created_graph = nx.read_graphml(planned_modified_graph_path)
+    planned_graph = nx.read_graphml(
+        TEST_DATA_PATH / "graphs" / "test_protein_variation_long.graphml"
+    )
+    planned_graph.add_node("n12")
+    planned_graph.add_edge("n10", "n12")
+    planned_graph.add_edge("n12", "n9")
+    planned_graph.remove_edge("n10", "n9")
+    nx.set_node_attributes(
+        planned_graph,
+        {
+            "n1": {"match": "true", "peptides": "DEG"},
+            "n2": {"match": "true", "peptides": "DEG"},
+            "n3": {"match": "true", "peptides": "ABCVTG;DEG"},
+            "n5": {"match": "true", "peptides": "ABCVTG"},
+            "n6": {"match": "true", "peptides": "ABCVTG"},
+            "n7": {"match": "true", "peptides": "ABCFQ"},
+            "n10": {"aminoacid": "W", "match": "false"},
+            "n11": {"match": "true", "peptides": "ABCFQ;ABCVTG"},
+            "n12": {"aminoacid": "Q", "match": "true", "peptides": "ABCFQ"},
+        },
+    )
+
+    pprint_graphs(created_graph, planned_graph)
+    assert created_graph.nodes == planned_graph.nodes
+    nx.utils.graphs_equal(planned_graph, created_graph)
 
 
 def pprint_graphs(graph, planned_graph):
