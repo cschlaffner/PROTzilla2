@@ -1364,6 +1364,13 @@
             "default": "accuracy",
             "dynamic": true
           },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
+          },
           "n_estimators": {
             "name": "The number of trees in the forest.",
             "type": "numeric",
@@ -1551,6 +1558,13 @@
             ],
             "default": "accuracy",
             "dynamic": true
+          },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
           },
           "C": {
             "name": "C: Regularization parameter (the strength of the regularization is inversely proportional to C)",
@@ -1742,6 +1756,13 @@
             ],
             "default": "accuracy",
             "dynamic": true
+          },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
           },
           "var_smoothing": {
             "name": "Portion of the largest variance of all features that is added to variances for calculation stability",
@@ -2102,6 +2123,13 @@
             "min": 1,
             "step": 1,
             "default": 1000
+          },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
           },
           "random_state": {
             "name": "Seed for random number generation",

@@ -66,6 +66,7 @@ def permutation_testing(
         n_permutations=n_permutations,
         n_jobs=n_jobs,
         random_state=random_state,
+        verbose=True,
     )
     return dict(
         score=score, permutation_scores=permutation_scores.tolist(), pvalue=pvalue

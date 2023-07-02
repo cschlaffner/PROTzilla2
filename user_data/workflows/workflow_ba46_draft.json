@@ -109,7 +109,7 @@
               "recall",
               "matthews_corrcoef"
             ],
-            "model_selection": "Randomized search",
+            "model_selection": "Grid search",
             "model_selection_scoring": "accuracy",
             "n_jobs": -1,
             "var_smoothing": [
