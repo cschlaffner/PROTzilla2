@@ -105,6 +105,7 @@ def go_analysis_with_STRING(
     proteins,
     protein_set_dbs,
     organism,
+    differential_expression_col=None,
     background=None,
     direction="both",
 ):
@@ -124,6 +125,9 @@ def go_analysis_with_STRING(
     :param organism: organism to use for enrichment as NCBI taxon identifier
         (e.g. Human is 9606)
     :type organism: int
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
     :param background: path to csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background: str or None
@@ -141,14 +145,14 @@ def go_analysis_with_STRING(
     out_messages = []
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
@@ -350,6 +354,7 @@ def enrichr_helper(protein_list, protein_sets, organism, direction, background=N
 def go_analysis_with_enrichr(
     proteins,
     organism,
+    differential_expression_col,
     direction="both",
     gene_sets_path=None,
     gene_sets_enrichr=None,
@@ -372,6 +377,9 @@ def go_analysis_with_enrichr(
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
@@ -410,9 +418,9 @@ def go_analysis_with_enrichr(
     out_messages = []
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -453,7 +461,7 @@ def go_analysis_with_enrichr(
         msg = "No background provided, using all genes in gene sets"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
@@ -523,6 +531,7 @@ def go_analysis_with_enrichr(
 def go_analysis_offline(
     proteins,
     protein_sets_path,
+    differential_expression_col,
     direction="both",
     background_path=None,
     background_number=None,
@@ -538,6 +547,9 @@ def go_analysis_offline(
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
     :param protein_sets_path: path to file containing protein sets. The identifers
         in the protein_sets should be the same type as the backgrounds and the proteins.
 
@@ -571,14 +583,14 @@ def go_analysis_offline(
     out_messages = []
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 

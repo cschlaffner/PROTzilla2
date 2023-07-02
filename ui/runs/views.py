@@ -18,6 +18,7 @@ from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
 from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
+from protzilla.constants.logging import logger
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -213,6 +214,30 @@ def change_field(request, run_name):
                 param_dict["categories"] = []
                 print(
                     f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
+                )
+
+        elif param_dict["fill"] == "protein_df_columns":
+            named_output = selected[0]
+            output_item = selected[1]
+            # KeyError is expected when named_output triggers the fill
+            try:
+                protein_iterable = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_iterable = None
+            if isinstance(protein_iterable, pd.DataFrame):
+                categories = []
+                for column in protein_iterable.columns:
+                    if column not in ["Protein ID", "Sample"]:
+                        categories.append(column)
+                param_dict["categories"] = categories
+            elif isinstance(protein_iterable, pd.Series):
+                param_dict["categories"] = protein_iterable.index
+            else:
+                param_dict["categories"] = []
+                logger.warning(
+                    f"Warning: expected protein_iterable to be a DataFrame or Series, but got {type(protein_iterable)}. Proceeding with empty list."
                 )
 
         elif param_dict["fill"] == "enrichment_categories":
