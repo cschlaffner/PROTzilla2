@@ -1,0 +1,11 @@
+ID   test_protein_variation_long        Unreviewed;         12 AA.
+AC   test_protein_variation_long
+DE   RecName: Full=Protzillas Made up Test Protein;
+DE            Short=hnRNP A2/B1;
+FT   VARIANT         4..5
+FT                   /note="DE -> VT (things)"
+FT                   /evidence="madethisupastestdata"
+FT                   /id="veryOwnID"
+SQ   SEQUENCE   12 IDK; 1234 IDK; AM0REG183R1SH ABC12;
+     ABCDEGABCD ET
+//

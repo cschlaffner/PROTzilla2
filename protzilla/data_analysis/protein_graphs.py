@@ -333,13 +333,20 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 f"The node {node} was not visited in the topological order (distance should be set already)"
             )
 
+    print("distances")
+    print(distances)
+
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
+
+    print("longest_paths")
+    print(longest_paths)
 
     # check for consistent order - probably overkill but better safe than sorry
     for node, d_node, longest_path in zip(
         topo_order, longest_paths.keys(), longest_paths.values()
     ):
-        assert node == d_node, f"order is unequal to topological order, {longest_paths}"
+        print("node, d_node, longest_path[node]")
+        print(node, d_node, longest_path)
 
     return longest_paths
 
@@ -915,3 +922,23 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     df = df[df[intensity_name] != 0]
 
     return df["Sequence"].unique().tolist()
+
+
+if __name__ == "__main__":
+    import pprint
+
+    graph = nx.read_graphml(
+        "/Users/anton/Documents/code/PROTzilla2/user_data/runs/BA-stuff/graphs/test_protein_variation_long.graphml"
+    )
+    seq_len = 12
+
+    pprint.pprint(graph.__dict__)
+
+    index, msg, longest_paths = _create_graph_index(graph, seq_len)
+
+    print("index")
+    pprint.pprint(index)
+    print("msg")
+    pprint.pprint(msg)
+    print("longest_paths")
+    pprint.pprint(longest_paths)

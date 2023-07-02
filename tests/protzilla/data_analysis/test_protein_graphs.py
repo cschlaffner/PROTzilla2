@@ -1363,6 +1363,10 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert nx.utils.graphs_equal(planned_graph, created_graph)
 
 
+def test_longer_variations():
+    pass
+
+
 def pprint_graphs(graph, planned_graph):
     # for debugging
     print("graph")
