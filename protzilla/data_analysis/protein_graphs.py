@@ -383,62 +383,52 @@ def _parse_file(file_path):
     longest path to be longer than the reference sequence.
     """
 
-    def is_valid_block(block_lines):
-        """
-        valid "VARIANT" blocks are those that don't substitute more amino acids than
-        they replace
-        """
-        pre_aa = None
-        post_line = None
-
-        for line in block_lines:
-            if "/note" in line:
-                if "Missing" in line:
-                    return True
-                pre_aa = line.split("->")[0].split()[1].replace('/note="', "").strip()
-                post_line = line.split("->")[1].split(" (")[0].strip()
-
-        if (
-            pre_aa is not None
-            and post_line is not None
-            and len(pre_aa) >= len(post_line)
-        ):
-            return True
-        return False
-
     with open(file_path, "r") as file:
         lines = file.readlines()
 
+    block = []
     filtered_lines = []
-    block_lines = []
     filtered_blocks = []
-    in_variant_block = False
-
+    variant_block = False
+    block_valid = False
     for line in lines:
-        line_seg = line.split()
-        if len(line_seg) == 3 and line_seg[0] == "FT" and line_seg[1].isupper():
-            block_start = True
+        segments = line.split()
+        if segments[0] == "FT":
+            if (
+                len(segments) == 3
+                and segments[1].isupper()
+                and (segments[1].isalpha() or "_" in segments[1])
+            ):  # start of new block
+                if block and block_valid:
+                    filtered_lines.extend(block)
+                elif block and not block_valid:
+                    filtered_blocks.append(block)
+
+                variant_block = segments[1] == "VARIANT"
+                block = []  # reset block lines as prev block was written or discarded
+
+            elif variant_block and "/note" in line:
+                # only VARIANTs that don't elongate the sequence are valid
+                if "Missing" in line:
+                    block_valid = True
+                else:
+                    pre_aa = (
+                        line.split("->")[0].split()[1].replace('/note="', "").strip()
+                    )
+                    post_line = line.split("->")[1].split(" (")[0].strip()
+                    block_valid = len(pre_aa) >= len(post_line)
+
+            elif not variant_block:  # all non-variant blocks are valid
+                block_valid = True
+
+            block.append(line)
         else:
-            block_start = False
-
-        if block_start:
-            if in_variant_block and len(block_lines) > 0:
-                if not is_valid_block(block_lines):
-                    filtered_lines = filtered_lines[: -len(block_lines)]
-                    filtered_blocks.append((block_lines,))
-                block_lines = []
-            if "VARIANT" in line:
-                in_variant_block = True
-            else:
-                in_variant_block = False
-
-        if in_variant_block:
-            block_lines.append(line)
-        filtered_lines.append(line)
-
-    if in_variant_block and len(block_lines) > 0:
-        if not is_valid_block(block_lines):
-            filtered_lines = filtered_lines[: -len(block_lines)]
+            if block and block_valid:
+                filtered_lines.extend(block)
+            elif block and not block_valid:
+                filtered_blocks.append(block)
+            block = []
+            filtered_lines.append(line)
 
     return filtered_lines, filtered_blocks
 
