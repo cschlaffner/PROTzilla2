@@ -5,7 +5,7 @@ import matplotlib.colors as mcolors
 import restring
 from biomart import BiomartServer
 
-from protzilla.data_integration.database_query import uniprot_databases, uniprot_columns
+from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -20,6 +20,8 @@ def insert_special_params(param_dict, run):
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
         param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        if "sorted" in param_dict and param_dict["sorted"]:
+            param_dict["outputs"].sort()
 
     if "fill" in param_dict:
         if param_dict["fill"] == "metadata_columns":

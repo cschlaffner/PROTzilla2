@@ -1,4 +1,5 @@
 import gseapy
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -245,7 +246,7 @@ def gsea_dot_plot(
     remove_library_names=False,
 ):
     """
-    Creates a dot plot from GSEA and preranked GSEA results. The plot is created using the gseapy library.
+    Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
     Only the top_terms that meet the cutoff are shown.
 
     :param input_df: GO enrichment results (offline or Enrichr)
@@ -315,4 +316,52 @@ def gsea_dot_plot(
         ]
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+
+
+def gsea_enrichment_plot(
+    term_dict=None,
+    term_name=None,
+    ranking=None,
+):
+    """
+    Creates a typical enrichment plot from GSEA or pre-ranked GSEA details. The plot is created using the gseapy library.
+
+    :param term_dict: Enrichment details for a gene set from GSEA
+    :type term_dict: dict
+    :param term_name: Name of the gene set, used as a title for the plot
+    :type term_name: str
+    :param ranking: Ranking output dataframe from GSEA or pre-ranked GSEA
+    :type ranking: pandas.DataFrame or pandas.Series
+    :return: Base64 encoded image of the plot
+    :rtype: bytes
+    """
+    if not isinstance(term_dict, dict) or not "nes" in term_dict.keys():
+        msg = "Please input a dictionary with enrichment details for a gene set from GSEA."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not term_name:
+        msg = "Please input a term name."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not (
+        isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)
+    ) or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name"):
+        msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
+        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if isinstance(ranking, pd.DataFrame):  # ensure that ranking is a series
+        ranking = ranking.iloc[:, 0]
+
+    try:
+        enrichment_plot_axes = gseapy.gseaplot(
+            rank_metric=ranking,
+            term=term_name,
+            **term_dict,
+        )
+        return [
+            dict(
+                plot_base64=fig_to_base64(enrichment_plot_axes[0].get_figure()),
+                key="gsea_enrichment_plot_img",
+            )
+        ]
+    except Exception as e:
+        msg = f"Could not plot enrichment plot for term {term_name}."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
