@@ -12,6 +12,7 @@ from protzilla.data_analysis.model_evaluation_plots import (
     roc_curve_plot,
     permutation_testing_plot,
 )
+from protzilla.data_analysis.model_selection import compute_learning_curve
 from protzilla.data_analysis.model_selection_plots import learning_curve_plot
 
 
@@ -150,18 +151,27 @@ def test_model_evaluation_plots(show_figures, random_forest_out, helpers):
 
 
 def test_model_selection_plots(show_figures, classification_df, meta_df, helpers):
-    curve_base64 = learning_curve_plot(
-        "Random Forest",
-        classification_df,
-        meta_df,
-        "Group",
-        "AD",
-        [3, 4, 6],
-        cv="K-Fold",
+    lc_out = compute_learning_curve(
+        clf_str="Random Forest",
+        input_df=classification_df,
+        metadata_df=meta_df,
+        labels_column="Group",
+        positive_label="AD",
+        train_sizes=[8, 9],
+        cross_validation_strategy="Nested CV",
+        inner_cv="Repeated Stratified K-Fold",
+        outer_cv="Repeated Stratified K-Fold",
         n_splits=3,
+        n_repeats=2,
         shuffle="yes",
         scoring="accuracy",
         random_state=42,
+    )
+    curve_base64 = learning_curve_plot(
+        train_sizes=lc_out["train_sizes"],
+        train_scores=lc_out["train_scores"],
+        test_scores=lc_out["test_scores"],
+        score_name="Accuracy",
     )
     if True:
         helpers.open_graph_from_base64(curve_base64[0])

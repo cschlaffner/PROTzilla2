@@ -21,7 +21,6 @@ from sklearn.model_selection import (
     StratifiedKFold,
     train_test_split,
     cross_validate,
-    BaseCrossValidator,
 )
 
 
@@ -124,16 +123,16 @@ def perform_nested_cross_validation(
     random_state=42,
     **parameters,
 ):
-    outer_cv = perform_cross_validation(
+    outer_cv_callable = perform_cross_validation(
         outer_cv, random_state=random_state, **parameters
     )
     outer_test_scores = list()
     outer_train_scores = list()
-    for train_index, test_index in outer_cv.split(input_df, labels_df):
+    for train_index, test_index in outer_cv_callable.split(input_df, labels_df):
         X_train, X_test = input_df.iloc[train_index], input_df.iloc[test_index]
         y_train, y_test = labels_df.iloc[train_index], labels_df.iloc[test_index]
 
-        inner_cv = perform_cross_validation(
+        inner_cv_callable = perform_cross_validation(
             inner_cv, random_state=random_state, **parameters
         )
         model = clone(clf)
@@ -142,7 +141,7 @@ def perform_nested_cross_validation(
             X_train,
             y_train,
             scoring=scoring,
-            cv=inner_cv,
+            cv=inner_cv_callable,
             return_train_score=True,
             return_estimator=True,
         )
