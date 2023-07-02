@@ -87,23 +87,12 @@ def t_test(
             protein_df.loc[:, grouping] == group2, intensity_name
         ].to_numpy()
 
-        # if a protein has a NaN value in a sample, user should remove it
-        group1_is_nan = np.isnan(group1_intensities)
-        group2_is_nan = np.isnan(group2_intensities)
-        if group1_is_nan.any() or group2_is_nan.any():
-            msg = "There are Proteins with NaN values present in your data. \
-                Please filter them out before running the differential expression analysis."
-            return dict(
-                de_proteins_df=None,
-                corrected_p_values=None,
-                log2_fold_change=None,
-                fc_threshold=None,
-                corrected_alpha=None,
-                messages=[dict(level=messages.ERROR, msg=msg)],
-            )
+        group1_intensities = group1_intensities[~np.isnan(group1_intensities)]
+        group2_intensities = group2_intensities[~np.isnan(group2_intensities)]
 
-        # if the intensity of a group for a protein is 0, it should be filtered out
-        if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
+        # if the intensity of a group for a protein is 0 or NaN (empty group)
+        # it should be filtered out
+        if not np.mean(group1_intensities) or not np.mean(group2_intensities):
             filtered_proteins.append(protein)
             continue
 
@@ -130,22 +119,6 @@ def t_test(
         protein for protein in proteins if protein not in filtered_proteins
     ]
 
-    de_proteins = [
-        protein
-        for protein, has_p, has_fc in zip(
-            remaining_proteins, p_values_mask, fold_change_mask
-        )
-        if has_p and has_fc
-    ]
-    de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
-
-    significant_proteins = [
-        protein for i, protein in enumerate(remaining_proteins) if p_values_mask[i]
-    ]
-    significant_proteins_df = intensity_df.loc[
-        intensity_df["Protein ID"].isin(significant_proteins)
-    ]
-
     corrected_p_values_df = pd.DataFrame(
         list(zip(proteins, corrected_p_values)),
         columns=["Protein ID", "corrected_p_value"],
@@ -164,6 +137,32 @@ def t_test(
         list(zip(proteins, t_statistic)),
         columns=["Protein ID", "t_statistic"],
     )
+
+    # add corrected p-values, fold change, log2 fold change and t-statistic to intensity_df
+    dataframes = [
+        corrected_p_values_df,
+        log2_fold_change_df,
+        fold_change_df,
+        t_statistic_df,
+    ]
+    for df in dataframes:
+        intensity_df = pd.merge(intensity_df, df, on="Protein ID", how="left")
+
+    de_proteins = [
+        protein
+        for protein, has_p, has_fc in zip(
+            remaining_proteins, p_values_mask, fold_change_mask
+        )
+        if has_p and has_fc
+    ]
+    de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
+
+    significant_proteins = [
+        protein for i, protein in enumerate(remaining_proteins) if p_values_mask[i]
+    ]
+    significant_proteins_df = intensity_df.loc[
+        intensity_df["Protein ID"].isin(significant_proteins)
+    ]
 
     proteins_filtered = len(filtered_proteins) > 0
     proteins_filtered_warning_msg = f"Some proteins were filtered out because they had a mean intensity of 0 in one of the groups."
