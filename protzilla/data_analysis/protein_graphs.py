@@ -774,6 +774,17 @@ def _match_potential_matches(
     for peptide, indices in potential_peptide_matches.items():
         peptide_match_nodes = {}  # store positions of matches for each node
         for match_start_index in indices:  # start index is of ref_index
+            # check with what node at the index the peptide start matches with
+            starting_aa = peptide[0]
+            for node, aa in graph_index[match_start_index]:
+                if starting_aa == aa:
+                    starting_node = node
+                    break
+            else:
+                logger.error(
+                    f"No fitting node for match start position {match_start_index} of {peptide} found"
+                )
+                continue
             matched, node_match_data, mismatches = _match_on_graph(
                 mismatches=0,
                 allowed_mismatches=allowed_mismatches,
@@ -781,8 +792,7 @@ def _match_potential_matches(
                 current_node=graph_index[match_start_index][0][0],
                 left_over_peptide=peptide,
                 node_match_data={},
-                current_index=match_start_index
-                - longest_paths[graph_index[match_start_index][0][0]],
+                current_index=match_start_index - longest_paths[starting_node],
             )
             if matched:
                 logger.debug(f"matched {peptide} at {match_start_index}")
