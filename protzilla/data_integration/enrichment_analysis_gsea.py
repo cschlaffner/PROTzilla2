@@ -5,11 +5,9 @@ from django.contrib import messages
 
 from protzilla.constants.logging import logger
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
+from protzilla.data_integration import database_query
 
-from .enrichment_analysis_helper import (
-    read_protein_or_gene_sets_file,
-    uniprot_ids_to_uppercase_gene_symbols,
-)
+from .enrichment_analysis_helper import read_protein_or_gene_sets_file
 
 
 def create_ranked_df(
@@ -119,7 +117,7 @@ def gsea_preranked(
     :type seed: int
     :param threads: Number of threads
     :type threads: int
-    :return: dictionary with results dataframe, ranking and messages
+    :return: dictionary with results dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
     if (
@@ -150,7 +148,7 @@ def gsea_preranked(
         gene_to_groups,
         group_to_genes,
         filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+    ) = database_query.uniprot_groups_to_genes(protein_groups)
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -193,19 +191,17 @@ def gsea_preranked(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
+    out_dict = {
+        "enriched_df": enriched_df,
+        "ranking": preranked_result.ranking,
+    }
+    out_dict.update(preranked_result.results)
+
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return dict(
-            enriched_df=enriched_df,
-            ranking=preranked_result.ranking,
-            filtered_groups=filtered_groups,
-            messages=[dict(level=messages.WARNING, msg=msg)],
-        )
-
-    return dict(
-        enriched_df=enriched_df,
-        ranking=preranked_result.ranking,
-    )
+        out_dict["filtered_groups"] = filtered_groups
+        out_dict["messages"] = [dict(level=messages.WARNING, msg=msg)]
+    return out_dict
 
 
 def create_genes_intensity_wide_df(
@@ -327,7 +323,7 @@ def gsea(
     :type seed: int
     :param threads: Number of threads to use
     :type threads: int
-    :return: dict with enriched dataframe and messages
+    :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
     assert grouping in metadata_df.columns, "Grouping column not in metadata df"
@@ -355,7 +351,7 @@ def gsea(
         gene_to_groups,
         group_to_genes,
         filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+    ) = database_query.uniprot_groups_to_genes(protein_groups)
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -409,13 +405,14 @@ def gsea(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
+    out_dict = {
+        "enriched_df": enriched_df,
+        "ranking": gsea_result.ranking,
+    }
+    out_dict.update(gsea_result.results)
+
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        return dict(
-            enriched_df=enriched_df,
-            filtered_groups=filtered_groups,
-            messages=[dict(level=messages.WARNING, msg=msg)],
-        )
-    return dict(
-        enriched_df=enriched_df,
-    )
+        out_dict["filtered_groups"] = filtered_groups
+        out_dict["messages"] = [dict(level=messages.WARNING, msg=msg)]
+    return out_dict
