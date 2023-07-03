@@ -1468,7 +1468,6 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         },
     )
 
-    pprint_graphs(created_graph, planned_graph)
     assert created_graph.nodes == planned_graph.nodes
     nx.utils.graphs_equal(planned_graph, created_graph)
 

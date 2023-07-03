@@ -671,7 +671,9 @@ def _match_potential_matches(
     :param longest_paths: length of longest path through the graph to each node
     :type longest_paths: dict[str, int]
 
-    return: dict of peptide to dict of start index of peptide match to dict of node
+    :return: dict of peptide to dict of start index of peptide match to dict of node to
+    tuple of start and end position of match in this node
+    :rtype: dict[str, dict[int, dict[str, tuple[int, int]]]]
     """
 
     peptide_mismatches = set(peptide_mismatches)
