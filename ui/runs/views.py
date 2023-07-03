@@ -192,7 +192,7 @@ def change_field(request, run_name):
         if param_dict["fill"] == "metadata_column_data":
             param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
         elif param_dict["fill"] == "uniprot_fields":
-            param_dict["categories"] = uniprot_columns(selected[0])
+            param_dict["categories"] = uniprot_columns(selected[0]) + ["Links"]
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]

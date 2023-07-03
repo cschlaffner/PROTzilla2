@@ -42,7 +42,7 @@ def insert_special_params(param_dict, run):
             databases = uniprot_databases()
             if databases:
                 # use the first database as a default, only used to initalize
-                param_dict["categories"] = uniprot_columns(databases[0])
+                param_dict["categories"] = uniprot_columns(databases[0]) + ["Links"]
             else:
                 param_dict["categories"] = ["Links"]
         elif param_dict["fill"] == "uniprot_databases":

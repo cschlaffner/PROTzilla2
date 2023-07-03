@@ -5,11 +5,9 @@ from django.contrib import messages
 
 from protzilla.constants.logging import logger
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
+from protzilla.data_integration import database_query
 
-from .enrichment_analysis_helper import (
-    read_protein_or_gene_sets_file,
-    uniprot_ids_to_uppercase_gene_symbols,
-)
+from .enrichment_analysis_helper import read_protein_or_gene_sets_file
 
 
 def create_ranked_df(
@@ -150,7 +148,7 @@ def gsea_preranked(
         gene_to_groups,
         group_to_genes,
         filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+    ) = database_query.uniprot_groups_to_genes(protein_groups)
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -353,7 +351,7 @@ def gsea(
         gene_to_groups,
         group_to_genes,
         filtered_groups,
-    ) = uniprot_ids_to_uppercase_gene_symbols(protein_groups)
+    ) = database_query.uniprot_groups_to_genes(protein_groups)
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
