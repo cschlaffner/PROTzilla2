@@ -21,6 +21,6 @@ from . import views
 urlpatterns = [
     path("", views.index),
     path("runs/", include("runs.urls")),
-    path("databases", views.databases),
+    path("databases", views.databases, name="databases"),
     path("admin/", admin.site.urls),
 ]
