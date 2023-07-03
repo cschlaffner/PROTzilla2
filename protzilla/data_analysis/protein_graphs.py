@@ -832,6 +832,11 @@ def _modify_graph(graph, contig_positions):
             first_node = None
             second_node = None
             third_node = None
+            first_node_dict = None
+            second_node_dict = None
+            third_node_dict = None
+            node_num = len(graph.nodes)
+
             if start == 0 and end == _node_length(current_node) - 1:
                 logger.debug(
                     f"matched whole current_node {current_node}, contig: ({start, end})"
@@ -845,45 +850,46 @@ def _modify_graph(graph, contig_positions):
             # check if contig starts at beginning of current_node,
             # if not create before_node
             if start != 0:
-                first_node = f"n{len(graph.nodes)}"
+                first_node = f"n{node_num}"
+                node_num += 1
                 first_node_label = graph.nodes[current_node]["aminoacid"][:start]
-                graph.add_node(
-                    first_node,
+                first_node_dict = dict(
+                    node_for_adding=first_node,
                     aminoacid=first_node_label,
                     match="false",
                 )
 
             if end != _node_length(current_node) - 1 and first_node:
                 # before_node, match_node and after_node
-                second_node = f"n{len(graph.nodes)}"
+                second_node = f"n{node_num}"
+                node_num += 1
                 second_node_label = graph.nodes[current_node]["aminoacid"][
                     start : end + 1
                 ]
-                graph.add_node(
-                    second_node,
+                second_node_dict = dict(
+                    node_for_adding=second_node,
                     aminoacid=second_node_label,
                     match="true",
                     peptides=peptide,
                 )
+
                 # adopt current_node to be after_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
-                nx.set_node_attributes(
-                    graph,
-                    {
-                        third_node: {
-                            "aminoacid": third_node_label,
-                            "match": "false",
-                        }
-                    },
-                )
+                third_node_dict = {
+                    third_node: {
+                        "aminoacid": third_node_label,
+                        "match": "false",
+                    }
+                }
 
             elif end != _node_length(current_node) - 1 and not first_node:
                 # match_node and after_node, no second node
-                first_node = f"n{len(graph.nodes)}"
+                first_node = f"n{node_num}"
+                node_num += 1
                 first_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
-                graph.add_node(
-                    first_node,
+                first_node_dict = dict(
+                    node_for_adding=first_node,
                     aminoacid=first_node_label,
                     match="true",
                     peptides=peptide,
@@ -892,42 +898,40 @@ def _modify_graph(graph, contig_positions):
                 # adopt current_node to be match/after_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
-                nx.set_node_attributes(
-                    graph,
-                    {
-                        third_node: {
-                            "aminoacid": third_node_label,
-                            "match": "false",
-                        }
-                    },
-                )
+                third_node_dict = {
+                    third_node: {
+                        "aminoacid": third_node_label,
+                        "match": "false",
+                    }
+                }
                 second_node = None
 
             else:  # before_node and match_node
                 # turn current_node into match_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][start:]
                 third_node = current_node
-                nx.set_node_attributes(
-                    graph,
-                    {
-                        third_node: {
-                            "aminoacid": third_node_label,
-                            "match": "true",
-                            "peptides": peptide,
-                        }
-                    },
-                )
+                third_node_dict = {
+                    third_node: {
+                        "aminoacid": third_node_label,
+                        "match": "true",
+                        "peptides": peptide,
+                    }
+                }
                 second_node = None
 
             # add edges
+            graph.add_node(**first_node_dict)
             predecessors = list(graph.predecessors(current_node))
             for pre in predecessors:
                 graph.remove_edge(pre, current_node)
                 graph.add_edge(pre, first_node)
             if second_node:
+                graph.add_node(**second_node_dict)
+                nx.set_node_attributes(graph, third_node_dict)
                 graph.add_edge(first_node, second_node)
                 graph.add_edge(second_node, third_node)
             else:
+                nx.set_node_attributes(graph, third_node_dict)
                 graph.add_edge(first_node, third_node)
 
             chars_removed += len(graph.nodes[first_node]["aminoacid"])
