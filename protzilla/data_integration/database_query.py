@@ -71,34 +71,46 @@ def uniprot_databases():
 
 
 def uniprot_to_genes(uniprot_ids):
-    """Takes a list of uniprot IDs and maps them to genes. also returns IDs that could not be mapped"""
+    """
+    Maps uniprot IDs to hgnc gene symbols. Also returns IDs that could not be mapped.
+    First uses all uniprot databases that contain genes, then uses biomart to map
+    proteins that have not been found with uniprot.
+
+    :param uniprot_ids: cleaned uniprot IDs, not containing isoforms or other modifications
+    :type uniprot_ids: list[str]
+    :return: a dict that maps uniprot ids to genes and a list of uniprot ids that were not found
+    :rtype: tuple[dict[str, str], list[str]]
+    """
 
     def merge_dict(gene_mapping, new_gene_mapping):
+        added_keys = set()
         for key, value in new_gene_mapping.items():
             if value and isinstance(value, str):
                 gene_mapping[key] = value
-        return gene_mapping
+                added_keys.add(key)
+        return gene_mapping, added_keys
 
-    logger.info("Starting to map uniprot IDs to genes.")
+    logger.info("Mapping to map uniprot IDs to genes.")
     available_databases = uniprot_databases()
     logger.info(f"Found {len(available_databases)} uniprot databases.")
     out_dict = {}
-    ids_to_search = uniprot_ids
+    ids_to_search = set(uniprot_ids)
     for db_name in available_databases:
+        # all available databases that have a gene column are used
         cols = uniprot_columns(db_name)
         if "Gene Names (primary)" in cols:
             df = uniprot_query_dataframe(
                 db_name, ids_to_search, ["Gene Names (primary)"]
             )
             mapping = df.to_dict()["Gene Names (primary)"]
-            out_dict = merge_dict(out_dict, mapping)
-            ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
+            out_dict, found_proteins = merge_dict(out_dict, mapping)
+            ids_to_search -= found_proteins
         elif "Gene Names" in cols:
             df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"])
             mapping = df.to_dict()["Gene Names"]
             first_gene_dict = {k: v and v.split()[0] for k, v in mapping.items()}
-            out_dict = merge_dict(out_dict, first_gene_dict)
-            ids_to_search = [id_ for id_ in ids_to_search if id_ not in mapping]
+            out_dict, found_proteins = merge_dict(out_dict, first_gene_dict)
+            ids_to_search -= found_proteins
 
         if not ids_to_search:
             logger.info("All proteins mapped, no biomart mapping will be performed.")
@@ -116,10 +128,10 @@ def uniprot_to_genes(uniprot_ids):
     )
     uniprot_id_to_hgnc_symbol = dict(set(map(tuple, biomart_results)))
     # should not overwrite anything as ids_to_search not in out_dict yet
-    out_dict = merge_dict(out_dict, uniprot_id_to_hgnc_symbol)
-    not_found = [id_ for id_ in ids_to_search if id_ not in uniprot_id_to_hgnc_symbol]
+    out_dict, found_proteins = merge_dict(out_dict, uniprot_id_to_hgnc_symbol)
+    not_found = ids_to_search - found_proteins
     logger.info("Done with mapping uniprot IDs to genes.")
-    return out_dict, not_found
+    return out_dict, list(not_found)
 
 
 def uniprot_groups_to_genes(uniprot_groups):
