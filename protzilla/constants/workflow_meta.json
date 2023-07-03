@@ -1987,6 +1987,48 @@
             "default": null
           }
         }
+      },
+      "random_sampling": {
+        "name": "Random sampling",
+        "description": "Returns a random subset of n rows from the input and labels dataframe",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "categories": [],
+            "default": "None"
+          },
+          "n_samples": {
+            "name": "Choose number of samples",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
       }
     },
     "model_evaluation": {

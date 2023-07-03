@@ -12,7 +12,10 @@ from protzilla.data_analysis.model_evaluation_plots import (
     roc_curve_plot,
     permutation_testing_plot,
 )
-from protzilla.data_analysis.model_selection import compute_learning_curve
+from protzilla.data_analysis.model_selection import (
+    compute_learning_curve,
+    random_sampling,
+)
 from protzilla.data_analysis.model_selection_plots import learning_curve_plot
 
 
@@ -208,3 +211,23 @@ def test_permutation_testing_plot(show_figures, random_forest_out, helpers):
     )
     if show_figures:
         helpers.open_graph_from_base64(hist_base64[0])
+
+
+def test_random_sampling(classification_df, meta_df):
+    current_out = random_sampling(
+        input_df=classification_df,
+        metadata_df=meta_df,
+        labels_column="Group",
+        n_samples=5,
+    )
+    input_df_len = len(current_out["input_df"])
+    labels_df_len = len(current_out["labels_df"])
+    assert (
+        input_df_len == labels_df_len
+    ), f"There is a dimension mismatch between the input dataframe={input_df_len} and the labels={labels_df_len} dataframe"
+    assert (
+        input_df_len == 5
+    ), f"The input dataframe should be reduced to a subset of 5 random samples, but only {input_df_len} were found."
+    assert (
+        labels_df_len == 5
+    ), f"The labels dataframe should be reduced to a subset of 5 random samples, but only {labels_df_len} were found."

@@ -3,7 +3,7 @@ import pandas as pd
 from kneed import KneeLocator
 from scipy.optimize import curve_fit
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import learning_curve
+from sklearn.model_selection import learning_curve, train_test_split
 from sklearn.svm import SVC
 from joblib import Parallel, delayed
 from protzilla.constants.logging import logger
@@ -103,3 +103,20 @@ def compute_learning_curve(
         train_scores=train_scores,
         minimum_viable_sample_size=minimum_viable_sample_size,
     )
+
+
+def random_sampling(input_df, metadata_df, labels_column, n_samples, random_state=6):
+    # prepare X and y dataframes for classification
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    common_indices = input_df_wide.index.intersection(labels_df.index)
+    labels_df = labels_df.loc[common_indices]
+    input_df_n_samples, _, labels_df_n_samples, _ = train_test_split(
+        input_df_wide, labels_df, train_size=n_samples, random_state=random_state
+    )
+    return dict(input_df=input_df_n_samples, labels_df=labels_df_n_samples)
