@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 
 @patch("protzilla.data_integration.database_query.uniprot_to_genes")
-def test_uniprot_groups_to_genes(mock):
-    mock.return_value = dict(a="ABS", b="HKL", c="NNF"), ["d"]
+def test_uniprot_groups_to_genes(mock_uniprot_to_genes):
+    mock_uniprot_to_genes.return_value = dict(a="ABS", b="HKL", c="NNF"), ["d"]
     gene_to_groups, group_to_genes, filtered = uniprot_groups_to_genes(
         ["a;b;c", "a-1;b-1_4", "c;d", "d-4;d-8"]
     )

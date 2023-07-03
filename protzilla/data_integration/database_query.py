@@ -113,9 +113,11 @@ def uniprot_to_genes(uniprot_ids):
             ids_to_search -= found_proteins
 
         if not ids_to_search:
-            logger.info("All proteins mapped, no biomart mapping will be performed.")
+            logger.info(
+                "All proteins mapped using uniprot, no biomart mapping will be performed."
+            )
             return out_dict, []
-    logger.info("Starting with biomart mapping.")
+    logger.info("Starting biomart mapping.")
     biomart_results = list(
         biomart_query(
             ids_to_search, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
