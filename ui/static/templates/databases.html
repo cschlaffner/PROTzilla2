@@ -1,16 +1,41 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+{% endblock %}
+
 {% block content %}
     {% for database in uniprot_databases %}
         {{ database }} <br>
     {% endfor %}
-    <form action="/databases/upload" method="post" enctype="multipart/form-data">
+    <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
         {% csrf_token %}
+        <label for="name">Name for new database:</label>
+        <input id="name" type="text" name="name">
         <label for="new-db" class="mt-2"></label><br>
-        <input name="new-db" type="file" id="new-db" class="file-input" hidden>
+        <input name="new-db" type="file" id="new-db" hidden>
         <label for="new-db" class="btn btn-grey">Choose file</label>
         <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
-        <input type="submit" value="Calculate" id="calculate_parameters_submit" class="btn btn-red mr-auto">
+
+        <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto" disabled>
     </form>
+    <script>
+        let file_uploaded = false;
+
+        function update_submit() {
+            $("#add-button").prop('disabled', !(file_uploaded && $("#name").val().length > 0));
+        }
+
+        $(document).ready(function () {
+            $(document).on('change', '#new-db', function () {
+                $('#chosen-new-db').text(this.files[0].name);
+                file_uploaded = true;
+                update_submit()
+            });
+            $(document).on('change', '#name', function () {
+                update_submit()
+            });
+        })
+    </script>
 {% endblock %}

@@ -22,5 +22,6 @@ urlpatterns = [
     path("", views.index),
     path("runs/", include("runs.urls")),
     path("databases", views.databases, name="databases"),
+    path("databases/upload", views.database_upload, name="database_upload"),
     path("admin/", admin.site.urls),
 ]
