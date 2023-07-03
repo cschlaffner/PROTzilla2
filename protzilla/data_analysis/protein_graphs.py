@@ -125,10 +125,6 @@ def peptides_to_isoform(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    print("ref_index", ref_index)
-    print("graph_index", graph_index)
-    print("longest_paths", longest_paths)
-
     potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
         allowed_mismatches=allowed_mismatches,
         k=k,
