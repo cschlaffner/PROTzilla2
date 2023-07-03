@@ -383,20 +383,16 @@ def _parse_file(file_path):
         lines = file.readlines()
 
     block = []
-    filtered_lines = []
+    kept_lines = []
     filtered_blocks = []
     variant_block = False
     block_valid = False
     for line in lines:
         segments = line.split()
         if segments[0] == "FT":
-            if (
-                len(segments) == 3
-                and segments[1].isupper()
-                and (segments[1].isalpha() or "_" in segments[1])
-            ):  # start of new block
+            if len(segments) == 3 and segments[1].isupper():  # start of new block
                 if block and block_valid:
-                    filtered_lines.extend(block)
+                    kept_lines.extend(block)
                 elif block and not block_valid:
                     filtered_blocks.append(block)
 
@@ -408,10 +404,15 @@ def _parse_file(file_path):
                 if "Missing" in line:
                     block_valid = True
                 else:
-                    pre_aa = (
-                        line.split("->")[0].split()[1].replace('/note="', "").strip()
-                    )
-                    post_line = line.split("->")[1].split(" (")[0].strip()
+                    matches = re.search(r"([A-Z]+) -> ([A-Z]+)", line)
+                    if matches is None:
+                        logger.error(f"Could not parse line:\n{line}")
+                        block_valid = False
+                        block.append(line)
+                        continue
+
+                    pre_aa = matches.group(1)
+                    post_line = matches.group(2)
                     block_valid = len(pre_aa) >= len(post_line)
 
             elif not variant_block:  # all non-variant blocks are valid
@@ -420,13 +421,13 @@ def _parse_file(file_path):
             block.append(line)
         else:
             if block and block_valid:
-                filtered_lines.extend(block)
+                kept_lines.extend(block)
             elif block and not block_valid:
                 filtered_blocks.append(block)
             block = []
-            filtered_lines.append(line)
+            kept_lines.append(line)
 
-    return filtered_lines, filtered_blocks
+    return kept_lines, filtered_blocks
 
 
 def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
