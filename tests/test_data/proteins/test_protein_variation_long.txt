@@ -18,6 +18,10 @@ FT   VARIANT         5
 FT                   /note="E -> L (things)"
 FT                   /evidence="madethisupastestdata4"
 FT                   /id="veryOwnID4"
+FT   VARIANT         5
+FT                   /note="E -> THISSHOULDBEPARSEDOUT (things)"
+FT                   /evidence="madethisupastestdata5"
+FT                   /id="veryOwnID5"
 SQ   SEQUENCE   12 IDK; 1234 IDK; AM0REG183R1SH ABC12;
      ABCDEGABCD ET
 //

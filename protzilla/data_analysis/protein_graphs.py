@@ -345,7 +345,7 @@ def _get_protein_file(
 ) -> (Path, list, requests.models.Response | None):
     path_to_graphs = run_path / "graphs"
     protein_file_path = path_to_graphs / f"{protein_id}.txt"
-    filtered_protein_file_path = path_to_graphs / f"{protein_id}.txt"
+    filtered_protein_file_path = path_to_graphs / f"{protein_id}_parsed.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
     r = None
 
