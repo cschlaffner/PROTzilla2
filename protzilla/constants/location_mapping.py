@@ -186,6 +186,11 @@ method_map = {
     ): model_selection.compute_learning_curve,
     (
         "data_analysis",
+        "model_selection",
+        "random_sampling",
+    ): model_selection.random_sampling,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,

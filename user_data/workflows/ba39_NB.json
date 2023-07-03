@@ -89,7 +89,7 @@
     "data_analysis": {
       "steps": [
         {
-          "name": "plot",
+          "name": "model_selection",
           "method": "compute_learning_curve",
           "parameters": {
             "clf_str": "Random Forest",
@@ -100,6 +100,10 @@
             "labels_column": "Group",
             "positive_label": "AD",
             "cross_validation_strategy": "Nested CV",
+            "inner_cv": "Repeated Stratified K-Fold",
+            "outer_cv": "Repeated Stratified K-Fold",
+            "n_splits": 10,
+            "n_repeats": 10,
             "train_sizes": [
               20,
               30,
@@ -116,7 +120,32 @@
             "scoring": "accuracy",
             "random_state": 6,
             "metadata_df": ""
-          }
+          },
+          "output_name": "NB learning curve"
+        },
+        {
+          "name": "plot",
+          "method": "learning_curve_plot",
+          "parameters": {
+            "train_sizes": [
+              "NB learning curve",
+              "train_sizes"
+            ],
+            "test_scores": [
+              "NB learning curve",
+              "test_scores"
+            ],
+            "train_scores": [
+              "NB learning curve",
+              "train_scores"
+            ],
+            "score_name": "Accuracy",
+            "minimum_viable_sample_size": [
+              "NB learning curve",
+              "minimum_viable_sample_size"
+            ]
+          },
+          "output_name": null
         },
         {
           "name": "classification",
