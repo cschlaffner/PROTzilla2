@@ -1,0 +1,275 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "Intensity"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {}
+          ],
+          "output_name": null
+        },
+        {
+          "name": "normalisation",
+          "method": "z_score",
+          "parameters": {},
+          "graphs": [
+            {}
+          ],
+          "output_name": null
+        },
+        {
+          "name": "imputation",
+          "method": "min_value_per_sample",
+          "parameters": {
+            "shrinking_value": 1
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "None",
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": "data_prep"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "plot",
+          "method": "compute_learning_curve",
+          "parameters": {
+            "clf_str": "Random Forest",
+            "input_df": [
+              "data_prep",
+              "dataframe"
+            ],
+            "labels_column": "Group",
+            "positive_label": "AD",
+            "cross_validation_strategy": "Nested CV",
+            "train_sizes": [
+              20,
+              30,
+              40,
+              50,
+              60,
+              70,
+              80,
+              90,
+              100,
+              110,
+              125
+            ],
+            "scoring": "accuracy",
+            "random_state": 6,
+            "metadata_df": ""
+          }
+        },
+        {
+          "name": "classification",
+          "method": "naive_bayes",
+          "parameters": {
+            "input_df": [
+              "data_prep",
+              "dataframe"
+            ],
+            "labels_column": "Group",
+            "test_size": 0.2,
+            "split_stratify": "yes",
+            "positive_label": "AD",
+            "validation_strategy": "Repeated Stratified K-Fold",
+            "n_splits": 5,
+            "n_repeats": 10,
+            "scoring": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ],
+            "model_selection": "Grid search",
+            "model_selection_scoring": "accuracy",
+            "n_jobs": -1,
+            "var_smoothing": [
+              1e-09,
+              1e-08,
+              1e-07,
+              1e-06,
+              1e-05,
+              0.0001
+            ],
+            "random_state": 6,
+            "metadata_df": ""
+          },
+          "output_name": "NB"
+        },
+        {
+          "name": "model_evaluation",
+          "method": "evaluate_classification_model",
+          "parameters": {
+            "model": [
+              "NB",
+              "model"
+            ],
+            "input_test_df": [
+              "NB",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "NB",
+              "y_test_df"
+            ],
+            "scoring": [
+              "accuracy",
+              "precision",
+              "recall",
+              "matthews_corrcoef"
+            ]
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
+          "method": "roc_curve_plot",
+          "parameters": {
+            "model": [
+              "NB",
+              "model"
+            ],
+            "input_test_df": [
+              "NB",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "NB",
+              "y_test_df"
+            ],
+            "plot_title": "Naive Bayes ROC Curve"
+          }
+        },
+        {
+          "name": "plot",
+          "method": "precision_recall_curve_plot",
+          "parameters": {
+            "model": [
+              "NB",
+              "model"
+            ],
+            "input_test_df": [
+              "NB",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "NB",
+              "y_test_df"
+            ],
+            "plot_title": "Naive Bayes Precision-Recall Curve"
+          },
+          "output_name": null
+        },
+        {
+          "name": "model_evaluation",
+          "method": "permutation_testing",
+          "parameters": {
+            "model": [
+              "NB",
+              "model"
+            ],
+            "input_df": [
+              "NB",
+              "X_train_df"
+            ],
+            "labels_df": [
+              "NB",
+              "y_train_df"
+            ],
+            "cross_validation_strategy": "Repeated Stratified K-Fold",
+            "n_splits": 5,
+            "n_repeats": 10,
+            "shuffle": "yes",
+            "scoring": "accuracy",
+            "n_permutations": 1000,
+            "n_jobs": -1,
+            "random_state": 6
+          },
+          "output_name": "NB permutation testing"
+        },
+        {
+          "name": "plot",
+          "method": "permutation_testing_plot",
+          "parameters": {
+            "score": [
+              "NB permutation testing",
+              "score"
+            ],
+            "permutation_scores": [
+              "NB permutation testing",
+              "permutation_scores"
+            ],
+            "pvalue": [
+              "NB permutation testing",
+              "pvalue"
+            ],
+            "score_name": "Accuracy"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}
