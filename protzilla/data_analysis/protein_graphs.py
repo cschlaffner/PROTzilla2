@@ -55,7 +55,7 @@ def peptides_to_isoform(
     matching peptides overlap.
 
     ProtGraph Source: https://github.com/mpc-bioinformatics/ProtGraph/
-    Used ProtGraph Version: https://github.com/antonneubauer/ProtGraph@master
+    Used ProtGraph Version: https://github.com/antonneubauer/ProtGraph
 
     :param peptide_df: Peptide Dataframe with columns "sequence", "protein_id"
     :type peptide_df: pd.DataFrame
