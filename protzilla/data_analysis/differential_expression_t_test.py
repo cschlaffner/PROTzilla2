@@ -7,8 +7,10 @@ from scipy import stats
 
 from .differential_expression_helper import apply_multiple_testing_correction
 
+
 def _is_valid(value):
     return value != 0 and not np.isnan(value)
+
 
 def t_test(
     intensity_df,
@@ -94,7 +96,9 @@ def t_test(
 
         # if the intensity of a group for a protein is 0 or NaN (empty group)
         # it should be filtered out
-        if not _is_valid(np.mean(group1_intensities)) or not _is_valid(np.mean(group2_intensities)):
+        if not _is_valid(np.mean(group1_intensities)) or not _is_valid(
+            np.mean(group2_intensities)
+        ):
             filtered_proteins.append(protein)
             continue
 
