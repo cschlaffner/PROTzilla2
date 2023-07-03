@@ -1112,6 +1112,14 @@
           "score_name": {
             "name": "Score name",
             "type": "text"
+          },
+          "minimum_viable_sample_size": {
+            "name": "Train scores",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           }
         }
       },

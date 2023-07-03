@@ -157,7 +157,7 @@ def test_model_selection_plots(show_figures, classification_df, meta_df, helpers
         metadata_df=meta_df,
         labels_column="Group",
         positive_label="AD",
-        train_sizes=[8, 9],
+        train_sizes=[8, 9, 10, 11],
         cross_validation_strategy="Nested CV",
         inner_cv="Repeated Stratified K-Fold",
         outer_cv="Repeated Stratified K-Fold",
@@ -172,9 +172,11 @@ def test_model_selection_plots(show_figures, classification_df, meta_df, helpers
         train_scores=lc_out["train_scores"],
         test_scores=lc_out["test_scores"],
         score_name="Accuracy",
+        minimum_viable_sample_size=lc_out["minimum_viable_sample_size"],
     )
     if True:
         helpers.open_graph_from_base64(curve_base64[0])
+        helpers.open_graph_from_base64(curve_base64[1])
 
 
 def test_evaluate_classification_model(show_figures, random_forest_out):

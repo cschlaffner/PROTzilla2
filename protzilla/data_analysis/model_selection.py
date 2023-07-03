@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from kneed import KneeLocator
+from scipy.optimize import curve_fit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import learning_curve
 from sklearn.svm import SVC
@@ -68,6 +70,8 @@ def compute_learning_curve(
             for size in train_sizes
         )
         test_scores, train_scores = zip(*results)
+        test_scores = np.array(test_scores)
+        train_scores = np.array(train_scores)
 
     else:
         cv_callable = perform_cross_validation(
@@ -82,13 +86,20 @@ def compute_learning_curve(
             cv=cv_callable,
             random_state=random_state,
         )
-        test_scores = test_scores.tolist()
-        train_scores = train_scores.tolist()
 
     # create df train_sizes, train_scores, test_scores
+    kneedle = KneeLocator(
+        train_sizes,
+        test_scores.mean(axis=1),
+        S=1.0,
+        curve="concave",
+        direction="increasing",
+    )
+    minimum_viable_sample_size = round(kneedle.elbow)
 
     return dict(
         train_sizes=train_sizes,
         test_scores=test_scores,
         train_scores=train_scores,
+        minimum_viable_sample_size=minimum_viable_sample_size,
     )
