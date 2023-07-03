@@ -152,6 +152,9 @@ def go_analysis_with_STRING(
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
@@ -179,7 +182,7 @@ def go_analysis_with_STRING(
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if protein_set_dbs is None or protein_set_dbs == "":
+    if not protein_set_dbs:
         protein_set_dbs = ["KEGG", "Component", "Function", "Process", "RCTM"]
         msg = "No protein set databases selected. Using all protein set databases."
         out_messages.append(dict(level=messages.INFO, msg=msg))
@@ -206,7 +209,7 @@ def go_analysis_with_STRING(
         logger.info("Starting analysis for up-regulated proteins")
 
         up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
-        if len(up_df) <= 1:
+        if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
                 dict(level=messages.ERROR, msg=msg, trace=up_df.to_string())
@@ -224,7 +227,11 @@ def go_analysis_with_STRING(
         down_df = get_functional_enrichment_with_delay(
             down_protein_list, **string_params
         )
-        if len(down_df) <= 1:
+        if (
+            down_df.empty
+            or not down_df.values.any()
+            or "ErrorMessage" in down_df.columns
+        ):
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
                 dict(level=messages.ERROR, msg=msg, trace=down_df.to_string())
@@ -461,6 +468,9 @@ def go_analysis_with_enrichr(
         msg = "No background provided, using all genes in gene sets"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
 
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
@@ -590,6 +600,9 @@ def go_analysis_offline(
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])

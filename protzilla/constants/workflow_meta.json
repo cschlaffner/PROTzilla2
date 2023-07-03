@@ -1851,7 +1851,7 @@
               "Upload a file (recommended)",
               "Choose biomart dataset",
               "Specify number of expressed genes (not recommended)",
-              "Use all genes in the gene_sets"
+              "Use all genes in the gene sets"
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
@@ -1931,7 +1931,7 @@
             "categories": [
               "Upload a file (recommended)",
               "Specify number of expressed genes (not recommended)",
-              "Use all genes in the gene_sets"
+              "Use all genes in the gene sets"
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
