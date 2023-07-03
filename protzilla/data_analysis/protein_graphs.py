@@ -838,6 +838,7 @@ def _modify_graph(graph, contig_positions):
         for start, end, peptide in contigs:
             start = start - chars_removed
             end = end - chars_removed
+            # all reset to clarify that they are used only in this loop
             first_node = None
             second_node = None
             third_node = None
@@ -856,8 +857,8 @@ def _modify_graph(graph, contig_positions):
                 )
                 continue
 
-            # check if contig starts at beginning of current_node,
-            # if not create before_node
+            # check if contig starts at beginning of current_node.
+            # if not, create first_node
             if start != 0:
                 first_node = f"n{node_num}"
                 node_num += 1
@@ -869,7 +870,7 @@ def _modify_graph(graph, contig_positions):
                 )
 
             if end != _node_length(current_node) - 1 and first_node:
-                # before_node, match_node and after_node
+                # first_node, second_node and third_node
                 second_node = f"n{node_num}"
                 node_num += 1
                 second_node_label = graph.nodes[current_node]["aminoacid"][
@@ -882,7 +883,7 @@ def _modify_graph(graph, contig_positions):
                     peptides=peptide,
                 )
 
-                # adopt current_node to be after_node
+                # adopt current_node to be third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
                 third_node_dict = {
@@ -893,7 +894,7 @@ def _modify_graph(graph, contig_positions):
                 }
 
             elif end != _node_length(current_node) - 1 and not first_node:
-                # match_node and after_node, no second node
+                # first_node and third_node, no second node
                 first_node = f"n{node_num}"
                 node_num += 1
                 first_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
@@ -904,7 +905,7 @@ def _modify_graph(graph, contig_positions):
                     peptides=peptide,
                 )
 
-                # adopt current_node to be match/after_node
+                # adopt current_node to be third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
                 third_node_dict = {
@@ -916,7 +917,7 @@ def _modify_graph(graph, contig_positions):
                 second_node = None
 
             else:  # before_node and match_node
-                # turn current_node into match_node
+                # turn current_node into third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][start:]
                 third_node = current_node
                 third_node_dict = {
