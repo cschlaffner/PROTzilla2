@@ -21,8 +21,8 @@
         <br>
     {% endif %}
 
-    {% for database in uniprot_databases %}
-        {{ database }} <br>
+    {% for database, cols in uniprot_databases.items %}
+        {{ database }}: {{ cols|join:", " }} <br>
     {% endfor %}
     <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
         {% csrf_token %}

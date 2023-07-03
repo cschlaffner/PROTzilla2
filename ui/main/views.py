@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from protzilla.data_integration.database_query import uniprot_databases
+from protzilla.data_integration.database_query import uniprot_databases, uniprot_columns
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import pandas
@@ -12,10 +12,12 @@ def index(request):
 
 
 def databases(request):
+    databases = uniprot_databases()
+    with_cols = {database: uniprot_columns(database) for database in databases}
     return render(
         request,
         "databases.html",
-        context=dict(uniprot_databases=uniprot_databases()),
+        context=dict(uniprot_databases=with_cols),
     )
 
 
