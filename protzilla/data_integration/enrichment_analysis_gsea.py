@@ -13,7 +13,12 @@ from .enrichment_analysis_helper import (
 
 
 def create_ranked_df(
-    protein_groups, protein_df, ranking_column, ranking_direction, group_to_genes, filtered_groups
+    protein_groups,
+    protein_df,
+    ranking_column,
+    ranking_direction,
+    group_to_genes,
+    filtered_groups,
 ):
     """
     Creates a ranked dataframe of genes according to values in ranking_column from protein_df and ranking_direction.
