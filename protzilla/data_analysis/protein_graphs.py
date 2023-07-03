@@ -386,46 +386,46 @@ def _parse_file(file_path):
     kept_lines = []
     filtered_blocks = []
     variant_block = False
-    block_valid = False
+    block_valid = True
     for line in lines:
         segments = line.split()
-        if segments[0] == "FT":
-            if len(segments) == 3 and segments[1].isupper():  # start of new block
-                if block and block_valid:
-                    kept_lines.extend(block)
-                elif block and not block_valid:
-                    filtered_blocks.append(block)
-
-                variant_block = segments[1] == "VARIANT"
-                block = []  # reset block lines as prev block was written or discarded
-
-            elif variant_block and "/note" in line:
-                # only VARIANTs that don't elongate the sequence are valid
-                if "Missing" in line:
-                    block_valid = True
-                else:
-                    matches = re.search(r"([A-Z]+) -> ([A-Z]+)", line)
-                    if matches is None:
-                        logger.error(f"Could not parse line:\n{line}")
-                        block_valid = False
-                        block.append(line)
-                        continue
-
-                    pre_aa = matches.group(1)
-                    post_line = matches.group(2)
-                    block_valid = len(pre_aa) >= len(post_line)
-
-            elif not variant_block:  # all non-variant blocks are valid
-                block_valid = True
-
-            block.append(line)
-        else:
+        if segments[0] != "FT":
+            # SP-EMBL files end with SQ-Lines
             if block and block_valid:
                 kept_lines.extend(block)
             elif block and not block_valid:
                 filtered_blocks.append(block)
             block = []
+            block_valid = True
             kept_lines.append(line)
+            continue
+
+        if len(segments) == 3 and segments[1].isupper():  # start of new block
+            if block and block_valid:
+                kept_lines.extend(block)
+            elif block and not block_valid:
+                filtered_blocks.append(block)
+
+            block = []  # reset block lines as prev block was written or discarded
+            block_valid = True  # all non-variant blocks are valid
+            variant_block = segments[1] == "VARIANT"
+
+        if variant_block and "/note" in line:
+            # only VARIANTs that don't elongate the sequence are valid
+            if not "Missing" in line:
+                matches = re.search(r"([A-Z]+) -> ([A-Z]+)", line)
+                if matches is None:
+                    # if this is invalid we don't want to be the ones who filter it out
+                    # It should either raise an error in graph creation or our parsing
+                    # is questionable
+                    logger.warning(f"Could not parse line:\n{line}, continuing anyway")
+                else:
+                    pre_aa = matches.group(1)
+                    post_line = matches.group(2)
+                    if len(pre_aa) < len(post_line):
+                        block_valid = False
+
+        block.append(line)
 
     return kept_lines, filtered_blocks
 
