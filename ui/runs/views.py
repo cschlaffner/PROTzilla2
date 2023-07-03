@@ -2,11 +2,18 @@ import sys
 import tempfile
 import traceback
 import zipfile
+from pathlib import Path
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 from django.contrib import messages
-from django.http import FileResponse, HttpResponseRedirect, JsonResponse
+from django.http import (
+    FileResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -78,6 +85,14 @@ def detail(request, run_name):
     show_table = run.current_out and any(
         isinstance(v, pd.DataFrame) for v in run.current_out.values()
     )
+
+    show_protein_graph = (
+        run.current_out
+        and "graph_path" in run.current_out
+        and run.current_out["graph_path"] is not None
+        and Path(run.current_out["graph_path"]).exists()
+    )
+
     return render(
         request,
         "runs/details.html",
@@ -99,6 +114,7 @@ def detail(request, run_name):
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),
+            show_protein_graph=show_protein_graph,
         ),
     )
 
@@ -523,4 +539,55 @@ def tables_content(request, run_name, index, key):
         )
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
+    )
+
+
+def protein_graph(request, run_name, index: int):
+    run = active_runs[run_name]
+
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
+
+    if "graph_path" not in outputs:
+        return HttpResponseBadRequest(
+            f"No Graph Path found in output of step with index {index}"
+        )
+
+    graph_path = outputs["graph_path"]
+    peptide_matches = outputs.get("peptide_matches", [])
+    peptide_mismatches = outputs.get("peptide_mismatches", [])
+    protein_id = outputs.get("protein_id", "")
+
+    if not Path(graph_path).exists():
+        return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
+
+    graph = nx.read_graphml(graph_path)
+
+    nodes = [
+        {
+            "data": {
+                "id": node,
+                "label": graph.nodes[node].get("aminoacid", "####### ERROR #######"),
+                "match": graph.nodes[node].get("match", "false"),
+                "peptides": graph.nodes[node].get("peptides", ""),
+            }
+        }
+        for node in graph.nodes()
+    ]
+    edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
+    elements = nodes + edges
+
+    return render(
+        request,
+        "runs/protein_graph.html",
+        context={
+            "elements": elements,
+            "peptide_matches": peptide_matches,
+            "peptide_mismatches": peptide_mismatches,
+            "protein_id": protein_id,
+            "run_name": run_name,
+            "used_memory": get_memory_usage(),
+        },
     )

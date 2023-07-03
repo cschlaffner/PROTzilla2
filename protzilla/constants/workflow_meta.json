@@ -956,7 +956,8 @@
       "heatmap": {
         "name": "Heatmap",
         "description": "",
-        "parameters": {}
+        "parameters": {
+        }
       },
       "scatter_plot": {
         "name": "Scatter plot",
@@ -1714,6 +1715,61 @@
             "max": 4294967295,
             "step": 1,
             "default": 42
+          }
+        }
+      }
+    },
+    "protein_graphs": {
+      "peptides_to_isoform": {
+        "name": "Peptide to Isoform",
+        "description": "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online.",
+        "parameters": {
+          "protein_id": {
+            "name": "Protein ID",
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the Uniprot-ID of the Protein"
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
+          },
+          "peptide_df": {
+            "type": "empty",
+            "name": "peptide_df",
+            "default": null
+          },
+          "k": {
+            "name": "k-mer length",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 5
+          },
+          "allowed_mismatches": {
+            "name": "Number of allowed mismatched Amino Acids per Peptide. For many allowed mismatches, this can take a long time.",
+            "type": "numeric",
+            "min": 0,
+            "step": 1,
+            "default": 2
+          }
+        }
+      },
+      "variation_graph": {
+        "name": "Protein Variation Graph",
+        "description" : "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "parameters": {
+          "protein_id": {
+            "name": "Protein ID",
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the Uniprot-ID of the Protein"
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
           }
         }
       }

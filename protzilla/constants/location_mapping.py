@@ -6,6 +6,7 @@ from ..data_analysis import (
     model_evaluation,
     model_evaluation_plots,
     plots,
+    protein_graphs,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -176,6 +177,16 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "peptides_to_isoform",
+    ): protein_graphs.peptides_to_isoform,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "variation_graph",
+    ): protein_graphs.variation_graph,
     (
         "data_integration",
         "enrichment_analysis",
