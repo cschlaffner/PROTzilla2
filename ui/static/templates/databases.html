@@ -5,4 +5,12 @@
     {% for database in uniprot_databases %}
         {{ database }} <br>
     {% endfor %}
+    <form action="/databases/upload" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="new-db" class="mt-2"></label><br>
+        <input name="new-db" type="file" id="new-db" class="file-input" hidden>
+        <label for="new-db" class="btn btn-grey">Choose file</label>
+        <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+        <input type="submit" value="Calculate" id="calculate_parameters_submit" class="btn btn-red mr-auto">
+    </form>
 {% endblock %}
