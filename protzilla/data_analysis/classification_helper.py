@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
+    matthews_corrcoef,
     precision_score,
     recall_score,
-    matthews_corrcoef,
 )
 from sklearn.model_selection import (
     GridSearchCV,

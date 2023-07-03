@@ -66,3 +66,7 @@ html, body {
 #go_enrichment_dot_plot_img {
     width: 700px;
 }
+
+#gsea_enrichment_plot_img {
+    width: 800px;
+}
