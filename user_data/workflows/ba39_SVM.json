@@ -92,7 +92,7 @@
           "name": "model_selection",
           "method": "compute_learning_curve",
           "parameters": {
-            "clf_str": "Naive Bayes",
+            "clf_str": "Support Vector Machine",
             "input_df": [
               "data_prep",
               "dataframe"
@@ -121,27 +121,27 @@
             "random_state": 6,
             "metadata_df": ""
           },
-          "output_name": "NB learning curve"
+          "output_name": "SVM learning curve"
         },
         {
           "name": "plot",
           "method": "learning_curve_plot",
           "parameters": {
             "train_sizes": [
-              "NB learning curve",
+              "SVM learning curve",
               "train_sizes"
             ],
             "test_scores": [
-              "NB learning curve",
+              "SVM learning curve",
               "test_scores"
             ],
             "train_scores": [
-              "NB learning curve",
+              "SVM learning curve",
               "train_scores"
             ],
             "score_name": "Accuracy",
             "minimum_viable_sample_size": [
-              "NB learning curve",
+              "SVM learning curve",
               "minimum_viable_sample_size"
             ]
           },
@@ -157,7 +157,7 @@
             ],
             "labels_column": "Group",
             "n_samples": [
-              "NB learning curve",
+              "SVM learning curve",
               "minimum_viable_sample_size"
             ],
             "random_state": 6
@@ -166,7 +166,7 @@
         },
         {
           "name": "classification",
-          "method": "naive_bayes",
+          "method": "svm",
           "parameters": {
             "input_df": [
               "subset",
@@ -188,33 +188,35 @@
             "model_selection": "Grid search",
             "model_selection_scoring": "accuracy",
             "n_jobs": -1,
-            "var_smoothing": [
-              1e-09,
-              1e-08,
-              1e-07,
-              1e-06,
-              1e-05,
-              0.0001
+            "C": [0.4, 0.5, 0.6, 0.8, 1.0],
+            "kernel": [
+              "linear",
+              "poly",
+              "rbf",
+              "sigmoid"
             ],
+            "gamma": ["scale", "auto", 0.001, 0.01, 0.4, 0.6, 0.8, 1.0],
+            "probability": true,
+            "tolerance": 0.0001,
             "random_state": 6,
             "metadata_df": ""
           },
-          "output_name": "NB"
+          "output_name": "SVM"
         },
         {
           "name": "model_evaluation",
           "method": "evaluate_classification_model",
           "parameters": {
             "model": [
-              "NB",
+              "SVM",
               "model"
             ],
             "input_test_df": [
-              "NB",
+              "SVM",
               "X_test_df"
             ],
             "labels_test_df": [
-              "NB",
+              "SVM",
               "y_test_df"
             ],
             "scoring": [
@@ -231,18 +233,18 @@
           "method": "roc_curve_plot",
           "parameters": {
             "model": [
-              "NB",
+              "SVM",
               "model"
             ],
             "input_test_df": [
-              "NB",
+              "SVM",
               "X_test_df"
             ],
             "labels_test_df": [
-              "NB",
+              "SVM",
               "y_test_df"
             ],
-            "plot_title": "Naive Bayes ROC Curve"
+            "plot_title": "Support Vector Machine ROC Curve"
           }
         },
         {
@@ -250,18 +252,18 @@
           "method": "precision_recall_curve_plot",
           "parameters": {
             "model": [
-              "NB",
+              "SVM",
               "model"
             ],
             "input_test_df": [
-              "NB",
+              "SVM",
               "X_test_df"
             ],
             "labels_test_df": [
-              "NB",
+              "SVM",
               "y_test_df"
             ],
-            "plot_title": "Naive Bayes Precision-Recall Curve"
+            "plot_title": "Support Vector Machine Precision-Recall Curve"
           },
           "output_name": null
         },
@@ -270,15 +272,15 @@
           "method": "permutation_testing",
           "parameters": {
             "model": [
-              "NB",
+              "SVM",
               "model"
             ],
             "input_df": [
-              "NB",
+              "SVM",
               "X_train_df"
             ],
             "labels_df": [
-              "NB",
+              "SVM",
               "y_train_df"
             ],
             "cross_validation_strategy": "Repeated Stratified K-Fold",
@@ -290,22 +292,22 @@
             "n_jobs": -1,
             "random_state": 6
           },
-          "output_name": "NB permutation testing"
+          "output_name": "SVM permutation testing"
         },
         {
           "name": "plot",
           "method": "permutation_testing_plot",
           "parameters": {
             "score": [
-              "NB permutation testing",
+              "SVM permutation testing",
               "score"
             ],
             "permutation_scores": [
-              "NB permutation testing",
+              "SVM permutation testing",
               "permutation_scores"
             ],
             "pvalue": [
-              "NB permutation testing",
+              "SVM permutation testing",
               "pvalue"
             ],
             "score_name": "Accuracy"
