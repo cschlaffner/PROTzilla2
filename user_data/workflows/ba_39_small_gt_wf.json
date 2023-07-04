@@ -74,6 +74,7 @@
             ],
             
             "log_base": 2,
+            "fc_threshold": 1,
             "grouping": "Group",
             "group1": "CTR", 
             "group2": "AD"
