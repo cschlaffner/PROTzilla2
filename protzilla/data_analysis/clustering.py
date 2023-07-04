@@ -239,7 +239,6 @@ def expectation_maximisation(
         **kwargs,
     )
 
-    # create dataframes for ouput dict
     cluster_labels_df = pd.DataFrame(
         {"Sample": input_df_wide.index, "Cluster Labels": model.predict(input_df_wide)}
     )
@@ -330,7 +329,6 @@ def hierarchical_agglomerative_clustering(
         **kwargs,
     )
 
-    # create dataframes for ouput dict
     cluster_labels_df = pd.DataFrame(
         {"Sample": input_df_wide.index, "Cluster Labels": model.labels_}
     )
