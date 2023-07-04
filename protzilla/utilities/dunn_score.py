@@ -26,6 +26,15 @@ def _get_clust_pairs(clusters):
 
 
 def dunn_score(X, labels=None):
+    """
+    The Dunn index is an internal clustering validation metric. It evaluates how
+    compact and how well separated from each other clusters are.
+
+    :param X: The dataframe that should be clustered in wide or long format
+    :type X: pd.DataFrame
+    :param labels: the predicted labels/classes by the clustering algorithm
+    :type labels: pd.DataFrame
+    """
     dist = pairwise_distances(X)
     clusters = set(labels)
     inter_dists = [

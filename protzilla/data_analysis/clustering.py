@@ -34,14 +34,14 @@ def k_means(
     function returns a dataframe with the corresponding cluster of each sample and \
     another dataframe with the coordinates of the cluster centers.
 
-    :param input_df: The dataframe that should be classified in wide or long format
+    :param input_df: The dataframe that should be clustered in wide or long format
     :type input_df: pd.DataFrame
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+     the true labels of the data
     :type labels_column: str
-    :param positive_label: The positive label for classification.
+    :param positive_label: The positive label for clustering.
     :type positive_label: str
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
@@ -161,21 +161,19 @@ def expectation_maximisation(
     **kwargs,
 ):
     """
-    Performs expectation maximization clustering by using the GaussianMixture estimator
-    from the sklearn package, which implements the expectation-maximization (EM)
-    algorithm a mixture of Gaussian models. It returns a dataframe with the
-    assigned Gaussian for each sample and a dataframe with the component's density for
-    each sample.
+    Performs expectation maximization clustering with a Gaussian Mixture Model, using
+    the GaussianMixture estimator from the sklearn package. It returns a dataframe with
+    the assigned Gaussian for each sample and a dataframe with the component's density
+    for each sample.
 
-    :param input_df: The dataframe that should be classified in wide or long format
+    :param input_df: The dataframe that should be clustered in wide or long format
     :type input_df: pd.DataFrame
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+     the true labels of the data
     :type labels_column: str
-    :param positive_label: The positive label for classification.
-    :type positive_label: str
+    :param positive_label: The positive label for clustering.
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
@@ -268,18 +266,18 @@ def hierarchical_agglomerative_clustering(
 ):
     """
     Performs Agglomerative Clustering by recursively merging a pair of clusters of
-    sample data and using linkage distance. The function returns a dataframe with the
-    corresponding cluster of each sample.
+    sample data. The strategy to merge a pair of clusters is determined by the linkage
+    distance, which uses the chosen metric to compute the distances between data points.
+    The function returns a dataframe with the corresponding cluster of each sample.
 
-    :param input_df: The dataframe that should be classified in wide or long format
+    :param input_df: The dataframe that should be clustered in wide or long format
     :type input_df: pd.DataFrame
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+     the true labels of the data
     :type labels_column: str
-    :param positive_label: The positive label for classification.
-    :type positive_label: str
+    :param positive_label: The positive label for clustering.
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
