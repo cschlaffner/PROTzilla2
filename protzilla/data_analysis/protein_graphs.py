@@ -203,7 +203,6 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
                 --output_csv={output_csv} \
                 -ft VARIANT \
                 -d skip"
-    # -ft VAR_SEQ --no_merge
 
     subprocess.run(cmd_str, shell=True)
 
@@ -296,7 +295,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     Create a mapping from node to longest_path from source to that node.
 
     Let n be a node in the graph and P be the set of all predecessors of n.
-    longest_paths[n] = max(longest_paths[p] + len(aminoacid of n)) for p in P
+    longest_paths[n] = max(longest_paths[p] + len(aminoacid of p)) for p in P
 
     e.g.:            n1     n2    n3   n5
         __start__ -> ABC -> DE -> F -> JK -> __end__
@@ -326,10 +325,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
         # visiting in topological order, so distance to node should be set already
         if distances[node] != -1:
-            for neighbor in protein_graph.neighbors(node):
-                distances[neighbor] = max(
-                    distances[neighbor], distances[node] + node_len
-                )
+            for succ in protein_graph.successors(node):
+                distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
                 f"The node {node} was not visited in the topological order (distance should be set already)"
