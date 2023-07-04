@@ -588,7 +588,7 @@ def go_analysis_offline(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
-    :param protein_sets_path: path to file containing gene sets. The identifers
+    :param protein_sets_path: path to file containing gene sets. The identifiers
         in the gene_sets should be uppercase gene symbols.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
@@ -700,6 +700,7 @@ def go_analysis_offline(
             return down_enriched
 
     if direction == "both":
+        filtered_groups = up_filtered_groups + down_filtered_groups
         enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
