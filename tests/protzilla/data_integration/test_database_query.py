@@ -1,10 +1,11 @@
+from unittest.mock import patch
+
 import pandas as pd
 
 from protzilla.data_integration.database_query import (
     uniprot_groups_to_genes,
     uniprot_to_genes,
 )
-from unittest.mock import patch
 
 
 @patch("protzilla.data_integration.database_query.uniprot_to_genes")

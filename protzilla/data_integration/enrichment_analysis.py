@@ -8,6 +8,7 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+from protzilla.data_integration import database_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -15,7 +16,6 @@ from .enrichment_analysis_helper import (
     read_background_file,
     read_protein_or_gene_sets_file,
 )
-from protzilla.data_integration import database_query
 
 
 # call methods for precommit hook not to delete imports
@@ -245,21 +245,19 @@ def go_analysis_with_STRING(
     return {"enrichment_results": merged_df}
 
 
-def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=False):
+def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
     """
     A method that merges the results for up- and down-regulated proteins for the GSEApy
     enrichment results. If a Gene_set and Term combination is present in both dataframes,
-    the one with the lower adjusted p-value is kept. Genes are merged and the overlap column
+    the one with the lower adjusted p-value is kept. Proteins were mapped to uppercase gene
+    symbols and need to be merged.Genes are merged and the overlap column
     is updated according to the number of genes.
-    If mapped is True, the proteins were mapped to uppercase gene symbols and the proteins
-    need to be merged as well.
+
 
     :param up_enriched: dataframe with enrichment results for up-regulated proteins
     :type up_enriched: pandas.DataFrame
     :param down_enriched: dataframe with enrichment results for down-regulated proteins
     :type down_enriched: pandas.DataFrame
-    :param mapped: whether the proteins were mapped to uppercase gene symbols
-    :type mapped: bool
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
@@ -277,12 +275,9 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
                 enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
 
             # merge proteins, genes and overlap columns
-            if mapped:
-                proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(";"))
-                proteins.update(
-                    down_enriched.loc[(gene_set, term), "Proteins"].split(";")
-                )
-                enriched.loc[(gene_set, term), "Proteins"] = ";".join(list(proteins))
+            proteins = set(up_enriched.loc[(gene_set, term), "Proteins"].split(";"))
+            proteins.update(down_enriched.loc[(gene_set, term), "Proteins"].split(";"))
+            enriched.loc[(gene_set, term), "Proteins"] = ";".join(list(proteins))
 
             genes = set(up_enriched.loc[(gene_set, term), "Genes"].split(";"))
             genes.update(down_enriched.loc[(gene_set, term), "Genes"].split(";"))
@@ -296,22 +291,27 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     return enriched.reset_index()
 
 
-def enrichr_helper(protein_list, protein_sets, organism, direction, background=None):
+def enrichr_helper(
+    protein_list, protein_sets, direction, organism=None, background=None, offline=False
+):
     """
-    A helper method for the enrichment analysis with Enrichr. It maps the proteins to uppercase gene symbols
-    and performs the enrichment analysis with GSEApy. It returns the enrichment results and the groups that
+    A helper method for the enrichment analysis with GSEApy. It maps the proteins to uppercase gene symbols
+    and performs the enrichment analysis with GSEApy. Enrichment is run offline, when offline is True,
+    else it is run via Enrichr API. It returns the enrichment results and the groups that
     were filtered out because no gene symbol could be found.
 
     :param protein_list: list of proteins
     :type protein_list: list
     :param protein_sets: list of protein sets to perform the enrichment analysis with
     :type protein_sets: list
-    :param organism: organism
+    :param organism: organism, not used when offline is True
     :type organism: str
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
     :param background: background for the enrichment analysis
     :type background: list or None
+    :param offline: whether to run the enrichment offline
+    :type offline: bool
     :return: enrichment results and filtered groups
     :rtype: tuple
     """
@@ -327,18 +327,37 @@ def enrichr_helper(protein_list, protein_sets, organism, direction, background=N
         return dict(messages=[dict(level=messages.ERROR, msg=msg)]), None
 
     logger.info(f"Starting analysis for {direction}-regulated proteins")
-    try:
-        enriched = gseapy.enrichr(
-            gene_list=list(gene_to_groups.keys()),
-            gene_sets=protein_sets,
-            background=background,
-            organism=organism,
-            outdir=None,
-            verbose=True,
-        ).results
-    except ValueError as e:
-        msg = "Something went wrong with the analysis. Please check your inputs."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]), None
+
+    msg = "Something went wrong with the analysis. Please check your inputs."
+    if offline:
+        try:
+            enriched = gseapy.enrich(
+                gene_list=list(gene_to_groups.keys()),
+                gene_sets=protein_sets,
+                background=background,
+                outdir=None,
+                verbose=True,
+            ).results
+        except ValueError as e:
+            return (
+                dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]),
+                None,
+            )
+    else:
+        try:
+            enriched = gseapy.enrichr(
+                gene_list=list(gene_to_groups.keys()),
+                gene_sets=protein_sets,
+                background=background,
+                organism=organism,
+                outdir=None,
+                verbose=True,
+            ).results
+        except ValueError as e:
+            return (
+                dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]),
+                None,
+            )
 
     enriched["Proteins"] = enriched["Genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
@@ -482,23 +501,29 @@ def go_analysis_with_enrichr(
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups = enrichr_helper(
-            up_protein_list, gene_sets, organism, "up", background
+            up_protein_list,
+            gene_sets,
+            organism=organism,
+            direction="up",
+            background=background,
         )
         if isinstance(up_enriched, dict):  # error occurred
             return up_enriched
 
     if direction == "down" or direction == "both":
         down_enriched, down_filtered_groups = enrichr_helper(
-            down_protein_list, gene_sets, organism, "down", background
+            down_protein_list,
+            gene_sets,
+            organism=organism,
+            direction="down",
+            background=background,
         )
         if isinstance(down_enriched, dict):  # error occurred
             return down_enriched
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(
-            up_enriched, down_enriched, mapped=True
-        )
+        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
@@ -533,13 +558,13 @@ def go_analysis_offline(
     against a given set of protein sets using the GSEApy package.
     For the analysis a hypergeometric test is used against a background provided as a
     path (recommended) or a number of proteins. If no background is provided, all proteins in
-    the protein_sets are used as the background.
+    the gene_sets are used as the background.
     Up- and down-regulated proteins are analyzed separately and the results are merged.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
     :param protein_sets_path: path to file containing protein sets. The identifers
-        in the protein_sets should be the same type as the backgrounds and the proteins.
+        in the gene_sets should be the same type as the backgrounds and the proteins.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
         - .txt: Setname or identifier followed by a tab-separated list of genes
@@ -605,11 +630,11 @@ def go_analysis_offline(
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    protein_sets = read_protein_or_gene_sets_file(protein_sets_path)
+    gene_sets = read_protein_or_gene_sets_file(protein_sets_path)
     if (
-        isinstance(protein_sets, dict) and "messages" in protein_sets
+        isinstance(gene_sets, dict) and "messages" in gene_sets
     ):  # file could not be read successfully
-        return protein_sets
+        return gene_sets
 
     if background_path:
         background = read_background_file(background_path)
@@ -625,47 +650,40 @@ def go_analysis_offline(
         out_messages.append(dict(level=messages.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
-        logger.info("Starting analysis for up-regulated proteins")
-        # gene set and gene list identifiers need to match
-        try:
-            up_enriched = gseapy.enrich(
-                gene_list=up_protein_list,
-                gene_sets=protein_sets,
-                background=background,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            msg = "Something went wrong with the analysis. Please check your inputs."
-            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
-            return dict(messages=out_messages)
-        logger.info("Finished analysis for up-regulated proteins")
+        up_enriched, up_filtered_groups = enrichr_helper(
+            up_protein_list,
+            gene_sets,
+            direction="up",
+            background=background,
+            offline=True,
+        )
+        if isinstance(up_enriched, dict):  # error occurred
+            return up_enriched
 
     if direction == "down" or direction == "both":
-        logger.info("Starting analysis for down-regulated proteins")
-        # gene set and gene list identifiers need to match
-        try:
-            down_enriched = gseapy.enrich(
-                gene_list=down_protein_list,
-                gene_sets=protein_sets,
-                background=background,
-                outdir=None,
-                verbose=True,
-            ).results
-        except ValueError as e:
-            msg = "Something went wrong with the analysis. Please check your inputs."
-            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
-            return dict(messages=out_messages)
-
-        logger.info("Finished analysis for down-regulated proteins")
+        down_enriched, down_filtered_groups = enrichr_helper(
+            down_protein_list,
+            gene_sets,
+            direction="down",
+            background=background,
+            offline=True,
+        )
+        if isinstance(down_enriched, dict):  # error occurred
+            return down_enriched
 
     if direction == "both":
-        enriched = merge_up_down_regulated_proteins_results(
-            up_enriched, down_enriched, mapped=False
-        )
+        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
+        filtered_groups = (
+            up_filtered_groups if direction == "up" else down_filtered_groups
+        )
 
-    if out_messages:
-        return {"enrichment_results": enriched, "messages": out_messages}
-    return {"enrichment_results": enriched}
+    out_dict = {"enrichment_results": enriched, "messages": out_messages}
+
+    if filtered_groups:
+        msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
+        out_dict["messages"].append(dict(level=messages.WARNING, msg=msg))
+        out_dict["filtered_groups"] = filtered_groups
+        return out_dict
+    return out_dict

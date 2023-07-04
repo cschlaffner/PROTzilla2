@@ -577,6 +577,10 @@ def go_analysis_offline_result_no_bg():
         "Odds Ratio": [5.294118e-01, 5.294118e-01],
         "Combined Score": [0.000000e00, 0.000000e00],
         "Genes": [
+            "Gene3;Gene2;Gene4;Gene1",
+            "Gene5;Gene6;Gene3;Gene1",
+        ],
+        "Proteins": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
         ],
@@ -593,22 +597,26 @@ def go_analysis_offline_result_with_bg():
         "Adjusted P-value": [7.272727e-01, 7.272727e-01],
         "Odds Ratio": [9.529412e-01, 9.529412e-01],
         "Genes": [
+            "Gene3;Gene2;Gene4;Gene1",
+            "Gene5;Gene6;Gene3;Gene1",
+        ],
+        "Proteins": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
         ],
     }
 
-
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.txt",
     ],
 )
 def test_go_analysis_offline_protein_sets(
-    protein_sets_path, go_analysis_offline_result_no_bg
+    mock_gene_mapping,protein_sets_path, go_analysis_offline_result_no_bg
 ):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
     proteins = [
@@ -620,6 +628,25 @@ def test_go_analysis_offline_protein_sets(
         "Protein6",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
+    mock_gene_mapping.return_value = (
+        {
+            "Gene1": ["Protein1"],
+            "Gene2": ["Protein2"],
+            "Gene3": ["Protein3"],
+            "Gene4": ["Protein4"],
+            "Gene5": ["Protein5"],
+            "Gene6": ["Protein6"]
+        },
+        {
+            "Protein1": ["Gene1"],
+            "Protein2": ["Gene2"],
+            "Protein3": ["Gene3"],
+            "Protein4": ["Gene4"],
+            "Protein5": ["Gene5"],
+            "Protein6": ["Gene6"]
+        },
+        [],
+    )
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
@@ -629,10 +656,12 @@ def test_go_analysis_offline_protein_sets(
     df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
+    cols = ["Genes", "Proteins"]
+    for col in cols:
+        df[col] = df[col].apply(lambda x: set(x.split(";")))
+        results[col] = results[col].apply(lambda x: set(x.split(";")))
+        df[col] = df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
 
     # Convert the "Odds Ratio" column to a numeric type with the desired precision
     df["Odds Ratio"] = df["Odds Ratio"].astype(np.float64)
@@ -675,7 +704,7 @@ def test_go_analysis_offline_background(
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
-        protein_sets_path=data_folder_tests / "protein_sets.txt",
+        protein_sets_path=data_folder_tests / "gene_sets.txt",
         background_path=background_path,
         direction="down",
     )
@@ -794,7 +823,7 @@ def test_merge_up_down_regulated_proteins_results():
     )
 
     merged = merge_up_down_regulated_proteins_results(
-        up_enriched, down_enriched, mapped=True
+        up_enriched, down_enriched
     )
     merged.set_index(["Gene_set", "Term"], inplace=True)
     expected_output.set_index(["Gene_set", "Term"], inplace=True)
@@ -813,9 +842,9 @@ def test_merge_up_down_regulated_proteins_results():
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.txt",
     ],
 )
 def test_read_protein_or_gene_sets_file(protein_sets_path):
