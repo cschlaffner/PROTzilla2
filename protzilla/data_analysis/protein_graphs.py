@@ -81,7 +81,7 @@ def peptides_to_isoform(
     ), f"allowed mismatches must be >= 0, is {allowed_mismatches}"
 
     assert isinstance(k, int), f"k must be an integer, is {type(k)}"
-    assert k > 0, f"k must be > 0, is {k}"
+    assert k > 1, f"k must be > 1, is {k}"
 
     if not protein_id:
         return dict(
@@ -100,10 +100,12 @@ def peptides_to_isoform(
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
+    filtered_blocks = None
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
         message = out_dict["messages"]
+        filtered_blocks = out_dict["filtered_blocks"]
         if graph_path is None:
             return dict(graph_path=None, messages=message)
     else:
@@ -116,7 +118,9 @@ def peptides_to_isoform(
         RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
     )
 
-    ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
+    ref_index, reference_sequence, seq_len = _create_reference_sequence_index(
+        protein_path, k=k
+    )
     graph_index, msg, longest_paths = _create_graph_index(protein_graph, seq_len)
 
     if msg:
@@ -154,6 +158,7 @@ def peptides_to_isoform(
         protein_id=protein_id,
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
+        filtered_blocks=filtered_blocks if filtered_blocks else [],
         messages=[dict(level=messages.INFO, msg=msg)],
     )
 
@@ -192,6 +197,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         logger.error(msg)
         return dict(
             graph_path=None,
+            filtered_blocks=filtered_blocks,
             messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
         )
 
@@ -209,7 +215,9 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
     logger.info(msg)
     return dict(
-        graph_path=str(graph_path), messages=[dict(level=messages.INFO, msg=msg)]
+        graph_path=str(graph_path),
+        filtered_blocks=filtered_blocks,
+        messages=[dict(level=messages.INFO, msg=msg)],
     )
 
 
@@ -427,7 +435,9 @@ def _parse_file(file_path):
     return kept_lines, filtered_blocks
 
 
-def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
+def _create_reference_sequence_index(
+    protein_path: str, k: int = 5
+) -> tuple[dict, str, int]:
     """
     Create mapping from kmer of reference_sequence of protein to starting position(s) \
     of kmer in reference_sequence
@@ -442,14 +452,16 @@ def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int
     """
 
     logger.debug("Creating reference sequence index")
-    ref_seq, seq_len = _get_ref_seq(protein_path)
+    reference_sequence, seq_length = _get_reference_sequence(protein_path)
 
     # create index
     index = {}
     kmer_list = []
-    for i, char in enumerate(ref_seq):
-        end_index = i + k if i + k < len(ref_seq) else len(ref_seq)
-        kmer = ref_seq[i:end_index]
+    for i, char in enumerate(reference_sequence):
+        end_index = (
+            i + k if i + k < len(reference_sequence) else len(reference_sequence)
+        )
+        kmer = reference_sequence[i:end_index]
         kmer_list.append(kmer)
         if kmer in index:
             index[kmer].append(i)
@@ -460,10 +472,10 @@ def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
     logger.debug("Finished creating reference sequence index")
-    return index, ref_seq, seq_len
+    return index, reference_sequence, seq_length
 
 
-def _get_ref_seq(protein_path: str) -> (str, int):
+def _get_reference_sequence(protein_path: str) -> (str, int):
     """
     Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
     sequence and sequence length.
@@ -502,7 +514,7 @@ def _get_ref_seq(protein_path: str) -> (str, int):
     if not found_lines:
         raise ValueError(f"Could not find lines with Sequence in {protein_path}")
 
-    ref_seq = ""
+    reference_sequence = ""
     seq_len = None
     for line in found_lines:
         # exactly one line starts with "SQ" with all following lines until "//" being
@@ -513,17 +525,17 @@ def _get_ref_seq(protein_path: str) -> (str, int):
             continue
         if line.startswith("//"):
             break
-        ref_seq += line.strip()
-    ref_seq = ref_seq.replace(" ", "")
+        reference_sequence += line.strip()
+    reference_sequence = reference_sequence.replace(" ", "")
 
-    if not ref_seq:
+    if not reference_sequence:
         raise ValueError(f"Could not find sequence for protein at path {protein_path}")
     if seq_len is None or not isinstance(seq_len, int) or seq_len < 1:
         raise ValueError(
             f"Could not find sequence length for protein file at path {protein_path}"
         )
 
-    return ref_seq, seq_len
+    return reference_sequence, seq_len
 
 
 def _potential_peptide_matches(
@@ -541,8 +553,6 @@ def _potential_peptide_matches(
     :type peptides: list
     :param ref_index: mapping from kmer to match-positions on reference sequence
     :type ref_index: dict(kmer: [starting position]}
-    :param ref_seq: reference sequence of protein
-    :type ref_seq: str
     :return: dict(peptide: [match start on reference sequence]),
     list(peptides without match)
     :rtype: dict, list

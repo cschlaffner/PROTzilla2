@@ -15,9 +15,9 @@ from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
     _create_protein_variation_graph,
-    _create_ref_seq_index,
+    _create_reference_sequence_index,
     _get_peptides,
-    _get_ref_seq,
+    _get_reference_sequence,
     _longest_paths,
     _match_potential_matches,
     _modify_graph,
@@ -492,7 +492,7 @@ def test_create_graph_index_invalid_end_node(critical_logger):
 
 
 def test_create_ref_seq_index_C0HM02():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/C0HM02.txt", k=5
     )
 
@@ -529,7 +529,7 @@ def test_create_ref_seq_index_C0HM02():
 
 
 def test_create_ref_seq_index_own_protein_k_1():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=1
     )
 
@@ -547,7 +547,7 @@ def test_create_ref_seq_index_own_protein_k_1():
 
 
 def test_create_ref_seq_index_own_protein_k_2():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=2
     )
 
@@ -566,7 +566,7 @@ def test_create_ref_seq_index_own_protein_k_2():
 
 
 def test_create_ref_seq_index_own_protein_k_5():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=5
     )
 
@@ -588,7 +588,7 @@ def test_create_ref_seq_index_own_protein_k_5():
 
 
 def test_get_ref_seq_C0HM02():
-    ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/C0HM02.txt")
+    ref_seq, seq_len = _get_reference_sequence(f"{TEST_DATA_PATH}/proteins/C0HM02.txt")
 
     planned_ref_seq = "MASRGALRRCLSPGLPRLLHLSRGLA"
     planned_seq_len = 26
@@ -599,7 +599,7 @@ def test_get_ref_seq_C0HM02():
 
 def test_get_ref_seq_test_protein():
     protein_path = f"{TEST_DATA_PATH}/proteins/test_protein.txt"
-    ref_seq, seq_len = _get_ref_seq(protein_path)
+    ref_seq, seq_len = _get_reference_sequence(protein_path)
 
     planned_ref_seq = "ABCDEGABCDET"
     planned_seq_len = 12
@@ -612,14 +612,14 @@ def test_get_ref_seq_empty_seq():
     protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(str(protein_path))
+        _get_reference_sequence(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
     protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(str(protein_path))
+        _get_reference_sequence(str(protein_path))
 
 
 def test_potential_peptide_matches_k5():
@@ -789,6 +789,7 @@ def test_create_prot_variation_graph(
 
     planned_out_dict = {
         "graph_path": str(output_folder / f"{protein_id}.graphml"),
+        "filtered_blocks": [],
         "messages": [dict(level=messages.INFO, msg=planned_msg)],
     }
 
@@ -818,6 +819,7 @@ def test_create_protein_variation_graph_bad_request(
 
     planned_out = dict(
         graph_path=None,
+        filtered_blocks=[],
         messages=[
             dict(level=messages.ERROR, msg=planned_msg, trace=mock_request.__dict__)
         ],
@@ -1230,6 +1232,7 @@ def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
     _create_protein_variation_graph=mock.MagicMock(
         return_value=dict(
             graph_path=None,
+            filtered_blocks=[],
             messages=[{"level": messages.ERROR, "msg": "No graph found"}],
         )
     ),
@@ -1444,6 +1447,14 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     assert list(out_dict["peptide_matches"]) == ["ABCFQ", "ABCVTG", "DEG"]
     assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLA"]
     assert out_dict["protein_id"] == protein_id
+    assert out_dict["filtered_blocks"] == [
+        [
+            "FT   VARIANT         5\n",
+            'FT                   /note="E -> THISSHOULDBEPARSEDOUT (things)"\n',
+            'FT                   /evidence="madethisupastestdata5"\n',
+            'FT                   /id="veryOwnID5"\n',
+        ]
+    ]
 
     created_graph = nx.read_graphml(planned_modified_graph_path)
     planned_graph = nx.read_graphml(
