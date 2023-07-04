@@ -1,0 +1,27 @@
+ID   test_protein_variation_long        Unreviewed;         12 AA.
+AC   test_protein_variation_long
+DE   RecName: Full=Protzillas Made up Test Protein;
+DE            Short=hnRNP A2/B1;
+FT   VARIANT         4..5
+FT                   /note="DE -> VT (things)"
+FT                   /evidence="madethisupastestdata"
+FT                   /id="veryOwnID"
+FT   VARIANT         5..6
+FT                   /note="EG -> QW (things)"
+FT                   /evidence="madethisupastestdata2"
+FT                   /id="veryOwnID2"
+FT   VARIANT         4
+FT                   /note="D -> F (things)"
+FT                   /evidence="madethisupastestdata3"
+FT                   /id="veryOwnID3"
+FT   VARIANT         5
+FT                   /note="E -> L (things)"
+FT                   /evidence="madethisupastestdata4"
+FT                   /id="veryOwnID4"
+FT   VARIANT         5
+FT                   /note="E -> THISSHOULDBEPARSEDOUT (things)"
+FT                   /evidence="madethisupastestdata5"
+FT                   /id="veryOwnID5"
+SQ   SEQUENCE   12 IDK; 1234 IDK; AM0REG183R1SH ABC12;
+     ABCDEGABCD ET
+//

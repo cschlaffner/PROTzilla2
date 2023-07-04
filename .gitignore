@@ -4,6 +4,7 @@ user_data/runs/*
 user_data/external_data/*
 user_data/debug/*
 ui/static/admin/*
+ui/uploads/*
 .vscode/*
 .flake8
 
