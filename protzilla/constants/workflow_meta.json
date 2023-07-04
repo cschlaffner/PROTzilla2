@@ -1981,6 +1981,13 @@
             "step": 1,
             "default": 6
           },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
+          },
           "metadata_df": {
             "type": "empty",
             "name": "metadata_df",
