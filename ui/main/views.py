@@ -39,3 +39,10 @@ def database_upload(request):
         EXTERNAL_DATA_PATH / "uniprot" / f"{chosen_name}.tsv", sep="\t", index=False
     )
     return HttpResponseRedirect(reverse("databases"))
+
+
+def database_delete(request):
+    database_name = request.POST["database"]
+    path = EXTERNAL_DATA_PATH / "uniprot" / f"{database_name}.tsv"
+    path.unlink()
+    return HttpResponseRedirect(reverse("databases"))

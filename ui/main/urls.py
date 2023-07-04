@@ -23,5 +23,6 @@ urlpatterns = [
     path("runs/", include("runs.urls")),
     path("databases", views.databases, name="databases"),
     path("databases/upload", views.database_upload, name="database_upload"),
+    path("databases/delete", views.database_delete, name="database_delete"),
     path("admin/", admin.site.urls),
 ]

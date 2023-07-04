@@ -47,13 +47,21 @@
                     </form>
                 </div>
 
-                <div class="">
+                <div>
                     <h3>Available Databases</h3>
 
                     {% for database, cols in uniprot_databases.items %}
                         <div class="mb-4">
-                            <h5>{{ database }}</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>{{ database }}</h5>
+                                <form action="{% url 'database_delete' %}" method="post" onsubmit="return confirm('Are you sure you want to delete {{ database }}?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="database" value="{{ database }}">
+                                    <input type="submit" value="delete" class="btn btn-red">
+                                </form>
+                            </div>
                             Columns: {{ cols|join:", " }}
+                            <hr>
                         </div>
                     {% endfor %}
                 </div>
