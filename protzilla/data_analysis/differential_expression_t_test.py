@@ -46,7 +46,7 @@ def t_test(
     :param alpha: the alpha value for the t-test
     :type alpha: float
 
-    :return: a dict containing a dataframe de_proteins_df in typical protzilla long format containing the differentially expressed proteins,
+    :return: a dict containing
     a df corrected_p_values, containing the p_values after application of multiple testing correction,
     a df log2_fold_change, containing the log2 fold changes per protein,
     a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
@@ -54,7 +54,10 @@ def t_test(
     a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
     a df fold_change_df, containing the fold_changes per protein,
     a df t_statistic_df, containing the t-statistic per protein,
+    a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
+        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
     a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
+        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
 
     :rtype: dict
     """
