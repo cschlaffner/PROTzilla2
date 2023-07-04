@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
 from kneed import KneeLocator
-from scipy.optimize import curve_fit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import learning_curve, train_test_split
+from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from joblib import Parallel, delayed
-from protzilla.constants.logging import logger
 
 from protzilla.data_analysis.classification_helper import (
     perform_cross_validation,
@@ -14,10 +13,12 @@ from protzilla.data_analysis.classification_helper import (
     perform_nested_cross_validation,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
+from django.contrib import messages
 
 estimator_mapping = {
     "Random Forest": RandomForestClassifier(),
     "Support Vector Machine": SVC(),
+    "Naive Bayes": GaussianNB(),
 }
 
 
@@ -51,23 +52,20 @@ def compute_learning_curve(
     clf = estimator_mapping[clf_str]
 
     if "Nested" in cross_validation_strategy:
-        if shuffle == "yes":
-            random_indices = np.random.RandomState(random_state).permutation(
-                input_df_wide.index
-            )
-            input_df_wide = input_df_wide.loc[random_indices]
-            labels_df = labels_df.loc[random_indices]
+        X_subsets, y_subsets = generate_stratified_subsets(
+            input_df_wide, labels_df["Encoded Label"], train_sizes, random_state
+        )
 
         results = Parallel(n_jobs=n_jobs, verbose=1)(
             delayed(perform_nested_cross_validation)(
-                input_df=input_df_wide.iloc[:size],
-                labels_df=labels_df["Encoded Label"].iloc[:size],
+                input_df=X_subsets[i],
+                labels_df=y_subsets[i],
                 clf=clf,
                 scoring=scoring,
                 random_state=random_state,
                 **cv_params,
             )
-            for size in train_sizes
+            for i in range(len(X_subsets))
         )
         test_scores, train_scores = zip(*results)
         test_scores = np.array(test_scores)
@@ -99,10 +97,30 @@ def compute_learning_curve(
 
     return dict(
         train_sizes=train_sizes,
-        test_scores=test_scores,
-        train_scores=train_scores,
+        test_scores=test_scores.tolist(),
+        train_scores=train_scores.tolist(),
         minimum_viable_sample_size=minimum_viable_sample_size,
     )
+
+
+def generate_stratified_subsets(input_df, labels_df, train_sizes, random_state):
+    X_subsets = []
+    y_subsets = []
+    if len(input_df) in train_sizes:
+        train_sizes.remove(len(input_df))
+        X_subsets.append(input_df)
+        y_subsets.append(labels_df)
+    for size in train_sizes:
+        X_train, X_remaining, y_train, y_remaining = train_test_split(
+            input_df,
+            labels_df,
+            stratify=labels_df,
+            train_size=size,
+            random_state=random_state,
+        )
+        X_subsets.append(X_train)
+        y_subsets.append(y_train)
+    return X_subsets, y_subsets
 
 
 def random_sampling(input_df, metadata_df, labels_column, n_samples, random_state=6):
@@ -116,7 +134,19 @@ def random_sampling(input_df, metadata_df, labels_column, n_samples, random_stat
     )
     common_indices = input_df_wide.index.intersection(labels_df.index)
     labels_df = labels_df.loc[common_indices]
+
+    if len(input_df) < n_samples:
+        msg = f"The number of samples should be less than {len(input_df)}"
+        return dict(
+            input_df=None,
+            labels_df=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
     input_df_n_samples, _, labels_df_n_samples, _ = train_test_split(
-        input_df_wide, labels_df, train_size=n_samples, random_state=random_state
+        input_df_wide,
+        labels_df,
+        train_size=n_samples,
+        random_state=random_state,
+        stratify=labels_df,
     )
     return dict(input_df=input_df_n_samples, labels_df=labels_df_n_samples)

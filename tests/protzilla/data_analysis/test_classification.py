@@ -15,8 +15,10 @@ from protzilla.data_analysis.model_evaluation_plots import (
 from protzilla.data_analysis.model_selection import (
     compute_learning_curve,
     random_sampling,
+    generate_stratified_subsets,
 )
 from protzilla.data_analysis.model_selection_plots import learning_curve_plot
+from protzilla.utilities.transform_dfs import long_to_wide
 
 
 @pytest.fixture
@@ -231,3 +233,20 @@ def test_random_sampling(classification_df, meta_df):
     assert (
         labels_df_len == 5
     ), f"The labels dataframe should be reduced to a subset of 5 random samples, but only {labels_df_len} were found."
+
+
+def test_generate_stratified_subsets(classification_df, meta_df):
+    classification_df = long_to_wide(classification_df)
+    train_sizes = [4, 6, 9]
+    X_subsets, y_subsets = generate_stratified_subsets(
+        input_df=classification_df,
+        labels_df=meta_df.set_index("Sample"),
+        train_sizes=train_sizes,
+        random_state=6,
+    )
+    label_counts9 = y_subsets[0]["Group"].value_counts()
+    label_counts4 = y_subsets[1]["Group"].value_counts()
+    label_counts6 = y_subsets[2]["Group"].value_counts()
+    assert label_counts9.values.tolist() == [5, 4]
+    assert label_counts4.values.tolist() == [2, 2]
+    assert label_counts6.values.tolist() == [3, 3]
