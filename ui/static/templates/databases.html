@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+    <style>
+        #contain {
+            height: 100vh;
+            margin-top: -3.6rem;
+        }
+    </style>
+{% endblock %}
+
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
 {% endblock %}
@@ -18,23 +27,39 @@
                 </div>
             {% endfor %}
         </div>
-        <br>
     {% endif %}
 
-    {% for database, cols in uniprot_databases.items %}
-        {{ database }}: {{ cols|join:", " }} <br>
-    {% endfor %}
-    <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
-        {% csrf_token %}
-        <label for="name">Name for new database:</label>
-        <input id="name" type="text" name="name">
-        <label for="new-db" class="mt-2"></label><br>
-        <input name="new-db" type="file" id="new-db" hidden>
-        <label for="new-db" class="btn btn-grey">Choose file</label>
-        <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+    <div class="container d-flex justify-content-center" id="">
+        <div class="mb-5">
+            <h3>Add a new Database</h3>
 
-        <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto" disabled>
-    </form>
+            <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <label for="name">Name for new database:</label>
+                    <input id="name" type="text" name="name">
+                </div>
+                <div class="mb-2">
+                    <input name="new-db" type="file" id="new-db" hidden>
+                    <label for="new-db" class="btn btn-grey">Choose file</label>
+                    <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+                </div>
+                <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto" disabled>
+            </form>
+        </div>
+
+        <div class="">
+            <h3>Available Databases</h3>
+
+            {% for database, cols in uniprot_databases.items %}
+                <div class="mb-4">
+                    <h5>{{ database }}</h5>
+                    Columns: {{ cols|join:", " }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <script>
         let file_uploaded = false;
 
