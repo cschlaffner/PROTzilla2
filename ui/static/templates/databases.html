@@ -3,10 +3,6 @@
 
 {% block css %}
     <style>
-        #contain {
-            height: 100vh;
-            margin-top: -3.6rem;
-        }
     </style>
 {% endblock %}
 
@@ -29,34 +25,39 @@
         </div>
     {% endif %}
 
-    <div class="container d-flex justify-content-center" id="">
-        <div class="mb-5">
-            <h3>Add a new Database</h3>
+    <div class="p-4">
+        <div class="d-flex justify-content-center flex-column align-items-center">
+            <div class="col w-50">
+                <div class="mb-5">
+                    <h3>Add a new Database</h3>
 
-            <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
-                {% csrf_token %}
-                <div class="mb-2">
-                    <label for="name">Name for new database:</label>
-                    <input id="name" type="text" name="name">
+                    <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label for="name">Name for new database:</label>
+                            <input class="form-control" id="name" type="text" name="name">
+                        </div>
+                        <div class="mb-2">
+                            <input name="new-db" type="file" id="new-db" hidden>
+                            <label for="new-db" class="btn btn-grey">Choose file</label>
+                            <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+                        </div>
+                        <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto"
+                               disabled>
+                    </form>
                 </div>
-                <div class="mb-2">
-                    <input name="new-db" type="file" id="new-db" hidden>
-                    <label for="new-db" class="btn btn-grey">Choose file</label>
-                    <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
-                </div>
-                <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto" disabled>
-            </form>
-        </div>
 
-        <div class="">
-            <h3>Available Databases</h3>
+                <div class="">
+                    <h3>Available Databases</h3>
 
-            {% for database, cols in uniprot_databases.items %}
-                <div class="mb-4">
-                    <h5>{{ database }}</h5>
-                    Columns: {{ cols|join:", " }}
+                    {% for database, cols in uniprot_databases.items %}
+                        <div class="mb-4">
+                            <h5>{{ database }}</h5>
+                            Columns: {{ cols|join:", " }}
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
         </div>
     </div>
 
