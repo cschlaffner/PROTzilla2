@@ -23,6 +23,8 @@ def max_quant_import(_, file_path, intensity_name):
         keep_default_na=True,
     )
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
+    df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
+    df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
@@ -35,7 +37,6 @@ def max_quant_import(_, file_path, intensity_name):
     molten = molten.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    ordered["Protein ID"] = ordered["Protein ID"].map(handle_protein_ids)
     return ordered, {}
 
 
@@ -72,6 +73,8 @@ def ms_fragger_import(_, file_path, intensity_name):
             "Combined Total Spectral Count",
         ]
     )
+    df["Protein ID"] = df["Protein ID"].map(handle_protein_ids)
+    df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
     intensity_df.columns = [
@@ -90,13 +93,20 @@ def ms_fragger_import(_, file_path, intensity_name):
     )
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    ordered["Protein ID"] = ordered["Protein ID"].map(handle_protein_ids)
     return ordered, {}
+
+
+def good_id(uniprot_id):
+    return not uniprot_id.startswith("CON__") and not uniprot_id.startswith("REV__")
+
+
+def grouping(protein_id):
+    # put isofroms together, and the non-isofrom version first
+    clean = clean_uniprot_id(protein_id)
+    return clean, clean != protein_id, protein_id
 
 
 def handle_protein_ids(protein_group):
     # todo add mapping to uniprot here
-    def by_normalized_id(protein_id):
-        return (clean := clean_uniprot_id(protein_id)), clean != protein_id
-
-    return ";".join(sorted(protein_group.split(";"), key=by_normalized_id))
+    group = filter(good_id, protein_group.split(";"))
+    return ";".join(sorted(group, key=grouping))
