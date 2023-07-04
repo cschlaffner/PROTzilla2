@@ -291,7 +291,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
     return enriched.reset_index()
 
 
-def enrichr_helper(
+def gseapy_helper(
     protein_list, protein_sets, direction, organism=None, background=None, offline=False
 ):
     """
@@ -500,22 +500,22 @@ def go_analysis_with_enrichr(
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = enrichr_helper(
+        up_enriched, up_filtered_groups = gseapy_helper(
             up_protein_list,
             gene_sets,
-            organism=organism,
             direction="up",
+            organism=organism,
             background=background,
         )
         if isinstance(up_enriched, dict):  # error occurred
             return up_enriched
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = enrichr_helper(
+        down_enriched, down_filtered_groups = gseapy_helper(
             down_protein_list,
             gene_sets,
-            organism=organism,
             direction="down",
+            organism=organism,
             background=background,
         )
         if isinstance(down_enriched, dict):  # error occurred
@@ -650,7 +650,7 @@ def go_analysis_offline(
         out_messages.append(dict(level=messages.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = enrichr_helper(
+        up_enriched, up_filtered_groups = gseapy_helper(
             up_protein_list,
             gene_sets,
             direction="up",
@@ -661,7 +661,7 @@ def go_analysis_offline(
             return up_enriched
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = enrichr_helper(
+        down_enriched, down_filtered_groups = gseapy_helper(
             down_protein_list,
             gene_sets,
             direction="down",
