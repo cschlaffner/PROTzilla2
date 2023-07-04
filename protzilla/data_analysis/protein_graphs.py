@@ -258,8 +258,8 @@ def _create_graph_index(
                 logger.error(msg)
                 return None, msg, longest_paths
             elif longest_paths[node] > seq_len:
-                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a Variation is longer than just one Amino Acid. This is unexpected behaviour. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
-                logger.warning(msg)
+                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a VARIANT substitutes more amino acids than it replaces. This is unexpected behaviour and should have been filtered out of the protein data. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                logger.error(msg)
                 return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
