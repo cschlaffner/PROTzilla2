@@ -1335,7 +1335,7 @@
             "multiple": true
           },
           "max_iter": {
-            "name": "The number of iterations tu perform",
+            "name": "The number of iterations to perform",
             "type": "numeric",
             "default": 100,
             "multiple": true
