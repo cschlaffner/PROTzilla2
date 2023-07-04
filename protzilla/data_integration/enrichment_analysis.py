@@ -574,9 +574,12 @@ def go_analysis_offline(
 ):
     """
     A method that performs offline over-representation analysis for a given set of proteins
-    against a given set of protein sets using the GSEApy package.
+    against a given set of gene sets using the GSEApy package.
+    Uniprot Protein IDs in proteins are converted to uppercase HGNC gene symbols.
+    If no match is found, the protein is excluded from the analysis. All excluded proteins
+    are returned in a list.
     For the analysis a hypergeometric test is used against a background provided as a
-    path (recommended) or a number of proteins. If no background is provided, all proteins in
+    path (recommended) or a number of proteins. If no background is provided, all genes in
     the gene_sets are used as the background.
     Up- and down-regulated proteins are analyzed separately and the results are merged.
 
@@ -585,24 +588,24 @@ def go_analysis_offline(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
-    :param protein_sets_path: path to file containing protein sets. The identifers
-        in the gene_sets should be the same type as the backgrounds and the proteins.
+    :param protein_sets_path: path to file containing gene sets. The identifers
+        in the gene_sets should be uppercase gene symbols.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
         - .txt: Setname or identifier followed by a tab-separated list of genes
-            Set_name    Protein1    Protein2...
-            Set_name    Protein1    Protein2...
+            Set_name    Gene1    Gene2...
+            Set_name    Gene2    Gene3...
         - .csv: Setname or identifier followed by a comma-separated list of genes
-            Set_name, Protein1, Protein2, ...
-            Set_name2, Protein2, Protein3, ...
+            Set_name, Gene1, Gene2, ...
+            Set_name2, Gene2, Gene3, ...
         - .json:
-            {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+            {Set_name: [Gene1, Gene2, ...], Set_name2: [Gene2, Gene3, ...]}
     :type protein_sets_path: str
-    :param background_path: background proteins to be used for the analysis. If no
-        background is provided, all proteins in protein sets are used.
-        The background is defined by your experiment.
+    :param background_path: background genes to be used for the analysis.
+        Should be provided as uppercase gene symbols. If no background is provided,
+        all genes in gene sets are used. The background is defined by your experiment.
     :type background_path: str or None
-    :param background_number: number of background proteins to be used for the analysis (not recommended)
+    :param background_number: number of background genes to be used for the analysis (not recommended)
         assumes that all your genes could be found in background.
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
