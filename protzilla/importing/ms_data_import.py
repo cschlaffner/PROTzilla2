@@ -96,11 +96,11 @@ def ms_fragger_import(_, file_path, intensity_name):
     return ordered, {}
 
 
-def good_id(uniprot_id):
+def valid_uniprot_id(uniprot_id):
     return not uniprot_id.startswith("CON__") and not uniprot_id.startswith("REV__")
 
 
-def grouping(protein_id):
+def isoforms_together(protein_id):
     # put isofroms together, and the non-isofrom version first
     clean = clean_uniprot_id(protein_id)
     return clean, clean != protein_id, protein_id
@@ -108,5 +108,5 @@ def grouping(protein_id):
 
 def handle_protein_ids(protein_group):
     # todo add mapping to uniprot here
-    group = filter(good_id, protein_group.split(";"))
-    return ";".join(sorted(group, key=grouping))
+    group = filter(valid_uniprot_id, protein_group.split(";"))
+    return ";".join(sorted(group, key=isoforms_together))
