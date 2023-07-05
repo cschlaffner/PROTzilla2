@@ -54,7 +54,7 @@
 | protzilla/workflow\_helper.py                                           |       53 |        0 |       36 |        0 |    100% |           |
 | runner\_cli.py                                                          |       21 |        5 |        2 |        1 |     74% | 55-58, 62 |
 | tests/\_\_init\_\_.py                                                   |        0 |        0 |        0 |        0 |    100% |           |
-| tests/conftest.py                                                       |       92 |       15 |       10 |        1 |     84% |22-23, 39, 87-92, 106-110, 149-152 |
+| tests/conftest.py                                                       |       76 |       12 |        6 |        0 |     85% |60-65, 79-83, 122-125 |
 | tests/protzilla/\_\_init\_\_.py                                         |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_analysis/test\_analysis\_plots.py                 |       21 |        2 |        4 |        2 |     84% |    78, 90 |
 | tests/protzilla/data\_analysis/test\_classification.py                  |       37 |        5 |        2 |        1 |     85% |75-91, 142-143 |
@@ -65,7 +65,7 @@
 | tests/protzilla/data\_analysis/test\_protein\_graphs.py                 |      603 |        0 |       10 |        0 |    100% |           |
 | tests/protzilla/data\_integration/test\_database\_integration.py        |       25 |        0 |        2 |        0 |    100% |           |
 | tests/protzilla/data\_integration/test\_database\_query.py              |       48 |        0 |        4 |        0 |    100% |           |
-| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      429 |       25 |       84 |        1 |     94% |399-480, 491-493 |
+| tests/protzilla/data\_integration/test\_enrichment\_analysis.py         |      401 |        3 |       78 |        1 |     99% |   402-404 |
 | tests/protzilla/data\_integration/test\_plots\_data\_integration.py     |      128 |        9 |       30 |        9 |     89% |31, 41, 56, 162, 191, 208, 258, 268, 285 |
 | tests/protzilla/data\_preprocessing/\_\_init\_\_.py                     |        0 |        0 |        0 |        0 |    100% |           |
 | tests/protzilla/data\_preprocessing/test\_filter\_proteins.py           |       25 |        4 |        2 |        1 |     81% | 13-39, 84 |
@@ -108,7 +108,7 @@
 | ui/runs/utilities/alert.py                                              |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                        |      317 |      261 |      106 |        0 |     14% |46, 58-97, 125-141, 158-179, 185-313, 317-324, 328-330, 334-336, 340-342, 346-355, 359-366, 370-378, 382-409, 413-442, 446-448, 452-453, 475-477, 481-495, 503-533, 552-565, 571-607 |
 | ui/runs/views\_helper.py                                                |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                               **TOTAL** | **6483** | **1017** | **1752** |  **236** | **81%** |           |
+|                                                               **TOTAL** | **6439** |  **992** | **1742** |  **235** | **81%** |           |
 
 
 ## Setup coverage badge
