@@ -244,10 +244,6 @@ def create_genes_intensity_wide_df(
     :rtype: pd.DataFrame
     """
     # (gene symbols in rows x samples in cols with intensities)
-    print(protein_df.shape)
-    print(protein_df.head())
-    print(len(protein_df["Sample"].unique()))
-    # hier fehlen schon sample?
     protein_df_wide = long_to_wide(protein_df).transpose()
     column_names = samples + ["Gene symbol"]
     processed_data = []
@@ -261,7 +257,6 @@ def create_genes_intensity_wide_df(
             row_data = intensity_values + [gene]
             processed_data.append(row_data)
 
-    x = 2
     df = pd.DataFrame(processed_data, columns=column_names)
 
     # if duplicate genes exist, use mean of intensities
