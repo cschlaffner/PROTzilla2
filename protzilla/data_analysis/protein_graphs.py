@@ -798,7 +798,7 @@ def _match_potential_matches(
                 mismatches=0,
                 allowed_mismatches=allowed_mismatches,
                 graph=graph,
-                current_node=graph_index[match_start_index][0][0],
+                current_node=starting_node,
                 left_over_peptide=peptide,
                 node_match_data={},
                 current_index=match_start_index - longest_paths[starting_node],
