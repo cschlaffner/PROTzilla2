@@ -61,10 +61,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            $('.collapsible-trigger').click(function () {
-                $(this).toggleClass('active');
-                $(this).next('.collapsible-content').slideToggle('fast');
-            });
+            {#$('.collapsible-trigger').click(function () {#}
+            {#    $(this).toggleClass('active');#}
+            {#    $(this).next('.collapsible-content').slideToggle('fast');#}
+            {# });#}
 
             var cy = window.cy = cytoscape({
                 container: document.getElementById('cy'),
@@ -121,7 +121,7 @@
                         removeOnDestroy: true,
                     });
                 });
-                node.on('mouseout', function (){
+                node.on('mouseout', function () {
                     popper.destroy();
                 });
                 node.on('position', function () {
@@ -194,16 +194,16 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div id="save-svg-button" class="card-body">
-                        <div class="row">
-                            <button class="btn btn-grey col-4 my-2 mx-5"
-                                    onclick="saveAsSvg()">Save as SVG
-                            </button>
-                            <button class="btn btn-grey col-4 my-2 mx-2"
-                                    onclick="window.location=getSvgUrl()">View SVG
-                            </button>
-                        </div>
-                    </div>
+                </div>
+            </div>
+            <div id="save-svg-button" class="border-top">
+                <div class="row">
+                    <button class="btn btn-grey col-4 my-2 mx-5"
+                            onclick="saveAsSvg()">Save as SVG
+                    </button>
+                    <button class="btn btn-grey col-4 my-2 mx-2"
+                            onclick="window.location=getSvgUrl()">View SVG
+                    </button>
                 </div>
             </div>
         </div>
