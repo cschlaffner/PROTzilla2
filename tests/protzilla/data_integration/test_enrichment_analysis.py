@@ -392,95 +392,6 @@ def test_go_analysis_with_no_gene_sets_input():
     assert "No gene sets provided" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.internet()
-@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
-def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
-    # Check if enrichr API is available
-    api_url = "https://maayanlab.cloud/Enrichr/addList"
-    try:
-        response = requests.get(api_url)
-        if response.status_code != 200:
-            pytest.skip("Enrichr API is currently unavailable")
-    except requests.exceptions.RequestException:
-        pytest.skip("Enrichr API is currently unavailable")
-
-    proteins = [
-        "Protein1",
-        "Protein2",
-        "Protein3",
-        "Protein4",
-        "Protein5",
-        "Protein6;Protein7;Protein8",
-        "Protein9;Protein10;Protein11",
-        "Protein12;Protein13",
-    ]
-    results = pd.read_csv(
-        data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
-    )
-
-    mock_gene_mapping.return_value = (
-        {
-            "ENO1": ["Protein1"],
-            "ENO2": ["Protein2"],
-            "ENO3": ["Protein3"],
-            "HK2": ["Protein4"],
-            "HK1": ["Protein6"],
-            "HK3": ["Protein7"],
-            "IDH3B": ["Protein8"],
-            "ATP6V1G2": ["Protein9"],
-            "GPT2": ["Protein10"],
-            "SDHB": ["Protein11"],
-            "COX6B1": ["Protein12;Protein13"],
-        },
-        {
-            "Protein1": ["ENO1"],
-            "Protein2": ["ENO2"],
-            "Protein3": ["ENO3"],
-            "Protein4": ["HK2"],
-            "Protein6": ["HK1"],
-            "Protein7": ["HK3"],
-            "Protein8": ["IDH3B"],
-            "Protein9": ["ATP6V1G2"],
-            "Protein10": ["GPT2"],
-            "Protein11": ["SDHB"],
-            "Protein12;Protein13": ["COX6B1"],
-        },
-        ["Protein5"],
-    )
-    current_out = go_analysis_with_enrichr(
-        proteins=pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8}),
-        gene_sets_enrichr=["Reactome_2013"],
-        organism="human",
-        direction="up",
-    )
-    df = current_out["enrichment_results"]
-
-    column_names = ["Term", "Genes", "Gene_set", "Overlap", "Proteins"]
-    # Compare all specified columns
-    for column in column_names:
-        assert df[column].equals(results[column])
-
-    # Compare the numeric columns separately with a tolerance for numerical equality
-    numerical_columns = [
-        "Odds Ratio",
-        "P-value",
-        "Adjusted P-value",
-        "Old P-value",
-        "Old Adjusted P-value",
-        "Combined Score",
-    ]
-    for column in numerical_columns:
-        numerical_equal = np.isclose(
-            df[column], results[column], rtol=1e-05, atol=1e-08
-        )
-        assert numerical_equal.all()
-
-    assert "messages" in current_out
-    assert "No background provided" in current_out["messages"][0]["msg"]
-    assert "Some proteins could not be mapped" in current_out["messages"][1]["msg"]
-
-
-@pytest.mark.internet()
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
@@ -997,7 +908,6 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
     assert "use a different ranking method" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.internet
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea(mock_mapping, data_folder_tests):
     proteins = pd.read_csv(
@@ -1293,7 +1203,6 @@ def test_create_ranked_df_descending():
     assert ranked_df.equals(expected_df)
 
 
-@pytest.mark.internet
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_preranked(mock_mapping, data_folder_tests):
     proteins_significant = pd.read_csv(
