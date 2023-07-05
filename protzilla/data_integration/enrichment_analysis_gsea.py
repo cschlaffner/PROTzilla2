@@ -4,8 +4,8 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
-from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 from protzilla.data_integration import database_query
+from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
 
@@ -244,6 +244,10 @@ def create_genes_intensity_wide_df(
     :rtype: pd.DataFrame
     """
     # (gene symbols in rows x samples in cols with intensities)
+    print(protein_df.shape)
+    print(protein_df.head())
+    print(len(protein_df["Sample"].unique()))
+    # hier fehlen schon sample?
     protein_df_wide = long_to_wide(protein_df).transpose()
     column_names = samples + ["Gene symbol"]
     processed_data = []
@@ -257,6 +261,7 @@ def create_genes_intensity_wide_df(
             row_data = intensity_values + [gene]
             processed_data.append(row_data)
 
+    x = 2
     df = pd.DataFrame(processed_data, columns=column_names)
 
     # if duplicate genes exist, use mean of intensities
@@ -268,6 +273,8 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
+    group1=None,
+    group2=None,
     gene_sets_path=None,
     gene_sets_enrichr=None,
     min_size=15,
@@ -293,6 +300,10 @@ def gsea(
     :type metadata_df: pd.DataFrame
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
+    :param group1: name of group 1
+    :type group1: str
+    :param group2: name of group 2
+    :type group2: str
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
@@ -341,7 +352,14 @@ def gsea(
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
-    assert grouping in metadata_df.columns, "Grouping column not in metadata df"
+    if not grouping in metadata_df.columns:
+        msg = "Grouping column not in metadata df"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    groups = metadata_df[grouping].unique().tolist()
+    if not group1 in groups or not group2 in groups:
+        msg = "Group names should be in metadata df but are not"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     if not is_intensity_df(protein_df):
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
@@ -360,6 +378,12 @@ def gsea(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    # only keep samples from the two groups
+    group_samples = metadata_df.loc[
+        metadata_df[grouping].isin([group1, group2]), "Sample"
+    ].tolist()
+    protein_df = protein_df[protein_df["Sample"].isin(group_samples)]
+    samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
@@ -375,18 +399,14 @@ def gsea(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    samples = protein_df["Sample"].unique().tolist()
     df = create_genes_intensity_wide_df(
         protein_df, protein_groups, samples, group_to_genes, filtered_groups
     )
 
     class_labels = []
     for sample in samples:
-        group_value = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
-        class_labels.append(group_value)
-    if len(set(class_labels)) != 2:
-        msg = "Input samples have to belong to exactly two groups"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        group_label = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
+        class_labels.append(group_label)
 
     # cannot use log2_ratio_of_classes if there are negative values
     if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():

@@ -8,6 +8,7 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+from protzilla.data_integration import database_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -15,7 +16,6 @@ from .enrichment_analysis_helper import (
     read_background_file,
     read_protein_or_gene_sets_file,
 )
-from protzilla.data_integration import database_query
 
 
 # call methods for precommit hook not to delete imports

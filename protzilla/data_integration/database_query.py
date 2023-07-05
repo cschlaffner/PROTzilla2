@@ -1,5 +1,5 @@
-from xml.etree.ElementTree import Element, SubElement, tostring
 from collections import defaultdict
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 import pandas
 import requests

@@ -2061,10 +2061,29 @@
             "dynamic": true
           },
           "grouping": {
-            "name": "Grouping for Samples",
+            "name": "Grouping from metadata",
             "type": "categorical",
             "fill": "metadata_columns",
-            "default": "None"
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
           },
           "min_size": {
             "name": "Minimum number of genes from gene set also in data",
