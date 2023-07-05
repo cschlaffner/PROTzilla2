@@ -85,7 +85,7 @@
           "name": "normalisation",
           "method": "median",
           "parameters": {
-            "percentile": 0.4
+            "percentile": 0.5
           },
           "graphs": [
             {

@@ -11,10 +11,15 @@ from .enrichment_analysis_helper import read_protein_or_gene_sets_file
 
 
 def create_ranked_df(
-    protein_groups, protein_df, ranking_direction, group_to_genes, filtered_groups
+    protein_groups,
+    protein_df,
+    ranking_column,
+    ranking_direction,
+    group_to_genes,
+    filtered_groups,
 ):
     """
-    Creates a ranked dataframe of genes according to values in protein_df and ranking_direction.
+    Creates a ranked dataframe of genes according to values in ranking_column from protein_df and ranking_direction.
     Groups that were filtered out are not included in the ranking.
     If multiple genes exist per group the same ranking value is used for all genes. If duplicate genes
     exist the one with the worse score is kept, so for example for p values the one with the higher p value.
@@ -23,6 +28,8 @@ def create_ranked_df(
     :type protein_groups: list
     :param protein_df: dataframe with protein groups and ranking values
     :type protein_df: pd.DataFrame
+    :param ranking_column: column name of ranking column
+    :type ranking_column: str
     :param ranking_direction: direction of ranking, either ascending or descending
     :type ranking_direction: str
     :param group_to_genes: dictionary mapping protein groups to list of genes
@@ -33,6 +40,10 @@ def create_ranked_df(
     :rtype: pd.DataFrame
     """
     logger.info("Ranking input")
+    # remove all columns but "Protein ID" and ranking column
+    protein_df = protein_df[["Protein ID", ranking_column]]
+    protein_df.drop_duplicates(subset="Protein ID", inplace=True)
+
     gene_values = {"Gene symbol": [], "Ranking value": []}
     for group in protein_groups:
         if group in filtered_groups:
@@ -40,7 +51,7 @@ def create_ranked_df(
         for gene in group_to_genes[group]:
             # if multiple genes per group, use same score value
             ranking_value = protein_df.loc[
-                protein_df["Protein ID"] == group, protein_df.columns[1]
+                protein_df["Protein ID"] == group, ranking_column
             ].values[0]
             gene_values["Gene symbol"].append(gene)
             gene_values["Ranking value"].append(ranking_value)
@@ -60,6 +71,7 @@ def create_ranked_df(
 
 def gsea_preranked(
     protein_df,
+    ranking_column=None,
     ranking_direction="ascending",
     gene_sets_path=None,
     gene_sets_enrichr=None,
@@ -84,6 +96,8 @@ def gsea_preranked(
 
     :param protein_df: dataframe with protein IDs and ranking values
     :type protein_df: pd.DataFrame
+    :param ranking_column: column name of ranking column in protein_df
+    :type ranking_column: str
     :param ranking_direction: direction of ranking for sorting, either ascending or descending
         (ascending - smaller values are better, descending - larger values are better)
     :type ranking_direction: str
@@ -122,9 +136,9 @@ def gsea_preranked(
     """
     if (
         not isinstance(protein_df, pd.DataFrame)
-        or protein_df.shape[1] != 2
         or not "Protein ID" in protein_df.columns
-        or not protein_df.iloc[:, 1].dtype == np.number
+        or not ranking_column in protein_df.columns
+        or not protein_df[ranking_column].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -160,6 +174,7 @@ def gsea_preranked(
     ranked_df = create_ranked_df(
         protein_groups,
         protein_df,
+        ranking_column,
         ranking_direction,
         group_to_genes,
         filtered_groups,
@@ -179,7 +194,7 @@ def gsea_preranked(
             outdir=None,
             seed=seed,
             verbose=True,
-            threads=4,
+            threads=threads,
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."

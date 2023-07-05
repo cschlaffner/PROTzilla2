@@ -1787,7 +1787,14 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
+          },
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
           },
           "protein_set_dbs": {
             "name": "Protein Set Libraries",
@@ -1829,7 +1836,14 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
+          },
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
           },
           "gene_sets_field": {
             "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
@@ -1893,7 +1907,7 @@
               "Upload a file (recommended)",
               "Choose biomart dataset",
               "Specify number of expressed genes (not recommended)",
-              "Use all genes in the gene_sets"
+              "Use all genes in the gene sets"
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
@@ -1943,7 +1957,14 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
+          },
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
           },
           "protein_sets_path": {
             "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
@@ -1966,7 +1987,7 @@
             "categories": [
               "Upload a file (recommended)",
               "Specify number of expressed genes (not recommended)",
-              "Use all genes in the gene_sets"
+              "Use all genes in the gene sets"
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
@@ -2103,7 +2124,17 @@
             "default": [
               null,
               null
+            ],
+            "fill_dynamic": [
+              "ranking_column"
             ]
+          },
+          "ranking_column": {
+            "name": "Column to use for ranking",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "categories": [],
+            "default": null
           },
           "ranking_direction": {
             "name": "Sort the ranking column (ascending - smaller values are better, descending - larger values are better)",
