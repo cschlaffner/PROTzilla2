@@ -565,7 +565,7 @@ def go_analysis_with_enrichr(
 
 def go_analysis_offline(
     proteins,
-    protein_sets_path,
+    gene_sets_path,
     differential_expression_col,
     direction="both",
     background_path=None,
@@ -588,7 +588,7 @@ def go_analysis_offline(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
-    :param protein_sets_path: path to file containing gene sets. The identifiers
+    :param gene_sets_path: path to file containing gene sets. The identifiers
         in the gene_sets should be uppercase gene symbols.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
@@ -600,7 +600,7 @@ def go_analysis_offline(
             Set_name2, Gene2, Gene3, ...
         - .json:
             {Set_name: [Gene1, Gene2, ...], Set_name2: [Gene2, Gene3, ...]}
-    :type protein_sets_path: str
+    :type gene_sets_path: str
     :param background_path: background genes to be used for the analysis.
         Should be provided as uppercase gene symbols. If no background is provided,
         all genes in gene sets are used. The background is defined by your experiment.
@@ -658,7 +658,7 @@ def go_analysis_offline(
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    gene_sets = read_protein_or_gene_sets_file(protein_sets_path)
+    gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
     if (
         isinstance(gene_sets, dict) and "messages" in gene_sets
     ):  # file could not be read successfully

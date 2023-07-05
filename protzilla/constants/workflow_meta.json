@@ -1966,7 +1966,7 @@
             "fill": "protein_df_columns",
             "default": null
           },
-          "protein_sets_path": {
+          "gene_sets_path": {
             "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null
