@@ -133,3 +133,22 @@ def test_ms_fragger_import(intensity_name):
 
     intensity_df = ms_fragger_import_intensity_df(intensity_name)
     pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
+
+
+def test_filter_rev_con():
+    intensity_df, other = ms_data_import.max_quant_import(
+        _=None,
+        file_path=PROJECT_PATH / "tests" / "proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    protein_ids = intensity_df["Protein ID"].unique().tolist()
+    # not the complete group should be filtered out if contains valid ids
+    assert "NOTFILTERED" in protein_ids
+    # all instances of rev and con should be filtered out
+    assert all(
+        not any(
+            id_.startswith("CON__") or id_.startswith("REV__")
+            for id_ in group.split(";")
+        )
+        for group in protein_ids
+    )

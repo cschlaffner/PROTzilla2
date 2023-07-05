@@ -29,8 +29,6 @@ def get_memory_usage():
 def clean_uniprot_id(uniprot_id):
     if "-" in uniprot_id:
         uniprot_id = uniprot_id.split("-")[0]
-    if uniprot_id.startswith("CON__") or uniprot_id.startswith("REV__"):
-        uniprot_id = uniprot_id[5:]
     if "_" in uniprot_id:
         uniprot_id = uniprot_id.split("_")[0]
     return uniprot_id
