@@ -4,8 +4,8 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
-from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 from protzilla.data_integration import database_query
+from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
 

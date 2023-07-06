@@ -3,9 +3,9 @@ import pandas as pd
 import pytest
 
 from protzilla.data_analysis.clustering import (
-    k_means,
     expectation_maximisation,
     hierarchical_agglomerative_clustering,
+    k_means,
 )
 
 
