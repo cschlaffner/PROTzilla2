@@ -3,12 +3,12 @@ from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
-    plots,
-    classification,
     model_evaluation,
     model_evaluation_plots,
     model_selection_plots,
     model_selection,
+    plots,
+    protein_graphs,
 )
 from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
@@ -156,6 +156,16 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
+        "clustering",
+        "hierarchical_agglomerative_clustering",
+    ): clustering.hierarchical_agglomerative_clustering,
+    (
+        "data_analysis",
         "classification",
         "random_forest",
     ): classification.random_forest,
@@ -199,6 +209,16 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "peptides_to_isoform",
+    ): protein_graphs.peptides_to_isoform,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "variation_graph",
+    ): protein_graphs.variation_graph,
     (
         "data_integration",
         "enrichment_analysis",
@@ -375,4 +395,14 @@ plot_map = {
         "plot",
         "go_enrichment_dot_plot",
     ): di_plots.go_enrichment_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_dot_plot",
+    ): di_plots.gsea_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_enrichment_plot",
+    ): di_plots.gsea_enrichment_plot,
 }

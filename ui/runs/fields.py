@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import pandas
 from django.template.loader import render_to_string
@@ -195,6 +196,13 @@ def make_displayed_history(run):
         )
         table_url = reverse("runs:tables_nokey", args=(run.run_name, i))
 
+        has_protein_graph = (
+            "graph_path" in history_step.outputs
+            and history_step.outputs["graph_path"] is not None
+            and Path(history_step.outputs["graph_path"]).exists()
+        )
+        protein_graph_url = reverse("runs:protein_graph", args=(run.run_name, i))
+
         displayed_history.append(
             dict(
                 display_name=name,
@@ -204,6 +212,7 @@ def make_displayed_history(run):
                 name=run.history.step_names[i],
                 index=i,
                 table_link=table_url if has_df else "",
+                protein_graph_link=protein_graph_url if has_protein_graph else "",
             )
         )
     return displayed_history

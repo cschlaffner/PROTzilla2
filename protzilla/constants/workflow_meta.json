@@ -956,7 +956,8 @@
       "heatmap": {
         "name": "Heatmap",
         "description": "",
-        "parameters": {}
+        "parameters": {
+        }
       },
       "scatter_plot": {
         "name": "Scatter plot",
@@ -1171,12 +1172,80 @@
               null
             ]
           },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
           "n_clusters": {
-            "name": "Number of clusters to form",
+            "name": "Number of clusters to find",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 8
+            "default": 8,
+            "multiple": true
           },
           "random_state": {
             "name": "Seed for centroid initialisation",
@@ -1184,7 +1253,8 @@
             "min": 0,
             "max": 4294967295,
             "step": 1,
-            "default": 6
+            "default": 6,
+            "multiple": true
           },
           "init_centroid_strategy": {
             "name": "Method for initialisation of centroids",
@@ -1193,27 +1263,291 @@
               "k-means++",
               "random"
             ],
-            "default": "random"
+            "default": "random",
+            "multiple": true
           },
           "n_init": {
             "name": "Number of times the k-means algorithm is run with different centroid seeds",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 10
+            "default": 10,
+            "multiple": true
           },
           "max_iter": {
             "name": "Maximum number of iterations of the k-means algorithm for a single run.",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 300
+            "default": 300,
+            "multiple": true
           },
           "tolerance": {
             "name": "Relative tolerance with regards to Frobenius norm",
             "type": "numeric",
             "min": 0,
-            "default": 1e-4
+            "default": 1e-4,
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      },
+      "expectation_maximisation": {
+        "name": "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models",
+        "description": "",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
+          "n_components": {
+            "name": "The number of mixture components",
+            "type": "numeric",
+            "default": 1,
+            "multiple": true
+          },
+          "reg_covar": {
+            "name": "Non-negative regularization added to the diagonal of covariance",
+            "type": "numeric",
+            "default": 1e-6,
+            "multiple": true
+          },
+          "covariance_type": {
+            "name": "Type of covariance",
+            "type": "categorical",
+            "categories": [
+              "full",
+              "tied",
+              "diag",
+              "spherical"
+            ],
+            "default": "full",
+            "multiple": true
+          },
+          "init_params": {
+            "name": "The method used to initialize the weights, the means and the precisions.",
+            "type": "categorical",
+            "categories": [
+              "kmeans",
+              "k-means++",
+              "random",
+              "random_from_data"
+            ],
+            "default": "kmeans",
+            "multiple": true
+          },
+          "max_iter": {
+            "name": "The number of iterations to perform",
+            "type": "numeric",
+            "default": 100,
+            "multiple": true
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      },
+      "hierarchical_agglomerative_clustering": {
+        "name": "Hierarchical agglomerative clustering",
+        "description": "Performs hierarchical clustering utilizing a bottom-up approach",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
+          "n_clusters": {
+            "name": "Number of clusters to find",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 2,
+            "multiple": true
+          },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "l1",
+              "l2"
+            ],
+            "default": "euclidean",
+            "multiple": true
+          },
+          "linkage": {
+            "name": "The linkage criterion to use in order to to determine the distance to use between sets of observation",
+            "type": "categorical",
+            "categories": [
+              "ward",
+              "complete",
+              "average",
+              "single"
+            ],
+            "default": "ward",
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
           }
         }
       }
@@ -1239,14 +1573,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1439,7 +1773,7 @@
             "type": "categorical",
             "fill": "metadata_columns",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1460,7 +1794,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "validation_strategy": {
             "name": "Validation Strategy",
@@ -2336,6 +2670,61 @@
           }
         }
       }
+    },
+    "protein_graphs": {
+      "peptides_to_isoform": {
+        "name": "Peptide to Isoform",
+        "description": "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online.",
+        "parameters": {
+          "protein_id": {
+            "name": "Protein ID",
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the Uniprot-ID of the Protein"
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
+          },
+          "peptide_df": {
+            "type": "empty",
+            "name": "peptide_df",
+            "default": null
+          },
+          "k": {
+            "name": "k-mer length",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 5
+          },
+          "allowed_mismatches": {
+            "name": "Number of allowed mismatched Amino Acids per Peptide. For many allowed mismatches, this can take a long time.",
+            "type": "numeric",
+            "min": 0,
+            "step": 1,
+            "default": 2
+          }
+        }
+      },
+      "variation_graph": {
+        "name": "Protein Variation Graph",
+        "description" : "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "parameters": {
+          "protein_id": {
+            "name": "Protein ID",
+            "type": "text",
+            "default": "",
+            "placeholder": "Enter the Uniprot-ID of the Protein"
+          },
+          "run_name": {
+            "type": "empty",
+            "name": "run_name",
+            "default": null
+          }
+        }
+      }
     }
   },
   "data_integration": {
@@ -2350,7 +2739,14 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
+          },
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
           },
           "protein_set_dbs": {
             "name": "Protein Set Libraries",
@@ -2392,15 +2788,56 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
           },
-          "protein_sets": {
-            "name": "Protein Sets",
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
+          },
+          "gene_sets_field": {
+            "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file",
+              "Choose from Enrichr Options"
+            ],
+            "default": "Choose from Enrichr Options",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "gene_sets_path"
+              ],
+              "Choose from Enrichr Options": [
+                "gene_sets_enrichr"
+              ]
+            }
+          },
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "gene_sets_enrichr": {
+            "name": "Gene Set Libraries",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
             "default": null,
-            "multiple": true
+            "multiple": true,
+            "dynamic": true
+          },
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
           },
           "organism": {
             "name": "Enrichr supported organism",
@@ -2414,6 +2851,51 @@
               "worm"
             ],
             "default": "human"
+          },
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file (recommended)",
+              "Choose biomart dataset",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene sets"
+            ],
+            "default": "Upload a file (recommended)",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ],
+              "Choose biomart dataset": [
+                "background_biomart"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with uppercase gene symbols (one gene per line, csv or txt)",
+            "type": "file",
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
+          },
+          "background_biomart": {
+            "name": "Biomart dataset",
+            "type": "categorical",
+            "fill": "biomart_datasets",
+            "categories": [],
+            "default": null,
+            "dynamic": true
           }
         }
       },
@@ -2427,17 +2909,62 @@
             "default": [
               null,
               null
-            ]
+            ],
+            "fill_dynamic": ["differential_expression_col"]
+          },
+          "differential_expression_col": {
+            "name": "Column name with differential expression values indicating direction of change",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "default": null
           },
           "protein_sets_path": {
-            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Protein1, Protein2, ... | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
             "type": "file",
             "default": null
           },
-          "background": {
-            "name": "Background set with UniProt IDs (one protein per line, csv or txt or no upload -> all proteins from protein sets)",
+          "direction": {
+            "name": "Direction of the analysis",
+            "type": "categorical",
+            "categories": [
+              "both",
+              "up",
+              "down"
+            ],
+            "default": "both"
+          },
+          "background_field": {
+            "name": "How do you want to provide the background set? This parameter works only for uploaded gene sets and will otherwise be ignored!",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Upload a file (recommended)",
+              "Specify number of expressed genes (not recommended)",
+              "Use all genes in the gene sets"
+            ],
+            "default": "Upload a file (recommended)",
+            "dynamic_parameters": {
+              "Upload a file": [
+                "background_path"
+              ],
+              "Specify number of expressed genes (not recommended)": [
+                "background_number"
+              ]
+            }
+          },
+          "background_path": {
+            "name": "Background set with UniProt IDs (one protein per line, csv or txt)",
             "type": "file",
-            "default": null
+            "default": null,
+            "dynamic": true
+          },
+          "background_number": {
+              "name": "Number of expressed genes",
+              "type": "numeric",
+              "min": 1,
+              "max": 4294967295,
+              "step": 1,
+              "default": null,
+              "dynamic": true
           }
         }
       },
@@ -2471,7 +2998,7 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
@@ -2489,7 +3016,7 @@
             "name": "Grouping for Samples",
             "type": "categorical",
             "fill": "metadata_columns",
-            "default": "None"
+            "default": null
           },
           "min_size": {
             "name": "Minimum number of genes from gene set also in data",
@@ -2549,7 +3076,17 @@
             "default": [
               null,
               null
+            ],
+            "fill_dynamic": [
+              "ranking_column"
             ]
+          },
+          "ranking_column": {
+            "name": "Column to use for ranking",
+            "type": "categorical",
+            "fill": "protein_df_columns",
+            "categories": [],
+            "default": null
           },
           "ranking_direction": {
             "name": "Sort the ranking column (ascending - smaller values are better, descending - larger values are better)",
@@ -2567,7 +3104,7 @@
               "Upload a file",
               "Choose from Enrichr Options"
             ],
-            "default": "euclidean",
+            "default": "Choose from Enrichr Options",
             "dynamic_parameters": {
               "Upload a file": [
                 "gene_sets_path"
@@ -2578,7 +3115,7 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName: Gene1, Gene2, ... | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
@@ -2635,6 +3172,14 @@
             "default": [
               null,
               null
+            ]
+          },
+          "database_name": {
+            "name": "Database Name",
+            "type": "categorical",
+            "fill": "uniprot_databases",
+            "fill_dynamic": [
+              "fields"
             ]
           },
           "fields": {
@@ -2768,6 +3313,101 @@
             "name": "Scale the size of the dots",
             "type": "numeric",
             "default": 5
+          }
+        }
+      },
+      "gsea_dot_plot": {
+        "name": "Dot plot for (pre-ranked) GSEA",
+        "description": "Creates a categorical scatter plot from GSEA data",
+        "parameters": {
+          "input_df": {
+            "name": "Choose enrichment dataframe to be plotted",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ],
+            "fill_dynamic": [
+              "gene_sets"
+            ]
+          },
+          "gene_sets": {
+            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "gsea_enrichment_categories"
+          },
+          "dot_color_value": {
+            "name": "Color the dots by value",
+            "type": "categorical",
+            "categories": [
+              "FDR q-val",
+              "NOM p-val"
+            ],
+            "default": "FDR q-val"
+          },
+          "x_axis_value": {
+            "name": "Value to display on x axis",
+            "type": "categorical",
+            "categories": [
+              "ES",
+              "NES"
+            ],
+            "default": "NES"
+          },
+          "cutoff": {
+            "name": "Cutoff value for fdr q-value or nominal p-value",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 0.05
+          },
+          "title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          },
+          "dot_size": {
+            "name": "Scale the size of the dots",
+            "type": "numeric",
+            "default": 5
+          },
+          "show_ring": {
+            "name": "Show ring around the dots",
+            "type": "boolean",
+            "default": false
+          },
+          "remove_library_names": {
+            "name": "Remove library names from gene sets (e.g. 'KEGG_2013__')",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "gsea_enrichment_plot": {
+        "name": "Enrichment Plot for (pre-ranked) GSEA",
+        "description": "Creates an enrichment plot from (pre-ranked) GSEA data with the enrichment score, ranked_metric, gene rank and hits",
+        "parameters": {
+          "term_dict": {
+            "name": "Enrichment details gene set to be plotted",
+            "type": "named_output",
+            "sorted": true,
+            "default": [
+              null,
+              null
+            ]
+          },
+          "term_name": {
+            "name": "name of the term_dict for title",
+            "type": "empty",
+            "default": null
+          },
+          "ranking": {
+            "name": "Ranking from GSEA",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           }
         }
       }

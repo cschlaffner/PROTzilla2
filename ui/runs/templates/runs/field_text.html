@@ -7,5 +7,5 @@
 
 <label for="{{ key }}">{{ name }}</label>
 <input name="{{ key }}" type="text" id="{{ key }}" value="{{ default }}"
-    class="form-control" {% if disabled %} disabled {% endif %}
+    class="form-control {{ class }}" {% if disabled %} disabled {% endif %}
     placeholder="{{ placeholder }}">

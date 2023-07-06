@@ -1,43 +1,17 @@
 import base64
 import io
 import json
+import logging
 from pathlib import Path
 from shutil import rmtree
-from PIL import Image
 
 import numpy as np
 import pandas as pd
 import pytest
-import requests
+from PIL import Image
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities import random_string
-
-
-def check_internet_connection():
-    try:
-        response = requests.get("https://www.google.com", stream=True)
-        return True
-    except requests.exceptions.RequestException:
-        return False
-
-
-def pytest_configure(config):
-    internet_available = check_internet_connection()
-    config.addinivalue_line(
-        "markers",
-        f"internet(required: bool = True): Mark test as dependent on an internet connection (internet_available={internet_available})",
-    )
-
-
-def pytest_collection_modifyitems(config, items):
-    for item in items:
-        internet_marker = item.get_closest_marker("internet")
-        internet_connection = check_internet_connection()
-        if internet_marker and not internet_connection:
-            item.add_marker(
-                pytest.mark.skip(reason="Internet connection not available")
-            )
 
 
 def pytest_addoption(parser):
@@ -70,6 +44,43 @@ def run_test_folder(tests_folder_name):
     Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
     yield
     rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
+
+
+@pytest.fixture
+def critical_logger():
+    from ..protzilla.constants.logging import logger
+
+    logger.setLevel(logging.CRITICAL)
+    yield
+    logger.setLevel(logging.INFO)
+
+
+@pytest.fixture
+def no_logging():
+    from ..protzilla.constants.logging import logger
+
+    # highest used level is 50 -> 60 blocks everything
+    logger.setLevel(60)
+    yield
+    logger.setLevel(logging.INFO)
+
+
+@pytest.fixture
+def error_logger():
+    from ..protzilla.constants.logging import logger
+
+    logger.setLevel(logging.ERROR)
+    yield
+    logger.setLevel(logging.INFO)
+
+
+@pytest.fixture(scope="function")
+def debug_logger():
+    from ..protzilla.constants.logging import logger
+
+    logger.setLevel(logging.DEBUG)
+    yield
+    logger.setLevel(logging.INFO)
 
 
 @pytest.fixture

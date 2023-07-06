@@ -3,9 +3,9 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import permutation_test_score
 
 from protzilla.data_analysis.classification_helper import (
-    evaluate_with_scoring,
     encode_labels,
     perform_cross_validation,
+    evaluate_with_scoring,
 )
 from protzilla.constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE as COLORS,
