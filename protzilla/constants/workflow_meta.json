@@ -1157,6 +1157,30 @@
             "type": "text"
           }
         }
+      },
+      "elbow_method_n_clusters": {
+        "name": "Elbow method",
+        "description": "a description",
+        "parameters": {
+          "model_evaluation_df": {
+            "name": "Model Evaluation dataframe from clustering method",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "estimator_str": {
+            "name": "Name of the evaluated clustering method",
+            "type": "text"
+          },
+          "find_elbow": {
+            "name": "wether to find the elbow of the shown curve",
+            "type": "categorical",
+            "categories":["yes", "no"],
+            "default": "no"
+          }
+        }
       }
     },
     "clustering": {
@@ -1218,7 +1242,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1234,7 +1261,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -1354,7 +1384,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1370,7 +1403,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -1490,7 +1526,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1506,7 +1545,10 @@
               "mutual_info_score",
               "normalized_mutual_info_score",
               "rand_score",
-              "v_measure_score"
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true

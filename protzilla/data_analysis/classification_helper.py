@@ -5,7 +5,6 @@ import pandas as pd
 from sklearn import clone
 from sklearn.metrics import (
     accuracy_score,
-    matthews_corrcoef,
     precision_score,
     recall_score,
     matthews_corrcoef,
@@ -200,7 +199,7 @@ def evaluate_clustering_with_scoring(
     labels_true=None,
 ):
     scores = defaultdict(list)
-    internal_indices = {
+    external_indices = {
         "adjusted_mutual_info_score": adjusted_mutual_info_score,
         "adjusted_rand_score": adjusted_rand_score,
         "completeness_score": completeness_score,
@@ -213,7 +212,7 @@ def evaluate_clustering_with_scoring(
         "jaccard_score": jaccard_score,
         "f1_score": f1_score,
     }
-    external_indices = {
+    internal_indices = {
         "davies_bouldin_score": davies_bouldin_score,
         "dunn_score": dunn_score,
         "silhouette_score": silhouette_score,
@@ -221,9 +220,9 @@ def evaluate_clustering_with_scoring(
 
     for score in scoring:
         if score in internal_indices:
-            s = internal_indices[score](labels_true, labels_pred)
+            s = internal_indices[score](X=input_df, labels=labels_pred)
         elif score in external_indices:
-            s = external_indices[score](X=input_df, labels=labels_pred)
+            s = external_indices[score](y_true=labels_true, y_pred=labels_pred)
         else:
             s = None
         scores[score] = s

@@ -56,3 +56,10 @@ def isBaseEncoded64(base64_string):
         return True
     except (TypeError, ValueError):
         return False
+
+
+def remove_underscore_and_capitalize(s):
+    # Remove underscores, add spaces, capitalize first letter of each word
+    words = s.split("_")
+    words = [word.capitalize() for word in words]
+    return " ".join(words)

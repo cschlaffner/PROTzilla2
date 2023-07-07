@@ -1,0 +1,96 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "Intensity"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {}
+          ],
+          "output_name": null
+        },
+        {
+          "name": "normalisation",
+          "method": "z_score",
+          "parameters": {},
+          "graphs": [
+            {}
+          ],
+          "output_name": null
+        },
+        {
+          "name": "imputation",
+          "method": "min_value_per_sample",
+          "parameters": {
+            "shrinking_value": 1
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "None",
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": "data_prep"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": []
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}

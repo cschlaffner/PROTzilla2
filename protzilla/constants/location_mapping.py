@@ -383,6 +383,11 @@ plot_map = {
     (
         "data_analysis",
         "plot",
+        "elbow_method_n_clusters",
+    ): model_selection_plots.elbow_method_n_clusters,
+    (
+        "data_analysis",
+        "plot",
         "permutation_testing_plot",
     ): model_evaluation_plots.permutation_testing_plot,
     (
