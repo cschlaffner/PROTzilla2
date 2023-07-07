@@ -22,6 +22,7 @@ def read_protein_or_gene_sets_file(path):
             Set_name2, Protein2, Protein3, ...
         - .json:
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    Empty strings are removed from the list of proteins or genes.
     :param path: path to file
     :type path: str
     :return: dict with protein or gene sets, a path to a gmt file or error message
@@ -38,18 +39,19 @@ def read_protein_or_gene_sets_file(path):
             sets = {}
             for row in reader:
                 key, *values = row
-                sets[key] = values
+                sets[key] = [value for value in values if value.strip()]
 
     elif file_extension == ".txt":
         with open(path, "r") as f:
             sets = {}
             for line in f.readlines():
                 key, *values = line.strip().split("\t")
-                sets[key] = values
+                sets[key] = [value for value in values if value.strip()]
 
     elif file_extension == ".json":
         with open(path, "r") as f:
             sets = json.load(f)
+            sets = {key: [value for value in values if value.strip()] for key, values in sets.items()}
 
     elif file_extension == ".gmt":
         # gseapy can handle gmt files
@@ -66,6 +68,7 @@ def read_background_file(path):
     """
     Reads a file of background proteins or genes.
     Accepts .csv and .txt files with one protein or gene per line.
+    Empty strings are removed from the list of proteins or genes.
     :param path: path to file
     :type path: str or None
     :return: list of background proteins or genes or error message
@@ -78,13 +81,13 @@ def read_background_file(path):
         if file_extension == ".csv":
             background = pd.read_csv(path, low_memory=False, header=None)
             # if multiple columns, use first
-            background = background.iloc[:, 0].tolist()
+            background = background.iloc[:, 0].dropna().tolist()
             logger.warning(
                 "You provided a background file with multiple columns. Only the first will be used."
             )
         elif file_extension == ".txt":
             with open(path, "r") as f:
-                background = [line.strip() for line in f]
+                background = [line.strip() for line in f if line.strip()]
         else:
             msg = "Invalid file type for background. Must be .csv, .txt or no upload"
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
