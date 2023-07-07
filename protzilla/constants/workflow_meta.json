@@ -1911,7 +1911,7 @@
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
-              "Upload a file": [
+              "Upload a file (recommended)": [
                 "background_path"
               ],
               "Specify number of expressed genes (not recommended)": [
