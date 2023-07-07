@@ -2,6 +2,9 @@ import pandas as pd
 from django.contrib import messages
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
+from sklearn.model_selection import ParameterGrid
+from collections import defaultdict
+from sklearn.base import clone
 
 from protzilla.data_analysis.classification_helper import (
     perform_grid_search_cv,
@@ -359,22 +362,43 @@ def perform_clustering(
         )
         return model, model_evaluation_df
     else:
+        # clf_parameters = create_dict_with_lists_as_values(clf_parameters)
+        # model = perform_grid_search_cv(
+        #     model_selection,
+        #     clf,
+        #     clf_parameters,
+        #     scorer(scoring),
+        #     model_selection_scoring,
+        # )
+        # model.fit(input_df, labels_df)
+        # model_evaluation_df = create_model_evaluation_df_grid_search(
+        #     pd.DataFrame(model.cv_results_),
+        #     clf_parameters,
+        #     scoring,
+        # )
+        # best_estimator = model.best_estimator_
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model = perform_grid_search_cv(
-            model_selection,
-            clf,
-            clf_parameters,
-            scorer(scoring),
-            model_selection_scoring,
-        )
-        model.fit(input_df, labels_df)
-        model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.cv_results_),
-            clf_parameters,
-            scoring,
-        )
-        best_estimator = model.best_estimator_
-        return best_estimator, model_evaluation_df
+        best_params = None
+        best_score = -float("inf")
+        results = defaultdict(list)
+        for params in ParameterGrid(clf_parameters):
+            model = clone(clf)
+            model = model.set_params(**params)
+            model.fit(input_df)
+            scores = evaluate_clustering_with_scoring(
+                scoring, input_df, model.labels_, labels_df
+            )
+            if scores[model_selection_scoring] > best_score:
+                best_params = params
+                best_score = scores[model_selection_scoring]
+            # Store the results for the current parameter combination
+            for param_name, param_value in params.items():
+                results[f"param_{param_name}"].append(param_value)
+            for score_name, score_value in scores.items():
+                results[score_name].append(score_value)
+        best_estimator = clf.set_params(**best_params)
+        best_estimator.fit(input_df)
+        return best_estimator, pd.DataFrame(results)
 
 
 def scorer(scoring):
