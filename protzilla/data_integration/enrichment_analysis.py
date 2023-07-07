@@ -1,20 +1,28 @@
-import csv
-import json
-import logging
 import os
-import shutil
 import time
 
-import gseapy as gp
+import gseapy
 import numpy as np
 import pandas as pd
 from django.contrib import messages
 from restring import restring
 
-from protzilla.utilities.random import random_string
+from protzilla.constants.logging import logger
 
-from ..constants.paths import RUNS_PATH
-from .database_query import biomart_query
+# Import enrichment analysis gsea methods to remove redundant function definition
+from .enrichment_analysis_gsea import gsea, gsea_preranked
+from .enrichment_analysis_helper import (
+    read_background_file,
+    read_protein_or_gene_sets_file,
+)
+from protzilla.data_integration import database_query
+
+
+# call methods for precommit hook not to delete imports
+def unused():
+    gsea_preranked(**{})
+    gsea(**{})
+
 
 last_call_time = None
 MIN_WAIT_TIME = 1  # Minimum wait time between STRING API calls in seconds
@@ -42,38 +50,69 @@ def get_functional_enrichment_with_delay(protein_list, **string_params):
     return result_df
 
 
-def merge_restring_dfs(df_dict):
+def merge_up_down_regulated_dfs_restring(up_df, down_df):
     """
-    This method merges the dataframes returned by the restring package
-    into a single dataframe.
+    A method that merges the results for up- and down-regulated proteins for the restring
+    enrichment results. If a category and Term combination is present in both dataframes,
+    the one with the lower p-value is kept. The unique proteins (inputGenes column) and the
+    unique genes (preferredNames column) of the two input dataframes are merged and the
+    number_of_genes column is updated accordingly.
 
-    :param df_dict: dictionary with dataframes returned by the restring package
-    :type df_dict: dict
+    :param up_df: dataframe with enrichment results for up-regulated proteins
+    :type up_df: pandas.DataFrame
+    :param down_df: dataframe with enrichment results for down-regulated proteins
+    :type down_df: pandas.DataFrame
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
-    dfs = []
-    for term, df in df_dict.items():
-        df["Gene_set"] = term
-        dfs.append(df.reset_index())
-    return pd.concat(dfs, ignore_index=True)
+    logger.info("Merging results for up- and down-regulated proteins")
+    up_df.set_index(["category", "term"], inplace=True)
+    down_df.set_index(["category", "term"], inplace=True)
+    enriched = up_df.copy()
+    for gene_set, term in down_df.index:
+        if (gene_set, term) in enriched.index:
+            if (
+                down_df.loc[(gene_set, term), "p_value"]
+                < enriched.loc[(gene_set, term), "p_value"]
+            ):
+                enriched.loc[(gene_set, term)] = down_df.loc[(gene_set, term)]
+
+            proteins = set(up_df.loc[(gene_set, term), "inputGenes"].split(","))
+            proteins.update(down_df.loc[(gene_set, term), "inputGenes"].split(","))
+            enriched.loc[(gene_set, term), "inputGenes"] = ",".join(list(proteins))
+
+            genes = set(up_df.loc[(gene_set, term), "preferredNames"].split(","))
+            genes.update(down_df.loc[(gene_set, term), "preferredNames"].split(","))
+            enriched.loc[(gene_set, term), "preferredNames"] = ",".join(list(genes))
+
+            # since inputGenes are proteins this is the number of unique proteins
+            enriched.loc[(gene_set, term), "number_of_genes"] = len(proteins)
+        else:
+            enriched.loc[(gene_set, term), :] = down_df.loc[(gene_set, term), :]
+
+    enriched = enriched.astype(
+        {
+            "number_of_genes": int,
+            "number_of_genes_in_background": int,
+            "ncbiTaxonId": int,
+        }
+    )
+    enriched.reset_index(inplace=True)
+    return enriched
 
 
 def go_analysis_with_STRING(
     proteins,
     protein_set_dbs,
     organism,
+    differential_expression_col=None,
     background=None,
     direction="both",
-    run_name=None,
-    folder_name=None,
 ):
     """
     This method performs online functional enrichment analysis using the STRING DB API
-    via the restring package. It writes the results to a folder in an
-    enrichment_results folder in the run folder or to a tmp folder (for testing).
-    Results for up- and down-regulated proteins are then aggregated and written
-    into summary and results dataframes. These are also written to the run folder.
+    via the restring package. Results for up- and down-regulated proteins are aggregated
+    and written into a result dataframe.
 
     :param proteins: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
@@ -86,6 +125,9 @@ def go_analysis_with_STRING(
     :param organism: organism to use for enrichment as NCBI taxon identifier
         (e.g. Human is 9606)
     :type organism: int
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
     :param background: path to csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background: str or None
@@ -96,30 +138,24 @@ def go_analysis_with_STRING(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the summary and results
     :type direction: str
-    :param run_name: name of the run folder to write results to. If None, a tmp folder
-        is used.
-    :type run_name: str or None
-    :param folder_name: name of the folder to write results to. If None, a random string
-        is used. This is for testing purposes.
-    :type folder_name: str or None
-    :return: dictionary with summary and results dataframes
+    :return: dictionary with enriched dataframe
     :rtype: dict
     """
 
-    # TODO 182: set logging level for whole django app in beginning
-    logging.basicConfig(level=logging.INFO)
     out_messages = []
-
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
@@ -132,7 +168,7 @@ def go_analysis_with_STRING(
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
@@ -142,29 +178,25 @@ def go_analysis_with_STRING(
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if protein_set_dbs is None or protein_set_dbs == "":
+    if not protein_set_dbs:
         protein_set_dbs = ["KEGG", "Component", "Function", "Process", "RCTM"]
         msg = "No protein set databases selected. Using all protein set databases."
         out_messages.append(dict(level=messages.INFO, msg=msg))
     elif not isinstance(protein_set_dbs, list):
         protein_set_dbs = [protein_set_dbs]
 
-    if background == "" or background is None:
-        logging.info("No background provided, using entire proteome")
-        statistical_background = None
-    else:
-        # assuming headerless one column file, tab separated
-        read = pd.read_csv(
-            background,
-            sep="\t",
-            low_memory=False,
-            header=None,
-        )
-        statistical_background = read.iloc[:, 0].tolist()
+    statistical_background = read_background_file(background)
+    if (
+        isinstance(statistical_background, dict)
+        and "messages" in statistical_background
+    ):
+        return statistical_background
+    if statistical_background is None:
+        logger.info("No background provided, using entire proteome")
 
     string_params = {
         "species": organism,
@@ -172,164 +204,56 @@ def go_analysis_with_STRING(
         "statistical_background": statistical_background,
     }
 
-    # change working direcory to run folder for enrichment analysis
-    # or make tmp folder
-    results_path = (
-        RUNS_PATH / run_name / "enrichment_results"
-        if run_name
-        else os.path.join(os.getcwd(), "tmp_enrichment_results")
-    )
-    os.makedirs(results_path, exist_ok=True)
-
-    # make folder for current enrichment analysis and details of analysis
-    enrichment_folder_name = (
-        f"enrichment_{random_string()}" if folder_name is None else folder_name
-    )
-    enrichment_folder_path = os.path.join(results_path, enrichment_folder_name)
-    os.makedirs(enrichment_folder_path, exist_ok=True)
-
-    details_folder_name = "enrichment_details"
-    details_folder_path = os.path.join(enrichment_folder_path, details_folder_name)
-    os.makedirs(details_folder_path, exist_ok=True)
-    start_dir = os.getcwd()
-    os.chdir(details_folder_path)
-
     # enhancement: add mapping to string API for identifiers before this (dont forget background)
-
     if direction == "up" or direction == "both":
-        logging.info("Starting analysis for up-regulated proteins")
+        logger.info("Starting analysis for up-regulated proteins")
 
         up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
-        try:
-            restring.write_functional_enrichment_tables(up_df, prefix="UP_")
-        except KeyError as e:
-            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
-            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+        if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
+            msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(
+                dict(level=messages.ERROR, msg=msg, trace=up_df.to_string())
+            )
             return dict(messages=out_messages)
 
-        logging.info("Finished analysis for up-regulated proteins")
+        # remove unwanted protein set databases
+        up_df.reset_index(inplace=True)
+        up_df = up_df[up_df["category"].isin(protein_set_dbs)]
+        logger.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
-        logging.info("Starting analysis for down-regulated proteins")
+        logger.info("Starting analysis for down-regulated proteins")
 
         down_df = get_functional_enrichment_with_delay(
             down_protein_list, **string_params
         )
-        try:
-            restring.write_functional_enrichment_tables(down_df, prefix="DOWN_")
-        except KeyError as e:
-            msg = "Error writing enrichment results. Check your input and make sure the organism id is correct."
-            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+        if (
+            down_df.empty
+            or not down_df.values.any()
+            or "ErrorMessage" in down_df.columns
+        ):
+            msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
+            out_messages.append(
+                dict(level=messages.ERROR, msg=msg, trace=down_df.to_string())
+            )
             return dict(messages=out_messages)
-        logging.info("Finished analysis for down-regulated proteins")
 
-    # change working directory back to current enrichment folder
-    os.chdir("..")
+        # remove unwanted protein set databases
+        down_df.reset_index(inplace=True)
+        down_df = down_df[down_df["category"].isin(protein_set_dbs)]
+        logger.info("Finished analysis for down-regulated proteins")
 
-    logging.info("Summarizing enrichment results")
-    results = {}
-    summaries = {}
-    for term in protein_set_dbs:
-        db = restring.aggregate_results(
-            directories=[details_folder_name], kind=term, PATH=enrichment_folder_path
-        )
-        result = restring.tableize_aggregated(db)
-        result.to_csv(f"{term}_results.csv")
-        results[term] = result
-        summary = restring.summary(db)
-        summary.to_csv(f"{term}_summary.csv")
-        summaries[term] = summary
-
-    # combine all results and summaries
-    if len(results) > 1:
-        merged_results = merge_restring_dfs(results)
-        merged_summary = merge_restring_dfs(summaries)
+    logger.info("Summarizing enrichment results")
+    if direction == "both":
+        merged_df = merge_up_down_regulated_dfs_restring(up_df, down_df)
     else:
-        merged_results = results[term]
-        merged_summary = summaries[term]
-
-    # switch back to original working directory
-    os.chdir(start_dir)
-
-    # delete tmp folder if it was created
-    if os.path.basename(results_path) == "tmp_enrichment_results":
-        shutil.rmtree(results_path)
+        merged_df = up_df if direction == "up" else down_df
+    merged_df.rename(columns={"category": "Gene_set"}, inplace=True)
 
     if len(out_messages) > 0:
-        return dict(messages=out_messages, results=results, summaries=summaries)
+        return dict(messages=out_messages, results=merged_df)
 
-    return {"result": merged_results, "summary": merged_summary}
-
-
-def uniprot_ids_to_uppercase_gene_symbols(proteins):
-    """
-    A method that converts a list of uniprot ids to uppercase gene symbols.
-    This is done by querying the biomart database. If a protein group is not found
-    in the database, it is added to the filtered_groups list.
-
-    :param proteins: list of uniprot ids
-    :type proteins: list
-    :return: dict with keys uppercase gene symbols and values protein_groups and a list of uniprot ids that were not found
-    :rtype: tuple
-    """
-    proteins_list = []
-    for group in proteins:
-        if ";" not in group:
-            proteins_list.append(group)
-        else:
-            group = group.split(";")
-            # isoforms map to the same gene symbol, that is only found with base protein
-            without_isoforms = set()
-            for protein in group:
-                if "-" in protein:
-                    without_isoforms.add(protein.split("-")[0])
-                elif "_VAR_" in protein:
-                    without_isoforms.add(protein.split("_VAR_")[0])
-                else:
-                    without_isoforms.add(protein)
-            proteins_list.extend(list(without_isoforms))
-
-    q = list(
-        biomart_query(
-            proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
-        )
-    )
-    q += list(
-        biomart_query(
-            proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
-        )
-    )
-    q = dict(set(map(tuple, q)))
-
-    # check per group in proteins if all proteins have the same gene symbol
-    # if yes, use that gene symbol, otherwise use all gene symbols
-    filtered_groups = []
-    gene_mapping = {}
-    for group in proteins:
-        if ";" not in group:
-            symbol = q.get(group, None)
-            if symbol is None:
-                filtered_groups.append(group)
-            else:
-                gene_mapping[symbol.upper()] = group
-        else:
-            # remove duplicate symbols within one group
-            symbols = set()
-            for protein in group.split(";"):
-                if "-" in protein:
-                    protein = protein.split("-")[0]
-                elif "_VAR_" in protein:
-                    protein = protein.split("_VAR_")[0]
-                if result := q.get(protein):
-                    symbols.add(result)
-
-            if not symbols:  # no gene symbol for any protein in group
-                filtered_groups.append(group)
-            else:
-                for symbol in symbols:
-                    gene_mapping[symbol.upper()] = group
-
-    return gene_mapping, filtered_groups
+    return {"enrichment_results": merged_df}
 
 
 def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=False):
@@ -351,7 +275,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     :rtype: pandas.DataFrame
     """
 
-    logging.info("Merging results for up- and down-regulated proteins")
+    logger.info("Merging results for up- and down-regulated proteins")
     up_enriched.set_index(["Gene_set", "Term"], inplace=True)
     down_enriched.set_index(["Gene_set", "Term"], inplace=True)
     enriched = up_enriched.copy()
@@ -383,7 +307,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     return enriched.reset_index()
 
 
-def enrichr_helper(protein_list, protein_sets, organism, direction):
+def enrichr_helper(protein_list, protein_sets, organism, direction, background=None):
     """
     A helper method for the enrichment analysis with Enrichr. It maps the proteins to uppercase gene symbols
     and performs the enrichment analysis with GSEApy. It returns the enrichment results and the groups that
@@ -397,50 +321,87 @@ def enrichr_helper(protein_list, protein_sets, organism, direction):
     :type organism: str
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
+    :param background: background for the enrichment analysis
+    :type background: list or None
+    :return: enrichment results and filtered groups
+    :rtype: tuple
     """
-    logging.info("Mapping Uniprot IDs to gene symbols")
-    gene_mapping, filtered_groups = uniprot_ids_to_uppercase_gene_symbols(protein_list)
-    logging.info(f"Starting analysis for {direction}-regulated proteins")
+    logger.info("Mapping Uniprot IDs to gene symbols")
+    gene_to_groups, _, filtered_groups = database_query.uniprot_groups_to_genes(
+        protein_list
+    )
 
+    if not gene_to_groups:
+        msg = (
+            "No gene symbols could be found for the proteins. Please check your input."
+        )
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)]), None
+
+    logger.info(f"Starting analysis for {direction}-regulated proteins")
     try:
-        enriched = gp.enrichr(
-            gene_list=list(gene_mapping.keys()),
+        enriched = gseapy.enrichr(
+            gene_list=list(gene_to_groups.keys()),
             gene_sets=protein_sets,
+            background=background,
             organism=organism,
             outdir=None,
             verbose=True,
         ).results
     except ValueError as e:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Something went wrong with the analysis. Please check your inputs.",
-                    trace=str(e),
-                )
-            ]
-        )
+        msg = "Something went wrong with the analysis. Please check your inputs."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]), None
 
     enriched["Proteins"] = enriched["Genes"].apply(
-        lambda x: ";".join([gene_mapping[gene] for gene in x.split(";")])
+        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
-    logging.info(f"Finished analysis for {direction}-regulated proteins")
+    logger.info(f"Finished analysis for {direction}-regulated proteins")
     return enriched, filtered_groups
 
 
-def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both"):
+def go_analysis_with_enrichr(
+    proteins,
+    organism,
+    differential_expression_col,
+    direction="both",
+    gene_sets_path=None,
+    gene_sets_enrichr=None,
+    background_path=None,
+    background_number=None,
+    background_biomart=None,
+    **kwargs,
+):
     """
-    A method that performs online overrepresentation analysis for a given set of proteins
-    against a given set of protein sets using the GSEApy package which accesses
-    the Enrichr API. Uniprot Protein IDs are converted to uppercase HGNC gene symbols.
+    A method that performs online over-representation analysis for a given set of proteins
+    against a given set of gene sets using the GSEApy package which accesses
+    the Enrichr API. Uniprot Protein IDs in proteins are converted to uppercase HGNC gene symbols.
     If no match is found, the protein is excluded from the analysis. All excluded proteins
     are returned in a list.
+    The enrichment is performed against a background provided as a path (recommended), number or
+    name of a biomart dataset. If no background is provided, all genes in the gene sets are used as
+    the background. Up- and down-regulated proteins are analyzed separately and the results are merged.
+    When gene sets from Enrichr are used, the background parameters are ignored. All genes in the gene sets
+    will be used instead.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
-    :param protein_sets: list of Enrichr Library name(s) to use as sets for the enrichment
-        (e.g. ['KEGG_2016','KEGG_2013'])
-    :type protein_sets: list of str
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
+    :param gene_sets_path: path to file with gene sets
+         The file can be a .csv, .txt, .json or .gmt file.
+        .gmt files are not parsed because GSEApy can handle them directly.
+        Other files must have one set per line with the set name and the proteins.
+            - .txt: Setname or identifier followed by a tab-separated list of genes
+                Set_name    Protein1    Protein2...
+                Set_name    Protein1    Protein2...
+            - .csv: Setname or identifier followed by a comma-separated list of genes
+                Set_name, Protein1, Protein2, ...
+                Set_name2, Protein2, Protein3, ...
+            - .json:
+                {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    :type gene_sets_path: str
+    :param gene_sets_enrichr: list of gene set library names to use from Enrichr
+    :type gene_sets_enrichr: list
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
@@ -449,29 +410,68 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         - up: Log2FC is > 0
         - down: Log2FC is < 0
         - both: functional enrichment info is retrieved for upregulated and downregulated
-        proteins separately, but the terms are aggregated for the summary and results
+        proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
+    :param background_path: path to file with background proteins, .csv or .txt, one protein per line
+    :type background_path: str or None
+    :param background_number: number of background genes to use (not recommended),
+        assumes that all genes could be found in background
+    :type background_number: int or None
+    :param background_biomart: name of biomart dataset to use as background
+    :type background_biomart: str or None
     :return: dictionary with results and filtered groups
     :rtype: dict
     """
-    # enhancement: protein_sets are categorical for now, could also be custom file upload later
-    #       background parameter would work then (with uploaded file)
-    # dependency: refactoring/designing of more complex input choices
-
-    # TODO 182: set logging level for whole django app in beginning
-    logging.basicConfig(level=logging.INFO)
     out_messages = []
-
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    if gene_sets_path:
+        gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
+        if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
+            return gene_sets
+    elif gene_sets_enrichr:
+        if isinstance(gene_sets_enrichr, str):
+            gene_sets = [gene_sets_enrichr]
+        else:
+            gene_sets = gene_sets_enrichr
+    else:
+        msg = "No gene sets provided"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    # if gene sets from Enrichr are used, ignore background parameter because gseapy does not support it
+    if gene_sets_enrichr and (
+        background_path or background_number or background_biomart
+    ):
+        msg = "Background parameter is not supported when using Enrichr gene sets and will be ignored"
+        out_messages.append(dict(level=messages.INFO, msg=msg))
+        background = background_path = background_number = background_biomart = None
+
+    if background_path:
+        background = read_background_file(background_path)
+        if (
+            isinstance(background, dict) and "messages" in background
+        ):  # an error occurred
+            return background
+    elif background_number:
+        background = background_number
+    elif background_biomart:
+        background = background_biomart
+    else:
+        background = None
+        msg = "No background provided, using all genes in gene sets"
+        out_messages.append(dict(level=messages.WARNING, msg=msg))
+
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
@@ -484,7 +484,7 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
@@ -494,19 +494,23 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups = enrichr_helper(
-            up_protein_list, protein_sets, organism, "up"
+            up_protein_list, gene_sets, organism, "up", background
         )
+        if isinstance(up_enriched, dict):  # error occurred
+            return up_enriched
 
     if direction == "down" or direction == "both":
         down_enriched, down_filtered_groups = enrichr_helper(
-            down_protein_list, protein_sets, organism, "down"
+            down_protein_list, gene_sets, organism, "down", background
         )
+        if isinstance(down_enriched, dict):  # error occurred
+            return down_enriched
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
@@ -523,72 +527,83 @@ def go_analysis_with_enrichr(proteins, protein_sets, organism, direction="both")
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
-            results=enriched,
+            enrichment_results=enriched,
             filtered_groups=filtered_groups,
             messages=out_messages,
         )
 
     return {
-        "results": enriched,
-        "filtered_groups": filtered_groups,
+        "enrichment_results": enriched,
         "messages": out_messages,
     }
 
 
-def go_analysis_offline(proteins, protein_sets_path, background=None, direction="both"):
+def go_analysis_offline(
+    proteins,
+    protein_sets_path,
+    differential_expression_col,
+    direction="both",
+    background_path=None,
+    background_number=None,
+    **kwargs,
+):
     """
-    A method that performs offline overrepresentation analysis for a given set of proteins
+    A method that performs offline over-representation analysis for a given set of proteins
     against a given set of protein sets using the GSEApy package.
-    For the analysis a hypergeometric test is used.
+    For the analysis a hypergeometric test is used against a background provided as a
+    path (recommended) or a number of proteins. If no background is provided, all proteins in
+    the protein_sets are used as the background.
+    Up- and down-regulated proteins are analyzed separately and the results are merged.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
+    :param differential_expression_col: name of the column in the proteins dataframe that contains values for
+        direction of expression change.
+    :type differential_expression_col: str
     :param protein_sets_path: path to file containing protein sets. The identifers
         in the protein_sets should be the same type as the backgrounds and the proteins.
 
         This could be any of the following file types: .gmt, .txt, .csv, .json
-        - .txt:
-            Set_name: Protein1, Protein2, ...
-            Set_name2: Protein2, Protein3, ...
-        - .csv:
+        - .txt: Setname or identifier followed by a tab-separated list of genes
+            Set_name    Protein1    Protein2...
+            Set_name    Protein1    Protein2...
+        - .csv: Setname or identifier followed by a comma-separated list of genes
             Set_name, Protein1, Protein2, ...
             Set_name2, Protein2, Protein3, ...
         - .json:
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
     :type protein_sets_path: str
-    :param background: background proteins to be used for the analysis. If no
+    :param background_path: background proteins to be used for the analysis. If no
         background is provided, all proteins in protein sets are used.
         The background is defined by your experiment.
-    :type background: str or None
+    :type background_path: str or None
+    :param background_number: number of background proteins to be used for the analysis (not recommended)
+        assumes that all your genes could be found in background.
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
-        - both: functional enrichment info is retrieved for upregulated and downregulated
-        proteins separately, but the terms are aggregated for the summary and results
+        - both: functional enrichment info is retrieved for up-regulated and down-regulated
+        proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
     :return: dictionary with results dataframe
     :rtype: dict
     """
-    # enhancement: proteins could also be a number input (or an uploaded file)
-    # dependency: refactoring/designing of more complex input choices
-
     # enhancement: make sure ID type for all inputs match
-
-    # TODO 182: set logging level for whole django app in beginning
-    logging.basicConfig(level=logging.INFO)
     out_messages = []
-
     if (
         not isinstance(proteins, pd.DataFrame)
-        or proteins.shape[1] != 2
         or not "Protein ID" in proteins.columns
-        or not proteins.iloc[:, 1].dtype == np.number
+        or not differential_expression_col in proteins.columns
+        or not proteins[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    expression_change_col = proteins.drop("Protein ID", axis=1).iloc[:, 0]
+    # remove all columns but "Protein ID" and differential_expression_col column
+    proteins = proteins[["Protein ID", differential_expression_col]]
+    proteins.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins[differential_expression_col]
     up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
     down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
 
@@ -601,7 +616,7 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "down"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
@@ -611,85 +626,34 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
-            logging.warning(msg)
+            logger.warning(msg)
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if protein_sets_path == "":
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="No file uploaded for protein sets.",
-                )
-            ]
-        )
+    protein_sets = read_protein_or_gene_sets_file(protein_sets_path)
+    if (
+        isinstance(protein_sets, dict) and "messages" in protein_sets
+    ):  # file could not be read successfully
+        return protein_sets
 
-    file_extension = os.path.splitext(protein_sets_path)[1]
-    if file_extension == ".csv":
-        with open(protein_sets_path, "r") as f:
-            reader = csv.reader(f)
-            protein_sets = {}
-            for row in reader:
-                key = row[0]
-                values = row[1:]
-                protein_sets[key] = values
-
-    elif file_extension == ".txt":
-        with open(protein_sets_path, "r") as f:
-            protein_sets = {}
-            for line in f:
-                key, value_str = line.strip().split(":")
-                values = [v.strip() for v in value_str.split(",")]
-                protein_sets[key] = values
-
-    elif file_extension == ".json":
-        with open(protein_sets_path, "r") as f:
-            protein_sets = json.load(f)
-
-    elif file_extension == ".gmt":
-        # gseapy can handle gmt files
-        protein_sets = protein_sets_path
-
+    if background_path:
+        background = read_background_file(background_path)
+        if isinstance(background, dict):  # an error occurred
+            return background
+    elif background_number:
+        background = background_number
     else:
-        return dict(
-            messages=[
-                dict(
-                    level=messages.ERROR,
-                    msg="Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt",
-                )
-            ]
-        )
-
-    if background == "" or background is None:
-        logging.info("No background provided, using all proteins in protein sets")
         background = None
-    else:
-        file_extension = os.path.splitext(background)[1]
-        if file_extension == ".csv":
-            background = pd.read_csv(
-                background, sep="\t", low_memory=False, header=None
-            )
-            # if multiple columns, use first
-            background = background.iloc[:, 0].tolist()
-        elif file_extension == ".txt":
-            with open(background, "r") as f:
-                background = [line.strip() for line in f]
-        else:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Invalid file type for background. Must be .csv, .txt or no upload",
-                    )
-                ]
-            )
+
+    if background is None:
+        msg = "No valid background provided, using all proteins in protein sets"
+        out_messages.append(dict(level=messages.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
-        logging.info("Starting analysis for up-regulated proteins")
+        logger.info("Starting analysis for up-regulated proteins")
         # gene set and gene list identifiers need to match
         try:
-            up_enriched = gp.enrich(
+            up_enriched = gseapy.enrich(
                 gene_list=up_protein_list,
                 gene_sets=protein_sets,
                 background=background,
@@ -697,22 +661,16 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
                 verbose=True,
             ).results
         except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-        logging.info("Finished analysis for up-regulated proteins")
+            msg = "Something went wrong with the analysis. Please check your inputs."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
+        logger.info("Finished analysis for up-regulated proteins")
 
     if direction == "down" or direction == "both":
-        logging.info("Starting analysis for up-regulated proteins")
+        logger.info("Starting analysis for down-regulated proteins")
         # gene set and gene list identifiers need to match
         try:
-            down_enriched = gp.enrich(
+            down_enriched = gseapy.enrich(
                 gene_list=down_protein_list,
                 gene_sets=protein_sets,
                 background=background,
@@ -720,16 +678,11 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
                 verbose=True,
             ).results
         except ValueError as e:
-            return dict(
-                messages=[
-                    dict(
-                        level=messages.ERROR,
-                        msg="Something went wrong with the analysis. Please check your inputs.",
-                        trace=str(e),
-                    )
-                ]
-            )
-        logging.info("Finished analysis for up-regulated proteins")
+            msg = "Something went wrong with the analysis. Please check your inputs."
+            out_messages.append(dict(level=messages.ERROR, msg=msg, trace=str(e)))
+            return dict(messages=out_messages)
+
+        logger.info("Finished analysis for down-regulated proteins")
 
     if direction == "both":
         enriched = merge_up_down_regulated_proteins_results(
@@ -738,4 +691,6 @@ def go_analysis_offline(proteins, protein_sets_path, background=None, direction=
     else:
         enriched = up_enriched if direction == "up" else down_enriched
 
-    return {"results": enriched}
+    if out_messages:
+        return {"enrichment_results": enriched, "messages": out_messages}
+    return {"enrichment_results": enriched}

@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas as pd
 from django.contrib import messages
 
+from protzilla.utilities import clean_uniprot_id
+
 
 def max_quant_import(_, file_path, intensity_name):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
@@ -20,7 +22,9 @@ def max_quant_import(_, file_path, intensity_name):
         na_values=["", 0],
         keep_default_na=True,
     )
-    df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"])
+    df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
+    df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
+    df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
@@ -69,6 +73,8 @@ def ms_fragger_import(_, file_path, intensity_name):
             "Combined Total Spectral Count",
         ]
     )
+    df["Protein ID"] = df["Protein ID"].map(handle_protein_ids)
+    df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
     intensity_df.columns = [
@@ -88,3 +94,19 @@ def ms_fragger_import(_, file_path, intensity_name):
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
     return ordered, {}
+
+
+def valid_uniprot_id(uniprot_id):
+    return not uniprot_id.startswith("CON__") and not uniprot_id.startswith("REV__")
+
+
+def isoforms_together(protein_id):
+    # put isofroms together, and the non-isofrom version first
+    clean = clean_uniprot_id(protein_id)
+    return clean, clean != protein_id, protein_id
+
+
+def handle_protein_ids(protein_group):
+    # todo add mapping to uniprot here
+    group = filter(valid_uniprot_id, protein_group.split(";"))
+    return ";".join(sorted(group, key=isoforms_together))

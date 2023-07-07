@@ -2,11 +2,18 @@ import sys
 import tempfile
 import traceback
 import zipfile
+from pathlib import Path
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 from django.contrib import messages
-from django.http import FileResponse, HttpResponseRedirect, JsonResponse
+from django.http import (
+    FileResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -14,9 +21,11 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
+from protzilla.constants.logging import logger
+from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities.memory import get_memory_usage
+from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -77,6 +86,14 @@ def detail(request, run_name):
     show_table = run.current_out and any(
         isinstance(v, pd.DataFrame) for v in run.current_out.values()
     )
+
+    show_protein_graph = (
+        run.current_out
+        and "graph_path" in run.current_out
+        and run.current_out["graph_path"] is not None
+        and Path(run.current_out["graph_path"]).exists()
+    )
+
     return render(
         request,
         "runs/details.html",
@@ -98,6 +115,7 @@ def detail(request, run_name):
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),
+            show_protein_graph=show_protein_graph,
         ),
     )
 
@@ -158,12 +176,7 @@ def change_dynamic_fields(request, run_name):
         "runs/fields.html",
         context=dict(fields=dynamic_fields),
     )
-    return JsonResponse(
-        dict(
-            parameters=parameters,
-        ),
-        safe=False,
-    )
+    return JsonResponse(dict(parameters=parameters), safe=False)
 
 
 def change_field(request, run_name):
@@ -194,27 +207,53 @@ def change_field(request, run_name):
         param_dict = parameters[key]
 
         if param_dict["fill"] == "metadata_column_data":
-            param_dict["categories"] = run.metadata[selected].unique()
+            param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
+        elif param_dict["fill"] == "uniprot_fields":
+            param_dict["categories"] = uniprot_columns(selected[0]) + ["Links"]
         elif param_dict["fill"] == "protein_ids":
             named_output = selected[0]
             output_item = selected[1]
             # KeyError is expected when named_output triggers the fill
             try:
-                protein_itr = run.history.output_of_named_step(
+                protein_iterable = run.history.output_of_named_step(
                     named_output, output_item
                 )
             except KeyError:
-                protein_itr = None
-            if isinstance(protein_itr, pd.DataFrame):
-                param_dict["categories"] = protein_itr["Protein ID"].unique()
-            elif isinstance(protein_itr, pd.Series):
-                param_dict["categories"] = protein_itr.unique()
-            elif isinstance(protein_itr, list):
-                param_dict["categories"] = protein_itr
+                protein_iterable = None
+            if isinstance(protein_iterable, pd.DataFrame):
+                param_dict["categories"] = protein_iterable["Protein ID"].unique()
+            elif isinstance(protein_iterable, pd.Series):
+                param_dict["categories"] = protein_iterable.unique()
+            elif isinstance(protein_iterable, list):
+                param_dict["categories"] = protein_iterable
             else:
                 param_dict["categories"] = []
                 print(
-                    f"Warning: expected protein_itr to be a DataFrame, Series or list, but got {type(protein_itr)}. Proceeding with empty list."
+                    f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
+                )
+
+        elif param_dict["fill"] == "protein_df_columns":
+            named_output = selected[0]
+            output_item = selected[1]
+            # KeyError is expected when named_output triggers the fill
+            try:
+                protein_iterable = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_iterable = None
+            if isinstance(protein_iterable, pd.DataFrame):
+                categories = []
+                for column in protein_iterable.columns:
+                    if column not in ["Protein ID", "Sample"]:
+                        categories.append(column)
+                param_dict["categories"] = categories
+            elif isinstance(protein_iterable, pd.Series):
+                param_dict["categories"] = protein_iterable.index
+            else:
+                param_dict["categories"] = []
+                logger.warning(
+                    f"Warning: expected protein_iterable to be a DataFrame or Series, but got {type(protein_iterable)}. Proceeding with empty list."
                 )
 
         elif param_dict["fill"] == "enrichment_categories":
@@ -226,19 +265,48 @@ def change_field(request, run_name):
             # KeyError is expected here because named_output trigger change_field
             # twice to make sure that the categories are updated after the named_output has updated
             try:
-                protein_itr = run.history.output_of_named_step(
+                protein_iterable = run.history.output_of_named_step(
                     named_output, output_item
                 )
             except KeyError:
-                protein_itr = None
+                protein_iterable = None
 
             if (
-                not isinstance(protein_itr, pd.DataFrame)
-                or not "Gene_set" in protein_itr.columns
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "Gene_set" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
-                param_dict["categories"] = protein_itr["Gene_set"].unique().tolist()
+                param_dict["categories"] = (
+                    protein_iterable["Gene_set"].unique().tolist()
+                )
+        elif param_dict["fill"] == "gsea_enrichment_categories":
+            named_output = selected[0]
+            output_item = selected[1]
+
+            try:
+                protein_iterable = run.history.output_of_named_step(
+                    named_output, output_item
+                )
+            except KeyError:
+                protein_iterable = None
+
+            if (
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "NES" in protein_iterable.columns
+            ):
+                param_dict["categories"] = []
+            else:
+                # gene_set_libraries are all prefixes for Term column in gsea output
+                # if no prefix is found, a single gmt file was used
+                gene_set_libraries = set()
+                for term in protein_iterable["Term"].unique():
+                    if "__" in term:
+                        gene_set_lib = term.split("__")[0]
+                        gene_set_libraries.add(gene_set_lib)
+                    else:
+                        gene_set_libraries.add("all")
+                param_dict["categories"] = list(gene_set_libraries)
 
         fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
@@ -438,9 +506,18 @@ def tables(request, run_name, index, key=None):
 
     # use current output when applicable (not yet in history)
     if index < len(run.history.steps):
-        outputs = run.history.steps[index].outputs
+        history_step = run.history.steps[index]
+        outputs = history_step.outputs
+        section = history_step.section
+        step = history_step.step
+        method = history_step.method
+        name = run.history.step_names[index]
     else:
         outputs = run.current_out
+        section = run.section
+        step = run.step
+        method = run.method
+        name = None
 
     options = []
     for k, value in outputs.items():
@@ -462,6 +539,11 @@ def tables(request, run_name, index, key=None):
             # put key as first option to make selected
             options=[(opt, opt) for opt in [key] + options],
             key=key,
+            section=section,
+            step=step,
+            method=method,
+            name=name,
+            clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
     )
 
@@ -473,6 +555,64 @@ def tables_content(request, run_name, index, key):
     else:
         outputs = run.current_out[key]
     out = outputs.replace(np.nan, None)
+
+    if "clean-ids" in request.GET and "Protein ID" in out.columns:
+        out["Protein ID"] = out["Protein ID"].map(
+            lambda group: ";".join(
+                unique_justseen(map(clean_uniprot_id, group.split(";")))
+            )
+        )
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
+    )
+
+
+def protein_graph(request, run_name, index: int):
+    run = active_runs[run_name]
+
+    if index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs
+    else:
+        outputs = run.current_out
+
+    if "graph_path" not in outputs:
+        return HttpResponseBadRequest(
+            f"No Graph Path found in output of step with index {index}"
+        )
+
+    graph_path = outputs["graph_path"]
+    peptide_matches = outputs.get("peptide_matches", [])
+    peptide_mismatches = outputs.get("peptide_mismatches", [])
+    protein_id = outputs.get("protein_id", "")
+
+    if not Path(graph_path).exists():
+        return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
+
+    graph = nx.read_graphml(graph_path)
+
+    nodes = [
+        {
+            "data": {
+                "id": node,
+                "label": graph.nodes[node].get("aminoacid", "####### ERROR #######"),
+                "match": graph.nodes[node].get("match", "false"),
+                "peptides": graph.nodes[node].get("peptides", ""),
+            }
+        }
+        for node in graph.nodes()
+    ]
+    edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
+    elements = nodes + edges
+
+    return render(
+        request,
+        "runs/protein_graph.html",
+        context={
+            "elements": elements,
+            "peptide_matches": peptide_matches,
+            "peptide_mismatches": peptide_mismatches,
+            "protein_id": protein_id,
+            "run_name": run_name,
+            "used_memory": get_memory_usage(),
+        },
     )

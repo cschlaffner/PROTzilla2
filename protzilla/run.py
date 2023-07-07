@@ -203,6 +203,8 @@ class Run:
         )
 
     def create_step_plot(self, method_callable, parameters):
+        if "term_name" in parameters:
+            parameters["term_name"] = parameters["term_dict"][1]
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "proteins_of_interest_input" in call_parameters:
             del call_parameters["proteins_of_interest_input"]
@@ -290,6 +292,7 @@ class Run:
             self.df = self.result_df
             self.result_df = None
             self.calculated_method = None
+            self.current_out = {}
             self.current_parameters = {}
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None

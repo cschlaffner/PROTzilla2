@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import pandas
 from django.template.loader import render_to_string
@@ -32,6 +33,7 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     # all_parameters_dict refers to the dictionary that contains all parameters for
     # a method with its corresponding meta information
     if param_dict["type"] == "numeric":
+        param_dict["multiple"] = param_dict.get("multiple", False)
         template = "runs/field_number.html"
         if "step" not in param_dict:
             param_dict["step"] = "any"
@@ -148,11 +150,15 @@ def make_displayed_history(run):
             fields = [""]
         else:
             for key, param_dict in parameters.items():
-                if key.endswith("_wrapper"):
-                    key = key[:-8]
+                if "dynamic" in param_dict:
+                    continue
                 if key == "proteins_of_interest" and key not in history_step.parameters:
                     history_step.parameters[key] = ["", ""]
-                param_dict["default"] = history_step.parameters[key]
+                param_dict["default"] = (
+                    history_step.parameters[key]
+                    if key in history_step.parameters
+                    else None
+                )
                 if param_dict["type"] == "named_output":
                     param_dict["steps"] = [param_dict["default"][0]]
                     param_dict["outputs"] = [param_dict["default"][1]]
@@ -186,6 +192,13 @@ def make_displayed_history(run):
         )
         table_url = reverse("runs:tables_nokey", args=(run.run_name, i))
 
+        has_protein_graph = (
+            "graph_path" in history_step.outputs
+            and history_step.outputs["graph_path"] is not None
+            and Path(history_step.outputs["graph_path"]).exists()
+        )
+        protein_graph_url = reverse("runs:protein_graph", args=(run.run_name, i))
+
         displayed_history.append(
             dict(
                 display_name=name,
@@ -195,6 +208,7 @@ def make_displayed_history(run):
                 name=run.history.step_names[i],
                 index=i,
                 table_link=table_url if has_df else "",
+                protein_graph_link=protein_graph_url if has_protein_graph else "",
             )
         )
     return displayed_history

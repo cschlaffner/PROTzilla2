@@ -1,10 +1,14 @@
 from ..data_analysis import (
+    classification,
     clustering,
     differential_expression,
     dimension_reduction,
+    model_evaluation,
+    model_evaluation_plots,
     plots,
+    protein_graphs,
 )
-from ..data_integration import di_plots, enrichment_analysis
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -38,11 +42,6 @@ method_map = {
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "samples_missing_filter",
-    ): filter_proteins.by_samples_missing,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -155,6 +154,31 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
+        "clustering",
+        "hierarchical_agglomerative_clustering",
+    ): clustering.hierarchical_agglomerative_clustering,
+    (
+        "data_analysis",
+        "classification",
+        "random_forest",
+    ): classification.random_forest,
+    (
+        "data_analysis",
+        "classification",
+        "svm",
+    ): classification.svm,
+    (
+        "data_analysis",
+        "model_evaluation",
+        "evaluate_classification_model",
+    ): model_evaluation.evaluate_classification_model,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -163,6 +187,16 @@ method_map = {
         "dimension_reduction",
         "umap",
     ): dimension_reduction.umap,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "peptides_to_isoform",
+    ): protein_graphs.peptides_to_isoform,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "variation_graph",
+    ): protein_graphs.variation_graph,
     (
         "data_integration",
         "enrichment_analysis",
@@ -178,6 +212,21 @@ method_map = {
         "enrichment_analysis",
         "go_analysis_offline",
     ): enrichment_analysis.go_analysis_offline,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea",
+    ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
+    (
+        "data_integration",
+        "database_integration",
+        "uniprot",
+    ): database_integration.add_uniprot_data,
 }
 
 # reversed mapping of method callable and location
@@ -189,11 +238,6 @@ location. The location is determined by the section, step, and method keys
 found in the workflow_meta file that correspond to the method.
 """
 plot_map = {
-    (
-        "data_preprocessing",
-        "filter_proteins",
-        "samples_missing_filter",
-    ): filter_proteins.by_samples_missing_plot,
     (
         "data_preprocessing",
         "filter_proteins",
@@ -300,6 +344,16 @@ plot_map = {
         "clustergram",
     ): plots.clustergram_plot,
     (
+        "data_analysis",
+        "plot",
+        "precision_recall_curve",
+    ): model_evaluation_plots.precision_recall_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "roc_curve",
+    ): model_evaluation_plots.roc_curve_plot,
+    (
         "data_integration",
         "plot",
         "go_enrichment_bar_plot",
@@ -309,4 +363,14 @@ plot_map = {
         "plot",
         "go_enrichment_dot_plot",
     ): di_plots.go_enrichment_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_dot_plot",
+    ): di_plots.gsea_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_enrichment_plot",
+    ): di_plots.gsea_enrichment_plot,
 }

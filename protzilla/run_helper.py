@@ -1,9 +1,11 @@
 import copy
 
-import gseapy as gp
+import gseapy
 import matplotlib.colors as mcolors
 import restring
+from biomart import BiomartServer
 
+from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -18,6 +20,8 @@ def insert_special_params(param_dict, run):
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
         param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        if "sorted" in param_dict and param_dict["sorted"]:
+            param_dict["outputs"].sort()
 
     if "fill" in param_dict:
         if param_dict["fill"] == "metadata_columns":
@@ -31,15 +35,40 @@ def insert_special_params(param_dict, run):
         elif param_dict["fill"] == "dbs_restring":
             param_dict["categories"] = restring.settings.file_types
         elif param_dict["fill"] == "dbs_gseapy":
-            param_dict["categories"] = gp.get_library_name()
+            param_dict["categories"] = gseapy.get_library_name()
         elif param_dict["fill"] == "matplotlib_colors":
             param_dict["categories"] = mcolors.CSS4_COLORS
+        elif param_dict["fill"] == "uniprot_fields":
+            databases = uniprot_databases()
+            if databases:
+                # use the first database as a default, only used to initalize
+                param_dict["categories"] = uniprot_columns(databases[0]) + ["Links"]
+            else:
+                param_dict["categories"] = ["Links"]
+        elif param_dict["fill"] == "uniprot_databases":
+            databases = uniprot_databases()
+            param_dict["default"] = databases[0] if databases else ""
+            param_dict["categories"] = databases
+        elif param_dict["fill"] == "biomart_datasets":
+            # retrieve datasets from BioMart server
+            server = BiomartServer("http://www.ensembl.org/biomart")
+            database = server.databases["ENSEMBL_MART_ENSEMBL"]
+            param_dict["categories"] = database.datasets
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
 
     if param_dict.get("default_select_all", False):
         param_dict["default"] = list(param_dict.get("categories", []))
+
+    if (
+        param_dict["type"] == "numeric"
+        and ("multiple" in param_dict and param_dict["multiple"])
+        and isinstance(param_dict["default"], list)
+    ):
+        # The default value of a multiselect numeric input is saved as a list of
+        # numbers, but it needs to be shown in the frontend in the format "1|2|0.12"
+        param_dict["default"] = "|".join(str(num) for num in param_dict["default"])
 
 
 def get_parameters(run, section, step, method):
