@@ -1,5 +1,4 @@
 import pandas as pd
-from matplotlib import pyplot as plt
 from sklearn.model_selection import permutation_test_score
 
 from protzilla.data_analysis.classification_helper import (
@@ -7,10 +6,6 @@ from protzilla.data_analysis.classification_helper import (
     perform_cross_validation,
     evaluate_with_scoring,
 )
-from protzilla.constants.colors import (
-    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE as COLORS,
-)
-from protzilla.utilities import fig_to_base64
 
 
 def evaluate_classification_model(model, input_test_df, labels_test_df, scoring):
