@@ -8,6 +8,7 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+from protzilla.data_integration import database_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -15,7 +16,6 @@ from .enrichment_analysis_helper import (
     read_background_file,
     read_protein_or_gene_sets_file,
 )
-from protzilla.data_integration import database_query
 
 
 # call methods for precommit hook not to delete imports
@@ -54,7 +54,7 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
     """
     A method that merges the results for up- and down-regulated proteins for the restring
     enrichment results. If a category and Term combination is present in both dataframes,
-    the one with the lower p-value is kept. The unique proteins (inputGenes column) and the
+    the one with the higher p-value is kept. The unique proteins (inputGenes column) and the
     unique genes (preferredNames column) of the two input dataframes are merged and the
     number_of_genes column is updated accordingly.
 
@@ -73,7 +73,7 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
         if (gene_set, term) in enriched.index:
             if (
                 down_df.loc[(gene_set, term), "p_value"]
-                < enriched.loc[(gene_set, term), "p_value"]
+                > enriched.loc[(gene_set, term), "p_value"]
             ):
                 enriched.loc[(gene_set, term)] = down_df.loc[(gene_set, term)]
 
@@ -260,7 +260,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
     """
     A method that merges the results for up- and down-regulated proteins for the GSEApy
     enrichment results. If a Gene_set and Term combination is present in both dataframes,
-    the one with the lower adjusted p-value is kept. Genes are merged and the overlap column
+    the one with the higher adjusted p-value is kept. Genes are merged and the overlap column
     is updated according to the number of genes.
     If mapped is True, the proteins were mapped to uppercase gene symbols and the proteins
     need to be merged as well.
@@ -283,7 +283,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched, mapped=
         if (gene_set, term) in enriched.index:
             if (
                 down_enriched.loc[(gene_set, term), "Adjusted P-value"]
-                < enriched.loc[(gene_set, term), "Adjusted P-value"]
+                > enriched.loc[(gene_set, term), "Adjusted P-value"]
             ):
                 enriched.loc[(gene_set, term)] = down_enriched.loc[(gene_set, term)]
 
