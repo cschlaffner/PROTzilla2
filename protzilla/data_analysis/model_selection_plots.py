@@ -50,39 +50,51 @@ def learning_curve_plot(
     return [fig_to_base64(display.figure_), fig_to_base64(display_elbow.figure_)]
 
 
-def elbow_method_n_clusters(model_evaluation_df, estimator_str, find_elbow):
+def elbow_method_n_clusters(model_evaluation_dfs, estimator_str, find_elbow):
+    model_evaluation_dfs = (
+        model_evaluation_dfs
+        if isinstance(model_evaluation_dfs, list)
+        else [model_evaluation_dfs]
+    )
+    # get the key of the n_clusters parameter
     n_clusters_label = (
         "param_n_clusters"
-        if "param_n_clusters" in model_evaluation_df.columns
+        if "param_n_clusters" in model_evaluation_dfs[0].columns
         else "param_n_components"
     )
-    n_clusters = list(model_evaluation_df[n_clusters_label])
-    # create dataframe with only the score metrics
-    filtered_columns = model_evaluation_df.columns[
-        ~model_evaluation_df.columns.str.startswith("param_")
-    ]
-    scores_df = model_evaluation_df[filtered_columns]
-    plots = []
-    for score_name in scores_df.columns:
-        score_values = list(scores_df[score_name])
 
+    # get column name of scoring metrics
+    score_names = model_evaluation_dfs[0].columns[
+        ~model_evaluation_dfs[0].columns.str.startswith("param_")
+    ]
+
+    plots = []
+    for score_name in score_names:
         score_name_plt = remove_underscore_and_capitalize(score_name)
-        plt.plot(n_clusters, score_values, marker="o")
+        plt.figure()
+        for model_evaluation_df in model_evaluation_dfs:
+            n_clusters = list(model_evaluation_df[n_clusters_label])
+            score_values = list(model_evaluation_df[score_name])
+            plt.plot(n_clusters, score_values, marker="o")
+            if find_elbow == "yes":
+                kn = KneeLocator(
+                    n_clusters,
+                    score_values,
+                    curve="convex",
+                    direction="decreasing",
+                )
+                elbow_point = kn.knee
+                plt.axvline(
+                    x=elbow_point, color="r", linestyle="--", label="Elbow Point"
+                )
+                plt.legend()
+
         plt.xlabel("Number of Clusters")
         plt.ylabel(score_name_plt)
         plt.title(
-            f"Evaluation of Optimal Number of Clusters with {score_name_plt} for {estimator_str}"
+            f"{estimator_str}:Evaluation of Optimal Number of Clusters with {score_name_plt}"
         )
-        if find_elbow is "yes":
-            kn = KneeLocator(
-                n_clusters,
-                score_values,
-                curve="convex",
-                direction="decreasing",
-            )
-            elbow_point = kn.knee
-            plt.axvline(x=elbow_point, color="r", linestyle="--", label="Elbow Point")
-            plt.legend()
         plots.append(fig_to_base64(plt.gcf()))
-        plt.show()
+        plt.clf()
+
     return plots

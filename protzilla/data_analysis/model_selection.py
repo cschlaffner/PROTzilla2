@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 from kneed import KneeLocator
@@ -12,6 +14,8 @@ from protzilla.data_analysis.classification_helper import (
     encode_labels,
     perform_nested_cross_validation,
 )
+from protzilla.data_analysis.model_selection_plots import elbow_method_n_clusters
+from protzilla.utilities import replace_spaces_with_underscores_and_lowercase
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 from django.contrib import messages
 
@@ -123,6 +127,7 @@ def generate_stratified_subsets(input_df, labels_df, train_sizes, random_state):
     return X_subsets, y_subsets
 
 
+# adapt for samples without labels
 def random_sampling(input_df, metadata_df, labels_column, n_samples, random_state=6):
     # prepare X and y dataframes for classification
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
@@ -150,3 +155,53 @@ def random_sampling(input_df, metadata_df, labels_column, n_samples, random_stat
         stratify=labels_df,
     )
     return dict(input_df=input_df_n_samples, labels_df=labels_df_n_samples)
+
+
+def v(
+    input_df,
+    clustering_method,
+    sample_sizes: list[int],
+    n_clusters,
+    scoring,
+    model_selection_scoring,
+    random_state,
+):
+    from protzilla.constants.location_mapping import method_map
+
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    clustering_method_key = replace_spaces_with_underscores_and_lowercase(
+        clustering_method
+    )
+    X_subsets = []
+    model_evaluation_dict = defaultdict(list)
+    for size in sample_sizes:
+        X, X_remaining = train_test_split(
+            input_df_wide,
+            train_size=size,
+            random_state=random_state,
+        )
+        X_subsets.append(X)
+        clustering_method_key_callable = method_map[
+            ("data_analysis", "clustering", clustering_method_key)
+        ]
+        results = clustering_method_key_callable(
+            input_df=X,
+            n_clusters=n_clusters,
+            n_components=n_clusters,
+            scoring=scoring,
+            model_selection_scoring=model_selection_scoring,
+            random_state=random_state,
+        )
+        model_evaluation_dict[f"sample_size_{size}"] = results["model_evaluation_df"]
+    return {**model_evaluation_dict, "clustering_method": clustering_method}
+
+
+def elbow_plot_multiple_sample_sizes(df, result_df, current_out):
+    estimator_str = current_out["clustering_method"]
+    del current_out["clustering_method"]
+    plots = elbow_method_n_clusters(
+        model_evaluation_dfs=list(current_out.values()),
+        estimator_str=estimator_str,
+        find_elbow="no",
+    )
+    return plots
