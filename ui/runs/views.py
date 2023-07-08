@@ -2,6 +2,7 @@ import sys
 import tempfile
 import traceback
 import zipfile
+import base64
 from pathlib import Path
 
 import networkx as nx
@@ -485,15 +486,16 @@ def download_plots(request, run_name):
         filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
 
-    f = tempfile.NamedTemporaryFile()
-    with zipfile.ZipFile(f, "w") as zf:
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        temp_filename = f.name
+    with zipfile.ZipFile(temp_filename, "w") as zf:
         for i, plot in enumerate(exported):
             filename = (
                 f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
             )
             zf.writestr(filename, plot.getvalue())
     return FileResponse(
-        open(f.name, "rb"),
+        open(temp_filename, "rb"),
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
     )
