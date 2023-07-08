@@ -201,6 +201,11 @@ method_map = {
     ): model_selection.random_sampling,
     (
         "data_analysis",
+        "model_selection",
+        "cluster_multiple_sample_sizes_and_k",
+    ): model_selection.cluster_multiple_sample_sizes_and_k,
+    (
+        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -375,6 +380,11 @@ plot_map = {
         "plot",
         "roc_curve_plot",
     ): model_evaluation_plots.roc_curve_plot,
+    (
+        "data_analysis",
+        "model_selection",
+        "cluster_multiple_sample_sizes_and_k",
+    ): model_selection.elbow_plot_multiple_sample_sizes,
     (
         "data_analysis",
         "plot",

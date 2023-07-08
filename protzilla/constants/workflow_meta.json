@@ -1162,7 +1162,7 @@
         "name": "Elbow method",
         "description": "a description",
         "parameters": {
-          "model_evaluation_df": {
+          "model_evaluation_dfs": {
             "name": "Model Evaluation dataframe from clustering method",
             "type": "named_output",
             "default": [
@@ -2412,6 +2412,90 @@
             "default": null
           }
         }
+      },
+      "cluster_multiple_sample_sizes_and_k": {
+        "name": "Cluster Analysis Varying Sample Sizes and Cluster",
+        "description": "Perform a cluster algorithm for multiple sample sizes and number of clusters",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "clustering_method": {
+            "name": "Select a clustering method",
+            "type": "categorical",
+            "categories": ["K Means", "Hierarchical Agglomerative Clustering", "Expectation Maximisation"],
+            "default": "K Means"
+          },
+          "sample_sizes": {
+            "name": "Sample sizes to analyse",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 8,
+            "multiple": true
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
+            ],
+            "default": "adjusted_rand_score"
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score",
+              "davies_bouldin_score",
+              "dunn_score",
+              "silhouette_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
+          "n_clusters": {
+            "name": "Number of clusters to find",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 8,
+            "multiple": true
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          }
+        },
+        "graphs": [
+          {}
+        ]
       }
     },
     "model_evaluation": {
