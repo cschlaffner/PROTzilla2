@@ -19,8 +19,8 @@ from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
 def k_means(
     input_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
-    labels_column: str,
+    metadata_df: pd.DataFrame = None,
+    labels_column: str = None,
     positive_label: str = None,
     model_selection: str = "Grid search",
     scoring: list[str] = ["completeness_score"],
@@ -80,14 +80,18 @@ def k_means(
         # prepare input_df and labels_df dataframes for clustering
         input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
         input_df_wide.sort_values(by="Sample", inplace=True)
-        labels_df = (
-            metadata_df[["Sample", labels_column]]
-            .set_index("Sample")
-            .sort_values(by="Sample")
-        )
-        encoding_mapping, labels_df = encode_labels(
-            labels_df, labels_column, positive_label
-        )
+        if metadata_df:
+            labels_df = (
+                metadata_df[["Sample", labels_column]]
+                .set_index("Sample")
+                .sort_values(by="Sample")
+            )
+            encoding_mapping, labels_df = encode_labels(
+                labels_df, labels_column, positive_label
+            )
+            labels_df_encoded = labels_df["Encoded Label"]
+        else:
+            labels_df_encoded = None
 
         clf = KMeans()
 
@@ -108,7 +112,7 @@ def k_means(
             clf,
             clf_parameters,
             scoring,
-            labels_df=labels_df["Encoded Label"],
+            labels_df=labels_df_encoded,
             **kwargs,
         )
 
@@ -150,8 +154,8 @@ def k_means(
 
 def expectation_maximisation(
     input_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
-    labels_column: str,
+    metadata_df: pd.DataFrame = None,
+    labels_column: str = None,
     positive_label: str = None,
     model_selection: str = "Grid search",
     scoring: list[str] = ["completeness_score"],
@@ -209,15 +213,18 @@ def expectation_maximisation(
     # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
-    labels_df = (
-        metadata_df[["Sample", labels_column]]
-        .set_index("Sample")
-        .sort_values(by="Sample")
-    )
-    encoding_mapping, labels_df = encode_labels(
-        labels_df, labels_column, positive_label
-    )
-
+    if metadata_df:
+        labels_df = (
+            metadata_df[["Sample", labels_column]]
+            .set_index("Sample")
+            .sort_values(by="Sample")
+        )
+        encoding_mapping, labels_df = encode_labels(
+            labels_df, labels_column, positive_label
+        )
+        labels_df_encoded = labels_df["Encoded Label"]
+    else:
+        labels_df_encoded = None
     clf = GaussianMixture()
 
     clf_parameters = dict(
@@ -236,7 +243,7 @@ def expectation_maximisation(
         clf,
         clf_parameters,
         scoring,
-        labels_df=labels_df["Encoded Label"],
+        labels_df=labels_df_encoded,
         **kwargs,
     )
 
@@ -257,8 +264,8 @@ def expectation_maximisation(
 
 def hierarchical_agglomerative_clustering(
     input_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
-    labels_column: str,
+    metadata_df: pd.DataFrame = None,
+    labels_column: str = None,
     positive_label: str = None,
     model_selection: str = "Grid search",
     scoring: list[str] = ["completeness_score"],
@@ -302,14 +309,18 @@ def hierarchical_agglomerative_clustering(
     # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
-    labels_df = (
-        metadata_df[["Sample", labels_column]]
-        .set_index("Sample")
-        .sort_values(by="Sample")
-    )
-    encoding_mapping, labels_df = encode_labels(
-        labels_df, labels_column, positive_label
-    )
+    if metadata_df:
+        labels_df = (
+            metadata_df[["Sample", labels_column]]
+            .set_index("Sample")
+            .sort_values(by="Sample")
+        )
+        encoding_mapping, labels_df = encode_labels(
+            labels_df, labels_column, positive_label
+        )
+        labels_df_encoded = labels_df["Encoded Label"]
+    else:
+        labels_df_encoded = None
 
     clf = AgglomerativeClustering()
 
@@ -326,7 +337,7 @@ def hierarchical_agglomerative_clustering(
         clf,
         clf_parameters,
         scoring,
-        labels_df=labels_df["Encoded Label"],
+        labels_df=labels_df_encoded,
         **kwargs,
     )
 
@@ -384,9 +395,9 @@ def perform_clustering(
         for params in ParameterGrid(clf_parameters):
             model = clone(clf)
             model = model.set_params(**params)
-            model.fit(input_df)
+            labels_pred = model.fit_predict(input_df)
             scores = evaluate_clustering_with_scoring(
-                scoring, input_df, model.labels_, labels_df
+                scoring, input_df, labels_pred, labels_df
             )
             if scores[model_selection_scoring] > best_score:
                 best_params = params
