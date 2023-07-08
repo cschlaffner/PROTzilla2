@@ -2491,6 +2491,13 @@
             "max": 4294967295,
             "step": 1,
             "default": 6
+          },
+          "n_jobs": {
+            "name": "Number of parallel jobs to run",
+            "type": "numeric",
+            "min": -1,
+            "step": 1,
+            "default": 1
           }
         },
         "graphs": [

@@ -8,6 +8,7 @@ from sklearn.model_selection import learning_curve, train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from joblib import Parallel, delayed
+from multiprocessing import Manager
 
 from protzilla.data_analysis.classification_helper import (
     perform_cross_validation,
@@ -157,7 +158,7 @@ def random_sampling(input_df, metadata_df, labels_column, n_samples, random_stat
     return dict(input_df=input_df_n_samples, labels_df=labels_df_n_samples)
 
 
-def v(
+def cluster_multiple_sample_sizes_and_k(
     input_df,
     clustering_method,
     sample_sizes: list[int],
@@ -165,6 +166,7 @@ def v(
     scoring,
     model_selection_scoring,
     random_state,
+    n_jobs,
 ):
     from protzilla.constants.location_mapping import method_map
 
@@ -173,8 +175,11 @@ def v(
         clustering_method
     )
     X_subsets = []
-    model_evaluation_dict = defaultdict(list)
-    for size in sample_sizes:
+    # model_evaluation_dict = defaultdict(list)
+    manager = Manager()
+    model_evaluation_dict = manager.dict()
+
+    def compute_clustering_for_sample_size(size):
         X, X_remaining = train_test_split(
             input_df_wide,
             train_size=size,
@@ -193,6 +198,11 @@ def v(
             random_state=random_state,
         )
         model_evaluation_dict[f"sample_size_{size}"] = results["model_evaluation_df"]
+
+    Parallel(n_jobs=n_jobs, verbose=1)(
+        delayed(compute_clustering_for_sample_size)(size) for size in sample_sizes
+    )
+
     return {**model_evaluation_dict, "clustering_method": clustering_method}
 
 
