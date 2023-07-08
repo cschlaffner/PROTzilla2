@@ -50,7 +50,9 @@ def learning_curve_plot(
     return [fig_to_base64(display.figure_), fig_to_base64(display_elbow.figure_)]
 
 
-def elbow_method_n_clusters(model_evaluation_dfs, estimator_str, find_elbow):
+def elbow_method_n_clusters(
+    model_evaluation_dfs, estimator_str, find_elbow, sample_sizes=None
+):
     model_evaluation_dfs = (
         model_evaluation_dfs
         if isinstance(model_evaluation_dfs, list)
@@ -72,10 +74,14 @@ def elbow_method_n_clusters(model_evaluation_dfs, estimator_str, find_elbow):
     for score_name in score_names:
         score_name_plt = remove_underscore_and_capitalize(score_name)
         plt.figure()
-        for model_evaluation_df in model_evaluation_dfs:
+        for sample_size, model_evaluation_df in zip(sample_sizes, model_evaluation_dfs):
             n_clusters = list(model_evaluation_df[n_clusters_label])
             score_values = list(model_evaluation_df[score_name])
-            plt.plot(n_clusters, score_values, marker="o")
+            sample_size = (
+                remove_underscore_and_capitalize(sample_size) if sample_size else None
+            )
+            plt.plot(n_clusters, score_values, marker="o", label=sample_size)
+            plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             if find_elbow == "yes":
                 kn = KneeLocator(
                     n_clusters,

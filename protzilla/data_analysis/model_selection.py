@@ -183,6 +183,7 @@ def cluster_multiple_sample_sizes_and_k(
         X, X_remaining = train_test_split(
             input_df_wide,
             train_size=size,
+            shuffle=True,
             random_state=random_state,
         )
         X_subsets.append(X)
@@ -211,6 +212,7 @@ def elbow_plot_multiple_sample_sizes(df, result_df, current_out):
     del current_out["clustering_method"]
     plots = elbow_method_n_clusters(
         model_evaluation_dfs=list(current_out.values()),
+        sample_sizes=list(current_out.keys()),
         estimator_str=estimator_str,
         find_elbow="no",
     )
