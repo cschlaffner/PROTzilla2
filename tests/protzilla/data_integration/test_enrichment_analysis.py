@@ -130,8 +130,8 @@ def test_merge_up_down_regulated_dfs_restring():
         {
             "category": ["cat1", "cat2", "cat3"],
             "term": ["term1", "term2", "term3"],
-            "p_value": [0.05, 0.2, 0.3],
-            "fdr": [0.4, 0.6, 0.7],
+            "p_value": [0.1, 0.2, 0.3],
+            "fdr": [0.5, 0.6, 0.7],
             "inputGenes": ["protein2,protein4,protein1", "protein3", "protein5"],
             "preferredNames": ["gene2,gene4,gene1", "gene3", "gene5"],
             "number_of_genes": [3, 1, 1],
@@ -392,7 +392,6 @@ def test_go_analysis_with_no_gene_sets_input():
     assert "No gene sets provided" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.internet()
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     # Check if enrichr API is available
@@ -757,7 +756,7 @@ def test_merge_up_down_regulated_proteins_results():
         {
             "Gene_set": ["Set1", "Set2", "Set3", "Set4"],
             "Term": ["Term1", "Term2", "Term3", "Term4"],
-            "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
+            "Adjusted P-value": [0.01, 0.05, 0.03, 0.001],
             "Proteins": [
                 "Protein1",
                 "Protein2;Protein3",
@@ -952,7 +951,6 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
     assert "use a different ranking method" in current_out["messages"][0]["msg"]
 
 
-@pytest.mark.internet
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea(mock_mapping, data_folder_tests):
     proteins = pd.read_csv(
@@ -1252,7 +1250,6 @@ def test_create_ranked_df_descending():
     assert ranked_df.equals(expected_df)
 
 
-@pytest.mark.internet
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 def test_gsea_preranked(mock_mapping, data_folder_tests):
     proteins_significant = pd.read_csv(

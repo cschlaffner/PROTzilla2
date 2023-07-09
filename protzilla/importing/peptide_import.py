@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas as pd
 from django.contrib import messages
 
+from .ms_data_import import handle_protein_ids
+
 
 def peptide_import(ms_df, file_path, intensity_name):
     try:
@@ -32,6 +34,9 @@ def peptide_import(ms_df, file_path, intensity_name):
     )
 
     df = read.drop(columns=["Intensity"])
+    df["Proteins"] = df["Proteins"].map(handle_protein_ids)
+    df = df[df["Proteins"].map(bool)]  # remove rows without valid protein id
+
     id_df = df[id_columns]
     intensity_df = df.filter(regex=f"^{peptide_intensity_name} ", axis=1)
     intensity_df.columns = [

@@ -143,9 +143,9 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
 
 
 @pytest.mark.parametrize("x_axis_type", ["Gene Sets", "Combined Score"])
-def test_enrichment_dot_plot(helpers, show_figures, x_axis_type, data_folder_tests):
+def test_go_enrichment_dot_plot(helpers, show_figures, x_axis_type, data_folder_tests):
     enrichment_df = pd.read_csv(
-        data_folder_tests / "Reactome_enrichment_enrichr.csv", header=0
+        data_folder_tests / "Reactome_enrichment_enrichr.csv", header=0, sep="\t"
     )
     dot_base64 = go_enrichment_dot_plot(
         input_df=enrichment_df,
@@ -157,9 +157,9 @@ def test_enrichment_dot_plot(helpers, show_figures, x_axis_type, data_folder_tes
         title="Reactome Enrichment Test",
         rotate_x_labels=False,
         show_ring=False,
-    )
+    )[0]
     if show_figures:
-        helpers.open_graph_from_base64(dot_base64[0])
+        helpers.open_graph_from_base64(dot_base64["plot_base64"])
 
 
 def test_enrichment_dot_plot_wrong_df(data_folder_tests):
@@ -197,8 +197,8 @@ def test_gsea_dot_plot_remove_names(show_figures, data_folder_tests, helpers):
     )
     dot_base64 = gsea_dot_plot(
         input_df=enrichment_df,
-        gene_sets=["KEGG_2016"],
-        cutoff=0.25,
+        gene_sets=["KEGG_2019"],
+        cutoff=1,
         dot_size=3,
         title="KEGG GSEA dotplot test",
         show_ring=False,

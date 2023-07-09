@@ -154,6 +154,16 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
+        "clustering",
+        "hierarchical_agglomerative_clustering",
+    ): clustering.hierarchical_agglomerative_clustering,
+    (
+        "data_analysis",
         "classification",
         "random_forest",
     ): classification.random_forest,
