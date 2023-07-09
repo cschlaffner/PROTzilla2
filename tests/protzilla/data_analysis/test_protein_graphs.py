@@ -297,6 +297,7 @@ def integration_test_peptides() -> pd.DataFrame:
         ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
         ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
         ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
+        ["Sample01", "test_protein_variation", "ABCVEG", 9845, 0.98734],
         ["Sample01", "test_protein_variation_shortcut", "ABCEGA", 93478.0, 0.98734],
     )
 
@@ -1264,20 +1265,21 @@ def test_peptides_to_isoform_integration_test(
         peptide_df=integration_test_peptides,
         protein_id=protein_id,
         run_name=run_name,
-        k=3,  # k = 3 for easier test data creation
+        k=3,  # for easier test data creation
+        allowed_mismatches=1,
     )
 
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
-    assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
+    assert list(out_dict["peptide_matches"]) == ["ABC", "ABCVEG", "DET"]
     assert out_dict["peptide_mismatches"] == ["ABCEGA", "DETYYY"]
     assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EG", match="false")
+    planned_graph.add_node("n6", aminoacid="EG", match="true", peptides="ABCVEG")
     planned_graph.add_node("n7", aminoacid="ABC", match="true", peptides="ABC")
 
     planned_graph.add_edge("n1", "n6")
@@ -1290,9 +1292,9 @@ def test_peptides_to_isoform_integration_test(
     nx.set_node_attributes(
         planned_graph,
         {
+            "n3": {"aminoacid": "V", "match": "true", "peptides": "ABCVEG"},
             "n4": {"aminoacid": "DET", "match": "true", "peptides": "DET"},
-            "n5": {"match": "true", "peptides": "ABC"},
-            "n7": {"match": "true"},
+            "n5": {"match": "true", "peptides": "ABC;ABCVEG"},
         },
     )
 
@@ -1411,7 +1413,11 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     tests_folder_name,
 ):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_longer_variations"
-    run_path = RUNS_PATH / run_name
+    run_path = (
+        RUNS_PATH
+        / tests_folder_name
+        / "test_peptides_to_isoform_integration_test_longer_variations"
+    )
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
     protein_id = "test_protein_variation_long"
