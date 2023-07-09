@@ -27,7 +27,6 @@
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cytoscape-3.24.0.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/klay.0.4.1.js' %}"></script>
@@ -61,10 +60,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            {#$('.collapsible-trigger').click(function () {#}
-            {#    $(this).toggleClass('active');#}
-            {#    $(this).next('.collapsible-content').slideToggle('fast');#}
-            {# });#}
 
             var cy = window.cy = cytoscape({
                 container: document.getElementById('cy'),
@@ -117,7 +112,9 @@
                             document.body.appendChild(div);
                             return div;
                         },
-                        placement: 'bottom', // this doesn't work :(
+                        // changing the placement from top to bottom does not change the positioning but wrecks the
+                        // ability to move nodes in a reasonable way
+                        placement: 'top',
                         removeOnDestroy: true,
                     });
                 });
