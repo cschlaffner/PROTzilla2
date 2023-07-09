@@ -2244,7 +2244,7 @@
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
-              "Upload a file": [
+              "Upload a file (recommended)": [
                 "background_path"
               ],
               "Specify number of expressed genes (not recommended)": [
@@ -2299,8 +2299,8 @@
             "fill": "protein_df_columns",
             "default": null
           },
-          "protein_sets_path": {
-            "name": "Upload Protein Sets with UniProt IDs (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Protein1, Protein2, ... | .json: {SetName: [Protein1, Protein2, ...], SetName2: [Protein2, Protein3, ...]})",
+          "gene_sets_path": {
+            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null
           },
@@ -2324,7 +2324,7 @@
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
-              "Upload a file": [
+              "Upload a file (recommended)": [
                 "background_path"
               ],
               "Specify number of expressed genes (not recommended)": [
@@ -2333,7 +2333,7 @@
             }
           },
           "background_path": {
-            "name": "Background set with UniProt IDs (one protein per line, csv or txt)",
+            "name": "Background set with uppercase gene symbols (one protein per line, csv or txt)",
             "type": "file",
             "default": null,
             "dynamic": true
