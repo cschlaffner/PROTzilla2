@@ -299,6 +299,7 @@ def integration_test_peptides() -> pd.DataFrame:
         ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
         ["Sample01", "test_protein_variation", "ABCVEG", 9845, 0.98734],
         ["Sample01", "test_protein_variation_shortcut", "ABCEGA", 93478.0, 0.98734],
+        ["Sample01", "test_protein_variation_shortcut", "ABCDEGA", 93478.0, 0.98734],
     )
 
     peptide_df = pd.DataFrame(
@@ -1322,19 +1323,22 @@ def test_peptides_to_isoform_integration_test_shortcut(
         protein_id=protein_id,
         run_name=run_name,
         k=3,  # k = 3 for easier test data creation
+        allowed_mismatches=0,
     )
 
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
-    assert list(out_dict["peptide_matches"]) == ["ABCEGA"]
+    assert list(out_dict["peptide_matches"]) == ["ABCDEGA", "ABCEGA"]
     assert out_dict["peptide_mismatches"] == []
     assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EGA", match="true")
+    planned_graph.add_node(
+        "n6", aminoacid="EGA", match="true", peptides="ABCDEGA;ABCEGA"
+    )
 
     planned_graph.add_edge("n1", "n6")
     planned_graph.add_edge("n3", "n6")
@@ -1347,7 +1351,11 @@ def test_peptides_to_isoform_integration_test_shortcut(
         planned_graph,
         {
             "n0": {"accession": "test_protein_variation_shortcut"},
-            "n1": {"accession": "test_protein_variation_shortcut"},
+            "n1": {
+                "accession": "test_protein_variation_shortcut",
+                "match": "true",
+                "peptides": "ABCDEGA",
+            },
             "n2": {"accession": "test_protein_variation_shortcut"},
             "n3": {"accession": "test_protein_variation_shortcut"},
             "n4": {
@@ -1358,9 +1366,8 @@ def test_peptides_to_isoform_integration_test_shortcut(
             "n5": {
                 "match": "true",
                 "accession": "test_protein_variation_shortcut",
-                "peptides": "ABCEGA",
+                "peptides": "ABCDEGA;ABCEGA",
             },
-            "n6": {"match": "true", "peptides": "ABCEGA"},
         },
     )
 
