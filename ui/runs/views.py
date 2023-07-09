@@ -1,8 +1,8 @@
+import base64
 import sys
 import tempfile
 import traceback
 import zipfile
-import base64
 from pathlib import Path
 
 import networkx as nx

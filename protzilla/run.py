@@ -1,6 +1,6 @@
+import base64
 import json
 import shutil
-import base64
 import traceback
 from io import BytesIO
 from pathlib import Path
@@ -386,10 +386,10 @@ class Run:
                 else:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
-            elif isinstance(plot, dict) and "plot_base64" in plot: # catch dicts
+            elif isinstance(plot, dict) and "plot_base64" in plot:
                 plot = plot["plot_base64"]
 
-            if isinstance(plot, bytes): # bytes are base64 encoded
+            if isinstance(plot, bytes):  # base64 encoded plots
                 if format_ in ["eps", "tiff"]:
                     img = Image.open(BytesIO(base64.b64decode(plot))).convert("RGB")
                     binary = BytesIO()
