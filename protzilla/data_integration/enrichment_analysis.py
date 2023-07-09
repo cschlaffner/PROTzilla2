@@ -302,7 +302,7 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
     return enriched.reset_index()
 
 
-def gseapy_helper(
+def gseapy_enrichment(
     protein_list, protein_sets, direction, organism=None, background=None, offline=False
 ):
     """
@@ -323,8 +323,8 @@ def gseapy_helper(
     :type background: list or None
     :param offline: whether to run the enrichment offline
     :type offline: bool
-    :return: enrichment results and filtered groups
-    :rtype: tuple
+    :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
+    :rtype: tuple[pandas.DataFrame, list, list]
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
     gene_to_groups, _, filtered_groups = database_query.uniprot_groups_to_genes(
@@ -335,11 +335,11 @@ def gseapy_helper(
         msg = (
             "No gene symbols could be found for the proteins. Please check your input."
         )
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)]), None
+        return None, None, [dict(level=messages.ERROR, msg=msg)]
 
     logger.info(f"Starting analysis for {direction}-regulated proteins")
 
-    msg = "Something went wrong with the analysis. Please check your inputs."
+    error_msg = "Something went wrong with the analysis. Please check your inputs."
     if offline:
         try:
             enriched = gseapy.enrich(
@@ -351,8 +351,9 @@ def gseapy_helper(
             ).results
         except ValueError as e:
             return (
-                dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]),
                 None,
+                None,
+                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
             )
     else:
         try:
@@ -366,15 +367,16 @@ def gseapy_helper(
             ).results
         except ValueError as e:
             return (
-                dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))]),
                 None,
+                None,
+                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
-        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
+        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
     logger.info(f"Finished analysis for {direction}-regulated proteins")
-    return enriched, filtered_groups
+    return enriched, filtered_groups, None
 
 
 def go_analysis_with_enrichr(
@@ -518,26 +520,28 @@ def go_analysis_with_enrichr(
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = gseapy_helper(
+        up_enriched, up_filtered_groups, error_msg = gseapy_enrichment(
             up_protein_list,
             gene_sets,
             direction="up",
             organism=organism,
             background=background,
         )
-        if isinstance(up_enriched, dict):  # error occurred
-            return up_enriched
+        if error_msg:
+            out_messages.append(error_msg)
+            return dict(messages=out_messages)
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = gseapy_helper(
+        down_enriched, down_filtered_groups, error_msg = gseapy_enrichment(
             down_protein_list,
             gene_sets,
             direction="down",
             organism=organism,
             background=background,
         )
-        if isinstance(down_enriched, dict):  # error occurred
-            return down_enriched
+        if error_msg:
+            out_messages.append(error_msg)
+            return dict(messages=out_messages)
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
@@ -678,26 +682,28 @@ def go_analysis_offline(
         out_messages.append(dict(level=messages.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
-        up_enriched, up_filtered_groups = gseapy_helper(
+        up_enriched, up_filtered_groups, error_msg = gseapy_enrichment(
             up_protein_list,
             gene_sets,
             direction="up",
             background=background,
             offline=True,
         )
-        if isinstance(up_enriched, dict):  # error occurred
-            return up_enriched
+        if error_msg:
+            out_messages.append(error_msg)
+            return dict(messages=out_messages)
 
     if direction == "down" or direction == "both":
-        down_enriched, down_filtered_groups = gseapy_helper(
+        down_enriched, down_filtered_groups, error_msg = gseapy_enrichment(
             down_protein_list,
             gene_sets,
             direction="down",
             background=background,
             offline=True,
         )
-        if isinstance(down_enriched, dict):  # error occurred
-            return down_enriched
+        if error_msg:
+            out_messages.append(error_msg)
+            return dict(messages=out_messages)
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups

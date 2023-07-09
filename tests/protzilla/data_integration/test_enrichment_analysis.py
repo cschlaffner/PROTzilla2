@@ -475,16 +475,17 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
 
 
-def test_go_analysis_enrichr_wrong_background_file():
+def test_go_analysis_enrichr_wrong_background_file(data_folder_tests):
     current_out = go_analysis_with_enrichr(
         proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
         differential_expression_col="log2_fold_change",
-        gene_sets_enrichr=["Reactome_2013"],
+        gene_sets_path=data_folder_tests / "Reactome_2022.txt",
         organism="human",
         direction="both",
         background_path="aMadeUpInputFormat.abc",
     )
     assert "messages" in current_out
+    assert "Invalid file type for background" in current_out["messages"][0]["msg"]
 
 
 @pytest.fixture
@@ -578,8 +579,12 @@ def test_go_analysis_offline_protein_sets(
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
     mock_gene_mapping.return_value = offline_mock_mapping
 
-    current_out = go_analysis_offline(proteins=proteins_df, gene_sets_path=protein_sets_path,
-                                      differential_expression_col="fold_change", direction="up")
+    current_out = go_analysis_offline(
+        proteins=proteins_df,
+        gene_sets_path=protein_sets_path,
+        differential_expression_col="fold_change",
+        direction="up",
+    )
     df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
@@ -635,9 +640,13 @@ def test_go_analysis_offline_background(
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [-1.0] * 6})
     mock_gene_mapping.return_value = offline_mock_mapping
 
-    current_out = go_analysis_offline(proteins=proteins_df, gene_sets_path=data_folder_tests / "gene_sets.txt",
-                                      differential_expression_col="fold_change", direction="down",
-                                      background_path=background_path)
+    current_out = go_analysis_offline(
+        proteins=proteins_df,
+        gene_sets_path=data_folder_tests / "gene_sets.txt",
+        differential_expression_col="fold_change",
+        direction="down",
+        background_path=background_path,
+    )
     df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
@@ -669,8 +678,13 @@ def test_go_analysis_offline_no_protein_sets():
         "Protein3",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
-    current_out = go_analysis_offline(proteins=proteins_df, gene_sets_path="",
-                                      differential_expression_col="fold_change", direction="up", background=None)
+    current_out = go_analysis_offline(
+        proteins=proteins_df,
+        gene_sets_path="",
+        differential_expression_col="fold_change",
+        direction="up",
+        background=None,
+    )
 
     assert "messages" in current_out
     assert "No file uploaded for protein sets" in current_out["messages"][0]["msg"]
@@ -683,8 +697,13 @@ def test_go_analysis_offline_invalid_protein_set_file():
         "Protein3",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
-    current_out = go_analysis_offline(proteins=proteins_df, gene_sets_path="an_invalid_filetype.png",
-                                      differential_expression_col="fold_change", direction="up", background="")
+    current_out = go_analysis_offline(
+        proteins=proteins_df,
+        gene_sets_path="an_invalid_filetype.png",
+        differential_expression_col="fold_change",
+        direction="up",
+        background="",
+    )
 
     assert "messages" in current_out
     assert "Invalid file type" in current_out["messages"][0]["msg"]
@@ -698,9 +717,13 @@ def test_go_analysis_offline_invalid_background_set_file():
         "Protein3",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
-    current_out = go_analysis_offline(proteins=proteins_df, gene_sets_path="a_valid_filetype.gmt",
-                                      differential_expression_col="fold_change", direction="up",
-                                      background_path="an_invalid_filetype.png")
+    current_out = go_analysis_offline(
+        proteins=proteins_df,
+        gene_sets_path="a_valid_filetype.gmt",
+        differential_expression_col="fold_change",
+        direction="up",
+        background_path="an_invalid_filetype.png",
+    )
 
     assert "messages" in current_out
     assert "Invalid file type" in current_out["messages"][0]["msg"]
