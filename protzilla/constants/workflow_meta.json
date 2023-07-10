@@ -1817,6 +1817,12 @@
             "default": 1,
             "multiple": true
           },
+          "max_features": {
+            "name": "The number of features to consider when looking for the best split",
+            "type": "numeric",
+            "default": 1,
+            "multiple": true
+          },
           "random_state": {
             "name": "Seed for random number generation",
             "type": "numeric",
