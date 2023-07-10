@@ -56,11 +56,9 @@ def get_parameter_type(workflow_meta, section, step, method, param):
 
 
 def get_workflow_default_param_value(
-    workflow_config, section, step, method, step_index_in_current_section, param
+    workflow_config, section, step, method, step_index_in_section, param
 ):
-    step_dict = workflow_config["sections"][section]["steps"][
-        step_index_in_current_section
-    ]
+    step_dict = workflow_config["sections"][section]["steps"][step_index_in_section]
     if step_dict["name"] == step and step_dict["method"] == method:
         if param in step_dict["parameters"]:
             return step_dict["parameters"][param]
