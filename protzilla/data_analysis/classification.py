@@ -102,7 +102,9 @@ def perform_classification(
         model_evaluation_df = create_model_evaluation_df_grid_search(
             pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-        return model.best_estimator_, model_evaluation_df
+        best_model = clf.set_params(**model.best_params_)
+        best_model.fit(input_df, labels_df)
+        return best_model, model_evaluation_df
 
 
 def random_forest(
