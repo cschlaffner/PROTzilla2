@@ -1,5 +1,4 @@
 import gseapy
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -10,7 +9,7 @@ from protzilla.utilities.utilities import fig_to_base64
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 
-def go_enrichment_bar_plot(
+def GO_enrichment_bar_plot(
     input_df,
     top_terms,
     cutoff,
@@ -122,7 +121,7 @@ def go_enrichment_bar_plot(
     return [fig_to_base64(ax.get_figure())]
 
 
-def go_enrichment_dot_plot(
+def GO_enrichment_dot_plot(
     input_df,
     top_terms,
     cutoff,

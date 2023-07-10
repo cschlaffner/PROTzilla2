@@ -201,13 +201,13 @@ def gsea_preranked(
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = preranked_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = preranked_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": preranked_result.ranking,
     }
     out_dict.update(preranked_result.results)
@@ -430,13 +430,13 @@ def gsea(
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = gsea_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = gsea_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": gsea_result.ranking,
     }
     out_dict.update(gsea_result.results)

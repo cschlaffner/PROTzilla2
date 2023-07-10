@@ -270,7 +270,7 @@ def test_export_plot_base64(tests_folder_name):
 
     run = Run.create(run_name)
     run.create_step_plot(
-        data_integration.di_plots.go_enrichment_bar_plot,
+        data_integration.di_plots.GO_enrichment_bar_plot,
         dict(
             input_df=pd.read_csv(input_df_path, sep="\t"),
             categories=["Reactome_2013"],

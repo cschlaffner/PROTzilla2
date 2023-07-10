@@ -52,20 +52,20 @@ def get_functional_enrichment_with_delay(protein_list, **string_params):
 
 def merge_up_down_regulated_dfs_restring(up_df, down_df):
     """
-    A method that merges the results for up- and down-regulated proteins for the restring
+    A method that merges the results for up- and downregulated proteins for the restring
     enrichment results. If a category and Term combination is present in both dataframes,
     the one with the higher p-value is kept. The unique proteins (inputGenes column) and the
     unique genes (preferredNames column) of the two input dataframes are merged and the
     number_of_genes column is updated accordingly.
 
-    :param up_df: dataframe with enrichment results for up-regulated proteins
+    :param up_df: dataframe with enrichment results for upregulated proteins
     :type up_df: pandas.DataFrame
-    :param down_df: dataframe with enrichment results for down-regulated proteins
+    :param down_df: dataframe with enrichment results for downregulated proteins
     :type down_df: pandas.DataFrame
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
-    logger.info("Merging results for up- and down-regulated proteins")
+    logger.info("Merging results for up- and downregulated proteins")
     up_df.set_index(["category", "term"], inplace=True)
     down_df.set_index(["category", "term"], inplace=True)
     enriched = up_df.copy()
@@ -101,7 +101,7 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
     return enriched
 
 
-def go_analysis_with_STRING(
+def GO_analysis_with_STRING(
     proteins,
     protein_set_dbs,
     organism,
@@ -111,12 +111,12 @@ def go_analysis_with_STRING(
 ):
     """
     This method performs online functional enrichment analysis using the STRING DB API
-    via the restring package. Results for up- and down-regulated proteins are aggregated
+    via the restring package. Results for up- and downregulated proteins are aggregated
     and written into a result dataframe.
 
     :param proteins: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
-        up- and down-regulated proteins. The magnitude of the expression change is
+        up- and downregulated proteins. The magnitude of the expression change is
         not used.
     :type proteins: pandas.DataFrame
     :param protein_set_dbs: list of protein set databases to use for enrichment
@@ -128,7 +128,7 @@ def go_analysis_with_STRING(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
-    :param background: path to csv file with background proteins (one protein ID per line).
+    :param background: path to txt or csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background: str or None
     :param direction: direction of enrichment analysis.
@@ -136,9 +136,9 @@ def go_analysis_with_STRING(
         - up: Log2FC is > 0
         - down: Log2FC is < 0
         - both: functional enrichment info is retrieved for upregulated and downregulated
-        proteins separately, but the terms are aggregated for the summary and results
+        proteins separately, but the terms are aggregated for the result dataframe
     :type direction: str
-    :return: dictionary with enriched dataframe
+    :return: dictionary with enrichment dataframe
     :rtype: dict
     """
 
@@ -206,7 +206,7 @@ def go_analysis_with_STRING(
 
     # enhancement: add mapping to string API for identifiers before this (dont forget background)
     if direction == "up" or direction == "both":
-        logger.info("Starting analysis for up-regulated proteins")
+        logger.info("Starting analysis for upregulated proteins")
 
         up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
         if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
@@ -219,10 +219,10 @@ def go_analysis_with_STRING(
         # remove unwanted protein set databases
         up_df.reset_index(inplace=True)
         up_df = up_df[up_df["category"].isin(protein_set_dbs)]
-        logger.info("Finished analysis for up-regulated proteins")
+        logger.info("Finished analysis for upregulated proteins")
 
     if direction == "down" or direction == "both":
-        logger.info("Starting analysis for down-regulated proteins")
+        logger.info("Starting analysis for downregulated proteins")
 
         down_df = get_functional_enrichment_with_delay(
             down_protein_list, **string_params
@@ -241,7 +241,7 @@ def go_analysis_with_STRING(
         # remove unwanted protein set databases
         down_df.reset_index(inplace=True)
         down_df = down_df[down_df["category"].isin(protein_set_dbs)]
-        logger.info("Finished analysis for down-regulated proteins")
+        logger.info("Finished analysis for downregulated proteins")
 
     logger.info("Summarizing enrichment results")
     if direction == "both":
@@ -253,27 +253,27 @@ def go_analysis_with_STRING(
     if len(out_messages) > 0:
         return dict(messages=out_messages, results=merged_df)
 
-    return {"enrichment_results": merged_df}
+    return {"enrichment_df": merged_df}
 
 
 def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
     """
-    A method that merges the results for up- and down-regulated proteins for the GSEApy
+    A method that merges the results for up- and downregulated proteins for the GSEApy
     enrichment results. If a Gene_set and Term combination is present in both dataframes,
     the one with the higher adjusted p-value is kept. Proteins were mapped to uppercase gene
     symbols and need to be merged. Genes are merged and the overlap column
     is updated according to the number of genes.
 
 
-    :param up_enriched: dataframe with enrichment results for up-regulated proteins
+    :param up_enriched: dataframe with enrichment results for upregulated proteins
     :type up_enriched: pandas.DataFrame
-    :param down_enriched: dataframe with enrichment results for down-regulated proteins
+    :param down_enriched: dataframe with enrichment results for downregulated proteins
     :type down_enriched: pandas.DataFrame
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
 
-    logger.info("Merging results for up- and down-regulated proteins")
+    logger.info("Merging results for up- and downregulated proteins")
     up_enriched.set_index(["Gene_set", "Term"], inplace=True)
     down_enriched.set_index(["Gene_set", "Term"], inplace=True)
     enriched = up_enriched.copy()
@@ -379,7 +379,7 @@ def gseapy_enrichment(
     return enriched, filtered_groups, None
 
 
-def go_analysis_with_enrichr(
+def GO_analysis_with_Enrichr(
     proteins,
     organism,
     differential_expression_col,
@@ -399,7 +399,7 @@ def go_analysis_with_enrichr(
     are returned in a list.
     The enrichment is performed against a background provided as a path (recommended), number or
     name of a biomart dataset. If no background is provided, all genes in the gene sets are used as
-    the background. Up- and down-regulated proteins are analyzed separately and the results are merged.
+    the background. Up- and downregulated proteins are analyzed separately and the results are merged.
     When gene sets from Enrichr are used, the background parameters are ignored. All genes in the gene sets
     will be used instead.
 
@@ -556,18 +556,18 @@ def go_analysis_with_enrichr(
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_messages.append(dict(level=messages.WARNING, msg=msg))
         return dict(
-            enrichment_results=enriched,
+            enrichment_df=enriched,
             filtered_groups=filtered_groups,
             messages=out_messages,
         )
 
     return {
-        "enrichment_results": enriched,
+        "enrichment_df": enriched,
         "messages": out_messages,
     }
 
 
-def go_analysis_offline(
+def GO_analysis_offline(
     proteins,
     gene_sets_path,
     differential_expression_col,
@@ -585,7 +585,7 @@ def go_analysis_offline(
     For the analysis a hypergeometric test is used against a background provided as a
     path (recommended) or a number of proteins. If no background is provided, all genes in
     the gene_sets are used as the background.
-    Up- and down-regulated proteins are analyzed separately and the results are merged.
+    Up- and downregulated proteins are analyzed separately and the results are merged.
 
     :param proteins: proteins to be analyzed
     :type proteins: list, series or dataframe
@@ -615,7 +615,7 @@ def go_analysis_offline(
         Possible values: up, down, both
         - up: Log2FC is > 0
         - down: Log2FC is < 0
-        - both: functional enrichment info is retrieved for up-regulated and down-regulated
+        - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
     :return: dictionary with results dataframe
@@ -714,7 +714,7 @@ def go_analysis_offline(
             up_filtered_groups if direction == "up" else down_filtered_groups
         )
 
-    out_dict = {"enrichment_results": enriched, "messages": out_messages}
+    out_dict = {"enrichment_df": enriched, "messages": out_messages}
 
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
