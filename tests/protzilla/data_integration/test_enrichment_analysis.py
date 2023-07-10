@@ -130,8 +130,8 @@ def test_merge_up_down_regulated_dfs_restring():
         {
             "category": ["cat1", "cat2", "cat3"],
             "term": ["term1", "term2", "term3"],
-            "p_value": [0.05, 0.2, 0.3],
-            "fdr": [0.4, 0.6, 0.7],
+            "p_value": [0.1, 0.2, 0.3],
+            "fdr": [0.5, 0.6, 0.7],
             "inputGenes": ["protein2,protein4,protein1", "protein3", "protein5"],
             "preferredNames": ["gene2,gene4,gene1", "gene3", "gene5"],
             "number_of_genes": [3, 1, 1],
@@ -474,16 +474,17 @@ def test_go_analysis_with_enrichr(mock_gene_mapping, data_folder_tests):
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
 
 
-def test_go_analysis_enrichr_wrong_background_file():
+def test_go_analysis_enrichr_wrong_background_file(data_folder_tests):
     current_out = go_analysis_with_enrichr(
         proteins=pd.DataFrame({"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}),
         differential_expression_col="log2_fold_change",
-        gene_sets_enrichr=["Reactome_2013"],
+        gene_sets_path=data_folder_tests / "Reactome_2022.txt",
         organism="human",
         direction="both",
         background_path="aMadeUpInputFormat.abc",
     )
     assert "messages" in current_out
+    assert "Invalid file type for background" in current_out["messages"][0]["msg"]
 
 
 @pytest.fixture
@@ -497,6 +498,10 @@ def go_analysis_offline_result_no_bg():
         "Odds Ratio": [5.294118e-01, 5.294118e-01],
         "Combined Score": [0.000000e00, 0.000000e00],
         "Genes": [
+            "Gene3;Gene2;Gene4;Gene1",
+            "Gene5;Gene6;Gene3;Gene1",
+        ],
+        "Proteins": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
         ],
@@ -513,22 +518,53 @@ def go_analysis_offline_result_with_bg():
         "Adjusted P-value": [7.272727e-01, 7.272727e-01],
         "Odds Ratio": [9.529412e-01, 9.529412e-01],
         "Genes": [
+            "Gene3;Gene2;Gene4;Gene1",
+            "Gene5;Gene6;Gene3;Gene1",
+        ],
+        "Proteins": [
             "Protein3;Protein2;Protein4;Protein1",
             "Protein5;Protein6;Protein3;Protein1",
         ],
     }
 
 
+@pytest.fixture
+def offline_mock_mapping():
+    return (
+        {
+            "Gene1": ["Protein1"],
+            "Gene2": ["Protein2"],
+            "Gene3": ["Protein3"],
+            "Gene4": ["Protein4"],
+            "Gene5": ["Protein5"],
+            "Gene6": ["Protein6"],
+        },
+        {
+            "Protein1": ["Gene1"],
+            "Protein2": ["Gene2"],
+            "Protein3": ["Gene3"],
+            "Protein4": ["Gene4"],
+            "Protein5": ["Gene5"],
+            "Protein6": ["Gene6"],
+        },
+        [],
+    )
+
+
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.txt",
     ],
 )
 def test_go_analysis_offline_protein_sets(
-    protein_sets_path, go_analysis_offline_result_no_bg
+    mock_gene_mapping,
+    protein_sets_path,
+    go_analysis_offline_result_no_bg,
+    offline_mock_mapping,
 ):
     results = pd.DataFrame(go_analysis_offline_result_no_bg)
     proteins = [
@@ -540,20 +576,23 @@ def test_go_analysis_offline_protein_sets(
         "Protein6",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 6})
+    mock_gene_mapping.return_value = offline_mock_mapping
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
+        gene_sets_path=protein_sets_path,
         differential_expression_col="fold_change",
-        protein_sets_path=protein_sets_path,
         direction="up",
     )
     df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
+    cols = ["Genes", "Proteins"]
+    for col in cols:
+        df[col] = df[col].apply(lambda x: set(x.split(";")))
+        results[col] = results[col].apply(lambda x: set(x.split(";")))
+        df[col] = df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
 
     # Convert the "Odds Ratio" column to a numeric type with the desired precision
     df["Odds Ratio"] = df["Odds Ratio"].astype(np.float64)
@@ -573,15 +612,20 @@ def test_go_analysis_offline_protein_sets(
     assert odds_equal.all()
 
 
+@patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
 @pytest.mark.parametrize(
     "background_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_genes.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_genes.txt",
     ],
 )
 def test_go_analysis_offline_background(
-    background_path, go_analysis_offline_result_with_bg, data_folder_tests
+    mock_gene_mapping,
+    background_path,
+    go_analysis_offline_result_with_bg,
+    data_folder_tests,
+    offline_mock_mapping,
 ):
     results = pd.DataFrame(go_analysis_offline_result_with_bg)
     proteins = [
@@ -593,23 +637,26 @@ def test_go_analysis_offline_background(
         "Protein6",
     ]
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [-1.0] * 6})
+    mock_gene_mapping.return_value = offline_mock_mapping
 
     current_out = go_analysis_offline(
         proteins=proteins_df,
+        gene_sets_path=data_folder_tests / "gene_sets.txt",
         differential_expression_col="fold_change",
-        protein_sets_path=data_folder_tests / "protein_sets.txt",
-        background_path=background_path,
         direction="down",
+        background_path=background_path,
     )
     df = current_out["enrichment_results"]
 
     # Convert last column to list of sets because order can change
-    df["Genes"] = df["Genes"].apply(lambda x: set(x.split(";")))
-    results["Genes"] = results["Genes"].apply(lambda x: set(x.split(";")))
-    df["Genes"] = df["Genes"].apply(lambda x: sorted(x))
-    results["Genes"] = results["Genes"].apply(lambda x: sorted(x))
+    cols = ["Genes", "Proteins"]
+    for col in cols:
+        df[col] = df[col].apply(lambda x: set(x.split(";")))
+        results[col] = results[col].apply(lambda x: set(x.split(";")))
+        df[col] = df[col].apply(lambda x: sorted(x))
+        results[col] = results[col].apply(lambda x: sorted(x))
 
-    column_names = ["Term", "Genes", "Gene_set", "Overlap"]
+    column_names = ["Term", "Genes", "Proteins", "Gene_set", "Overlap"]
     # Compare all specified columns
     for column in column_names:
         assert df[column].equals(results[column])
@@ -632,10 +679,10 @@ def test_go_analysis_offline_no_protein_sets():
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
         proteins=proteins_df,
+        gene_sets_path="",
         differential_expression_col="fold_change",
-        protein_sets_path="",
-        background=None,
         direction="up",
+        background=None,
     )
 
     assert "messages" in current_out
@@ -651,10 +698,10 @@ def test_go_analysis_offline_invalid_protein_set_file():
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
         proteins=proteins_df,
+        gene_sets_path="an_invalid_filetype.png",
         differential_expression_col="fold_change",
-        protein_sets_path="an_invalid_filetype.png",
-        background="",  # no background
         direction="up",
+        background="",
     )
 
     assert "messages" in current_out
@@ -671,10 +718,10 @@ def test_go_analysis_offline_invalid_background_set_file():
     proteins_df = pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 3})
     current_out = go_analysis_offline(
         proteins=proteins_df,
+        gene_sets_path="a_valid_filetype.gmt",
         differential_expression_col="fold_change",
-        protein_sets_path="a_valid_filetype.gmt",
-        background_path="an_invalid_filetype.png",
         direction="up",
+        background_path="an_invalid_filetype.png",
     )
 
     assert "messages" in current_out
@@ -709,7 +756,7 @@ def test_merge_up_down_regulated_proteins_results():
         {
             "Gene_set": ["Set1", "Set2", "Set3", "Set4"],
             "Term": ["Term1", "Term2", "Term3", "Term4"],
-            "Adjusted P-value": [0.01, 0.02, 0.03, 0.0001],
+            "Adjusted P-value": [0.01, 0.05, 0.03, 0.001],
             "Proteins": [
                 "Protein1",
                 "Protein2;Protein3",
@@ -721,9 +768,7 @@ def test_merge_up_down_regulated_proteins_results():
         }
     )
 
-    merged = merge_up_down_regulated_proteins_results(
-        up_enriched, down_enriched, mapped=True
-    )
+    merged = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
     merged.set_index(["Gene_set", "Term"], inplace=True)
     expected_output.set_index(["Gene_set", "Term"], inplace=True)
     merged = merged.sort_index()
@@ -741,32 +786,32 @@ def test_merge_up_down_regulated_proteins_results():
 @pytest.mark.parametrize(
     "protein_sets_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.json",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data/protein_sets.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.json",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data/gene_sets.txt",
     ],
 )
 def test_read_protein_or_gene_sets_file(protein_sets_path):
     expected_output = {
         "Set1": [
-            "Protein1",
-            "Protein2",
-            "Protein3",
-            "Protein4",
-            "Protein7",
-            "Protein8",
-            "Protein9",
-            "Protein10",
+            "Gene1",
+            "Gene2",
+            "Gene3",
+            "Gene4",
+            "Gene7",
+            "Gene8",
+            "Gene9",
+            "Gene10",
         ],
         "Set2": [
-            "Protein1",
-            "Protein3",
-            "Protein5",
-            "Protein6",
-            "Protein7",
-            "Protein8",
-            "Protein9",
-            "Protein10",
+            "Gene1",
+            "Gene3",
+            "Gene5",
+            "Gene6",
+            "Gene7",
+            "Gene8",
+            "Gene9",
+            "Gene10",
         ],
     }
 
@@ -797,24 +842,24 @@ def test_read_protein_or_gene_sets_file_invalid_filetype(data_folder_tests):
 @pytest.mark.parametrize(
     "background_path",
     [
-        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.csv",
-        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_proteins.txt",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_genes.csv",
+        PROJECT_PATH / "tests/test_data/enrichment_data//background_test_genes.txt",
     ],
 )
 def test_read_background_file(background_path):
     expected_output = [
-        "Protein1",
-        "Protein2",
-        "Protein3",
-        "Protein4",
-        "Protein5",
-        "Protein6",
-        "Protein7",
-        "Protein8",
-        "Protein9",
-        "Protein10",
-        "Protein11",
-        "Protein12",
+        "Gene1",
+        "Gene2",
+        "Gene3",
+        "Gene4",
+        "Gene5",
+        "Gene6",
+        "Gene7",
+        "Gene8",
+        "Gene9",
+        "Gene10",
+        "Gene11",
+        "Gene12",
     ]
 
     result_list = read_background_file(background_path)
