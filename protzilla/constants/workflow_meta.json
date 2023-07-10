@@ -1872,7 +1872,7 @@
                 "p_samples"
               ],
               "Manual": [
-                "test_size"
+                "train_val_split"
               ]
             }
           },
@@ -2075,7 +2075,7 @@
                 "p_samples"
               ],
               "Manual": [
-                "test_size"
+                "train_val_split"
               ]
             }
           },

@@ -31,7 +31,7 @@ def perform_classification(
     clf_parameters,
     scoring,
     model_selection_scoring="accuracy",
-    test_validate_split=None,
+    train_val_split=None,
     random_state=42,
     n_jobs=1,
     **parameters,
@@ -39,7 +39,7 @@ def perform_classification(
     logger.info(f"Number of jobs: {n_jobs}")
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
-            input_df, labels_df, test_size=test_validate_split
+            input_df, labels_df, test_size=train_val_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
