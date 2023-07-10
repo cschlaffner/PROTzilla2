@@ -347,12 +347,12 @@ def gsea(
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
-    if not grouping in metadata_df.columns:
+    if grouping not in metadata_df.columns:
         msg = "Grouping column not in metadata df"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     groups = metadata_df[grouping].unique().tolist()
-    if not group1 in groups or not group2 in groups:
+    if group1 not in groups or group2 not in groups:
         msg = "Group names should be in metadata df but are not"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
