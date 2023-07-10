@@ -8,6 +8,14 @@
 
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).on('change', '#new-db', function () {
+                $('#chosen-new-db').text(this.files[0].name);
+                $("#add-button").prop('disabled', false);
+            });
+        })
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -35,7 +43,7 @@
                         {% csrf_token %}
                         <div class="mb-2">
                             <label for="name">Name for new database (required):</label>
-                            <input class="form-control" id="name" type="text" name="name">
+                            <input class="form-control" id="name" type="text" name="name" required>
                         </div>
                         <div class="mb-2">
                             <input name="new-db" type="file" id="new-db" hidden>
@@ -69,23 +77,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        let file_uploaded = false;
-
-        function update_submit() {
-            $("#add-button").prop('disabled', !(file_uploaded && $("#name").val().length > 0));
-        }
-
-        $(document).ready(function () {
-            $(document).on('change', '#new-db', function () {
-                $('#chosen-new-db').text(this.files[0].name);
-                file_uploaded = true;
-                update_submit()
-            });
-            $(document).on('change', '#name', function () {
-                update_submit()
-            });
-        })
-    </script>
 {% endblock %}
