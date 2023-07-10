@@ -982,4 +982,5 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
 
-    return df["Sequence"].unique().tolist()
+    peptides = df["Sequence"].unique().tolist()
+    return peptides
