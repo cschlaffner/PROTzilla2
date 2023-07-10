@@ -2,9 +2,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import re
 from django.contrib import messages
+from collections import defaultdict
 
 from protzilla.utilities import clean_uniprot_id
+from protzilla.data_integration.database_query import biomart_query
 
 
 def max_quant_import(_, file_path, intensity_name):
@@ -23,6 +26,7 @@ def max_quant_import(_, file_path, intensity_name):
         keep_default_na=True,
     )
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
+    df["Protein IDs"] = map_to_uniprot(df["Protein IDs"].tolist())
     df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
     df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     if "Gene names" not in df.columns:  # genes column should be removed eventually
@@ -35,10 +39,14 @@ def max_quant_import(_, file_path, intensity_name):
         return None, dict(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
-
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
+
+    df = pd.concat([id_df, intensity_df], axis=1)
+    # deal with same id appearing multiple times
+    df = df.groupby(["Protein IDs"]).mean().reset_index()
+
     molten = pd.melt(
-        pd.concat([id_df, intensity_df], axis=1),
+        df,
         id_vars=selected_columns,
         var_name="Sample",
         value_name=intensity_name,
@@ -115,6 +123,77 @@ def isoforms_together(protein_id):
 
 
 def handle_protein_ids(protein_group):
-    # todo add mapping to uniprot here
-    group = filter(valid_uniprot_id, protein_group.split(";"))
+    group = filter(valid_uniprot_id, set(protein_group.split(";")))
     return ";".join(sorted(group, key=isoforms_together))
+
+
+def map_to_uniprot(protein_groups):
+    regex = {
+        "ensembl_peptide_id": re.compile(r"ENSP\d{11}"),
+        "refseq_peptide": re.compile(r"NP_\d{6,}"),
+        "refseq_peptide_predicted": re.compile(r"XP_\d{9}"),
+    }
+
+    # go through groups, find protein ids
+    extracted_ids = {k: set() for k in regex.keys()}
+    group_to_clean_ids = []
+    for group in protein_groups:
+        ids = group.split(";")
+        found = set()
+        for protein_id in ids:
+            for identifier, pattern in regex.items():
+                if m := pattern.search(protein_id):
+                    found_id = m.group(0)
+                    extracted_ids[identifier].add(found_id)
+                    found.add(found_id)
+                    break
+            else:
+                print(f"{protein_id} not matched")
+        group_to_clean_ids.append(found)
+    id_to_uniprot = {}
+    for identifier, matching_ids in extracted_ids.items():
+        if not matching_ids:
+            continue
+        result = biomart_query(
+            matching_ids,
+            identifier,
+            [identifier, "uniprotswissprot"],
+        )
+        #  todo trembl uniprot mapping
+        # tembl = set(matching_ids)
+        for query, swiss in result:
+            if swiss:
+                id_to_uniprot[query] = swiss
+        #         tembl.remove(query)
+        # result = biomart_query(
+        #     tembl,
+        #     identifier,
+        #     [identifier, "uniprotsptrembl"],
+        # )
+        # for query, trembl in result:
+        #     if trembl:
+        #         id_to_uniprot[query] = trembl
+    print(id_to_uniprot)
+    new_groups = []
+    k = 0
+    for orig, found in zip(protein_groups, group_to_clean_ids):
+        # new_groups.append(new_group)
+        a = [id_to_uniprot.get(id_) for id_ in found]
+        x = ";".join(filter(bool, a))
+        new_groups.append(x)
+        if not x:
+            print(orig, x)
+            k += 1
+    print(k, len(new_groups))
+    # replace groups with new ids (if found)
+    return new_groups
+
+
+if __name__ == "__main__":
+    df, _ = max_quant_import(
+        None,
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
+        "Intensity",
+    )
+
+    df.to_csv("out.csv")
