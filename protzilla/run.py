@@ -262,7 +262,10 @@ class Run:
     def next_step(self, name=None):
         if not name:
             name = get_workflow_default_param_value(
-                self.workflow_config, *self.current_run_location(), "output_name"
+                self.workflow_config,
+                *self.current_run_location(),
+                self.step_index_in_current_section(),
+                "output_name",
             )
         try:
             parameters = self.current_parameters.get(self.calculated_method, {})
