@@ -34,7 +34,7 @@
                     <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
                         {% csrf_token %}
                         <div class="mb-2">
-                            <label for="name">Name for new database:</label>
+                            <label for="name">Name for new database (required):</label>
                             <input class="form-control" id="name" type="text" name="name">
                         </div>
                         <div class="mb-2">
