@@ -200,17 +200,17 @@ method_map = {
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_with_STRING",
+        "GO_analysis_with_STRING",
     ): enrichment_analysis.GO_analysis_with_STRING,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_with_enrichr",
+        "GO_analysis_with_Enrichr",
     ): enrichment_analysis.GO_analysis_with_Enrichr,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_offline",
+        "GO_analysis_offline",
     ): enrichment_analysis.GO_analysis_offline,
     (
         "data_integration",
@@ -356,12 +356,12 @@ plot_map = {
     (
         "data_integration",
         "plot",
-        "go_enrichment_bar_plot",
+        "GO_enrichment_bar_plot",
     ): di_plots.GO_enrichment_bar_plot,
     (
         "data_integration",
         "plot",
-        "go_enrichment_dot_plot",
+        "GO_enrichment_dot_plot",
     ): di_plots.GO_enrichment_dot_plot,
     (
         "data_integration",

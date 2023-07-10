@@ -25,7 +25,7 @@ def test_enrichment_bar_plot_restring(show_figures, helpers):
         top_terms=10,
         cutoff=0.05,
         value="fdr",
-        categories=["KEGG", "Process"],
+        gene_sets=["KEGG", "Process"],
     )
     if show_figures:
         helpers.open_graph_from_base64(bar_base64[0])
@@ -35,7 +35,7 @@ def test_enrichment_bar_plot_restring(show_figures, helpers):
         top_terms=10,
         cutoff=0.05,
         value="p_value",
-        categories=["KEGG", "Process"],
+        gene_sets=["KEGG", "Process"],
     )
     if show_figures:
         helpers.open_graph_from_base64(bar_base64[0])
@@ -50,7 +50,7 @@ def test_enrichment_bar_plot(show_figures, helpers, data_folder_tests):
         top_terms=10,
         cutoff=0.05,
         value="p_value",
-        categories=["Reactome_2013"],
+        gene_sets=["Reactome_2013"],
     )
     if show_figures:
         helpers.open_graph_from_base64(bar_base64[0])
@@ -65,7 +65,7 @@ def test_enrichment_bar_plot_wrong_value(data_folder_tests):
         top_terms=10,
         cutoff=0.05,
         value="fdr",
-        categories=["Reactome_2013"],
+        gene_sets=["Reactome_2013"],
     )[0]
     assert "messages" in current_out
     assert "FDR is not available" in current_out["messages"][0]["msg"]
@@ -78,7 +78,7 @@ def test_enrichment_bar_plot_empty_df():
         top_terms=10,
         cutoff=0.05,
         value="p_value",
-        categories=["Reactome_2013"],
+        gene_sets=["Reactome_2013"],
     )[0]
     assert "messages" in current_out
     assert "No data to plot" in current_out["messages"][0]["msg"]
@@ -89,11 +89,7 @@ def test_enrichment_bar_plot_no_category(data_folder_tests):
         data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
     )
     current_out = GO_enrichment_bar_plot(
-        input_df=enrichment_df,
-        top_terms=10,
-        cutoff=0.05,
-        value="p_value",
-        categories=[],
+        input_df=enrichment_df, top_terms=10, cutoff=0.05, value="p_value", gene_sets=[]
     )[0]
     assert "messages" in current_out
     assert "Please select at least one category" in current_out["messages"][0]["msg"]
@@ -106,7 +102,7 @@ def test_enrichment_bar_plot_wrong_df():
         top_terms=10,
         cutoff=0.05,
         value="p_value",
-        categories=["KEGG"],
+        gene_sets=["KEGG"],
     )[0]
     assert "messages" in current_out
     assert (
@@ -122,7 +118,7 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
         top_terms=10,
         cutoff=0,
         value="fdr",
-        categories=["KEGG", "Process"],
+        gene_sets=["KEGG", "Process"],
     )[0]
 
     assert "messages" in current_out
@@ -136,7 +132,7 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
         top_terms=10,
         cutoff=0,
         value="p_value",
-        categories=["Reactome_2013"],
+        gene_sets=["Reactome_2013"],
     )[0]
     assert "messages" in current_out
     assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
@@ -151,7 +147,7 @@ def test_GO_enrichment_dot_plot(helpers, show_figures, x_axis_type, data_folder_
         input_df=enrichment_df,
         top_terms=5,
         cutoff=0.05,
-        categories=["Reactome_2013"],
+        gene_sets=["Reactome_2013"],
         x_axis_type=x_axis_type,
         title="Reactome Enrichment Test",
         rotate_x_labels=False,
@@ -165,7 +161,7 @@ def test_GO_enrichment_dot_plot(helpers, show_figures, x_axis_type, data_folder_
 def test_enrichment_dot_plot_wrong_df(data_folder_tests):
     result = pd.read_csv(data_folder_tests / "merged_KEGG_process.csv", header=0)
     current_out = GO_enrichment_dot_plot(
-        input_df=result, top_terms=10, cutoff=0.05, categories=["KEGG", "Process"]
+        input_df=result, top_terms=10, cutoff=0.05, gene_sets=["KEGG", "Process"]
     )[0]
 
     assert "messages" in current_out

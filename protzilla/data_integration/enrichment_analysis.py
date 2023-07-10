@@ -102,11 +102,11 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
 
 
 def GO_analysis_with_STRING(
-    proteins,
-    protein_set_dbs,
+    proteins_df,
+    gene_sets_restring,
     organism,
     differential_expression_col=None,
-    background=None,
+    background_path=None,
     direction="both",
 ):
     """
@@ -114,23 +114,23 @@ def GO_analysis_with_STRING(
     via the restring package. Results for up- and downregulated proteins are aggregated
     and written into a result dataframe.
 
-    :param proteins: dataframe with protein IDs and expression change column
+    :param proteins_df: dataframe with protein IDs and expression change column
         (e.g. log2 fold change). The expression change column is used to determine
         up- and downregulated proteins. The magnitude of the expression change is
         not used.
-    :type proteins: pandas.DataFrame
-    :param protein_set_dbs: list of protein set databases to use for enrichment
+    :type proteins_df: pandas.DataFrame
+    :param gene_sets_restring: list of knowledge databases to use for enrichment
         Possible values: KEGG, Component, Function, Process and RCTM
-    :type protein_set_dbs: list
+    :type gene_sets_restring: list
     :param organism: organism to use for enrichment as NCBI taxon identifier
         (e.g. Human is 9606)
     :type organism: int
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
-    :param background: path to txt or csv file with background proteins (one protein ID per line).
+    :param background_path: path to txt or csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
-    :type background: str or None
+    :type background_path: str or None
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
         - up: Log2FC is > 0
@@ -144,20 +144,20 @@ def GO_analysis_with_STRING(
 
     out_messages = []
     if (
-        not isinstance(proteins, pd.DataFrame)
-        or not "Protein ID" in proteins.columns
-        or not differential_expression_col in proteins.columns
-        or not proteins[differential_expression_col].dtype == np.number
+        not isinstance(proteins_df, pd.DataFrame)
+        or not "Protein ID" in proteins_df.columns
+        or not differential_expression_col in proteins_df.columns
+        or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     # remove all columns but "Protein ID" and differential_expression_col column
-    proteins = proteins[["Protein ID", differential_expression_col]]
-    proteins.drop_duplicates(subset="Protein ID", inplace=True)
-    expression_change_col = proteins[differential_expression_col]
-    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
+    proteins_df = proteins_df[["Protein ID", differential_expression_col]]
+    proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins_df[differential_expression_col]
+    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
 
     if len(up_protein_list) == 0:
         if direction == "up":
@@ -182,14 +182,14 @@ def GO_analysis_with_STRING(
             direction = "up"
             out_messages.append(dict(level=messages.WARNING, msg=msg))
 
-    if not protein_set_dbs:
-        protein_set_dbs = ["KEGG", "Component", "Function", "Process", "RCTM"]
+    if not gene_sets_restring:
+        gene_sets_restring = ["KEGG", "Component", "Function", "Process", "RCTM"]
         msg = "No protein set databases selected. Using all protein set databases."
         out_messages.append(dict(level=messages.INFO, msg=msg))
-    elif not isinstance(protein_set_dbs, list):
-        protein_set_dbs = [protein_set_dbs]
+    elif not isinstance(gene_sets_restring, list):
+        gene_sets_restring = [gene_sets_restring]
 
-    statistical_background = read_background_file(background)
+    statistical_background = read_background_file(background_path)
     if (
         isinstance(statistical_background, dict)
         and "messages" in statistical_background
@@ -200,7 +200,6 @@ def GO_analysis_with_STRING(
 
     string_params = {
         "species": organism,
-        "caller_ID": "PROTzilla",
         "statistical_background": statistical_background,
     }
 
@@ -218,7 +217,7 @@ def GO_analysis_with_STRING(
 
         # remove unwanted protein set databases
         up_df.reset_index(inplace=True)
-        up_df = up_df[up_df["category"].isin(protein_set_dbs)]
+        up_df = up_df[up_df["category"].isin(gene_sets_restring)]
         logger.info("Finished analysis for upregulated proteins")
 
     if direction == "down" or direction == "both":
@@ -240,7 +239,7 @@ def GO_analysis_with_STRING(
 
         # remove unwanted protein set databases
         down_df.reset_index(inplace=True)
-        down_df = down_df[down_df["category"].isin(protein_set_dbs)]
+        down_df = down_df[down_df["category"].isin(gene_sets_restring)]
         logger.info("Finished analysis for downregulated proteins")
 
     logger.info("Summarizing enrichment results")
@@ -380,7 +379,7 @@ def gseapy_enrichment(
 
 
 def GO_analysis_with_Enrichr(
-    proteins,
+    proteins_df,
     organism,
     differential_expression_col,
     direction="both",
@@ -403,8 +402,8 @@ def GO_analysis_with_Enrichr(
     When gene sets from Enrichr are used, the background parameters are ignored. All genes in the gene sets
     will be used instead.
 
-    :param proteins: proteins to be analyzed
-    :type proteins: list, series or dataframe
+    :param proteins_df: proteins to be analyzed
+    :type proteins_df: dataframe
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
@@ -445,10 +444,10 @@ def GO_analysis_with_Enrichr(
     """
     out_messages = []
     if (
-        not isinstance(proteins, pd.DataFrame)
-        or not "Protein ID" in proteins.columns
-        or not differential_expression_col in proteins.columns
-        or not proteins[differential_expression_col].dtype == np.number
+        not isinstance(proteins_df, pd.DataFrame)
+        or not "Protein ID" in proteins_df.columns
+        or not differential_expression_col in proteins_df.columns
+        or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
@@ -490,11 +489,11 @@ def GO_analysis_with_Enrichr(
         out_messages.append(dict(level=messages.WARNING, msg=msg))
 
     # remove all columns but "Protein ID" and differential_expression_col column
-    proteins = proteins[["Protein ID", differential_expression_col]]
-    proteins.drop_duplicates(subset="Protein ID", inplace=True)
-    expression_change_col = proteins[differential_expression_col]
-    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
+    proteins_df = proteins_df[["Protein ID", differential_expression_col]]
+    proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins_df[differential_expression_col]
+    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
 
     if not up_protein_list:
         if direction == "up":
@@ -568,7 +567,7 @@ def GO_analysis_with_Enrichr(
 
 
 def GO_analysis_offline(
-    proteins,
+    proteins_df,
     gene_sets_path,
     differential_expression_col,
     direction="both",
@@ -587,8 +586,8 @@ def GO_analysis_offline(
     the gene_sets are used as the background.
     Up- and downregulated proteins are analyzed separately and the results are merged.
 
-    :param proteins: proteins to be analyzed
-    :type proteins: list, series or dataframe
+    :param proteins_df: proteins to be analyzed
+    :type proteins_df: dataframe
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
@@ -624,20 +623,20 @@ def GO_analysis_offline(
     # enhancement: make sure ID type for all inputs match
     out_messages = []
     if (
-        not isinstance(proteins, pd.DataFrame)
-        or not "Protein ID" in proteins.columns
-        or not differential_expression_col in proteins.columns
-        or not proteins[differential_expression_col].dtype == np.number
+        not isinstance(proteins_df, pd.DataFrame)
+        or not "Protein ID" in proteins_df.columns
+        or not differential_expression_col in proteins_df.columns
+        or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     # remove all columns but "Protein ID" and differential_expression_col column
-    proteins = proteins[["Protein ID", differential_expression_col]]
-    proteins.drop_duplicates(subset="Protein ID", inplace=True)
-    expression_change_col = proteins[differential_expression_col]
-    up_protein_list = list(proteins.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins.loc[expression_change_col < 0, "Protein ID"])
+    proteins_df = proteins_df[["Protein ID", differential_expression_col]]
+    proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
+    expression_change_col = proteins_df[differential_expression_col]
+    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
+    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
 
     if not up_protein_list:
         if direction == "up":

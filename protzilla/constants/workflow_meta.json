@@ -2110,11 +2110,11 @@
   },
   "data_integration": {
     "enrichment_analysis": {
-      "go_analysis_with_STRING": {
+      "GO_analysis_with_STRING": {
         "name": "GO Analysis with STRING",
         "description": "Online GO Analysis using STRING API",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -2129,8 +2129,8 @@
             "fill": "protein_df_columns",
             "default": null
           },
-          "protein_set_dbs": {
-            "name": "Protein Set Libraries",
+          "gene_sets_restring": {
+            "name": "Knowledge bases for enrichment",
             "type": "categorical",
             "fill": "dbs_restring",
             "categories": [],
@@ -2152,18 +2152,18 @@
             ],
             "default": "both"
           },
-          "background": {
+          "background_path": {
             "name": "Background set (no upload = entire proteome)",
             "type": "file",
             "default": null
           }
         }
       },
-      "go_analysis_with_enrichr": {
+      "GO_analysis_with_Enrichr": {
         "name": "GO Analysis with Enrichr",
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -2280,11 +2280,11 @@
           }
         }
       },
-      "go_analysis_offline": {
+      "GO_analysis_offline": {
         "name": "GO Analysis offline",
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -2592,7 +2592,7 @@
       }
     },
     "plot": {
-      "go_enrichment_bar_plot": {
+      "GO_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",
         "description": "Creates a bar plot from GO enrichment data",
         "parameters": {
@@ -2607,8 +2607,8 @@
               "categories"
             ]
           },
-          "categories": {
-            "name": "Categories/Sets to be plotted",
+          "gene_sets": {
+            "name": "Sets to be plotted",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
@@ -2650,7 +2650,7 @@
           }
         }
       },
-      "go_enrichment_dot_plot": {
+      "GO_enrichment_dot_plot": {
         "name": "Dot plot for GO enrichment analysis (offline & with Enrichr) ",
         "description": "Creates a categorical scatter plot from GO enrichment data",
         "parameters": {
@@ -2674,8 +2674,8 @@
             ],
             "default": "Gene Sets"
           },
-          "categories": {
-            "name": "Categories/Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+          "gene_sets": {
+            "name": "Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"

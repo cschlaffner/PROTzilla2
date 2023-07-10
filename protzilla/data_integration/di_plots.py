@@ -14,7 +14,7 @@ def GO_enrichment_bar_plot(
     top_terms,
     cutoff,
     value,
-    categories=[],
+    gene_sets=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
 ):
@@ -26,8 +26,8 @@ def GO_enrichment_bar_plot(
 
     :param input_df: GO enrichment results
     :type input_df: pandas.DataFrame
-    :param categories: Categories/Sets from enrichment to plot
-    :type categories: list
+    :param gene_sets: Categories/Sets from enrichment to plot
+    :type gene_sets: list
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value or FDR. Only terms with
@@ -65,14 +65,14 @@ def GO_enrichment_bar_plot(
         msg = "Please choose an enrichment result dataframe to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(categories, list):
-        categories = [categories]
-    if not categories:
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
+    if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
-    df = input_df[input_df["Gene_set"].isin(categories)]
+    df = input_df[input_df["Gene_set"].isin(gene_sets)]
 
     if value == "fdr":  # only available for restring result
         if restring_input:
@@ -103,7 +103,7 @@ def GO_enrichment_bar_plot(
 
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
-    size_y = top_terms * 0.5 * len(categories)
+    size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(
             df=df,
@@ -125,7 +125,7 @@ def GO_enrichment_dot_plot(
     input_df,
     top_terms,
     cutoff,
-    categories=[],
+    gene_sets=[],
     x_axis_type="Gene Sets",
     title="",
     rotate_x_labels=False,
@@ -139,8 +139,8 @@ def GO_enrichment_dot_plot(
 
     :param input_df: GO enrichment results (offline or Enrichr)
     :type input_df: pandas.DataFrame
-    :param categories: Categories/Gene Set Libraries from enrichment to plot
-    :type categories: list
+    :param gene_sets: Categories/Gene Set Libraries from enrichment to plot
+    :type gene_sets: list
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value. Only terms with
@@ -167,20 +167,20 @@ def GO_enrichment_dot_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(categories, list):
-        categories = [categories]
-    if not categories:
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
+    if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if len(categories) > 1 and x_axis_type == "Combined Score":
+    if len(gene_sets) > 1 and x_axis_type == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
         return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
-    df = input_df[input_df["Gene_set"].isin(categories)]
+    df = input_df[input_df["Gene_set"].isin(gene_sets)]
 
-    size_y = top_terms * len(categories)
+    size_y = top_terms * len(gene_sets)
     xticklabels_rot = 45 if rotate_x_labels else 0
 
     if x_axis_type == "Gene Sets":
@@ -248,7 +248,7 @@ def gsea_dot_plot(
     Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
     Only the top_terms that meet the cutoff are shown.
 
-    :param input_df: GO enrichment results (offline or Enrichr)
+    :param input_df: GSEA or pre-ranked GSEA results
     :type input_df: pandas.DataFrame
     :param cutoff: Cutoff for the dot_color_value. Only terms with
         dot_color_value < cutoff will be shown.
