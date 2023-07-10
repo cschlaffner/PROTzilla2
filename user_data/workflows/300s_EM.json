@@ -102,61 +102,16 @@
               "data_prep",
               "dataframe"
             ],
-            "clustering_method": "Hierarchical Agglomerative Clustering",
-            "sample_sizes": [
-              20,
-              30,
-              40,
-              50,
-              60,
-              70,
-              90,
-              100,
-              125
-            ],
-            "model_selection_scoring": "dunn_score",
-            "scoring": [
-              "davies_bouldin_score",
-              "dunn_score"
-            ],
-            "n_clusters": [
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10
-            ],
-            "random_state": 6,
-            "n_jobs": -1
-          },
-          "graphs": [
-            {}
-          ],
-          "output_name": "HC"
-        },
-        {
-          "name": "model_selection",
-          "method": "cluster_multiple_sample_sizes_and_k",
-          "parameters": {
-            "input_df": [
-              "data_prep",
-              "dataframe"
-            ],
             "clustering_method": "Expectation Maximisation",
             "sample_sizes": [
               20,
               30,
               40,
-              50,
               60,
-              70,
-              90,
+              80,
               100,
-              125
+              200,
+              290
             ],
             "model_selection_scoring": "dunn_score",
             "scoring": [
@@ -172,7 +127,13 @@
               7,
               8,
               9,
-              10
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
             ],
             "random_state": 6,
             "n_jobs": -1
@@ -180,51 +141,7 @@
           "graphs": [
             {}
           ],
-          "output_name": "EM"
-        },
-        {
-          "name": "model_selection",
-          "method": "cluster_multiple_sample_sizes_and_k",
-          "parameters": {
-            "input_df": [
-              "data_prep",
-              "dataframe"
-            ],
-            "clustering_method": "K Means",
-            "sample_sizes": [
-              20,
-              30,
-              40,
-              50,
-              60,
-              70,
-              90,
-              100,
-              125
-            ],
-            "model_selection_scoring": "dunn_score",
-            "scoring": [
-              "davies_bouldin_score",
-              "dunn_score"
-            ],
-            "n_clusters": [
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10
-            ],
-            "random_state": 6,
-            "n_jobs": -1
-          },
-          "graphs": [
-            {}
-          ],
-          "output_name": "KM"
+          "output_name": null
         }
       ]
     },
