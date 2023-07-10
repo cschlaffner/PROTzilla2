@@ -161,7 +161,11 @@
                          data-bs-toggle="collapse"
                          href="#collapse_matches">
                         {#  could add icon here #}
-                        <div class="ms-3">Peptide Matches</div>
+                        <div class="ms-3">Peptide Matches
+                            {% if peptide_matches %}
+                                ({{ peptide_matches|length }})
+                            {% endif %}
+                        </div>
                     </div>
                     <div id="collapse_matches" class="collapse">
                         <div class="card-body my-2 ps-5 pe-2">
@@ -178,7 +182,11 @@
                          data-bs-toggle="collapse"
                          href="#collapse_mismatches">
                         {#  could add icon here #}
-                        <div class="ms-3">Peptide Mismatches</div>
+                        <div class="ms-3">Peptide Mismatches
+                            {% if peptide_mismatches %}
+                                ({{ peptide_mismatches|length }})
+                            {% endif %}
+                        </div>
                     </div>
                     <div id="collapse_mismatches" class="collapse">
                         <div class="card-body my-2 ps-5 pe-2">
