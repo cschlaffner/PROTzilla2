@@ -268,6 +268,8 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
+    group1=None,
+    group2=None,
     gene_sets_path=None,
     gene_sets_enrichr=None,
     min_size=15,
@@ -293,6 +295,10 @@ def gsea(
     :type metadata_df: pd.DataFrame
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
+    :param group1: name of group 1
+    :type group1: str
+    :param group2: name of group 2
+    :type group2: str
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
@@ -341,7 +347,14 @@ def gsea(
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
-    assert grouping in metadata_df.columns, "Grouping column not in metadata df"
+    if grouping not in metadata_df.columns:
+        msg = "Grouping column not in metadata df"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    groups = metadata_df[grouping].unique().tolist()
+    if group1 not in groups or group2 not in groups:
+        msg = "Group names should be in metadata df but are not"
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     if not is_intensity_df(protein_df):
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
@@ -360,6 +373,12 @@ def gsea(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    # only keep samples from the two groups
+    group_samples = metadata_df.loc[
+        metadata_df[grouping].isin([group1, group2]), "Sample"
+    ].tolist()
+    protein_df = protein_df[protein_df["Sample"].isin(group_samples)]
+    samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
     (
@@ -375,18 +394,14 @@ def gsea(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    samples = protein_df["Sample"].unique().tolist()
     df = create_genes_intensity_wide_df(
         protein_df, protein_groups, samples, group_to_genes, filtered_groups
     )
 
     class_labels = []
     for sample in samples:
-        group_value = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
-        class_labels.append(group_value)
-    if len(set(class_labels)) != 2:
-        msg = "Input samples have to belong to exactly two groups"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        group_label = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
+        class_labels.append(group_label)
 
     # cannot use log2_ratio_of_classes if there are negative values
     if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():
