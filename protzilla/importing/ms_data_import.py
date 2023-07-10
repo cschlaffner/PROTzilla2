@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from django.contrib import messages
 
@@ -11,7 +12,6 @@ def max_quant_import(_, file_path, intensity_name):
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a Max Quant file."
         return None, dict(
-            meta_df=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
     selected_columns = ["Protein IDs", "Gene names"]
@@ -25,8 +25,17 @@ def max_quant_import(_, file_path, intensity_name):
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
     df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
     df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
+    if "Gene names" not in df.columns:  # genes column should be removed eventually
+        df["Gene names"] = np.nan
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
+
+    if intensity_df.empty:
+        msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again"
+        return None, dict(
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
     molten = pd.melt(
         pd.concat([id_df, intensity_df], axis=1),
@@ -55,7 +64,6 @@ def ms_fragger_import(_, file_path, intensity_name):
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a MS Fragger file."
         return None, dict(
-            meta_df=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
     selected_columns = ["Protein ID", "Gene"]
