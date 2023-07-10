@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import pandas as pd
 from sklearn.metrics import (
     PrecisionRecallDisplay,
@@ -69,16 +70,29 @@ def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
 
 def confusion_matrix_plot(model, input_test_df, labels_test_df, plot_title=None):
     input_test_df = input_test_df.set_index("Sample")
-
-    display = ConfusionMatrixDisplay.from_estimator(
-        model,
-        input_test_df,
-        labels_test_df["Encoded Label"],
-        cmap=plt.cm.Blues,
+    unique_tuples = set(
+        labels_test_df[["Label", "Encoded Label"]].itertuples(index=False)
     )
-    display.plot()
+    encoded_labels, display_labels = zip(*unique_tuples)
+    encoded_labels = list(encoded_labels)
+    display_labels = list(display_labels)
+    out = list()
+    try:
+        display = ConfusionMatrixDisplay.from_estimator(
+            model,
+            input_test_df,
+            labels_test_df["Encoded Label"],
+            labels=encoded_labels,
+            display_labels=display_labels,
+        )
+    except Exception as e:
+        display = ConfusionMatrixDisplay.from_estimator(
+            model, input_test_df, labels_test_df["Encoded Label"]
+        )
+    display.plot(cmap=mpl.colormaps["Blues"])
     plt.title(plot_title)
-    return [fig_to_base64(display.figure_)]
+    out.append(fig_to_base64(display.figure_))
+    return out
 
 
 def permutation_testing_plot(score, permutation_scores, pvalue, score_name):

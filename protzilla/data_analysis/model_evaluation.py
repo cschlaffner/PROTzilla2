@@ -2,7 +2,6 @@ import pandas as pd
 from sklearn.model_selection import permutation_test_score
 
 from protzilla.data_analysis.classification_helper import (
-    encode_labels,
     perform_cross_validation,
     evaluate_with_scoring,
 )
@@ -28,11 +27,12 @@ def evaluate_classification_model(model, input_test_df, labels_test_df, scoring)
     input_test_df = input_test_df.set_index("Sample")
 
     y_pred = model.predict(input_test_df)
-    scores = evaluate_with_scoring(scoring, labels_test_df["Encoded Label"], y_pred)
+    labels_test_df["Predicted Label"] = pd.Series(y_pred)
 
+    scores = evaluate_with_scoring(scoring, labels_test_df["Encoded Label"], y_pred)
     scores_df = pd.DataFrame.from_dict(scores, orient="index", columns=["Score"])
     scores_df = scores_df.reset_index().rename(columns={"index": "Metric"})
-    return dict(scores_df=scores_df)
+    return dict(scores_df=scores_df, labels_test_df=labels_test_df)
 
 
 def permutation_testing(
