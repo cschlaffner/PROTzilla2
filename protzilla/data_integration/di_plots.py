@@ -211,7 +211,7 @@ def GO_enrichment_dot_plot(
         try:
             ax = gseapy.dotplot(
                 df,
-                size=10,
+                size=dot_size,
                 top_term=top_terms,
                 figsize=(3, size_y),
                 cutoff=cutoff,

@@ -2662,7 +2662,7 @@
               null
             ],
             "fill_dynamic": [
-              "categories"
+              "gene_sets"
             ]
           },
           "x_axis_type": {
@@ -2675,7 +2675,7 @@
             "default": "Gene Sets"
           },
           "gene_sets": {
-            "name": "Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+            "name": "Sets to be plotted (if this is empty, try reselecting the enrichment dataframe from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"

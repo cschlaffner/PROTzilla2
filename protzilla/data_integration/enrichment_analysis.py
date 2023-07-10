@@ -345,6 +345,7 @@ def gseapy_enrichment(
                 gene_list=list(gene_to_groups.keys()),
                 gene_sets=protein_sets,
                 background=background,
+                no_plot=True,
                 outdir=None,
                 verbose=True,
             ).results
