@@ -11,23 +11,23 @@
 {% endblock %}
 
 {% block content %}
-    {# include django messages for alerting user #}
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
-                     role="alert">
-                    {{ message | safe }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                            aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
     <div class="p-4">
         <div class="d-flex justify-content-center flex-column align-items-center">
             <div class="col w-50">
+                {# include django messages for alerting user #}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                                 role="alert">
+                                {{ message | safe }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="mb-5">
                     <h3>Add a new Database</h3>
 
@@ -54,7 +54,8 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5>{{ database }}</h5>
-                                <form action="{% url 'database_delete' %}" method="post" onsubmit="return confirm('Are you sure you want to delete {{ database }}?');">
+                                <form action="{% url 'database_delete' %}" method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete {{ database }}?');">
                                     {% csrf_token %}
                                     <input type="hidden" name="database" value="{{ database }}">
                                     <input type="submit" value="delete" class="btn btn-red">
