@@ -99,6 +99,7 @@ def by_median(
                 df_sample[f"Normalised {intensity_name}"] = 0
                 zeroed_samples.append(sample)
         df_sample.drop(axis=1, labels=[intensity_name], inplace=True)
+        df_sample.rename(columns={f"Normalised {intensity_name}":intensity_name})
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
     pd.reset_option("mode.chained_assignment")

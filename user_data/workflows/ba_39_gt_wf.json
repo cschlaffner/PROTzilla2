@@ -62,7 +62,7 @@
           "name": "normalisation",
           "method": "median",
           "parameters": {
-            "percentile": 0.5
+            "percentile":0.5
           },
           "graphs": [
             {
@@ -87,6 +87,7 @@
             ],
             
             "log_base": 2,
+            "fc_threshold":0.0309,
             "grouping": "Group",
             "group1": "CTR", 
             "group2": "AD"

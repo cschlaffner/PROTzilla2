@@ -22,6 +22,30 @@
     "data_preprocessing": {
       "steps": [
         {
+          "name": "filter_samples",
+          "method": "proteins_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
           "name": "transformation",
           "method": "log_transformation",
           "parameters": {
@@ -36,7 +60,7 @@
         },
         {
           "name": "normalisation",
-          "method": "totalsum",
+          "method": "median",
           "parameters": {
             "percentile": 0.5
           },
@@ -51,8 +75,6 @@
           "name": "imputation",
           "method": "knn",
           "parameters": {
-            "shrinking_value": 1,
-            "strategy": "most_frequent",
             "number_of_neighbours": 5
           },
           "graphs": [
@@ -79,7 +101,7 @@
               "dataframe"
             ],
             "log_base": 2,
-            "fc_threshold": 1,
+            "fc_threshold": 0.0309,
             "grouping": "Group",
             "group1": "CTR",
             "group2": "AD"

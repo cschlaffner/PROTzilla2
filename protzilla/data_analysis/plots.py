@@ -92,7 +92,7 @@ def create_volcano_plot(
         p="corrected_p_value",
         snp=None,
         gene=None,
-        genomewideline_value=alpha,
+        genomewideline_value=-np.log10(alpha),
         effect_size_line=[-fc_threshold, fc_threshold],
         xlabel="log2(fc)",
         ylabel="-log10(p)",

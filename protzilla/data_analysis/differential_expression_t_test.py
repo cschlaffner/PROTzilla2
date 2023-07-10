@@ -96,24 +96,6 @@ def t_test(
 
         group1_intensities = group1_intensities[~np.isnan(group1_intensities)]
         group2_intensities = group2_intensities[~np.isnan(group2_intensities)]
-<<<<<<< HEAD
-
-        # if a protein has a NaN value in a sample, user should remove it
-        # group1_is_nan = np.isnan(group1_intensities)
-        # group2_is_nan = np.isnan(group2_intensities)
-        # if group1_is_nan.any() or group2_is_nan.any():
-        #     msg = "There are Proteins with NaN values present in your data. \
-        #         Please filter them out before running the differential expression analysis."
-        #     return dict(
-        #         de_proteins_df=None,
-        #         corrected_p_values=None,
-        #         log2_fold_change=None,
-        #         fc_threshold=None,
-        #         corrected_alpha=None,
-        #         messages=[dict(level=messages.ERROR, msg=msg)],
-        #     )
-=======
->>>>>>> main
 
         # if the intensity of a group for a protein is 0 or NaN (empty group)
         # it should be filtered out
