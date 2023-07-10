@@ -17,6 +17,7 @@ def GO_enrichment_bar_plot(
     gene_sets=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+    figsize=None,
 ):
     """
     Create a bar plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -39,6 +40,8 @@ def GO_enrichment_bar_plot(
     :type title: str, optional
     :param colors: Colors to use for the bars, defaults to PROTZILLA_DISCRETE_COLOR_SEQUENCE
     :type colors: list, optional
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -110,7 +113,7 @@ def GO_enrichment_bar_plot(
             column=column,
             cutoff=cutoff,
             group="Gene_set",
-            figsize=(10, size_y),
+            figsize=figsize if figsize else (10, size_y),
             top_term=top_terms,
             color=colors,
             title=title,
@@ -131,6 +134,7 @@ def GO_enrichment_dot_plot(
     rotate_x_labels=False,
     show_ring=False,
     dot_size=5,
+    figsize=None,
 ):
     """
     Creates a dot plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -156,6 +160,8 @@ def GO_enrichment_dot_plot(
     :type show_ring: bool
     :param dot_size: Size of the dots, defaults to 5
     :type dot_size: int
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -191,7 +197,7 @@ def GO_enrichment_dot_plot(
                 x="Gene_set",
                 size=dot_size,
                 top_term=top_terms,
-                figsize=(3, size_y),
+                figsize=figsize if figsize else (3, size_y),
                 cutoff=cutoff,
                 title=title,
                 xticklabels_rot=xticklabels_rot,
@@ -213,7 +219,7 @@ def GO_enrichment_dot_plot(
                 df,
                 size=dot_size,
                 top_term=top_terms,
-                figsize=(3, size_y),
+                figsize=figsize if figsize else (3, size_y),
                 cutoff=cutoff,
                 title=title,
                 xticklabels_rot=xticklabels_rot,
@@ -243,6 +249,7 @@ def gsea_dot_plot(
     show_ring=False,
     dot_size=5,
     remove_library_names=False,
+    figsize=None,
 ):
     """
     Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
@@ -267,6 +274,8 @@ def gsea_dot_plot(
     :type dot_size: int
     :param remove_library_names: Remove the library names from the displayed gene sets, defaults to False
     :type remove_library_names: bool
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -303,7 +312,7 @@ def gsea_dot_plot(
             x=x_axis_value,
             cutoff=cutoff,
             size=dot_size,
-            figsize=(5, size_y),
+            figsize=figsize if figsize else (5, size_y),
             title=title,
             show_ring=show_ring,
         )
@@ -322,6 +331,7 @@ def gsea_enrichment_plot(
     term_dict=None,
     term_name=None,
     ranking=None,
+    figsize=None,
 ):
     """
     Creates a typical enrichment plot from GSEA or pre-ranked GSEA details. The plot is created using the gseapy library.
@@ -332,6 +342,8 @@ def gsea_enrichment_plot(
     :type term_name: str
     :param ranking: Ranking output dataframe from GSEA or pre-ranked GSEA
     :type ranking: pandas.DataFrame or pandas.Series
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -354,6 +366,7 @@ def gsea_enrichment_plot(
             rank_metric=ranking,
             term=term_name,
             **term_dict,
+            figsize=figsize if figsize else (6, 5.5),
         )
         return [
             dict(
