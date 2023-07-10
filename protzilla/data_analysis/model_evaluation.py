@@ -26,7 +26,6 @@ def evaluate_classification_model(model, input_test_df, labels_test_df, scoring)
     :rtype: dict
     """
     input_test_df = input_test_df.set_index("Sample")
-    _, labels_test_df = encode_labels(labels_test_df, "Label")
 
     y_pred = model.predict(input_test_df)
     scores = evaluate_with_scoring(scoring, labels_test_df["Encoded Label"], y_pred)
@@ -49,7 +48,6 @@ def permutation_testing(
 ):
     # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
     input_df = input_df.set_index("Sample")
-    _, labels_df = encode_labels(labels_df, "Label")
 
     cv_callable = perform_cross_validation(cross_validation_strategy, **cv_params)
     score, permutation_scores, pvalue = permutation_test_score(

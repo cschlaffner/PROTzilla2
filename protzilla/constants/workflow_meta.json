@@ -1181,6 +1181,40 @@
             "default": "no"
           }
         }
+      },
+      "confusion_matrix_plot": {
+        "name": "Confusion Matrix",
+        "description": "",
+        "parameters": {
+          "model": {
+            "name": "Choose trained model",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "input_test_df": {
+            "name": "Choose test data",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_test_df": {
+            "name": "Choose labels for test data",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "plot_title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
+          }
+        }
       }
     },
     "clustering": {

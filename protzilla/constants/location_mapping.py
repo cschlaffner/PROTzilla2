@@ -382,6 +382,11 @@ plot_map = {
     ): model_evaluation_plots.roc_curve_plot,
     (
         "data_analysis",
+        "plot",
+        "confusion_matrix_plot",
+    ): model_evaluation_plots.confusion_matrix_plot,
+    (
+        "data_analysis",
         "model_selection",
         "cluster_multiple_sample_sizes_and_k",
     ): model_selection.elbow_plot_multiple_sample_sizes,

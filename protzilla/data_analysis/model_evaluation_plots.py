@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
+from sklearn.metrics import (
+    PrecisionRecallDisplay,
+    RocCurveDisplay,
+    ConfusionMatrixDisplay,
+)
 from sklearn.model_selection import permutation_test_score
 
 from protzilla.data_analysis.classification_helper import (
@@ -29,7 +33,6 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title
     :rtype: bytes
     """
     input_test_df = input_test_df.set_index("Sample")
-    _, labels_test_df = encode_labels(labels_test_df, "Label")
 
     display = PrecisionRecallDisplay.from_estimator(
         model, input_test_df, labels_test_df["Encoded Label"]
@@ -55,10 +58,23 @@ def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     :rtype: bytes
     """
     input_test_df = input_test_df.set_index("Sample")
-    _, labels_test_df = encode_labels(labels_test_df, "Label")
 
     display = RocCurveDisplay.from_estimator(
         model, input_test_df, labels_test_df["Encoded Label"]
+    )
+    display.plot()
+    plt.title(plot_title)
+    return [fig_to_base64(display.figure_)]
+
+
+def confusion_matrix_plot(model, input_test_df, labels_test_df, plot_title=None):
+    input_test_df = input_test_df.set_index("Sample")
+
+    display = ConfusionMatrixDisplay.from_estimator(
+        model,
+        input_test_df,
+        labels_test_df["Encoded Label"],
+        cmap=plt.cm.Blues,
     )
     display.plot()
     plt.title(plot_title)
