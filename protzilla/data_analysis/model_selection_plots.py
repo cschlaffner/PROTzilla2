@@ -70,6 +70,10 @@ def elbow_method_n_clusters(
         ~model_evaluation_dfs[0].columns.str.startswith("param_")
     ]
 
+    # sort sample size keys
+    sorted_data = sorted(zip(sample_sizes, model_evaluation_dfs), key=lambda x: (int(x[0][len('sample_size_'):]), x[1]))
+    sample_sizes, model_evaluation_dfs = zip(*sorted_data)
+
     plots = []
     for score_name in score_names:
         score_name_plt = remove_underscore_and_capitalize(score_name)

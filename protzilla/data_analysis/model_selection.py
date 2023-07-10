@@ -175,6 +175,10 @@ def cluster_multiple_sample_sizes_and_k(
         clustering_method
     )
     X_subsets = []
+    if len(input_df_wide) in sample_sizes:
+        sample_sizes.remove(len(input_df_wide))
+        X_subsets.append(input_df_wide)
+
     # model_evaluation_dict = defaultdict(list)
     manager = Manager()
     model_evaluation_dict = manager.dict()
