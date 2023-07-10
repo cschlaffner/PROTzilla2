@@ -128,6 +128,26 @@
           "output_name": "SVM"
         },
         {
+          "name": "plot",
+          "method": "confusion_matrix_plot",
+          "parameters": {
+            "model": [
+              "SVM",
+              "model"
+            ],
+            "input_test_df": [
+              "SVM",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "SVM",
+              "y_test_df"
+            ],
+            "plot_title": "BA46: SVM Confusion Matrix"
+          },
+          "output_name": null
+        },
+        {
           "name": "model_evaluation",
           "method": "evaluate_classification_model",
           "parameters": {

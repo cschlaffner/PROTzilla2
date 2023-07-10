@@ -224,6 +224,26 @@
         },
         {
           "name": "plot",
+          "method": "confusion_matrix_plot",
+          "parameters": {
+            "model": [
+              "RF",
+              "model"
+            ],
+            "input_test_df": [
+              "RF",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "RF",
+              "y_test_df"
+            ],
+            "plot_title": "BA39: Random Forest Confusion Matrix"
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
           "method": "roc_curve_plot",
           "parameters": {
             "model": [
@@ -238,7 +258,7 @@
               "RF",
               "y_test_df"
             ],
-            "plot_title": "Random Forests Machine ROC Curve"
+            "plot_title": "BA39: Random Forests Machine ROC Curve"
           }
         },
         {
@@ -257,7 +277,7 @@
               "RF",
               "y_test_df"
             ],
-            "plot_title": "Random Forests Precision-Recall Curve"
+            "plot_title": "BA39: Random Forests Precision-Recall Curve"
           },
           "output_name": null
         },

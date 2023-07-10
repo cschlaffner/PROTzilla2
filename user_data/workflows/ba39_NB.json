@@ -228,6 +228,26 @@
         },
         {
           "name": "plot",
+          "method": "confusion_matrix_plot",
+          "parameters": {
+            "model": [
+              "NB",
+              "model"
+            ],
+            "input_test_df": [
+              "NB",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "NB",
+              "y_test_df"
+            ],
+            "plot_title": "BA39: Naive Bayes Confusion Matrix"
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
           "method": "roc_curve_plot",
           "parameters": {
             "model": [
@@ -242,7 +262,7 @@
               "NB",
               "y_test_df"
             ],
-            "plot_title": "Naive Bayes ROC Curve"
+            "plot_title": "BA39: Naive Bayes ROC Curve"
           }
         },
         {
@@ -261,7 +281,7 @@
               "NB",
               "y_test_df"
             ],
-            "plot_title": "Naive Bayes Precision-Recall Curve"
+            "plot_title": "BA39: Naive Bayes Precision-Recall Curve"
           },
           "output_name": null
         },

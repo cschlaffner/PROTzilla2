@@ -148,6 +148,26 @@
         },
         {
           "name": "plot",
+          "method": "confusion_matrix_plot",
+          "parameters": {
+            "model": [
+              "RF",
+              "model"
+            ],
+            "input_test_df": [
+              "RF",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "RF",
+              "y_test_df"
+            ],
+            "plot_title": "BA46: Random Forest Confusion Matrix"
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
           "method": "roc_curve_plot",
           "parameters": {
             "model": [

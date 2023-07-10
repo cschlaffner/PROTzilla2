@@ -230,6 +230,26 @@
         },
         {
           "name": "plot",
+          "method": "confusion_matrix_plot",
+          "parameters": {
+            "model": [
+              "SVM",
+              "model"
+            ],
+            "input_test_df": [
+              "SVM",
+              "X_test_df"
+            ],
+            "labels_test_df": [
+              "SVM",
+              "y_test_df"
+            ],
+            "plot_title": "BA39: SVM Confusion Matrix"
+          },
+          "output_name": null
+        },
+        {
+          "name": "plot",
           "method": "roc_curve_plot",
           "parameters": {
             "model": [
