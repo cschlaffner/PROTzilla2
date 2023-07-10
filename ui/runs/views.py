@@ -48,7 +48,6 @@ def index(request):
         request,
         "runs/index.html",
         context={
-            "run_name_prefill": f"hello{123:03d}",
             "available_workflows": Run.available_workflows(),
             "available_runs": Run.available_runs(),
         },
