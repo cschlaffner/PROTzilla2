@@ -26,7 +26,7 @@ def max_quant_import(_, file_path, intensity_name):
         keep_default_na=True,
     )
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
-    df["Protein IDs"] = map_to_uniprot(df["Protein IDs"].tolist())
+    df["Protein IDs"] = map_groups_to_uniprot(df["Protein IDs"].tolist())
     df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
     df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     if "Gene names" not in df.columns:  # genes column should be removed eventually
@@ -127,29 +127,7 @@ def handle_protein_ids(protein_group):
     return ";".join(sorted(group, key=isoforms_together))
 
 
-def map_to_uniprot(protein_groups):
-    regex = {
-        "ensembl_peptide_id": re.compile(r"ENSP\d{11}"),
-        "refseq_peptide": re.compile(r"NP_\d{6,}"),
-        "refseq_peptide_predicted": re.compile(r"XP_\d{9}"),
-    }
-
-    # go through groups, find protein ids
-    extracted_ids = {k: set() for k in regex.keys()}
-    group_to_clean_ids = []
-    for group in protein_groups:
-        ids = group.split(";")
-        found = set()
-        for protein_id in ids:
-            for identifier, pattern in regex.items():
-                if m := pattern.search(protein_id):
-                    found_id = m.group(0)
-                    extracted_ids[identifier].add(found_id)
-                    found.add(found_id)
-                    break
-            else:
-                print(f"{protein_id} not matched")
-        group_to_clean_ids.append(found)
+def map_ids(extracted_ids):
     id_to_uniprot = {}
     for identifier, matching_ids in extracted_ids.items():
         if not matching_ids:
@@ -173,6 +151,34 @@ def map_to_uniprot(protein_groups):
         # for query, trembl in result:
         #     if trembl:
         #         id_to_uniprot[query] = trembl
+
+    return id_to_uniprot
+
+
+def map_groups_to_uniprot(protein_groups):
+    regex = {
+        "ensembl_peptide_id": re.compile(r"ENSP\d{11}"),
+        "refseq_peptide": re.compile(r"NP_\d{6,}"),
+        "refseq_peptide_predicted": re.compile(r"XP_\d{9}"),
+    }
+
+    # go through groups, find protein ids
+    extracted_ids = {k: set() for k in regex.keys()}
+    group_to_clean_ids = []
+    for group in protein_groups:
+        ids = group.split(";")
+        found = set()
+        for protein_id in ids:
+            for identifier, pattern in regex.items():
+                if m := pattern.search(protein_id):
+                    found_id = m.group(0)
+                    extracted_ids[identifier].add(found_id)
+                    found.add(found_id)
+                    break
+            else:
+                print(f"{protein_id} not matched")
+        group_to_clean_ids.append(found)
+    id_to_uniprot = map_ids(extracted_ids)
     print(id_to_uniprot)
     new_groups = []
     k = 0
