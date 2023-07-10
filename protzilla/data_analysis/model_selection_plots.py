@@ -71,7 +71,10 @@ def elbow_method_n_clusters(
     ]
 
     # sort sample size keys
-    sorted_data = sorted(zip(sample_sizes, model_evaluation_dfs), key=lambda x: (int(x[0][len('sample_size_'):]), x[1]))
+    sorted_data = sorted(
+        zip(sample_sizes, model_evaluation_dfs),
+        key=lambda x: (int(x[0][len("sample_size_") :]), x[1]),
+    )
     sample_sizes, model_evaluation_dfs = zip(*sorted_data)
 
     plots = []
