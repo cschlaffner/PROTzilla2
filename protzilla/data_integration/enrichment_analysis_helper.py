@@ -51,7 +51,10 @@ def read_protein_or_gene_sets_file(path):
     elif file_extension == ".json":
         with open(path, "r") as f:
             sets = json.load(f)
-            sets = {key: [value for value in values if value.strip()] for key, values in sets.items()}
+            sets = {
+                key: [value for value in values if value.strip()]
+                for key, values in sets.items()
+            }
 
     elif file_extension == ".gmt":
         # gseapy can handle gmt files
