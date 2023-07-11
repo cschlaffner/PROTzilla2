@@ -4,7 +4,6 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
-from protzilla.data_integration import database_query
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
@@ -71,8 +70,7 @@ def create_ranked_df(
 
 def gsea_preranked(
     protein_df,
-    group_to_genes,
-    gene_to_groups,
+    gene_mapping,
     ranking_column=None,
     ranking_direction="ascending",
     gene_sets_path=None,
@@ -98,10 +96,8 @@ def gsea_preranked(
 
     :param protein_df: dataframe with protein IDs and ranking values
     :type protein_df: pd.DataFrame
-    :param group_to_genes: mapping from protein groups to genes
-    :type group_to_genes: dict[str, list[str]]
-    :param gene_to_groups: mapping from gene to protein groups
-    :type gene_to_groups: dict[str, list[str]]
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param ranking_column: column name of ranking column in protein_df
     :type ranking_column: str
     :param ranking_direction: direction of ranking for sorting, either ascending or descending
@@ -163,8 +159,9 @@ def gsea_preranked(
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
 
+    group_to_genes = gene_mapping["group_to_genes"]
+    gene_to_groups = gene_mapping["gene_to_groups"]
     filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
@@ -272,8 +269,7 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
-    group_to_genes,
-    gene_to_groups,
+    gene_mapping,
     group1=None,
     group2=None,
     gene_sets_path=None,
@@ -299,10 +295,8 @@ def gsea(
     :type protein_df: pd.DataFrame
     :param metadata_df: dataframe with metadata
     :type metadata_df: pd.DataFrame
-    :param group_to_genes: mapping from protein groups to genes
-    :type group_to_genes: dict[str, list[str]]
-    :param gene_to_groups: mapping from gene to protein groups
-    :type gene_to_groups: dict[str, list[str]]
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
     :param group1: name of group 1
@@ -399,8 +393,9 @@ def gsea(
     protein_df = protein_df[protein_df["Sample"].isin(group_samples)]
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
 
+    group_to_genes = gene_mapping["group_to_genes"]
+    gene_to_groups = gene_mapping["gene_to_groups"]
     filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:

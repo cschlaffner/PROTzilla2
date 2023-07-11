@@ -1,4 +1,3 @@
-import os
 import time
 
 import gseapy
@@ -8,7 +7,6 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
-from protzilla.data_integration import database_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -145,8 +143,8 @@ def GO_analysis_with_STRING(
     out_messages = []
     if (
         not isinstance(proteins_df, pd.DataFrame)
-        or not "Protein ID" in proteins_df.columns
-        or not differential_expression_col in proteins_df.columns
+        or "Protein ID" not in proteins_df.columns
+        or differential_expression_col not in proteins_df.columns
         or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
@@ -305,8 +303,7 @@ def gseapy_enrichment(
     protein_list,
     protein_sets,
     direction,
-    group_to_genes,
-    gene_to_groups,
+    gene_mapping,
     organism=None,
     background=None,
     offline=False,
@@ -323,10 +320,8 @@ def gseapy_enrichment(
     :type protein_sets: list
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
-    :param group_to_genes: mapping from protein groups to genes
-    :type group_to_genes: dict[str, list[str]]
-    :param gene_to_groups: mapping from gene to protein groups
-    :type gene_to_groups: dict[str, list[str]]
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param organism: organism, not used when offline is True
     :type organism: str
     :param background: background for the enrichment analysis
@@ -337,8 +332,9 @@ def gseapy_enrichment(
     :rtype: tuple[pandas.DataFrame, list, list]
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
+    gene_to_groups = gene_mapping["gene_to_groups"]
     genes = list(gene_to_groups.keys())
-    filtered_groups = set(protein_list) - set(group_to_genes.keys())
+    filtered_groups = set(protein_list) - set(gene_mapping["group_to_genes"].keys())
 
     if not genes:
         msg = (

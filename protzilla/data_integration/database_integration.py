@@ -74,7 +74,6 @@ def gene_mapping(dataframe, database_names):
     except KeyError:
         msg = "No Protein ID column found."
         return dict(
-            mapping={},
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
     if isinstance(database_names, str):
@@ -83,7 +82,9 @@ def gene_mapping(dataframe, database_names):
         groups, database_names
     )
     return {
-        "group_to_genes": groups_to_genes,
-        "gene_to_groups": gene_to_groups,
-        "filtered": filtered,
+        "gene_mapping": {
+            "group_to_genes": groups_to_genes,
+            "gene_to_groups": gene_to_groups,
+            "filtered": filtered,
+        }
     }
