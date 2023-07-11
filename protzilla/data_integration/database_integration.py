@@ -1,4 +1,3 @@
-import pandas
 import pandas as pd
 from django.contrib import messages
 

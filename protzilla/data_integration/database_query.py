@@ -97,8 +97,6 @@ def uniprot_to_genes(uniprot_ids, databases):
         return gene_mapping, added_keys
 
     logger.info("Mapping to map uniprot IDs to genes.")
-    # available_databases = uniprot_databases()
-    # logger.info(f"Found {len(available_databases)} uniprot databases.")
     out_dict = {}
     ids_to_search = set(uniprot_ids)
     for db_name in databases:
