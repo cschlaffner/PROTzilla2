@@ -71,6 +71,8 @@ def create_ranked_df(
 
 def gsea_preranked(
     protein_df,
+    group_to_genes,
+    gene_to_groups,
     ranking_column=None,
     ranking_direction="ascending",
     gene_sets_path=None,
@@ -96,6 +98,10 @@ def gsea_preranked(
 
     :param protein_df: dataframe with protein IDs and ranking values
     :type protein_df: pd.DataFrame
+    :param group_to_genes: mapping from protein groups to genes
+    :type group_to_genes: dict[str, list[str]]
+    :param gene_to_groups: mapping from gene to protein groups
+    :type gene_to_groups: dict[str, list[str]]
     :param ranking_column: column name of ranking column in protein_df
     :type ranking_column: str
     :param ranking_direction: direction of ranking for sorting, either ascending or descending
@@ -136,8 +142,8 @@ def gsea_preranked(
     """
     if (
         not isinstance(protein_df, pd.DataFrame)
-        or not "Protein ID" in protein_df.columns
-        or not ranking_column in protein_df.columns
+        or "Protein ID" not in protein_df.columns
+        or ranking_column not in protein_df.columns
         or not protein_df[ranking_column].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
@@ -158,11 +164,8 @@ def gsea_preranked(
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = database_query.uniprot_groups_to_genes(protein_groups)
+
+    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -269,6 +272,8 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
+    group_to_genes,
+    gene_to_groups,
     group1=None,
     group2=None,
     gene_sets_path=None,
@@ -294,6 +299,10 @@ def gsea(
     :type protein_df: pd.DataFrame
     :param metadata_df: dataframe with metadata
     :type metadata_df: pd.DataFrame
+    :param group_to_genes: mapping from protein groups to genes
+    :type group_to_genes: dict[str, list[str]]
+    :param gene_to_groups: mapping from gene to protein groups
+    :type gene_to_groups: dict[str, list[str]]
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
     :param group1: name of group 1
@@ -391,11 +400,8 @@ def gsea(
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
     logger.info("Mapping Uniprot IDs to uppercase gene symbols")
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = database_query.uniprot_groups_to_genes(protein_groups)
+
+    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
