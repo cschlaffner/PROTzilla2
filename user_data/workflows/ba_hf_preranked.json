@@ -132,8 +132,8 @@
           "method": "gsea_preranked",
           "parameters": {
             "protein_df": [
-              "mapping",
-              "gene_mapping"
+              "t-test_data",
+              "de_proteins_df"
             ],
             "ranking_column": "fold_change",
             "ranking_direction": "descending",
