@@ -2617,6 +2617,14 @@
             "type": "categorical",
             "multiple": true,
             "fill": "uniprot_databases"
+          },
+          "use_biomart": {
+            "name": "Use biomart after Uniprot databases",
+            "type": "categorical",
+            "categories": [
+              "Yes",
+              "No"
+            ]
           }
         }
       },
