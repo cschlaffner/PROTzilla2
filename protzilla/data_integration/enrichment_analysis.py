@@ -336,7 +336,7 @@ def gseapy_enrichment(
         )
         return None, None, [dict(level=messages.ERROR, msg=msg)]
 
-    logger.info(f"Starting analysis for {direction}-regulated proteins")
+    logger.info(f"Starting analysis for {direction}regulated proteins")
 
     error_msg = "Something went wrong with the analysis. Please check your inputs."
     if offline:
@@ -375,7 +375,7 @@ def gseapy_enrichment(
     enriched["Proteins"] = enriched["Genes"].apply(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
-    logger.info(f"Finished analysis for {direction}-regulated proteins")
+    logger.info(f"Finished analysis for {direction}regulated proteins")
     return enriched, filtered_groups, None
 
 
