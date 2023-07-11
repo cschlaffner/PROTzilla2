@@ -273,7 +273,7 @@ def test_export_plot_base64(tests_folder_name):
         data_integration.di_plots.GO_enrichment_bar_plot,
         dict(
             input_df=pd.read_csv(input_df_path, sep="\t"),
-            categories=["Reactome_2013"],
+            gene_sets=["Reactome_2013"],
             top_terms=10,
             cutoff=0.05,
             value="p_value",
