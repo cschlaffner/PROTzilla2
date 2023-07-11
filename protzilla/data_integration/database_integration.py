@@ -82,9 +82,8 @@ def gene_mapping(dataframe, database_names):
     gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
         groups, database_names
     )
-    return {"mapping": groups_to_genes}
-
-
-print(
-    gene_mapping(pandas.DataFrame({"Protein ID": ["P10636;P10637"]}), ["all_reviewed"])
-)
+    return {
+        "group_to_genes": groups_to_genes,
+        "gene_to_groups": gene_to_groups,
+        "filtered": filtered,
+    }
