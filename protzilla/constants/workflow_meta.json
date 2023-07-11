@@ -2182,6 +2182,14 @@
             "fill": "protein_df_columns",
             "default": null
           },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
           "gene_sets_field": {
             "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
             "type": "categorical_dynamic",
@@ -2305,6 +2313,14 @@
             "fill": "protein_df_columns",
             "default": null
           },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
           "gene_sets_path": {
             "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
@@ -2361,6 +2377,14 @@
         "parameters": {
           "protein_df": {
             "name": "Dataframe with Protein IDs, Samples and intensities",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "gene_mapping": {
+            "name": "Gene mapping",
             "type": "named_output",
             "default": [
               null,
@@ -2502,6 +2526,14 @@
               "descending"
             ],
             "default": "ascending"
+          },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           },
           "gene_sets_field": {
             "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",

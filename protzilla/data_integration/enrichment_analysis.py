@@ -331,7 +331,6 @@ def gseapy_enrichment(
     :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
     :rtype: tuple[pandas.DataFrame, list, list]
     """
-    logger.info("Mapping Uniprot IDs to gene symbols")
     gene_to_groups = gene_mapping.get("gene_to_groups", {})
     genes = list(gene_to_groups.keys())
     filtered_groups = set(protein_list) - set(
@@ -384,7 +383,7 @@ def gseapy_enrichment(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
     logger.info(f"Finished analysis for {direction}regulated proteins")
-    return enriched, filtered_groups, None
+    return enriched, list(filtered_groups), None
 
 
 def GO_analysis_with_Enrichr(
