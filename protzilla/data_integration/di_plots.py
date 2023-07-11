@@ -68,11 +68,11 @@ def GO_enrichment_bar_plot(
         msg = "Please choose an enrichment result dataframe to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(gene_sets, list):
-        gene_sets = [gene_sets]
     if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
 
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(gene_sets)]
@@ -173,11 +173,11 @@ def GO_enrichment_dot_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(gene_sets, list):
-        gene_sets = [gene_sets]
     if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
 
     if len(gene_sets) > 1 and x_axis_type == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
@@ -294,10 +294,10 @@ def gsea_dot_plot(
     if not dot_size:
         dot_size = 5
 
+    if not gene_sets or gene_sets == "all":
+        logger.info("Plotting for all gene set libraries.")
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
-    if not gene_sets or "all" in gene_sets:
-        logger.info("Plotting for all gene set libraries.")
     else:  # remove all Gene_sets that were not selected
         input_df = input_df[input_df["Term"].str.startswith(tuple(gene_sets))]
 
