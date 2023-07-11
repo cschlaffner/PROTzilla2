@@ -116,6 +116,18 @@
     "data_integration": {
       "steps": [
         {
+          "name": "database_integration",
+          "method": "gene_mapping",
+          "parameters": {
+            "dataframe": [
+              "t-test_data",
+              "de_proteins_df"
+            ],
+            "database_names": "all_reviewed"
+          },
+          "output_name": "mapping"
+        },
+        {
           "name": "enrichment_analysis",
           "method": "GO_analysis_with_Enrichr",
           "parameters": {
@@ -124,12 +136,16 @@
               "de_proteins_df"
             ],
             "differential_expression_col": "log2_fold_change",
+            "gene_mapping": [
+              "mapping",
+              "gene_mapping"
+            ],
             "gene_sets_field": "Upload a file (recommended)",
             "gene_sets_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\ReactomePathways.gmt",
             "direction": "both",
             "organism": "human",
             "background_field": "Upload a file (recommended)",
-            "background_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\hf_imported_bg.csv"
+            "background_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\background_gene_symbols.txt"
           }
         }
       ]
