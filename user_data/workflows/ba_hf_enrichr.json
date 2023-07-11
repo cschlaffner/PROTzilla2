@@ -1,0 +1,138 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            },
+            {
+              "graph_type_quantites": "Pie chart"
+            }
+          ],
+          "output_name": null
+        },
+        {
+          "name": "outlier_detection",
+          "method": "local_outlier_factor",
+          "parameters": {
+            "number_of_neighbors": 3
+          },
+          "output_name": null
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.5
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "t_test",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "fc_threshold": 1,
+            "log_base": "",
+            "grouping": "Characteristics[disease]",
+            "group1": "normal",
+            "group2": "ischemic cardiomyopathy",
+            "metadata_df": ""
+          },
+          "output_name": "t-test_data"
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "GO_analysis_with_Enrichr",
+          "parameters": {
+            "proteins_df": [
+              "t-test_data",
+              "de_proteins_df"
+            ],
+            "differential_expression_col": "log2_fold_change",
+            "gene_sets_field": "Upload a file (recommended)",
+            "gene_sets_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\ReactomePathways.gmt",
+            "direction": "both",
+            "organism": "human",
+            "background_field": "Upload a file (recommended)",
+            "background_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\hf_imported_bg.csv"
+          }
+        }
+      ]
+    }
+  }
+}

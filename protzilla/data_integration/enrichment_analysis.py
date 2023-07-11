@@ -322,8 +322,8 @@ def gseapy_enrichment(
     :type background: list or None
     :param offline: whether to run the enrichment offline
     :type offline: bool
-    :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
-    :rtype: tuple[pandas.DataFrame, list, list]
+    :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
+    :rtype: tuple[pandas.DataFrame, list, dict]
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
     gene_to_groups, _, filtered_groups = database_query.uniprot_groups_to_genes(
@@ -353,7 +353,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
     else:
         try:
@@ -369,7 +369,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(

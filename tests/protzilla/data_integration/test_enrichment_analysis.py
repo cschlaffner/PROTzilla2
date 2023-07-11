@@ -1007,7 +1007,6 @@ def test_gsea(mock_mapping, data_folder_tests):
         numerical_columns
     ].astype(float)
     for column in numerical_columns:
-        expected_enrichment_df[column]
         numerical_equal = np.isclose(
             expected_enrichment_df[column],
             current_out["enrichment_df"][column],
