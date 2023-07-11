@@ -1,3 +1,4 @@
+import pandas
 import pandas as pd
 from django.contrib import messages
 
@@ -65,3 +66,22 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
                 new_column.append(";".join(map(str, group_values)))
         dataframe[field] = new_column
     return {"results_df": dataframe}
+
+
+def gene_mapping(dataframe, databases):
+    try:
+        groups = dataframe["Protein ID"].unique().tolist()
+    except KeyError:
+        msg = "No Protein ID column found."
+        return dict(
+            mapping={},
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+
+    gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
+        groups, databases
+    )
+    return {"mapping": groups_to_genes}
+
+
+print(gene_mapping(pandas.DataFrame({"Protein ID": ["P10636"]}), []))

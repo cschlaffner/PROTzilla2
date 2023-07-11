@@ -70,7 +70,7 @@ def uniprot_databases():
     return sorted(databases)
 
 
-def uniprot_to_genes(uniprot_ids):
+def uniprot_to_genes(uniprot_ids, databases):
     """
     Maps uniprot IDs to hgnc gene symbols. Also returns IDs that could not be mapped.
     First uses all uniprot databases that contain genes, then uses biomart to map
@@ -78,6 +78,8 @@ def uniprot_to_genes(uniprot_ids):
 
     :param uniprot_ids: cleaned uniprot IDs, not containing isoforms or other modifications
     :type uniprot_ids: list[str]
+    :param databases: names of uniprot databases that should be used for mapping
+    :type databases: list[str]
     :return: a dict that maps uniprot ids to genes and a list of uniprot ids that were not found
     :rtype: tuple[dict[str, str], list[str]]
     """
@@ -91,11 +93,11 @@ def uniprot_to_genes(uniprot_ids):
         return gene_mapping, added_keys
 
     logger.info("Mapping to map uniprot IDs to genes.")
-    available_databases = uniprot_databases()
-    logger.info(f"Found {len(available_databases)} uniprot databases.")
+    # available_databases = uniprot_databases()
+    # logger.info(f"Found {len(available_databases)} uniprot databases.")
     out_dict = {}
     ids_to_search = set(uniprot_ids)
-    for db_name in available_databases:
+    for db_name in databases:
         # all available databases that have a gene column are used
         cols = uniprot_columns(db_name)
         if "Gene Names (primary)" in cols:
@@ -136,12 +138,12 @@ def uniprot_to_genes(uniprot_ids):
     return out_dict, list(not_found)
 
 
-def uniprot_groups_to_genes(uniprot_groups):
+def uniprot_groups_to_genes(uniprot_groups, databases):
     proteins = set()
     for group in uniprot_groups:
         for protein in group.split(";"):
             proteins.add(clean_uniprot_id(protein))
-    id_to_gene, not_found = uniprot_to_genes(list(proteins))
+    id_to_gene, not_found = uniprot_to_genes(list(proteins), databases)
     group_to_genes = {}
     gene_to_groups = defaultdict(list)
     filtered = []
