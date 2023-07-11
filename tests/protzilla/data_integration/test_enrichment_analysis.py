@@ -21,7 +21,7 @@ from protzilla.data_integration.enrichment_analysis import (
     GO_analysis_with_Enrichr,
     GO_analysis_with_STRING,
     merge_up_down_regulated_dfs_restring,
-    merge_up_down_regulated_proteins_results,
+    merge_up_down_regulated_dfs_gseapy,
 )
 from protzilla.data_integration.enrichment_analysis_gsea import (
     create_genes_intensity_wide_df,
@@ -772,7 +772,7 @@ def test_merge_up_down_regulated_proteins_results():
         }
     )
 
-    merged = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+    merged = merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched)
     merged.set_index(["Gene_set", "Term"], inplace=True)
     expected_output.set_index(["Gene_set", "Term"], inplace=True)
     merged = merged.sort_index()
