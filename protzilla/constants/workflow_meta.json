@@ -2604,7 +2604,7 @@
               null
             ],
             "fill_dynamic": [
-              "categories"
+              "gene_sets"
             ]
           },
           "gene_sets": {
