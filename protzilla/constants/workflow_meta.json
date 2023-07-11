@@ -2091,7 +2091,7 @@
       },
       "variation_graph": {
         "name": "Protein Variation Graph",
-        "description" : "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "description": "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
@@ -2121,7 +2121,9 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
@@ -2170,7 +2172,9 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
@@ -2262,13 +2266,13 @@
             "dynamic": true
           },
           "background_number": {
-              "name": "Number of expressed genes",
-              "type": "numeric",
-              "min": 1,
-              "max": 4294967295,
-              "step": 1,
-              "default": null,
-              "dynamic": true
+            "name": "Number of expressed genes",
+            "type": "numeric",
+            "min": 1,
+            "max": 4294967295,
+            "step": 1,
+            "default": null,
+            "dynamic": true
           },
           "background_biomart": {
             "name": "Biomart dataset",
@@ -2291,7 +2295,9 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
@@ -2339,13 +2345,13 @@
             "dynamic": true
           },
           "background_number": {
-              "name": "Number of expressed genes",
-              "type": "numeric",
-              "min": 1,
-              "max": 4294967295,
-              "step": 1,
-              "default": null,
-              "dynamic": true
+            "name": "Number of expressed genes",
+            "type": "numeric",
+            "min": 1,
+            "max": 4294967295,
+            "step": 1,
+            "default": null,
+            "dynamic": true
           }
         }
       },
@@ -2562,6 +2568,26 @@
       }
     },
     "database_integration": {
+      "gene_mapping": {
+        "name": "Gene Mapping",
+        "description": "Map protein groups to genes",
+        "parameters": {
+          "dataframe": {
+            "name": "Dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "database_names": {
+            "name": "Database Name",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "uniprot_databases"
+          }
+        }
+      },
       "uniprot": {
         "name": "Uniprot",
         "description": "Add Uniprot data to a dataframe",

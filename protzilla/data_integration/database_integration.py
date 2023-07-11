@@ -68,7 +68,7 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
     return {"results_df": dataframe}
 
 
-def gene_mapping(dataframe, databases):
+def gene_mapping(dataframe, database_names):
     try:
         groups = dataframe["Protein ID"].unique().tolist()
     except KeyError:
@@ -77,11 +77,14 @@ def gene_mapping(dataframe, databases):
             mapping={},
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
-
+    if isinstance(database_names, str):
+        database_names = [database_names]
     gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
-        groups, databases
+        groups, database_names
     )
     return {"mapping": groups_to_genes}
 
 
-print(gene_mapping(pandas.DataFrame({"Protein ID": ["P10636"]}), []))
+print(
+    gene_mapping(pandas.DataFrame({"Protein ID": ["P10636;P10637"]}), ["all_reviewed"])
+)
