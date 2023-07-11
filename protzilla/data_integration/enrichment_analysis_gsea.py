@@ -361,6 +361,12 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    intensity_name = protein_df.columns[3]
+    # cannot use log2_ratio_of_classes if there are negative values
+    if ranking_method == "log2_ratio_of_classes" and (protein_df[intensity_name] < 0).any():
+        msg = "Negative values in the dataframe. Please use a different ranking method."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
@@ -403,11 +409,6 @@ def gsea(
     for sample in samples:
         group_label = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
         class_labels.append(group_label)
-
-    # cannot use log2_ratio_of_classes if there are negative values
-    if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():
-        msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     logger.info("Running GSEA")
     try:
