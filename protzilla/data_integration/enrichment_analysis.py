@@ -332,9 +332,11 @@ def gseapy_enrichment(
     :rtype: tuple[pandas.DataFrame, list, list]
     """
     logger.info("Mapping Uniprot IDs to gene symbols")
-    gene_to_groups = gene_mapping["gene_to_groups"]
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
     genes = list(gene_to_groups.keys())
-    filtered_groups = set(protein_list) - set(gene_mapping["group_to_genes"].keys())
+    filtered_groups = set(protein_list) - set(
+        gene_mapping.get("group_to_genes", {}).keys()
+    )
 
     if not genes:
         msg = (
@@ -389,6 +391,7 @@ def GO_analysis_with_Enrichr(
     proteins_df,
     organism,
     differential_expression_col,
+    gene_mapping,
     direction="both",
     gene_sets_path=None,
     gene_sets_enrichr=None,
@@ -414,6 +417,8 @@ def GO_analysis_with_Enrichr(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
@@ -530,6 +535,7 @@ def GO_analysis_with_Enrichr(
             up_protein_list,
             gene_sets,
             direction="up",
+            gene_mapping=gene_mapping,
             organism=organism,
             background=background,
         )
@@ -542,6 +548,7 @@ def GO_analysis_with_Enrichr(
             down_protein_list,
             gene_sets,
             direction="down",
+            gene_mapping=gene_mapping,
             organism=organism,
             background=background,
         )
@@ -577,6 +584,7 @@ def GO_analysis_offline(
     proteins_df,
     gene_sets_path,
     differential_expression_col,
+    gene_mapping,
     direction="both",
     background_path=None,
     background_number=None,
@@ -598,6 +606,8 @@ def GO_analysis_offline(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param gene_sets_path: path to file containing gene sets. The identifiers
         in the gene_sets should be uppercase gene symbols.
 
@@ -692,6 +702,7 @@ def GO_analysis_offline(
             up_protein_list,
             gene_sets,
             direction="up",
+            gene_mapping=gene_mapping,
             background=background,
             offline=True,
         )
@@ -704,6 +715,7 @@ def GO_analysis_offline(
             down_protein_list,
             gene_sets,
             direction="down",
+            gene_mapping=gene_mapping,
             background=background,
             offline=True,
         )

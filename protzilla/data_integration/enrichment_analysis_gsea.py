@@ -160,8 +160,8 @@ def gsea_preranked(
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    group_to_genes = gene_mapping["group_to_genes"]
-    gene_to_groups = gene_mapping["gene_to_groups"]
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
     filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
@@ -394,8 +394,8 @@ def gsea(
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    group_to_genes = gene_mapping["group_to_genes"]
-    gene_to_groups = gene_mapping["gene_to_groups"]
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
     filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
