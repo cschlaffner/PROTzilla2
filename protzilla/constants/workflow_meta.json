@@ -2613,18 +2613,15 @@
             ]
           },
           "database_names": {
-            "name": "Database Name",
+            "name": "Uniprot Database Name",
             "type": "categorical",
             "multiple": true,
             "fill": "uniprot_databases"
           },
           "use_biomart": {
-            "name": "Use biomart after Uniprot databases",
-            "type": "categorical",
-            "categories": [
-              "Yes",
-              "No"
-            ]
+            "name": "Use Biomart after Uniprot databases",
+            "type": "boolean",
+            "default": false
           }
         }
       },

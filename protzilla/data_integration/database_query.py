@@ -97,7 +97,7 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
                 added_keys.add(key)
         return gene_mapping, added_keys
 
-    logger.info("Mapping to map uniprot IDs to genes.")
+    logger.info("Mapping Uniprot IDs to genes.")
     out_dict = {}
     ids_to_search = set(uniprot_ids)
     for db_name in databases:
@@ -123,6 +123,7 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
             )
             return out_dict, []
     if not use_biomart:
+        logger.info("Skipping biomart, done with mapping uniprot IDs to genes.")
         return out_dict, list(ids_to_search)
     logger.info("Starting biomart mapping.")
     biomart_results = list(

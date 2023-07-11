@@ -67,7 +67,7 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
     return {"results_df": dataframe}
 
 
-def gene_mapping(dataframe, database_names, use_biomart):
+def gene_mapping(dataframe, database_names, use_biomart=False):
     try:
         groups = dataframe["Protein ID"].unique().tolist()
     except KeyError:
@@ -77,7 +77,6 @@ def gene_mapping(dataframe, database_names, use_biomart):
         )
     if isinstance(database_names, str):
         database_names = [database_names]
-    use_biomart = use_biomart if isinstance(use_biomart, bool) else use_biomart == "Yes"
     gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
         groups, database_names, use_biomart=use_biomart
     )
