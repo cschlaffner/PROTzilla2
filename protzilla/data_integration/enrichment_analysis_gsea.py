@@ -363,7 +363,10 @@ def gsea(
 
     intensity_name = protein_df.columns[3]
     # cannot use log2_ratio_of_classes if there are negative values
-    if ranking_method == "log2_ratio_of_classes" and (protein_df[intensity_name] < 0).any():
+    if (
+        ranking_method == "log2_ratio_of_classes"
+        and (protein_df[intensity_name] < 0).any()
+    ):
         msg = "Negative values in the dataframe. Please use a different ranking method."
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
