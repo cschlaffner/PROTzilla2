@@ -2091,7 +2091,7 @@
       },
       "variation_graph": {
         "name": "Protein Variation Graph",
-        "description" : "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "description": "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
@@ -2121,7 +2121,9 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
@@ -2170,13 +2172,23 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
             "type": "categorical",
             "fill": "protein_df_columns",
             "default": null
+          },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           },
           "gene_sets_field": {
             "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
@@ -2262,13 +2274,13 @@
             "dynamic": true
           },
           "background_number": {
-              "name": "Number of expressed genes",
-              "type": "numeric",
-              "min": 1,
-              "max": 4294967295,
-              "step": 1,
-              "default": null,
-              "dynamic": true
+            "name": "Number of expressed genes",
+            "type": "numeric",
+            "min": 1,
+            "max": 4294967295,
+            "step": 1,
+            "default": null,
+            "dynamic": true
           },
           "background_biomart": {
             "name": "Biomart dataset",
@@ -2291,13 +2303,23 @@
               null,
               null
             ],
-            "fill_dynamic": ["differential_expression_col"]
+            "fill_dynamic": [
+              "differential_expression_col"
+            ]
           },
           "differential_expression_col": {
             "name": "Column name with differential expression values indicating direction of change",
             "type": "categorical",
             "fill": "protein_df_columns",
             "default": null
+          },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           },
           "gene_sets_path": {
             "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
@@ -2339,13 +2361,13 @@
             "dynamic": true
           },
           "background_number": {
-              "name": "Number of expressed genes",
-              "type": "numeric",
-              "min": 1,
-              "max": 4294967295,
-              "step": 1,
-              "default": null,
-              "dynamic": true
+            "name": "Number of expressed genes",
+            "type": "numeric",
+            "min": 1,
+            "max": 4294967295,
+            "step": 1,
+            "default": null,
+            "dynamic": true
           }
         }
       },
@@ -2355,6 +2377,14 @@
         "parameters": {
           "protein_df": {
             "name": "Dataframe with Protein IDs, Samples and intensities",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "gene_mapping": {
+            "name": "Gene mapping",
             "type": "named_output",
             "default": [
               null,
@@ -2497,6 +2527,14 @@
             ],
             "default": "ascending"
           },
+          "gene_mapping": {
+            "name": "Gene mapping",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
           "gene_sets_field": {
             "name": "How do you want to provide the gene sets? (reselect to show dynamic fields)",
             "type": "categorical_dynamic",
@@ -2562,6 +2600,31 @@
       }
     },
     "database_integration": {
+      "gene_mapping": {
+        "name": "Gene Mapping",
+        "description": "Map protein groups to genes",
+        "parameters": {
+          "dataframe": {
+            "name": "Dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "database_names": {
+            "name": "Uniprot Database Name",
+            "type": "categorical",
+            "multiple": true,
+            "fill": "uniprot_databases"
+          },
+          "use_biomart": {
+            "name": "Use Biomart after Uniprot databases",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
       "uniprot": {
         "name": "Uniprot",
         "description": "Add Uniprot data to a dataframe",

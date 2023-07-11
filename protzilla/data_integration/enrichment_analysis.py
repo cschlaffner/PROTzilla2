@@ -1,4 +1,3 @@
-import os
 import time
 
 import gseapy
@@ -8,7 +7,6 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
-from protzilla.data_integration import database_query
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -145,8 +143,8 @@ def GO_analysis_with_STRING(
     out_messages = []
     if (
         not isinstance(proteins_df, pd.DataFrame)
-        or not "Protein ID" in proteins_df.columns
-        or not differential_expression_col in proteins_df.columns
+        or "Protein ID" not in proteins_df.columns
+        or differential_expression_col not in proteins_df.columns
         or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
@@ -302,7 +300,13 @@ def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
 
 
 def gseapy_enrichment(
-    protein_list, protein_sets, direction, organism=None, background=None, offline=False
+    protein_list,
+    protein_sets,
+    direction,
+    gene_mapping,
+    organism=None,
+    background=None,
+    offline=False,
 ):
     """
     A helper method for the enrichment analysis with GSEApy. It maps the proteins to uppercase gene symbols
@@ -310,14 +314,16 @@ def gseapy_enrichment(
     else it is run via Enrichr API. It returns the enrichment results and the groups that
     were filtered out because no gene symbol could be found.
 
-    :param protein_list: list of proteins
+    :param protein_list: protein groups that should be analysed
     :type protein_list: list
-    :param protein_sets: list of protein sets to perform the enrichment analysis with
+    :param protein_sets: protein sets to perform the enrichment analysis with
     :type protein_sets: list
-    :param organism: organism, not used when offline is True
-    :type organism: str
     :param direction: direction of regulation ("up" or "down")
     :type direction: str
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
+    :param organism: organism, not used when offline is True
+    :type organism: str
     :param background: background for the enrichment analysis
     :type background: list or None
     :param offline: whether to run the enrichment offline
@@ -325,12 +331,13 @@ def gseapy_enrichment(
     :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
     :rtype: tuple[pandas.DataFrame, list, list]
     """
-    logger.info("Mapping Uniprot IDs to gene symbols")
-    gene_to_groups, _, filtered_groups = database_query.uniprot_groups_to_genes(
-        protein_list
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
+    genes = list(gene_to_groups.keys())
+    filtered_groups = set(protein_list) - set(
+        gene_mapping.get("group_to_genes", {}).keys()
     )
 
-    if not gene_to_groups:
+    if not genes:
         msg = (
             "No gene symbols could be found for the proteins. Please check your input."
         )
@@ -342,7 +349,7 @@ def gseapy_enrichment(
     if offline:
         try:
             enriched = gseapy.enrich(
-                gene_list=list(gene_to_groups.keys()),
+                gene_list=genes,
                 gene_sets=protein_sets,
                 background=background,
                 no_plot=True,
@@ -358,7 +365,7 @@ def gseapy_enrichment(
     else:
         try:
             enriched = gseapy.enrichr(
-                gene_list=list(gene_to_groups.keys()),
+                gene_list=genes,
                 gene_sets=protein_sets,
                 background=background,
                 organism=organism,
@@ -376,13 +383,14 @@ def gseapy_enrichment(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
     logger.info(f"Finished analysis for {direction}regulated proteins")
-    return enriched, filtered_groups, None
+    return enriched, list(filtered_groups), None
 
 
 def GO_analysis_with_Enrichr(
     proteins_df,
     organism,
     differential_expression_col,
+    gene_mapping,
     direction="both",
     gene_sets_path=None,
     gene_sets_enrichr=None,
@@ -408,6 +416,8 @@ def GO_analysis_with_Enrichr(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param gene_sets_path: path to file with gene sets
          The file can be a .csv, .txt, .json or .gmt file.
         .gmt files are not parsed because GSEApy can handle them directly.
@@ -524,6 +534,7 @@ def GO_analysis_with_Enrichr(
             up_protein_list,
             gene_sets,
             direction="up",
+            gene_mapping=gene_mapping,
             organism=organism,
             background=background,
         )
@@ -536,6 +547,7 @@ def GO_analysis_with_Enrichr(
             down_protein_list,
             gene_sets,
             direction="down",
+            gene_mapping=gene_mapping,
             organism=organism,
             background=background,
         )
@@ -571,6 +583,7 @@ def GO_analysis_offline(
     proteins_df,
     gene_sets_path,
     differential_expression_col,
+    gene_mapping,
     direction="both",
     background_path=None,
     background_number=None,
@@ -592,6 +605,8 @@ def GO_analysis_offline(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param gene_sets_path: path to file containing gene sets. The identifiers
         in the gene_sets should be uppercase gene symbols.
 
@@ -686,6 +701,7 @@ def GO_analysis_offline(
             up_protein_list,
             gene_sets,
             direction="up",
+            gene_mapping=gene_mapping,
             background=background,
             offline=True,
         )
@@ -698,6 +714,7 @@ def GO_analysis_offline(
             down_protein_list,
             gene_sets,
             direction="down",
+            gene_mapping=gene_mapping,
             background=background,
             offline=True,
         )

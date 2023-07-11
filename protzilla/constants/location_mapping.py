@@ -227,6 +227,11 @@ method_map = {
         "database_integration",
         "uniprot",
     ): database_integration.add_uniprot_data,
+    (
+        "data_integration",
+        "database_integration",
+        "gene_mapping",
+    ): database_integration.gene_mapping,
 }
 
 # reversed mapping of method callable and location
