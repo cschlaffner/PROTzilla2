@@ -44,7 +44,11 @@ def biomart_query(queries, filter_name, attributes):
     except requests.ConnectionError:
         return
     for line in response.iter_lines():
-        yield line.decode("utf-8").split("\t")
+        decoded = line.decode("utf-8")
+        if decoded == "<html>" or len(tabbed := decoded.split("\t")) != len(attributes):
+            logger.warning("biomart query failed")
+            return
+        yield tabbed
 
 
 def uniprot_query_dataframe(filename, uniprot_ids, fields):

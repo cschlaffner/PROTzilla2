@@ -193,21 +193,22 @@ def gsea_preranked(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
-            verbose=True,
             threads=threads,
+            verbose=True,
+            no_plot=True,
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = preranked_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = preranked_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": preranked_result.ranking,
     }
     out_dict.update(preranked_result.results)
@@ -360,6 +361,12 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    intensity_name = protein_df.columns[3]
+    # cannot use log2_ratio_of_classes if there are negative values
+    if ranking_method == "log2_ratio_of_classes" and (protein_df[intensity_name] < 0).any():
+        msg = "Negative values in the dataframe. Please use a different ranking method."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
@@ -403,11 +410,6 @@ def gsea(
         group_label = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
         class_labels.append(group_label)
 
-    # cannot use log2_ratio_of_classes if there are negative values
-    if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():
-        msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-
     logger.info("Running GSEA")
     try:
         gsea_result = gseapy.gsea(
@@ -422,21 +424,22 @@ def gsea(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
-            verbose=True,
             threads=threads,
+            verbose=True,
+            no_plot=True,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = gsea_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = gsea_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": gsea_result.ranking,
     }
     out_dict.update(gsea_result.results)
