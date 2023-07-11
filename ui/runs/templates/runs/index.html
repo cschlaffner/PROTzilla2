@@ -35,7 +35,7 @@
     </div>
 
     <div class="col mx-4">
-      <form action="{% url 'runs:continue' %}" method="post">
+      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
           <h3>Continue an existing Run:</h3>
@@ -47,6 +47,7 @@
         </div>
         <input type="submit" value="Continue" class="btn btn-red">
       </form>
+    <a class="btn btn-grey" href="{% url 'databases' %}">Manage Databases</a>
     </div>
   </div>
 </div>

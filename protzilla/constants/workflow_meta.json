@@ -1096,12 +1096,80 @@
               null
             ]
           },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
           "n_clusters": {
-            "name": "Number of clusters to form",
+            "name": "Number of clusters to find",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 8
+            "default": 8,
+            "multiple": true
           },
           "random_state": {
             "name": "Seed for centroid initialisation",
@@ -1109,7 +1177,8 @@
             "min": 0,
             "max": 4294967295,
             "step": 1,
-            "default": 6
+            "default": 6,
+            "multiple": true
           },
           "init_centroid_strategy": {
             "name": "Method for initialisation of centroids",
@@ -1118,27 +1187,291 @@
               "k-means++",
               "random"
             ],
-            "default": "random"
+            "default": "random",
+            "multiple": true
           },
           "n_init": {
             "name": "Number of times the k-means algorithm is run with different centroid seeds",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 10
+            "default": 10,
+            "multiple": true
           },
           "max_iter": {
             "name": "Maximum number of iterations of the k-means algorithm for a single run.",
             "type": "numeric",
             "min": 1,
             "step": 1,
-            "default": 300
+            "default": 300,
+            "multiple": true
           },
           "tolerance": {
             "name": "Relative tolerance with regards to Frobenius norm",
             "type": "numeric",
             "min": 0,
-            "default": 1e-4
+            "default": 1e-4,
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      },
+      "expectation_maximisation": {
+        "name": "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models",
+        "description": "",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
+          "n_components": {
+            "name": "The number of mixture components",
+            "type": "numeric",
+            "default": 1,
+            "multiple": true
+          },
+          "reg_covar": {
+            "name": "Non-negative regularization added to the diagonal of covariance",
+            "type": "numeric",
+            "default": 1e-6,
+            "multiple": true
+          },
+          "covariance_type": {
+            "name": "Type of covariance",
+            "type": "categorical",
+            "categories": [
+              "full",
+              "tied",
+              "diag",
+              "spherical"
+            ],
+            "default": "full",
+            "multiple": true
+          },
+          "init_params": {
+            "name": "The method used to initialize the weights, the means and the precisions.",
+            "type": "categorical",
+            "categories": [
+              "kmeans",
+              "k-means++",
+              "random",
+              "random_from_data"
+            ],
+            "default": "kmeans",
+            "multiple": true
+          },
+          "max_iter": {
+            "name": "The number of iterations to perform",
+            "type": "numeric",
+            "default": 100,
+            "multiple": true
+          },
+          "random_state": {
+            "name": "Seed for random number generation",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "step": 1,
+            "default": 6
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          }
+        }
+      },
+      "hierarchical_agglomerative_clustering": {
+        "name": "Hierarchical agglomerative clustering",
+        "description": "Performs hierarchical clustering utilizing a bottom-up approach",
+        "parameters": {
+          "input_df": {
+            "name": "Choose input dataframe",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "fill_dynamic": [
+              "positive_label"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "positive_label": {
+            "name": "Choose positive class",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "model_selection": {
+            "name": "Choose strategy to perform parameter fine-tuning",
+            "type": "categorical_dynamic",
+            "categories": [
+              "Grid search",
+              "Randomized search",
+              "Manual"
+            ],
+            "default": "Grid search",
+            "dynamic_parameters": {
+              "Grid search": [
+                "model_selection_scoring"
+              ],
+              "Randomized search": [
+                "model_selection_scoring"
+              ]
+            }
+          },
+          "model_selection_scoring": {
+            "name": "Select a scoring for identifying the best estimator following a grid search",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "dynamic": true
+          },
+          "scoring": {
+            "name": "score",
+            "type": "categorical",
+            "categories": [
+              "adjusted_rand_score",
+              "completeness_score",
+              "fowlkes_mallows_score",
+              "homogeneity_score",
+              "mutual_info_score",
+              "normalized_mutual_info_score",
+              "rand_score",
+              "v_measure_score"
+            ],
+            "default": "adjusted_rand_score",
+            "multiple": true
+          },
+          "n_clusters": {
+            "name": "Number of clusters to find",
+            "type": "numeric",
+            "min": 1,
+            "step": 1,
+            "default": 2,
+            "multiple": true
+          },
+          "metric": {
+            "name": "Distance metric",
+            "type": "categorical",
+            "categories": [
+              "euclidean",
+              "manhattan",
+              "cosine",
+              "l1",
+              "l2"
+            ],
+            "default": "euclidean",
+            "multiple": true
+          },
+          "linkage": {
+            "name": "The linkage criterion to use in order to to determine the distance to use between sets of observation",
+            "type": "categorical",
+            "categories": [
+              "ward",
+              "complete",
+              "average",
+              "single"
+            ],
+            "default": "ward",
+            "multiple": true
+          },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
           }
         }
       }
@@ -1164,14 +1497,14 @@
               "positive_label"
             ],
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "positive_label": {
             "name": "Choose positive class",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1367,7 +1700,7 @@
             "type": "categorical",
             "fill": "metadata_columns",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "test_size": {
             "name": "Test size",
@@ -1388,7 +1721,7 @@
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
-            "default": "None"
+            "default": null
           },
           "validation_strategy": {
             "name": "Validation Strategy",
@@ -1777,11 +2110,11 @@
   },
   "data_integration": {
     "enrichment_analysis": {
-      "go_analysis_with_STRING": {
+      "GO_analysis_with_STRING": {
         "name": "GO Analysis with STRING",
         "description": "Online GO Analysis using STRING API",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -1796,8 +2129,8 @@
             "fill": "protein_df_columns",
             "default": null
           },
-          "protein_set_dbs": {
-            "name": "Protein Set Libraries",
+          "gene_sets_restring": {
+            "name": "Knowledge bases for enrichment",
             "type": "categorical",
             "fill": "dbs_restring",
             "categories": [],
@@ -1819,18 +2152,18 @@
             ],
             "default": "both"
           },
-          "background": {
+          "background_path": {
             "name": "Background set (no upload = entire proteome)",
             "type": "file",
             "default": null
           }
         }
       },
-      "go_analysis_with_enrichr": {
+      "GO_analysis_with_Enrichr": {
         "name": "GO Analysis with Enrichr",
         "description": "Online GO Analysis using Enrichr API",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -1911,7 +2244,7 @@
             ],
             "default": "Upload a file (recommended)",
             "dynamic_parameters": {
-              "Upload a file": [
+              "Upload a file (recommended)": [
                 "background_path"
               ],
               "Specify number of expressed genes (not recommended)": [
@@ -1947,11 +2280,11 @@
           }
         }
       },
-      "go_analysis_offline": {
+      "GO_analysis_offline": {
         "name": "GO Analysis offline",
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
-          "proteins": {
+          "proteins_df": {
             "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
@@ -1966,7 +2299,7 @@
             "fill": "protein_df_columns",
             "default": null
           },
-          "protein_sets_path": {
+          "gene_sets_path": {
             "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null
@@ -2061,10 +2394,29 @@
             "dynamic": true
           },
           "grouping": {
-            "name": "Grouping for Samples",
+            "name": "Grouping from metadata",
             "type": "categorical",
             "fill": "metadata_columns",
-            "default": "None"
+            "fill_dynamic": [
+              "group1",
+              "group2"
+            ],
+            "categories": [],
+            "default": null
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "categorical",
+            "fill": "metadata_column_data",
+            "categories": [],
+            "default": null
           },
           "min_size": {
             "name": "Minimum number of genes from gene set also in data",
@@ -2240,7 +2592,7 @@
       }
     },
     "plot": {
-      "go_enrichment_bar_plot": {
+      "GO_enrichment_bar_plot": {
         "name": "Bar plot for GO enrichment analysis",
         "description": "Creates a bar plot from GO enrichment data",
         "parameters": {
@@ -2252,11 +2604,11 @@
               null
             ],
             "fill_dynamic": [
-              "categories"
+              "gene_sets"
             ]
           },
-          "categories": {
-            "name": "Categories/Sets to be plotted",
+          "gene_sets": {
+            "name": "Sets to be plotted",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
@@ -2298,7 +2650,7 @@
           }
         }
       },
-      "go_enrichment_dot_plot": {
+      "GO_enrichment_dot_plot": {
         "name": "Dot plot for GO enrichment analysis (offline & with Enrichr) ",
         "description": "Creates a categorical scatter plot from GO enrichment data",
         "parameters": {
@@ -2310,7 +2662,7 @@
               null
             ],
             "fill_dynamic": [
-              "categories"
+              "gene_sets"
             ]
           },
           "x_axis_type": {
@@ -2322,8 +2674,8 @@
             ],
             "default": "Gene Sets"
           },
-          "categories": {
-            "name": "Categories/Sets to be plotted (if this is empty, try reselecting 'results' from your chosen input)",
+          "gene_sets": {
+            "name": "Sets to be plotted (if this is empty, try reselecting the enrichment dataframe from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "enrichment_categories"
