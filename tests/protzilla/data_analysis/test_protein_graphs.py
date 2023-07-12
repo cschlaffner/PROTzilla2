@@ -1356,22 +1356,22 @@ def test_peptides_to_isoform_integration_test_shortcut(
     nx.set_node_attributes(
         planned_graph,
         {
-            "n0": {"accession": "test_protein_variation_shortcut"},
+            "n0": {"accession": "test_protein-shortcut"},
             "n1": {
-                "accession": "test_protein_variation_shortcut",
+                "accession": "test_protein-shortcut",
                 "match": "true",
                 "peptides": "ABCDEGA",
             },
-            "n2": {"accession": "test_protein_variation_shortcut"},
-            "n3": {"accession": "test_protein_variation_shortcut"},
+            "n2": {"accession": "test_protein-shortcut"},
+            "n3": {"accession": "test_protein-shortcut"},
             "n4": {
                 "aminoacid": "BCDET",
                 "match": "false",
-                "accession": "test_protein_variation_shortcut",
+                "accession": "test_protein-shortcut",
             },
             "n5": {
                 "match": "true",
-                "accession": "test_protein_variation_shortcut",
+                "accession": "test_protein-shortcut",
                 "peptides": "ABCDEGA;ABCEGA",
             },
         },
