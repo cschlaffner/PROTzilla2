@@ -253,7 +253,7 @@ def GO_analysis_with_STRING(
     return {"enrichment_df": merged_df}
 
 
-def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
+def merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched):
     """
     A method that merges the results for up- and downregulated proteins for the GSEApy
     enrichment results. If a Gene_set and Term combination is present in both dataframes,
@@ -557,7 +557,7 @@ def GO_analysis_with_Enrichr(
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
@@ -724,7 +724,7 @@ def GO_analysis_offline(
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
