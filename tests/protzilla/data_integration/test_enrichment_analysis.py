@@ -653,7 +653,6 @@ def test_GO_analysis_offline_background(
         protein_sets_path=data_folder_tests / "protein_sets.txt",
         background_path=background_path,
         direction="down",
-        background_path=background_path,
         gene_mapping=offline_mock_mapping,
     )
     df = current_out["enrichment_df"]

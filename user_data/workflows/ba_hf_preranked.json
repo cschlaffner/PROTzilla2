@@ -143,7 +143,7 @@
             ],
             "gene_sets_field": "Upload a file (recommended)",
             "gene_sets_path": "C:\\Users\\bzwad\\Documents\\Uni\\WS22_23\\BP\\PROTzilla2\\user_data\\data\\ReactomePathways.gmt",
-            "min_size": 15,
+            "min_size": 1,
             "max_size": 500,
             "number_of_permutations": 1000,
             "permutation_type": "phenotype",

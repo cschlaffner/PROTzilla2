@@ -144,7 +144,7 @@
             "grouping": "Characteristics[disease]",
             "group1": "normal",
             "group2": "ischemic cardiomyopathy",
-            "min_size": 15,
+            "min_size": 1,
             "max_size": 500,
             "number_of_permutations": 1000,
             "permutation_type": "phenotype",
