@@ -7,6 +7,7 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+from protzilla.utilities.utilities import clean_uniprot_id
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
@@ -205,7 +206,12 @@ def GO_analysis_with_STRING(
     if direction == "up" or direction == "both":
         logger.info("Starting analysis for upregulated proteins")
 
-        up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
+        up_protein_ids = []
+        up_protein_ids.extend(
+            protein_group.split(";") for protein_group in up_protein_list
+        )
+        up_cleaned_ids = [clean_uniprot_id(protein_id) for protein_id in up_protein_ids]
+        up_df = get_functional_enrichment_with_delay(up_cleaned_ids, **string_params)
         if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
@@ -221,8 +227,15 @@ def GO_analysis_with_STRING(
     if direction == "down" or direction == "both":
         logger.info("Starting analysis for downregulated proteins")
 
+        down_protein_ids = []
+        down_protein_ids.extend(
+            protein_group.split(";") for protein_group in down_protein_list
+        )
+        down_cleaned_ids = [
+            clean_uniprot_id(protein_id) for protein_id in down_protein_ids
+        ]
         down_df = get_functional_enrichment_with_delay(
-            down_protein_list, **string_params
+            down_cleaned_ids, **string_params
         )
         if (
             down_df.empty
