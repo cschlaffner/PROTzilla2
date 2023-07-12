@@ -266,7 +266,7 @@ def GO_analysis_with_STRING(
     return {"enrichment_df": merged_df}
 
 
-def merge_up_down_regulated_proteins_results(up_enriched, down_enriched):
+def merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched):
     """
     A method that merges the results for up- and downregulated proteins for the GSEApy
     enrichment results. If a Gene_set and Term combination is present in both dataframes,
@@ -341,8 +341,8 @@ def gseapy_enrichment(
     :type background: list or None
     :param offline: whether to run the enrichment offline
     :type offline: bool
-    :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
-    :rtype: tuple[pandas.DataFrame, list, list]
+    :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
+    :rtype: tuple[pandas.DataFrame, list, dict]
     """
     gene_to_groups = gene_mapping.get("gene_to_groups", {})
     genes = list(gene_to_groups.keys())
@@ -373,7 +373,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
     else:
         try:
@@ -389,7 +389,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
@@ -570,7 +570,7 @@ def GO_analysis_with_Enrichr(
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
@@ -737,7 +737,7 @@ def GO_analysis_offline(
 
     if direction == "both":
         filtered_groups = up_filtered_groups + down_filtered_groups
-        enriched = merge_up_down_regulated_proteins_results(up_enriched, down_enriched)
+        enriched = merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched)
     else:
         enriched = up_enriched if direction == "up" else down_enriched
         filtered_groups = (
