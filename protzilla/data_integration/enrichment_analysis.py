@@ -328,8 +328,8 @@ def gseapy_enrichment(
     :type background: list or None
     :param offline: whether to run the enrichment offline
     :type offline: bool
-    :return: enrichment results, filtered groups, error message if occurred [level, msg, trace(optional)]
-    :rtype: tuple[pandas.DataFrame, list, list]
+    :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
+    :rtype: tuple[pandas.DataFrame, list, dict]
     """
     gene_to_groups = gene_mapping.get("gene_to_groups", {})
     genes = list(gene_to_groups.keys())
@@ -360,7 +360,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
     else:
         try:
@@ -376,7 +376,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                [dict(level=messages.ERROR, msg=error_msg, trace=str(e))],
+                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
