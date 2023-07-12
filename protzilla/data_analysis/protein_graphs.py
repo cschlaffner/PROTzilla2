@@ -15,6 +15,7 @@ from protzilla.constants.paths import RUNS_PATH
 def variation_graph(protein_id: str, run_name: str):
     """
     Wrapper function for creating a Protein-Variation-Graph for a given UniProt Protein.
+    VARIANT feature entries inserting amino acids are filtered out before graph creation
 
     For functionality see _create_protein_variation_graph
 

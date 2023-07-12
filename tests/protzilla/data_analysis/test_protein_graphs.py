@@ -294,12 +294,18 @@ def integration_test_peptides() -> pd.DataFrame:
             0,
             0.98734,
         ],
-        ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
-        ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
-        ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
+        ["Sample01", "test_protein_variation", "ZZZ", 0, 0.98734],
+        ["Sample02", "test_protein_variation", "ZZZ", np.NaN, 0.98734],
+        ["Sample03", "test_protein_variation", "ZZZ", 0, 0.98734],
         ["Sample01", "test_protein_variation", "ABCVEG", 9845, 0.98734],
-        ["Sample01", "test_protein_variation_shortcut", "ABCEGA", 93478.0, 0.98734],
-        ["Sample01", "test_protein_variation_shortcut", "ABCDEGA", 93478.0, 0.98734],
+        [
+            "Sample01",
+            "test_protein-shortcut;test_protein_variation",
+            "ABCEGA",
+            93478.0,
+            0.98734,
+        ],
+        ["Sample01", "test_protein-shortcut", "ABCDEGA", 93478.0, 0.98734],
     )
 
     peptide_df = pd.DataFrame(
@@ -1313,7 +1319,7 @@ def test_peptides_to_isoform_integration_test_shortcut(
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
-    protein_id = "test_protein_variation_shortcut"
+    protein_id = "test_protein-shortcut"
     test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
     test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
     shutil.copy(test_protein_path, test_protein_destination)
@@ -1437,7 +1443,7 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         ["Sample01", "test_protein_variation_long", "ABCFQ", 234, 0.87452],
         ["Sample01", "test_protein_variation_long", "ABCVTG", 234234.0, 0.87452],
         ["Sample01", "test_protein_variation_long", "ABCFLA", 234, 0.87452],
-        ["Sample01", "test_protein_variation_long", "FLA", 234, 0.87452],
+        ["Sample01", "test_protein_variation_long", "FLG", 234, 0.87452],
     )
     peptide_df = pd.DataFrame(
         data=peptide_protein_list,
@@ -1458,7 +1464,7 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABCFQ", "ABCVTG", "DEG"]
-    assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLA"]
+    assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLG"]
     assert out_dict["protein_id"] == protein_id
     assert out_dict["filtered_blocks"] == [
         [
