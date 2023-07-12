@@ -128,8 +128,7 @@ def handle_protein_ids(protein_group):
 
 
 def map_ids(extracted_ids):
-    id_to_uniprot = {}
-    # add multiple results? always try trempl?
+    id_to_uniprot = defaultdict(list)
     all_count = 0
     for identifier, matching_ids in extracted_ids.items():
         # print(" ".join(matching_ids))
@@ -145,14 +144,9 @@ def map_ids(extracted_ids):
         )
         for query, swiss in result:
             if swiss:
-                id_to_uniprot[query] = swiss
-        print(
-            "map",
-            len(id_to_uniprot),
-        )
+                id_to_uniprot[query].append(swiss)
         left = matching_ids - set(id_to_uniprot.keys())
-        print(len(matching_ids), len(set(q for q, t in result if t)))
-        #         tembl.remove(query)
+        # uniprotswissprot and uniprotsptrembl are non overlapping, so no problem
         result = list(
             biomart_query(
                 left,
@@ -162,15 +156,9 @@ def map_ids(extracted_ids):
         )
         for query, trembl in result:
             if trembl:
-                id_to_uniprot[query] = trembl
-        print(
-            "map",
-            len(id_to_uniprot),
-        )
-
-        print(len(set(q for q, t in result if t)))
+                id_to_uniprot[query].append(trembl)
     print(len(id_to_uniprot), all_count)
-    return id_to_uniprot
+    return dict(id_to_uniprot)
 
 
 def map_groups_to_uniprot(protein_groups):
@@ -182,29 +170,26 @@ def map_groups_to_uniprot(protein_groups):
 
     # go through groups, find protein ids
     extracted_ids = {k: set() for k in regex.keys()}
-    group_to_clean_ids = []
+    found_ids = []
     for group in protein_groups:
-        ids = group.split(";")
-        found = set()
-        for protein_id in ids:
+        found_in_group = set()
+        for protein_id in group.split(";"):
             for identifier, pattern in regex.items():
-                if m := pattern.search(protein_id):
-                    found_id = m.group(0)
+                if match := pattern.search(protein_id):
+                    found_id = match.group(0)
                     extracted_ids[identifier].add(found_id)
-                    found.add(found_id)
-                    break
-            # else:
-            #     print(f"{protein_id} not matched")
-        group_to_clean_ids.append(found)
+                    found_in_group.add(found_id)
+                    break  # can only match one regex
+        found_ids.append(found_in_group)
     id_to_uniprot = map_ids(extracted_ids)
-    print(id_to_uniprot)
     new_groups = []
-    for orig, found in zip(protein_groups, group_to_clean_ids):
-        # new_groups.append(new_group)
-        a = [id_to_uniprot.get(id_) for id_ in found]
-        x = ";".join(filter(bool, a))
-        new_groups.append(x)
-    # replace groups with new ids (if found)
+    for found in found_ids:
+        all_ids_of_group = set()
+        for old_id in found:
+            # check if uniprot?
+            new_ids = id_to_uniprot.get(old_id, [])
+            all_ids_of_group.update(new_ids)
+        new_groups.append(";".join(all_ids_of_group))
     return new_groups
 
 
