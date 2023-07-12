@@ -246,7 +246,7 @@ def create_genes_intensity_wide_df(
     """
     # (gene symbols in rows x samples in cols with intensities)
     protein_df_wide = long_to_wide(protein_df).transpose()
-    column_names = samples + ["Gene symbol"]
+    column_names = ["Gene symbol"] + samples
     processed_data = []
 
     for group in protein_groups:
@@ -255,7 +255,7 @@ def create_genes_intensity_wide_df(
         for gene in group_to_genes[group]:
             # if multiple genes per group, use same intensity value
             intensity_values = protein_df_wide.loc[group, :].tolist()
-            row_data = intensity_values + [gene]
+            row_data = [gene] + intensity_values
             processed_data.append(row_data)
 
     df = pd.DataFrame(processed_data, columns=column_names)
