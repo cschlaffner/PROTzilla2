@@ -163,9 +163,9 @@ def map_ids(extracted_ids):
 
 def map_groups_to_uniprot(protein_groups):
     regex = {
-        "ensembl_peptide_id": re.compile(r"ENSP\d{11}"),
-        "refseq_peptide": re.compile(r"NP_\d{6,}"),
-        "refseq_peptide_predicted": re.compile(r"XP_\d{9}"),
+        "ensembl_peptide_id": re.compile(r"^ENSP\d{11}"),
+        "refseq_peptide": re.compile(r"^NP_\d{6,}"),
+        "refseq_peptide_predicted": re.compile(r"^XP_\d{9}"),
     }
 
     # go through groups, find protein ids
