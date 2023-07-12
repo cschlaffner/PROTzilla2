@@ -43,7 +43,7 @@ def max_quant_import(_, file_path, intensity_name):
 
     df = pd.concat([id_df, intensity_df], axis=1)
     # sum intensities if id appears multiple times
-    df = df.groupby(["Protein IDs"]).sum().reset_index()
+    df = df.groupby(["Protein IDs"]).sum(numeric_only=True).reset_index()
 
     molten = pd.melt(
         df,
