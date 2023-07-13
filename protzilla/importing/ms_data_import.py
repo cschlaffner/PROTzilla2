@@ -145,8 +145,10 @@ def map_ids(extracted_ids):
         for query, swiss in result:
             if swiss:
                 id_to_uniprot[query].append(swiss)
+
+        # we trust reviewed results more, so we don't look up ids we found in swiss
+        # in trembl again
         left = matching_ids - set(id_to_uniprot.keys())
-        # uniprotswissprot and uniprotsptrembl are non overlapping, so no problem
         result = list(
             biomart_query(
                 left,
@@ -196,7 +198,8 @@ def map_groups_to_uniprot(protein_groups):
 if __name__ == "__main__":
     df, _ = max_quant_import(
         None,
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
+        # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/",
         "Intensity",
     )
 
