@@ -12,7 +12,7 @@ from protzilla.utilities.utilities import clean_uniprot_id
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
 from .enrichment_analysis_helper import (
-    map_to_string_ids,
+    map_to_STRING_ids,
     read_background_file,
     read_protein_or_gene_sets_file,
 )
@@ -204,7 +204,7 @@ def GO_analysis_with_STRING(
             background_ids.update(map(clean_uniprot_id, protein_group.split(";")))
         statistical_background = list(background_ids)
         # STRING IDs are required for background
-        statistical_background = map_to_string_ids(statistical_background, organism)
+        statistical_background = map_to_STRING_ids(statistical_background, organism)
 
     string_params = {
         "species": organism,
