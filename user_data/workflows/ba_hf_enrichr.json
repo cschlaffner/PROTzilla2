@@ -123,7 +123,7 @@
               "t-test_data",
               "de_proteins_df"
             ],
-            "database_names": "all_reviewed"
+            "database_names": ["all_reviewed", "uniprot_human"]
           },
           "output_name": "mapping"
         },
