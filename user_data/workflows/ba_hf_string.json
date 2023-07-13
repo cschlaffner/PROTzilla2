@@ -133,7 +133,7 @@
           "parameters": {
             "proteins_df": [
               "t-test_data",
-              "log2_fold_change_df"
+              "de_proteins_df"
             ],
             "differential_expression_col": "log2_fold_change",
             "gene_sets_restring": "RCTM",
