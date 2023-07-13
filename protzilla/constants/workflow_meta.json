@@ -1114,13 +1114,11 @@
             "name": "Score name",
             "type": "text"
           },
-          "minimum_viable_sample_size": {
-            "name": "Train scores",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
+          "initial_coef_sigmoid": {
+            "name": "Initial coeficients for sigmoid function",
+            "type": "numeric",
+            "default": [1,1,1],
+            "multiple": true
           }
         }
       },
