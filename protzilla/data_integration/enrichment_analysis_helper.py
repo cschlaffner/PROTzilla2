@@ -103,6 +103,9 @@ def read_background_file(path):
 def map_to_STRING_ids(proteins_list, organism):
     """
     This method maps a list of protein IDs to STRING IDs using the STRING API.
+    The mapping is done as suggested by STRING documentation:
+    https://string-db.org/cgi/help.pl?subpage=api%23mapping-identifiers
+
     :param proteins_list: list of protein IDs
     :type proteins_list: list
     :param organism: organism NCBI identifier
