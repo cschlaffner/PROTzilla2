@@ -4,7 +4,6 @@ import pandas as pd
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
-from protzilla.data_integration import database_query
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
@@ -71,6 +70,7 @@ def create_ranked_df(
 
 def gsea_preranked(
     protein_df,
+    gene_mapping,
     ranking_column=None,
     ranking_direction="ascending",
     gene_sets_path=None,
@@ -96,6 +96,8 @@ def gsea_preranked(
 
     :param protein_df: dataframe with protein IDs and ranking values
     :type protein_df: pd.DataFrame
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param ranking_column: column name of ranking column in protein_df
     :type ranking_column: str
     :param ranking_direction: direction of ranking for sorting, either ascending or descending
@@ -136,8 +138,8 @@ def gsea_preranked(
     """
     if (
         not isinstance(protein_df, pd.DataFrame)
-        or not "Protein ID" in protein_df.columns
-        or not ranking_column in protein_df.columns
+        or "Protein ID" not in protein_df.columns
+        or ranking_column not in protein_df.columns
         or not protein_df[ranking_column].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
@@ -157,12 +159,10 @@ def gsea_preranked(
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = database_query.uniprot_groups_to_genes(protein_groups)
+
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
+    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -193,21 +193,22 @@ def gsea_preranked(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
-            verbose=True,
             threads=threads,
+            verbose=True,
+            no_plot=True,
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = preranked_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = preranked_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": preranked_result.ranking,
     }
     out_dict.update(preranked_result.results)
@@ -245,7 +246,7 @@ def create_genes_intensity_wide_df(
     """
     # (gene symbols in rows x samples in cols with intensities)
     protein_df_wide = long_to_wide(protein_df).transpose()
-    column_names = samples + ["Gene symbol"]
+    column_names = ["Gene symbol"] + samples
     processed_data = []
 
     for group in protein_groups:
@@ -254,7 +255,7 @@ def create_genes_intensity_wide_df(
         for gene in group_to_genes[group]:
             # if multiple genes per group, use same intensity value
             intensity_values = protein_df_wide.loc[group, :].tolist()
-            row_data = intensity_values + [gene]
+            row_data = [gene] + intensity_values
             processed_data.append(row_data)
 
     df = pd.DataFrame(processed_data, columns=column_names)
@@ -268,6 +269,7 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
+    gene_mapping,
     group1=None,
     group2=None,
     gene_sets_path=None,
@@ -293,6 +295,8 @@ def gsea(
     :type protein_df: pd.DataFrame
     :param metadata_df: dataframe with metadata
     :type metadata_df: pd.DataFrame
+    :param gene_mapping: result of a gene mapping step
+    :type gene_mapping: dict[str, dict]
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
     :param group1: name of group 1
@@ -360,6 +364,15 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
+    intensity_name = protein_df.columns[3]
+    # cannot use log2_ratio_of_classes if there are negative values
+    if (
+        ranking_method == "log2_ratio_of_classes"
+        and (protein_df[intensity_name] < 0).any()
+    ):
+        msg = "Negative values in the dataframe. Please use a different ranking method."
+        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
         if isinstance(gene_sets, dict) and "messages" in gene_sets:  # an error occurred
@@ -380,12 +393,10 @@ def gsea(
     protein_df = protein_df[protein_df["Sample"].isin(group_samples)]
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
-    logger.info("Mapping Uniprot IDs to uppercase gene symbols")
-    (
-        gene_to_groups,
-        group_to_genes,
-        filtered_groups,
-    ) = database_query.uniprot_groups_to_genes(protein_groups)
+
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_groups = gene_mapping.get("gene_to_groups", {})
+    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
 
     if not gene_to_groups:
         msg = "No proteins could be mapped to gene symbols"
@@ -403,11 +414,6 @@ def gsea(
         group_label = metadata_df.loc[metadata_df["Sample"] == sample, grouping].iloc[0]
         class_labels.append(group_label)
 
-    # cannot use log2_ratio_of_classes if there are negative values
-    if ranking_method == "log2_ratio_of_classes" and (df < 0).any().any():
-        msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
-
     logger.info("Running GSEA")
     try:
         gsea_result = gseapy.gsea(
@@ -422,21 +428,22 @@ def gsea(
             weighted_score_type=weighted_score,
             outdir=None,
             seed=seed,
-            verbose=True,
             threads=threads,
+            verbose=True,
+            no_plot=True,
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"
         return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
-    enriched_df = gsea_result.res2d
-    enriched_df["Lead_proteins"] = enriched_df["Lead_genes"].apply(
+    enrichment_df = gsea_result.res2d
+    enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
         lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
     )
 
     out_dict = {
-        "enriched_df": enriched_df,
+        "enrichment_df": enrichment_df,
         "ranking": gsea_result.ranking,
     }
     out_dict.update(gsea_result.results)
