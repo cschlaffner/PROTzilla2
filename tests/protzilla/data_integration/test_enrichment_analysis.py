@@ -57,7 +57,7 @@ def test_get_functional_enrichment_with_delay(mock_enrichment):
         "P07814",
         "P13716",
     ]
-    string_params = {"species": 9606, "caller_ID": "PROTzilla"}
+    string_params = {"species": 9606}
     mock_data = {
         "category": ["Process", "Process", "KEGG"],
         "term": ["GO:0006090", "GO:0098883", "hsa00860"],

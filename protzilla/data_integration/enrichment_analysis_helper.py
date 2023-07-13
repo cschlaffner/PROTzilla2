@@ -3,9 +3,11 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import requests
 from django.contrib import messages
 
 from protzilla.constants.logging import logger
+from protzilla.utilities.utilities import random_string
 
 
 def read_protein_or_gene_sets_file(path):
@@ -96,3 +98,45 @@ def read_background_file(path):
             return dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
         return background
+
+
+def map_to_string_ids(proteins_list, organism):
+    """
+    This method maps a list of protein IDs to STRING IDs using the STRING API.
+    :param proteins_list: list of protein IDs
+    :type proteins_list: list
+    :param organism: organism NCBI identifier
+    :type organism: str
+    :return: list of STRING IDs or None if no IDs could be found
+    :rtype: list or None
+    """
+    logger.info("Mapping proteins to STRING IDs")
+    string_api_url = "https://string-db.org/api"  # latest version while in development
+    output_format = "tsv-no-header"
+    method = "get_string_ids"
+
+    params = {
+        "identifiers": "\r".join(proteins_list),
+        "species": organism,  # species NCBI identifier
+        "limit": 1,  # only one (best) identifier per input protein
+        "echo_query": 1,  # see input identifiers in the output
+        "caller_identity": f"PROTzilla-{random_string()}",
+    }
+
+    request_url = "/".join([string_api_url, output_format, method])
+    results = requests.post(request_url, data=params)  # call STRING API
+
+    mapped = []
+    for line in results.text.strip().split("\n"):
+        split_line = line.split("\t")
+        if len(split_line) < 3:  # no identifier found
+            continue
+        string_identifier = split_line[2]
+        mapped.append(string_identifier)
+
+    if len(mapped) == 0:
+        logger.warning("No STRING IDs could be found")
+        mapped = None
+    else:
+        logger.info(f"Mapped {len(mapped)} proteins to STRING IDs")
+    return mapped
