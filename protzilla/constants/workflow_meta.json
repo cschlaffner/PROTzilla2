@@ -2155,7 +2155,7 @@
             "default": "both"
           },
           "background_path": {
-            "name": "Background set (no upload = entire proteome)",
+            "name": "Background set (no upload = entire proteome), UniProt IDs (one per line, txt or csv)",
             "type": "file",
             "default": null
           }
