@@ -65,3 +65,25 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
                 new_column.append(";".join(map(str, group_values)))
         dataframe[field] = new_column
     return {"results_df": dataframe}
+
+
+def gene_mapping(dataframe, database_names, use_biomart=False):
+    try:
+        groups = dataframe["Protein ID"].unique().tolist()
+    except KeyError:
+        msg = "No Protein ID column found."
+        return dict(
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+    if isinstance(database_names, str):
+        database_names = [database_names]
+    gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
+        groups, database_names, use_biomart=use_biomart
+    )
+    return {
+        "gene_mapping": {
+            "group_to_genes": groups_to_genes,
+            "gene_to_groups": gene_to_groups,
+            "filtered": filtered,
+        }
+    }

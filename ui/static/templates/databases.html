@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <style>
+    </style>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).on('change', '#new-db', function () {
+                $('#chosen-new-db').text(this.files[0].name);
+                $("#add-button").prop('disabled', false);
+            });
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="p-4">
+        <div class="d-flex justify-content-center flex-column align-items-center">
+            <div class="col w-50">
+                {# include django messages for alerting user #}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                                 role="alert">
+                                {{ message | safe }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="mb-5">
+                    <h3>Add a new Database</h3>
+
+                    <form action="{% url 'database_upload' %}" method="post" enctype="multipart/form-data" id="myform">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label for="name">Name for new database (required):</label>
+                            <input class="form-control" id="name" type="text" name="name" required>
+                        </div>
+                        <div class="mb-2">
+                            <input name="new-db" type="file" id="new-db" hidden>
+                            <label for="new-db" class="btn btn-grey">Choose file</label>
+                            <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+                        </div>
+                        <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto"
+                               disabled>
+                    </form>
+                </div>
+
+                <div>
+                    <h3>Available Databases</h3>
+
+                    {% for database, cols in uniprot_databases.items %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>{{ database }}</h5>
+                                <form action="{% url 'database_delete' %}" method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete {{ database }}?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="database" value="{{ database }}">
+                                    <input type="submit" value="delete" class="btn btn-red">
+                                </form>
+                            </div>
+                            Columns: {{ cols|join:", " }}
+                            <hr>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -11,19 +11,21 @@ from sklearn.metrics import (
     mean_squared_error,
     adjusted_mutual_info_score,
     adjusted_rand_score,
+    completeness_score,
+    davies_bouldin_score,
+    f1_score,
     fowlkes_mallows_score,
     homogeneity_score,
-    completeness_score,
+    jaccard_score,
+    matthews_corrcoef,
     mutual_info_score,
     normalized_mutual_info_score,
-    v_measure_score,
+    precision_score,
     rand_score,
-    davies_bouldin_score,
+    recall_score,
     silhouette_score,
-    jaccard_score,
-    f1_score,
+    v_measure_score,
 )
-from protzilla.utilities.dunn_score import dunn_score
 from sklearn.model_selection import (
     GridSearchCV,
     KFold,
@@ -36,6 +38,8 @@ from sklearn.model_selection import (
     train_test_split,
     cross_validate,
 )
+
+from protzilla.utilities.dunn_score import dunn_score
 
 
 def encode_labels(labels_df, labels_column, positive_label=None):

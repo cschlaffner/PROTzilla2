@@ -117,7 +117,7 @@
       "steps": [
         {
           "name": "enrichment_analysis",
-          "method": "go_analysis_with_enrichr",
+          "method": "GO_analysis_with_Enrichr",
           "parameters": {
             "proteins": [
               "t-test",

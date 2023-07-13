@@ -1,18 +1,18 @@
 import pandas as pd
 from django.contrib import messages
-from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import ParameterGrid
 from collections import defaultdict
 from sklearn.base import clone
 
 from protzilla.data_analysis.classification_helper import (
-    perform_grid_search_cv,
     create_dict_with_lists_as_values,
     create_model_evaluation_df_grid_search,
-    evaluate_clustering_with_scoring,
     create_model_evaluation_df_grid_search_manual,
     encode_labels,
+    evaluate_clustering_with_scoring,
+    perform_grid_search_cv,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 

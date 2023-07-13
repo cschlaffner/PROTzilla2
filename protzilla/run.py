@@ -1,3 +1,4 @@
+import base64
 import json
 import shutil
 import traceback
@@ -374,7 +375,7 @@ class Run:
     def export_plots(self, format_):
         exports = []
         for plot in self.plots:
-            if isinstance(plot, plotly.graph_objs.Figure):  # to catch dicts
+            if isinstance(plot, plotly.graph_objs.Figure):
                 if format_ in ["eps", "tiff"]:
                     png_binary = plotly.io.to_image(plot, format="png", scale=4)
                     img = Image.open(BytesIO(png_binary)).convert("RGB")
@@ -387,6 +388,21 @@ class Run:
                 else:
                     binary_string = plotly.io.to_image(plot, format=format_, scale=4)
                     exports.append(BytesIO(binary_string))
+            elif isinstance(plot, dict) and "plot_base64" in plot:
+                plot = plot["plot_base64"]
+
+            if isinstance(plot, bytes):  # base64 encoded plots
+                if format_ in ["eps", "tiff"]:
+                    img = Image.open(BytesIO(base64.b64decode(plot))).convert("RGB")
+                    binary = BytesIO()
+                    if format_ == "tiff":
+                        img.save(binary, format="tiff", compression="tiff_lzw")
+                    else:
+                        img.save(binary, format=format_)
+                    binary.seek(0)
+                    exports.append(binary)
+                elif format_ in ["png", "jpg"]:
+                    exports.append(BytesIO(base64.b64decode(plot)))
         return exports
 
     def name_step(self, index, name):
