@@ -2430,11 +2430,8 @@
           },
           "n_samples": {
             "name": "Choose number of samples",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
+            "type": "numeric",
+            "default": 40
           },
           "random_state": {
             "name": "Seed for random number generation",
