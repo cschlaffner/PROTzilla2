@@ -37,7 +37,7 @@ def biomart_query(queries, filter_name, attributes):
         SubElement(dataset, "Attribute", attrib={"name": attribute})
     try:
         response = requests.post(
-            url="http://grch37.ensembl.org/biomart/martservice",
+            url="https://www.ensembl.org/biomart/martservice",  # url="http://grch37.ensembl.org/biomart/martservice",
             data={"query": tostring(root)},
             stream=True,
         )
