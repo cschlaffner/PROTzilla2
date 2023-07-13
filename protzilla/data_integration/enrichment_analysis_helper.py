@@ -134,7 +134,7 @@ def map_to_string_ids(proteins_list, organism):
         string_identifier = split_line[2]
         mapped.append(string_identifier)
 
-    if len(mapped == 0):
+    if len(mapped) == 0:
         logger.warning("No STRING IDs could be found")
         mapped = None
     else:
