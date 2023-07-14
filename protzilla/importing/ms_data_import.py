@@ -26,12 +26,13 @@ def max_quant_import(_, file_path, intensity_name):
         keep_default_na=True,
     )
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
-    df["Protein IDs"] = map_groups_to_uniprot(df["Protein IDs"].tolist())
-    df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
-    df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
+    # df["Protein IDs"] = map_groups_to_uniprot(df["Protein IDs"].tolist())
+    # df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
+    # df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     if "Gene names" not in df.columns:  # genes column should be removed eventually
         df["Gene names"] = np.nan
     id_df = df[selected_columns]
+    id_df = id_df.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
 
     if intensity_df.empty:
@@ -43,18 +44,18 @@ def max_quant_import(_, file_path, intensity_name):
 
     df = pd.concat([id_df, intensity_df], axis=1)
     # sum intensities if id appears multiple times
-    df = df.groupby(["Protein IDs"]).sum(numeric_only=True).reset_index()
+    # df = df.groupby(["Protein IDs"]).sum(numeric_only=True).reset_index()
 
-    molten = pd.melt(
-        df,
-        id_vars=selected_columns,
-        var_name="Sample",
-        value_name=intensity_name,
-    )
-    molten = molten.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
-    ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
-    ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    return ordered, {}
+    # molten = pd.melt(
+    #     df,
+    #     id_vars=selected_columns,
+    #     var_name="Sample",
+    #     value_name=intensity_name,
+    # )
+    # ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
+    # ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    # return ordered, {}
+    return handle_df(df, intensity_name)
 
 
 def ms_fragger_import(_, file_path, intensity_name):
@@ -109,6 +110,33 @@ def ms_fragger_import(_, file_path, intensity_name):
     )
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    return ordered, {}
+
+
+def handle_df(df, intensity_name):
+    # remove con groups
+
+    # remove rev xxx proteins
+
+    df["Protein ID"] = map_groups_to_uniprot(df["Protein ID"].tolist())
+    print(df)
+
+    df["Protein ID"] = df["Protein ID"].map(handle_protein_ids)
+    print(df)
+
+    df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
+    print(df)
+    df = df.groupby(["Protein ID", "Gene"]).sum().reset_index()
+    molten = pd.melt(
+        df,
+        id_vars=["Protein ID", "Gene"],
+        var_name="Sample",
+        value_name=intensity_name,
+    )
+
+    ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
+    ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+
     return ordered, {}
 
 
@@ -199,8 +227,13 @@ if __name__ == "__main__":
     df, _ = max_quant_import(
         None,
         # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/",
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/proteinGroups_small.txt",
         "Intensity",
     )
 
+    # df.to_csv("out_new.csv")
     df.to_csv("out.csv")
+    old_df = pd.read_csv("out.csv")
+
+    print(df)
+    print(old_df.equals(df))
