@@ -98,7 +98,10 @@ def database_delete(request):
     if metadata_path.exists():
         with open(metadata_path, "r") as f:
             metadata = json.load(f)
-        del metadata[database_name]
+        try:
+            del metadata[database_name]
+        except KeyError:
+            pass
         with open(metadata_path, "w") as f:
             json.dump(metadata, f)
 
