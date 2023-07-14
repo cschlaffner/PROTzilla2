@@ -48,3 +48,11 @@ def fig_to_base64(fig):
     fig.savefig(img, format="png", bbox_inches="tight")
     img.seek(0)
     return base64.b64encode(img.getvalue())
+
+def chunks(lst, n):
+    """
+    Yield successive n-sized chunks from lst.
+    taken from: https://stackoverflow.com/a/312464/8929127
+    """
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]

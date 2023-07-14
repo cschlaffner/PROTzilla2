@@ -5,40 +5,10 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from django.contrib import messages
-from scipy import stats
+
 
 from .differential_expression_helper import apply_multiple_testing_correction
-
-
-def linear_model_protein(
-    protein, intensity_df, grouping, group1, group2, intensity_name, i, results_dict, success_dict
-):
-    """
-    puts in results_dict: a Tuple of a boolean if successfully executed t-test and result of
-    t-test or in event of no success the error msg
-    """
-    protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
-    protein_df = protein_df.loc[
-        (protein_df.loc[:, grouping] == group1)
-        | (protein_df.loc[:, grouping] == group2)
-    ]
-    protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
-
-    # if a protein has a NaN value in a sample, user should remove it
-    intensity_is_nan = np.isnan(protein_df[[intensity_name]].to_numpy())
-    if intensity_is_nan.any():
-        success_dict[i] = False
-        return
-
-    # lm(intensity ~ group + constant)
-    Y = protein_df[[intensity_name]]
-    X = protein_df[[grouping]]
-    X = sm.add_constant(X)
-    model = sm.OLS(Y, X)
-    results = model.fit()
-
-    success_dict[i] = True
-    results_dict[i] = results
+from ..utilities import chunks
 
 
 def linear_model(
@@ -104,9 +74,11 @@ def linear_model(
     results_dict = manager.dict()
     success_dict = manager.dict()
     jobs = []
-    for i, protein in enumerate(proteins):
-        args = (protein, intensity_df, grouping, group1, group2, intensity_name, i, results_dict, success_dict)
-        p = multiprocessing.Process(target=linear_model_protein, args=args)
+
+    # split into 4 processes
+    for proteins_enumerated_chunk in chunks(list(enumerate(proteins)), 4):
+        args = (proteins_enumerated_chunk, intensity_df, grouping, group1, group2, intensity_name, results_dict, success_dict)
+        p = multiprocessing.Process(target=linear_model_worker, args=args)
         jobs.append(p)
         p.start()
 
@@ -176,3 +148,34 @@ def linear_model(
         if proteins_filtered
         else [],
     )
+
+def linear_model_worker(
+    proteins_enumerated_chunk, intensity_df, grouping, group1, group2, intensity_name, results_dict, success_dict
+):
+    """
+    puts in results_dict: a Tuple of a boolean if successfully executed t-test and result of
+    t-test or in event of no success the error msg
+    """
+    for i, protein in proteins_enumerated_chunk:
+        protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
+        protein_df = protein_df.loc[
+            (protein_df.loc[:, grouping] == group1)
+            | (protein_df.loc[:, grouping] == group2)
+        ]
+        protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
+
+        # if a protein has a NaN value in a sample, user should remove it
+        intensity_is_nan = np.isnan(protein_df[[intensity_name]].to_numpy())
+        if intensity_is_nan.any():
+            success_dict[i] = False
+            return
+
+        # lm(intensity ~ group + constant)
+        Y = protein_df[[intensity_name]]
+        X = protein_df[[grouping]]
+        X = sm.add_constant(X)
+        model = sm.OLS(Y, X)
+        results = model.fit()
+
+        success_dict[i] = True
+        results_dict[i] = results
