@@ -143,7 +143,7 @@ def test_filter_rev_con():
     )
     protein_ids = intensity_df["Protein ID"].unique().tolist()
     # not the complete group should be filtered out if contains valid ids
-    assert "NOTFILTERED" in protein_ids
+    assert "P00000" in protein_ids
     # all instances of rev and con should be filtered out
     assert all(
         not any(
