@@ -1,8 +1,8 @@
 import json
 from shutil import rmtree
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 from PIL import Image
 

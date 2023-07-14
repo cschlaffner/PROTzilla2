@@ -1,10 +1,10 @@
+import re
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import re
 from django.contrib import messages
-from collections import defaultdict
 
 from protzilla.data_integration.database_query import biomart_query
 
