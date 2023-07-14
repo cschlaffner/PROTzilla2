@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 
 import numpy as np
 import pandas as pd
@@ -7,6 +8,37 @@ from django.contrib import messages
 from scipy import stats
 
 from .differential_expression_helper import apply_multiple_testing_correction
+
+
+def linear_model_protein(
+    protein, intensity_df, grouping, group1, group2, intensity_name, i, results_dict, success_dict
+):
+    """
+    puts in results_dict: a Tuple of a boolean if successfully executed t-test and result of
+    t-test or in event of no success the error msg
+    """
+    protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
+    protein_df = protein_df.loc[
+        (protein_df.loc[:, grouping] == group1)
+        | (protein_df.loc[:, grouping] == group2)
+    ]
+    protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
+
+    # if a protein has a NaN value in a sample, user should remove it
+    intensity_is_nan = np.isnan(protein_df[[intensity_name]].to_numpy())
+    if intensity_is_nan.any():
+        success_dict[i] = False
+        return
+
+    # lm(intensity ~ group + constant)
+    Y = protein_df[[intensity_name]]
+    X = protein_df[[grouping]]
+    X = sm.add_constant(X)
+    model = sm.OLS(Y, X)
+    results = model.fit()
+
+    success_dict[i] = True
+    results_dict[i] = results
 
 
 def linear_model(
@@ -68,39 +100,34 @@ def linear_model(
     log2_fold_change = []
     filtered_proteins = []
 
-    for protein in proteins:
-        protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
-        protein_df = protein_df.loc[
-            (protein_df.loc[:, grouping] == group1)
-            | (protein_df.loc[:, grouping] == group2)
-        ]
-        protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
+    manager = multiprocessing.Manager()
+    results_dict = manager.dict()
+    success_dict = manager.dict()
+    jobs = []
+    for i, protein in enumerate(proteins):
+        args = (protein, intensity_df, grouping, group1, group2, intensity_name, i, results_dict, success_dict)
+        p = multiprocessing.Process(target=linear_model_protein, args=args)
+        jobs.append(p)
+        p.start()
 
-        # if a protein has a NaN value in a sample, user should remove it
-        intensity_is_nan = np.isnan(protein_df[[intensity_name]].to_numpy())
-        if intensity_is_nan.any():
-            msg = "There are Proteins with NaN values present in your data. \
-                Please filter them out before running the differential expression analysis."
-            return dict(
-                de_proteins_df=None,
-                corrected_p_values=None,
-                log2_fold_change=None,
-                fc_threshold=None,
-                alpha=alpha,
-                corrected_alpha=None,
-                messages=[dict(level=messages.ERROR, msg=msg)],
-            )
+    for proc in jobs:
+        proc.join()
 
-        # lm(intensity ~ group + constant)
-        Y = protein_df[[intensity_name]]
-        X = protein_df[[grouping]]
-        X = sm.add_constant(X)
-        model = sm.OLS(Y, X)
-        results = model.fit()
+    if not all(success_dict.values()):
+        msg = "There are Proteins with NaN values present in your data. \
+                            Please filter them out before running the differential expression analysis."
+        return dict(
+            de_proteins_df=None,
+            corrected_p_values=None,
+            log2_fold_change=None,
+            fc_threshold=None,
+            alpha=alpha,
+            corrected_alpha=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
 
-        # Extract p-value for the coefficient of interest
+    for results in [results_dict[key] for key in sorted(results_dict.keys())]:
         p_values.append(results.pvalues[grouping])
-        # Extract the coefficient (fold change)
         log2_fold_change.append(results.params[grouping])
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
