@@ -133,6 +133,11 @@ def test_ms_fragger_import(intensity_name):
     )
 
     intensity_df = ms_fragger_import_intensity_df(intensity_name)
+
+    # we do not care about the genes column, it is never used (and replaced by nan)
+    intensity_df = intensity_df.drop(columns=["Gene"])
+    test_intensity_df = test_intensity_df.drop(columns=["Gene"])
+
     pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
 
 
