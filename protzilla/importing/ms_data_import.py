@@ -89,20 +89,24 @@ def ms_fragger_import(_, file_path, intensity_name):
 
 
 def transform_and_clean(df, intensity_name):
-    non_contaminant_groups = df["Protein ID"].map(
-        lambda group: not any(id_.startswith("CON__") for id_ in group.split(";"))
+    contaminant_groups_mask = df["Protein ID"].map(
+        lambda group: any(id_.startswith("CON__") for id_ in group.split(";"))
     )
-    df = df[non_contaminant_groups]
+    contaminants = df[contaminant_groups_mask].reset_index(drop=True)
+    df = df[~contaminant_groups_mask]
 
     # REV__ and XXX__ proteins get removed here as well
-    df["Protein ID"] = map_groups_to_uniprot(df["Protein ID"].tolist())
+    new_groups, filtered_proteins = clean_protein_groups(
+        df["Protein ID"].tolist(), map_to_uniprot=True
+    )
+    df["Protein ID"] = new_groups
 
     has_valid_protein_id = df["Protein ID"].map(bool)
     df = df[has_valid_protein_id]
 
     # sum intensities for duplicate protein groups, NaN if all are NaN, sum of numbers otherwise
     df = df.groupby("Protein ID", as_index=False).sum(min_count=1)
-    df["Gene"] = np.nan  # add genes column back
+    df["Gene"] = np.nan  # add genes column back (removed by groupby)
 
     molten = pd.melt(
         df, id_vars=["Protein ID", "Gene"], var_name="Sample", value_name=intensity_name
@@ -110,7 +114,7 @@ def transform_and_clean(df, intensity_name):
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    return ordered, {}
+    return ordered, dict(contaminants=contaminants, filtered_proteins=filtered_proteins)
 
 
 def map_ids(extracted_ids):
@@ -144,11 +148,10 @@ def map_ids(extracted_ids):
         for query, trembl in result:
             if trembl:
                 id_to_uniprot[query].append(trembl)
-    print(len(id_to_uniprot), all_count)
     return dict(id_to_uniprot)
 
 
-def map_groups_to_uniprot(protein_groups):
+def clean_protein_groups(protein_groups, map_to_uniprot=True):
     regex = {
         "ensembl_peptide_id": re.compile(r"^ENSP\d{11}"),
         "refseq_peptide": re.compile(r"^NP_\d{6,}"),
@@ -193,17 +196,17 @@ def map_groups_to_uniprot(protein_groups):
                 new_ids = id_to_uniprot.get(old_id, [])
                 all_ids_of_group.update(new_ids)
         new_groups.append(";".join(sorted(all_ids_of_group)))
-    return new_groups
+    return new_groups, removed_protein_ids
 
 
 if __name__ == "__main__":
-    df, _ = max_quant_import(
+    df, out = max_quant_import(
         None,
         # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
         "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/proteinGroups_small.txt",
         "Intensity",
     )
-
+    print(out)
     # df.to_csv("out_new.csv")
     df.to_csv("out_new.csv")
     # old_df = pd.read_csv("out.csv")
