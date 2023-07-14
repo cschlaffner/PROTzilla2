@@ -7,10 +7,12 @@ from django.contrib import messages
 from restring import restring
 
 from protzilla.constants.logging import logger
+from protzilla.utilities.utilities import clean_uniprot_id
 
 # Import enrichment analysis gsea methods to remove redundant function definition
 from .enrichment_analysis_gsea import gsea, gsea_preranked
 from .enrichment_analysis_helper import (
+    map_to_STRING_ids,
     read_background_file,
     read_protein_or_gene_sets_file,
 )
@@ -182,7 +184,7 @@ def GO_analysis_with_STRING(
 
     if not gene_sets_restring:
         gene_sets_restring = ["KEGG", "Component", "Function", "Process", "RCTM"]
-        msg = "No protein set databases selected. Using all protein set databases."
+        msg = "No knowledge databases selected. Using all knowledge databases."
         out_messages.append(dict(level=messages.INFO, msg=msg))
     elif not isinstance(gene_sets_restring, list):
         gene_sets_restring = [gene_sets_restring]
@@ -195,6 +197,14 @@ def GO_analysis_with_STRING(
         return statistical_background
     if statistical_background is None:
         logger.info("No background provided, using entire proteome")
+    else:
+        # split and clean statistical background
+        background_ids = set()
+        for protein_group in statistical_background:
+            background_ids.update(map(clean_uniprot_id, protein_group.split(";")))
+        statistical_background = list(background_ids)
+        # STRING IDs are required for background
+        statistical_background = map_to_STRING_ids(statistical_background, organism)
 
     string_params = {
         "species": organism,
@@ -205,7 +215,13 @@ def GO_analysis_with_STRING(
     if direction == "up" or direction == "both":
         logger.info("Starting analysis for upregulated proteins")
 
-        up_df = get_functional_enrichment_with_delay(up_protein_list, **string_params)
+        up_cleaned_ids = set()
+        for protein_group in up_protein_list:
+            up_cleaned_ids.update(map(clean_uniprot_id, protein_group.split(";")))
+
+        up_df = get_functional_enrichment_with_delay(
+            list(up_cleaned_ids), **string_params
+        )
         if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
@@ -221,8 +237,12 @@ def GO_analysis_with_STRING(
     if direction == "down" or direction == "both":
         logger.info("Starting analysis for downregulated proteins")
 
+        down_cleaned_ids = set()
+        for protein_group in down_protein_list:
+            down_cleaned_ids.update(map(clean_uniprot_id, protein_group.split(";")))
+
         down_df = get_functional_enrichment_with_delay(
-            down_protein_list, **string_params
+            list(down_cleaned_ids), **string_params
         )
         if (
             down_df.empty
