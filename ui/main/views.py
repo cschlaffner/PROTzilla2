@@ -94,6 +94,14 @@ def database_delete(request):
     database_name = request.POST["database"]
     path = database_path(database_name)
     path.unlink()
+
+    if metadata_path.exists():
+        with open(metadata_path, "r") as f:
+            metadata = json.load(f)
+        del metadata[database_name]
+        with open(metadata_path, "w") as f:
+            json.dump(metadata, f)
+
     return HttpResponseRedirect(reverse("databases"))
 
 
