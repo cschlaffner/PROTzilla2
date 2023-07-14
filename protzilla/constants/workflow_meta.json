@@ -2613,13 +2613,13 @@
             ]
           },
           "database_names": {
-            "name": "Uniprot Database Name",
+            "name": "Uniprot Databases (offline)",
             "type": "categorical",
             "multiple": true,
             "fill": "uniprot_databases"
           },
           "use_biomart": {
-            "name": "Use Biomart after Uniprot databases",
+            "name": "Use Biomart after Uniprot databases (online)",
             "type": "boolean",
             "default": false
           }
