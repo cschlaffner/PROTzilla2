@@ -6,7 +6,6 @@ import re
 from django.contrib import messages
 from collections import defaultdict
 
-from protzilla.utilities import clean_uniprot_id
 from protzilla.data_integration.database_query import biomart_query
 
 
@@ -26,9 +25,6 @@ def max_quant_import(_, file_path, intensity_name):
         keep_default_na=True,
     )
     df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
-    # df["Protein IDs"] = map_groups_to_uniprot(df["Protein IDs"].tolist())
-    # df["Protein IDs"] = df["Protein IDs"].map(handle_protein_ids)
-    # df = df[df["Protein IDs"].map(bool)]  # remove rows without valid protein id
     if "Gene names" not in df.columns:  # genes column should be removed eventually
         df["Gene names"] = np.nan
     id_df = df[selected_columns]
@@ -43,18 +39,6 @@ def max_quant_import(_, file_path, intensity_name):
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
 
     df = pd.concat([id_df, intensity_df], axis=1)
-    # sum intensities if id appears multiple times
-    # df = df.groupby(["Protein IDs"]).sum(numeric_only=True).reset_index()
-
-    # molten = pd.melt(
-    #     df,
-    #     id_vars=selected_columns,
-    #     var_name="Sample",
-    #     value_name=intensity_name,
-    # )
-    # ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
-    # ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    # return ordered, {}
     return transform_and_clean(df, intensity_name)
 
 
@@ -113,18 +97,16 @@ def transform_and_clean(df, intensity_name):
     # REV__ and XXX__ proteins get removed here as well
     df["Protein ID"] = map_groups_to_uniprot(df["Protein ID"].tolist())
 
-    df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
+    has_valid_protein_id = df["Protein ID"].map(bool)
+    df = df[has_valid_protein_id]
 
+    # sum intensities for duplicate protein groups, NaN if all are NaN, sum of numbers otherwise
     df = df.groupby("Protein ID", as_index=False).sum(min_count=1)
-    df["Gene"] = np.nan
+    df["Gene"] = np.nan  # add genes column back
 
     molten = pd.melt(
-        df,
-        id_vars=["Protein ID", "Gene"],
-        var_name="Sample",
-        value_name=intensity_name,
+        df, id_vars=["Protein ID", "Gene"], var_name="Sample", value_name=intensity_name
     )
-
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
