@@ -119,35 +119,32 @@ def transform_and_clean(df, intensity_name):
 
 def map_ids(extracted_ids):
     id_to_uniprot = defaultdict(list)
-    all_count = 0
     for identifier, matching_ids in extracted_ids.items():
-        all_count += len(matching_ids)
         if not matching_ids:
             continue
-        result = list(
-            biomart_query(
-                matching_ids,
-                identifier,
-                [identifier, "uniprotswissprot"],
-            )
-        )
-        for query, swiss in result:
-            if swiss:
-                id_to_uniprot[query].append(swiss)
 
-        # we trust reviewed results more, so we don't look up ids we found in swiss
-        # in trembl again
-        left = matching_ids - set(id_to_uniprot.keys())
-        result = list(
-            biomart_query(
-                left,
-                identifier,
-                [identifier, "uniprotsptrembl"],
-            )
+        result = biomart_query(
+            matching_ids,
+            identifier,
+            [identifier, "uniprotswissprot"],
         )
-        for query, trembl in result:
-            if trembl:
-                id_to_uniprot[query].append(trembl)
+        for other_id, uniport_id in result:
+            if uniport_id:
+                id_to_uniprot[other_id].append(uniport_id)
+
+        # we trust reviewed results more, so we don't look up ids we found in
+        # uniprotswissprot in uniprotsptrembl again
+        left = matching_ids - set(id_to_uniprot.keys())
+
+        result = biomart_query(
+            left,
+            identifier,
+            [identifier, "uniprotsptrembl"],
+        )
+        for other_id, uniport_id in result:
+            if uniport_id:
+                id_to_uniprot[other_id].append(uniport_id)
+
     return dict(id_to_uniprot)
 
 
@@ -164,6 +161,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
         """,
         re.VERBOSE,
     )
+
     removed_protein_ids = []
 
     extracted_ids = {k: set() for k in regex.keys()}

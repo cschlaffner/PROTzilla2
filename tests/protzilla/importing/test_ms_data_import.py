@@ -164,9 +164,9 @@ def test_transform_and_clean():
     columns = ["Protein ID", "Gene", "A", "B", "C"]
     data = [
         ["P00000", "X", 1.0, 6.0, np.nan],
-        ["P00000;REV__P12345", "X", np.nan, 2.0, np.nan],  # REV__P12345 removed
+        ["P00000;REV__P12345", "X", np.nan, 2.0, np.nan],
         ["Q11111", "Y", 4.0, 4, np.nan],
-        ["Q11111;CON__P12345", "Y", 4.0, 4.0, np.nan],  # CON group filtered
+        ["Q11111;CON__P12345", "Y", 4.0, 4.0, np.nan],
     ]
     out_col = ["Sample", "Protein ID", "Gene", "intensity"]
     output = [
