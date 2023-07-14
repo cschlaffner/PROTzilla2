@@ -9,7 +9,7 @@ from django.contrib import messages
 from protzilla.data_integration.database_query import biomart_query
 
 
-def max_quant_import(_, file_path, intensity_name):
+def max_quant_import(_, file_path, intensity_name, map_to_uniprot=False):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a Max Quant file."
@@ -39,10 +39,10 @@ def max_quant_import(_, file_path, intensity_name):
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
 
     df = pd.concat([id_df, intensity_df], axis=1)
-    return transform_and_clean(df, intensity_name)
+    return transform_and_clean(df, intensity_name, map_to_uniprot)
 
 
-def ms_fragger_import(_, file_path, intensity_name):
+def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
     assert intensity_name in [
         "Intensity",
         "MaxLFQ Total Intensity",
@@ -85,10 +85,10 @@ def ms_fragger_import(_, file_path, intensity_name):
         ).columns
     )
     df = pd.concat([id_df, intensity_df], axis=1)
-    return transform_and_clean(df, intensity_name)
+    return transform_and_clean(df, intensity_name, map_to_uniprot)
 
 
-def transform_and_clean(df, intensity_name):
+def transform_and_clean(df, intensity_name, map_to_uniprot):
     contaminant_groups_mask = df["Protein ID"].map(
         lambda group: any(id_.startswith("CON__") for id_ in group.split(";"))
     )
@@ -97,7 +97,7 @@ def transform_and_clean(df, intensity_name):
 
     # REV__ and XXX__ proteins get removed here as well
     new_groups, filtered_proteins = clean_protein_groups(
-        df["Protein ID"].tolist(), map_to_uniprot=True
+        df["Protein ID"].tolist(), map_to_uniprot
     )
     df["Protein ID"] = new_groups
 
@@ -117,7 +117,7 @@ def transform_and_clean(df, intensity_name):
     return ordered, dict(contaminants=contaminants, filtered_proteins=filtered_proteins)
 
 
-def map_ids(extracted_ids):
+def map_ids_to_uniprot(extracted_ids):
     id_to_uniprot = defaultdict(list)
     for identifier, matching_ids in extracted_ids.items():
         if not matching_ids:
@@ -182,7 +182,8 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
                 removed_protein_ids.append(protein_id)
         found_ids_per_group.append(found_in_group)
 
-    id_to_uniprot = map_ids(extracted_ids)
+    if map_to_uniprot:
+        id_to_uniprot = map_ids_to_uniprot(extracted_ids)
     new_groups = []
 
     for group in found_ids_per_group:
@@ -190,9 +191,11 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
         for old_id in group:
             if uniprot.search(old_id):
                 all_ids_of_group.add(old_id)
-            else:
+            elif map_to_uniprot:
                 new_ids = id_to_uniprot.get(old_id, [])
                 all_ids_of_group.update(new_ids)
+            else:
+                all_ids_of_group.add(old_id)
         new_groups.append(";".join(sorted(all_ids_of_group)))
     return new_groups, removed_protein_ids
 
@@ -200,11 +203,14 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
 if __name__ == "__main__":
     df, out = max_quant_import(
         None,
-        # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/proteinGroups_small.txt",
+        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
+        # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/proteinGroups_small.txt",
         "Intensity",
+        map_to_uniprot=True,
     )
-    print(out)
+    for k, v in out.items():
+        print(k)
+        print(v)
     # df.to_csv("out_new.csv")
     df.to_csv("out_new.csv")
     # old_df = pd.read_csv("out.csv")
