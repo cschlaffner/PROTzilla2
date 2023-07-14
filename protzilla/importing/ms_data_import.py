@@ -117,37 +117,6 @@ def transform_and_clean(df, intensity_name, map_to_uniprot):
     return ordered, dict(contaminants=contaminants, filtered_proteins=filtered_proteins)
 
 
-def map_ids_to_uniprot(extracted_ids):
-    id_to_uniprot = defaultdict(list)
-    for identifier, matching_ids in extracted_ids.items():
-        if not matching_ids:
-            continue
-
-        result = biomart_query(
-            matching_ids,
-            identifier,
-            [identifier, "uniprotswissprot"],
-        )
-        for other_id, uniport_id in result:
-            if uniport_id:
-                id_to_uniprot[other_id].append(uniport_id)
-
-        # we trust reviewed results more, so we don't look up ids we found in
-        # uniprotswissprot in uniprotsptrembl again
-        left = matching_ids - set(id_to_uniprot.keys())
-
-        result = biomart_query(
-            left,
-            identifier,
-            [identifier, "uniprotsptrembl"],
-        )
-        for other_id, uniport_id in result:
-            if uniport_id:
-                id_to_uniprot[other_id].append(uniport_id)
-
-    return dict(id_to_uniprot)
-
-
 def clean_protein_groups(protein_groups, map_to_uniprot=True):
     regex = {
         "ensembl_peptide_id": re.compile(r"^ENSP\d{11}"),
@@ -200,19 +169,32 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     return new_groups, removed_protein_ids
 
 
-if __name__ == "__main__":
-    df, out = max_quant_import(
-        None,
-        "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/not-uniprot-maxquant.txt",
-        # "/Users/fynnkroeger/Desktop/Studium/Bachelorprojekt/inputs/proteinGroups_small.txt",
-        "Intensity",
-        map_to_uniprot=True,
-    )
-    for k, v in out.items():
-        print(k)
-        print(v)
-    # df.to_csv("out_new.csv")
-    df.to_csv("out_new.csv")
-    # old_df = pd.read_csv("out.csv")
+def map_ids_to_uniprot(extracted_ids):
+    id_to_uniprot = defaultdict(list)
+    for identifier, matching_ids in extracted_ids.items():
+        if not matching_ids:
+            continue
 
-    print(df)
+        result = biomart_query(
+            matching_ids,
+            identifier,
+            [identifier, "uniprotswissprot"],
+        )
+        for other_id, uniport_id in result:
+            if uniport_id:
+                id_to_uniprot[other_id].append(uniport_id)
+
+        # we trust reviewed results more, so we don't look up ids we found in
+        # uniprotswissprot in uniprotsptrembl again
+        left = matching_ids - set(id_to_uniprot.keys())
+
+        result = biomart_query(
+            left,
+            identifier,
+            [identifier, "uniprotsptrembl"],
+        )
+        for other_id, uniport_id in result:
+            if uniport_id:
+                id_to_uniprot[other_id].append(uniport_id)
+
+    return dict(id_to_uniprot)
