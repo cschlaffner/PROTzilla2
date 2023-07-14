@@ -14,11 +14,16 @@ def index(request):
 
 def databases(request):
     databases = uniprot_databases()
-    with_cols = {database: uniprot_columns(database) for database in databases}
+    df_infos = {}
+
+    for db in databases:
+        df_infos[db] = dict(
+            cols=uniprot_columns(db), filesize=database_path(db).stat().st_size
+        )
     return render(
         request,
         "databases.html",
-        context=dict(uniprot_databases=with_cols),
+        context=dict(uniprot_databases=df_infos),
     )
 
 
@@ -52,14 +57,16 @@ def database_upload(request):
     if not (EXTERNAL_DATA_PATH / "uniprot").exists():
         (EXTERNAL_DATA_PATH / "uniprot").mkdir(parents=True, exist_ok=True)
 
-    dataframe.to_csv(
-        EXTERNAL_DATA_PATH / "uniprot" / f"{chosen_name}.tsv", sep="\t", index=False
-    )
+    dataframe.to_csv(database_path(chosen_name), sep="\t", index=False)
     return HttpResponseRedirect(reverse("databases"))
 
 
 def database_delete(request):
     database_name = request.POST["database"]
-    path = EXTERNAL_DATA_PATH / "uniprot" / f"{database_name}.tsv"
+    path = database_path(database_name)
     path.unlink()
     return HttpResponseRedirect(reverse("databases"))
+
+
+def database_path(name):
+    return EXTERNAL_DATA_PATH / "uniprot" / f"{name}.tsv"
