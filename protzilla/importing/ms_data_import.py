@@ -114,18 +114,16 @@ def ms_fragger_import(_, file_path, intensity_name):
 
 
 def handle_df(df, intensity_name):
-    # remove con groups
+    non_contaminant_groups = df["Protein ID"].map(
+        lambda group: not any(id_.startswith("CON__") for id_ in group.split(";"))
+    )
+    df = df[non_contaminant_groups]
 
-    # remove rev xxx proteins
-
+    # REV__ and XXX__ proteins get removed here as well
     df["Protein ID"] = map_groups_to_uniprot(df["Protein ID"].tolist())
-    print(df)
-
-    df["Protein ID"] = df["Protein ID"].map(handle_protein_ids)
-    print(df)
 
     df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
-    print(df)
+
     df = df.groupby(["Protein ID", "Gene"]).sum().reset_index()
     molten = pd.melt(
         df,
@@ -140,26 +138,10 @@ def handle_df(df, intensity_name):
     return ordered, {}
 
 
-def valid_uniprot_id(uniprot_id):
-    return not uniprot_id.startswith("CON__") and not uniprot_id.startswith("REV__")
-
-
-def isoforms_together(protein_id):
-    # put isofroms together, and the non-isofrom version first
-    clean = clean_uniprot_id(protein_id)
-    return clean, clean != protein_id, protein_id
-
-
-def handle_protein_ids(protein_group):
-    group = filter(valid_uniprot_id, set(protein_group.split(";")))
-    return ";".join(sorted(group, key=isoforms_together))
-
-
 def map_ids(extracted_ids):
     id_to_uniprot = defaultdict(list)
     all_count = 0
     for identifier, matching_ids in extracted_ids.items():
-        # print(" ".join(matching_ids))
         all_count += len(matching_ids)
         if not matching_ids:
             continue
@@ -204,8 +186,8 @@ def map_groups_to_uniprot(protein_groups):
         """,
         re.VERBOSE,
     )
+    removed_protein_ids = []
 
-    # go through groups, find protein ids
     extracted_ids = {k: set() for k in regex.keys()}
     found_ids_per_group = []
     for group in protein_groups:
@@ -220,6 +202,8 @@ def map_groups_to_uniprot(protein_groups):
                     extracted_ids[identifier].add(found_id)
                     found_in_group.add(found_id)
                     break  # can only match one regex
+            else:
+                removed_protein_ids.append(protein_id)
         found_ids_per_group.append(found_in_group)
 
     id_to_uniprot = map_ids(extracted_ids)
@@ -233,7 +217,7 @@ def map_groups_to_uniprot(protein_groups):
             else:
                 new_ids = id_to_uniprot.get(old_id, [])
                 all_ids_of_group.update(new_ids)
-        new_groups.append(";".join(all_ids_of_group))
+        new_groups.append(";".join(sorted(all_ids_of_group)))
     return new_groups
 
 
@@ -246,7 +230,7 @@ if __name__ == "__main__":
     )
 
     # df.to_csv("out_new.csv")
-    df.to_csv("out.csv")
+    df.to_csv("out_new.csv")
     # old_df = pd.read_csv("out.csv")
 
     print(df)
