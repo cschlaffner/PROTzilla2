@@ -114,7 +114,12 @@ def transform_and_clean(df, intensity_name, map_to_uniprot):
     ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    return ordered, dict(contaminants=contaminants, filtered_proteins=filtered_proteins)
+    msg = f"Successfully imported {len(df)} protein groups for {int(len(ordered)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
+    return ordered, dict(
+        contaminants=contaminants,
+        filtered_proteins=filtered_proteins,
+        messages=[dict(level=messages.INFO, msg=msg)],
+    )
 
 
 def clean_protein_groups(protein_groups, map_to_uniprot=True):

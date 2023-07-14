@@ -19,6 +19,11 @@
               "iBAQ"
             ],
             "default": "Intensity"
+          },
+          "map_to_uniprot": {
+            "name": "Map to Uniprot IDs using Biomart",
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -46,6 +51,11 @@
               "Total Spectral Count"
             ],
             "default": "Intensity"
+          },
+          "map_to_uniprot": {
+            "name": "Map to Uniprot IDs using Biomart",
+            "type": "boolean",
+            "default": false
           }
         }
       }
