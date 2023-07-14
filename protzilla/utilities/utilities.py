@@ -1,6 +1,7 @@
 import operator
 import os
 from itertools import groupby
+from math import ceil
 from random import choices
 from string import ascii_letters
 import base64
@@ -49,10 +50,10 @@ def fig_to_base64(fig):
     img.seek(0)
     return base64.b64encode(img.getvalue())
 
-def chunks(lst, n):
+def chunks(lst, c):
     """
-    Yield successive n-sized chunks from lst.
-    taken from: https://stackoverflow.com/a/312464/8929127
+    Yield n chunks from lst.
     """
+    n = ceil(len(lst)/c)
     for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+        yield lst[i:min(i + n, len(lst))]

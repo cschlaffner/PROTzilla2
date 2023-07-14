@@ -5,21 +5,21 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from django.contrib import messages
-
+import concurrent.futures
 
 from .differential_expression_helper import apply_multiple_testing_correction
 from ..utilities import chunks
 
 
 def linear_model(
-    intensity_df,
-    metadata_df,
-    grouping,
-    group1,
-    group2,
-    multiple_testing_correction_method,
-    alpha,
-    fc_threshold,
+        intensity_df,
+        metadata_df,
+        grouping,
+        group1,
+        group2,
+        multiple_testing_correction_method,
+        alpha,
+        fc_threshold,
 ):
     """
     A function to fit a linear model using Ordinary Least Squares for each Protein.
@@ -70,22 +70,16 @@ def linear_model(
     log2_fold_change = []
     filtered_proteins = []
 
-    manager = multiprocessing.Manager()
-    results_dict = manager.dict()
-    success_dict = manager.dict()
-    jobs = []
-
     # split into 4 processes
-    for proteins_enumerated_chunk in chunks(list(enumerate(proteins)), 4):
-        args = (proteins_enumerated_chunk, intensity_df, grouping, group1, group2, intensity_name, results_dict, success_dict)
-        p = multiprocessing.Process(target=linear_model_worker, args=args)
-        jobs.append(p)
-        p.start()
+    proteins_chunks = list(chunks(proteins, 4))
+    params = (intensity_df, grouping, group1, group2, intensity_name)
 
-    for proc in jobs:
-        proc.join()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(linear_model_worker, chunk, *params) for chunk in proteins_chunks]
+        results = [result for success, result in [f.result() for f in futures]]
+        success = [success for success, result in [f.result() for f in futures]]
 
-    if not all(success_dict.values()):
+    if not all(success):
         msg = "There are Proteins with NaN values present in your data. \
                             Please filter them out before running the differential expression analysis."
         return dict(
@@ -98,9 +92,9 @@ def linear_model(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    for results in [results_dict[key] for key in sorted(results_dict.keys())]:
-        p_values.append(results.pvalues[grouping])
-        log2_fold_change.append(results.params[grouping])
+    for result in results:
+        p_values.append(result.pvalues[grouping])
+        log2_fold_change.append(result.params[grouping])
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
@@ -149,26 +143,26 @@ def linear_model(
         else [],
     )
 
+
 def linear_model_worker(
-    proteins_enumerated_chunk, intensity_df, grouping, group1, group2, intensity_name, results_dict, success_dict
+        proteins_chunk, intensity_df, grouping, group1, group2, intensity_name
 ):
     """
     puts in results_dict: a Tuple of a boolean if successfully executed t-test and result of
     t-test or in event of no success the error msg
     """
-    for i, protein in proteins_enumerated_chunk:
+    for protein in proteins_chunk:
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
         protein_df = protein_df.loc[
             (protein_df.loc[:, grouping] == group1)
             | (protein_df.loc[:, grouping] == group2)
-        ]
+            ]
         protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
 
         # if a protein has a NaN value in a sample, user should remove it
         intensity_is_nan = np.isnan(protein_df[[intensity_name]].to_numpy())
         if intensity_is_nan.any():
-            success_dict[i] = False
-            return
+            return False, None
 
         # lm(intensity ~ group + constant)
         Y = protein_df[[intensity_name]]
@@ -177,5 +171,4 @@ def linear_model_worker(
         model = sm.OLS(Y, X)
         results = model.fit()
 
-        success_dict[i] = True
-        results_dict[i] = results
+        return True, results
