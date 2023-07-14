@@ -69,7 +69,13 @@
                                     <input type="submit" value="delete" class="btn btn-red">
                                 </form>
                             </div>
-                            Filesize: {{ infos.filesize|filesizeformat }}
+                            {% if infos.num_proteins %}
+                                {{ infos.num_proteins|floatformat:"g" }} proteins |
+                            {% endif %}
+                            {% if infos.date %}
+                                Added on {{ infos.date }} |
+                            {% endif %}
+                            {{ infos.filesize|filesizeformat }}
                             <br>
                             Columns: {{ infos.cols|join:", " }}
                             <hr>
