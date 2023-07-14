@@ -3,12 +3,12 @@ import io
 import json
 from pathlib import Path
 from shutil import rmtree
-from PIL import Image
 
 import numpy as np
 import pandas as pd
 import pytest
 import requests
+from PIL import Image
 
 from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from ..protzilla.utilities import random_string

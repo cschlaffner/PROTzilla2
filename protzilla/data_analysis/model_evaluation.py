@@ -1,8 +1,8 @@
 import pandas as pd
 
 from protzilla.data_analysis.classification_helper import (
-    evaluate_with_scoring,
     encode_labels,
+    evaluate_with_scoring,
 )
 
 

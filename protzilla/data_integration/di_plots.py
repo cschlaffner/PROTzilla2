@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 from django.contrib import messages
 
-from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.utilities.utilities import fig_to_base64
+
+from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 
 def go_enrichment_bar_plot(
