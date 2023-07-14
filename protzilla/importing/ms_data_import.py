@@ -55,7 +55,7 @@ def max_quant_import(_, file_path, intensity_name):
     # ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     # ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
     # return ordered, {}
-    return handle_df(df, intensity_name)
+    return transform_and_clean(df, intensity_name)
 
 
 def ms_fragger_import(_, file_path, intensity_name):
@@ -90,8 +90,6 @@ def ms_fragger_import(_, file_path, intensity_name):
             "Combined Total Spectral Count",
         ]
     )
-    df["Protein ID"] = df["Protein ID"].map(handle_protein_ids)
-    df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
     id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
     intensity_df.columns = [
@@ -102,18 +100,11 @@ def ms_fragger_import(_, file_path, intensity_name):
             regex="MaxLFQ Total$|MaxLFQ$|Total$|MaxLFQ Unique$|Unique$", axis=1
         ).columns
     )
-    molten = pd.melt(
-        pd.concat([id_df, intensity_df], axis=1),
-        id_vars=selected_columns,
-        var_name="Sample",
-        value_name=intensity_name,
-    )
-    ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
-    ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    return ordered, {}
+    df = pd.concat([id_df, intensity_df], axis=1)
+    return transform_and_clean(df, intensity_name)
 
 
-def handle_df(df, intensity_name):
+def transform_and_clean(df, intensity_name):
     non_contaminant_groups = df["Protein ID"].map(
         lambda group: not any(id_.startswith("CON__") for id_ in group.split(";"))
     )
@@ -124,7 +115,9 @@ def handle_df(df, intensity_name):
 
     df = df[df["Protein ID"].map(bool)]  # remove rows without valid protein id
 
-    df = df.groupby(["Protein ID", "Gene"]).sum().reset_index()
+    df = df.groupby("Protein ID", as_index=False).sum(min_count=1)
+    df["Gene"] = np.nan
+
     molten = pd.melt(
         df,
         id_vars=["Protein ID", "Gene"],

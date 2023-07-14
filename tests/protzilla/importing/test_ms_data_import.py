@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
@@ -152,3 +153,30 @@ def test_filter_rev_con():
         )
         for group in protein_ids
     )
+
+
+def test_transform_and_clean():
+    columns = ["Protein ID", "Gene", "A", "B", "C"]
+    data = [
+        ["P00000", "X", 1, 6, np.nan],
+        ["P00000;REV__P12345", "X", np.nan, 2, np.nan],  # REV__P12345 removed
+        ["Q11111", "Y", 4, 4, np.nan],
+        ["Q11111;CON__P12345", "Y", 4, 4, np.nan],  # CON group filtered
+    ]
+    out_col = ["Sample", "Protein ID", "Gene", "intensity"]
+    output = [
+        ["A", "P00000", "X", 1],  # add nan and number
+        ["A", "Q11111", "Y", 4],
+        ["B", "P00000", "X", 8],  # add number and number
+        ["B", "Q11111", "Y", 4],
+        ["C", "P00000", "X", np.nan],  # add nan only
+        ["C", "Q11111", "A", np.nan],
+    ]
+    df = pd.DataFrame(data, columns=columns)
+    res, _ = ms_data_import.transform_and_clean(df, "intensity")
+    expected_df = pd.DataFrame(output, columns=out_col)
+    # we do not care about the genes column, it is never used (and replaced by nan)
+    expected_df = expected_df.drop(columns=["Gene"])
+    res = res.drop(columns=["Gene"])
+
+    assert res.equals(expected_df)
