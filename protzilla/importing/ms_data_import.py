@@ -197,28 +197,42 @@ def map_groups_to_uniprot(protein_groups):
         "refseq_peptide": re.compile(r"^NP_\d{6,}"),
         "refseq_peptide_predicted": re.compile(r"^XP_\d{9}"),
     }
+    uniprot = re.compile(
+        r"""^[A-Z]               # start with capital letter
+        [A-Z\d]{5}([A-Z\d]{4})?  # match ids of length 6 or 10
+        ([-_][-\d]+)?            # match variations like -8 and _9-6
+        """,
+        re.VERBOSE,
+    )
 
     # go through groups, find protein ids
     extracted_ids = {k: set() for k in regex.keys()}
-    found_ids = []
+    found_ids_per_group = []
     for group in protein_groups:
         found_in_group = set()
         for protein_id in group.split(";"):
+            if match := uniprot.search(protein_id):
+                found_in_group.add(match.group(0))
+                continue
             for identifier, pattern in regex.items():
                 if match := pattern.search(protein_id):
                     found_id = match.group(0)
                     extracted_ids[identifier].add(found_id)
                     found_in_group.add(found_id)
                     break  # can only match one regex
-        found_ids.append(found_in_group)
+        found_ids_per_group.append(found_in_group)
+
     id_to_uniprot = map_ids(extracted_ids)
     new_groups = []
-    for found in found_ids:
+
+    for group in found_ids_per_group:
         all_ids_of_group = set()
-        for old_id in found:
-            # check if uniprot?
-            new_ids = id_to_uniprot.get(old_id, [])
-            all_ids_of_group.update(new_ids)
+        for old_id in group:
+            if uniprot.search(old_id):
+                all_ids_of_group.add(old_id)
+            else:
+                new_ids = id_to_uniprot.get(old_id, [])
+                all_ids_of_group.update(new_ids)
         new_groups.append(";".join(all_ids_of_group))
     return new_groups
 
@@ -233,7 +247,6 @@ if __name__ == "__main__":
 
     # df.to_csv("out_new.csv")
     df.to_csv("out.csv")
-    old_df = pd.read_csv("out.csv")
+    # old_df = pd.read_csv("out.csv")
 
     print(df)
-    print(old_df.equals(df))
