@@ -20,6 +20,15 @@ def async_to_csv(item, path, *args, **kwargs):
     remove_finished_processes()
 
 
+def async_method_call(target, tag):
+    new_thread = threading.Thread(
+        target=target,
+    )
+    wait_for(tag)
+    new_thread.start()
+    threads[tag] = new_thread
+    return new_thread
+
 
 def remove_finished_processes():
     finished = list()
@@ -31,12 +40,13 @@ def remove_finished_processes():
         del threads[path]
 
 
-def wait_for(path_to_wait_for):
+def wait_for(tag):
     remove_finished_processes()
-    for path, process in threads.items():
-        if path_to_wait_for == path or path_to_wait_for in path.parents:
-            # print(f"waiting: {path_to_wait_for=}\n {path=}")
-            process.join()
+    thread = threads.get(tag, False)
+    if thread and thread.is_alive():
+        print(f"wait for {thread=}")
+        thread.join()
+        print("ready")
 
 
 def kill_all_with_path(kill_path):

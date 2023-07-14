@@ -15,7 +15,7 @@ from .utilities.async_tasks import (
     async_method_call,
     async_to_csv,
     kill_all_with_path,
-    wait_for,
+    wait_for, write_to_csv,
 )
 
 
@@ -41,7 +41,7 @@ class History:
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
-                wait_for(df_path)
+                wait_for("save_history")
                 df = pd.read_csv(df_path)
             else:
                 df = None
@@ -87,7 +87,7 @@ class History:
             index = len(self.steps)
             df_path = self.df_path(index)
             df_path.parent.mkdir(parents=True, exist_ok=True)
-            async_to_csv(dataframe, df_path, index=False)
+            write_to_csv(dataframe, df_path, index=False)
         if "memory" in self.df_mode:
             df = dataframe
         executed_step = ExecutedStep(
@@ -145,8 +145,12 @@ class History:
         return step, df
 
     def save(self):
+        thread = async_method_call(self.synchron_save, "save_history")
+        print(threading.active_count())
+        return thread
+
+    def synchron_save(self):
         if (history_dfs_path := RUNS_PATH / self.run_name / "history_dfs").exists():
-            kill_all_with_path(history_dfs_path)
             shutil.rmtree(history_dfs_path)
 
         to_save = []
@@ -177,7 +181,7 @@ class History:
 
                 path = RUNS_PATH / self.run_name / "history_dfs" / filename
                 path.parent.mkdir(exist_ok=True)
-                async_to_csv(deepcopy(value), path)
+                write_to_csv(value, path)
                 cleaned[key] = {"__dataframe__": True, "path": str(path)}
             elif isinstance(value, BaseEstimator):
                 filename = f"{index}-{section}-{step}-{method}-{key}.joblib"
@@ -225,7 +229,7 @@ class ExecutedStep:
         if self._dataframe is not None:
             return self._dataframe
         if self.dataframe_path is not None:
-            wait_for(self.dataframe_path)
+            wait_for("save_history")
             return pd.read_csv(self.dataframe_path)
         return None
 

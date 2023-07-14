@@ -5,7 +5,7 @@ from django.contrib import messages
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities import random_string
-from protzilla.utilities.async_tasks import async_to_csv
+from protzilla.utilities.async_tasks import async_to_csv, write_to_csv
 
 
 def metadata_import_method(df, file_path, feature_orientation):
@@ -49,7 +49,7 @@ def metadata_import_method(df, file_path, feature_orientation):
         meta_df.index = meta_df.index - 1
 
         file_path = f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_{random_string()}.csv"
-        async_to_csv(meta_df, file_path, index=False)
+        write_to_csv(meta_df, file_path, index=False)
         return metadata_import_method(df, file_path, "Columns")
 
     elif file_path.startswith(
