@@ -22,7 +22,7 @@ def random_string():
 
 
 def get_memory_usage():
-    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024**2
+    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
     return f"{round(memory_mb, 1)} MB"
 
 
@@ -50,10 +50,15 @@ def fig_to_base64(fig):
     img.seek(0)
     return base64.b64encode(img.getvalue())
 
+
 def chunks(lst, c):
     """
     Yield n chunks from lst.
     """
-    n = ceil(len(lst)/c)
+    n = ceil(len(lst) / c)
     for i in range(0, len(lst), n):
         yield lst[i:min(i + n, len(lst))]
+
+
+def flatten(lst):
+    return [item for sublist in lst for item in sublist]
