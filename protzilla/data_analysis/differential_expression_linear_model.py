@@ -71,7 +71,7 @@ def linear_model(
     filtered_proteins = []
 
     # split into 4 threads
-    proteins_chunks = list(chunks(proteins, 4))
+    proteins_chunks = list(chunks(proteins, 8))
     params = (intensity_df, grouping, group1, group2, intensity_name)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
