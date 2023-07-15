@@ -13,33 +13,27 @@ def max_quant_import(_, file_path, intensity_name, map_to_uniprot=False):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a Max Quant file."
-        return None, dict(
-            messages=[dict(level=messages.ERROR, msg=msg)],
-        )
-    selected_columns = ["Protein IDs", "Gene names"]
-    read = pd.read_csv(
+        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+    df = pd.read_csv(
         file_path,
         sep="\t",
         low_memory=False,
         na_values=["", 0],
         keep_default_na=True,
     )
-    df = read.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
-    if "Gene names" not in df.columns:  # genes column should be removed eventually
-        df["Gene names"] = np.nan
-    id_df = df[selected_columns]
-    id_df = id_df.rename(columns={"Protein IDs": "Protein ID", "Gene names": "Gene"})
+    protein_groups = df["Protein IDs"]
+
+    df = df.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
     intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
 
     if intensity_df.empty:
         msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again"
-        return None, dict(
-            messages=[dict(level=messages.ERROR, msg=msg)],
-        )
-    intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
+        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
 
-    df = pd.concat([id_df, intensity_df], axis=1)
-    return transform_and_clean(df, intensity_name, map_to_uniprot)
+    intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
+    intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
 def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
@@ -89,33 +83,40 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
 
 
 def transform_and_clean(df, intensity_name, map_to_uniprot):
+    print(df)
+    """
+    accepts wide df with samples as rows, proteins als cols only. add deprecated gene column
+    """
+    assert "Protein ID" in df.columns
+
     contaminant_groups_mask = df["Protein ID"].map(
         lambda group: any(id_.startswith("CON__") for id_ in group.split(";"))
     )
-    contaminants = df[contaminant_groups_mask].reset_index(drop=True)
+    contaminants = df[contaminant_groups_mask]["Protein ID"].tolist()
     df = df[~contaminant_groups_mask]
 
     # REV__ and XXX__ proteins get removed here as well
     new_groups, filtered_proteins = clean_protein_groups(
         df["Protein ID"].tolist(), map_to_uniprot
     )
-    df["Protein ID"] = new_groups
+    df = df.assign(**{"Protein ID": new_groups})
 
     has_valid_protein_id = df["Protein ID"].map(bool)
     df = df[has_valid_protein_id]
 
     # sum intensities for duplicate protein groups, NaN if all are NaN, sum of numbers otherwise
     df = df.groupby("Protein ID", as_index=False).sum(min_count=1)
-    df["Gene"] = np.nan  # add genes column back (removed by groupby)
+
+    df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 
     molten = pd.melt(
         df, id_vars=["Protein ID", "Gene"], var_name="Sample", value_name=intensity_name
     )
-    ordered = molten[["Sample", "Protein ID", "Gene", intensity_name]]
-    ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    molten = molten[["Sample", "Protein ID", "Gene", intensity_name]]
+    molten.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     msg = f"Successfully imported {len(df)} protein groups for {int(len(ordered)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
-    return ordered, dict(
+    return molten, dict(
         contaminants=contaminants,
         filtered_proteins=filtered_proteins,
         messages=[dict(level=messages.INFO, msg=msg)],
