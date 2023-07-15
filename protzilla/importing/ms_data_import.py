@@ -83,7 +83,18 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
 
 def transform_and_clean(df, intensity_name, map_to_uniprot):
     """
-    accepts wide df with samples as rows, proteins als cols only. add deprecated gene column
+    Transforms a dataframe that is read from a file in wide format into long format,
+    removing contaminant groups, and processing protein ids, removing invalid ones
+
+    :param df: wide dataframe containing a protein column and sample columns
+    :type df: pd.DataFrame
+    :param intensity_name: name of the intensity in the output dataframe
+    :type intensity_name: str
+    :param map_to_uniprot: decides if protein ids will be mapped to uniprot ids
+    :type map_to_uniprot: bool
+    :return: a protzilla dataframe in long format with sample, protein, gene and
+        intensity columns; contaminants and rejected proteins
+    :rtype: tuple[pd.DataFrame, list[str], list[str]]
     """
     assert "Protein ID" in df.columns
 
@@ -127,7 +138,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
         "refseq_peptide": re.compile(r"^NP_\d{6,}"),
         "refseq_peptide_predicted": re.compile(r"^XP_\d{9}"),
     }
-    uniprot = re.compile(
+    uniprot_regex = re.compile(
         r"""^[A-Z]               # start with capital letter
         [A-Z\d]{5}([A-Z\d]{4})?  # match ids of length 6 or 10
         ([-_][-\d]+)?            # match variations like -8 and _9-6
@@ -142,7 +153,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     for group in protein_groups:
         found_in_group = set()
         for protein_id in group.split(";"):
-            if match := uniprot.search(protein_id):
+            if match := uniprot_regex.search(protein_id):
                 found_in_group.add(match.group(0))
                 continue
             for identifier, pattern in regex.items():
@@ -162,7 +173,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     for group in found_ids_per_group:
         all_ids_of_group = set()
         for old_id in group:
-            if uniprot.search(old_id):
+            if uniprot_regex.search(old_id):
                 all_ids_of_group.add(old_id)
             elif map_to_uniprot:
                 new_ids = id_to_uniprot.get(old_id, [])
