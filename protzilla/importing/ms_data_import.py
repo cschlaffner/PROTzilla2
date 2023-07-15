@@ -50,25 +50,23 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
     ]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a MS Fragger file."
-        return None, dict(
-            messages=[dict(level=messages.ERROR, msg=msg)],
-        )
-    selected_columns = ["Protein ID", "Gene"]
-    read = pd.read_csv(
+        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    df = pd.read_csv(
         file_path,
         sep="\t",
         low_memory=False,
         na_values=["", 0],
         keep_default_na=True,
     )
-    df = read.drop(
+    protein_groups = df["Protein ID"]
+    df = df.drop(
         columns=[
             "Combined Spectral Count",
             "Combined Unique Spectral Count",
             "Combined Total Spectral Count",
         ]
     )
-    id_df = df[selected_columns]
     intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
     intensity_df.columns = [
         c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
@@ -78,12 +76,12 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
             regex="MaxLFQ Total$|MaxLFQ$|Total$|MaxLFQ Unique$|Unique$", axis=1
         ).columns
     )
-    df = pd.concat([id_df, intensity_df], axis=1)
-    return transform_and_clean(df, intensity_name, map_to_uniprot)
+    intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
 def transform_and_clean(df, intensity_name, map_to_uniprot):
-    print(df)
     """
     accepts wide df with samples as rows, proteins als cols only. add deprecated gene column
     """
@@ -115,7 +113,7 @@ def transform_and_clean(df, intensity_name, map_to_uniprot):
     molten = molten[["Sample", "Protein ID", "Gene", intensity_name]]
     molten.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    msg = f"Successfully imported {len(df)} protein groups for {int(len(ordered)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
+    msg = f"Successfully imported {len(df)} protein groups for {int(len(molten)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
     return molten, dict(
         contaminants=contaminants,
         filtered_proteins=filtered_proteins,

@@ -161,31 +161,31 @@ def test_filter_rev_con():
 
 
 def test_transform_and_clean():
-    columns = ["Protein ID", "Gene", "A", "B", "C"]
+    columns = ["Protein ID", "A", "B", "C"]
     data = [
-        ["P00000", "X", 1.0, 6.0, np.nan],
-        ["P00000;REV__P12345", "X", np.nan, 2.0, np.nan],
-        ["Q11111", "Y", 4.0, 4, np.nan],
-        ["Q11111;CON__P12345", "Y", 4.0, 4.0, np.nan],
+        ["P00000", 1.0, 6.0, np.nan],
+        ["P00000;REV__P12345", np.nan, 2.0, np.nan],
+        ["Q11111", 4.0, 4, np.nan],
+        ["Q11111;CON__P12345", 4.0, 4.0, np.nan],
     ]
-    out_col = ["Sample", "Protein ID", "Gene", "intensity"]
+    out_col = ["Sample", "Protein ID", "intensity"]
     output = [
-        ["A", "P00000", "X", 1.0],  # add nan and number
-        ["A", "Q11111", "Y", 4.0],
-        ["B", "P00000", "X", 8.0],  # add number and number
-        ["B", "Q11111", "Y", 4.0],
-        ["C", "P00000", "X", np.nan],  # add nan only
-        ["C", "Q11111", "A", np.nan],
+        ["A", "P00000", 1.0],  # add nan and number
+        ["A", "Q11111", 4.0],
+        ["B", "P00000", 8.0],  # add number and number
+        ["B", "Q11111", 4.0],
+        ["C", "P00000", np.nan],  # add nan only
+        ["C", "Q11111", np.nan],
     ]
     df = pd.DataFrame(data, columns=columns)
-    res, other = ms_data_import.transform_and_clean(df, "intensity")
+    res, other = ms_data_import.transform_and_clean(
+        df, "intensity", map_to_uniprot=False
+    )
     expected_df = pd.DataFrame(output, columns=out_col)
-    # we do not care about the genes column, it is never used (and replaced by nan)
-    expected_df = expected_df.drop(columns=["Gene"])
+
+    # we do not care about the genes column, it is deprecated (and replaced by nan)
     res = res.drop(columns=["Gene"])
 
     assert res.equals(expected_df)
-    pd.testing.assert_frame_equal(
-        other["contaminants"], pd.DataFrame([data[3]], columns=columns)
-    )
+    assert other["contaminants"] == ["Q11111;CON__P12345"]
     assert other["filtered_proteins"] == ["REV__P12345"]
