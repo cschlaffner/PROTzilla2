@@ -1,3 +1,4 @@
+import concurrent
 import logging
 
 import numpy as np
@@ -6,18 +7,19 @@ from django.contrib import messages
 from scipy import stats
 
 from .differential_expression_helper import apply_multiple_testing_correction
+from ..utilities import chunks, flatten
 
 
 def t_test(
-    intensity_df,
-    metadata_df,
-    grouping,
-    group1,
-    group2,
-    multiple_testing_correction_method,
-    alpha,
-    fc_threshold,
-    log_base,
+        intensity_df,
+        metadata_df,
+        grouping,
+        group1,
+        group2,
+        multiple_testing_correction_method,
+        alpha,
+        fc_threshold,
+        log_base,
 ):
     """
     A function to conduct a two sample t-test between groups defined in the
@@ -77,45 +79,38 @@ def t_test(
     filtered_proteins = []
     t_statistic = []
 
-    for protein in proteins:
-        protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
+    # split into 4 threads
+    proteins_chunks = list(chunks(proteins, 4))
+    params = (intensity_df, grouping, group1, group2, intensity_name, log_base)
 
-        group1_intensities = protein_df.loc[
-            protein_df.loc[:, grouping] == group1, intensity_name
-        ].to_numpy()
-        group2_intensities = protein_df.loc[
-            protein_df.loc[:, grouping] == group2, intensity_name
-        ].to_numpy()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(t_test_worker, chunk, *params)
+            for chunk in proteins_chunks
+        ]
+        success, results = zip(*[f.result() for f in futures])
+        results = flatten(results)
 
-        # if a protein has a NaN value in a sample, user should remove it
-        group1_is_nan = np.isnan(group1_intensities)
-        group2_is_nan = np.isnan(group2_intensities)
-        if group1_is_nan.any() or group2_is_nan.any():
-            msg = "There are Proteins with NaN values present in your data. \
-                Please filter them out before running the differential expression analysis."
-            return dict(
-                de_proteins_df=None,
-                corrected_p_values=None,
-                log2_fold_change=None,
-                fc_threshold=None,
-                corrected_alpha=None,
-                messages=[dict(level=messages.ERROR, msg=msg)],
-            )
-
-        # if the intensity of a group for a protein is 0, it should be filtered out
-        if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
+    if not all(success):
+        msg = "There are Proteins with NaN values present in your data. \
+                        Please filter them out before running the differential expression analysis."
+        return dict(
+            de_proteins_df=None,
+            corrected_p_values=None,
+            log2_fold_change=None,
+            fc_threshold=None,
+            corrected_alpha=None,
+            messages=[dict(level=messages.ERROR, msg=msg)],
+        )
+    for result, protein in zip(results, proteins):
+        if result["filtered"]:
             filtered_proteins.append(protein)
             continue
+        p_values.append(result["p"])
+        t_statistic.append(result["t"])
 
-        t, p = stats.ttest_ind(group1_intensities, group2_intensities)
-        p_values.append(p)
-        t_statistic.append(t)
-        if log_base == "":
-            fc = np.mean(group2_intensities) / np.mean(group1_intensities)
-        else:
-            fc = log_base ** (np.mean(group2_intensities) - np.mean(group1_intensities))
-        fold_change.append(fc)
-        log2_fold_change.append(np.log2(fc))
+        fold_change.append(result["fc"])
+        log2_fold_change.append(np.log2(result["fc"]))
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
@@ -182,3 +177,41 @@ def t_test(
         if proteins_filtered
         else [],
     )
+
+
+def t_test_worker(
+        proteins_chunk, intensity_df, grouping, group1, group2, intensity_name, log_base
+):
+    """
+    :returns: a Tuple of a boolean if successfully executed t-test and a list of dicts with results
+     of t-test
+    """
+    results = []
+    for protein in proteins_chunk:
+        protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
+
+        group1_intensities = protein_df.loc[
+            protein_df.loc[:, grouping] == group1, intensity_name
+        ].to_numpy()
+        group2_intensities = protein_df.loc[
+            protein_df.loc[:, grouping] == group2, intensity_name
+        ].to_numpy()
+
+        # if a protein has a NaN value in a sample, user should remove it
+        group1_is_nan = np.isnan(group1_intensities)
+        group2_is_nan = np.isnan(group2_intensities)
+        if group1_is_nan.any() or group2_is_nan.any():
+            return False, None
+        # if the intensity of a group for a protein is 0, it should be filtered out
+        if np.mean(group1_intensities) == 0 or np.mean(group2_intensities) == 0:
+            results.append(dict(filtered=True))
+            continue
+
+        t, p = stats.ttest_ind(group1_intensities, group2_intensities)
+        if log_base == "":
+            fc = np.mean(group2_intensities) / np.mean(group1_intensities)
+        else:
+            fc = log_base ** (np.mean(group2_intensities) - np.mean(group1_intensities))
+        results.append(dict(t=t, p=p, fc=fc, filtered=False))
+
+    return True, results

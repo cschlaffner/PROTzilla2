@@ -14,30 +14,37 @@ def diff_expr_test_data():
         ["Sample1", "Protein2", "Gene1", 16],
         ["Sample1", "Protein3", "Gene1", 1],
         ["Sample1", "Protein4", "Gene1", 14],
+        ["Sample1", "Protein5", "Gene1", 14],
         ["Sample2", "Protein1", "Gene1", 20],
         ["Sample2", "Protein2", "Gene1", 15],
         ["Sample2", "Protein3", "Gene1", 2],
         ["Sample2", "Protein4", "Gene1", 15],
+        ["Sample2", "Protein5", "Gene1", 15],
         ["Sample3", "Protein1", "Gene1", 22],
         ["Sample3", "Protein2", "Gene1", 14],
         ["Sample3", "Protein3", "Gene1", 3],
         ["Sample3", "Protein4", "Gene1", 16],
+        ["Sample3", "Protein5", "Gene1", 16],
         ["Sample4", "Protein1", "Gene1", 8],
         ["Sample4", "Protein2", "Gene1", 15],
         ["Sample4", "Protein3", "Gene1", 1],
         ["Sample4", "Protein4", "Gene1", 9],
+        ["Sample4", "Protein5", "Gene1", 9],
         ["Sample5", "Protein1", "Gene1", 10],
         ["Sample5", "Protein2", "Gene1", 14],
         ["Sample5", "Protein3", "Gene1", 2],
         ["Sample5", "Protein4", "Gene1", 10],
+        ["Sample5", "Protein5", "Gene1", 10],
         ["Sample6", "Protein1", "Gene1", 12],
         ["Sample6", "Protein2", "Gene1", 13],
         ["Sample6", "Protein3", "Gene1", 3],
         ["Sample6", "Protein4", "Gene1", 11],
+        ["Sample6", "Protein5", "Gene1", 11],
         ["Sample7", "Protein1", "Gene1", 12],
         ["Sample7", "Protein2", "Gene1", 13],
         ["Sample7", "Protein3", "Gene1", 3],
         ["Sample7", "Protein4", "Gene1", 11],
+        ["Sample7", "Protein5", "Gene1", 11],
     )
 
     test_intensity_df = pd.DataFrame(
@@ -90,9 +97,9 @@ def test_differential_expression_linear_model(
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
-    log2_fc = [-5, -0.5, 0, -2.5]
-    de_proteins = ["Protein1", "Protein4"]
+    corrected_p_values = [0.006, 0.3598, 1.0, 0.006, 0.006]
+    log2_fc = [-5, -0.5, 0, -2.5, -2.5]
+    de_proteins = ["Protein1", "Protein4", "Protein5"]
 
     p_values_rounded = [
         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
@@ -134,8 +141,8 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0072, 0.3838, 1.0, 0.0072]
-    log2_fc = [-1, -0.0995, 0, -0.585]
+    corrected_p_values = [0.006, 0.3598, 1.0, 0.006, 0.006]
+    log2_fc = [-1, -0.0995, 0, -0.585, -0.585]
     de_proteins = ["Protein1"]
     significant_proteins = ["Protein1", "Protein4"]
 
