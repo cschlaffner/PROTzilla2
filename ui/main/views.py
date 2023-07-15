@@ -1,3 +1,4 @@
+import shutil
 import pandas
 import json
 from datetime import date
@@ -40,37 +41,40 @@ def databases(request):
 
 
 def database_upload(request):
-    # add option to copy and not verify the file?
-    chosen_name = request.POST["name"]
-    # check for collision
+    name = request.POST["name"]
+    if database_path(name).exists():
+        msg = "Filename already taken."
+        messages.add_message(request, messages.ERROR, msg, "alert-danger")
+        return HttpResponseRedirect(reverse("databases"))
 
     path = dict(request.FILES)["new-db"][0].temporary_file_path()
-    if not path.endswith(".tsv") or path.endswith(".csv"):
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "File must be a tab-separated file (.tsv, .csv).",
-            "alert-danger",
-        )
-        return HttpResponseRedirect(reverse("databases"))
-    try:
-        dataframe = pandas.read_csv(path, sep="\t")
-    except UnicodeDecodeError:
-        messages.add_message(
-            request, messages.ERROR, "File could not be decoded.", "alert-danger"
-        )
-        return HttpResponseRedirect(reverse("databases"))
-    if "Entry" not in dataframe.columns:
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Required 'Entry' column not found.",
-            "alert-danger",
-        )
-        return HttpResponseRedirect(reverse("databases"))
     if not (EXTERNAL_DATA_PATH / "uniprot").exists():
         (EXTERNAL_DATA_PATH / "uniprot").mkdir(parents=True)
-    dataframe.to_csv(database_path(chosen_name), sep="\t", index=False)
+
+    just_copy = request.POST.get("just-copy", False)
+    if just_copy:
+        shutil.copy(path, database_path(name))
+        num_proteins = 0
+    else:
+        if not path.endswith(".tsv") or path.endswith(".csv"):
+            msg = "File must be a tab-separated file (.tsv, .csv)."
+            messages.add_message(request, messages.ERROR, msg, "alert-danger")
+            return HttpResponseRedirect(reverse("databases"))
+
+        try:
+            dataframe = pandas.read_csv(path, sep="\t")
+        except UnicodeDecodeError:
+            msg = "File could not be decoded."
+            messages.add_message(request, messages.ERROR, msg, "alert-danger")
+            return HttpResponseRedirect(reverse("databases"))
+
+        if "Entry" not in dataframe.columns:
+            msg = "Required 'Entry' column not found."
+            messages.add_message(request, messages.ERROR, msg, "alert-danger")
+            return HttpResponseRedirect(reverse("databases"))
+
+        dataframe.to_csv(database_path(name), sep="\t", index=False)
+        num_proteins = len(dataframe)
 
     if not metadata_path.parent.exists():
         metadata_path.parent.mkdir(parents=True)
@@ -80,10 +84,7 @@ def database_upload(request):
             metadata = json.load(f)
     else:
         metadata = {}
-    metadata[chosen_name] = {
-        "num_proteins": len(dataframe),
-        "date": date.today().isoformat(),
-    }
+    metadata[name] = dict(num_proteins=num_proteins, date=date.today().isoformat())
     with open(metadata_path, "w") as f:
         json.dump(metadata, f)
 
@@ -98,12 +99,11 @@ def database_delete(request):
     if metadata_path.exists():
         with open(metadata_path, "r") as f:
             metadata = json.load(f)
-        try:
+
+        if database_name in metadata:
             del metadata[database_name]
-        except KeyError:
-            pass
-        with open(metadata_path, "w") as f:
-            json.dump(metadata, f)
+            with open(metadata_path, "w") as f:
+                json.dump(metadata, f)
 
     return HttpResponseRedirect(reverse("databases"))
 
