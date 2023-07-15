@@ -144,7 +144,7 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
     corrected_p_values = [0.006, 0.3598, 1.0, 0.006, 0.006]
     log2_fc = [-1, -0.0995, 0, -0.585, -0.585]
     de_proteins = ["Protein1"]
-    significant_proteins = ["Protein1", "Protein4"]
+    significant_proteins = ["Protein1", "Protein4", "Protein5"]
 
     p_values_rounded = [
         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
