@@ -80,7 +80,7 @@ def t_test(
     t_statistic = []
 
     # split into 4 threads
-    proteins_chunks = list(chunks(proteins, 8))
+    proteins_chunks = list(chunks(proteins, 4))
     params = (intensity_df, grouping, group1, group2, intensity_name, log_base)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
