@@ -203,8 +203,10 @@ def GO_analysis_with_STRING(
         for protein_group in statistical_background:
             background_ids.update(map(clean_uniprot_id, protein_group.split(";")))
         statistical_background = list(background_ids)
+        print("split and cleaned", len(statistical_background))
         # STRING IDs are required for background
         statistical_background = map_to_string_ids(statistical_background, organism)
+        print("number of mapped background ids", len(statistical_background))
 
     string_params = {
         "species": organism,
@@ -352,11 +354,17 @@ def gseapy_enrichment(
     :rtype: tuple[pandas.DataFrame, list, dict]
     """
     gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    genes = list(gene_to_groups.keys())
-    filtered_groups = set(protein_list) - set(
-        gene_mapping.get("group_to_genes", {}).keys()
-    )
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    genes = set()
+    filtered_groups = set()
+    for group in protein_list:
+        if group in group_to_genes:
+            genes.update(group_to_genes[group])
+        else:
+            filtered_groups.add(group)
 
+    print(genes)
+    print(direction, len(genes))
     if not genes:
         msg = (
             "No gene symbols could be found for the proteins. Please check your input."
@@ -369,7 +377,7 @@ def gseapy_enrichment(
     if offline:
         try:
             enriched = gseapy.enrich(
-                gene_list=genes,
+                gene_list=list(genes),
                 gene_sets=protein_sets,
                 background=background,
                 no_plot=True,
@@ -385,7 +393,7 @@ def gseapy_enrichment(
     else:
         try:
             enriched = gseapy.enrichr(
-                gene_list=genes,
+                gene_list=list(genes),
                 gene_sets=protein_sets,
                 background=background,
                 organism=organism,
