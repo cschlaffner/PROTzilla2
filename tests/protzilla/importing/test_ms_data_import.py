@@ -171,7 +171,7 @@ def test_transform_and_clean():
         ["Q11111;CON__P12345", 4.0, 4.0, np.nan],
     ]
     out_col = ["Sample", "Protein ID", "intensity"]
-    output = [
+    expected_output = [
         ["A", "P00000", 1.0],  # add nan and number
         ["A", "Q11111", 4.0],
         ["B", "P00000", 8.0],  # add number and number
@@ -183,7 +183,7 @@ def test_transform_and_clean():
     res, other = ms_data_import.transform_and_clean(
         df, "intensity", map_to_uniprot=False
     )
-    expected_df = pd.DataFrame(output, columns=out_col)
+    expected_df = pd.DataFrame(expected_output, columns=out_col)
 
     # we do not care about the genes column, it is deprecated (and replaced by nan)
     res = res.drop(columns=["Gene"])

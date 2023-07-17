@@ -150,6 +150,8 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
 
     extracted_ids = {k: set() for k in regex.keys()}
     found_ids_per_group = []
+    # go through all groups and find the valid proteins
+    # non uniprot ids are put into extracted_ids, so they can be mapped
     for group in protein_groups:
         found_in_group = set()
         for protein_id in group.split(";"):
@@ -188,28 +190,19 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
 
 def map_ids_to_uniprot(extracted_ids):
     id_to_uniprot = defaultdict(list)
-    for identifier, matching_ids in extracted_ids.items():
-        if not matching_ids:
+    for identifier, ids in extracted_ids.items():
+        if not ids:
             continue
 
-        result = biomart_query(
-            matching_ids,
-            identifier,
-            [identifier, "uniprotswissprot"],
-        )
+        result = biomart_query(ids, identifier, [identifier, "uniprotswissprot"])
         for other_id, uniport_id in result:
             if uniport_id:
                 id_to_uniprot[other_id].append(uniport_id)
 
         # we trust reviewed results more, so we don't look up ids we found in
         # uniprotswissprot in uniprotsptrembl again
-        left = matching_ids - set(id_to_uniprot.keys())
-
-        result = biomart_query(
-            left,
-            identifier,
-            [identifier, "uniprotsptrembl"],
-        )
+        left = ids - set(id_to_uniprot.keys())
+        result = biomart_query(left, identifier, [identifier, "uniprotsptrembl"])
         for other_id, uniport_id in result:
             if uniport_id:
                 id_to_uniprot[other_id].append(uniport_id)
