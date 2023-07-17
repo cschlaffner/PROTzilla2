@@ -35,8 +35,6 @@ from protzilla.data_integration.database_query import uniprot_groups_to_genes
 # print("not found groups", len(set(proteins).difference(set(groups))))
 
 
-
-
 # with open('background_gene_symbols_new.txt', 'w') as file:
 #     # Write each string on a separate line
 #     for string in genes:
@@ -55,3 +53,27 @@ from protzilla.data_integration.database_query import uniprot_groups_to_genes
 
 
 # set index of a dataframe from 0 to 1
+
+# gsea_rank = pd.read_csv("enr_data/gsea-ranking.csv")
+# pre_rank = pd.read_csv("enr_data/preranked-ranking.csv")
+# # sort both dataframes by 2nd column and if that is similar by 1st column
+# gsea_rank = gsea_rank.sort_values(by=[gsea_rank.columns[1], gsea_rank.columns[0]], ascending=[False, True])
+# pre_rank = pre_rank.sort_values(by=[pre_rank.columns[1], pre_rank.columns[0]], ascending=[False, True])
+# gsea_rank.rename(columns={gsea_rank.columns[0]: "gene_name", gsea_rank.columns[1]: "prerank"}, inplace=True)
+# # reset index
+# gsea_rank.reset_index(drop=True, inplace=True)
+# pre_rank.reset_index(drop=True, inplace=True)
+# print(gsea_rank == pre_rank)
+# generally the same values but not the same order
+
+# calculate the difference in ranking values
+# gsea_rank["diff"] = gsea_rank["prerank"] - pre_rank["prerank"]
+# print(gsea_rank["diff"])
+
+# how many are different in the order?
+# print((gsea_rank["Gene symbol"] == pre_rank["gene_name"]).sum())
+# print("gsea_rank", gsea_rank.shape)
+# # 49/57 are similar -> 8 are different, in percent: 14.04%
+#
+# # amount of duplicate values in gsea_rank
+# print(gsea_rank["0"].duplicated().sum()) # 8 duplicates, all different order
