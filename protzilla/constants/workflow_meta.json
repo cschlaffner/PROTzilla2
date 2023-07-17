@@ -21,7 +21,7 @@
             "default": "Intensity"
           },
           "map_to_uniprot": {
-            "name": "Map to Uniprot IDs using Biomart",
+            "name": "Map to Uniprot IDs using Biomart (online)",
             "type": "boolean",
             "default": false
           }
@@ -53,7 +53,7 @@
             "default": "Intensity"
           },
           "map_to_uniprot": {
-            "name": "Map to Uniprot IDs using Biomart",
+            "name": "Map to Uniprot IDs using Biomart (online)",
             "type": "boolean",
             "default": false
           }
