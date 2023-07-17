@@ -352,10 +352,14 @@ def gseapy_enrichment(
     :rtype: tuple[pandas.DataFrame, list, dict]
     """
     gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    genes = list(gene_to_groups.keys())
-    filtered_groups = set(protein_list) - set(
-        gene_mapping.get("group_to_genes", {}).keys()
-    )
+    group_to_genes = gene_mapping.get("group_to_genes", {})
+    genes = set()
+    filtered_groups = set()
+    for group in protein_list:
+        if group in group_to_genes:
+            genes.update(group_to_genes[group])
+        else:
+            filtered_groups.add(group)
 
     if not genes:
         msg = (
@@ -369,7 +373,7 @@ def gseapy_enrichment(
     if offline:
         try:
             enriched = gseapy.enrich(
-                gene_list=genes,
+                gene_list=list(genes),
                 gene_sets=protein_sets,
                 background=background,
                 no_plot=True,
@@ -385,7 +389,7 @@ def gseapy_enrichment(
     else:
         try:
             enriched = gseapy.enrichr(
-                gene_list=genes,
+                gene_list=list(genes),
                 gene_sets=protein_sets,
                 background=background,
                 organism=organism,
