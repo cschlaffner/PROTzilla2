@@ -153,7 +153,9 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     for group in protein_groups:
         found_in_group = set()
         for protein_id in group.split(";"):
-            if match := uniprot_regex.search(protein_id):
+            if not protein_id.startswith("ENSP") and (
+                match := uniprot_regex.search(protein_id)
+            ):
                 found_in_group.add(match.group(0))
                 continue
             for identifier, pattern in regex.items():

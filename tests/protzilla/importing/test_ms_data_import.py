@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+from unittest.mock import patch
+
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.importing import ms_data_import
@@ -189,3 +191,37 @@ def test_transform_and_clean():
     assert res.equals(expected_df)
     assert other["contaminants"] == ["Q11111;CON__P12345"]
     assert other["filtered_proteins"] == ["REV__P12345"]
+
+
+def test_clean_protein_groups():
+    expected = [
+        "A0A009IHW8-8-7-6;M99999_7-8;P12345;Q12345-3",
+        "P00000;P12345;P12345-1;P12345-11;P12345-9",
+        "ENSP12345678901;NP_123456;NP_123456789;XP_123456789",
+        "P12345",
+        "",
+    ]
+    test_data = [
+        "P12345;Q12345-3;A0A009IHW8-8-7-6;M99999_7-8",
+        "P12345-9;P12345;P12345-1;P00000;P12345-11",
+        "ENSP12345678901.1;NP_123456;XP_123456789;NP_123456789",
+        "P12345_VAR_38832",
+        "REV__P12345;YP_123456789;0000000;TAU-98",
+    ]
+    clean_groups, filtered = ms_data_import.clean_protein_groups(
+        test_data, map_to_uniprot=False
+    )
+    assert clean_groups == expected
+    assert filtered == "REV__P12345 YP_123456789 0000000 TAU-98".split()
+
+
+@patch("protzilla.importing.ms_data_import.map_ids_to_uniprot")
+def test_clean_protein_groups_map(ids_to_uniprot_mock):
+    ids_to_uniprot_mock.return_value = {"NP_123456": ["P54321", "P12345"]}
+    expected = ["P12321;P12345;P54321", ""]
+    test_data = ["NP_123456;P12321", "XP_123456789"]
+    clean_groups, filtered = ms_data_import.clean_protein_groups(
+        test_data, map_to_uniprot=True
+    )
+    assert clean_groups == expected
+    assert filtered == []
