@@ -421,7 +421,7 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
         "Protein12;Protein13",
     ]
     results = pd.read_csv(
-        data_folder_tests / "Reactome_enrichment_enrichr_background2022.csv",
+        data_folder_tests / "Reactome_enrichment_enrichr_2022.csv",
         index_col=0,
     )
 
@@ -430,21 +430,18 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
             "ENO2": ["Protein2"],
             "ENO3": ["Protein3"],
             "HK2": ["Protein4"],
-            "HK1": ["Protein6"],
-            "HK3": ["Protein7"],
-            "IDH3B": ["Protein8"],
-            "GPT2": ["Protein10"],
-            "SDHB": ["Protein11"],
+            "HK1": ["Protein6;Protein7;Protein8"],
+            "HK3": ["Protein6;Protein7;Protein8"],
+            "IDH3B": ["Protein6;Protein7;Protein8"],
+            "GPT2": ["Protein9;Protein10;Protein11"],
+            "SDHB": ["Protein9;Protein10;Protein11"],
         },
         "group_to_genes": {
             "Protein2": ["ENO2"],
             "Protein3": ["ENO3"],
             "Protein4": ["HK2"],
-            "Protein6": ["HK1"],
-            "Protein7": ["HK3"],
-            "Protein8": ["IDH3B"],
-            "Protein10": ["GPT2"],
-            "Protein11": ["SDHB"],
+            "Protein6;Protein7;Protein8": ["HK1", "HK3", "IDH3B"],
+            "Protein9;Protein10;Protein11": ["GPT2", "SDHB"],
         },
         "filtered": ["Protein1", "Protein5", "Protein12;Protein13"],
     }
@@ -456,7 +453,7 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
         differential_expression_col="fold_change",
         direction="up",
         gene_sets_path=data_folder_tests / "Reactome_2022.txt",
-        background_biomart="hsapiens_gene_ensembl",
+        background_path=None,
     )
     df = current_out["enrichment_df"]
 
@@ -480,7 +477,8 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
         assert numerical_equal.all()
 
     assert "messages" in current_out
-    assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
+    assert "No background provided" in current_out["messages"][0]["msg"]
+    assert "Some proteins could not be mapped" in current_out["messages"][1]["msg"]
 
 
 def test_GO_analysis_Enrichr_wrong_background_file(data_folder_tests):
