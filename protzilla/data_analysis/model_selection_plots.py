@@ -8,7 +8,13 @@ from protzilla.utilities import fig_to_base64, remove_underscore_and_capitalize
 
 
 def learning_curve_plot(
-    train_sizes, train_scores, test_scores, score_name, initial_coef_sigmoid
+    train_sizes,
+    train_scores,
+    test_scores,
+    score_name,
+    model_function,
+    initial_coef_model_function,
+    plot_title,
 ):
     # learning curve with training and validation score
     display = LearningCurveDisplay(
@@ -23,23 +29,41 @@ def learning_curve_plot(
     )
     # set legend names for each curve
     legend = plt.legend()
+    plt.title(plot_title)
+    plt.ylim(0.35, 1.05)
     legend_labels = [f"Training {score_name}", f"Test {score_name}"]
     for text, label in zip(legend.get_texts(), legend_labels):
         text.set_text(label)
 
     # find flattening point in learning curve
-    def sigmoid(x, a, b, c):
-        return a / (1 + np.exp(-b * (x - c)))
 
     test_scores_mean = np.array(test_scores).mean(axis=1)
     params, _ = curve_fit(
-        sigmoid, train_sizes, test_scores_mean, p0=initial_coef_sigmoid
+        model_functions[model_function],
+        train_sizes,
+        test_scores_mean,
+        p0=initial_coef_model_function,
     )
+    # [1e-04, -0.02, 2, 0.7]
+    # [1.47379e-07, -4.10108e-05, 0.006, 0.557847]
     x_fit = np.linspace(min(train_sizes), max(train_sizes), 100)
-    curve_values = sigmoid(x_fit, *params)
-    diff = np.diff(curve_values)
-    flattening_point_idx = np.argmax(diff < np.mean(diff))
-    flattening_point = x_fit[flattening_point_idx]
+    curve_values = model_functions[model_function](x_fit, *params)
+
+    if model_function == "cubic_function":
+        # diff = np.diff(curve_values)
+        # flattening_point_idxs = np.where(diff < np.mean(diff))[0]
+        # flattening_point_idx = flattening_point_idxs[x_fit > 60]
+        # flattening_point = x_fit[flattening_point_idx]
+        diff = np.diff(curve_values)
+        mask = x_fit > 60
+        filtered_diff = diff[mask[:-1]]
+        filtered_x_fit = x_fit[mask]
+        flattening_point_idx = np.argmax(filtered_diff < np.mean(filtered_diff))
+        flattening_point = filtered_x_fit[flattening_point_idx]
+    else:
+        diff = np.diff(curve_values)
+        flattening_point_idx = np.argmax(diff < np.mean(diff))
+        flattening_point = x_fit[flattening_point_idx]
 
     plt.figure()
     plt.plot(train_sizes, test_scores_mean, "o-", label=f"Test {score_name}")
@@ -52,11 +76,19 @@ def learning_curve_plot(
     )
     plt.xlabel("Training Set Size")
     plt.ylabel(score_name)
-    plt.ylim(0.4, 1.0)
+    plt.ylim(0.35, 1.05)
+    plt.title(plot_title)
     plt.legend()
     display_flat = plt.gcf()
 
     return [fig_to_base64(display.figure_), fig_to_base64(display_flat)]
+
+
+model_functions = {
+    "sigmoid": lambda x, a, b, c: a / (1 + np.exp(-b * (x - c))),
+    "exponential": lambda x, a, b, c: a * np.exp(b * x) + c,
+    "cubic_function": lambda x, a, b, c, d: a * x**3 + b * x**2 + c * x + d,
+}
 
 
 def elbow_method_n_clusters(

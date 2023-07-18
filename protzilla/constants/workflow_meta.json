@@ -1114,11 +1114,21 @@
             "name": "Score name",
             "type": "text"
           },
-          "initial_coef_sigmoid": {
+          "model_function": {
+            "name": "Choose a function to fit the data to",
+            "type": "categorical",
+            "categories": ["sigmoid", "exponential","cubic_function"],
+            "default": "sigmoid"
+          },
+          "initial_coef_model_function": {
             "name": "Initial coeficients for sigmoid function",
             "type": "numeric",
             "default": [1,1,1],
             "multiple": true
+          },
+          "plot_title": {
+            "name": "Title of the plot (optional)",
+            "type": "text"
           }
         }
       },
@@ -1152,6 +1162,10 @@
           },
           "score_name": {
             "name": "Score name",
+            "type": "text"
+          },
+          "plot_title": {
+            "name": "Title of the plot (optional)",
             "type": "text"
           }
         }

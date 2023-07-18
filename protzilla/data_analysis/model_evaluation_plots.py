@@ -95,7 +95,7 @@ def confusion_matrix_plot(model, input_test_df, labels_test_df, plot_title=None)
     return out
 
 
-def permutation_testing_plot(score, permutation_scores, pvalue, score_name):
+def permutation_testing_plot(score, permutation_scores, pvalue, score_name, plot_title):
     # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
     fig, ax = plt.subplots()
 
@@ -104,9 +104,12 @@ def permutation_testing_plot(score, permutation_scores, pvalue, score_name):
     ax.legend(
         [line],
         [f"Score on original\ndata: {score:.2f}\n(p-value: {pvalue:.3f})"],
-        loc="upper right",
-        bbox_to_anchor=(1.4, 1),
+        # loc="upper right",
+        # bbox_to_anchor=(1.4, 1),
     )
     ax.set_xlabel(f"{score_name} score")
     _ = ax.set_ylabel("Probability")
+    plt.title(plot_title)
+    plt.xlim(0.0, 1.00)
+    plt.ylim(0.0, 14.00)
     return [fig_to_base64(fig)]
