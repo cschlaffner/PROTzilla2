@@ -80,12 +80,14 @@ def k_means(
         # prepare input_df and labels_df dataframes for clustering
         input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
         input_df_wide.sort_values(by="Sample", inplace=True)
-        if metadata_df:
+        if isinstance(metadata_df, pd.DataFrame):
             labels_df = (
                 metadata_df[["Sample", labels_column]]
                 .set_index("Sample")
                 .sort_values(by="Sample")
             )
+            common_indices = input_df_wide.index.intersection(labels_df.index)
+            labels_df = labels_df.loc[common_indices]
             encoding_mapping, labels_df = encode_labels(
                 labels_df, labels_column, positive_label
             )
@@ -213,12 +215,14 @@ def expectation_maximisation(
     # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
-    if metadata_df:
+    if isinstance(metadata_df, pd.DataFrame):
         labels_df = (
             metadata_df[["Sample", labels_column]]
             .set_index("Sample")
             .sort_values(by="Sample")
         )
+        common_indices = input_df_wide.index.intersection(labels_df.index)
+        labels_df = labels_df.loc[common_indices]
         encoding_mapping, labels_df = encode_labels(
             labels_df, labels_column, positive_label
         )
@@ -309,12 +313,14 @@ def hierarchical_agglomerative_clustering(
     # prepare input_df and labels_df dataframes for clustering
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     input_df_wide.sort_values(by="Sample", inplace=True)
-    if metadata_df:
+    if isinstance(metadata_df, pd.DataFrame):
         labels_df = (
             metadata_df[["Sample", labels_column]]
             .set_index("Sample")
             .sort_values(by="Sample")
         )
+        common_indices = input_df_wide.index.intersection(labels_df.index)
+        labels_df = labels_df.loc[common_indices]
         encoding_mapping, labels_df = encode_labels(
             labels_df, labels_column, positive_label
         )
