@@ -110,7 +110,7 @@
               60,
               80,
               150,
-              290
+              289
             ],
             "model_selection_scoring": "dunn_score",
             "scoring": [
