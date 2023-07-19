@@ -44,6 +44,7 @@ class CustomUploadedFile(UploadedFile):
 
     def __init__(self, name, content_type, size, charset, content_type_extra=None):
         start, ext = os.path.splitext(name)
+        # the NamedTemporaryFile arguments were actually changed
         file = tempfile.NamedTemporaryFile(
             suffix=ext,
             prefix=start + "_",
