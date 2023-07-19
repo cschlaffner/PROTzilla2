@@ -142,7 +142,10 @@
           "name": "model_selection",
           "method": "random_sampling",
           "parameters": {
-            "input_df": 40,
+            "input_df": [
+              "data_prep",
+              "dataframe"
+            ],
             "labels_column": "Group",
             "n_samples": 40,
             "random_state": 6,
