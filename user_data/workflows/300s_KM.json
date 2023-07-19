@@ -148,8 +148,8 @@
           "method": "random_sampling",
           "parameters": {
             "input_df": [
-              "random_sampling",
-              "subset"
+              "subset",
+              "input_df"
             ],
             "labels_column": "Group",
             "n_samples": 40,

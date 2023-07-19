@@ -158,8 +158,8 @@
           "method": "k_means",
           "parameters": {
             "input_df": [
-              "random_sampling",
-              "subset"
+              "subset",
+              "input_df"
             ],
             "labels_column": "Group",
             "positive_label": "AD",

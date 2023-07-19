@@ -162,8 +162,8 @@
           "method": "hierarchical_agglomerative_clustering",
           "parameters": {
             "input_df": [
-              "random_sampling",
-              "subset"
+              "subset",
+              "input_df"
             ],
             "labels_column": "Group",
             "positive_label": "CTR",
