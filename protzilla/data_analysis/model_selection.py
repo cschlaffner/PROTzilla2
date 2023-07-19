@@ -4,7 +4,11 @@ import numpy as np
 import pandas as pd
 from kneed import KneeLocator
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import learning_curve, train_test_split
+from sklearn.model_selection import (
+    learning_curve,
+    train_test_split,
+    StratifiedShuffleSplit,
+)
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from joblib import Parallel, delayed
@@ -160,64 +164,88 @@ def random_sampling(input_df, metadata_df, labels_column, n_samples, random_stat
 
 def cluster_multiple_sample_sizes_and_k(
     input_df,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
     clustering_method,
     sample_sizes: list[int],
     n_clusters,
     scoring,
     model_selection_scoring,
     random_state,
-    n_jobs,
 ):
     from protzilla.constants.location_mapping import method_map
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    # necessary for ba as subsets need to be stratified
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    common_indices = input_df_wide.index.intersection(labels_df.index)
+    labels_df = labels_df.loc[common_indices]
+
     clustering_method_key = replace_spaces_with_underscores_and_lowercase(
         clustering_method
     )
     X_subsets = []
-    if len(input_df_wide) in sample_sizes:
-        sample_sizes.remove(len(input_df_wide))
-        X_subsets.append(input_df_wide)
+    # if len(input_df_wide) in sample_sizes:
+    #     sample_sizes.remove(len(input_df_wide))
+    #     X_subsets.append(input_df_wide)
 
-    # model_evaluation_dict = defaultdict(list)
-    manager = Manager()
-    model_evaluation_dict = manager.dict()
+    model_evaluation_dict = defaultdict()
+    merged_df = pd.concat([input_df_wide, labels_df], axis=1)
+    stratified_subsets = []
+    for i, size in enumerate(sample_sizes):
+        if i == 0:
+            # For the first sample size, use train_test_split
+            samples, _ = train_test_split(
+                merged_df, train_size=size, stratify=labels_df
+            )
+        else:
+            # For subsequent sample sizes, take a subset of the previous sample
+            previous_samples = stratified_subsets[i - 1]
+            previous_indices = previous_samples.index.tolist()
+            remaining_samples = merged_df.loc[~merged_df.index.isin(previous_indices)]
+            train_size = size - sample_sizes[i - 1]
+            if train_size == len(remaining_samples):
+                additional_samples = remaining_samples
+            else:
+                additional_samples, _ = train_test_split(
+                    remaining_samples,
+                    train_size=train_size,
+                    stratify=labels_df.loc[~merged_df.index.isin(previous_indices)],
+                )
+            samples = pd.concat([previous_samples, additional_samples])
+        # Remove the samples from merged_df
+        stratified_subsets.append(samples.drop(labels_column, axis=1))
 
-    def compute_clustering_for_sample_size(size):
-        X, X_remaining = train_test_split(
-            input_df_wide,
-            train_size=size,
-            shuffle=True,
-            random_state=random_state,
-        )
-        X_subsets.append(X)
+    # Extract X for each sample size
+    for subset in stratified_subsets:
         clustering_method_key_callable = method_map[
             ("data_analysis", "clustering", clustering_method_key)
         ]
         results = clustering_method_key_callable(
-            input_df=X,
+            input_df=subset,
             n_clusters=n_clusters,
             n_components=n_clusters,
             scoring=scoring,
             model_selection_scoring=model_selection_scoring,
             random_state=random_state,
         )
-        model_evaluation_dict[f"sample_size_{size}"] = results["model_evaluation_df"]
+        model_evaluation_dict[f"sample_size_{len(subset)}"] = results[
+            "model_evaluation_df"
+        ]
 
-    Parallel(n_jobs=n_jobs, verbose=1)(
-        delayed(compute_clustering_for_sample_size)(size) for size in sample_sizes
-    )
-
-    return {**model_evaluation_dict, "clustering_method": clustering_method}
+    return {**model_evaluation_dict}
 
 
-def elbow_plot_multiple_sample_sizes(df, result_df, current_out):
-    estimator_str = current_out["clustering_method"]
-    del current_out["clustering_method"]
+def elbow_plot_multiple_sample_sizes(df, result_df, current_out, plot_title):
     plots = elbow_method_n_clusters(
         model_evaluation_dfs=list(current_out.values()),
         sample_sizes=list(current_out.keys()),
-        estimator_str=estimator_str,
         find_elbow="no",
+        plot_title=plot_title,
     )
     return plots

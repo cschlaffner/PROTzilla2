@@ -92,7 +92,7 @@ model_functions = {
 
 
 def elbow_method_n_clusters(
-    model_evaluation_dfs, estimator_str, find_elbow, sample_sizes=None
+    model_evaluation_dfs, find_elbow, sample_sizes=None, plot_title=None
 ):
     model_evaluation_dfs = (
         model_evaluation_dfs
@@ -145,9 +145,7 @@ def elbow_method_n_clusters(
 
         plt.xlabel("Number of Clusters")
         plt.ylabel(score_name_plt)
-        plt.title(
-            f"{estimator_str}:Evaluation of Optimal Number of Clusters with {score_name_plt}"
-        )
+        plt.title(plot_title)
         plots.append(fig_to_base64(plt.gcf()))
         plt.clf()
 
