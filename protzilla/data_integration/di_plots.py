@@ -331,6 +331,8 @@ def gsea_enrichment_plot(
     term_dict=None,
     term_name=None,
     ranking=None,
+    pos_pheno_label="",
+    neg_pheno_label="",
     figsize=None,
 ):
     """
@@ -342,6 +344,10 @@ def gsea_enrichment_plot(
     :type term_name: str
     :param ranking: Ranking output dataframe from GSEA or pre-ranked GSEA
     :type ranking: pandas.DataFrame or pandas.Series
+    :param pos_pheno_label: Label for the positively correlated phenotype, defaults to ""
+    :type pos_pheno_label: str, optional
+    :param neg_pheno_label: Label for the negatively correlated phenotype, defaults to ""
+    :type neg_pheno_label: str, optional
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
@@ -365,6 +371,8 @@ def gsea_enrichment_plot(
         enrichment_plot_axes = gseapy.gseaplot(
             rank_metric=ranking,
             term=term_name,
+            pheno_pos=pos_pheno_label,
+            pheno_neg=neg_pheno_label,
             **term_dict,
             figsize=figsize if figsize else (6, 5.5),
         )
