@@ -158,8 +158,8 @@
           "method": "expectation_maximisation",
           "parameters": {
             "input_df": [
-              "subset",
-              "dataframe"
+              "random_sampling",
+              "subset"
             ],
             "labels_column": "Group",
             "positive_label": "AD",
