@@ -5,9 +5,6 @@ import pandas as pd
 from sklearn import clone
 from sklearn.metrics import (
     accuracy_score,
-    precision_score,
-    recall_score,
-    matthews_corrcoef,
     mean_squared_error,
     adjusted_mutual_info_score,
     adjusted_rand_score,
@@ -25,6 +22,7 @@ from sklearn.metrics import (
     recall_score,
     silhouette_score,
     v_measure_score,
+    calinski_harabasz_score,
 )
 from sklearn.model_selection import (
     GridSearchCV,
@@ -220,13 +218,16 @@ def evaluate_clustering_with_scoring(
         "davies_bouldin_score": davies_bouldin_score,
         "dunn_score": dunn_score,
         "silhouette_score": silhouette_score,
+        "calinski_harabasz_score": calinski_harabasz_score,
     }
 
     for score in scoring:
         if score in internal_indices:
             s = internal_indices[score](X=input_df, labels=labels_pred)
         elif score in external_indices:
-            s = external_indices[score](y_true=labels_true, y_pred=labels_pred)
+            s = external_indices[score](
+                labels_true=labels_true, labels_pred=labels_pred
+            )
         else:
             s = None
         scores[score] = s

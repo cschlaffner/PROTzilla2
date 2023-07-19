@@ -1291,7 +1291,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1310,7 +1311,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -1433,7 +1435,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1452,7 +1455,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -1575,7 +1579,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "dynamic": true
@@ -1594,7 +1599,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -2480,6 +2486,13 @@
             "categories": ["K Means", "Hierarchical Agglomerative Clustering", "Expectation Maximisation"],
             "default": "K Means"
           },
+          "labels_column": {
+            "name": "Choose labels column from metadata",
+            "type": "categorical",
+            "fill": "metadata_columns",
+            "categories": [],
+            "default": null
+          },
           "sample_sizes": {
             "name": "Sample sizes to analyse",
             "type": "numeric",
@@ -2502,7 +2515,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score"
           },
@@ -2520,7 +2534,8 @@
               "v_measure_score",
               "davies_bouldin_score",
               "dunn_score",
-              "silhouette_score"
+              "silhouette_score",
+              "calinski_harabasz_score"
             ],
             "default": "adjusted_rand_score",
             "multiple": true
@@ -2541,16 +2556,19 @@
             "step": 1,
             "default": 6
           },
-          "n_jobs": {
-            "name": "Number of parallel jobs to run",
-            "type": "numeric",
-            "min": -1,
-            "step": 1,
-            "default": 1
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
           }
         },
         "graphs": [
-          {}
+          {
+            "plot_title": {
+              "name": "Title of the plot (optional)",
+              "type": "text"
+            }
+          }
         ]
       }
     },
