@@ -167,6 +167,7 @@ class Run:
         self.calculated_method = self.method
         # error handling for CLI
         if "messages" in self.current_out:
+            print(self.current_out["messages"])
             for message in self.current_out["messages"]:
                 log_function = MESSAGE_TO_LOGGING_FUNCTION.get(message["level"])
                 if log_function:
