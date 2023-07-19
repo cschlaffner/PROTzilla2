@@ -103,6 +103,7 @@
               "dataframe"
             ],
             "clustering_method": "K Means",
+            "labels_column": "Group",
             "sample_sizes": [
               20,
               40,
