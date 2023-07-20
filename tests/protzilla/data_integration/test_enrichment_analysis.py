@@ -648,6 +648,7 @@ def test_GO_analysis_offline_background(
         proteins_df=proteins_df,
         gene_sets_path=data_folder_tests / "gene_sets.txt",
         differential_expression_col="fold_change",
+        differential_expression_threshold=1.0,  # all are downregulated
         direction="down",
         background_path=background_path,
         gene_mapping=offline_mock_mapping,
