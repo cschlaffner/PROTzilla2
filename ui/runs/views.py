@@ -47,7 +47,6 @@ def index(request):
         request,
         "runs/index.html",
         context={
-            "run_name_prefill": f"hello{123:03d}",
             "available_workflows": Run.available_workflows(),
             "available_runs": Run.available_runs(),
         },
@@ -485,15 +484,16 @@ def download_plots(request, run_name):
         filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
 
-    f = tempfile.NamedTemporaryFile()
-    with zipfile.ZipFile(f, "w") as zf:
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        temp_filename = f.name
+    with zipfile.ZipFile(temp_filename, "w") as zf:
         for i, plot in enumerate(exported):
             filename = (
                 f"{run.step_index}-{run.section}-{run.step}-{run.method}-{i}.{format_}"
             )
             zf.writestr(filename, plot.getvalue())
     return FileResponse(
-        open(f.name, "rb"),
+        open(temp_filename, "rb"),
         filename=f"{run.step_index}-{run.section}-{run.step}-{run.method}-{format_}.zip",
         as_attachment=True,
     )
@@ -556,12 +556,14 @@ def tables_content(request, run_name, index, key):
         outputs = run.current_out[key]
     out = outputs.replace(np.nan, None)
 
-    if "clean-ids" in request.GET and "Protein ID" in out.columns:
-        out["Protein ID"] = out["Protein ID"].map(
-            lambda group: ";".join(
-                unique_justseen(map(clean_uniprot_id, group.split(";")))
-            )
-        )
+    if "clean-ids" in request.GET:
+        for column in out.columns:
+            if "protein" in column.lower():
+                out[column] = out[column].map(
+                    lambda group: ";".join(
+                        unique_justseen(map(clean_uniprot_id, group.split(";")))
+                    )
+                )
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )

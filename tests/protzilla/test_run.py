@@ -1,10 +1,11 @@
 import json
 from shutil import rmtree
 
+import pandas as pd
 import pytest
 from PIL import Image
 
-from protzilla import data_preprocessing
+from protzilla import data_integration, data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import ms_data_import
 from protzilla.run import Run
@@ -253,6 +254,33 @@ def test_export_plot(tests_folder_name):
         dict(graph_type="Boxplot", graph_type_quantites="Bar chart", group_by="Sample"),
     )
     assert len(run.plots) > 1
+    for plot in run.export_plots("tiff"):
+        Image.open(plot).verify()
+    for plot in run.export_plots("eps"):
+        Image.open(plot).verify()
+
+
+def test_export_plot_base64(tests_folder_name):
+    run_name = tests_folder_name + "/test_export_plot_" + random_string()
+    input_df_path = (
+        PROJECT_PATH
+        / "tests/test_data/enrichment_data"
+        / "Reactome_enrichment_enrichr.csv"
+    )
+
+    run = Run.create(run_name)
+    run.create_step_plot(
+        data_integration.di_plots.GO_enrichment_bar_plot,
+        dict(
+            input_df=pd.read_csv(input_df_path, sep="\t"),
+            gene_sets=["Reactome_2013"],
+            top_terms=10,
+            cutoff=0.05,
+            value="p_value",
+        ),
+    )
+    for plot in run.export_plots("png"):
+        Image.open(plot).verify()
     for plot in run.export_plots("tiff"):
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):

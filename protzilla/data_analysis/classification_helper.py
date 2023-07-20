@@ -4,9 +4,22 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
+    adjusted_mutual_info_score,
+    adjusted_rand_score,
+    completeness_score,
+    davies_bouldin_score,
+    f1_score,
+    fowlkes_mallows_score,
+    homogeneity_score,
+    jaccard_score,
     matthews_corrcoef,
+    mutual_info_score,
+    normalized_mutual_info_score,
     precision_score,
+    rand_score,
     recall_score,
+    silhouette_score,
+    v_measure_score,
 )
 from sklearn.model_selection import (
     GridSearchCV,
@@ -18,6 +31,8 @@ from sklearn.model_selection import (
     StratifiedKFold,
     train_test_split,
 )
+
+from protzilla.utilities.dunn_score import dunn_score
 
 
 def encode_labels(labels_df, labels_column, positive_label=None):
@@ -105,6 +120,7 @@ def evaluate_with_scoring(scoring, y_true, y_pred):
         "precision": precision_score,
         "recall": recall_score,
         "matthews_corrcoef": matthews_corrcoef,
+        "f1_score": f1_score,
     }
 
     scores = defaultdict(list)
@@ -115,6 +131,43 @@ def evaluate_with_scoring(scoring, y_true, y_pred):
             s = "Score not known"
         scores[score] = s
 
+    return scores
+
+
+def evaluate_clustering_with_scoring(
+    scoring,
+    input_df,
+    labels_pred,
+    labels_true=None,
+):
+    scores = defaultdict(list)
+    internal_indices = {
+        "adjusted_mutual_info_score": adjusted_mutual_info_score,
+        "adjusted_rand_score": adjusted_rand_score,
+        "completeness_score": completeness_score,
+        "fowlkes_mallows_score": fowlkes_mallows_score,
+        "homogeneity_score": homogeneity_score,
+        "mutual_info_score": mutual_info_score,
+        "normalized_mutual_info_score": normalized_mutual_info_score,
+        "rand_score": rand_score,
+        "v_measure_score": v_measure_score,
+        "jaccard_score": jaccard_score,
+        "f1_score": f1_score,
+    }
+    external_indices = {
+        "davies_bouldin_score": davies_bouldin_score,
+        "dunn_score": dunn_score,
+        "silhouette_score": silhouette_score,
+    }
+
+    for score in scoring:
+        if score in internal_indices:
+            s = internal_indices[score](labels_true, labels_pred)
+        elif score in external_indices:
+            s = external_indices[score](X=input_df, labels=labels_pred)
+        else:
+            s = None
+        scores[score] = s
     return scores
 
 

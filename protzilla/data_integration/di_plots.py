@@ -1,5 +1,4 @@
 import gseapy
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -10,14 +9,15 @@ from protzilla.utilities.utilities import fig_to_base64
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 
-def go_enrichment_bar_plot(
+def GO_enrichment_bar_plot(
     input_df,
     top_terms,
     cutoff,
     value,
-    categories=[],
+    gene_sets=[],
     title="",
     colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+    figsize=None,
 ):
     """
     Create a bar plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -27,8 +27,8 @@ def go_enrichment_bar_plot(
 
     :param input_df: GO enrichment results
     :type input_df: pandas.DataFrame
-    :param categories: Categories/Sets from enrichment to plot
-    :type categories: list
+    :param gene_sets: Categories/Sets from enrichment to plot
+    :type gene_sets: list
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value or FDR. Only terms with
@@ -40,6 +40,8 @@ def go_enrichment_bar_plot(
     :type title: str, optional
     :param colors: Colors to use for the bars, defaults to PROTZILLA_DISCRETE_COLOR_SEQUENCE
     :type colors: list, optional
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -66,14 +68,14 @@ def go_enrichment_bar_plot(
         msg = "Please choose an enrichment result dataframe to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(categories, list):
-        categories = [categories]
-    if not categories:
+    if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
 
     # remove all Gene_sets that are not in categories
-    df = input_df[input_df["Gene_set"].isin(categories)]
+    df = input_df[input_df["Gene_set"].isin(gene_sets)]
 
     if value == "fdr":  # only available for restring result
         if restring_input:
@@ -104,14 +106,14 @@ def go_enrichment_bar_plot(
 
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
-    size_y = top_terms * 0.5 * len(categories)
+    size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(
             df=df,
             column=column,
             cutoff=cutoff,
             group="Gene_set",
-            figsize=(10, size_y),
+            figsize=figsize if figsize else (10, size_y),
             top_term=top_terms,
             color=colors,
             title=title,
@@ -122,16 +124,17 @@ def go_enrichment_bar_plot(
     return [fig_to_base64(ax.get_figure())]
 
 
-def go_enrichment_dot_plot(
+def GO_enrichment_dot_plot(
     input_df,
     top_terms,
     cutoff,
-    categories=[],
+    gene_sets=[],
     x_axis_type="Gene Sets",
     title="",
     rotate_x_labels=False,
     show_ring=False,
     dot_size=5,
+    figsize=None,
 ):
     """
     Creates a dot plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -140,8 +143,8 @@ def go_enrichment_dot_plot(
 
     :param input_df: GO enrichment results (offline or Enrichr)
     :type input_df: pandas.DataFrame
-    :param categories: Categories/Gene Set Libraries from enrichment to plot
-    :type categories: list
+    :param gene_sets: Categories/Gene Set Libraries from enrichment to plot
+    :type gene_sets: list
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value. Only terms with
@@ -157,6 +160,8 @@ def go_enrichment_dot_plot(
     :type show_ring: bool
     :param dot_size: Size of the dots, defaults to 5
     :type dot_size: int
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -168,20 +173,20 @@ def go_enrichment_dot_plot(
         msg = "No data to plot. Please check your input data or run enrichment again."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
-    if not isinstance(categories, list):
-        categories = [categories]
-    if not categories:
+    if not gene_sets:
         msg = "Please select at least one category to plot."
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+    if not isinstance(gene_sets, list):
+        gene_sets = [gene_sets]
 
-    if len(categories) > 1 and x_axis_type == "Combined Score":
+    if len(gene_sets) > 1 and x_axis_type == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
         return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
-    df = input_df[input_df["Gene_set"].isin(categories)]
+    df = input_df[input_df["Gene_set"].isin(gene_sets)]
 
-    size_y = top_terms * len(categories)
+    size_y = top_terms * len(gene_sets)
     xticklabels_rot = 45 if rotate_x_labels else 0
 
     if x_axis_type == "Gene Sets":
@@ -192,7 +197,7 @@ def go_enrichment_dot_plot(
                 x="Gene_set",
                 size=dot_size,
                 top_term=top_terms,
-                figsize=(3, size_y),
+                figsize=figsize if figsize else (3, size_y),
                 cutoff=cutoff,
                 title=title,
                 xticklabels_rot=xticklabels_rot,
@@ -212,9 +217,9 @@ def go_enrichment_dot_plot(
         try:
             ax = gseapy.dotplot(
                 df,
-                size=10,
+                size=dot_size,
                 top_term=top_terms,
-                figsize=(3, size_y),
+                figsize=figsize if figsize else (3, size_y),
                 cutoff=cutoff,
                 title=title,
                 xticklabels_rot=xticklabels_rot,
@@ -244,12 +249,13 @@ def gsea_dot_plot(
     show_ring=False,
     dot_size=5,
     remove_library_names=False,
+    figsize=None,
 ):
     """
     Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
     Only the top_terms that meet the cutoff are shown.
 
-    :param input_df: GO enrichment results (offline or Enrichr)
+    :param input_df: GSEA or pre-ranked GSEA results
     :type input_df: pandas.DataFrame
     :param cutoff: Cutoff for the dot_color_value. Only terms with
         dot_color_value < cutoff will be shown.
@@ -268,6 +274,8 @@ def gsea_dot_plot(
     :type dot_size: int
     :param remove_library_names: Remove the library names from the displayed gene sets, defaults to False
     :type remove_library_names: bool
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -286,10 +294,10 @@ def gsea_dot_plot(
     if not dot_size:
         dot_size = 5
 
+    if not gene_sets or gene_sets == "all":
+        logger.info("Plotting for all gene set libraries.")
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
-    if not gene_sets or "all" in gene_sets:
-        logger.info("Plotting for all gene set libraries.")
     else:  # remove all Gene_sets that were not selected
         input_df = input_df[input_df["Term"].str.startswith(tuple(gene_sets))]
 
@@ -304,7 +312,7 @@ def gsea_dot_plot(
             x=x_axis_value,
             cutoff=cutoff,
             size=dot_size,
-            figsize=(5, size_y),
+            figsize=figsize if figsize else (5, size_y),
             title=title,
             show_ring=show_ring,
         )
@@ -323,6 +331,9 @@ def gsea_enrichment_plot(
     term_dict=None,
     term_name=None,
     ranking=None,
+    pos_pheno_label="",
+    neg_pheno_label="",
+    figsize=None,
 ):
     """
     Creates a typical enrichment plot from GSEA or pre-ranked GSEA details. The plot is created using the gseapy library.
@@ -333,6 +344,12 @@ def gsea_enrichment_plot(
     :type term_name: str
     :param ranking: Ranking output dataframe from GSEA or pre-ranked GSEA
     :type ranking: pandas.DataFrame or pandas.Series
+    :param pos_pheno_label: Label for the positively correlated phenotype, defaults to ""
+    :type pos_pheno_label: str, optional
+    :param neg_pheno_label: Label for the negatively correlated phenotype, defaults to ""
+    :type neg_pheno_label: str, optional
+    :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
+    :type figsize: tuple, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -354,7 +371,10 @@ def gsea_enrichment_plot(
         enrichment_plot_axes = gseapy.gseaplot(
             rank_metric=ranking,
             term=term_name,
+            pheno_pos=pos_pheno_label,
+            pheno_neg=neg_pheno_label,
             **term_dict,
+            figsize=figsize if figsize else (6, 5.5),
         )
         return [
             dict(

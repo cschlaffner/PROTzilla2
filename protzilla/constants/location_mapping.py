@@ -154,6 +154,16 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
+        "clustering",
+        "hierarchical_agglomerative_clustering",
+    ): clustering.hierarchical_agglomerative_clustering,
+    (
+        "data_analysis",
         "classification",
         "random_forest",
     ): classification.random_forest,
@@ -190,18 +200,18 @@ method_map = {
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_with_STRING",
-    ): enrichment_analysis.go_analysis_with_STRING,
+        "GO_analysis_with_STRING",
+    ): enrichment_analysis.GO_analysis_with_STRING,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_with_enrichr",
-    ): enrichment_analysis.go_analysis_with_enrichr,
+        "GO_analysis_with_Enrichr",
+    ): enrichment_analysis.GO_analysis_with_Enrichr,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_offline",
-    ): enrichment_analysis.go_analysis_offline,
+        "GO_analysis_offline",
+    ): enrichment_analysis.GO_analysis_offline,
     (
         "data_integration",
         "enrichment_analysis",
@@ -217,6 +227,11 @@ method_map = {
         "database_integration",
         "uniprot",
     ): database_integration.add_uniprot_data,
+    (
+        "data_integration",
+        "database_integration",
+        "gene_mapping",
+    ): database_integration.gene_mapping,
 }
 
 # reversed mapping of method callable and location
@@ -346,13 +361,13 @@ plot_map = {
     (
         "data_integration",
         "plot",
-        "go_enrichment_bar_plot",
-    ): di_plots.go_enrichment_bar_plot,
+        "GO_enrichment_bar_plot",
+    ): di_plots.GO_enrichment_bar_plot,
     (
         "data_integration",
         "plot",
-        "go_enrichment_dot_plot",
-    ): di_plots.go_enrichment_dot_plot,
+        "GO_enrichment_dot_plot",
+    ): di_plots.GO_enrichment_dot_plot,
     (
         "data_integration",
         "plot",

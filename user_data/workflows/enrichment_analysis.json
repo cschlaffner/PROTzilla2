@@ -109,19 +109,40 @@
             ],
             "grouping": "Group"
           },
-          "output_name": "t-test"
+          "output_name": "t-test_data"
         }
       ]
     },
     "data_integration": {
       "steps": [
         {
-          "name": "enrichment_analysis",
-          "method": "go_analysis_with_enrichr",
+          "name": "database_integration",
+          "method": "gene_mapping",
           "parameters": {
-            "proteins": [
-              "t-test",
+            "dataframe": [
+              "t-test_data",
               "de_proteins_df"
+            ],
+            "database_names": [
+              "all_reviewed",
+              "uniprot_human"
+            ]
+          },
+          "output_name": "mapping"
+        },
+        {
+          "name": "enrichment_analysis",
+          "method": "GO_analysis_with_Enrichr",
+          "parameters": {
+            "proteins_df": [
+              "t-test_data",
+              "de_proteins_df"
+            ],
+            "differential_expression_col": "log2_fold_change",
+            "differential_expression_threshold": 0,
+            "gene_mapping": [
+              "mapping",
+              "gene_mapping"
             ]
           }
         }
