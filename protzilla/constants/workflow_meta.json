@@ -2141,6 +2141,13 @@
             "fill": "protein_df_columns",
             "default": null
           },
+          "differential_expression_threshold": {
+            "name": "Threshold for differential expression: Proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "default": 0
+          },
           "gene_sets_restring": {
             "name": "Knowledge bases for enrichment",
             "type": "categorical",
@@ -2165,7 +2172,7 @@
             "default": "both"
           },
           "background_path": {
-            "name": "Background set (no upload = entire proteome)",
+            "name": "Background set (no upload = entire proteome), UniProt IDs (one per line, txt or csv)",
             "type": "file",
             "default": null
           }
@@ -2191,6 +2198,13 @@
             "type": "categorical",
             "fill": "protein_df_columns",
             "default": null
+          },
+          "differential_expression_threshold": {
+            "name": "Threshold for differential expression: Proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "default": 0
           },
           "gene_mapping": {
             "name": "Gene mapping",
@@ -2322,6 +2336,13 @@
             "type": "categorical",
             "fill": "protein_df_columns",
             "default": null
+          },
+          "differential_expression_threshold": {
+            "name": "Threshold for differential expression: Proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
+            "type": "numeric",
+            "min": 0,
+            "max": 4294967295,
+            "default": 0
           },
           "gene_mapping": {
             "name": "Gene mapping",
@@ -2881,6 +2902,16 @@
               null,
               null
             ]
+          },
+          "pos_pheno_label": {
+            "name": "Label for positively correlated phenotype",
+            "type": "text",
+            "default": ""
+          },
+          "neg_pheno_label": {
+            "name": "Label for negatively correlated phenotype",
+            "type": "text",
+            "default": ""
           }
         }
       }

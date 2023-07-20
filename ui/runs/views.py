@@ -557,12 +557,14 @@ def tables_content(request, run_name, index, key):
         outputs = run.current_out[key]
     out = outputs.replace(np.nan, None)
 
-    if "clean-ids" in request.GET and "Protein ID" in out.columns:
-        out["Protein ID"] = out["Protein ID"].map(
-            lambda group: ";".join(
-                unique_justseen(map(clean_uniprot_id, group.split(";")))
-            )
-        )
+    if "clean-ids" in request.GET:
+        for column in out.columns:
+            if "protein" in column.lower():
+                out[column] = out[column].map(
+                    lambda group: ";".join(
+                        unique_justseen(map(clean_uniprot_id, group.split(";")))
+                    )
+                )
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
