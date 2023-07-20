@@ -144,3 +144,4 @@ dmypy.json
 # vscode settings
 .vscode/
 
+*.ipynb
