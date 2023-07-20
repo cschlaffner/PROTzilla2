@@ -225,7 +225,7 @@ def GO_analysis_with_STRING(
         statistical_background = list(background_ids)
         print("split and cleaned", len(statistical_background))
         # STRING IDs are required for background
-        statistical_background = map_to_string_ids(statistical_background, organism)
+        statistical_background = map_to_STRING_ids(statistical_background, organism)
         print("number of mapped background ids", len(statistical_background))
 
     string_params = {

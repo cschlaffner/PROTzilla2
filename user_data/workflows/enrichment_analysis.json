@@ -139,7 +139,7 @@
               "de_proteins_df"
             ],
             "differential_expression_col": "log2_fold_change",
-            "differential_expression_threshold": 1,
+            "differential_expression_threshold": 0,
             "gene_mapping": [
               "mapping",
               "gene_mapping"
