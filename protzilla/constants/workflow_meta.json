@@ -2871,6 +2871,16 @@
               null,
               null
             ]
+          },
+          "pos_pheno_label": {
+            "name": "Label for positively correlated phenotype",
+            "type": "text",
+            "default": ""
+          },
+          "neg_pheno_label": {
+            "name": "Label for negatively correlated phenotype",
+            "type": "text",
+            "default": ""
           }
         }
       }
