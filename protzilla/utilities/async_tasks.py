@@ -44,9 +44,7 @@ def wait_for(tag):
     remove_finished_processes()
     thread = threads.get(tag, False)
     if thread and thread.is_alive():
-        print(f"wait for {thread=}")
         thread.join()
-        print("ready")
 
 
 def kill_all_with_path(kill_path):

@@ -146,7 +146,6 @@ class History:
 
     def save(self):
         thread = async_method_call(self.synchron_save, "save_history")
-        print(threading.active_count())
         return thread
 
     def synchron_save(self):
