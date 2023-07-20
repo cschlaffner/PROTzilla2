@@ -49,6 +49,9 @@
                             <input name="new-db" type="file" id="new-db" hidden>
                             <label for="new-db" class="btn btn-grey">Choose file</label>
                             <span class="ms-1"><em id="chosen-new-db">No file chosen</em></span>
+                            <br>
+                            <input name="just-copy" id="just-copy" type="checkbox">
+                            <label for="just-copy">Copy file without verification and protein count</label>
                         </div>
                         <input id="add-button" type="submit" value="Add new database" class="btn btn-red mr-auto"
                                disabled>
@@ -56,9 +59,9 @@
                 </div>
 
                 <div>
-                    <h3>Available Databases</h3>
+                    <h3>Available Uniprot Databases</h3>
 
-                    {% for database, cols in uniprot_databases.items %}
+                    {% for database, infos in uniprot_databases.items %}
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5>{{ database }}</h5>
@@ -69,7 +72,15 @@
                                     <input type="submit" value="delete" class="btn btn-red">
                                 </form>
                             </div>
-                            Columns: {{ cols|join:", " }}
+                            {% if infos.num_proteins %}
+                                {{ infos.num_proteins|floatformat:"g" }} proteins |
+                            {% endif %}
+                            {% if infos.date %}
+                                Added on {{ infos.date }} |
+                            {% endif %}
+                            {{ infos.filesize|filesizeformat }}
+                            <br>
+                            Columns: {{ infos.cols|join:", " }}
                             <hr>
                         </div>
                     {% endfor %}
