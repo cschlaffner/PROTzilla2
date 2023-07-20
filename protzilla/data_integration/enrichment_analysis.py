@@ -106,6 +106,7 @@ def GO_analysis_with_STRING(
     gene_sets_restring,
     organism,
     differential_expression_col=None,
+    differential_expression_threshold=0,
     background_path=None,
     direction="both",
 ):
@@ -128,13 +129,20 @@ def GO_analysis_with_STRING(
     :param differential_expression_col: name of the column in the proteins dataframe that contains values for
         direction of expression change.
     :type differential_expression_col: str
+    :param differential_expression_threshold: threshold for differential expression.
+        Proteins with values above this threshold are considered upregulated, proteins with
+        differential_expression_colvalues below this threshold are considered downregulated.
+        If "log" is in the name of differential_expression_col, the threshold is applied symmetrically:
+        e.g. log2_fold_change > threshold, the protein is upregulated, if log2_fold_change < -threshold,
+        the protein is downregulated.
+    :type differential_expression_threshold: float
     :param background_path: path to txt or csv file with background proteins (one protein ID per line).
         If no background is provided, the entire proteome is used as background.
     :type background_path: str or None
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
-        - up: Log2FC is > 0
-        - down: Log2FC is < 0
+        - up: upregulated proteins only
+        - down: downregulated proteins only
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the result dataframe
     :type direction: str
@@ -156,8 +164,20 @@ def GO_analysis_with_STRING(
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
     proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins_df[differential_expression_col]
-    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
+
+    # split protein list according to direction of expression change and threshold
+    if "log" in differential_expression_col:
+        up_threshold = differential_expression_threshold
+        down_threshold = -differential_expression_threshold
+    else:
+        up_threshold = differential_expression_threshold
+        down_threshold = differential_expression_threshold
+    up_protein_list = list(
+        proteins_df.loc[expression_change_col > up_threshold, "Protein ID"]
+    )
+    down_protein_list = list(
+        proteins_df.loc[expression_change_col < down_threshold, "Protein ID"]
+    )
 
     if len(up_protein_list) == 0:
         if direction == "up":
@@ -369,7 +389,7 @@ def gseapy_enrichment(
         msg = (
             "No gene symbols could be found for the proteins. Please check your input."
         )
-        return None, None, [dict(level=messages.ERROR, msg=msg)]
+        return None, None, dict(level=messages.ERROR, msg=msg)
 
     logger.info(f"Starting analysis for {direction}regulated proteins")
 
@@ -419,6 +439,7 @@ def GO_analysis_with_Enrichr(
     organism,
     differential_expression_col,
     gene_mapping,
+    differential_expression_threshold=0,
     direction="both",
     gene_sets_path=None,
     gene_sets_enrichr=None,
@@ -464,10 +485,17 @@ def GO_analysis_with_Enrichr(
     :param organism: organism to be used for the analysis, must be one of the following
         supported by Enrichr: "human", "mouse", "yeast", "fly", "fish", "worm"
     :type organism: str
+    :param differential_expression_threshold: threshold for differential expression.
+        Proteins with values above this threshold are considered upregulated, proteins with
+        differential_expression_col values below this threshold are considered downregulated.
+        If "log" is in the name of differential_expression_col, the threshold is applied symmetrically:
+        e.g. log2_fold_change > threshold, the protein is upregulated, if log2_fold_change < -threshold,
+        the protein is downregulated.
+    :type differential_expression_threshold: float
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
-        - up: Log2FC is > 0
-        - down: Log2FC is < 0
+        - up: upregulated proteins only
+        - down: downregulated proteins only
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
@@ -531,8 +559,20 @@ def GO_analysis_with_Enrichr(
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
     proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins_df[differential_expression_col]
-    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
+
+    # split protein list according to direction of expression change and threshold
+    if "log" in differential_expression_col:
+        up_threshold = differential_expression_threshold
+        down_threshold = -differential_expression_threshold
+    else:
+        up_threshold = differential_expression_threshold
+        down_threshold = differential_expression_threshold
+    up_protein_list = list(
+        proteins_df.loc[expression_change_col > up_threshold, "Protein ID"]
+    )
+    down_protein_list = list(
+        proteins_df.loc[expression_change_col < down_threshold, "Protein ID"]
+    )
 
     if not up_protein_list:
         if direction == "up":
@@ -612,6 +652,7 @@ def GO_analysis_offline(
     gene_sets_path,
     differential_expression_col,
     gene_mapping,
+    differential_expression_threshold=0,
     direction="both",
     background_path=None,
     background_number=None,
@@ -654,10 +695,18 @@ def GO_analysis_offline(
     :type background_path: str or None
     :param background_number: number of background genes to be used for the analysis (not recommended)
         assumes that all your genes could be found in background.
+    :type background_number: int or None
+    :param differential_expression_threshold: threshold for differential expression.
+        Proteins with values above this threshold are considered upregulated, proteins with
+        differential_expression_col values below this threshold are considered downregulated.
+        If "log" is in the name of differential_expression_col, the threshold is applied symmetrically:
+        e.g. log2_fold_change > threshold, the protein is upregulated, if log2_fold_change < -threshold,
+        the protein is downregulated.
+    :type differential_expression_threshold: float
     :param direction: direction of enrichment analysis.
         Possible values: up, down, both
-        - up: Log2FC is > 0
-        - down: Log2FC is < 0
+        - up: upregulated proteins only
+        - down: downregulated proteins only
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
@@ -679,8 +728,20 @@ def GO_analysis_offline(
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
     proteins_df.drop_duplicates(subset="Protein ID", inplace=True)
     expression_change_col = proteins_df[differential_expression_col]
-    up_protein_list = list(proteins_df.loc[expression_change_col > 0, "Protein ID"])
-    down_protein_list = list(proteins_df.loc[expression_change_col < 0, "Protein ID"])
+
+    # split protein list according to direction of expression change and threshold
+    if "log" in differential_expression_col:
+        up_threshold = differential_expression_threshold
+        down_threshold = -differential_expression_threshold
+    else:
+        up_threshold = differential_expression_threshold
+        down_threshold = differential_expression_threshold
+    up_protein_list = list(
+        proteins_df.loc[expression_change_col > up_threshold, "Protein ID"]
+    )
+    down_protein_list = list(
+        proteins_df.loc[expression_change_col < down_threshold, "Protein ID"]
+    )
 
     if not up_protein_list:
         if direction == "up":
