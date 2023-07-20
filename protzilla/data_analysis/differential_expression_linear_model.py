@@ -95,7 +95,7 @@ def linear_model(
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
 
-    for result in flatten(results):
+    for result in results:
         p_values.append(result.pvalues[grouping])
         log2_fold_change.append(result.params[grouping])
 
