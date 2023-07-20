@@ -100,9 +100,12 @@ def read_background_file(path):
         return background
 
 
-def map_to_string_ids(proteins_list, organism):
+def map_to_STRING_ids(proteins_list, organism):
     """
     This method maps a list of protein IDs to STRING IDs using the STRING API.
+    The mapping is done as suggested by STRING documentation:
+    https://string-db.org/cgi/help.pl?subpage=api%23mapping-identifiers
+
     :param proteins_list: list of protein IDs
     :type proteins_list: list
     :param organism: organism NCBI identifier
@@ -124,7 +127,11 @@ def map_to_string_ids(proteins_list, organism):
     }
 
     request_url = "/".join([string_api_url, output_format, method])
-    results = requests.post(request_url, data=params)  # call STRING API
+    try:
+        results = requests.post(request_url, data=params)  # call STRING API
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Calling STRING DB API failed. {e}")
+        return None
 
     mapped = []
     for line in results.text.strip().split("\n"):
@@ -134,9 +141,11 @@ def map_to_string_ids(proteins_list, organism):
         string_identifier = split_line[2]
         mapped.append(string_identifier)
 
-    if len(mapped) == 0:
+    if not mapped:
         logger.warning("No STRING IDs could be found")
         mapped = None
     else:
-        logger.info(f"Mapped {len(mapped)} proteins to STRING IDs")
+        logger.info(
+            f"Mapped {len(mapped)} proteins to STRING IDs. {len(proteins_list) - len(mapped)} could not be mapped."
+        )
     return mapped
