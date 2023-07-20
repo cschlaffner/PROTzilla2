@@ -10,7 +10,7 @@ from django.urls import reverse
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 
-metadata_path = EXTERNAL_DATA_PATH / "internal" / "metadata" / "uniprot.json"
+database_metadata_path = EXTERNAL_DATA_PATH / "internal" / "metadata" / "uniprot.json"
 
 
 def index(request):
@@ -20,18 +20,18 @@ def index(request):
 def databases(request):
     databases = uniprot_databases()
     df_infos = {}
-    if metadata_path.exists():
-        with open(metadata_path, "r") as f:
-            metadata = json.load(f)
+    if database_metadata_path.exists():
+        with open(database_metadata_path, "r") as f:
+            database_metadata = json.load(f)
     else:
-        metadata = {}
+        database_metadata = {}
 
     for db in databases:
         df_infos[db] = dict(
             cols=uniprot_columns(db),
             filesize=database_path(db).stat().st_size,
-            date=metadata.get(db, {}).get("date", ""),
-            num_proteins=metadata.get(db, {}).get("num_proteins", 0),
+            date=database_metadata.get(db, {}).get("date", ""),
+            num_proteins=database_metadata.get(db, {}).get("num_proteins", 0),
         )
     return render(
         request,
@@ -56,8 +56,8 @@ def database_upload(request):
         shutil.copy(path, database_path(name))
         num_proteins = 0
     else:
-        if not path.endswith(".tsv") or path.endswith(".csv"):
-            msg = "File must be a tab-separated file (.tsv, .csv)."
+        if not path.endswith(".tsv"):
+            msg = "File must be a tab-separated file with the extension .tsv"
             messages.add_message(request, messages.ERROR, msg, "alert-danger")
             return HttpResponseRedirect(reverse("databases"))
 
@@ -76,17 +76,19 @@ def database_upload(request):
         dataframe.to_csv(database_path(name), sep="\t", index=False)
         num_proteins = len(dataframe)
 
-    if not metadata_path.parent.exists():
-        metadata_path.parent.mkdir(parents=True)
+    if not database_metadata_path.parent.exists():
+        database_metadata_path.parent.mkdir(parents=True)
 
-    if metadata_path.exists():
-        with open(metadata_path, "r") as f:
-            metadata = json.load(f)
+    if database_metadata_path.exists():
+        with open(database_metadata_path, "r") as f:
+            database_metadata = json.load(f)
     else:
-        metadata = {}
-    metadata[name] = dict(num_proteins=num_proteins, date=date.today().isoformat())
-    with open(metadata_path, "w") as f:
-        json.dump(metadata, f)
+        database_metadata = {}
+    database_metadata[name] = dict(
+        num_proteins=num_proteins, date=date.today().isoformat()
+    )
+    with open(database_metadata_path, "w") as f:
+        json.dump(database_metadata, f)
 
     return HttpResponseRedirect(reverse("databases"))
 
@@ -96,14 +98,14 @@ def database_delete(request):
     path = database_path(database_name)
     path.unlink()
 
-    if metadata_path.exists():
-        with open(metadata_path, "r") as f:
-            metadata = json.load(f)
+    if database_metadata_path.exists():
+        with open(database_metadata_path, "r") as f:
+            database_metadata = json.load(f)
 
-        if database_name in metadata:
-            del metadata[database_name]
-            with open(metadata_path, "w") as f:
-                json.dump(metadata, f)
+        if database_name in database_metadata:
+            del database_metadata[database_name]
+            with open(database_metadata_path, "w") as f:
+                json.dump(database_metadata, f)
 
     return HttpResponseRedirect(reverse("databases"))
 
