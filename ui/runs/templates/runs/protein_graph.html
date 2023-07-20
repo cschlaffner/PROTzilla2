@@ -103,12 +103,14 @@
 
             cy.nodes().forEach(function (node) {
                 let popper;
+                let p_div;
                 let peptides_string = node.data('peptides').split(';').join('<br>');
                 node.on('mouseover', (event) => {
                     popper = node.popper({
                         content: () => {
                             let div = document.createElement('div');
                             div.innerHTML = peptides_string;
+                            p_div = div;
                             document.body.appendChild(div);
                             return div;
                         },
@@ -119,9 +121,11 @@
                     });
                 });
                 node.on('mouseout', function () {
+                    p_div.remove();
                     popper.destroy();
                 });
                 node.on('position', function () {
+                    p_div.remove();
                     popper.destroy();
                 });
             });
