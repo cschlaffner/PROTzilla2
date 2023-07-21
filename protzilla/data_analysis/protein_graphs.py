@@ -101,7 +101,7 @@ def peptides_to_isoform(
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
-    filtered_blocks = None
+    filtered_blocks = []
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
@@ -159,7 +159,7 @@ def peptides_to_isoform(
         protein_id=protein_id,
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
-        filtered_blocks=filtered_blocks if filtered_blocks else [],
+        filtered_blocks=filtered_blocks,
         messages=[dict(level=messages.INFO, msg=msg)],
     )
 
@@ -459,9 +459,7 @@ def _create_reference_sequence_index(
     index = {}
     kmer_list = []
     for i, char in enumerate(reference_sequence):
-        end_index = (
-            i + k if i + k < len(reference_sequence) else len(reference_sequence)
-        )
+        end_index = min(i + k, len(reference_sequence))
         kmer = reference_sequence[i:end_index]
         kmer_list.append(kmer)
         if kmer in index:
