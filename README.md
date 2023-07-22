@@ -24,7 +24,7 @@
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/plots.py                                   |       77 |        3 |       36 |        4 |     94% |55, 64->66, 106, 255 |
-| protzilla/data\_analysis/protein\_graphs.py                         |      382 |       28 |      190 |       13 |     92% |31-39, 87, 110-111, 123, 251-253, 262-264, 282-283, 334, 359-363, 407, 421, 487, 518, 525, 722 |
+| protzilla/data\_analysis/protein\_graphs.py                         |      392 |       30 |      194 |       15 |     92% |32-40, 88, 113-114, 128, 259-261, 270-272, 290-291, 340, 365-369, 413, 427, 495, 526, 533, 730, 788->787, 792-795 |
 | protzilla/data\_integration/database\_integration.py                |       58 |       10 |       32 |        1 |     86% | 59, 71-83 |
 | protzilla/data\_integration/database\_query.py                      |       96 |       35 |       44 |        4 |     62% |13-51, 55-57, 61, 67-74, 95->94, 107-112, 113->120, 121-124 |
 | protzilla/data\_integration/di\_plots.py                            |      124 |       21 |       58 |       11 |     82% |75, 104->107, 108, 173-174, 177-178, 180, 183-184, 212-214, 234-239, 291-292, 295, 368 |
@@ -43,7 +43,7 @@
 | protzilla/history.py                                                |      134 |       11 |       54 |        7 |     90% |35, 109, 116, 126, 172-176, 218, 225 |
 | protzilla/importing/metadata\_import.py                             |       31 |       11 |       14 |        1 |     56% |     20-35 |
 | protzilla/importing/ms\_data\_import.py                             |       48 |        4 |        8 |        2 |     89% |12-13, 56-57 |
-| protzilla/importing/peptide\_import.py                              |       25 |        2 |        2 |        0 |     93% |     17-18 |
+| protzilla/importing/peptide\_import.py                              |       22 |        2 |        2 |        0 |     92% |     15-16 |
 | protzilla/run.py                                                    |      282 |       30 |      102 |       10 |     85% |47-53, 57-63, 121->132, 153, 155, 172->170, 208, 211, 255-256, 285-288, 331, 364, 368-371, 390, 402->375 |
 | protzilla/run\_helper.py                                            |       60 |       22 |       44 |        4 |     60% |24, 35-56, 62, 71 |
 | protzilla/runner.py                                                 |       89 |        4 |       38 |        3 |     94% |115, 124, 156-157 |
@@ -74,7 +74,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      320 |      264 |      112 |        0 |     13% |46, 57-96, 124-140, 157-178, 184-312, 316-323, 327-329, 333-335, 339-341, 345-354, 358-365, 369-377, 381-408, 412-441, 445-447, 451-452, 474-476, 480-495, 503-533, 552-567, 573-609 |
 | ui/runs/views\_helper.py                                            |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                           **TOTAL** | **4016** | **1031** | **1566** |  **200** | **71%** |           |
+|                                                           **TOTAL** | **4023** | **1033** | **1570** |  **202** | **71%** |           |
 
 
 ## Setup coverage badge
