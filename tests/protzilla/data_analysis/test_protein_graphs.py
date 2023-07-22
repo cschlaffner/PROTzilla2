@@ -15,9 +15,9 @@ from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
     _create_protein_variation_graph,
-    _create_ref_seq_index,
+    _create_reference_sequence_index,
     _get_peptides,
-    _get_ref_seq,
+    _get_reference_sequence,
     _longest_paths,
     _match_potential_matches,
     _modify_graph,
@@ -294,10 +294,18 @@ def integration_test_peptides() -> pd.DataFrame:
             0,
             0.98734,
         ],
-        ["Sample01", "test_protein_variation-1", "ZZZ", 0, 0.98734],
-        ["Sample02", "test_protein_variation-1", "ZZZ", np.NaN, 0.98734],
-        ["Sample03", "test_protein_variation-1", "ZZZ", 0, 0.98734],
-        ["Sample01", "test_protein_variation_shortcut", "ABCEGA", 93478.0, 0.98734],
+        ["Sample01", "test_protein_variation", "ZZZ", 0, 0.98734],
+        ["Sample02", "test_protein_variation", "ZZZ", np.NaN, 0.98734],
+        ["Sample03", "test_protein_variation", "ZZZ", 0, 0.98734],
+        ["Sample01", "test_protein_variation", "ABCVEG", 9845, 0.98734],
+        [
+            "Sample01",
+            "test_protein-shortcut;test_protein_variation",
+            "ABCEGA",
+            93478.0,
+            0.98734,
+        ],
+        ["Sample01", "test_protein-shortcut", "ABCDEGA", 93478.0, 0.98734],
     )
 
     peptide_df = pd.DataFrame(
@@ -492,7 +500,7 @@ def test_create_graph_index_invalid_end_node(critical_logger):
 
 
 def test_create_ref_seq_index_C0HM02():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/C0HM02.txt", k=5
     )
 
@@ -529,7 +537,7 @@ def test_create_ref_seq_index_C0HM02():
 
 
 def test_create_ref_seq_index_own_protein_k_1():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=1
     )
 
@@ -547,7 +555,7 @@ def test_create_ref_seq_index_own_protein_k_1():
 
 
 def test_create_ref_seq_index_own_protein_k_2():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=2
     )
 
@@ -566,7 +574,7 @@ def test_create_ref_seq_index_own_protein_k_2():
 
 
 def test_create_ref_seq_index_own_protein_k_5():
-    index, _, seq_len = _create_ref_seq_index(
+    index, _, seq_len = _create_reference_sequence_index(
         protein_path=f"{TEST_DATA_PATH}/proteins/test_protein.txt", k=5
     )
 
@@ -588,7 +596,7 @@ def test_create_ref_seq_index_own_protein_k_5():
 
 
 def test_get_ref_seq_C0HM02():
-    ref_seq, seq_len = _get_ref_seq(f"{TEST_DATA_PATH}/proteins/C0HM02.txt")
+    ref_seq, seq_len = _get_reference_sequence(f"{TEST_DATA_PATH}/proteins/C0HM02.txt")
 
     planned_ref_seq = "MASRGALRRCLSPGLPRLLHLSRGLA"
     planned_seq_len = 26
@@ -599,7 +607,7 @@ def test_get_ref_seq_C0HM02():
 
 def test_get_ref_seq_test_protein():
     protein_path = f"{TEST_DATA_PATH}/proteins/test_protein.txt"
-    ref_seq, seq_len = _get_ref_seq(protein_path)
+    ref_seq, seq_len = _get_reference_sequence(protein_path)
 
     planned_ref_seq = "ABCDEGABCDET"
     planned_seq_len = 12
@@ -612,14 +620,14 @@ def test_get_ref_seq_empty_seq():
     protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(str(protein_path))
+        _get_reference_sequence(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
     protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
-        _get_ref_seq(str(protein_path))
+        _get_reference_sequence(str(protein_path))
 
 
 def test_potential_peptide_matches_k5():
@@ -789,6 +797,7 @@ def test_create_prot_variation_graph(
 
     planned_out_dict = {
         "graph_path": str(output_folder / f"{protein_id}.graphml"),
+        "filtered_blocks": [],
         "messages": [dict(level=messages.INFO, msg=planned_msg)],
     }
 
@@ -818,6 +827,7 @@ def test_create_protein_variation_graph_bad_request(
 
     planned_out = dict(
         graph_path=None,
+        filtered_blocks=[],
         messages=[
             dict(level=messages.ERROR, msg=planned_msg, trace=mock_request.__dict__)
         ],
@@ -1230,6 +1240,7 @@ def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
     _create_protein_variation_graph=mock.MagicMock(
         return_value=dict(
             graph_path=None,
+            filtered_blocks=[],
             messages=[{"level": messages.ERROR, "msg": "No graph found"}],
         )
     ),
@@ -1261,20 +1272,21 @@ def test_peptides_to_isoform_integration_test(
         peptide_df=integration_test_peptides,
         protein_id=protein_id,
         run_name=run_name,
-        k=3,  # k = 3 for easier test data creation
+        k=3,  # for easier test data creation
+        allowed_mismatches=1,
     )
 
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
-    assert list(out_dict["peptide_matches"]) == ["ABC", "DET"]
+    assert list(out_dict["peptide_matches"]) == ["ABC", "ABCVEG", "DET"]
     assert out_dict["peptide_mismatches"] == ["ABCEGA", "DETYYY"]
     assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EG", match="false")
+    planned_graph.add_node("n6", aminoacid="EG", match="true", peptides="ABCVEG")
     planned_graph.add_node("n7", aminoacid="ABC", match="true", peptides="ABC")
 
     planned_graph.add_edge("n1", "n6")
@@ -1287,9 +1299,9 @@ def test_peptides_to_isoform_integration_test(
     nx.set_node_attributes(
         planned_graph,
         {
+            "n3": {"aminoacid": "V", "match": "true", "peptides": "ABCVEG"},
             "n4": {"aminoacid": "DET", "match": "true", "peptides": "DET"},
-            "n5": {"match": "true", "peptides": "ABC"},
-            "n7": {"match": "true"},
+            "n5": {"match": "true", "peptides": "ABC;ABCVEG"},
         },
     )
 
@@ -1307,7 +1319,7 @@ def test_peptides_to_isoform_integration_test_shortcut(
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
-    protein_id = "test_protein_variation_shortcut"
+    protein_id = "test_protein-shortcut"
     test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
     test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
     shutil.copy(test_protein_path, test_protein_destination)
@@ -1317,19 +1329,22 @@ def test_peptides_to_isoform_integration_test_shortcut(
         protein_id=protein_id,
         run_name=run_name,
         k=3,  # k = 3 for easier test data creation
+        allowed_mismatches=0,
     )
 
     planned_modified_graph_path = run_path / "graphs" / f"{protein_id}_modified.graphml"
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
-    assert list(out_dict["peptide_matches"]) == ["ABCEGA"]
+    assert list(out_dict["peptide_matches"]) == ["ABCDEGA", "ABCEGA"]
     assert out_dict["peptide_mismatches"] == []
     assert out_dict["protein_id"] == protein_id
 
     created_graph = nx.read_graphml(out_dict["graph_path"])
 
     planned_graph = test_protein_variation_graph.copy()
-    planned_graph.add_node("n6", aminoacid="EGA", match="true")
+    planned_graph.add_node(
+        "n6", aminoacid="EGA", match="true", peptides="ABCDEGA;ABCEGA"
+    )
 
     planned_graph.add_edge("n1", "n6")
     planned_graph.add_edge("n3", "n6")
@@ -1341,21 +1356,24 @@ def test_peptides_to_isoform_integration_test_shortcut(
     nx.set_node_attributes(
         planned_graph,
         {
-            "n0": {"accession": "test_protein_variation_shortcut"},
-            "n1": {"accession": "test_protein_variation_shortcut"},
-            "n2": {"accession": "test_protein_variation_shortcut"},
-            "n3": {"accession": "test_protein_variation_shortcut"},
+            "n0": {"accession": "test_protein-shortcut"},
+            "n1": {
+                "accession": "test_protein-shortcut",
+                "match": "true",
+                "peptides": "ABCDEGA",
+            },
+            "n2": {"accession": "test_protein-shortcut"},
+            "n3": {"accession": "test_protein-shortcut"},
             "n4": {
                 "aminoacid": "BCDET",
                 "match": "false",
-                "accession": "test_protein_variation_shortcut",
+                "accession": "test_protein-shortcut",
             },
             "n5": {
                 "match": "true",
-                "accession": "test_protein_variation_shortcut",
-                "peptides": "ABCEGA",
+                "accession": "test_protein-shortcut",
+                "peptides": "ABCDEGA;ABCEGA",
             },
-            "n6": {"match": "true", "peptides": "ABCEGA"},
         },
     )
 
@@ -1408,7 +1426,11 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     tests_folder_name,
 ):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_longer_variations"
-    run_path = RUNS_PATH / run_name
+    run_path = (
+        RUNS_PATH
+        / tests_folder_name
+        / "test_peptides_to_isoform_integration_test_longer_variations"
+    )
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
     protein_id = "test_protein_variation_long"
@@ -1421,7 +1443,7 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         ["Sample01", "test_protein_variation_long", "ABCFQ", 234, 0.87452],
         ["Sample01", "test_protein_variation_long", "ABCVTG", 234234.0, 0.87452],
         ["Sample01", "test_protein_variation_long", "ABCFLA", 234, 0.87452],
-        ["Sample01", "test_protein_variation_long", "FLA", 234, 0.87452],
+        ["Sample01", "test_protein_variation_long", "FLG", 234, 0.87452],
     )
     peptide_df = pd.DataFrame(
         data=peptide_protein_list,
@@ -1442,8 +1464,16 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     assert out_dict["graph_path"] == str(planned_modified_graph_path)
     assert Path(planned_modified_graph_path).exists()
     assert list(out_dict["peptide_matches"]) == ["ABCFQ", "ABCVTG", "DEG"]
-    assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLA"]
+    assert out_dict["peptide_mismatches"] == ["ABCFLA", "FLG"]
     assert out_dict["protein_id"] == protein_id
+    assert out_dict["filtered_blocks"] == [
+        [
+            "FT   VARIANT         5\n",
+            'FT                   /note="E -> THISSHOULDBEPARSEDOUT (things)"\n',
+            'FT                   /evidence="madethisupastestdata5"\n',
+            'FT                   /id="veryOwnID5"\n',
+        ]
+    ]
 
     created_graph = nx.read_graphml(planned_modified_graph_path)
     planned_graph = nx.read_graphml(
@@ -1468,7 +1498,6 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         },
     )
 
-    pprint_graphs(created_graph, planned_graph)
     assert created_graph.nodes == planned_graph.nodes
     nx.utils.graphs_equal(planned_graph, created_graph)
 

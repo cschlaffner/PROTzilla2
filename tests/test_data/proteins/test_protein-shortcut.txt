@@ -1,5 +1,5 @@
-ID   test_protein_variation_shortcut        Unreviewed;         12 AA.
-AC   test_protein_variation_shortcut
+ID   test_protein-shortcut        Unreviewed;         12 AA.
+AC   test_protein-shortcut
 DE   RecName: Full=Protzillas second Made up Test Protein;
 DE            Short=hnRNP A2/B1;
 FT   VARIANT         4

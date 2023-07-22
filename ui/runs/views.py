@@ -1,4 +1,3 @@
-import base64
 import sys
 import tempfile
 import traceback
@@ -615,6 +614,7 @@ def protein_graph(request, run_name, index: int):
             "peptide_matches": peptide_matches,
             "peptide_mismatches": peptide_mismatches,
             "protein_id": protein_id,
+            "filtered_blocks": outputs.get("filtered_blocks", []),
             "run_name": run_name,
             "used_memory": get_memory_usage(),
         },
