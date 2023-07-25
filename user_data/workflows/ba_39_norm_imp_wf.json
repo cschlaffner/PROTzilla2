@@ -101,7 +101,7 @@
               "dataframe"
             ],
             "log_base": 2,
-            "fc_threshold": 0.0309,
+            "fc_threshold": 0.0474,
             "grouping": "Group",
             "group1": "CTR",
             "group2": "AD"

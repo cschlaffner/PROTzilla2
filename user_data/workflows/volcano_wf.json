@@ -7,7 +7,7 @@
           "name": "ms_data_import",
           "method": "max_quant_import",
           "parameters": {
-            "intensity_name": "Intensity"
+            "intensity_name": "iBAQ"
           }
         },
         {
@@ -23,9 +23,9 @@
       "steps": [
         {
           "name": "filter_samples",
-          "method": "proteins_missing_filter",
+          "method": "protein_count_filter",
           "parameters": {
-            "percentage": 0.5
+            "threshold": 2
           },
           "graphs": [
             {
@@ -37,11 +37,11 @@
           "name": "filter_proteins",
           "method": "samples_missing_filter",
           "parameters": {
-            "percentage": 0.5
+            "threshold": 0.5
           },
           "graphs": [
             {
-              "graph_type": "Pie chart"
+              "graph_type": "Bar chart"
             }
           ]
         },
@@ -56,19 +56,6 @@
               "graph_type": "Boxplot",
               "group_by": "Sample"
             }
-          ]
-        },
-        {
-          "name": "normalisation",
-          "method": "median",
-          "parameters": {
-            "percentile":0.5
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            }
           ],
           "output_name": "preprocessed_data"
         }
@@ -76,7 +63,6 @@
     },
     "data_analysis": {
       "steps": [
-        
         {
           "name": "differential_expression",
           "method": "t_test",
@@ -85,33 +71,33 @@
               "preprocessed_data",
               "dataframe"
             ],
-            
             "log_base": 2,
-            "fc_threshold":0.0474,
+            "fc_threshold": 1,
             "grouping": "Group",
-            "group1": "CTR", 
+            "group1": "CTR",
             "group2": "AD"
           },
-          "output_name": "ttest_result"
+          "output_name": "ttest"
         },
         {
           "name": "plot",
           "method": "volcano",
           "parameters": {
+            "proteins_of_interest": [],
             "p_values": [
-              "ttest_result",
+              "ttest",
               "corrected_p_values_df"
             ],
             "log2_fc": [
-              "ttest_result",
+              "ttest",
               "log2_fold_change_df"
             ],
             "fc_threshold": [
-              "ttest_result",
+              "ttest",
               "fc_threshold"
             ],
             "alpha": [
-              "ttest_result",
+              "ttest",
               "corrected_alpha"
             ]
           }
@@ -119,8 +105,7 @@
       ]
     },
     "data_integration": {
-      "steps": [
-      ]
+      "steps": []
     }
   }
 }
