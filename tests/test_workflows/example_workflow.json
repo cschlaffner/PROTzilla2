@@ -7,7 +7,7 @@
           "name": "ms_data_import",
           "method": "max_quant_import",
           "parameters": {
-            "intensity_name": "iBAQ"
+            "intensity_name": "Intensity"
           }
         },
         {

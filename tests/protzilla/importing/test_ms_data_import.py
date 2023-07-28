@@ -1,5 +1,8 @@
+import numpy as np
 import pandas as pd
 import pytest
+from unittest.mock import patch
+
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.importing import ms_data_import
@@ -132,6 +135,11 @@ def test_ms_fragger_import(intensity_name):
     )
 
     intensity_df = ms_fragger_import_intensity_df(intensity_name)
+
+    # we do not care about the genes column, it is never used (and replaced by nan)
+    intensity_df = intensity_df.drop(columns=["Gene"])
+    test_intensity_df = test_intensity_df.drop(columns=["Gene"])
+
     pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
 
 
@@ -143,7 +151,7 @@ def test_filter_rev_con():
     )
     protein_ids = intensity_df["Protein ID"].unique().tolist()
     # not the complete group should be filtered out if contains valid ids
-    assert "NOTFILTERED" in protein_ids
+    assert "P00000" in protein_ids
     # all instances of rev and con should be filtered out
     assert all(
         not any(
@@ -152,3 +160,68 @@ def test_filter_rev_con():
         )
         for group in protein_ids
     )
+
+
+def test_transform_and_clean():
+    columns = ["Protein ID", "A", "B", "C"]
+    data = [
+        ["P00000", 1.0, 6.0, np.nan],
+        ["P00000;REV__P12345", np.nan, 2.0, np.nan],
+        ["Q11111", 4.0, 4, np.nan],
+        ["Q11111;CON__P12345", 4.0, 4.0, np.nan],
+    ]
+    out_col = ["Sample", "Protein ID", "intensity"]
+    expected_output = [
+        ["A", "P00000", 1.0],  # add nan and number
+        ["A", "Q11111", 4.0],
+        ["B", "P00000", 8.0],  # add number and number
+        ["B", "Q11111", 4.0],
+        ["C", "P00000", np.nan],  # add nan only
+        ["C", "Q11111", np.nan],
+    ]
+    df = pd.DataFrame(data, columns=columns)
+    res, other = ms_data_import.transform_and_clean(
+        df, "intensity", map_to_uniprot=False
+    )
+    expected_df = pd.DataFrame(expected_output, columns=out_col)
+
+    # we do not care about the genes column, it is deprecated (and replaced by nan)
+    res = res.drop(columns=["Gene"])
+
+    assert res.equals(expected_df)
+    assert other["contaminants"] == ["Q11111;CON__P12345"]
+    assert other["filtered_proteins"] == ["REV__P12345"]
+
+
+def test_clean_protein_groups():
+    expected = [
+        "A0A009IHW8-8-7-6;M99999_7-8;P12345;Q12345-3",
+        "P00000;P12345;P12345-1;P12345-11;P12345-9",
+        "ENSP12345678901;NP_123456;NP_123456789;XP_123456789",
+        "P12345",
+        "",
+    ]
+    test_data = [
+        "P12345;Q12345-3;A0A009IHW8-8-7-6;M99999_7-8",
+        "P12345-9;P12345;P12345-1;P00000;P12345-11",
+        "ENSP12345678901.1;NP_123456;XP_123456789;NP_123456789",
+        "P12345_VAR_38832",
+        "REV__P12345;YP_123456789;0000000;TAU-98",
+    ]
+    clean_groups, filtered = ms_data_import.clean_protein_groups(
+        test_data, map_to_uniprot=False
+    )
+    assert clean_groups == expected
+    assert filtered == "REV__P12345 YP_123456789 0000000 TAU-98".split()
+
+
+@patch("protzilla.importing.ms_data_import.map_ids_to_uniprot")
+def test_clean_protein_groups_map(ids_to_uniprot_mock):
+    ids_to_uniprot_mock.return_value = {"NP_123456": ["P54321", "P12345"]}
+    expected = ["P12321;P12345;P54321", ""]
+    test_data = ["NP_123456;P12321", "XP_123456789"]
+    clean_groups, filtered = ms_data_import.clean_protein_groups(
+        test_data, map_to_uniprot=True
+    )
+    assert clean_groups == expected
+    assert filtered == []

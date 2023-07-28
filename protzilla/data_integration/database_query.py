@@ -9,7 +9,7 @@ from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.utilities import clean_uniprot_id
 
 
-def biomart_query(queries, filter_name, attributes):
+def biomart_query(queries, filter_name, attributes, use_grch37=False):
     if not queries:
         return
 
@@ -35,9 +35,15 @@ def biomart_query(queries, filter_name, attributes):
     )
     for attribute in attributes:
         SubElement(dataset, "Attribute", attrib={"name": attribute})
+
+    if use_grch37:
+        biomart_url = "http://grch37.ensembl.org/biomart/martservice"
+    else:
+        biomart_url = "https://www.ensembl.org/biomart/martservice"
+
     try:
         response = requests.post(
-            url="http://grch37.ensembl.org/biomart/martservice",
+            url=biomart_url,
             data={"query": tostring(root)},
             stream=True,
         )
