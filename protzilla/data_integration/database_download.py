@@ -4,10 +4,13 @@ from pathlib import Path
 import requests
 from requests.adapters import HTTPAdapter, Retry
 from tqdm import tqdm
+from datetime import date
+import json
 
 # cannot be imported form constats as package cannot be found
 external_data_path = Path(__file__).parent.parent.parent / "user_data" / "external_data"
 uniprot_db_path = external_data_path / "uniprot"
+database_metadata_path = external_data_path / "internal" / "metadata" / "uniprot.json"
 
 
 def get_next_link(headers):
@@ -50,6 +53,7 @@ def download_uniprot_paged(name):
             progress += len(lines[1:])
             print(f"\rprogress: {progress} / {total}", end="")
         print()
+    return total
 
 
 def download_uniprot_stream(name):
@@ -73,12 +77,16 @@ def download_uniprot_stream(name):
 
 if __name__ == "__main__":
     uniprot_db_path.mkdir(exist_ok=True, parents=True)
+    database_metadata_path.parent.mkdir(exist_ok=True, parents=True)
     databases = [path for path in uniprot_db_path.iterdir() if path.suffix == ".tsv"]
     if not databases:
         print("no Uniprot database found, starting to download")
         print("this will take 1-5 minutes")
         try:
-            download_uniprot_paged("human_reviewed")
+            num_proteins = download_uniprot_paged("human_reviewed")
+            infos = dict(num_proteins=num_proteins, date=date.today().isoformat())
+            with open(database_metadata_path, "w") as f:
+                json.dump(dict(human_reviewed=infos), f)
         except Exception as e:
             print(e)
             print(
