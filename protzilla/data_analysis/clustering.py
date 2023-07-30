@@ -1,18 +1,17 @@
+from collections import defaultdict
+
 import pandas as pd
 from django.contrib import messages
+from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import ParameterGrid
-from collections import defaultdict
-from sklearn.base import clone
 
 from protzilla.data_analysis.classification_helper import (
     create_dict_with_lists_as_values,
-    create_model_evaluation_df_grid_search,
     create_model_evaluation_df_grid_search_manual,
     encode_labels,
     evaluate_clustering_with_scoring,
-    perform_grid_search_cv,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -378,21 +377,6 @@ def perform_clustering(
         )
         return model, model_evaluation_df
     else:
-        # clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        # model = perform_grid_search_cv(
-        #     model_selection,
-        #     clf,
-        #     clf_parameters,
-        #     scorer(scoring),
-        #     model_selection_scoring,
-        # )
-        # model.fit(input_df, labels_df)
-        # model_evaluation_df = create_model_evaluation_df_grid_search(
-        #     pd.DataFrame(model.cv_results_),
-        #     clf_parameters,
-        #     scoring,
-        # )
-        # best_estimator = model.best_estimator_
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
         best_params = None
         best_score = -float("inf")
