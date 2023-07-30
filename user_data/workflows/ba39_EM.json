@@ -148,7 +148,7 @@
             ],
             "labels_column": "Group",
             "n_samples": 40,
-            "random_state": 6,
+            "random_state": 63,
             "metadata_df": null
           },
           "output_name": "subset"

@@ -140,10 +140,13 @@
               "train_scores"
             ],
             "score_name": "Accuracy",
-            "minimum_viable_sample_size": [
-              "SVM learning curve",
-              "minimum_viable_sample_size"
-            ]
+            "model_function": "sigmoid",
+            "initial_coef_model_function": [
+              0.978,
+              0.079,
+              82.081
+            ],
+            "plot_title": "BA39: SVM Learning Curve"
           },
           "output_name": null
         },
@@ -156,11 +159,9 @@
               "dataframe"
             ],
             "labels_column": "Group",
-            "n_samples": [
-              "SVM learning curve",
-              "minimum_viable_sample_size"
-            ],
-            "random_state": 6
+            "n_samples": 68,
+            "random_state": 6,
+            "metadata_df": null
           },
           "output_name": "subset"
         },
@@ -188,15 +189,19 @@
             "model_selection": "Grid search",
             "model_selection_scoring": "accuracy",
             "n_jobs": -1,
-            "C": [0.4, 0.5, 0.6, 0.8, 1.0],
+            "C": [
+              0.4,
+              0.5,
+              0.6,
+              0.8,
+              1.0
+            ],
             "kernel": [
               "linear",
               "poly",
               "rbf",
               "sigmoid"
             ],
-            "gamma": ["scale", "auto", 0.001, 0.01, 0.4, 0.6, 0.8, 1.0],
-            "probability": true,
             "tolerance": 0.0001,
             "random_state": 6,
             "metadata_df": ""

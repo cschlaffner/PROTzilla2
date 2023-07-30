@@ -140,10 +140,13 @@
               "train_scores"
             ],
             "score_name": "Accuracy",
-            "minimum_viable_sample_size": [
-              "NB learning curve",
-              "minimum_viable_sample_size"
-            ]
+            "model_function": "cubic_function",
+            "initial_coef_model_function": [
+              1,
+              1,
+              1
+            ],
+            "plot_title": "BA39: Naive Bayes Learning Curve"
           },
           "output_name": null
         },
@@ -156,11 +159,9 @@
               "dataframe"
             ],
             "labels_column": "Group",
-            "n_samples": [
-              "NB learning curve",
-              "minimum_viable_sample_size"
-            ],
-            "random_state": 6
+            "n_samples": 80,
+            "random_state": 6,
+            "metadata_df": null
           },
           "output_name": "subset"
         },
@@ -303,7 +304,6 @@
             ],
             "cross_validation_strategy": "Repeated Stratified K-Fold",
             "n_splits": 5,
-            "n_repeats": 10,
             "shuffle": "yes",
             "scoring": "accuracy",
             "n_permutations": 1000,

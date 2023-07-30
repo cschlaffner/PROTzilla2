@@ -140,10 +140,8 @@
               "train_scores"
             ],
             "score_name": "Accuracy",
-            "minimum_viable_sample_size": [
-              "RF learning curve",
-              "minimum_viable_sample_size"
-            ]
+            "model_function": "sigmoid",
+            "initial_coef_model_function": [0.9584, 0.0422, 81.7743]
           },
           "output_name": null
         },
@@ -156,10 +154,7 @@
               "dataframe"
             ],
             "labels_column": "Group",
-            "n_samples": [
-              "RF learning curve",
-              "minimum_viable_sample_size"
-            ],
+            "n_samples": 63,
             "random_state": 6
           },
           "output_name": "subset"
