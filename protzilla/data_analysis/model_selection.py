@@ -2,27 +2,22 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
+from django.contrib import messages
+from joblib import Parallel, delayed
 from kneed import KneeLocator
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import (
-    learning_curve,
-    train_test_split,
-    StratifiedShuffleSplit,
-)
+from sklearn.model_selection import learning_curve, train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
-from joblib import Parallel, delayed
-from multiprocessing import Manager
 
 from protzilla.data_analysis.classification_helper import (
-    perform_cross_validation,
     encode_labels,
+    perform_cross_validation,
     perform_nested_cross_validation,
 )
 from protzilla.data_analysis.model_selection_plots import elbow_method_n_clusters
 from protzilla.utilities import replace_spaces_with_underscores_and_lowercase
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
-from django.contrib import messages
 
 estimator_mapping = {
     "Random Forest": RandomForestClassifier(),
@@ -189,10 +184,6 @@ def cluster_multiple_sample_sizes_and_k(
     clustering_method_key = replace_spaces_with_underscores_and_lowercase(
         clustering_method
     )
-    X_subsets = []
-    # if len(input_df_wide) in sample_sizes:
-    #     sample_sizes.remove(len(input_df_wide))
-    #     X_subsets.append(input_df_wide)
 
     model_evaluation_dict = defaultdict()
     merged_df = pd.concat([input_df_wide, labels_df], axis=1)
@@ -201,7 +192,10 @@ def cluster_multiple_sample_sizes_and_k(
         if i == 0:
             # For the first sample size, use train_test_split
             samples, _ = train_test_split(
-                merged_df, train_size=size, stratify=labels_df
+                merged_df,
+                train_size=size,
+                stratify=labels_df,
+                random_state=random_state,
             )
         else:
             # For subsequent sample sizes, take a subset of the previous sample
@@ -216,6 +210,7 @@ def cluster_multiple_sample_sizes_and_k(
                     remaining_samples,
                     train_size=train_size,
                     stratify=labels_df.loc[~merged_df.index.isin(previous_indices)],
+                    random_state=random_state,
                 )
             samples = pd.concat([previous_samples, additional_samples])
         # Remove the samples from merged_df
@@ -237,11 +232,19 @@ def cluster_multiple_sample_sizes_and_k(
         model_evaluation_dict[f"sample_size_{len(subset)}"] = results[
             "model_evaluation_df"
         ]
-
-    return {**model_evaluation_dict}
+    stratified_subsets_dict = dict(
+        zip([str(s) for s in sample_sizes], stratified_subsets)
+    )
+    return {**model_evaluation_dict, **stratified_subsets_dict}
 
 
 def elbow_plot_multiple_sample_sizes(df, result_df, current_out, plot_title):
+    current_out = {
+        key: value
+        for key, value in current_out.items()
+        if key.startswith("sample_size")
+    }
+
     plots = elbow_method_n_clusters(
         model_evaluation_dfs=list(current_out.values()),
         sample_sizes=list(current_out.keys()),

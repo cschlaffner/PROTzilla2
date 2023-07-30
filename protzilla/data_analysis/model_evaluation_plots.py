@@ -1,21 +1,15 @@
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.metrics import (
+    ConfusionMatrixDisplay,
     PrecisionRecallDisplay,
     RocCurveDisplay,
-    ConfusionMatrixDisplay,
 )
-from sklearn.model_selection import permutation_test_score
 
-from protzilla.data_analysis.classification_helper import (
-    encode_labels,
-    perform_cross_validation,
-)
-from protzilla.utilities.utilities import fig_to_base64
 from protzilla.constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE as COLORS,
 )
+from protzilla.utilities.utilities import fig_to_base64
 
 
 def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
@@ -85,7 +79,7 @@ def confusion_matrix_plot(model, input_test_df, labels_test_df, plot_title=None)
             labels=encoded_labels,
             display_labels=display_labels,
         )
-    except Exception as e:
+    except Exception:
         display = ConfusionMatrixDisplay.from_estimator(
             model, input_test_df, labels_test_df["Encoded Label"]
         )
@@ -96,7 +90,7 @@ def confusion_matrix_plot(model, input_test_df, labels_test_df, plot_title=None)
 
 
 def permutation_testing_plot(score, permutation_scores, pvalue, score_name, plot_title):
-    # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
+    # credits to https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
     fig, ax = plt.subplots()
 
     ax.hist(permutation_scores, bins=20, density=True, color=COLORS[0])

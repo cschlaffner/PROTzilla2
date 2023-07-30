@@ -1,3 +1,4 @@
+import matplotlib as mpl
 import numpy as np
 from kneed import KneeLocator
 from matplotlib import pyplot as plt
@@ -44,16 +45,11 @@ def learning_curve_plot(
         test_scores_mean,
         p0=initial_coef_model_function,
     )
-    # [1e-04, -0.02, 2, 0.7]
-    # [1.47379e-07, -4.10108e-05, 0.006, 0.557847]
+
     x_fit = np.linspace(min(train_sizes), max(train_sizes), 100)
     curve_values = model_functions[model_function](x_fit, *params)
 
     if model_function == "cubic_function":
-        # diff = np.diff(curve_values)
-        # flattening_point_idxs = np.where(diff < np.mean(diff))[0]
-        # flattening_point_idx = flattening_point_idxs[x_fit > 60]
-        # flattening_point = x_fit[flattening_point_idx]
         diff = np.diff(curve_values)
         mask = x_fit > 60
         filtered_diff = diff[mask[:-1]]
@@ -92,7 +88,10 @@ model_functions = {
 
 
 def elbow_method_n_clusters(
-    model_evaluation_dfs, find_elbow, sample_sizes=None, plot_title=None
+    model_evaluation_dfs,
+    find_elbow,
+    sample_sizes=None,
+    plot_title=None,
 ):
     model_evaluation_dfs = (
         model_evaluation_dfs
@@ -117,7 +116,6 @@ def elbow_method_n_clusters(
         key=lambda x: (int(x[0][len("sample_size_") :]), x[1]),
     )
     sample_sizes, model_evaluation_dfs = zip(*sorted_data)
-
     plots = []
     for score_name in score_names:
         score_name_plt = remove_underscore_and_capitalize(score_name)
@@ -128,7 +126,24 @@ def elbow_method_n_clusters(
             sample_size = (
                 remove_underscore_and_capitalize(sample_size) if sample_size else None
             )
-            plt.plot(n_clusters, score_values, marker="o", label=sample_size)
+            numeric_sample_sizes = [int(s.split("_")[-1]) for s in sample_sizes]
+            max_sample_size = max(numeric_sample_sizes)
+
+            # Normalize the sample size values to map them to the colormap range [0, 1]
+            normalized_sample_size = int(sample_size.split(" ")[-1]) / max_sample_size
+            # Calculate the index in the color gradient based on the normalized sample size
+            color_index = int(normalized_sample_size * (max_sample_size - 1))
+            # Get the color from the gradient based on the color index
+            colors = mpl.colormaps["plasma"](np.linspace(0.2, 1, max_sample_size))
+            line_color = colors[color_index]
+
+            plt.plot(
+                n_clusters,
+                score_values,
+                marker="o",
+                label=sample_size,
+                color=line_color,
+            )
             plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             if find_elbow == "yes":
                 kn = KneeLocator(
@@ -146,6 +161,12 @@ def elbow_method_n_clusters(
         plt.xlabel("Number of Clusters")
         plt.ylabel(score_name_plt)
         plt.title(plot_title)
+        if score_name == "davies_bouldin_score":
+            plt.ylim(0.0, 4.0)
+        elif score_name == "dunn_score":
+            plt.ylim(0.0, 1.05)
+        elif score_name == "calinski_harabasz_score":
+            plt.ylim(0.0, 29.0)
         plots.append(fig_to_base64(plt.gcf()))
         plt.clf()
 

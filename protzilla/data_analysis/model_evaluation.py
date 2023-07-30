@@ -2,8 +2,8 @@ import pandas as pd
 from sklearn.model_selection import permutation_test_score
 
 from protzilla.data_analysis.classification_helper import (
-    perform_cross_validation,
     evaluate_with_scoring,
+    perform_cross_validation,
 )
 
 
@@ -46,7 +46,6 @@ def permutation_testing(
     random_state,
     **cv_params,
 ):
-    # add license https://scikit-learn.org/stable/auto_examples/model_selection/plot_permutation_tests_for_classification.html#sphx-glr-auto-examples-model-selection-plot-permutation-tests-for-classification-py
     input_df = input_df.set_index("Sample")
 
     cv_callable = perform_cross_validation(cross_validation_strategy, **cv_params)
