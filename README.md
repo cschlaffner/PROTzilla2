@@ -40,11 +40,11 @@
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
 | protzilla/data\_preprocessing/plots.py                              |       71 |        7 |        9 |        1 |     90% |176->191, 368-392 |
 | protzilla/data\_preprocessing/transformation.py                     |       20 |        2 |        8 |        3 |     82% |31, 40->49, 50 |
-| protzilla/history.py                                                |      134 |       11 |       54 |        7 |     90% |35, 109, 116, 126, 172-176, 218, 225 |
+| protzilla/history.py                                                |      134 |       11 |       60 |        7 |     91% |35, 109, 116, 126, 172-176, 218, 225 |
 | protzilla/importing/metadata\_import.py                             |       31 |       11 |       14 |        1 |     56% |     20-35 |
 | protzilla/importing/ms\_data\_import.py                             |       48 |        4 |        8 |        2 |     89% |12-13, 56-57 |
 | protzilla/importing/peptide\_import.py                              |       22 |        2 |        2 |        0 |     92% |     15-16 |
-| protzilla/run.py                                                    |      282 |       30 |      102 |       10 |     85% |47-53, 57-63, 121->132, 153, 155, 172->170, 208, 211, 255-256, 285-288, 331, 364, 368-371, 390, 402->375 |
+| protzilla/run.py                                                    |      282 |       30 |      114 |       10 |     85% |47-53, 57-63, 121->132, 153, 155, 172->170, 208, 211, 255-256, 285-288, 331, 364, 368-371, 390, 402->375 |
 | protzilla/run\_helper.py                                            |       60 |       22 |       44 |        4 |     60% |24, 35-56, 62, 71 |
 | protzilla/runner.py                                                 |       89 |        4 |       38 |        3 |     94% |115, 124, 156-157 |
 | protzilla/utilities/\_\_init\_\_.py                                 |        1 |        0 |        0 |        0 |    100% |           |
@@ -69,12 +69,12 @@
 | ui/runs/fields.py                                                   |      116 |       98 |       66 |        0 |     10% |16-27, 35-63, 74-84, 88-90, 103-114, 118-123, 136-214, 218-226 |
 | ui/runs/migrations/\_\_init\_\_.py                                  |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/templatetags/\_\_init\_\_.py                                |        0 |        0 |        0 |        0 |    100% |           |
-| ui/runs/templatetags/id\_tags.py                                    |       10 |       10 |        2 |        0 |      0% |      1-13 |
+| ui/runs/templatetags/id\_tags.py                                    |       10 |       10 |        4 |        0 |      0% |      1-13 |
 | ui/runs/urls.py                                                     |        4 |        4 |        0 |        0 |      0% |       1-6 |
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      320 |      264 |      112 |        0 |     13% |46, 57-96, 124-140, 157-178, 184-312, 316-323, 327-329, 333-335, 339-341, 345-354, 358-365, 369-377, 381-408, 412-441, 445-447, 451-452, 474-476, 480-495, 503-533, 552-567, 573-609 |
 | ui/runs/views\_helper.py                                            |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                           **TOTAL** | **4023** | **1033** | **1570** |  **202** | **71%** |           |
+|                                                           **TOTAL** | **4023** | **1033** | **1590** |  **202** | **72%** |           |
 
 
 ## Setup coverage badge
@@ -83,7 +83,7 @@ Below are examples of the badges you can use in your main branch `README` file.
 
 ### Direct image
 
-[![Coverage badge](https://github.com/antonneubauer/PROTzilla2/raw/python-coverage-comment-action-data/badge.svg)](https://github.com/antonneubauer/PROTzilla2/tree/python-coverage-comment-action-data)
+[![Coverage badge](https://github.com/cschlaffner/PROTzilla2/raw/python-coverage-comment-action-data/badge.svg)](https://github.com/cschlaffner/PROTzilla2/tree/python-coverage-comment-action-data)
 
 This is the one to use if your repository is private or if you don't want to customize anything.
 
