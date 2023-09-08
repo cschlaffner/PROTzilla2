@@ -32,7 +32,6 @@ def peptide_import(ms_df, file_path, intensity_name):
     )
 
     df = read.drop(columns=["Intensity"])
-
     id_df = df[id_columns]
     intensity_df = df.filter(regex=f"^{peptide_intensity_name} ", axis=1)
     intensity_df.columns = [
