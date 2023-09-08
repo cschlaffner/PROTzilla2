@@ -120,7 +120,7 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
-    # can this be extracted into a seperate method? (duplicate in change_field, detail)
+    # TODO 92 extract into a seperate method like try_reactivate_run
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -153,7 +153,6 @@ def change_method(request, run_name):
 
 
 def change_dynamic_fields(request, run_name):
-    # can this be extracted into a seperate method? (duplicate in change_field, detail)
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -179,8 +178,6 @@ def change_dynamic_fields(request, run_name):
 
 
 def change_field(request, run_name):
-    # can this be extracted into a seperate method? (duplicate in change_method, detail)
-    # e.g. "try_reactivate_run"
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
