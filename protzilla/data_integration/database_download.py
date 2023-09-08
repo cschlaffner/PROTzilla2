@@ -7,7 +7,7 @@ from tqdm import tqdm
 from datetime import date
 import json
 
-# cannot be imported form constats as package cannot be found
+# cannot be imported form constants as package cannot be found
 external_data_path = Path(__file__).parent.parent.parent / "user_data" / "external_data"
 uniprot_db_path = external_data_path / "uniprot"
 database_metadata_path = external_data_path / "internal" / "metadata" / "uniprot.json"
@@ -32,9 +32,11 @@ def get_batch(batch_url, session):
 
 
 def download_uniprot_paged(name):
-    """downloads basic info on all human proteins from the uniprot paged rest api.
+    """
+    downloads basic info on all human proteins from the uniprot paged rest api.
     this will take very long due to limitations in the api, therefore stream should be used.
     code taken from https://www.uniprot.org/help/api_queries including get_next_link and get_batch
+    parameter name: str = name the database will be saved as
     """
 
     retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504])
@@ -57,8 +59,11 @@ def download_uniprot_paged(name):
 
 
 def download_uniprot_stream(name):
-    """downloads basic info on all human proteins from the streamed uniprot rest api.
-    can fail due to unstable internet connection or problems with the api."""
+    """
+    downloads basic info on all human proteins from the streamed uniprot rest api.
+    can fail due to unstable internet connection or problems with the api.
+    parameter name: str = name the database will be saved as
+    """
     with requests.get(
         "https://rest.uniprot.org/uniprotkb/stream",
         params=dict(
@@ -79,7 +84,9 @@ if __name__ == "__main__":
     uniprot_db_path.mkdir(exist_ok=True, parents=True)
     database_metadata_path.parent.mkdir(exist_ok=True, parents=True)
     databases = [path for path in uniprot_db_path.iterdir() if path.suffix == ".tsv"]
-    if not databases:
+    if databases:
+        print(f"{len(databases)} Uniprot databases found, no download started")
+    else:
         print("no Uniprot database found, starting to download")
         print("this will take 1-5 minutes")
         try:
