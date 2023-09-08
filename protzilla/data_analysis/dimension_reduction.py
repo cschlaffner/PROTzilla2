@@ -23,7 +23,7 @@ def t_sne(
     enables you to adjust the most significant parameters that affect the output. \
     You can find the default values for the non-adjustable parameters here:
     https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
-    
+
     :param input_df: the dataframe, whose dimensions should be reduced.
     :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.
@@ -115,7 +115,7 @@ def umap(
     enables you to adjust the most significant parameters that affect the output. \
     You can find the default values for the non-adjustable parameters here:
     https://umap-learn.readthedocs.io/en/latest/api.html
-    
+
     :param input_df: the dataframe, whose dimensions should be reduced.
     :type input_df: pd.DataFrame
     :param n_components: The dimension of the space to embed into.

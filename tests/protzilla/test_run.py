@@ -1,6 +1,7 @@
 import json
 from shutil import rmtree
 
+import numpy as np
 import pandas as pd
 import pytest
 from PIL import Image
@@ -101,9 +102,7 @@ def test_run_back(tests_folder_name):
     )
     df1 = run.df
     run.step_index += 1
-    run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_samples_missing, percentage=1
-    )
+    run.calculate_and_next(data_preprocessing.transformation.by_log)
     df2 = run.df
     assert not df1.equals(df2)
     run.back_step()
@@ -162,6 +161,7 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
+    run.df["Intensity"] = np.nan
 
     run.perform_calculation_from_location(
         "data_preprocessing",
