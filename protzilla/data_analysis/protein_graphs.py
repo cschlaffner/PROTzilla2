@@ -15,6 +15,7 @@ from protzilla.constants.paths import RUNS_PATH
 def variation_graph(protein_id: str, run_name: str):
     """
     Wrapper function for creating a Protein-Variation-Graph for a given UniProt Protein.
+    VARIANT feature entries inserting amino acids are filtered out before graph creation
 
     For functionality see _create_protein_variation_graph
 
@@ -55,7 +56,7 @@ def peptides_to_isoform(
     matching peptides overlap.
 
     ProtGraph Source: https://github.com/mpc-bioinformatics/ProtGraph/
-    Used ProtGraph Version: https://github.com/antonneubauer/ProtGraph@master
+    Used ProtGraph Version: https://github.com/antonneubauer/ProtGraph
 
     :param peptide_df: Peptide Dataframe with columns "sequence", "protein_id"
     :type peptide_df: pd.DataFrame
@@ -81,7 +82,7 @@ def peptides_to_isoform(
     ), f"allowed mismatches must be >= 0, is {allowed_mismatches}"
 
     assert isinstance(k, int), f"k must be an integer, is {type(k)}"
-    assert k > 0, f"k must be > 0, is {k}"
+    assert k > 1, f"k must be > 1, is {k}"
 
     if not protein_id:
         return dict(
@@ -100,10 +101,12 @@ def peptides_to_isoform(
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
+    filtered_blocks = []
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
         graph_path = out_dict["graph_path"]
         message = out_dict["messages"]
+        filtered_blocks = out_dict["filtered_blocks"]
         if graph_path is None:
             return dict(graph_path=None, messages=message)
     else:
@@ -116,7 +119,9 @@ def peptides_to_isoform(
         RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
     )
 
-    ref_index, ref_seq, seq_len = _create_ref_seq_index(protein_path, k=k)
+    ref_index, reference_sequence, seq_len = _create_reference_sequence_index(
+        protein_path, k=k
+    )
     graph_index, msg, longest_paths = _create_graph_index(protein_graph, seq_len)
 
     if msg:
@@ -154,6 +159,7 @@ def peptides_to_isoform(
         protein_id=protein_id,
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
+        filtered_blocks=filtered_blocks,
         messages=[dict(level=messages.INFO, msg=msg)],
     )
 
@@ -192,6 +198,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         logger.error(msg)
         return dict(
             graph_path=None,
+            filtered_blocks=filtered_blocks,
             messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
         )
 
@@ -203,14 +210,15 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
                 --output_csv={output_csv} \
                 -ft VARIANT \
                 -d skip"
-    # -ft VAR_SEQ --no_merge
 
     subprocess.run(cmd_str, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
     logger.info(msg)
     return dict(
-        graph_path=str(graph_path), messages=[dict(level=messages.INFO, msg=msg)]
+        graph_path=str(graph_path),
+        filtered_blocks=filtered_blocks,
+        messages=[dict(level=messages.INFO, msg=msg)],
     )
 
 
@@ -259,8 +267,8 @@ def _create_graph_index(
                 logger.error(msg)
                 return None, msg, longest_paths
             elif longest_paths[node] > seq_len:
-                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a Variation is longer than just one Amino Acid. This is unexpected behaviour. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
-                logger.warning(msg)
+                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a VARIANT substitutes more amino acids than it replaces. This is unexpected behaviour and should have been filtered out of the protein data. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                logger.error(msg)
                 return None, msg, longest_paths
 
     index = [[] for i in range(seq_len)]
@@ -296,7 +304,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     Create a mapping from node to longest_path from source to that node.
 
     Let n be a node in the graph and P be the set of all predecessors of n.
-    longest_paths[n] = max(longest_paths[p] + len(aminoacid of n)) for p in P
+    longest_paths[n] = max(longest_paths[p] + len(aminoacid of p)) for p in P
 
     e.g.:            n1     n2    n3   n5
         __start__ -> ABC -> DE -> F -> JK -> __end__
@@ -326,10 +334,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
         # visiting in topological order, so distance to node should be set already
         if distances[node] != -1:
-            for neighbor in protein_graph.neighbors(node):
-                distances[neighbor] = max(
-                    distances[neighbor], distances[node] + node_len
-                )
+            for succ in protein_graph.successors(node):
+                distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
                 f"The node {node} was not visited in the topological order (distance should be set already)"
@@ -430,7 +436,9 @@ def _parse_file(file_path):
     return kept_lines, filtered_blocks
 
 
-def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int]:
+def _create_reference_sequence_index(
+    protein_path: str, k: int = 5
+) -> tuple[dict, str, int]:
     """
     Create mapping from kmer of reference_sequence of protein to starting position(s) \
     of kmer in reference_sequence
@@ -445,14 +453,14 @@ def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int
     """
 
     logger.debug("Creating reference sequence index")
-    ref_seq, seq_len = _get_ref_seq(protein_path)
+    reference_sequence, seq_length = _get_reference_sequence(protein_path)
 
     # create index
     index = {}
     kmer_list = []
-    for i, char in enumerate(ref_seq):
-        end_index = i + k if i + k < len(ref_seq) else len(ref_seq)
-        kmer = ref_seq[i:end_index]
+    for i, char in enumerate(reference_sequence):
+        end_index = min(i + k, len(reference_sequence))
+        kmer = reference_sequence[i:end_index]
         kmer_list.append(kmer)
         if kmer in index:
             index[kmer].append(i)
@@ -463,10 +471,10 @@ def _create_ref_seq_index(protein_path: str, k: int = 5) -> tuple[dict, str, int
         assert kmer in index, f"kmer {kmer} not in index but should be"
 
     logger.debug("Finished creating reference sequence index")
-    return index, ref_seq, seq_len
+    return index, reference_sequence, seq_length
 
 
-def _get_ref_seq(protein_path: str) -> (str, int):
+def _get_reference_sequence(protein_path: str) -> (str, int):
     """
     Parses Protein-File in UniProt SP-EMBL format in .txt files. Extracts reference
     sequence and sequence length.
@@ -505,7 +513,7 @@ def _get_ref_seq(protein_path: str) -> (str, int):
     if not found_lines:
         raise ValueError(f"Could not find lines with Sequence in {protein_path}")
 
-    ref_seq = ""
+    reference_sequence = ""
     seq_len = None
     for line in found_lines:
         # exactly one line starts with "SQ" with all following lines until "//" being
@@ -516,17 +524,17 @@ def _get_ref_seq(protein_path: str) -> (str, int):
             continue
         if line.startswith("//"):
             break
-        ref_seq += line.strip()
-    ref_seq = ref_seq.replace(" ", "")
+        reference_sequence += line.strip()
+    reference_sequence = reference_sequence.replace(" ", "")
 
-    if not ref_seq:
+    if not reference_sequence:
         raise ValueError(f"Could not find sequence for protein at path {protein_path}")
     if seq_len is None or not isinstance(seq_len, int) or seq_len < 1:
         raise ValueError(
             f"Could not find sequence length for protein file at path {protein_path}"
         )
 
-    return ref_seq, seq_len
+    return reference_sequence, seq_len
 
 
 def _potential_peptide_matches(
@@ -544,8 +552,6 @@ def _potential_peptide_matches(
     :type peptides: list
     :param ref_index: mapping from kmer to match-positions on reference sequence
     :type ref_index: dict(kmer: [starting position]}
-    :param ref_seq: reference sequence of protein
-    :type ref_seq: str
     :return: dict(peptide: [match start on reference sequence]),
     list(peptides without match)
     :rtype: dict, list
@@ -671,7 +677,9 @@ def _match_potential_matches(
     :param longest_paths: length of longest path through the graph to each node
     :type longest_paths: dict[str, int]
 
-    return: dict of peptide to dict of start index of peptide match to dict of node
+    :return: dict of peptide to dict of start index of peptide match to dict of node to
+    tuple of start and end position of match in this node
+    :rtype: dict[str, dict[int, dict[str, tuple[int, int]]]]
     """
 
     peptide_mismatches = set(peptide_mismatches)
@@ -774,15 +782,25 @@ def _match_potential_matches(
     for peptide, indices in potential_peptide_matches.items():
         peptide_match_nodes = {}  # store positions of matches for each node
         for match_start_index in indices:  # start index is of ref_index
+            # check with what node at the index the peptide start matches with
+            starting_aa = peptide[0]
+            for node, aa in graph_index[match_start_index]:
+                if starting_aa == aa:
+                    starting_node = node
+                    break
+            else:
+                logger.error(
+                    f"No fitting node for match start position {match_start_index} of {peptide} found"
+                )
+                continue
             matched, node_match_data, mismatches = _match_on_graph(
                 mismatches=0,
                 allowed_mismatches=allowed_mismatches,
                 graph=graph,
-                current_node=graph_index[match_start_index][0][0],
+                current_node=starting_node,
                 left_over_peptide=peptide,
                 node_match_data={},
-                current_index=match_start_index
-                - longest_paths[graph_index[match_start_index][0][0]],
+                current_index=match_start_index - longest_paths[starting_node],
             )
             if matched:
                 logger.debug(f"matched {peptide} at {match_start_index}")
@@ -826,6 +844,7 @@ def _modify_graph(graph, contig_positions):
         for start, end, peptide in contigs:
             start = start - chars_removed
             end = end - chars_removed
+            # all reset to clarify that they are used only in this loop
             first_node = None
             second_node = None
             third_node = None
@@ -844,8 +863,8 @@ def _modify_graph(graph, contig_positions):
                 )
                 continue
 
-            # check if contig starts at beginning of current_node,
-            # if not create before_node
+            # check if contig starts at beginning of current_node.
+            # if not, create first_node
             if start != 0:
                 first_node = f"n{node_num}"
                 node_num += 1
@@ -857,7 +876,7 @@ def _modify_graph(graph, contig_positions):
                 )
 
             if end != _node_length(current_node) - 1 and first_node:
-                # before_node, match_node and after_node
+                # first_node, second_node and third_node
                 second_node = f"n{node_num}"
                 node_num += 1
                 second_node_label = graph.nodes[current_node]["aminoacid"][
@@ -870,7 +889,7 @@ def _modify_graph(graph, contig_positions):
                     peptides=peptide,
                 )
 
-                # adopt current_node to be after_node
+                # adopt current_node to be third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
                 third_node_dict = {
@@ -881,7 +900,7 @@ def _modify_graph(graph, contig_positions):
                 }
 
             elif end != _node_length(current_node) - 1 and not first_node:
-                # match_node and after_node, no second node
+                # first_node and third_node, no second node
                 first_node = f"n{node_num}"
                 node_num += 1
                 first_node_label = graph.nodes[current_node]["aminoacid"][: end + 1]
@@ -892,7 +911,7 @@ def _modify_graph(graph, contig_positions):
                     peptides=peptide,
                 )
 
-                # adopt current_node to be match/after_node
+                # adopt current_node to be third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
                 third_node = current_node
                 third_node_dict = {
@@ -904,7 +923,7 @@ def _modify_graph(graph, contig_positions):
                 second_node = None
 
             else:  # before_node and match_node
-                # turn current_node into match_node
+                # turn current_node into third_node
                 third_node_label = graph.nodes[current_node]["aminoacid"][start:]
                 third_node = current_node
                 third_node_dict = {
@@ -962,4 +981,5 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
 
-    return df["Sequence"].unique().tolist()
+    peptides = df["Sequence"].unique().tolist()
+    return peptides

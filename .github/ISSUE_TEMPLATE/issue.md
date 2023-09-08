@@ -7,9 +7,7 @@ project: PROTzilla 2
 
 ---
 
-<Useful Description>
-  
-  
-  
+Useful Description
+
 ## Acceptance Criteria
 - [ ] 
