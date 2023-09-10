@@ -5,13 +5,6 @@ This is a guide for developers starting to work on PROTzilla and will provide an
 ### project structure
 [...]
 
-### the runner
-PROTzilla can be used not only in the browser but also from the command line without a graphical user interface. The runner is a practical tool for this. 
-It can execute an entire workflow without further user input. In the future, the runner should also be executable from the browser. 
-This way, as soon as researchers created a workflow with the analysis they want to perform, they can get their results for multiple datasets with less effort.
-PROTzilla is thus intended to be an independent package that also works independently of Django. 
-> [!NOTE]
-> think about whether new features should be implemented in the `protzilla` or `ui` folder.
 
 ### workflow structure
 To analyze protein data in PROTzilla a user will go through **sections** "importing", "data_preprocessing", "data_analysis" and "data_integration". 
@@ -22,21 +15,16 @@ All implemented methods are listed in `protzilla/constants/workflow_meta.json` f
 > [!NOTE]
 > remember the hierarchy `section > step > method > parameter`
 
-
-
 ### what is the difference between run, workflow and history?
 The directory `user_data/workflows` contains workflow templates. 
 They store the configuration of an analysis, which contains the order of steps and also their corresponding selected methods and parameters.
-A workflow can be shared among users for reproducible results. 
-
+A workflow can be shared among users for reproducible results. <br>
 When a user starts PROTzilla, they are asked to create a new run and select a workflow template.
 A Run object from `protzilla/run.py` will be created, and a new folder with the name of the run will be generated in `user_data/runs`.
-The selected workflow will be copied into the run directory and will be the `workflow_config` of this run.
-
+The selected workflow will be copied into the run directory and will be the `workflow_config` of this run. <br>
 The run will follow the steps listed in the `workflow_config` and selected methods and parameter values as default. 
-If no default methods or parameters are selected within `workflow_config`, default values from `workflow_meta.json` will be used.
-
-The history contains the outputs of steps that have already been executed and is necessary for the back button.
+If no default methods or parameters are selected within `workflow_config`, default values from `workflow_meta.json` will be used. <br>
+The history contains the outputs of steps that have already been executed. If the user chooses to return to the previous step and presses the back button, the previous step will be loaded from history.
 
 > [!WARNING]
 > never delete the `hello123` run as for some reason the tests on github will fail then. We tried to identify the problem but our best solution was to just leave `hello123` where it was.
@@ -44,6 +32,14 @@ The history contains the outputs of steps that have already been executed and is
 ### why are there #TODOs with a number in the code?
 To-dos are small issues or suggestions listed in [the issues list with label "todo"](https://github.com/cschlaffner/PROTzilla2/issues?q=is%3Aissue+is%3Aopen+label%3Atodo).
 The number corresponds to the issue ID. 
+
+### the runner
+PROTzilla can be used not only in the browser but also from the command line without a graphical user interface. The runner is a practical tool for this. 
+It can execute an entire workflow without further user input. In the future, the runner should also be executable from the browser. 
+This way, as soon as researchers created a workflow with the analysis they want to perform, they can get their results for multiple datasets with less effort.
+PROTzilla is thus intended to be an independent package that also works independently of Django. 
+> [!NOTE]
+> think about whether new features should be implemented in the `protzilla` or `ui` folder.
 
 # tutorial
 
