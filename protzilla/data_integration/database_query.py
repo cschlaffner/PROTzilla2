@@ -91,6 +91,8 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
     :param databases: names of uniprot databases that should be used for mapping
     :type databases: list[str]
     :param use_biomart: should biomart be used to map ids that could not be mapped with databases
+    :type use_biomart: bool
+
     :return: a dict that maps uniprot ids to genes and a list of uniprot ids that were not found
     :rtype: tuple[dict[str, str], list[str]]
     """

@@ -25,8 +25,10 @@ def read_protein_or_gene_sets_file(path):
         - .json:
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
     Empty strings are removed from the list of proteins or genes.
+
     :param path: path to file
     :type path: str
+
     :return: dict with protein or gene sets, a path to a gmt file or error message
     :rtype: dict
     """
@@ -74,8 +76,10 @@ def read_background_file(path):
     Reads a file of background proteins or genes.
     Accepts .csv and .txt files with one protein or gene per line.
     Empty strings are removed from the list of proteins or genes.
+
     :param path: path to file
     :type path: str or None
+
     :return: list of background proteins or genes or error message
     :rtype: list
     """
@@ -110,6 +114,7 @@ def map_to_STRING_ids(proteins_list, organism):
     :type proteins_list: list
     :param organism: organism NCBI identifier
     :type organism: str
+    
     :return: list of STRING IDs or None if no IDs could be found
     :rtype: list or None
     """

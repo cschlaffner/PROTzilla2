@@ -33,10 +33,12 @@ def get_functional_enrichment_with_delay(protein_list, **string_params):
     This method performs online functional enrichment analysis using the STRING DB API
     via the restring package. It adds a delay between calls to the API to avoid
     exceeding the rate limit.
+
     :param protein_list: list of protein IDs to perform enrichment analysis for
     :type protein_list: list
     :param string_params: parameters for the restring package
     :type string_params: dict
+
     :return: dataframe with functional enrichment results
     :rtype: pandas.DataFrame
     """
@@ -62,6 +64,7 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
     :type up_df: pandas.DataFrame
     :param down_df: dataframe with enrichment results for downregulated proteins
     :type down_df: pandas.DataFrame
+
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
@@ -146,6 +149,7 @@ def GO_analysis_with_STRING(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the result dataframe
     :type direction: str
+
     :return: dictionary with enrichment dataframe
     :rtype: dict
     """
@@ -306,6 +310,7 @@ def merge_up_down_regulated_dfs_gseapy(up_enriched, down_enriched):
     :type up_enriched: pandas.DataFrame
     :param down_enriched: dataframe with enrichment results for downregulated proteins
     :type down_enriched: pandas.DataFrame
+
     :return: merged dataframe
     :rtype: pandas.DataFrame
     """
@@ -368,6 +373,7 @@ def gseapy_enrichment(
     :type background: list or None
     :param offline: whether to run the enrichment offline
     :type offline: bool
+
     :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
     :rtype: tuple[pandas.DataFrame, list, dict]
     """
@@ -502,6 +508,7 @@ def GO_analysis_with_Enrichr(
     :type background_number: int or None
     :param background_biomart: name of biomart dataset to use as background
     :type background_biomart: str or None
+
     :return: dictionary with results and filtered groups
     :rtype: dict
     """
@@ -706,6 +713,7 @@ def GO_analysis_offline(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
+    
     :return: dictionary with results dataframe
     :rtype: dict
     """
