@@ -107,17 +107,17 @@ def random_forest(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+        the target variable (labels) for classification.
     :type labels_column: str
     :param train_test_split: The proportion of data to be used for testing. Default is
-     0.2 (80-20 train-test split).
+        0.2 (80-20 train-test split).
     :type train_test_split: int, optional
     :param n_estimators: The number of decision trees to be used in the random forest.
     :type n_estimators: int, optional
     :param criterion: The impurity measure used for tree construction.
     :type criterion: str, optional
     :param max_depth: The maximum depth of the decision trees. If not specified (None),
-     the trees will expand until all leaves are pure or contain minimum samples per leaf.
+        the trees will expand until all leaves are pure or contain minimum samples per leaf.
     :type max_depth: int or None, optional
     :param bootstrap: Whether bootstrap samples should be used when building trees.
     :type bootstrap: bool, optional
@@ -128,12 +128,12 @@ def random_forest(
     :param validation_strategy: The strategy for model validation.
     :type validation_strategy: str, optional
     :param scoring: The scoring metric(s) used to evaluate the model's performance
-    during validation.
+        during validation.
     :type scoring: list[str], optional
     :param **kwargs: Additional keyword arguments to be passed to the function.
     :return: A RandomForestClassifier instance, a dataframe consisting of the model's
-     training parameters and the validation score, along with four dataframes containing
-     the respective test and training samples and labels.
+        training parameters and the validation score, along with four dataframes containing
+        the respective test and training samples and labels.
     :rtype: dict
 
     """

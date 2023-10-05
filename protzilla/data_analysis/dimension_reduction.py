@@ -31,20 +31,20 @@ def t_sne(
     :param perplexity: the perplexity is related to the number of nearest neighbors
     :type perplexity: float
     :param metric: The metric to use when calculating distance between instances in a \
-    feature array. Possible metrics are: euclidean, manhattan, cosine and haversine
+        feature array. Possible metrics are: euclidean, manhattan, cosine and haversine
     :type metric: str
     :param random_state: determines the random number generator.
     :type random_state: int
     :param n_iter: maximum number of iterations for the optimization
     :type n_iter: int
     :param n_iter_without_progress: Maximum number of iterations without progress \
-    before we abort the optimization, used after 250 initial iterations with early \
-    exaggeration. Note that progress is only checked every 50 iterations so this \
-    value is rounded to the next multiple of 50.
+        before we abort the optimization, used after 250 initial iterations with early \
+        exaggeration. Note that progress is only checked every 50 iterations so this \
+        value is rounded to the next multiple of 50.
     :type n_iter_without_progress: int
     :param method: the method exact will run on the slower, but exact, algorithm in \
-    O(N^2) time. However, the exact method cannot scale to millions of examples. \
-    Barnes-Hut approximation will run faster, but not exact, in O(NlogN) time.
+        O(N^2) time. However, the exact method cannot scale to millions of examples. \
+        Barnes-Hut approximation will run faster, but not exact, in O(NlogN) time.
     :type method: str
     """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
@@ -121,15 +121,15 @@ def umap(
     :param n_components: The dimension of the space to embed into.
     :type n_components: int
     :param n_neighbors: The size of local neighborhood in terms of number of \
-    neighboring sample points
+        neighboring sample points
     :type n_neighbors: float
     :param min_dist: the effective minimum distance between embedded points. Smaller \
-    values will result in a more clustered/clumped embedding where nearby points on \
-    the manifold are drawn closer together, while larger values will result on a more \
-    even dispersal of points.
+        values will result in a more clustered/clumped embedding where nearby points on \
+        the manifold are drawn closer together, while larger values will result on a more \
+        even dispersal of points.
     :type min_dist: float
     :param metric: The metric to use when calculating distance between instances in a \
-    feature array.
+        feature array.
     :type metric: str
     :param random_state: determines the random number generator.
     :type random_state: int
