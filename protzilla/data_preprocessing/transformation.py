@@ -13,10 +13,11 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     :param intensity_df: a protein data frame in long format
     :type intensity_df: pd.DataFrame
     :param log_base: String of the used log method "log10" (base 10)\
-    or "log2" (base 2). Default: "log10"
-    :type log_base: Str
+        or "log2" (base 2). Default: "log10"
+    :type log_base: str
+
     :return: returns a pandas DataFrame in typical protzilla\
-    long format with the transformed data and an empty dict.
+        long format with the transformed data and an empty dict.
     :rtype: Tuple[pandas DataFrame, dict]
     """
     intensity_name = intensity_df.columns.values.tolist()[3]

@@ -48,15 +48,17 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
     """
     This function filters samples based on the amount of nan values.
     If the percentage of existing values is below a threshold (percentage), the sample is filtered out.
-    :param df: the intensity dataframe that should be filtered\
-    in long format
+
+    :param df: the intensity dataframe that should be filtered
+        in long format
     :type df: pd.DataFrame
-    :param percentage: float ranging from 0 to 1. Defining the\
-    relative share of proteins that were detected in the sample in inorder to be kept.\
+    :param percentage: float ranging from 0 to 1. Defining the
+        relative share of proteins that were detected in the sample in inorder to be kept.
     :type percentage: float
-    :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs\
-    that were discarded and a list of Protein IDs\
-    that were kept
+    
+    :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs
+        that were discarded and a list of Protein IDs
+        that were kept
     :rtype: Tuple[pandas DataFrame, dict]
     """
     intensity_name = intensity_df.columns.values.tolist()[3]

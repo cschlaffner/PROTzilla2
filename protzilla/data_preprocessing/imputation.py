@@ -117,16 +117,17 @@ def by_min_per_sample(
     If not wanted, make sure to filter 0 intensity samples in the
     filtering step.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
@@ -157,15 +158,16 @@ def by_min_per_protein(
     CAVE: All proteins without any values will be filtered out.
 
     :param intensity_df: the dataframe that should be filtered in\
-    long format
+        long format
     :type intensity_df: pandas DataFrame
     :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+        used for imputation. With a shrinking factor of 0.1 for\
+        example, a tenth of the minimum value found will be used for\
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
+
     :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     transformed_df = long_to_wide(intensity_df)
@@ -201,15 +203,16 @@ def by_min_per_dataset(
     take a fraction of that minimum value for imputation.
 
     :param intensity_df: the dataframe that should be filtered in\
-    long format
+        long format
     :type intensity_df: pandas DataFrame
     :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+        used for imputation. With a shrinking factor of 0.1 for\
+        example, a tenth of the minimum value found will be used for\
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
+    
     :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
