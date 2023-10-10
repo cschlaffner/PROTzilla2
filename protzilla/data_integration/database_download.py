@@ -39,6 +39,9 @@ def download_uniprot_paged(name):
 
     :param name: name the database will be saved as
     :type name: str
+
+    :return: the number of proteins that were downloaded
+    :rtype: int
     """
 
     retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504])
@@ -67,6 +70,9 @@ def download_uniprot_stream(name):
 
     :param name: name the database will be saved as
     :type name: str
+
+    :return: nothing
+    :rtype: NoneType
     """
     with requests.get(
         "https://rest.uniprot.org/uniprotkb/stream",
