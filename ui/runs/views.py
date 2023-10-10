@@ -43,6 +43,15 @@ active_runs = {}
 
 
 def index(request):
+    """
+    Renders the main index page of the PROTzilla application.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page
+    :rtype: HttpResponse
+    """
     return render(
         request,
         "runs/index.html",
@@ -54,6 +63,20 @@ def index(request):
 
 
 def detail(request, run_name):
+    """
+    Renders the details page of a specific run.
+    For rendering a context dict is created that contains all the dynamic information
+    that is needed to display the page. This wraps other methods that provide subparts
+    for the page e.g. make_displayed_history() to show the history.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered details page
+    :rtype: HttpResponse
+    """
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
@@ -120,7 +143,19 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
-    # TODO 92 extract into a seperate method like try_reactivate_run
+    """
+    Changes the method during a step of a run.
+    This is called when the user selects a new method in the first dropdown of a step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the new fields for the selected method
+    :rtype: JsonResponse
+    """
+    # TODO 92 extract into a separate method like try_reactivate_run
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -153,6 +188,19 @@ def change_method(request, run_name):
 
 
 def change_dynamic_fields(request, run_name):
+    """
+    Renders fields that depend on the value of another field e.g. a dropdown, the value being the
+    dynamic_trigger_value below. The field is specified its key and part of the request.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the new fields depending on the value of the dynamic trigger
+    :rtype: JsonResponse
+    """
+    print("change_dynamic_fields")
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -178,6 +226,22 @@ def change_dynamic_fields(request, run_name):
 
 
 def change_field(request, run_name):
+    """
+    Changes the value of one or multiple fields during a method of a run depending on a
+    selected value in another field. The field that triggers this method is identified by
+    the post_id variable.
+    In contrast to change_dynamic_fields, this method changes the value of the field itself
+    instead of rendering new fields.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the updated fields depending on the value of the
+        dynamic trigger field
+    :rtype: JsonResponse
+    """
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
