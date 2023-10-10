@@ -374,6 +374,15 @@ def change_field(request, run_name):
 
 
 def create(request):
+    """
+    Creates a new run. The user is then redirected to the detail page of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the new run
+    :rtype: HttpResponse
+    """
     run_name = request.POST["run_name"]
     run = Run.create(
         run_name,
@@ -385,24 +394,67 @@ def create(request):
 
 
 def continue_(request):
+    """
+    Continues an existing run. The user is redirected to the detail page of the run and
+    can resume working on the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
     run_name = request.POST["run_name"]
     active_runs[run_name] = Run.continue_existing(run_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def next_(request, run_name):
+    """
+    Skips to and renders the next step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the next step/method
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.next_step(request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def back(request, run_name):
+    """
+    Goes back to and renders the previous step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the previous step/method
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def add(request, run_name):
+    """
+    Adds a new method to the run. The method is added as the next step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, new method visible in sidebar
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -416,6 +468,17 @@ def add(request, run_name):
 
 
 def delete_step(request, run_name):
+    """
+    Deletes a step/method from the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, deleted method no longer visible in sidebar
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -427,6 +490,17 @@ def delete_step(request, run_name):
 
 
 def export_workflow(request, run_name):
+    """
+    Exports the workflow of the run as a JSON file so that it can be reused and shared.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
@@ -439,6 +513,18 @@ def export_workflow(request, run_name):
 
 
 def calculate(request, run_name):
+    """
+    Performs the current methods calculation during the run. Django messages are used to
+    display additional information, warnings and errors to the user.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
@@ -470,6 +556,20 @@ def calculate(request, run_name):
 
 
 def plot(request, run_name):
+    """
+    Creates a plot from the current step/method of the run.
+    This is only called by the plot button in the data preprocessing section aka when a plot is
+    simultaneously a step on its own.
+    Django messages are used to display additional information, warnings and errors to the user.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, now with the plot
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
@@ -503,17 +603,54 @@ def plot(request, run_name):
 
 
 def add_name(request, run_name):
+    """
+    Adds a name to a step/method of the run. The name can be used to identify the step
+    and use results of the steps in later steps.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def results_exist(request, run_name):
+    """
+    Checks if the results of the run exist. This is used to determine if the Next button
+    should be enabled or not.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with a boolean value
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     return JsonResponse(dict(results_exist=run.result_df is not None))
 
 
 def all_button_parameters(request, run_name):
+    """
+    Returns all parameters that are needed to render the buttons as enabled or disabled
+    in the run detail page.
+    See ui/runs/templates/runs/form_buttons.html for detailed documentation.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with the parameters
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     d = dict()
     d["current_plot_parameters"] = run.current_plot_parameters.get(run.method, {})
@@ -532,12 +669,36 @@ def all_button_parameters(request, run_name):
 
 
 def outputs_of_step(request, run_name):
+    """
+    Returns the output keys of a named step of the run. This is used to determine which
+    parameters can be used as input for future steps.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with the output keys
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
 
 
 def download_plots(request, run_name):
+    """
+    Downloads all plots of the current method in the run. If multiple plots are created,
+    they are zipped together. The format of the plots is specified in the request.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a FileResponse with the plots
+    :rtype: FileResponse
+    """
     run = active_runs[run_name]
     format_ = request.GET["format"]
     exported = run.export_plots(format_=format_)
