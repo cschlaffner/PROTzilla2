@@ -713,7 +713,7 @@ def GO_analysis_offline(
         - both: functional enrichment info is retrieved for upregulated and downregulated
         proteins separately, but the terms are aggregated for the resulting dataframe
     :type direction: str
-    
+
     :return: dictionary with results dataframe
     :rtype: dict
     """

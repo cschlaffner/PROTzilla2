@@ -40,7 +40,7 @@ def fig_to_base64(fig):
 
     :param fig: matplotlib figure
     :type fig: matplotlib.figure.Figure
-    
+
     :return: base64 encoded image
     :rtype: bytes
     """

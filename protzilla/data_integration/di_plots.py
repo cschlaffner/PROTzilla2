@@ -353,7 +353,7 @@ def gsea_enrichment_plot(
     :type neg_pheno_label: str, optional
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
-    
+
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """

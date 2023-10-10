@@ -22,7 +22,7 @@ from ..importing import metadata_import, ms_data_import, peptide_import
 
 
 # In this data structure, a method is associated with a location. The location is
-# determined by the section, step, and method keys found in the workflow_meta 
+# determined by the section, step, and method keys found in the workflow_meta
 # file that correspond to the method.
 method_map = {
     (
@@ -237,8 +237,8 @@ method_map = {
 location_map = {v: k for k, v in method_map.items()}
 
 
-# In this data structure, a plot for a given method is associated with a 
-# location. The location is determined by the section, step, and method keys 
+# In this data structure, a plot for a given method is associated with a
+# location. The location is determined by the section, step, and method keys
 # found in the workflow_meta file that correspond to the method.
 plot_map = {
     (

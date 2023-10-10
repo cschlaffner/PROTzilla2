@@ -36,7 +36,7 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
 def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
     """
     Calculate and plot the roc curve for a classification model.
-    
+
     :param model: The trained classification model instance to be evaluated.
     :type model: BaseEstimator
     :param input_test_df: The input features of the testing data as a DataFrame.

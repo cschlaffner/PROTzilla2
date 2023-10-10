@@ -55,7 +55,7 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
     :param percentage: float ranging from 0 to 1. Defining the
         relative share of proteins that were detected in the sample in inorder to be kept.
     :type percentage: float
-    
+
     :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs
         that were discarded and a list of Protein IDs
         that were kept

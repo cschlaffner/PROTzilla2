@@ -351,7 +351,7 @@ def gsea(
     :type seed: int
     :param threads: Number of threads to use
     :type threads: int
-    
+
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """

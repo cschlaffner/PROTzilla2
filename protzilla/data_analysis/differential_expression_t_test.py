@@ -45,7 +45,7 @@ def t_test(
     :type multiple_testing_correction_method: str
     :param alpha: the alpha value for the t-test
     :type alpha: float
-    :param fc_threshold: threshold for the abs(log_2(fold_change)) (vertical line in a volcano plot). 
+    :param fc_threshold: threshold for the abs(log_2(fold_change)) (vertical line in a volcano plot).
         Only proteins with a larger abs(log_2(fold_change)) are seen as differentially expressed
     :type fc-threshold: int
     :param log_base: in case the data was previously log transformed this parameter contains the base (e.g. 2 if the data was log_2 transformed).

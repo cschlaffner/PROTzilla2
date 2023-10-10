@@ -26,10 +26,10 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     This functions transforms the dataframe from a wide
     format to the typical protzilla long format.
 
-    :param wide_df: the dataframe in wide format that 
+    :param wide_df: the dataframe in wide format that
         should be changed
     :type wide_df: pd.DataFrame
-    :param original_long_df: the original long protzilla format 
+    :param original_long_df: the original long protzilla format
         dataframe, that was the source of the wide format dataframe
     :type orginal_long_df: pd.DataFrame
 
@@ -68,7 +68,7 @@ def is_intensity_df(df: pd.DataFrame):
 
     :param df: the dataframe that should be checked
     :type df: pd.DataFrame
-    
+
     :return: returns True if the dataframe is an intensity dataframe
     :rtype: bool
     """

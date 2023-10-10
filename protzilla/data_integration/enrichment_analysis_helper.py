@@ -114,7 +114,7 @@ def map_to_STRING_ids(proteins_list, organism):
     :type proteins_list: list
     :param organism: organism NCBI identifier
     :type organism: str
-    
+
     :return: list of STRING IDs or None if no IDs could be found
     :rtype: list or None
     """

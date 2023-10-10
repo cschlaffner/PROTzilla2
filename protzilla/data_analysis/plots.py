@@ -13,15 +13,15 @@ def scatter_plot(
     color_df: pd.DataFrame | None = None,
 ):
     """
-    Function to create a scatter plot from data. 
-    
-    :param input_df: the dataframe that should be plotted. It should have either 2 
+    Function to create a scatter plot from data.
+
+    :param input_df: the dataframe that should be plotted. It should have either 2
         or 3 dimension
     :type input_df: pd.Dataframe
-    :param color_df: the Dataframe with one column according to which the marks should 
+    :param color_df: the Dataframe with one column according to which the marks should
         be colored. This is an optional parameter
     :type color_df: pd.Dataframe
-    
+
     :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
     :rtype: list[plotly figure]/dict
     """
@@ -171,7 +171,7 @@ def clustergram_plot(
     :param flip_axes: If "yes", the rows and columns of the clustergram will be
         swapped. If "no", the default orientation is used.
     :type flip_axes: str
-    
+
     :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
     :rtype: list[plotly figure]/dict
     """
