@@ -302,6 +302,7 @@ def test_name_step(example_workflow_short, tests_folder_name):
         "importing",
         "ms_data_import",
         "max_quant_import",
+        run.step_index_in_current_section(),
         "output_name",
     )
 

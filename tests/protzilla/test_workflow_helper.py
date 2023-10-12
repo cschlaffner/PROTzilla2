@@ -124,6 +124,7 @@ def test_get_workflow_default_param_value(example_workflow):
         "data_preprocessing",
         "filter_proteins",
         "samples_missing_filter",
+        0,
         "percentage",
     )
     output_name = get_workflow_default_param_value(
@@ -131,6 +132,7 @@ def test_get_workflow_default_param_value(example_workflow):
         "data_preprocessing",
         "normalisation",
         "median",
+        5,
         "output_name",
     )
     output_name_t_test = get_workflow_default_param_value(
@@ -138,6 +140,7 @@ def test_get_workflow_default_param_value(example_workflow):
         "data_analysis",
         "differential_expression",
         "t_test",
+        1,
         "output_name",
     )
 
@@ -152,6 +155,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "data_preprocessing",
         "filter_samples",
         "protein_intensity_sum_filter",
+        0,
         "threshold",
     )
 
@@ -165,6 +169,7 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
         "data_preprocessing",
         "filter_proteins",
         "samples_missing_filter",
+        0,
         "percentage",
     )
     assert example_workflow == example_workflow_copy
