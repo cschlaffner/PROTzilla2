@@ -190,7 +190,7 @@ def clustergram_plot(
             )
             # In the clustergram each row represents a sample that can pertain to a
             # group. In the following code the necessary data structures are created
-            # to assign eachgroup to a unique color.
+            # to assign each group to a unique color.
             sample_group_dict = dict(
                 zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
             )
