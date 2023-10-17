@@ -46,6 +46,11 @@ def t_sne(
         O(N^2) time. However, the exact method cannot scale to millions of examples. \
         Barnes-Hut approximation will run faster, but not exact, in O(NlogN) time.
     :type method: str
+    :return: a dictionary with a single key, "embedded_data," which contains a new
+        DataFrame in wide format. This DataFrame consists of the t-SNE embedded data
+        with two columns, "Component1" and "Component2," and shares the same index as
+        the input_df.
+    :rtype: dict
     """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
@@ -133,6 +138,14 @@ def umap(
     :type metric: str
     :param random_state: determines the random number generator.
     :type random_state: int
+    :param transform_seed: Random seed used for the stochastic aspects of the transform
+        operation.
+    :type transform_seed: int
+    :return: a dictionary with a single key, "embedded_data," which contains a new
+        DataFrame in wide format. This DataFrame consists of the UMAP embedded data
+        with two columns, "Component1" and "Component2," and shares the same index as
+        the input_df.
+    :rtype: dict
     """
 
     # umap import is slow, so it should only get imported when needed
