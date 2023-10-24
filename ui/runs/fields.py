@@ -336,7 +336,10 @@ def make_name_field(allow_next, form, run, end_of_run):
     if end_of_run:
         return ""
     default = get_workflow_default_param_value(
-        run.workflow_config, *run.current_run_location(), "output_name"
+        run.workflow_config,
+        *run.current_run_location(),
+        run.step_index_in_current_section(),
+        "output_name",
     )
     if not default:
         default = ""

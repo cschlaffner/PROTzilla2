@@ -80,7 +80,12 @@ def get_parameters(run, section, step, method):
 
     for key, param_dict in parameters.items():
         workflow_default = get_workflow_default_param_value(
-            run.workflow_config, section, step, method, key
+            run.workflow_config,
+            section,
+            step,
+            method,
+            run.step_index_in_current_section(),
+            key,
         )
         if method in run.current_parameters and key in run.current_parameters[method]:
             param_dict["default"] = run.current_parameters[method][key]
