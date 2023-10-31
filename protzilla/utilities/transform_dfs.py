@@ -11,7 +11,7 @@ def long_to_wide(intensity_df: pd.DataFrame):
         long format
         :type intensity_df: pd.DataFrame
 
-    :return: returns dataframe in wide format suitable for use by\
+    :return: returns dataframe in wide format suitable for use by
         packages such as sklearn
     :rtype: pd.DataFrame
     """

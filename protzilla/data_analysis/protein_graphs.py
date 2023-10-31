@@ -312,7 +312,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                                   n4
         longest_paths: {n1: 0, n2: 3, n3: 5, n4: 5, n5: 6, __end__: 8}
 
-    :param protein_graph: Protein-Graph as created by ProtGraph \
+    :param protein_graph: Protein-Graph as created by ProtGraph 
         (-> _create_protein_variation_graph)
     :type protein_graph: nx.DiGraph
     :param start_node: Source of protein_graph
@@ -440,7 +440,7 @@ def _create_reference_sequence_index(
     protein_path: str, k: int = 5
 ) -> tuple[dict, str, int]:
     """
-    Create mapping from kmer of reference_sequence of protein to starting position(s) \
+    Create mapping from kmer of reference_sequence of protein to starting position(s) 
     of kmer in reference_sequence
 
     :param protein_path: Path to protein file from UniProt (.txt)
