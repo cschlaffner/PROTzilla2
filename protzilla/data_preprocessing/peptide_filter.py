@@ -14,7 +14,7 @@ def by_pep_value(
     :type intensity_df: pd.Dataframe
     :param peptide_df: the pandas dataframe containing the peptide information
     :type peptide_df: pd.Dataframe
-    :param threshold: peptides with a PEP-value below this threshold will be filtered\
+    :param threshold: peptides with a PEP-value below this threshold will be filtered
         out
     :type threshold: float
 

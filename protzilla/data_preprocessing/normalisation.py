@@ -14,11 +14,11 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     Scales the data to zero mean and unit variance. This is often also
     called z-score normalisation/transformation.
 
-    :param intensity_df: the dataframe that should be filtered in\
+    :param intensity_df: the dataframe that should be filtered in
         long format
     :type intensity_df: pd.DataFrame
 
-    :return: returns a scaled dataframe in typical protzilla long format and an empty\
+    :return: returns a scaled dataframe in typical protzilla long format and an empty
         dictionary
     :rtype: Tuple[pandas DataFrame, dict]
     """
@@ -56,14 +56,14 @@ def by_median(
     Divides each intensity by the chosen intensity quartile of the
     respective sample. By default, the median (50%-quartile) is used.
 
-    :param intensity_df: the dataframe that should be filtered in\
+    :param intensity_df: the dataframe that should be filtered in
         long format
     :type intensity_df: pandas DataFrame
-    :param percentile: the chosen quartile of the sample intensities for\
+    :param percentile: the chosen quartile of the sample intensities for
         normalisation
     :type percentile: float
 
-    :return: returns a scaled dataframe in typical protzilla long format\
+    :return: returns a scaled dataframe in typical protzilla long format
         and a dict, containing all zeroed samples due to quantile being 0
     :rtype: Tuple[pandas DataFrame, dict]
     """
@@ -118,11 +118,11 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     Normalises the data on the level of each sample.
     Divides each intensity by the total sum of sample intensities.
 
-    :param intensity_df: the dataframe that should be filtered in\
+    :param intensity_df: the dataframe that should be filtered in
         long format
     :type intensity_df: pandas DataFrame
 
-    :return: returns a scaled dataframe in typical protzilla long format\
+    :return: returns a scaled dataframe in typical protzilla long format
         and a dict, containing all zeroed samples due to sum being 0
     :rtype: Tuple[pandas DataFrame, dict]
     """
@@ -181,12 +181,12 @@ def by_reference_protein(
     protein in each sample. Samples where this value is zero will be
     removed and returned separately.
 
-    :param intensity_df: the dataframe that should be filtered in\
+    :param intensity_df: the dataframe that should be filtered in
         long format
     :type intensity_df: pandas DataFrame
     :param reference_protein: Protein ID of the protein to normalise by
         type reference_protein_id: str
-    :return: returns a scaled dataframe in typical protzilla long format \
+    :return: returns a scaled dataframe in typical protzilla long format 
         and dict with a list of the indices of the dropped samples
     :rtype: Tuple[pandas DataFrame, dict]
     """
