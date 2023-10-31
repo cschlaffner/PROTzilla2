@@ -47,22 +47,22 @@ def k_means(
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
     :type scoring: list[str]
-    :param n_clusters: the number of clusters to form as well as the number of \
+    :param n_clusters: the number of clusters to form as well as the number of 
         centroids to generate.
     :type n_clusters: int
     :param random_state: Determines random number generation for centroid initialization
     :type random_state: int
-    :param init_centroid_strategy: method for centroid initialization. Possible methods\
+    :param init_centroid_strategy: method for centroid initialization. Possible methods
         are: k-means++ and random
     :type init_centroid_strategy: str
-    :param n_init: Number of times the k-means algorithm is run with different centroid\
+    :param n_init: Number of times the k-means algorithm is run with different centroid
         seeds.
     :type n_init: int
-    :param max_iter: Maximum number of iterations of the k-means algorithm for a single\
+    :param max_iter: Maximum number of iterations of the k-means algorithm for a single
         run.
     :type max_iter: int
-    :param tolerance: Relative tolerance with regards to Frobenius norm of the \
-        difference in the cluster centers of two consecutive iterations to declare\
+    :param tolerance: Relative tolerance with regards to Frobenius norm of the 
+        difference in the cluster centers of two consecutive iterations to declare
         convergence.
     :type tolerance: float
     :returns: A dictionary containing the following elements:

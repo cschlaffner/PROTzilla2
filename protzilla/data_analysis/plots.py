@@ -16,7 +16,7 @@ def scatter_plot(
     Function to create a scatter plot from data.
 
     :param input_df: the dataframe that should be plotted. It should have either 2
-        or 3 dimension
+        or 3 dimensions
     :type input_df: pd.Dataframe
     :param color_df: the Dataframe with one column according to which the marks should
         be colored. This is an optional parameter
