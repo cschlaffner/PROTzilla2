@@ -4,7 +4,7 @@ This is a guide for developers starting to work on PROTzilla and will provide an
 
 ### Project Structure
 PROTzilla is structured as follows:
-- [PROTzilla2/protzilla](./protzilla) package: contains all methods to perform calculations and generate plots. It can be used without the UI. You can find more information about how each specific method works by looking up the docstring attached to each method.
+- [PROTzilla2/protzilla](./protzilla) package: contains all methods to perform calculations and generate plots. It can be used without the UI. You can find more information about each method in the corresponding docstring.
 -  [PROTzilla2/protzilla/constants/workflow_meta.json](./protzilla/constants/workflow_meta.json): contains the metadata of all available methods in PROTzilla. 
 - [PROTzilla2/run.py](./run.py): The Run class oversees run management, calculations, workflow configuration, and history tracking, including result accumulation upon calling next.
 - [PROTzilla2/history.py](./history.py): the History class stores the chosen method, parameters, plots, output dataframe and specific outputs of all already calculated steps.
@@ -14,9 +14,9 @@ PROTzilla is structured as follows:
 
 
 ### Concept of a Workflow and Workflow Structure
-A workflow serves as a blueprint for a run, containing all the necessary statistical methods, visualizations, and their respective parameters to perform a protein analysis. 
+A workflow serves as a blueprint for a run, containing all the necessary statistical methods, visualizations, and their respective parameters used to analyse protein data. This blueprints can be reused by scientists to get reproducible results. 
 
-A workflow in protzilla is organized in four **sections** "importing", "data_preprocessing", "data_analysis" and "data_integration". Each section is divided into **steps**, which are an agrupation of similar **methods** that can be added to the workflow. Also, methods can have **parameters**.
+A workflow in protzilla is organized in four **sections** "importing", "data_preprocessing", "data_analysis" and "data_integration". Each section is divided into **steps**, which are groups of similar **methods** that can be added to the workflow. Also, methods can have **parameters**.
 All implemented methods are listed in `protzilla/constants/workflow_meta.json` following the tree structure `section > step > method > parameter`.
 
 > [!NOTE]
@@ -25,13 +25,13 @@ All implemented methods are listed in `protzilla/constants/workflow_meta.json` f
 
 ### Run class
 On the class side, the Run deals with being able to continue runs and starting new ones.
-On the instance side, the Run deals with making calculations by calling methods that return a dataframe and other outputs in a dict (importing, data preprocessing) or just a dict of outputs (data analysis, data integration). It also creates plots that belong to another same step (preprocessing) or are a step on their own (analysis, integration) and exports them.
+On the instance side, the Run deals with making calculations by calling methods that return a dataframe and other outputs in a dict (importing, data preprocessing) or just a dict of outputs (data analysis, data integration). It also creates plots that belong to another step (preprocessing) or are a step on their own (analysis, integration) and exports them.
 Workflow manipulation is also handled in the Run. The run class is responsible for knowing the configuration of the run's workflow and the current location.
-Each run has a History, which holds the previous results that get added when `next` gets called.
+Each run has a History, which holds the previous results. When `next` is called, another step is added to the history.
 
 
 ### History class
-The History is mainly responsible for knowing the chosen method, parameters, plots, output dataframe and specific outputs (e.g. dropouts or p-values) of all previous steps. Depending on the set storage mode, it returns the data from memory or disk when they are requested. It also holds the information what outputs were saved by the user during data analysis.
+The History is mainly responsible for knowing the chosen method, parameters, plots, output dataframe and specific outputs (e.g. dropouts or p-values) of all previous steps. Depending on the chosen storage mode, it returns the data from memory or disk when it is requested. It also holds the names users can attach to executed methods to use them in later calcuations.
 
 
 ### How do the run, workflow, and history interact with one another?
@@ -65,7 +65,6 @@ This folder contains methods that are used to analyse the outputs of the data pr
 ### Workflow Meta File
 The workflow meta file contains all the needed metainformation for each of the implemented methods in PROTzilla. A method's position in the JSON hierarchy determines its location (`section > step > method`). Also other information such as the name, description and parameters of the method are specified on this file. It is a key file to then build PROTzilla's frontend. 
 
-<!--  for the information that then is displayed in the frontend and in there it is also all information about the method's parameters. Through the workflow meta file the location for a method is known, -->
 #### Method parameters specification
 The parameters for each method can be specified in the form of a dict in the `protzilla/constants/workflow_meta.json` file. To each parameter a name, a type and a default are assigned. Then depending on the type of the parameter also other information needs to be specified in the workflow meta file, that will then affect how the input parameter fields in the frontend are built. 
 
@@ -88,7 +87,7 @@ The UI is built with the web framework Django. The folder /ui encapsulates all t
 
 A Django project is structured in such way that the root folder (in this case /ui) contains application folders. In PROTzilla there are two applications main and runs. The main functionality of PROTzilla is in the runs application.
 
-In Django, web pages and other content are delivered by views. Each view is represented by a Python function, which is usually in the views.py file. A view function takes a HTTP request and returns a HTTP response, for example this can be a HTML page or a HTTP error. Also, Django allows to create HTML pages dynamically with the approach of templates. A template contains the static parts of the desired HTML output as well as some special syntax describing how dynamic content will be inserted. Templates are usually located at the templates folder inside the app folder. For further information on Django see their documentation here (add link!).
+In Django, web pages and other content are delivered by views. Each view is represented by a Python function, which is usually found in the views.py file. A view function takes a HTTP request and returns a HTTP response, for example this can be a HTML page or a HTTP error. Also, Django allows to create HTML pages dynamically with templates. A template contains the static parts of the desired HTML output as well as some special syntax describing how dynamic content will be inserted. Templates are usually located at the templates folder inside the app folder. For further information on Django see their [documentation](https://docs.djangoproject.com/).
 
 PROTzilla's frontend has two main pages: the home page, where runs can be created and continued and the run page, where the user can upload, process, analyse and plot proteomics data according to the selected workflow or add and delete any steps in the current workflow.
 
