@@ -34,7 +34,7 @@
 | protzilla/data\_preprocessing/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                   |       17 |        2 |        4 |        1 |     76% |     51-52 |
 | protzilla/data\_preprocessing/filter\_samples.py                    |       34 |        0 |        4 |        0 |    100% |           |
-| protzilla/data\_preprocessing/imputation.py                         |       74 |        1 |       14 |        3 |     95% |140, 290->299, 309->315 |
+| protzilla/data\_preprocessing/imputation.py                         |       74 |        1 |       14 |        3 |     95% |140, 292->301, 311->317 |
 | protzilla/data\_preprocessing/normalisation.py                      |       97 |        1 |       22 |        2 |     97% |244->255, 256 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |172, 189, 244, 245->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
@@ -61,7 +61,7 @@
 | ui/main/settings.py                                                 |       28 |        0 |        2 |        1 |     97% |    24->32 |
 | ui/main/upload\_handler.py                                          |       37 |       37 |        2 |        0 |      0% |      1-69 |
 | ui/main/urls.py                                                     |        4 |        4 |        0 |        0 |      0% |     16-21 |
-| ui/main/views.py                                                    |       76 |       76 |       32 |        0 |      0% |     1-114 |
+| ui/main/views.py                                                    |       76 |       76 |       32 |        0 |      0% |     1-115 |
 | ui/main/wsgi.py                                                     |        4 |        4 |        0 |        0 |      0% |     10-16 |
 | ui/manage.py                                                        |       14 |       14 |        2 |        0 |      0% |      2-24 |
 | ui/runs/\_\_init\_\_.py                                             |        0 |        0 |        0 |        0 |    100% |           |
