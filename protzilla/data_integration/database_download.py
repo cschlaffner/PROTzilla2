@@ -1,11 +1,11 @@
+import json
 import re
+from datetime import date
 from pathlib import Path
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
 from tqdm import tqdm
-from datetime import date
-import json
 
 # cannot be imported form constants as package cannot be found
 external_data_path = Path(__file__).parent.parent.parent / "user_data" / "external_data"

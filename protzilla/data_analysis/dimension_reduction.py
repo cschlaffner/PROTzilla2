@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from django.contrib import messages
 from sklearn.manifold import TSNE
