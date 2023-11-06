@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from django.contrib import messages
-from scipy import stats
 
 from .differential_expression_helper import apply_multiple_testing_correction
 

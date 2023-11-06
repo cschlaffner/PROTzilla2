@@ -18,7 +18,7 @@
               "group_by": "Sample"
             },
             {
-              "graph_type_quantites": "Bar chart"
+              "graph_type_quantities": "Bar chart"
             }
           ]
         }

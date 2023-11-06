@@ -1,8 +1,8 @@
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
-from unittest.mock import patch
-
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.importing import ms_data_import

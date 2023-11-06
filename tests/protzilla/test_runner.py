@@ -176,7 +176,7 @@ def test_serialize_workflow_graphs():
     serial_imputation_graphs = {
         "graph_type": "Bar chart",
         "group_by": "Sample",
-        "graph_type_quantites": "Pie chart",
+        "graph_type_quantities": "Pie chart",
     }
 
     serial_filter_graphs = {"graph_type": "Pie chart"}
