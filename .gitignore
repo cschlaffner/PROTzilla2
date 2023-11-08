@@ -143,3 +143,5 @@ dmypy.json
 # vscode settings
 .vscode/
 
+#custom file everyone has
+Miniconda3-latest-Linux-x86_64.sh
