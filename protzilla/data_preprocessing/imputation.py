@@ -221,6 +221,71 @@ def by_min_per_dataset(
     return intensity_df_copy, dict()
 
 
+def by_normal_distribution_sampling(
+    intensity_df: pd.DataFrame,
+    strategy="perProtein",
+    down_shift=0,
+    scaling_factor=1,
+) -> tuple[pd.DataFrame, dict]:
+    """
+    A function to perform imputation via sampling of a normal distribution
+    defined by the existing datapoints and user-defined parameters for down-
+    shifting and scaling. Imputes missing values for each protein  taking into
+    account data from each protein.
+
+    :param intensity_df: the dataframe that should be filtered in\
+    long format
+    :type intensity_df: pandas DataFrame
+    :param strategy: which strategy to use for definition of the normal\
+    distribution to be sampled. Can be "perProtein", "perDataset" or "most_frequent"\
+    :type strategy: str
+    :param down_shift: a factor defining how many dataset standard deviations\
+    to shift the mean of the normal distribution used for imputation.\
+    Default: 0 (no shift)
+    :type down_shift: float
+    :param scaling_factor: a factor determining how the variance of the normal\
+    distribution used for imputation is scaled compared to dataset.
+    Default: 1 (no scaling)
+    :type down_shift: float
+    :return: returns an imputed dataframe in typical protzilla long format\
+    and an empty dict
+    :rtype: pd.DataFrame, int
+    """
+    assert strategy in ["perProtein", "perDataset"]
+
+    transformed_df = long_to_wide(intensity_df)
+    transformed_df.dropna(axis=1, how="all", inplace=True)
+
+    # protein_means = transformed_df.mean(axis=1)
+    # protein_std = transformed_df.std(axis=1)
+    # scaled_protein_means = protein_means + down_shift * protein_std
+    # scaled_protein_std = protein_std * scaling_factor
+
+    # Iterate over proteins to impute minimal value
+    if strategy == "perProtein":
+        for column in transformed_df.columns:
+            # determine mean (loc)
+            protein_mean = transformed_df[column].mean()
+            protein_std = transformed_df[column].std()
+            scaled_protein_mean = max(0, protein_mean + down_shift * protein_std)
+            scaled_protein_std = protein_std * scaling_factor
+            # determine standard deviation (scale)
+            value_to_be_imputed = abs(
+                np.random.normal(
+                    loc=scaled_protein_mean,
+                    scale=scaled_protein_std,
+                )
+            )
+            transformed_df[column].fillna(value_to_be_imputed, inplace=True)
+    else:
+        pass
+        # determine mean of normal distribution of dataset
+        # TODO
+
+    imputed_df = wide_to_long(transformed_df, intensity_df)
+    return imputed_df, dict()
+
+
 def by_knn_plot(
     df, result_df, current_out, graph_type, graph_type_quantities, group_by
 ):

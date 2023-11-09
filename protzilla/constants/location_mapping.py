@@ -315,6 +315,11 @@ plot_map = {
     ): imputation.by_min_per_dataset_plot,
     (
         "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling_per_protein",
+    ): imputation.by_normal_distribution_sampling,
+    (
+        "data_preprocessing",
         "outlier_detection",
         "pca",
     ): outlier_detection.by_pca_plot,

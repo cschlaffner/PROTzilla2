@@ -677,6 +677,69 @@
             }
           }
         ]
+      },
+      "normal_distribution_sampling_per_protein": {
+        "name": "Normal Distribution Sampling",
+        "description": "Imputation methods include normal distribution sampling per Protein or over Dataset",
+        "parameters": {
+          "strategy": {
+            "name": "Strategy:",
+            "type": "categorical",
+            "categories": [
+              "perProtein",
+              "perDataset"
+            ],
+            "default": "perProtein"
+          },
+          "down_shift": {
+            "name": "Downshift:",
+            "type": "numeric",
+            "min": -10,
+            "max": 10,
+            "default": -1
+          },
+           "scaling_factor": {
+            "name": "Scaling Factor:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type_quantities": {
+              "name": "Graph type Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
       }
     },
     "filter_peptides": {
