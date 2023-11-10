@@ -144,6 +144,5 @@ dmypy.json
 .vscode/
 
 #custom file everyone has
-Miniconda3-latest-Linux-x86_64.sh
-Miniconda3-latest-MacOSX-x86_64.sh
-Miniconda3-latest.exe 
+Miniconda3*.sh
+Miniconda3*.exe
