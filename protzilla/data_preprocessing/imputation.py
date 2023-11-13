@@ -256,32 +256,31 @@ def by_normal_distribution_sampling(
     transformed_df = long_to_wide(intensity_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
 
-    # protein_means = transformed_df.mean(axis=1)
-    # protein_std = transformed_df.std(axis=1)
-    # scaled_protein_means = protein_means + down_shift * protein_std
-    # scaled_protein_std = protein_std * scaling_factor
-
-    # Iterate over proteins to impute minimal value
+    # TODO: sample the normal distribution for each missing value instead of sampling once for all missing values
     if strategy == "perProtein":
         for column in transformed_df.columns:
-            # determine mean (loc)
-            protein_mean = transformed_df[column].mean()
-            protein_std = transformed_df[column].std()
+            # determine mean and standard deviation of log-transformed protein intensties
+            protein_mean = np.log10(transformed_df[column]).mean()
+            protein_std = np.log10(transformed_df[column]).std()
+            # calculate mean and standard deviation of normal distribution to be sampled
             scaled_protein_mean = max(0, protein_mean + down_shift * protein_std)
             scaled_protein_std = protein_std * scaling_factor
-            # determine standard deviation (scale)
-            value_to_be_imputed = abs(
+            # sample from normal distribution and transform back to linear scale
+            log_value_to_be_imputed = abs(
                 np.random.normal(
                     loc=scaled_protein_mean,
                     scale=scaled_protein_std,
                 )
             )
+            value_to_be_imputed = 10**log_value_to_be_imputed
+            # impute missing values for current protein group
             transformed_df[column].fillna(value_to_be_imputed, inplace=True)
     else:
         pass
         # determine mean of normal distribution of dataset
-        # TODO
+        # TODO: implement perDataset strategy
 
+    # Turn the wide format into the long format and return imputed dataframe
     imputed_df = wide_to_long(transformed_df, intensity_df)
     return imputed_df, dict()
 
