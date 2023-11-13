@@ -129,6 +129,11 @@ method_map = {
     ): imputation.by_min_per_dataset,
     (
         "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling",
+    ): imputation.by_normal_distribution_sampling,
+    (
+        "data_preprocessing",
         "filter_peptides",
         "pep_filter",
     ): peptide_filter.by_pep_value,
@@ -316,7 +321,7 @@ plot_map = {
     (
         "data_preprocessing",
         "imputation",
-        "normal_distribution_sampling_per_protein",
+        "normal_distribution_sampling",
     ): imputation.by_normal_distribution_sampling,
     (
         "data_preprocessing",

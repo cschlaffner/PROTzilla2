@@ -678,7 +678,7 @@
           }
         ]
       },
-      "normal_distribution_sampling_per_protein": {
+      "normal_distribution_sampling": {
         "name": "Normal Distribution Sampling",
         "description": "Imputation methods include normal distribution sampling per Protein or over Dataset",
         "parameters": {
