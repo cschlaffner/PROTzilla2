@@ -232,6 +232,8 @@ def by_normal_distribution_sampling(
     defined by the existing datapoints and user-defined parameters for down-
     shifting and scaling. Imputes missing values for each protein  taking into
     account data from each protein.
+    The downshifted normal distribution that will be sampled for imputation has a lower
+    limit for the mean of at 0, meaning that if the downshifted mean were to be negative, it will be set at 0.
 
     :param intensity_df: the dataframe that should be filtered in\
     long format
@@ -253,40 +255,90 @@ def by_normal_distribution_sampling(
     """
     assert strategy in ["perProtein", "perDataset"]
 
-    transformed_df = long_to_wide(intensity_df)
-    transformed_df.dropna(axis=1, how="all", inplace=True)
-
     if strategy == "perProtein":
-        for column in transformed_df.columns:
-            # determine mean and standard deviation of log-transformed protein intensities
-            protein_mean = np.log10(transformed_df[column]).mean()
-            protein_std = np.log10(transformed_df[column]).std()
-            # calculate mean and standard deviation of normal distribution to be sampled
-            scaled_protein_mean = max(0, protein_mean + down_shift * protein_std)
-            scaled_protein_std = protein_std * scaling_factor
-            # iterate over all values of current protein group
-            for index, value in transformed_df[column].iteritems():
-                # if value is NaN, sample from normal distribution and impute value
-                if np.isnan(value):
-                    log_value_to_be_imputed = abs(
-                        np.random.normal(
-                            loc=scaled_protein_mean,
-                            scale=scaled_protein_std,
-                        )
-                    )
-                    value_to_be_imputed = 10**log_value_to_be_imputed
-                    transformed_df[column].loc[index] = value_to_be_imputed
-    else:
-        pass
-        # determine mean of normal distribution of dataset
-        # TODO: implement perDataset strategy
+        transformed_df = long_to_wide(intensity_df)
+        # iterate over all protein groups
+        for protein_grp in transformed_df.columns:
+            # determine number of missing values
+            number_of_nans = transformed_df[protein_grp].isnull().sum()
 
-    # Turn the wide format into the long format and return imputed dataframe
-    imputed_df = wide_to_long(transformed_df, intensity_df)
-    return imputed_df, dict()
+            # get indices of NaN values in current protein group
+            location_of_nans = transformed_df[protein_grp].isnull()
+            indices_of_nans = location_of_nans[location_of_nans].index
+
+            # determine mean and standard deviation of log-transformed protein intensities
+            protein_grp_mean = np.log10(transformed_df[protein_grp]).mean(skipna=True)
+            protein_grp_std = np.log10(transformed_df[protein_grp]).std(skipna=True)
+
+            # calculate mean and standard deviation of normal distribution to be sampled
+            sampling_mean = max(0, protein_grp_mean + down_shift * protein_grp_std)
+            sampling_std = protein_grp_std * scaling_factor
+
+            # calculate log-transformed values to be imputed
+            log_impute_values = abs(
+                np.random.normal(
+                    loc=sampling_mean,
+                    scale=sampling_std,
+                    size=number_of_nans,
+                )
+            )
+
+            # transform log-transformed values to be imputed back to normal scale and round to nearest integer
+            impute_values = np.round(10**log_impute_values, decimals=0)
+
+            # zip indices of NaN values with values to be imputed together as a Series, such that fillna can be used
+            impute_value_series = pd.Series(impute_values, index=indices_of_nans)
+            transformed_df[protein_grp].fillna(impute_value_series, inplace=True)
+
+        imputed_df = wide_to_long(transformed_df, intensity_df)
+        return imputed_df, dict()
+
+    else:
+        # deep copy the dataframe
+        intensity_type = intensity_df.columns[3]
+
+        # get indices of NaN values in current protein group
+        location_of_nans = intensity_df[intensity_type].isnull()
+        indices_of_nans = location_of_nans[location_of_nans].index
+        # calculate the mean and standard deviation of the entire dataset
+        dataset_mean = np.log10(intensity_df[intensity_type]).mean()
+        dataset_std = np.log10(intensity_df[intensity_type]).std()
+
+        # calculate mean and standard deviation of normal distribution to be sampled
+        scaled_dataset_mean = max(0, dataset_mean + down_shift * dataset_std)
+        scaled_dataset_std = dataset_std * scaling_factor
+
+        # get number of NaN values in dataset
+        number_of_nans = intensity_df[intensity_type].isnull().sum()
+
+        # calculate log-transformed values to be imputed
+        log_impute_values = abs(
+            np.random.normal(
+                loc=scaled_dataset_mean,
+                scale=scaled_dataset_std,
+                size=number_of_nans,
+            )
+        )
+
+        # transform log-transformed values to be imputed back to normal scale and round to nearest integer
+        impute_values = np.round(10**log_impute_values, decimals=0)
+
+        # zip indices of NaN values with values to be imputed together as a Series, such that fillna can be used
+        impute_value_series = pd.Series(impute_values, index=indices_of_nans)
+        intensity_df[intensity_type].fillna(impute_value_series, inplace=True)
+
+        return intensity_df, dict()
 
 
 def by_knn_plot(
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantities, group_by
+    )
+
+
+def by_normal_distribution_sampling_plot(
     df, result_df, current_out, graph_type, graph_type_quantities, group_by
 ):
     return _build_box_hist_plot(
@@ -380,3 +432,14 @@ def _build_box_hist_plot(
             heading="Number of Imputed Values",
         )
     return [fig1, fig2]
+
+
+def xf():
+    # load df from intensity_df.csv
+    df = pd.read_csv("intensity_df.csv")
+    # impute missing values
+    for i in range(1):
+        result_df, _ = by_normal_distribution_sampling(
+            df, strategy="perProtein", down_shift=0, scaling_factor=1
+        )
+        print("done")
