@@ -248,11 +248,13 @@ def create_histograms(
     trace0 = go.Histogram(
         x=dataframe_a[intensity_name_a],
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+        xbins=dict(start=0),
         name=name_a,
     )
     trace1 = go.Histogram(
         x=dataframe_b[intensity_name_b],
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+        xbins=dict(start=0),
         name=name_b,
     )
     fig.add_trace(trace0, 1, 1)
@@ -276,6 +278,101 @@ def create_histograms(
         },
     )
     fig.update_yaxes(rangemode="tozero")
+    fig.update_xaxes(rangemode="tozero")
+    return fig
+
+
+def create_overlay_histogram(
+    dataframe_a: pd.DataFrame,
+    dataframe_b: pd.DataFrame,
+    name_a="",
+    name_b="",
+    heading="",
+    y_title="",
+    x_title="",
+) -> Figure:
+    """
+    A function to create a histogram for visualisation
+    of distributions. Assumes that you are comparing two dataframes
+    (for example before and after filtering/normalisation) and creates
+    a visualisation for each one.
+
+    :param dataframe_a: First dataframe in protzilla long format for\
+    first histogram
+    :type dataframe_a: pd.DataFrame
+    :param dataframe_b: Second dataframe in protzilla long format\
+    for second histogram
+    :type dataframe_b: pd.DataFrame
+    :param name_a: Name of first histogram
+    :type name_a: str
+    :param name_b: Name of second histogram
+    :type name_b: str
+    :param heading: Header or title for the graph (optional)
+    :type heading: str
+    :param y_title: Optional y axis title for graphs.
+    :type y_title: str
+    :param x_title: Optional x axis title for graphs.
+    :type x_title: str
+    :return: returns a pie or bar chart of the data
+    :rtype: Figure (plotly object)
+    """
+    intensity_name_a = dataframe_a.columns[3]
+    intensity_name_b = dataframe_b.columns[3]
+    fig = go.Figure()
+    fig.add_trace(
+        go.Histogram(
+            x=dataframe_a[intensity_name_a],
+            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+        )
+    )
+    fig.add_trace(
+        go.Histogram(
+            x=dataframe_b[intensity_name_b],
+            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+        )
+    )
+    # Overlay both histograms
+    fig.update_layout(barmode="overlay")
+    # Reduce opacity to see both histograms
+    fig.update_traces(opacity=0.5)
+
+    fig.update_layout(
+        xaxis_title=x_title,
+        yaxis_title=y_title,
+        font=dict(size=14, family="Arial"),
+        plot_bgcolor="white",
+        yaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
+        title={
+            "text": f"<b>{heading}</b>",
+            "font": dict(size=16),
+            "y": 0.98,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        },
+    )
+    """fig.update_layout(
+            title_text="Switching between linear and log yaxis and xaxis ",
+            updatemenus=[
+                dict(
+                    buttons=[
+                        dict(
+                            label="Linear",
+                            method="relayout",
+                            #args=[{"yaxis.type": "linear", "xaxis.type": "linear"}],
+                            args=[{"xaxis.type": "linear"}],
+                        ),
+                        dict(
+                            label="Log",
+                            method="relayout",
+                            #args=[{"yaxis.type": "log", "xaxis.type": "log"}],
+                            args=[{"xaxis.type": "log"}],
+                        ),
+                    ]
+                )
+            ]
+    )    
+    """
     return fig
 
 
