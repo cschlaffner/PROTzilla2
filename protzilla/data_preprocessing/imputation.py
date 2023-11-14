@@ -432,14 +432,3 @@ def _build_box_hist_plot(
             heading="Number of Imputed Values",
         )
     return [fig1, fig2]
-
-
-def xf():
-    # load df from intensity_df.csv
-    df = pd.read_csv("intensity_df.csv")
-    # impute missing values
-    for i in range(1):
-        result_df, _ = by_normal_distribution_sampling(
-            df, strategy="perProtein", down_shift=0, scaling_factor=1
-        )
-        print("done")
