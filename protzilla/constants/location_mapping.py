@@ -322,7 +322,7 @@ plot_map = {
         "data_preprocessing",
         "imputation",
         "normal_distribution_sampling",
-    ): imputation.by_normal_distribution_sampling,
+    ): imputation.by_normal_distribution_sampling_plot,
     (
         "data_preprocessing",
         "outlier_detection",
