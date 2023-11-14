@@ -294,7 +294,7 @@ def by_normal_distribution_sampling(
         return imputed_df, dict()
 
     else:
-        # deep copy the dataframe
+        # determine column for protein intensities
         intensity_type = intensity_df.columns[3]
 
         # get indices of NaN values in current protein group
