@@ -278,7 +278,6 @@ def _build_box_hist_plot(
 
     2. a graph summarising the amount of
     filtered proteins.
-
     """
     if graph_type == "Boxplot":
         fig1 = create_box_plots(
@@ -296,6 +295,7 @@ def _build_box_hist_plot(
             name_a="Before Imputation",
             name_b="After Imputation",
             heading="Distribution of Protein Intensities",
+            overlay=True,
         )
 
     values_of_sectors = [
