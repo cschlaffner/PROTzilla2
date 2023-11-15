@@ -78,10 +78,20 @@
                             'text-valign': 'center',
                             'text-halign': 'center',
                             'width': getWidth,
-                            'background-color': 'lightblue',
                             'horizontal-text-margin': '10px',
-                            'color': function (node) {
-                                return node.data('match') === 'true' ? 'red' : 'black';
+                            'color': 'black',
+                            'background-color': function (node) {
+                                let max_peptides = {{ max_peptides }};
+                                let min_peptides = {{ min_peptides }};
+                                let peptides_count = node.data("peptides_count");
+                                if (peptides_count > 0) {
+                                    //
+                                    let peptide_interpolation = (peptides_count - min_peptides) / (max_peptides - min_peptides);
+                                    return getBlueColorFromScale(peptide_interpolation);
+                                }
+                                else {
+                                    return 'lightgrey';
+                                }
                             }
                         }
                     },
@@ -115,7 +125,7 @@
                             return div;
                         },
                         // changing the placement from top to bottom does not change the positioning but wrecks the
-                        // ability to move nodes in a reasonable way
+                        // ability to move nodes in a reasonable way. This is some sort of bug I was not able to fix
                         placement: 'top',
                         removeOnDestroy: true,
                     });
@@ -142,6 +152,20 @@
             var url = URL.createObjectURL(blob);
             return url;
         };
+
+        function getBlueColorFromScale(value) {
+            value = Math.min(1, Math.max(0, value));
+            var lightnessMin = 90; // very light
+            var lightnessMax = 55; // somewhat dark
+
+            var hue = 9; // muted red hue
+            var saturation = 60;
+            // Interpolate the lightness value
+            var lightness = lightnessMin + (lightnessMax - lightnessMin) * value;
+
+            return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+        }
+
     </script>
 {% endblock %}
 
