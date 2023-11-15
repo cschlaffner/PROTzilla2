@@ -472,6 +472,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -519,6 +528,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -566,6 +584,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -616,6 +643,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -663,6 +699,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {

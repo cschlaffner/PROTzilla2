@@ -14,9 +14,9 @@ def generate_tics(min,max):
             ticktext=ticktext,
     )
 def millify(n):
-    millnames = ['', ' 000', ' M', ' B', ' T', 'Q', 'Q', 'S', 'S', 'O', 'N']
+    millnames = ['', 'K', 'M', 'B', 'T', 'Q', 'Q', 'S', 'S', 'O', 'N']
     n = float(n)
     millidx = max(0,min(len(millnames)-1,
                         int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
 
-    return '{:.0f}{}'.format(n / 10**(3 * millidx), ' ' + millnames[millidx])
+    return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])

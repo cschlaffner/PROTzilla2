@@ -119,6 +119,7 @@ def create_box_plots(
     y_title="",
     x_title="",
     group_by: str = "None",
+    visual_transformation="linear",
 ) -> Figure:
     """
     A function to create a boxplot for visualisation
@@ -207,6 +208,8 @@ def create_box_plots(
             "yanchor": "top",
         },
     )
+    if visual_transformation == "log10":
+        fig.update_yaxes(type="log")
     fig.update_yaxes(rangemode="tozero")
     return fig
 
@@ -219,6 +222,7 @@ def create_histograms(
     heading="",
     y_title="",
     x_title="",
+    visual_transformation="linear",
     overlay=False,
 ) -> Figure:
     """
@@ -243,25 +247,31 @@ def create_histograms(
     :type y_title: str
     :param x_title: Optional x axis title for graphs.
     :type x_title: str
-    :param overlay: Specifies whether to draw one Histogram with overlay or two separat histograms
+    :param overlay: Specifies whether to draw one Histogram with overlay or two separate histograms
     :type overlay: bool
+    :param visual_transformation: Visual transformation of the y-axis data.
+    :type visual_transformation: str
     :return: returns a pie or bar chart of the data
     :rtype: Figure (plotly object)
     """
     intensity_name_a = dataframe_a.columns[3]
     intensity_name_b = dataframe_b.columns[3]
 
-    log_intensitys_a = dataframe_a[intensity_name_a].apply(np.log10)
-    log_intensitys_b = dataframe_b[intensity_name_b].apply(np.log10)
+    intensities_a = dataframe_a[intensity_name_a]
+    intensities_b = dataframe_b[intensity_name_b]
+
+    if visual_transformation == "log10":
+        intensities_a = intensities_a.apply(np.log10)
+        intensities_b = intensities_b.apply(np.log10)
 
     trace0 = go.Histogram(
-        x=log_intensitys_a,#dataframe_a[intensity_name_a],
+        x=intensities_a,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
         xbins=dict(start=0),
         name=name_a,
     )
     trace1 = go.Histogram(
-        x=log_intensitys_b,#dataframe_b[intensity_name_b],
+        x=intensities_b,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
         xbins=dict(start=0),
         name=name_b,
@@ -270,17 +280,21 @@ def create_histograms(
         fig = make_subplots(rows=1, cols=2)
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
+        if visual_transformation == "log10":
+            fig.update_layout(
+                xaxis=generate_tics(0, max(max(intensities_a), max(intensities_b))),
+                xaxis2=generate_tics(0, max(max(intensities_a), max(intensities_b)))
+            )
     else:
         fig = go.Figure()
         fig.add_trace(trace1)
         fig.add_trace(trace0)
         fig.update_layout(barmode='overlay')
         fig.update_traces(opacity=1)
-        fig.update_layout(
-            xaxis=generate_tics(
-                0,
-                max(max(log_intensitys_a), max(log_intensitys_b)))
-        )
+        if visual_transformation == "log10":
+            fig.update_layout(
+                xaxis=generate_tics(0, max(max(intensities_a), max(intensities_b)))
+            )
 
     fig.update_layout(bargap=0.2)
 

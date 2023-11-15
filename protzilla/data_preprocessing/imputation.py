@@ -222,42 +222,42 @@ def by_min_per_dataset(
 
 
 def by_knn_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
 def by_simple_imputer_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
 def by_min_per_sample_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
 def by_min_per_protein_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
 def by_min_per_dataset_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
@@ -266,7 +266,7 @@ def number_of_imputed_values(input_df, result_df):
 
 
 def _build_box_hist_plot(
-    df, result_df, graph_type, graph_type_quantities, group_by
+    df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
 ) -> list[Figure]:
     """
     This function creates two visualisations:
@@ -287,6 +287,7 @@ def _build_box_hist_plot(
             name_b="After Imputation",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
+            visual_transformation=visual_transformation,
         )
     elif graph_type == "Histogram":
         fig1 = create_histograms(
@@ -295,6 +296,7 @@ def _build_box_hist_plot(
             name_a="Before Imputation",
             name_b="After Imputation",
             heading="Distribution of Protein Intensities",
+            visual_transformation=visual_transformation,
             overlay=True,
         )
 
