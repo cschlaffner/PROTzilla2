@@ -1,9 +1,11 @@
 import pandas as pd
-import statistics
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
+
+from protzilla.data_preprocessing.plots_helper import generate_tics
 
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
@@ -249,14 +251,17 @@ def create_histograms(
     intensity_name_a = dataframe_a.columns[3]
     intensity_name_b = dataframe_b.columns[3]
 
+    log_intensitys_a = dataframe_a[intensity_name_a].apply(np.log10)
+    log_intensitys_b = dataframe_b[intensity_name_b].apply(np.log10)
+
     trace0 = go.Histogram(
-        x=dataframe_a[intensity_name_a],
+        x=log_intensitys_a,#dataframe_a[intensity_name_a],
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
         xbins=dict(start=0),
         name=name_a,
     )
     trace1 = go.Histogram(
-        x=dataframe_b[intensity_name_b],
+        x=log_intensitys_b,#dataframe_b[intensity_name_b],
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
         xbins=dict(start=0),
         name=name_b,
@@ -267,10 +272,15 @@ def create_histograms(
         fig.add_trace(trace1, 1, 2)
     else:
         fig = go.Figure()
-        fig.add_trace(trace0)
         fig.add_trace(trace1)
+        fig.add_trace(trace0)
         fig.update_layout(barmode='overlay')
-        fig.update_traces(opacity=0.75)
+        fig.update_traces(opacity=1)
+        fig.update_layout(
+            xaxis=generate_tics(
+                0,
+                max(max(log_intensitys_a), max(log_intensitys_b)))
+        )
 
     fig.update_layout(bargap=0.2)
 
