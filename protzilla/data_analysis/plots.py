@@ -2,6 +2,7 @@ import dash_bio as dashbio
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from django.contrib import messages
 
 from protzilla.utilities.clustergram import Clustergram
@@ -254,3 +255,49 @@ def clustergram_plot(
         else:
             msg = f"An unknown error occurred: {e}"
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+
+
+def prot_quant_plot(input_df: pd.DataFrame):
+    wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    fig = go.Figure()
+
+    # Use shortened names or aliases for the legend if necessary
+    # This is just a placeholder; you'll need to create your own mapping
+    legend_names = {column: column[:10] + "..." for column in wide_df.columns}
+
+    x_values = wide_df.index
+    for column in wide_df.columns:
+        fig.add_trace(
+            go.Scatter(
+                x=x_values,
+                y=wide_df[column],
+                mode="lines+markers",
+                name=legend_names[column],
+                hoverinfo="name+y",
+            )
+        )
+
+    fig.update_layout(
+        title="Quant Prot Plot",
+        xaxis_title="Sample",
+        yaxis_title="Intensity",
+        legend_title="Protein Groups",
+        xaxis=dict(
+            tickangle=-90,
+            tickvals=wide_df.index[::2],  # Show every other label to reduce clutter
+            ticktext=[
+                label[:10] + "..." for label in wide_df.index[::2]
+            ],  # Shortened label text
+        ),
+        autosize=True,
+        margin=dict(l=100, r=300, t=100, b=100),  # Adjust margins to fit legend
+        legend=dict(
+            x=1.05,  # Place legend to the right of the plot
+            y=1,
+            bgcolor="rgba(255, 255, 255, 0.5)",
+            orientation="v",
+        ),
+    )
+
+    return [fig]

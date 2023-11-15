@@ -351,6 +351,11 @@ plot_map = {
     (
         "data_analysis",
         "plot",
+        "prot_quant",
+    ): plots.prot_quant_plot,
+    (
+        "data_analysis",
+        "plot",
         "precision_recall_curve",
     ): model_evaluation_plots.precision_recall_curve_plot,
     (

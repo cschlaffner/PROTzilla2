@@ -1024,6 +1024,20 @@
           }
         }
       },
+      "prot_quant": {
+          "name": "Prot Quant",
+          "description": "todo",
+          "parameters": {
+            "input_df": {
+              "name": "Input dataframe: choose dataframe to be plotted",
+              "type": "named_output",
+              "default": [
+                null,
+                null
+              ]
+            }
+          }
+      },
       "precision_recall_curve": {
         "name": "Precision recall curve",
         "description": "The precision-recall curve shows the tradeoff between precision and recall for different threshold",
