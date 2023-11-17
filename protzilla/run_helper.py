@@ -24,11 +24,13 @@ def insert_special_params(param_dict, run):
             param_dict["outputs"].sort()
 
     if "fill" in param_dict:
-        if param_dict["fill"] == "metadata_columns":
+        if param_dict["fill"] == "metadata_non_sample_columns":
             # Sample not needed for anova and t-test
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
             ].unique()
+        elif param_dict["fill"] == "metadata_columns":
+            param_dict["categories"] = run.metadata.columns.unique()
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()

@@ -57,3 +57,35 @@ def metadata_import_method(df, file_path, feature_orientation):
         os.remove(file_path)
 
     return df, {"metadata": meta_df}
+
+
+def metadata_column_assignment(
+    df,
+    metadata_df,
+    metadata_sample_column,
+    metadata_group_column,
+    metadata_batch_column,
+):
+    assert (
+        metadata_sample_column in metadata_df.columns
+    ), f"Sample column {metadata_sample_column} not found in metadata file."
+    assert (
+        metadata_group_column in metadata_df.columns
+    ), f"Group column {metadata_group_column} not found in metadata file."
+    assert (
+        metadata_batch_column in metadata_df.columns
+    ), f"Batch column {metadata_batch_column} not found in metadata file."
+    # assert that all columns parameters are unique
+    assert (
+        len({metadata_sample_column, metadata_group_column, metadata_batch_column}) == 3
+    ), "The columns parameters must be unique."
+
+    rename_dict = {
+        metadata_sample_column: "Sample",
+        metadata_group_column: "Group",
+        metadata_batch_column: "Batch",
+    }
+    # rename given in metadata_sample_column column to "Sample" if it is called otherwise
+    renamed_metadata_df = metadata_df.rename(columns=rename_dict, inplace=True)
+
+    return df, dict()
