@@ -5,7 +5,9 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
-from protzilla.data_preprocessing.plots_helper import generate_tics
+from protzilla.data_preprocessing.plots_helper import (
+    generate_tics,
+)
 
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
@@ -264,17 +266,28 @@ def create_histograms(
         intensities_a = intensities_a.apply(np.log10)
         intensities_b = intensities_b.apply(np.log10)
 
+    min_value = min(min(intensities_a), min(intensities_b))
+    max_value = max(max(intensities_a), max(intensities_b))
+
     trace0 = go.Histogram(
         x=intensities_a,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
-        xbins=dict(start=0),
         name=name_a,
+        xbins=dict(
+            start=min_value,
+            end=max_value,
+            size=0.05,
+        ),
     )
     trace1 = go.Histogram(
         x=intensities_b,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
-        xbins=dict(start=0),
         name=name_b,
+        xbins=dict(
+            start=min_value,
+            end=max_value,
+            size=0.05,
+        ),
     )
     if not overlay:
         fig = make_subplots(rows=1, cols=2)
@@ -282,21 +295,21 @@ def create_histograms(
         fig.add_trace(trace1, 1, 2)
         if visual_transformation == "log10":
             fig.update_layout(
-                xaxis=generate_tics(0, max(max(intensities_a), max(intensities_b))),
-                xaxis2=generate_tics(0, max(max(intensities_a), max(intensities_b)))
+                xaxis=generate_tics(0, max_value),
+                xaxis2=generate_tics(0, max_value)
             )
     else:
         fig = go.Figure()
-        fig.add_trace(trace1)
         fig.add_trace(trace0)
+        fig.add_trace(trace1)
         fig.update_layout(barmode='overlay')
-        fig.update_traces(opacity=1)
+        fig.update_traces(opacity=0.75)
         if visual_transformation == "log10":
             fig.update_layout(
-                xaxis=generate_tics(0, max(max(intensities_a), max(intensities_b)))
+                xaxis=generate_tics(0,max_value)
             )
 
-    fig.update_layout(bargap=0.2)
+    #fig.update_layout(bargap=0)
 
     fig.update_layout(
         xaxis_title=x_title,
@@ -315,30 +328,7 @@ def create_histograms(
         },
     )
     fig.update_yaxes(rangemode="tozero")
-    fig.update_xaxes(rangemode="tozero")
 
-    """fig.update_layout(
-                title_text="Switching between linear and log yaxis and xaxis ",
-                updatemenus=[
-                    dict(
-                        buttons=[
-                            dict(
-                                label="Linear",
-                                method="relayout",
-                                #args=[{"yaxis.type": "linear", "xaxis.type": "linear"}],
-                                args=[{"xaxis.type": "linear"}],
-                            ),
-                            dict(
-                                label="Log",
-                                method="relayout",
-                                #args=[{"yaxis.type": "log", "xaxis.type": "log"}],
-                                args=[{"xaxis.type": "log"}],
-                            ),
-                        ]
-                    )
-                ]
-        )    
-        """
     return fig
 
 def create_anomaly_score_bar_plot(

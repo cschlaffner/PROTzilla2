@@ -13,9 +13,9 @@ from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 
 def by_knn(
-    intensity_df: pd.DataFrame,
-    number_of_neighbours=5,
-    **kwargs  # quantile, default is median
+        intensity_df: pd.DataFrame,
+        number_of_neighbours=5,
+        **kwargs  # quantile, default is median
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform value imputation based on KNN
@@ -59,8 +59,8 @@ def by_knn(
 
 
 def by_simple_imputer(
-    intensity_df: pd.DataFrame,
-    strategy="mean",
+        intensity_df: pd.DataFrame,
+        strategy="mean",
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-wise imputations
@@ -101,8 +101,8 @@ def by_simple_imputer(
 
 
 def by_min_per_sample(
-    intensity_df: pd.DataFrame,
-    shrinking_value=1,
+        intensity_df: pd.DataFrame,
+        shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform  minimal value imputation on the level
@@ -145,8 +145,8 @@ def by_min_per_sample(
 
 
 def by_min_per_protein(
-    intensity_df: pd.DataFrame,
-    shrinking_value=1,
+        intensity_df: pd.DataFrame,
+        shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
@@ -190,8 +190,8 @@ def by_min_per_protein(
 
 
 def by_min_per_dataset(
-    intensity_df: pd.DataFrame,
-    shrinking_value=1,
+        intensity_df: pd.DataFrame,
+        shrinking_value=1,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to impute missing values for each protein
@@ -222,7 +222,7 @@ def by_min_per_dataset(
 
 
 def by_knn_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
         df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
@@ -230,7 +230,7 @@ def by_knn_plot(
 
 
 def by_simple_imputer_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
         df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
@@ -238,7 +238,7 @@ def by_simple_imputer_plot(
 
 
 def by_min_per_sample_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
         df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
@@ -246,7 +246,7 @@ def by_min_per_sample_plot(
 
 
 def by_min_per_protein_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
         df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
@@ -254,7 +254,7 @@ def by_min_per_protein_plot(
 
 
 def by_min_per_dataset_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
         df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
@@ -266,7 +266,7 @@ def number_of_imputed_values(input_df, result_df):
 
 
 def _build_box_hist_plot(
-    df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
 ) -> list[Figure]:
     """
     This function creates two visualisations:
@@ -279,12 +279,22 @@ def _build_box_hist_plot(
     2. a graph summarising the amount of
     filtered proteins.
     """
+
+    intensity_name_df = df.columns[3]
+    intensity_name_result_df = result_df.columns[3]
+
+    imputed_df = result_df.copy()
+
+    imputed_df[intensity_name_result_df] = list(map(lambda x, y:
+                       y if np.isnan(x) else np.nan,
+                       df[intensity_name_df], result_df[intensity_name_result_df]))
+
     if graph_type == "Boxplot":
         fig1 = create_box_plots(
             dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Imputation",
-            name_b="After Imputation",
+            dataframe_b=imputed_df,
+            name_a="Original Values",
+            name_b="Imputed Values",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
             visual_transformation=visual_transformation,
@@ -292,9 +302,9 @@ def _build_box_hist_plot(
     elif graph_type == "Histogram":
         fig1 = create_histograms(
             dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Imputation",
-            name_b="After Imputation",
+            dataframe_b=imputed_df,
+            name_a="Original Values",
+            name_b="Imputed Values",
             heading="Distribution of Protein Intensities",
             visual_transformation=visual_transformation,
             overlay=True,
