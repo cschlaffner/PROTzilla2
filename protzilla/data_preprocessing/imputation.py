@@ -226,7 +226,6 @@ def by_normal_distribution_sampling(
     strategy="perProtein",
     down_shift=0,
     scaling_factor=1,
-    round_values=False,
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform imputation via sampling of a normal distribution
@@ -263,22 +262,18 @@ def by_normal_distribution_sampling(
         transformed_df = long_to_wide(intensity_df)
         # iterate over all protein groups
         for protein_grp in transformed_df.columns:
-            # determine number of missing values
+
             number_of_nans = transformed_df[protein_grp].isnull().sum()
 
             # don't impute values if there not enough values (> 1) to sample from
             if number_of_nans > len(transformed_df[protein_grp]) - 2:
                 continue
 
-            # get indices of NaN values in current protein group
             location_of_nans = transformed_df[protein_grp].isnull()
             indices_of_nans = location_of_nans[location_of_nans].index
 
-            # determine mean and standard deviation of log-transformed protein intensities
             protein_grp_mean = np.log10(transformed_df[protein_grp]).mean(skipna=True)
             protein_grp_std = np.log10(transformed_df[protein_grp]).std(skipna=True)
-
-            # calculate mean and standard deviation of normal distribution to be sampled
             sampling_mean = protein_grp_mean + down_shift * protein_grp_std
             sampling_std = protein_grp_std * scaling_factor
 
@@ -288,7 +283,6 @@ def by_normal_distribution_sampling(
                 scale=sampling_std,
                 size=number_of_nans,
             )
-
             # transform log-transformed values to be imputed back to normal scale and round to nearest integer
             impute_values = 10**log_impute_values
 
@@ -303,33 +297,25 @@ def by_normal_distribution_sampling(
         # determine column for protein intensities
         intensity_type = intensity_df.columns[3]
 
-        # get number of NaN values in dataset
         number_of_nans = intensity_df[intensity_type].isnull().sum()
-
-        # throw error if dataset is basically empty, something went wrong
         assert number_of_nans <= len(intensity_df[intensity_type]) - 2
 
-        # get indices of NaN values in current protein group
         location_of_nans = intensity_df[intensity_type].isnull()
         indices_of_nans = location_of_nans[location_of_nans].index
 
-        # calculate the mean and standard deviation of the entire dataset
         dataset_mean = np.log10(intensity_df[intensity_type]).mean()
         dataset_std = np.log10(intensity_df[intensity_type]).std()
-
-        # calculate mean and standard deviation of normal distribution to be sampled
-        scaled_dataset_mean = max(0, dataset_mean + down_shift * dataset_std)
-        scaled_dataset_std = dataset_std * scaling_factor
+        sampling_mean = max(0, dataset_mean + down_shift * dataset_std)
+        sampling_std = dataset_std * scaling_factor
 
         # calculate log-transformed values to be imputed
         log_impute_values = abs(
             np.random.normal(
-                loc=scaled_dataset_mean,
-                scale=scaled_dataset_std,
+                loc=sampling_mean,
+                scale=sampling_std,
                 size=number_of_nans,
             )
         )
-
         # transform log-transformed values to be imputed back to normal scale and round to nearest integer
         impute_values = 10**log_impute_values
 
