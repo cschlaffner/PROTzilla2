@@ -24,7 +24,7 @@
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/plots.py                                   |       77 |        3 |       36 |        4 |     94% |55, 64->66, 106, 255 |
-| protzilla/data\_analysis/protein\_graphs.py                         |      392 |       30 |      194 |       15 |     92% |32-40, 88, 113-114, 128, 259-261, 270-272, 290-291, 340, 365-369, 413, 427, 495, 526, 533, 730, 788->787, 792-795 |
+| protzilla/data\_analysis/protein\_graphs.py                         |      392 |       30 |      194 |       15 |     92% |32-40, 148, 173-174, 188, 261-263, 272-274, 292-293, 342, 367-371, 415, 429, 497, 528, 535, 734, 792->791, 796-799 |
 | protzilla/data\_integration/database\_integration.py                |       58 |       10 |       32 |        1 |     86% | 59, 71-83 |
 | protzilla/data\_integration/database\_query.py                      |       99 |       38 |       46 |        4 |     60% |13-57, 61-63, 67, 73-80, 101->100, 113-118, 119->126, 127-130 |
 | protzilla/data\_integration/di\_plots.py                            |      124 |       21 |       58 |       11 |     82% |75, 104->107, 108, 173-174, 177-178, 180, 183-184, 212-214, 234-239, 291-292, 295, 368 |
