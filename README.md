@@ -34,7 +34,7 @@
 | protzilla/data\_preprocessing/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                   |       17 |        2 |        4 |        1 |     76% |     51-52 |
 | protzilla/data\_preprocessing/filter\_samples.py                    |       34 |        0 |        4 |        0 |    100% |           |
-| protzilla/data\_preprocessing/imputation.py                         |       74 |        1 |       14 |        3 |     95% |140, 292->301, 311->317 |
+| protzilla/data\_preprocessing/imputation.py                         |      110 |       21 |       20 |        4 |     73% |140, 265-268, 271, 274, 286-289, 292, 297-299, 302, 305, 319-322, 325, 376, 395, 404, 417, 423, 429 |
 | protzilla/data\_preprocessing/normalisation.py                      |       97 |        1 |       22 |        2 |     97% |244->255, 256 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |172, 189, 244, 245->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
@@ -74,7 +74,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      320 |      264 |      112 |        0 |     13% |46, 57-96, 124-140, 156-177, 181-309, 313-320, 324-326, 330-332, 336-338, 342-351, 355-362, 366-374, 378-405, 409-438, 442-444, 448-449, 471-473, 477-492, 500-530, 549-564, 570-606 |
 | ui/runs/views\_helper.py                                            |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                           **TOTAL** | **4077** | **1052** | **1630** |  **203** | **71%** |           |
+|                                                           **TOTAL** | **4113** | **1072** | **1636** |  **204** | **71%** |           |
 
 
 ## Setup coverage badge
