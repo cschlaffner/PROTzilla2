@@ -83,34 +83,28 @@
       },
       "metadata_column_assignment": {
         "name": "Metadata Column Assignment",
-        "description": "Assign columns to metadata categories",
+        "description": "Assign columns to metadata categories, repeatable for each category",
         "parameters": {
           "metadata_df": {
             "type": "empty",
             "name": "metadata_df",
             "default": null
           },
-          "metadata_sample_column": {
-            "name": "Sample Column",
-            "fill": "metadata_columns",
+          "metadata_required_column": {
+            "name": "Missing, but required Metadata Columns",
+            "fill": "metadata_required_columns",
             "type": "categorical",
             "categories": [],
-            "default": "Sample"
+            "default": null
           },
-          "metadata_group_column": {
-            "name": "Group Column",
-            "fill": "metadata_columns",
+          "metadata_unknown_column": {
+            "name": "Existing, but unknown Metadata Columns",
+            "fill": "metadata_unknown_columns",
             "type": "categorical",
             "categories": [],
-            "default": "Group"
-          },
-          "metadata_batch_column": {
-            "name": "Batch Column",
-            "fill": "metadata_columns",
-            "type": "categorical",
-            "categories": [],
-            "default": "Batch"
+            "default": null
           }
+
         }
       }
     },

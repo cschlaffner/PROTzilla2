@@ -29,8 +29,22 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
             ].unique()
-        elif param_dict["fill"] == "metadata_columns":
-            param_dict["categories"] = run.metadata.columns.unique()
+        elif param_dict["fill"] == "metadata_unknown_columns":
+            # give selection of existing columns without ["Sample", "Group", "Batch"]
+            # as they are already named correctly for our purposes
+            param_dict["categories"] = run.metadata.columns[
+                ~run.metadata.columns.isin(["Sample", "Group", "Batch"])
+            ].unique()
+
+        elif param_dict["fill"] == "metadata_required_columns":
+            # TODO add other possible metadata columns
+            # exclude columns that are already in metadata and known to be required
+            param_dict["categories"] = [
+                col
+                for col in ["Sample", "Group", "Batch"]
+                if col not in run.metadata.columns
+            ]
+
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
