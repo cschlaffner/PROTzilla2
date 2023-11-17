@@ -9,6 +9,8 @@ from protzilla.data_preprocessing.imputation import (
     by_min_per_protein_plot,
     by_min_per_sample,
     by_min_per_sample_plot,
+    by_normal_distribution_sampling,
+    by_normal_distribution_sampling_plot,
     by_simple_imputer,
     by_simple_imputer_plot,
     np,
@@ -16,6 +18,11 @@ from protzilla.data_preprocessing.imputation import (
     pd,
 )
 from tests.protzilla.data_preprocessing import test_plots_data_preprocessing
+
+
+def protein_group_intensities(dataframe, protein_group_name):
+    # small helper function for tests
+    return dataframe[dataframe["Protein ID"] == protein_group_name]["Intensity"]
 
 
 @pytest.fixture
@@ -264,6 +271,44 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     ), f"Imputation by simple median imputation per protein does not match!\n\
              Imputation should be \n\
             {assertion_df} but is\n {result_df}"
+
+
+@pytest.mark.order(2)
+@pytest.mark.dependency(depends=["test_build_box_hist_plot"])
+def test_imputation_normal_distribution_sampling(show_figures, input_imputation_df):
+    # perform imputation on test data frame
+    result_df_perProtein = by_normal_distribution_sampling(
+        input_imputation_df, strategy="perProtein", down_shift=-10
+    )[0]
+    result_df_perDataset = by_normal_distribution_sampling(
+        input_imputation_df, strategy="perDataset", down_shift=-10
+    )[0]
+
+    fig1, fig2 = by_normal_distribution_sampling_plot(
+        input_imputation_df, result_df_perProtein, {}, "Boxplot", "Bar chart", "Sample"
+    )
+    if show_figures:
+        fig1.show()
+        fig2.show()
+
+    assert (
+        result_df_perProtein["Intensity"].min() >= 0
+    ), f"Imputation by normal distribution sampling should not have negative values!"
+    assert (
+        result_df_perDataset["Intensity"].min() >= 0
+    ), f"Imputation by normal distribution sampling should not have negative values!"
+
+    assert (
+        False == protein_group_intensities(result_df_perProtein, "Protein1").hasnans
+    ) and (
+        False == protein_group_intensities(result_df_perProtein, "Protein3").hasnans
+    ), f"Imputation by normal distribution sampling should not have NaN values!"
+    assert protein_group_intensities(
+        result_df_perProtein, "Protein2"
+    ).hasnans, f"This protein group should have NaN values! Not enough data points to sample from!"
+    assert (
+        False == result_df_perDataset["Intensity"].hasnans
+    ), f"Imputation by normal distribution sampling per Dataset should not have NaN values!"
 
 
 def test_number_of_imputed_values(input_imputation_df, assertion_df_knn):
