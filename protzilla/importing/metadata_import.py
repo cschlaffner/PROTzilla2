@@ -57,3 +57,42 @@ def metadata_import_method(df, file_path, feature_orientation):
         os.remove(file_path)
 
     return df, {"metadata": meta_df}
+
+
+def metadata_column_assignment(
+    df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    metadata_required_column: str = None,
+    metadata_unknown_column: str = None,
+):
+    """
+    This function renames a column in the metadata dataframe to the required column name.
+
+    :param df: this is passed for consistency, but not used
+    :type df: pandas DataFrame
+    :param metadata_df: the metadata dataframe to be changed
+    :type metadata_df: float
+    :param metadata_required_column: the name of the column in the dataframe that is used for the metadata assignment
+    :type metadata_df: str
+    :param metadata_unknown_column: the name of the column in the metadata dataframe that is renamed to the
+     required column name
+    :type metadata_unknown_column: str
+    :return: returns the unchanged dataframe and a dict with messages, potentially empty if no messages
+    :rtype: pd.DataFrame, dict
+    """
+
+    # TODO add info box in UI explaining that no option for unknown columns means all columns are named correctly
+    # check if required column already in metadata, if so give error message
+    if metadata_required_column is None or metadata_unknown_column is None:
+        msg = f"You can proceed, as there is nothing that needs to be changed."
+        return df, dict(messages=[dict(level=messages.INFO, msg=msg)])
+
+    if metadata_required_column in metadata_df.columns:
+        msg = f"Metadata already contains column '{metadata_required_column}'. \
+        Please rename the column or select another column."
+        return df, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+    # rename given in metadata_sample_column column to "Sample" if it is called otherwise
+    renamed_metadata_df = metadata_df.rename(
+        columns={metadata_unknown_column: metadata_required_column}, inplace=True
+    )
+    return df, dict()
