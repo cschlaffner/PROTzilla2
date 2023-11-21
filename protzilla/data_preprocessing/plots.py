@@ -257,6 +257,12 @@ def create_histograms(
     :return: returns a pie or bar chart of the data
     :rtype: Figure (plotly object)
     """
+    if visual_transformation not in {"linear", "log10"}:
+        raise ValueError(
+            f"""visual_transformation parameter  must be "linear" or
+                "log10" but is {visual_transformation}"""
+        )
+
     intensity_name_a = dataframe_a.columns[3]
     intensity_name_b = dataframe_b.columns[3]
 
