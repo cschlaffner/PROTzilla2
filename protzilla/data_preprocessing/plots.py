@@ -6,7 +6,8 @@ from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
 from protzilla.data_preprocessing.plots_helper import (
-    generate_tics,
+    generate_log_tics,
+    generate_lin_tics,
 )
 
 from ..constants.colors import (
@@ -269,6 +270,8 @@ def create_histograms(
     min_value = min(min(intensities_a), min(intensities_b))
     max_value = max(max(intensities_a), max(intensities_b))
 
+    binsize_factor = 0.0005 if visual_transformation == "linear" else 0.02
+
     trace0 = go.Histogram(
         x=intensities_a,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
@@ -276,7 +279,7 @@ def create_histograms(
         xbins=dict(
             start=min_value,
             end=max_value,
-            size=0.05,
+            size=(max_value-min_value)*binsize_factor,
         ),
     )
     trace1 = go.Histogram(
@@ -286,7 +289,7 @@ def create_histograms(
         xbins=dict(
             start=min_value,
             end=max_value,
-            size=0.05,
+            size=(max_value-min_value)*binsize_factor,
         ),
     )
     if not overlay:
@@ -295,8 +298,8 @@ def create_histograms(
         fig.add_trace(trace1, 1, 2)
         if visual_transformation == "log10":
             fig.update_layout(
-                xaxis=generate_tics(0, max_value),
-                xaxis2=generate_tics(0, max_value)
+                xaxis=generate_log_tics(0, max_value),
+                xaxis2=generate_log_tics(0, max_value)
             )
     else:
         fig = go.Figure()
@@ -306,10 +309,8 @@ def create_histograms(
         fig.update_traces(opacity=0.75)
         if visual_transformation == "log10":
             fig.update_layout(
-                xaxis=generate_tics(0,max_value)
+                xaxis=generate_log_tics(0, max_value)
             )
-
-    #fig.update_layout(bargap=0)
 
     fig.update_layout(
         xaxis_title=x_title,
