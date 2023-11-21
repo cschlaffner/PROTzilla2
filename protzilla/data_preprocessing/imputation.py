@@ -335,10 +335,10 @@ def by_knn_plot(
 
 
 def by_normal_distribution_sampling_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
     )
 
 
