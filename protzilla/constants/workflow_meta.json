@@ -80,6 +80,32 @@
             "default": "Columns (samples in rows, features in columns)"
           }
         }
+      },
+      "metadata_column_assignment": {
+        "name": "Metadata Column Assignment",
+        "description": "Assign columns to metadata categories, repeatable for each category",
+        "parameters": {
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          },
+          "metadata_required_column": {
+            "name": "Missing, but required Metadata Columns",
+            "fill": "metadata_required_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          },
+          "metadata_unknown_column": {
+            "name": "Existing, but unknown Metadata Columns",
+            "fill": "metadata_unknown_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          }
+
+        }
       }
     },
     "peptide_import": {
@@ -722,6 +748,69 @@
             }
           }
         ]
+      },
+      "normal_distribution_sampling": {
+        "name": "Normal Distribution Sampling",
+        "description": "Imputation methods include normal distribution sampling per Protein or over Dataset",
+        "parameters": {
+          "strategy": {
+            "name": "Strategy:",
+            "type": "categorical",
+            "categories": [
+              "perProtein",
+              "perDataset"
+            ],
+            "default": "perProtein"
+          },
+          "down_shift": {
+            "name": "Downshift:",
+            "type": "numeric",
+            "min": -10,
+            "max": 10,
+            "default": -1
+          },
+           "scaling_factor": {
+            "name": "Scaling Factor:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            }
+          },
+          {
+            "graph_type_quantities": {
+              "name": "Graph type Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
       }
     },
     "filter_peptides": {
@@ -789,7 +878,7 @@
           "grouping": {
             "name": "Grouping:",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "selected_groups"
             ],
@@ -855,7 +944,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -921,7 +1010,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -1154,7 +1243,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1290,7 +1379,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1426,7 +1515,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1547,7 +1636,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1753,7 +1842,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "categories": [],
             "default": null
           },
@@ -2502,7 +2591,7 @@
           "grouping": {
             "name": "Grouping from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
