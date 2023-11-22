@@ -1,14 +1,11 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
-from protzilla.data_preprocessing.plots_helper import (
-    generate_log_tics,
-    generate_lin_tics,
-)
+from protzilla.data_preprocessing.plots_helper import generate_log_tics
 
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
@@ -285,7 +282,7 @@ def create_histograms(
         xbins=dict(
             start=min_value,
             end=max_value,
-            size=(max_value-min_value)*binsize_factor,
+            size=(max_value - min_value) * binsize_factor,
         ),
     )
     trace1 = go.Histogram(
@@ -295,7 +292,7 @@ def create_histograms(
         xbins=dict(
             start=min_value,
             end=max_value,
-            size=(max_value-min_value)*binsize_factor,
+            size=(max_value - min_value) * binsize_factor,
         ),
     )
     if not overlay:
@@ -305,18 +302,16 @@ def create_histograms(
         if visual_transformation == "log10":
             fig.update_layout(
                 xaxis=generate_log_tics(0, max_value),
-                xaxis2=generate_log_tics(0, max_value)
+                xaxis2=generate_log_tics(0, max_value),
             )
     else:
         fig = go.Figure()
         fig.add_trace(trace0)
         fig.add_trace(trace1)
-        fig.update_layout(barmode='overlay')
+        fig.update_layout(barmode="overlay")
         fig.update_traces(opacity=0.75)
         if visual_transformation == "log10":
-            fig.update_layout(
-                xaxis=generate_log_tics(0, max_value)
-            )
+            fig.update_layout(xaxis=generate_log_tics(0, max_value))
 
     fig.update_layout(
         xaxis_title=x_title,
@@ -337,6 +332,7 @@ def create_histograms(
     fig.update_yaxes(rangemode="tozero")
 
     return fig
+
 
 def create_anomaly_score_bar_plot(
     anomaly_df,
