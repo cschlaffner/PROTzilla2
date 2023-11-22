@@ -1124,6 +1124,26 @@
                 null,
                 null
               ]
+            },
+            "protein_group": {
+              "name": "Protein group: choose highlighted protein group",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null
+            },
+            "similarity_measure": {
+              "name": "Similarity Measurement: choose how to compare protein groups",
+              "type": "categorical",
+              "categories": ["euclidean distance", "cosine similarity"],
+              "default": "euclidean_distance"
+            },
+            "similarity": {
+              "name": "Similarity",
+              "type": "numeric",
+              "min": -1,
+              "max": 999,
+              "default": 1
             }
           }
       },

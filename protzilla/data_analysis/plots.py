@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from django.contrib import messages
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
@@ -257,43 +258,108 @@ def clustergram_plot(
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
 
-def prot_quant_plot(input_df: pd.DataFrame):
+def prot_quant_plot(input_df: pd.DataFrame, protein_group: str, similarity: float, similarity_measure: str):
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     fig = go.Figure()
 
-    # Use shortened names or aliases for the legend if necessary
-    # This is just a placeholder; you'll need to create your own mapping
-    legend_names = {column: column[:10] + "..." for column in wide_df.columns}
+    color_mapping = {
+        'A': 'green',
+        'C': 'blue',
+    }
 
-    x_values = wide_df.index
-    for column in wide_df.columns:
-        fig.add_trace(
-            go.Scatter(
-                x=x_values,
-                y=wide_df[column],
-                mode="lines+markers",
-                name=legend_names[column],
-                hoverinfo="name+y",
-            )
-        )
+    lower_upper_x = []
+    lower_upper_y = []
+
+    lower_upper_x.append(wide_df.index[0])
+    lower_upper_y.append(wide_df.iloc[0].min())
+
+    for index, row in wide_df.iterrows():
+        lower_upper_x.append(index)
+        lower_upper_y.append(row.max())
+
+    for index, row in reversed(list(wide_df.iterrows())):
+        lower_upper_x.append(index)
+        lower_upper_y.append(row.min())
+
+    fig.add_trace(go.Scatter(
+        x=lower_upper_x,
+        y=lower_upper_y,
+        fill="toself",
+        name="Intensity Range",
+        line=dict(color="silver")
+    ))
+
+    similar_groups = []
+    for group_to_compare in wide_df.columns:
+        if group_to_compare != protein_group:
+            similarity_measure_method = euclidean_distances if similarity_measure == "euclidean distance" else cosine_similarity
+            distance = similarity_measure_method(wide_df[protein_group].values.reshape(1, -1), wide_df[group_to_compare].values.reshape(1, -1))[0][0]
+            if distance <= similarity:
+                similar_groups.append(group_to_compare)
+    
+    
+    for group in similar_groups:
+        fig.add_trace(go.Scatter(
+            x=wide_df.index,
+            y=wide_df[group],
+            mode="lines",
+            name=group,
+            line=dict(color='rgba(102,51,153,0.5)'),
+            showlegend=len(similar_groups) <= 7
+        ))
+    
+    if len(similar_groups) > 7:
+        fig.add_trace(go.Scatter(
+            x=[None],
+            y=[None],
+            mode='lines',
+            marker=dict(color="rgba(102,51,153,0.5)"),
+            name='Similar Protein Groups'
+        ))
+
+    formatted_protein_name = protein_group[:15] + "..." if len(protein_group) > 15 else protein_group
+    fig.add_trace(go.Scatter(
+        x=wide_df.index,
+        y=wide_df[protein_group],
+        mode="lines",
+        name= formatted_protein_name,
+        line=dict(color='orangered'),
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode='markers',
+        marker=dict(color="green"),
+        name='Experimental Group'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode='markers',
+        marker=dict(color="blue"),
+        name='Control Group'
+    ))
 
     fig.update_layout(
-        title="Quant Prot Plot",
+        title=f"Intensity of {formatted_protein_name} in all samples",
         xaxis_title="Sample",
         yaxis_title="Intensity",
-        legend_title="Protein Groups",
+        legend_title="Legend",
         xaxis=dict(
-            tickangle=-90,
-            tickvals=wide_df.index[::2],  # Show every other label to reduce clutter
+            tickmode='array',
+            tickangle=0,
+            tickvals=wide_df.index,
             ticktext=[
-                label[:10] + "..." for label in wide_df.index[::2]
-            ],  # Shortened label text
+                f"<span style='font-size: 10px; color:{color_mapping.get(label[0], 'black')}'><b>•</b></span>" for label in wide_df.index
+            ],
         ),
         autosize=True,
-        margin=dict(l=100, r=300, t=100, b=100),  # Adjust margins to fit legend
+        margin=dict(l=100, r=300, t=100, b=100),
         legend=dict(
-            x=1.05,  # Place legend to the right of the plot
+            x=1.05,
             y=1,
             bgcolor="rgba(255, 255, 255, 0.5)",
             orientation="v",
