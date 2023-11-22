@@ -22,6 +22,21 @@ def test_metadata_import():
     rmtree(RUNS_PATH / name)
 
 
+def test_metadata_import_diann():
+    name = "test_run" + random_string()
+    run = Run.create(name)
+    run.step_index += 1
+    run.calculate_and_next(
+        metadata_import.metadata_import_method_diann,
+        file_path=f"{PROJECT_PATH}/tests/diann_run_relationship_metadata.xlsx",
+    )
+    test_metadata = pd.read_excel(
+        f"{PROJECT_PATH}/tests/diann_run_relationship_metadata.xlsx"
+    )
+    pd.testing.assert_frame_equal(test_metadata, run.metadata)
+    rmtree(RUNS_PATH / name)
+
+
 def test_metadata_orientation():
     name1 = "test_run" + random_string()
     name2 = "test_run" + random_string()
