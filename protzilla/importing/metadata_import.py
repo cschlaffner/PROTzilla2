@@ -100,22 +100,26 @@ def metadata_import_method(
 def metadata_import_method_diann(
     df: DataFrame, file_path: str, groupby_sample: bool = False
 ) -> (DataFrame, dict):
+    """
+    This method imports a metadata file with run relationship information and returns the intensity dataframe and the
+    metadata dataframe. If the import fails, it returns the unchanged dataframe and a dict with a message about the
+    error.
+    """
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return df, dict(
             metadata=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
+
     if file_path.startswith(
         f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
     ):
         os.remove(file_path)
 
-    # this indicates a DIANN metadata file with replicate information, we now want to calculate the median across
-    # all MS runs for a sample then instead of having intensities for each MS run in our dataframe, we
-    # have intensities for each sample
-    # note that up until now, "Sample" in the intensity df referred to the ms run
     if groupby_sample:
+        # we want to take the median of all MS runs (column "Sample" in the intensity df) for each Sample
+        # (column "sample name" in the metadata df)
         res = pd.merge(
             df,
             meta_df[["MS run", "sample name"]],
