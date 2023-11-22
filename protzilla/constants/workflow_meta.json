@@ -113,6 +113,32 @@
           }
 
         }
+      },
+      "metadata_column_assignment": {
+        "name": "Metadata Column Assignment",
+        "description": "Assign columns to metadata categories, repeatable for each category",
+        "parameters": {
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          },
+          "metadata_required_column": {
+            "name": "Missing, but required Metadata Columns",
+            "fill": "metadata_required_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          },
+          "metadata_unknown_column": {
+            "name": "Existing, but unknown Metadata Columns",
+            "fill": "metadata_unknown_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          }
+
+        }
       }
     },
     "peptide_import": {
@@ -840,7 +866,7 @@
           "grouping": {
             "name": "Grouping:",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "selected_groups"
             ],
@@ -906,7 +932,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -972,7 +998,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -1205,7 +1231,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1341,7 +1367,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1477,7 +1503,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1598,7 +1624,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1804,7 +1830,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "categories": [],
             "default": null
           },
@@ -2553,7 +2579,7 @@
           "grouping": {
             "name": "Grouping from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"

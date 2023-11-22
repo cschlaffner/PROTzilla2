@@ -34,11 +34,6 @@ method_map = {
     (
         "importing",
         "ms_data_import",
-        "diann_import",
-    ): ms_data_import.diann_import,
-    (
-        "importing",
-        "ms_data_import",
         "ms_fragger_import",
     ): ms_data_import.ms_fragger_import,
     (
@@ -51,6 +46,11 @@ method_map = {
         "metadata_import",
         "metadata_import_method_diann",
     ): metadata_import.metadata_import_method_diann,
+    (
+        "importing",
+        "metadata_import",
+        "metadata_column_assignment",
+    ): metadata_import.metadata_column_assignment,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
     (
         "data_preprocessing",
