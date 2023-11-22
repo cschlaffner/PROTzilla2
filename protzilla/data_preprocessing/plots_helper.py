@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 
 def generate_log_tics(min, max):
@@ -10,10 +11,12 @@ def generate_log_tics(min, max):
     tickvals = np.arange(first_step, last_step, step_size)
     ticktext = np.vectorize(lambda x: millify(pow(10, x)))(tickvals)
     return dict(
-        tickmode='array',
+        tickmode="array",
         tickvals=tickvals,
         ticktext=ticktext,
     )
+
+
 def generate_lin_tics(min, max):
     temp = math.floor(np.log10(max - min) / 2)
     step_size = pow(10, temp)
@@ -22,16 +25,20 @@ def generate_lin_tics(min, max):
     tickvals = np.arange(first_step, last_step, step_size)
     ticktext = np.vectorize(lambda x: millify(x))(tickvals)
     return dict(
-        tickmode='array',
+        tickmode="array",
         tickvals=tickvals,
         ticktext=ticktext,
     )
 
 
 def millify(n):
-    millnames = ['', 'K', 'M', 'B', 'T', 'Q', 'Q', 'S', 'S', 'O', 'N']
+    millnames = ["", "K", "M", "B", "T", "Q", "Q", "S", "S", "O", "N"]
     n = float(n)
-    millidx = max(0, min(len(millnames) - 1,
-                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+    millidx = max(
+        0,
+        min(
+            len(millnames) - 1, int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))
+        ),
+    )
 
-    return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+    return "{:.0f}{}".format(n / 10 ** (3 * millidx), millnames[millidx])

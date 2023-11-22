@@ -18,9 +18,9 @@ from ..constants.colors import (
 
 
 def create_pie_plot(
-        names_of_sectors: "list[str]",
-        values_of_sectors: "list[int]",
-        heading="",
+    names_of_sectors: "list[str]",
+    values_of_sectors: "list[int]",
+    heading="",
 ) -> Figure:
     """
     Function to create generic pie graph from data.
@@ -60,12 +60,12 @@ def create_pie_plot(
 
 
 def create_bar_plot(
-        names_of_sectors: "list[str]",
-        values_of_sectors: "list[int]",
-        heading="",
-        colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_SEQUENCE,
-        y_title="",
-        x_title="",
+    names_of_sectors: "list[str]",
+    values_of_sectors: "list[int]",
+    heading="",
+    colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+    y_title="",
+    x_title="",
 ) -> Figure:
     """
     Function to create generic bar graph from data.
@@ -115,15 +115,15 @@ def create_bar_plot(
 
 
 def create_box_plots(
-        dataframe_a: pd.DataFrame,
-        dataframe_b: pd.DataFrame,
-        name_a="",
-        name_b="",
-        heading="",
-        y_title="",
-        x_title="",
-        group_by: str = "None",
-        visual_transformation="linear",
+    dataframe_a: pd.DataFrame,
+    dataframe_b: pd.DataFrame,
+    name_a="",
+    name_b="",
+    heading="",
+    y_title="",
+    x_title="",
+    group_by: str = "None",
+    visual_transformation="linear",
 ) -> Figure:
     """
     A function to create a boxplot for visualisation
@@ -219,15 +219,15 @@ def create_box_plots(
 
 
 def create_histograms(
-        dataframe_a: pd.DataFrame,
-        dataframe_b: pd.DataFrame,
-        name_a="",
-        name_b="",
-        heading="",
-        y_title="",
-        x_title="",
-        visual_transformation="linear",
-        overlay=False,
+    dataframe_a: pd.DataFrame,
+    dataframe_b: pd.DataFrame,
+    name_a="",
+    name_b="",
+    heading="",
+    y_title="",
+    x_title="",
+    visual_transformation="linear",
+    overlay=False,
 ) -> Figure:
     """
     A function to create a histogram for visualisation
@@ -306,18 +306,16 @@ def create_histograms(
         if visual_transformation == "log10":
             fig.update_layout(
                 xaxis=generate_log_tics(0, max_value),
-                xaxis2=generate_log_tics(0, max_value)
+                xaxis2=generate_log_tics(0, max_value),
             )
     else:
         fig = go.Figure()
         fig.add_trace(trace0)
         fig.add_trace(trace1)
-        fig.update_layout(barmode='overlay')
+        fig.update_layout(barmode="overlay")
         fig.update_traces(opacity=0.75)
         if visual_transformation == "log10":
-            fig.update_layout(
-                xaxis=generate_log_tics(0, max_value)
-            )
+            fig.update_layout(xaxis=generate_log_tics(0, max_value))
 
     fig.update_layout(
         xaxis_title=x_title,
@@ -341,9 +339,9 @@ def create_histograms(
 
 
 def create_anomaly_score_bar_plot(
-        anomaly_df,
-        colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-        colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    anomaly_df,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -400,10 +398,10 @@ def create_anomaly_score_bar_plot(
 
 
 def create_pca_2d_scatter_plot(
-        pca_df,
-        explained_variance_ratio,
-        colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-        colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -454,10 +452,10 @@ def create_pca_2d_scatter_plot(
 
 
 def create_pca_3d_scatter_plot(
-        pca_df,
-        explained_variance_ratio,
-        colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-        colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
