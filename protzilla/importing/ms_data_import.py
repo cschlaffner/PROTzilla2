@@ -81,6 +81,31 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
     return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
+def diann_import(_, file_path, map_to_uniprot=False):
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a DIA-NN MS file."
+        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    df = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+    df = df.drop(
+        columns=["Protein.Group", "Protein.Names", "Genes", "First.Protein.Description"]
+    )
+    # rename column names of samples, removing file path and ".raw"
+    intensity_df = df.rename(columns=lambda x: re.sub(r"(.*[/\\])|(.raw)", r"", x))
+    intensity_df = intensity_df.rename(columns={"Protein.Ids": "Protein ID"})
+
+    # placeholder intensity name for following cleanup
+    intensity_name = "Intensity"
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
+
+
 def transform_and_clean(df, intensity_name, map_to_uniprot):
     """
     Transforms a dataframe that is read from a file in wide format into long format,
