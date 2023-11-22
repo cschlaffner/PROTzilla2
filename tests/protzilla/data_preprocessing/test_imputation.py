@@ -218,8 +218,7 @@ def test_imputation_min_value_per_protein(
 
     fig1, fig2 = by_min_per_protein_plot(
         input_imputation_df,
-        result_df,
-        {},
+        result_df, {},
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -315,13 +314,7 @@ def test_imputation_normal_distribution_sampling(show_figures, input_imputation_
     )[0]
 
     fig1, fig2 = by_normal_distribution_sampling_plot(
-        input_imputation_df,
-        result_df_perProtein,
-        {},
-        "Boxplot",
-        "Bar chart",
-        "Sample",
-        "linear",
+        input_imputation_df, result_df_perProtein, {}, "Boxplot", "Bar chart", "Sample", "linear"
     )
     if show_figures:
         fig1.show()
