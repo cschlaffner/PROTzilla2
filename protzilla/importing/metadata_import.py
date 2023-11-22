@@ -8,42 +8,58 @@ from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities import random_string
 
 
-def file_importer(file_path: str) -> (DataFrame, str):
+def file_importer(file_path: str) -> tuple[pd.DataFrame, str]:
     """
     Imports a file based on its file extension and returns a pandas DataFrame or None if the file format is not
     supported / the file doesn't exist.
     """
-    if file_path.endswith(".csv"):
-        meta_df = pd.read_csv(
-            file_path,
-            sep=",",
-            low_memory=False,
-            na_values=[""],
-            keep_default_na=True,
-            skipinitialspace=True,
-        )
-    elif file_path.endswith(".xlsx"):
-        meta_df = pd.read_excel(file_path)
-    elif file_path.endswith(".psv"):
-        meta_df = pd.read_csv(file_path, sep="|", low_memory=False)
-    elif file_path.endswith(".tsv"):
-        meta_df = pd.read_csv(file_path, sep="\t", low_memory=False)
-    elif file_path == "":
-        return None, "The file upload is empty. Please select a metadata file."
-    else:
-        return (
-            None,
-            "File format not supported. \
-        Supported file formats are csv, xlsx, psv or tsv",
-        )
-    return meta_df, dict()
+    try:
+        if file_path.endswith(".csv"):
+            meta_df = pd.read_csv(
+                file_path,
+                sep=",",
+                low_memory=False,
+                na_values=[""],
+                keep_default_na=True,
+                skipinitialspace=True,
+            )
+        elif file_path.endswith(".xlsx"):
+            meta_df = pd.read_excel(file_path)
+        elif file_path.endswith(".psv"):
+            meta_df = pd.read_csv(file_path, sep="|", low_memory=False)
+        elif file_path.endswith(".tsv"):
+            meta_df = pd.read_csv(file_path, sep="\t", low_memory=False)
+        elif file_path == "":
+            return (
+                pd.DataFrame(),
+                "The file upload is empty. Please select a metadata file.",
+            )
+        else:
+            return (
+                pd.DataFrame(),
+                "File format not supported. \
+            Supported file formats are csv, xlsx, psv or tsv",
+            )
+        msg = "Metadata file successfully imported."
+        return meta_df, msg
+    except pd.errors.EmptyDataError:
+        msg = "The file is empty."
+        return pd.DataFrame(), msg
 
 
-def metadata_import_method(df: pd.DataFrame, file_path: str, feature_orientation: str):
+def metadata_import_method(
+    df: pd.DataFrame, file_path: str, feature_orientation: str
+) -> tuple[pd.DataFrame, dict]:
+    """
+        Imports a metadata file and returns the intensity dataframe and a dict with a message if the file import failed,
+        and the metadata dataframe if the import was successful.
+
+    returns: (DataFrame, dict)
+    """
     meta_df, msg = file_importer(file_path)
-    if meta_df is None:
+    if meta_df.empty:
         return df, dict(
-            meta_df=None,
+            metadata=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
     # always return metadata in the same orientation (features as columns)
@@ -78,14 +94,16 @@ def metadata_import_method(df: pd.DataFrame, file_path: str, feature_orientation
         )
         res.groupby(["Protein ID", "sample name"], as_index=False).median()
 
-    return df, {"metadata": meta_df}
+    return df, {"metadata": meta_df, "messages": [dict(level=messages.INFO, msg=msg)]}
 
 
-def metadata_import_method_diann(df, file_path, groupby_sample=False):
+def metadata_import_method_diann(
+    df: DataFrame, file_path: str, groupby_sample: bool = False
+) -> (DataFrame, dict):
     meta_df, msg = file_importer(file_path)
-    if meta_df is None:
+    if meta_df.empty:
         return df, dict(
-            meta_df=None,
+            metadata=None,
             messages=[dict(level=messages.ERROR, msg=msg)],
         )
     if file_path.startswith(
