@@ -1,12 +1,12 @@
+import logging
 import time
 
 import gseapy
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from restring import restring
 
-from protzilla.constants.logging import logger
+from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import clean_uniprot_id
 
 # Import enrichment analysis gsea methods to remove redundant function definition
@@ -158,7 +158,7 @@ def GO_analysis_with_STRING(
         or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # remove all columns but "Protein ID" and differential_expression_col column
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
@@ -182,30 +182,30 @@ def GO_analysis_with_STRING(
     if len(up_protein_list) == 0:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
             msg = "No proteins found. Check your input."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
             logger.warning(msg)
             direction = "down"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     if len(down_protein_list) == 0:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
             logger.warning(msg)
             direction = "up"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     if not gene_sets_restring:
         gene_sets_restring = ["KEGG", "Component", "Function", "Process", "RCTM"]
         msg = "No knowledge databases selected. Using all knowledge databases."
-        out_messages.append(dict(level=messages.INFO, msg=msg))
+        out_messages.append(dict(level=logging.INFO, msg=msg))
     elif not isinstance(gene_sets_restring, list):
         gene_sets_restring = [gene_sets_restring]
 
@@ -245,7 +245,7 @@ def GO_analysis_with_STRING(
         if up_df.empty or not up_df.values.any() or "ErrorMessage" in up_df.columns:
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
-                dict(level=messages.ERROR, msg=msg, trace=up_df.to_string())
+                dict(level=logging.ERROR, msg=msg, trace=up_df.to_string())
             )
             return dict(messages=out_messages)
 
@@ -271,7 +271,7 @@ def GO_analysis_with_STRING(
         ):
             msg = "Error getting enrichment results. Check your input and make sure the organism id is correct."
             out_messages.append(
-                dict(level=messages.ERROR, msg=msg, trace=down_df.to_string())
+                dict(level=logging.ERROR, msg=msg, trace=down_df.to_string())
             )
             return dict(messages=out_messages)
 
@@ -385,7 +385,7 @@ def gseapy_enrichment(
         msg = (
             "No gene symbols could be found for the proteins. Please check your input."
         )
-        return None, None, dict(level=messages.ERROR, msg=msg)
+        return None, None, dict(level=logging.ERROR, msg=msg)
 
     logger.info(f"Starting analysis for {direction}regulated proteins")
 
@@ -404,7 +404,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
+                dict(level=logging.ERROR, msg=error_msg, trace=str(e)),
             )
     else:
         try:
@@ -420,7 +420,7 @@ def gseapy_enrichment(
             return (
                 None,
                 None,
-                dict(level=messages.ERROR, msg=error_msg, trace=str(e)),
+                dict(level=logging.ERROR, msg=error_msg, trace=str(e)),
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
@@ -513,7 +513,7 @@ def GO_analysis_with_Enrichr(
         or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
@@ -526,14 +526,14 @@ def GO_analysis_with_Enrichr(
             gene_sets = gene_sets_enrichr
     else:
         msg = "No gene sets provided"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # if gene sets from Enrichr are used, ignore background parameter because gseapy does not support it
     if gene_sets_enrichr and (
         background_path or background_number or background_biomart
     ):
         msg = "Background parameter is not supported when using Enrichr gene sets and will be ignored"
-        out_messages.append(dict(level=messages.INFO, msg=msg))
+        out_messages.append(dict(level=logging.INFO, msg=msg))
         background = background_path = background_number = background_biomart = None
 
     if background_path:
@@ -549,7 +549,7 @@ def GO_analysis_with_Enrichr(
     else:
         background = None
         msg = "No background provided, using all genes in gene sets"
-        out_messages.append(dict(level=messages.WARNING, msg=msg))
+        out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     # remove all columns but "Protein ID" and differential_expression_col column
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
@@ -573,25 +573,25 @@ def GO_analysis_with_Enrichr(
     if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and not down_protein_list:
             msg = "No proteins found. Check your input."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
             logger.warning(msg)
             direction = "down"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
             logger.warning(msg)
             direction = "up"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups, error_msg = gseapy_enrichment(
@@ -630,7 +630,7 @@ def GO_analysis_with_Enrichr(
 
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        out_messages.append(dict(level=messages.WARNING, msg=msg))
+        out_messages.append(dict(level=logging.WARNING, msg=msg))
         return dict(
             enrichment_df=enriched,
             filtered_groups=filtered_groups,
@@ -718,7 +718,7 @@ def GO_analysis_offline(
         or not proteins_df[differential_expression_col].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # remove all columns but "Protein ID" and differential_expression_col column
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
@@ -742,25 +742,25 @@ def GO_analysis_offline(
     if not up_protein_list:
         if direction == "up":
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
             msg = "No proteins found. Check your input."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
             logger.warning(msg)
             direction = "down"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     if not down_protein_list:
         if direction == "down":
             msg = "No downregulated proteins found. Check your input or select 'up' direction."
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No downregulated proteins found. Running analysis for 'up' direction only."
             logger.warning(msg)
             direction = "up"
-            out_messages.append(dict(level=messages.WARNING, msg=msg))
+            out_messages.append(dict(level=logging.WARNING, msg=msg))
 
     gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
     if (
@@ -779,7 +779,7 @@ def GO_analysis_offline(
 
     if background is None:
         msg = "No valid background provided, using all proteins in protein sets"
-        out_messages.append(dict(level=messages.INFO, msg=msg))
+        out_messages.append(dict(level=logging.INFO, msg=msg))
 
     if direction == "up" or direction == "both":
         up_enriched, up_filtered_groups, error_msg = gseapy_enrichment(
@@ -820,7 +820,7 @@ def GO_analysis_offline(
 
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
-        out_dict["messages"].append(dict(level=messages.WARNING, msg=msg))
+        out_dict["messages"].append(dict(level=logging.WARNING, msg=msg))
         out_dict["filtered_groups"] = filtered_groups
         return out_dict
     return out_dict

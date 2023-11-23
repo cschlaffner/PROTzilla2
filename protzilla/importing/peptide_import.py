@@ -1,7 +1,7 @@
+import logging
 from pathlib import Path
 
 import pandas as pd
-from django.contrib import messages
 
 
 def peptide_import(ms_df, file_path, intensity_name):
@@ -13,9 +13,7 @@ def peptide_import(ms_df, file_path, intensity_name):
         ], f"Unknown intensity name: {intensity_name}"
         assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
     except AssertionError as e:
-        return ms_df, dict(
-            peptide_df=None, messages=[dict(level=messages.ERROR, msg=e)]
-        )
+        return ms_df, dict(peptide_df=None, messages=[dict(level=logging.ERROR, msg=e)])
 
     # Intensity -> Intensity, iBAQ -> LFQ, LFQ -> LFQ
     peptide_intensity_name = (

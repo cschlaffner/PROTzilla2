@@ -1,7 +1,7 @@
+import logging
 import os
 
 import pandas as pd
-from django.contrib import messages
 from pandas import DataFrame
 
 from protzilla.constants.paths import PROJECT_PATH
@@ -60,7 +60,7 @@ def metadata_import_method(
     if meta_df.empty:
         return df, dict(
             metadata=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
     # always return metadata in the same orientation (features as columns)
     # as the dtype get lost when transposing, we save the df to disk after
@@ -94,7 +94,7 @@ def metadata_import_method(
         )
         res.groupby(["Protein ID", "sample name"], as_index=False).median()
 
-    return df, {"metadata": meta_df, "messages": [dict(level=messages.INFO, msg=msg)]}
+    return df, {"metadata": meta_df, "messages": [dict(level=logging.INFO, msg=msg)]}
 
 
 def metadata_import_method_diann(
@@ -109,7 +109,7 @@ def metadata_import_method_diann(
     if meta_df.empty:
         return df, dict(
             metadata=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     if file_path.startswith(
@@ -160,12 +160,12 @@ def metadata_column_assignment(
     # check if required column already in metadata, if so give error message
     if metadata_required_column is None or metadata_unknown_column is None:
         msg = f"You can proceed, as there is nothing that needs to be changed."
-        return df, dict(messages=[dict(level=messages.INFO, msg=msg)])
+        return df, dict(messages=[dict(level=logging.INFO, msg=msg)])
 
     if metadata_required_column in metadata_df.columns:
         msg = f"Metadata already contains column '{metadata_required_column}'. \
         Please rename the column or select another column."
-        return df, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return df, dict(messages=[dict(level=logging.ERROR, msg=msg)])
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
         columns={metadata_unknown_column: metadata_required_column}, inplace=True

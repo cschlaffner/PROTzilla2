@@ -1,7 +1,7 @@
+import logging
 import traceback
 
 import pandas as pd
-from django.contrib import messages
 from sklearn.preprocessing import StandardScaler
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
@@ -199,7 +199,7 @@ def by_reference_protein(
         msg = "The protein was not found"
         return scaled_df, dict(
             dropped_samples=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     samples = intensity_df["Sample"].unique().tolist()

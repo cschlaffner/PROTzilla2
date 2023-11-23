@@ -10,8 +10,8 @@ import plotly
 from PIL import Image
 
 from .constants.location_mapping import location_map, method_map, plot_map
-from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
+from .constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from .history import History
 from .workflow_helper import (
     get_parameter_type,

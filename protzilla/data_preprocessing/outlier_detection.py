@@ -1,5 +1,6 @@
+import logging
+
 import pandas as pd
-from django.contrib import messages
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -69,7 +70,7 @@ def by_isolation_forest(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -123,7 +124,7 @@ def by_local_outlier_factor(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -224,7 +225,7 @@ def by_pca(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 

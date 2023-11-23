@@ -1,9 +1,10 @@
+import logging
+
 import gseapy
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 
-from protzilla.constants.logging import logger
+from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import fig_to_base64
 
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
@@ -48,7 +49,7 @@ def GO_enrichment_bar_plot(
 
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     # This method can be used for both restring and gseapy results
     # restring results are different from the expected gseapy results
@@ -66,11 +67,11 @@ def GO_enrichment_bar_plot(
         input_df["Overlap"] = "0/0"
     elif not "Term" in input_df.columns:
         msg = "Please choose an enrichment result dataframe to plot."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if not gene_sets:
         msg = "Please select at least one category to plot."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
 
@@ -84,7 +85,7 @@ def GO_enrichment_bar_plot(
             df = df[df["fdr"] <= cutoff]
             if len(df) == 0:
                 msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-                return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
+                return [dict(messages=[dict(level=logging.WARNING, msg=msg)])]
 
             column = "-log10(FDR)"
             df[column] = -1 * np.log10(df["fdr"])
@@ -95,7 +96,7 @@ def GO_enrichment_bar_plot(
                 dict(
                     messages=[
                         dict(
-                            level=messages.ERROR,
+                            level=logging.ERROR,
                             msg="FDR is not available for this enrichment result.",
                         )
                     ]
@@ -120,7 +121,7 @@ def GO_enrichment_bar_plot(
         )
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
     return [fig_to_base64(ax.get_figure())]
 
 
@@ -167,21 +168,21 @@ def GO_enrichment_dot_plot(
     """
     if not isinstance(input_df, pd.DataFrame) or not "Overlap" in input_df.columns:
         msg = "Please input a dataframe from offline GO enrichment analysis or GO enrichment analysis with Enrichr."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if not gene_sets:
         msg = "Please select at least one category to plot."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
 
     if len(gene_sets) > 1 and x_axis_type == "Combined Score":
         msg = "Combined Score is only available for one category. Choose only one category or Gene Sets as x-axis."
-        return [dict(messages=[dict(level=messages.WARNING, msg=msg)])]
+        return [dict(messages=[dict(level=logging.WARNING, msg=msg)])]
 
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(gene_sets)]
@@ -211,7 +212,7 @@ def GO_enrichment_dot_plot(
             ]
         except ValueError as e:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-            return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+            return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
 
     elif x_axis_type == "Combined Score":
         try:
@@ -233,10 +234,10 @@ def GO_enrichment_dot_plot(
             ]
         except ValueError as e:
             msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-            return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+            return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
     else:
         msg = "Invalid x_axis_type value"
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
 
 def gsea_dot_plot(
@@ -281,15 +282,15 @@ def gsea_dot_plot(
     """
     if not isinstance(input_df, pd.DataFrame) or not "NES" in input_df.columns:
         msg = "Please input a dataframe from GSEA or preranked GSEA."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if cutoff is None or cutoff == "":
         msg = "Please enter a cutoff value."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
 
     if not dot_size:
         dot_size = 5
@@ -324,7 +325,7 @@ def gsea_dot_plot(
         ]
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
 
 
 def gsea_enrichment_plot(
@@ -355,15 +356,15 @@ def gsea_enrichment_plot(
     """
     if not isinstance(term_dict, dict) or not "nes" in term_dict.keys():
         msg = "Please input a dictionary with enrichment details for a gene set from GSEA."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if not term_name:
         msg = "Please input a term name."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if not (
         isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)
     ) or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name"):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if isinstance(ranking, pd.DataFrame):  # ensure that ranking is a series
         ranking = ranking.iloc[:, 0]
 
@@ -384,4 +385,4 @@ def gsea_enrichment_plot(
         ]
     except Exception as e:
         msg = f"Could not plot enrichment plot for term {term_name}."
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]

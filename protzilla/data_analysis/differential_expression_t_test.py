@@ -2,7 +2,6 @@ import logging
 
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from scipy import stats
 
 from .differential_expression_helper import apply_multiple_testing_correction
@@ -186,7 +185,7 @@ def t_test(
         fold_change_df=fold_change_df,
         t_statistic_df=t_statistic_df,
         significant_proteins_df=significant_proteins_df,
-        messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
+        messages=[dict(level=logging.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
     )

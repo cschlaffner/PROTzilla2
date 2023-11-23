@@ -1,5 +1,6 @@
+import logging
+
 import pandas as pd
-from django.contrib import messages
 from sklearn.manifold import TSNE
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
@@ -94,7 +95,7 @@ def t_sne(
             msg = ""
         return dict(
             embedded_data=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -165,5 +166,5 @@ def umap(
             msg = ""
         return dict(
             embedded_data=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )

@@ -1,6 +1,5 @@
+"""This module contains the logging configuration for the protzilla app."""
 import logging
-
-from django.contrib import messages
 
 
 class ProtzillaLoggingHandler(logging.Handler):
@@ -73,8 +72,9 @@ logger = logging.getLogger("protzilla")
 logger.setLevel(protzilla_logging_level)
 logger.addHandler(ProtzillaLoggingHandler(protzilla_logging_level))
 
+# I have no idea what the hell this does, but refractoring it breaks run.py logging
 MESSAGE_TO_LOGGING_FUNCTION = {
-    messages.ERROR: logging.error,
-    messages.WARNING: logging.warning,
-    messages.INFO: logging.info,
+    logging.ERROR: logging.error,
+    logging.WARNING: logging.warning,
+    logging.INFO: logging.info,
 }

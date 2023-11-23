@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from django.contrib import messages
 
 from .differential_expression_helper import apply_multiple_testing_correction
 
@@ -87,7 +86,7 @@ def linear_model(
                 fc_threshold=None,
                 alpha=alpha,
                 corrected_alpha=None,
-                messages=[dict(level=messages.ERROR, msg=msg)],
+                messages=[dict(level=logging.ERROR, msg=msg)],
             )
 
         # lm(intensity ~ group + constant)
@@ -144,7 +143,7 @@ def linear_model(
         fc_threshold=fc_threshold,
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
-        messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
+        messages=[dict(level=logging.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
     )
