@@ -334,7 +334,8 @@ def next_(request, run_name):
 
 def back(request, run_name):
     run = active_runs[run_name]
-    run.back_step()
+    if run.step_index > 0:
+        run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
