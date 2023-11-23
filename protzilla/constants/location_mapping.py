@@ -38,6 +38,11 @@ method_map = {
     ): ms_data_import.ms_fragger_import,
     (
         "importing",
+        "ms_data_import",
+        "diann_import",
+    ): ms_data_import.diann_import,
+    (
+        "importing",
         "metadata_import",
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
