@@ -189,18 +189,20 @@ def change_method(request, run_name):
 
 def change_dynamic_fields(request, run_name):
     """
-    Renders fields that depend on the value of another field e.g. a dropdown, the value being the
-    dynamic_trigger_value below. The field is specified its key and part of the request.
+    Renders fields that depend on the value of another field e.g. a dropdown, the value
+    being the dynamic_trigger_value below. The field is specified by its key and part of
+    the request.
 
     :param request: the request object
     :type request: HttpRequest
     :param run_name: the name of the run
     :type run_name: str
 
-    :return: a JSON response object containing the new fields depending on the value of the dynamic trigger
+    :return: a JSON response object containing the new fields depending on the value of
+        the dynamic trigger
     :rtype: JsonResponse
     """
-    print("change_dynamic_fields")
+
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -604,8 +606,8 @@ def plot(request, run_name):
 
 def add_name(request, run_name):
     """
-    Adds a name to a step/method of the run. The name can be used to identify the step
-    and use results of the steps in later steps.
+    Adds a name to the results of a calculated method of the run. The name can be used
+    to identify the result and use them later.
 
     :param request: the request object
     :type request: HttpRequest

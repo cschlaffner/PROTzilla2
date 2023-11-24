@@ -253,7 +253,7 @@ def svm(
         during validation.
     :type scoring: list[str]
     :param **kwargs: Additional keyword arguments to be passed to the function.
-    :return: A SVC instance, a dataframe consisting of the model's
+    :return: A dict containing: a SVC instance, a dataframe consisting of the model's
         training parameters and the validation score, along with four dataframes
         containing the respective test and training samples and labels.
     :rtype: dict
