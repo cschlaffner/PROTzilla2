@@ -252,10 +252,7 @@ def test_export_plot(tests_folder_name):
     run.create_plot(
         data_preprocessing.imputation.by_min_per_sample_plot,
         dict(
-            graph_type="Boxplot",
-            graph_type_quantities="Bar chart",
-            group_by="Sample",
-            visual_transformation="linear",
+            graph_type="Boxplot", graph_type_quantities="Bar chart", group_by="Sample"
         ),
     )
     assert len(run.plots) > 1
