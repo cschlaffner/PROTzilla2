@@ -6,7 +6,10 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
-from protzilla.data_preprocessing.plots_helper import generate_tics
+from protzilla.data_preprocessing.plots_helper import (
+    generate_log_tics,
+    generate_lin_tics,
+)
 
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
@@ -17,7 +20,7 @@ from ..constants.colors import (
 def create_pie_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
-    heading: str = "",
+    heading="",
 ) -> Figure:
     """
     Function to create generic pie graph from data.
@@ -25,9 +28,13 @@ def create_pie_plot(
     a whole.
 
     :param names_of_sectors: Name of parts (so-called sectors) or categories
+    :type names_of_sectors: list[str]
     :param values_of_sectors: Corresponding values for sectors
+    :type values_of_sectors: list[str]
     :param heading: Header for the graph - for example the topic
+    :type heading: str
     :return: returns a pie chart of the data
+    :rtype: Figure (plotly object)
     """
     if any(i < 0 for i in values_of_sectors):
         raise ValueError
@@ -55,10 +62,10 @@ def create_pie_plot(
 def create_bar_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
-    heading: str = "",
+    heading="",
     colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_SEQUENCE,
-    y_title: str = "",
-    x_title: str = "",
+    y_title="",
+    x_title="",
 ) -> Figure:
     """
     Function to create generic bar graph from data.
@@ -66,11 +73,17 @@ def create_bar_plot(
     a whole.
 
     :param names_of_sectors: Name of parts (so called sectors) or categories
+    :type names_of_sectors: list[str]
     :param values_of_sectors: Corresponding values for sectors
+    :type values_of_sectors: list[str]
     :param heading: Header for the graph - for example the topic
+    :type heading: str
     :param y_title: Optional y-axis title.
+    :type y_title: str
     :param x_title: Optional x-axis title.
+    :type x_title: str
     :return: returns a bar chart of the data
+    :rtype: Figure (plotly object)
     """
 
     fig = px.bar(
@@ -104,13 +117,13 @@ def create_bar_plot(
 def create_box_plots(
     dataframe_a: pd.DataFrame,
     dataframe_b: pd.DataFrame,
-    name_a: str = "",
-    name_b: str = "",
-    heading: str = "",
-    y_title: str = "",
-    x_title: str = "",
+    name_a="",
+    name_b="",
+    heading="",
+    y_title="",
+    x_title="",
     group_by: str = "None",
-    visual_transformation: str = "linear",
+    visual_transformation="linear",
 ) -> Figure:
     """
     A function to create a boxplot for visualisation
@@ -120,20 +133,28 @@ def create_box_plots(
 
     :param dataframe_a: First dataframe in protzilla long format for\
     first boxplot
+    :type dataframe_a: pd.DataFrame
     :param dataframe_b: Second dataframe in protzilla long format\
     for second boxplot
+    :type dataframe_b: pd.DataFrame
     :param name_a: Name of first boxplot
+    :type name_a: str
     :param name_b: Name of second boxplot
+    :type name_b: str
     :param heading: Header or title for the graph (optional)
+    :type heading: str
     :param y_title: Optional y-axis title for graphs.
+    :type y_title: str
     :param x_title: Optional x-axis title for graphs.
+    :type x_title: str
     :param group_by: Optional argument to create a grouped boxplot\
-    :param visual_transformation: Visual transformation of the y-axis data.
     graph. Arguments can be either "Sample" to group by sample or\
     "Protein ID" to group by protein. Leave "None" to get ungrouped\
     conventional graphs. If set the function will ignore the\
     graph_type argument. Default is "None".
+    :type group_by: str
     :return: returns a boxplot of the data
+    :rtype: Figure (plotly object)
     """
     if group_by not in {"None", "Sample", "Protein ID"}:
         raise ValueError(
@@ -200,13 +221,13 @@ def create_box_plots(
 def create_histograms(
     dataframe_a: pd.DataFrame,
     dataframe_b: pd.DataFrame,
-    name_a: str = "",
-    name_b: str = "",
-    heading: str = "",
-    y_title: str = "",
-    x_title: str = "",
-    visual_transformation: str = "linear",
-    overlay: bool = False,
+    name_a="",
+    name_b="",
+    heading="",
+    y_title="",
+    x_title="",
+    visual_transformation="linear",
+    overlay=False,
 ) -> Figure:
     """
     A function to create a histogram for visualisation
@@ -216,16 +237,26 @@ def create_histograms(
 
     :param dataframe_a: First dataframe in protzilla long format for\
     first histogram
+    :type dataframe_a: pd.DataFrame
     :param dataframe_b: Second dataframe in protzilla long format\
     for second histogram
+    :type dataframe_b: pd.DataFrame
     :param name_a: Name of first histogram
+    :type name_a: str
     :param name_b: Name of second histogram
+    :type name_b: str
     :param heading: Header or title for the graph (optional)
+    :type heading: str
     :param y_title: Optional y axis title for graphs.
+    :type y_title: str
     :param x_title: Optional x axis title for graphs.
+    :type x_title: str
     :param overlay: Specifies whether to draw one Histogram with overlay or two separate histograms
+    :type overlay: bool
     :param visual_transformation: Visual transformation of the y-axis data.
+    :type visual_transformation: str
     :return: returns a pie or bar chart of the data
+    :rtype: Figure (plotly object)
     """
     if visual_transformation not in {"linear", "log10"}:
         raise ValueError(
@@ -274,8 +305,8 @@ def create_histograms(
         fig.add_trace(trace1, 1, 2)
         if visual_transformation == "log10":
             fig.update_layout(
-                xaxis=generate_tics(0, max_value, True),
-                xaxis2=generate_tics(0, max_value, True),
+                xaxis=generate_log_tics(0, max_value),
+                xaxis2=generate_log_tics(0, max_value),
             )
     else:
         fig = go.Figure()
@@ -284,7 +315,7 @@ def create_histograms(
         fig.update_layout(barmode="overlay")
         fig.update_traces(opacity=0.75)
         if visual_transformation == "log10":
-            fig.update_layout(xaxis=generate_tics(0, max_value, True))
+            fig.update_layout(xaxis=generate_log_tics(0, max_value))
 
     fig.update_layout(
         xaxis_title=x_title,
@@ -308,9 +339,9 @@ def create_histograms(
 
 
 def create_anomaly_score_bar_plot(
-    anomaly_df: pd.DataFrame,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    anomaly_df,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -318,12 +349,16 @@ def create_anomaly_score_bar_plot(
 
     :param anomaly_df: pandas Dataframe that contains the anomaly score for each\
     sample, including outliers and on-outliers samples
+    :type anomaly_df: pd.DataFrame
     :param colour_outlier: hex code for colour depicting the outliers.
     Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
     non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     non-outlier colour
+    :type colour_non_outlier: str
     :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
     """
 
     fig = px.bar(
@@ -363,10 +398,10 @@ def create_anomaly_score_bar_plot(
 
 
 def create_pca_2d_scatter_plot(
-    pca_df: pd.DataFrame,
-    explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -375,14 +410,19 @@ def create_pca_2d_scatter_plot(
 
     :param pca_df: a DataFrame that contains the projection of\
     the intensity_df on first principal components
+    :type pca_df: pd.DataFrame
     :param explained_variance_ratio: a list that contains the\
     explained variation for each component
+    :type explained_variance_ratio: list
     :param colour_outlier: hex code for colour depicting the outliers.
     Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
     non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     non-outlier colour
+    :type colour_non_outlier: str
     :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
     """
     fig = go.Figure(
         data=go.Scatter(
@@ -412,10 +452,10 @@ def create_pca_2d_scatter_plot(
 
 
 def create_pca_3d_scatter_plot(
-    pca_df: pd.DataFrame,
-    explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    pca_df,
+    explained_variance_ratio,
+    colour_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+    colour_non_outlier=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -424,14 +464,19 @@ def create_pca_3d_scatter_plot(
 
     :param pca_df: a DataFrame that contains the projection of\
     the intensity_df on first principal components
+    :type pca_df: pd.DataFrame
     :param explained_variance_ratio: a list that contains the\
     explained variation for each component
+    :type explained_variance_ratio: list
     :param colour_outlier: hex code for colour depicting the outliers.
     Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
     non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     non-outlier colour
+    :type colour_non_outlier: str
     :return: returns a plotly Figure object
+    :rtype: Figure (plotly object)
     """
     fig = go.Figure(
         data=go.Scatter3d(
