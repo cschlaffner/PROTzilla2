@@ -152,11 +152,11 @@ def by_pca(
     :param number_of_components: number of principal components
         used in the PCA. Allowed: 2 or 3. Default: 3
     :type number_of_components: integer (2 or 3)
-    
+
     :return: returns a Dataframe containing all samples that are not outliers.
-        A dict with list of inlier sample names, a DataFrame that contains the projection 
-        of the intensity_df on first principal components, a list that contains the 
-        explained variation for each component and an int, the number of components 
+        A dict with list of inlier sample names, a DataFrame that contains the projection
+        of the intensity_df on first principal components, a list that contains the
+        explained variation for each component and an int, the number of components
         the calculations were executed with
     :rtype: Tuple[pandas DataFrame, dict]
     """

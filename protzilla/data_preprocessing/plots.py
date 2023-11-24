@@ -420,7 +420,7 @@ def create_pca_3d_scatter_plot(
         non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
         non-outlier colour
     :type colour_non_outlier: str
-    
+
     :return: returns a plotly Figure object
     :rtype: Figure (plotly object)
     """

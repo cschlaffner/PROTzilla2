@@ -40,6 +40,62 @@ def variation_graph(protein_id: str, run_name: str):
     return out
 
 
+def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
+    """
+    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
+    Included features are just `Variation`, digestion is skipped.
+    The Graph is saved in .graphml-Format.
+
+    This is designed, so it can be used for peptides_to_isoform but works independently
+    as well
+
+    ProtGraph: https://github.com/mpc-bioinformatics/ProtGraph/
+
+    :param protein_id: UniProt Protein-ID
+    :type: str
+    :param run_name: name of the run this is executed from. Used for saving the protein
+        file, graph
+    :type: str
+
+    :return: dict(graph_path, messages)
+    """
+
+    logger.info(f"Creating graph for protein {protein_id}")
+    run_path = RUNS_PATH / run_name
+    path_to_protein_file, filtered_blocks, request = _get_protein_file(
+        protein_id, run_path
+    )
+
+    path_to_protein_file = Path(path_to_protein_file)
+    if not path_to_protein_file.exists() and request.status_code != 200:
+        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"  # noqa E501
+        logger.error(msg)
+        return dict(
+            graph_path=None,
+            filtered_blocks=filtered_blocks,
+            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+        )
+
+    output_folder_path = run_path / "graphs"
+    output_csv = output_folder_path / f"{protein_id}.csv"
+    graph_path = output_folder_path / f"{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                --export_output_folder={output_folder_path} \
+                --output_csv={output_csv} \
+                -ft VARIANT \
+                -d skip"
+
+    subprocess.run(cmd_str, shell=True)
+
+    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"  # noqa E501
+    logger.info(msg)
+    return dict(
+        graph_path=str(graph_path),
+        filtered_blocks=filtered_blocks,
+        messages=[dict(level=messages.INFO, msg=msg)],
+    )
+
+
 def peptides_to_isoform(
     peptide_df: pd.DataFrame,
     protein_id: str,
@@ -67,6 +123,10 @@ def peptides_to_isoform(
     :type run_name: str
     :param k: k-mer size to build necessary indices for matching peptides, defaults to 5
     :type k: int, optional
+    :param allowed_mismatches: max number of mismatched amino acids between a given
+        peptide and the reference sequence at a given starting location of a potential
+        match
+    :type allowed_mismatches: int
 
     :return: dict of path to graph - either the modified graph or the original graph if
         the modification failed, the protein id, list of matched peptides, list of unmatched
@@ -250,7 +310,7 @@ def _create_graph_index(
             starting_point = node
             break
     else:
-        msg = "No starting point found in the graph. An error in the graph creation is likely."
+        msg = "No starting point found in the graph. An error in the graph creation is likely."  # noqa E501
         logger.error(msg)
         return None, msg, None
 
@@ -263,15 +323,15 @@ def _create_graph_index(
     for node in protein_graph.nodes:
         if protein_graph.nodes[node]["aminoacid"] == "__end__":
             if longest_paths[node] < seq_len:
-                msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"  # noqa E501
                 logger.error(msg)
                 return None, msg, longest_paths
             elif longest_paths[node] > seq_len:
-                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a VARIANT substitutes more amino acids than it replaces. This is unexpected behaviour and should have been filtered out of the protein data. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a VARIANT substitutes more amino acids than it replaces. This is unexpected behaviour and should have been filtered out of the protein data. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"  # noqa E501
                 logger.error(msg)
                 return None, msg, longest_paths
 
-    index = [[] for i in range(seq_len)]
+    index = [[] for _ in range(seq_len)]
     for node in longest_paths:
         if (
             protein_graph.nodes[node]["aminoacid"] == "__start__"
@@ -312,7 +372,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                                   n4
         longest_paths: {n1: 0, n2: 3, n3: 5, n4: 5, n5: 6, __end__: 8}
 
-    :param protein_graph: Protein-Graph as created by ProtGraph 
+    :param protein_graph: Protein-Graph as created by ProtGraph
         (-> _create_protein_variation_graph)
     :type protein_graph: nx.DiGraph
     :param start_node: Source of protein_graph
@@ -338,7 +398,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"
+                f"The node {node} was not visited in the topological order (distance should be set already)"  # noqa E501
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -418,7 +478,7 @@ def _parse_file(file_path):
 
         if variant_block and "/note" in line:
             # only VARIANTs that don't elongate the sequence are valid
-            if not "Missing" in line:
+            if "Missing" not in line:
                 matches = re.search(r"([A-Z]+) -> ([A-Z]+)", line)
                 if matches is None:
                     # if this is invalid we don't want to be the ones who filter it out
@@ -440,7 +500,7 @@ def _create_reference_sequence_index(
     protein_path: str, k: int = 5
 ) -> tuple[dict, str, int]:
     """
-    Create mapping from kmer of reference_sequence of protein to starting position(s) 
+    Create mapping from kmer of reference_sequence of protein to starting position(s)
     of kmer in reference_sequence
 
     :param protein_path: Path to protein file from UniProt (.txt)
@@ -563,7 +623,7 @@ def _potential_peptide_matches(
         raise ValueError(f"k must be positive integer, but is {k}")
     if not isinstance(allowed_mismatches, int) or allowed_mismatches < 0:
         raise ValueError(
-            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"
+            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"  # noqa E501
         )
 
     logger.debug("Matching peptides to reference sequence")
@@ -580,7 +640,7 @@ def _potential_peptide_matches(
                 # for now potential matches like this will be dismissed even if
                 # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
                 logger.debug(
-                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
+                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"  # noqa E501
                 )
                 continue
             matched_starts.append(match_start_pos)
@@ -591,7 +651,7 @@ def _potential_peptide_matches(
             peptide_mismatches.add(peptide)
 
     logger.debug(
-        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"
+        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"  # noqa E501
     )
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
@@ -656,9 +716,10 @@ def _match_potential_matches(
     recursive matching method that branches off at the end of each node that is matches
     to the end while there is still amino acids left over in the peptide. A new
     recursion is opened for each successor of a node, given the scenario above.
-    A recursion is closed if the end of the peptide is reached or if the number of mismatches
-    exceeds the allowed number of mismatches. This leads to potential run time problems
-    for many allowed mismatches and long peptides in graphs with frequent Variations.
+    A recursion is closed if the end of the peptide is reached or if the number of
+    mismatches exceeds the allowed number of mismatches. This leads to potential run
+    time problems for many allowed mismatches and long peptides in graphs with frequent
+    Variations.
 
     For the recursive method, see below.
 
@@ -714,7 +775,8 @@ def _match_potential_matches(
         :param graph: protein variation graph, as created by ProtGraph
             (-> _create_protein_variation_graph)
         :type graph: networkx.DiGraph
-        :param current_node: current node in the graph, starting with the node of the match start
+        :param current_node: current node in the graph, starting with the node of the
+            match start
         :type current_node: str
         :param left_over_peptide: peptide that still needs to be matched to the graph
         :type left_over_peptide: str
@@ -760,7 +822,7 @@ def _match_potential_matches(
             last_index = i
 
         # node is matched til end, peptide not done
-        data_from_succ = []
+        data_from_successor = []
         recursion_start_mismatches = mismatches
         for succ in graph.successors(current_node):
             recursion_start_data = node_match_data.copy()
@@ -774,9 +836,9 @@ def _match_potential_matches(
                 current_index=0,
             )
             if match:
-                data_from_succ.append((match, match_data_from_succ, mismatches))
-        if data_from_succ:
-            return_val = min(data_from_succ, key=lambda item: item[2])
+                data_from_successor.append((match, match_data_from_succ, mismatches))
+        if data_from_successor:
+            return_val = min(data_from_successor, key=lambda item: item[2])
             return return_val
         else:
             return False, {}, mismatches
@@ -793,7 +855,7 @@ def _match_potential_matches(
                     break
             else:
                 logger.error(
-                    f"No fitting node for match start position {match_start_index} of {peptide} found"
+                    f"No fitting node for match start position {match_start_index} of {peptide} found"  # noqa E501
                 )
                 continue
             matched, node_match_data, mismatches = _match_on_graph(
@@ -829,7 +891,8 @@ def _modify_graph(graph, contig_positions):
 
     :param graph: Protein Graph to be modified
     :type graph: nx.DiGraph
-    :param contig_positions: Dict from current_node to contig-positions {current_node: [(start, end)]}.
+    :param contig_positions: Dict from current_node to contig-positions
+        {current_node: [(start, end)]}.
     :type contig_positions: dict(list[tuple])
     :param longest_paths: mapping from current_node to the longest path to current_node
         (-> _longest_paths())
@@ -978,8 +1041,8 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     pattern = rf"^({protein_id}-\d+)$"
-    filter = df["Protein ID"].str.contains(pattern)
-    df = df[~filter]
+    protein_id_filter = df["Protein ID"].str.contains(pattern)
+    df = df[~protein_id_filter]
 
     intensity_name = [col for col in df.columns if "intensity" in col.lower()][0]
     df = df.dropna(subset=[intensity_name])

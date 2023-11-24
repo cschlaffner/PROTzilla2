@@ -186,7 +186,7 @@ def by_reference_protein(
     :type intensity_df: pandas DataFrame
     :param reference_protein: Protein ID of the protein to normalise by
         type reference_protein_id: str
-    :return: returns a scaled dataframe in typical protzilla long format 
+    :return: returns a scaled dataframe in typical protzilla long format
         and dict with a list of the indices of the dropped samples
     :rtype: Tuple[pandas DataFrame, dict]
     """

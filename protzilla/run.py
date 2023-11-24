@@ -26,8 +26,8 @@ class Run:
 
     :param run_path: the path to this runs' dir
     :type run_path: str
-    :param workflow_config: Contains the contents of the workflow .json 
-        that was selected for this run at first. It is always updated when 
+    :param workflow_config: Contains the contents of the workflow .json
+        that was selected for this run at first. It is always updated when
         the workflow gets changed throughout the run (e.g. change of a parameter).
     :type workflow_config: dict
     :param run_name: name of the run
@@ -36,7 +36,7 @@ class Run:
     :type history: protzilla.History
     :param step_index: index of the current step over all steps in the workflow
     :type step_index: int
-    :param workflow_meta: contains contents of the workflow meta file that contains all 
+    :param workflow_meta: contains contents of the workflow meta file that contains all
         methods and parameters that exist in protzilla
     :type workflow_meta: dict
 
@@ -58,8 +58,8 @@ class Run:
     :param current_parameters: calculation parameters that were used to calculate the current step
         (e.g. to update workflow_config correctly)
     :type current_parameters: dict
-    :param current_plot_parameters: plot parameters that were used to generate plots for the 
-        current step (Not used in data analysis! A plot is its own step in that section 
+    :param current_plot_parameters: plot parameters that were used to generate plots for the
+        current step (Not used in data analysis! A plot is its own step in that section
         to allow for more flexibility)
     :type current_plot_parameters: dict
     :param calculated_method: method that was used to calculate the current step

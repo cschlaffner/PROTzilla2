@@ -1,5 +1,5 @@
 import copy
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest

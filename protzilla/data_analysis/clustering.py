@@ -30,8 +30,8 @@ def k_means(
     **kwargs,
 ):
     """
-    A method that uses k-means to partition a number of samples in k clusters. The 
-    function returns a dataframe with the corresponding cluster of each sample and 
+    A method that uses k-means to partition a number of samples in k clusters. The
+    function returns a dataframe with the corresponding cluster of each sample and
     another dataframe with the coordinates of the cluster centers.
 
     :param input_df: The dataframe that should be clustered in wide or long format
@@ -47,7 +47,7 @@ def k_means(
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
     :type scoring: list[str]
-    :param n_clusters: the number of clusters to form as well as the number of 
+    :param n_clusters: the number of clusters to form as well as the number of
         centroids to generate.
     :type n_clusters: int
     :param random_state: Determines random number generation for centroid initialization
@@ -61,7 +61,7 @@ def k_means(
     :param max_iter: Maximum number of iterations of the k-means algorithm for a single
         run.
     :type max_iter: int
-    :param tolerance: Relative tolerance with regards to Frobenius norm of the 
+    :param tolerance: Relative tolerance with regards to Frobenius norm of the
         difference in the cluster centers of two consecutive iterations to declare
         convergence.
     :type tolerance: float

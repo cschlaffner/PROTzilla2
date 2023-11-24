@@ -7,7 +7,7 @@ def long_to_wide(intensity_df: pd.DataFrame):
     can be more easily handled by packages such as sklearn.
     Each sample gets one row with all observations as columns.
 
-    :param intensity_df: the dataframe that should be transformed into 
+    :param intensity_df: the dataframe that should be transformed into
         long format
         :type intensity_df: pd.DataFrame
 

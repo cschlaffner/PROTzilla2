@@ -143,3 +143,6 @@ dmypy.json
 # vscode settings
 .vscode/
 
+#custom file everyone has
+Miniconda3*.sh
+Miniconda3*.exe
