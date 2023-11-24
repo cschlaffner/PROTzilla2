@@ -444,7 +444,12 @@ def number_of_imputed_values(input_df, result_df):
 
 
 def _build_box_hist_plot(
-    df, result_df, graph_type, graph_type_quantities, group_by, visual_transformation
+    df: pd.DataFrame,
+    result_df: pd.DataFrame,
+    graph_type: str = "Boxplot",
+    graph_type_quantities: str = "Pie chart",
+    group_by: str = "None",
+    visual_transformation: str = "linear",
 ) -> list[Figure]:
     """
     This function creates two visualisations:
