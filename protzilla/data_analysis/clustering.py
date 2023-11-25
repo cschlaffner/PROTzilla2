@@ -30,8 +30,8 @@ def k_means(
     **kwargs,
 ):
     """
-    A method that uses k-means to partition a number of samples in k clusters. The \
-    function returns a dataframe with the corresponding cluster of each sample and \
+    A method that uses k-means to partition a number of samples in k clusters. The
+    function returns a dataframe with the corresponding cluster of each sample and
     another dataframe with the coordinates of the cluster centers.
 
     :param input_df: The dataframe that should be clustered in wide or long format
@@ -39,7 +39,7 @@ def k_means(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the true labels of the data
+        the true labels of the data
     :type labels_column: str
     :param positive_label: The positive label for clustering.
     :type positive_label: str
@@ -47,23 +47,23 @@ def k_means(
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
     :type scoring: list[str]
-    :param n_clusters: the number of clusters to form as well as the number of \
-    centroids to generate.
+    :param n_clusters: the number of clusters to form as well as the number of
+        centroids to generate.
     :type n_clusters: int
     :param random_state: Determines random number generation for centroid initialization
     :type random_state: int
-    :param init_centroid_strategy: method for centroid initialization. Possible methods\
-     are: k-means++ and random
+    :param init_centroid_strategy: method for centroid initialization. Possible methods
+        are: k-means++ and random
     :type init_centroid_strategy: str
-    :param n_init: Number of times the k-means algorithm is run with different centroid\
-     seeds.
+    :param n_init: Number of times the k-means algorithm is run with different centroid
+        seeds.
     :type n_init: int
-    :param max_iter: Maximum number of iterations of the k-means algorithm for a single\
-     run.
+    :param max_iter: Maximum number of iterations of the k-means algorithm for a single
+        run.
     :type max_iter: int
-    :param tolerance: Relative tolerance with regards to Frobenius norm of the \
-    difference in the cluster centers of two consecutive iterations to declare\
-     convergence.
+    :param tolerance: Relative tolerance with regards to Frobenius norm of the
+        difference in the cluster centers of two consecutive iterations to declare
+        convergence.
     :type tolerance: float
     :returns: A dictionary containing the following elements:
         - model: The trained Gaussian Mixture Model.
@@ -171,9 +171,10 @@ def expectation_maximisation(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the true labels of the data
+        the true labels of the data
     :type labels_column: str
     :param positive_label: The positive label for clustering.
+    :type positive_label: str
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
@@ -183,17 +184,17 @@ def expectation_maximisation(
     :param covariance_type: The covariance type for the Gaussian Mixture Model.
     :type covariance_type: str, optional
     :param reg_covar: Non-negative regularization added to the diagonal of covariance
-     matrices.
+        matrices.
     :type reg_covar: float
     :param init_params: The method used to initialize the weights, the means and
-     the precisions.
+        the precisions.
     :type init_params: str
     :param max_iter: The number of EM iterations to perform.
     :type max_iter: int, optional
     :param random_state: The random seed for reproducibility.
     :type random_state: int
     :param **kwargs: Additional keyword arguments to be passed to the
-     `perform_clustering` function.
+        `perform_clustering` function.
     :returns: A dictionary containing the following elements:
         - model: The trained Gaussian Mixture Model.
         - model_evaluation_df:  dataframe consisting of the model's parameters and the
@@ -275,9 +276,10 @@ def hierarchical_agglomerative_clustering(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the true labels of the data
+        the true labels of the data
     :type labels_column: str
     :param positive_label: The positive label for clustering.
+    :type positive_label: str
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
     :param scoring: The scoring metric(s) used for model evaluation.
@@ -287,7 +289,7 @@ def hierarchical_agglomerative_clustering(
     :param metric: Metric used to compute the linkage.
     :type metric: str
     :param linkage: Which linkage criterion to use. The linkage criterion determines
-     which distance to use between sets of observation
+        which distance to use between sets of observation
     :type linkage: str
     :returns: A dictionary containing the following elements:
         - model: The trained Gaussian Mixture Model.

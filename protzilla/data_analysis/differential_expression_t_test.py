@@ -45,20 +45,25 @@ def t_test(
     :type multiple_testing_correction_method: str
     :param alpha: the alpha value for the t-test
     :type alpha: float
+    :param fc_threshold: threshold for the abs(log_2(fold_change)) (vertical line in a volcano plot).
+        Only proteins with a larger abs(log_2(fold_change)) than the fc_threshold are seen as differentially expressed
+    :type fc-threshold: float
+    :param log_base: in case the data was previously log transformed this parameter contains the base (e.g. 2 if the data was log_2 transformed).
+         If the data was not log transformed the parmeter should be ""
+    :type log_base: int/str
 
     :return: a dict containing
-    a df corrected_p_values, containing the p_values after application of multiple testing correction,
-    a df log2_fold_change, containing the log2 fold changes per protein,
-    a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
-    a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
-    a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
-    a df fold_change_df, containing the fold_changes per protein,
-    a df t_statistic_df, containing the t-statistic per protein,
-    a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
-        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
-    a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
-        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
-
+        a df corrected_p_values, containing the p_values after application of multiple testing correction,
+        a df log2_fold_change, containing the log2 fold changes per protein,
+        a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
+        a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
+        a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
+        a df fold_change_df, containing the fold_changes per protein,
+        a df t_statistic_df, containing the t-statistic per protein,
+        a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
+            corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
+        a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
+            corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
     :rtype: dict
     """
     assert grouping in metadata_df.columns

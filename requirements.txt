@@ -33,3 +33,5 @@ protgraph @ git+https://github.com/antonneubauer/ProtGraph@master
 joblib==1.2.0
 networkx==3.1
 beautifulsoup4==4.12.2
+sphinx==7.2.6
+sphinx-autoapi==3.0.0

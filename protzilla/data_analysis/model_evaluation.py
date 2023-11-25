@@ -18,7 +18,7 @@ def evaluate_classification_model(model, input_test_df, labels_test_df, scoring)
     :param labels_test_df: The true labels of the testing data as a DataFrame.
     :type labels_test_df: pd.DataFrame
     :param scoring: The scoring metric to be used for evaluation. It can be a string
-     representing a predefined metric e.g. accuracy, precision, recall, matthews_corrcoef
+        representing a predefined metric e.g. accuracy, precision, recall, matthews_corrcoef
     :type scoring: str or callable
     :return: A dataframe with the metric name and its corresponding score.
     :rtype: dict
