@@ -616,7 +616,6 @@ def protein_graph(request, run_name, index: int):
             }
         )
 
-    print("min peptides", min_peptides)
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
 
