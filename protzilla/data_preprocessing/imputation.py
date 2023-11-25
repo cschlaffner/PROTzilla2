@@ -29,17 +29,18 @@ def by_knn(
     Implements an instance of the sklearn.impute KNNImputer
     class.
     https://scikit-learn.org/stable/modules/generated/sklearn.impute.KNNImputer.html
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param number_of_neighbours: number of neighbouring samples used for\
-    imputation. Default: 5
+    :param number_of_neighbours: number of neighbouring samples used for
+        imputation. Default: 5
     :type number_of_neighbours: int
-    :param **kwargs: additional keyword arguments passed to\
+    :param **kwargs: additional keyword arguments passed to
         KNNImputer.fit_transform
     :type kwargs: dict
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame
     """
 
@@ -74,14 +75,15 @@ def by_simple_imputer(
     no data will be imputed. This function automatically filters
     out such proteins from the DataFrame beforehand.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param strategy: Defines the imputation strategy. Can be "mean",\
-    "median" or "most_frequent" (for mode).
+    :param strategy: Defines the imputation strategy. Can be "mean",
+        "median" or "most_frequent" (for mode).
     :type strategy: str
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, int
     """
     assert strategy in ["mean", "median", "most_frequent"]
@@ -117,16 +119,17 @@ def by_min_per_sample(
     If not wanted, make sure to filter 0 intensity samples in the
     filtering step.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
@@ -156,16 +159,17 @@ def by_min_per_protein(
     take a fraction of that minimum value for imputation.
     CAVE: All proteins without any values will be filtered out.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     transformed_df = long_to_wide(intensity_df)
@@ -200,16 +204,17 @@ def by_min_per_dataset(
     the dataframe. The user can also assign a shrinking factor to
     take a fraction of that minimum value for imputation.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
@@ -221,7 +226,119 @@ def by_min_per_dataset(
     return intensity_df_copy, dict()
 
 
+def by_normal_distribution_sampling(
+    intensity_df: pd.DataFrame,
+    strategy="perProtein",
+    down_shift=0,
+    scaling_factor=1,
+) -> tuple[pd.DataFrame, dict]:
+    """
+    A function to perform imputation via sampling of a normal distribution
+    defined by the existing datapoints and user-defined parameters for down-
+    shifting and scaling. Imputes missing values for each protein  taking into
+    account data from each protein or the whole dataset. The data is log-
+    transformed before sampling from the normal distribution and transformed
+    back afterwards, meaning only values > 0 are imputed.
+    Will not impute if insufficient data is available for sampling.
+    :param intensity_df: the dataframe that should be filtered in
+    long format
+    :type intensity_df: pandas DataFrame
+    :param strategy: which strategy to use for definition of the normal
+    distribution to be sampled. Can be "perProtein", "perDataset" or "most_frequent"
+    :type strategy: str
+    :param down_shift: a factor defining how many dataset standard deviations
+    to shift the mean of the normal distribution used for imputation.
+    Default: 0 (no shift)
+    :type down_shift: float
+    :param scaling_factor: a factor determining how the variance of the normal
+    distribution used for imputation is scaled compared to dataset.
+    Default: 1 (no scaling)
+    :type down_shift: float
+    :param round_values: whether to round the imputed values to the nearest integer
+    Default: False
+    :type round_values: bool
+    :return: returns an imputed dataframe in typical protzilla long format\
+    and an empty dict
+    :rtype: pd.DataFrame, int
+    """
+    assert strategy in ["perProtein", "perDataset"]
+
+    if strategy == "perProtein":
+        transformed_df = long_to_wide(intensity_df)
+        # iterate over all protein groups
+        for protein_grp in transformed_df.columns:
+            number_of_nans = transformed_df[protein_grp].isnull().sum()
+
+            # don't impute values if there not enough values (> 1) to sample from
+            if number_of_nans > len(transformed_df[protein_grp]) - 2:
+                continue
+
+            location_of_nans = transformed_df[protein_grp].isnull()
+            indices_of_nans = location_of_nans[location_of_nans].index
+
+            protein_grp_mean = np.log10(transformed_df[protein_grp]).mean(skipna=True)
+            protein_grp_std = np.log10(transformed_df[protein_grp]).std(skipna=True)
+            sampling_mean = protein_grp_mean + down_shift * protein_grp_std
+            sampling_std = protein_grp_std * scaling_factor
+
+            # calculate log-transformed values to be imputed
+            log_impute_values = np.random.normal(
+                loc=sampling_mean,
+                scale=sampling_std,
+                size=number_of_nans,
+            )
+            # transform log-transformed values to be imputed back to normal scale and round to nearest integer
+            impute_values = 10**log_impute_values
+
+            # zip indices of NaN values with values to be imputed together as a Series, such that fillna can be used
+            impute_value_series = pd.Series(impute_values, index=indices_of_nans)
+            transformed_df[protein_grp].fillna(impute_value_series, inplace=True)
+
+        imputed_df = wide_to_long(transformed_df, intensity_df)
+        return imputed_df, dict()
+
+    else:
+        # determine column for protein intensities
+        intensity_type = intensity_df.columns[3]
+
+        number_of_nans = intensity_df[intensity_type].isnull().sum()
+        assert number_of_nans <= len(intensity_df[intensity_type]) - 2
+
+        location_of_nans = intensity_df[intensity_type].isnull()
+        indices_of_nans = location_of_nans[location_of_nans].index
+
+        dataset_mean = np.log10(intensity_df[intensity_type]).mean()
+        dataset_std = np.log10(intensity_df[intensity_type]).std()
+        sampling_mean = max(0, dataset_mean + down_shift * dataset_std)
+        sampling_std = dataset_std * scaling_factor
+
+        # calculate log-transformed values to be imputed
+        log_impute_values = abs(
+            np.random.normal(
+                loc=sampling_mean,
+                scale=sampling_std,
+                size=number_of_nans,
+            )
+        )
+        # transform log-transformed values to be imputed back to normal scale and round to nearest integer
+        impute_values = 10**log_impute_values
+
+        # zip indices of NaN values with values to be imputed together as a Series, such that fillna can be used
+        impute_value_series = pd.Series(impute_values, index=indices_of_nans)
+        intensity_df[intensity_type].fillna(impute_value_series, inplace=True)
+
+        return intensity_df, dict()
+
+
 def by_knn_plot(
+    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+):
+    return _build_box_hist_plot(
+        df, result_df, graph_type, graph_type_quantities, group_by
+    )
+
+
+def by_normal_distribution_sampling_plot(
     df, result_df, current_out, graph_type, graph_type_quantities, group_by
 ):
     return _build_box_hist_plot(
@@ -278,7 +395,6 @@ def _build_box_hist_plot(
 
     2. a graph summarising the amount of
     filtered proteins.
-
     """
     if graph_type == "Boxplot":
         fig1 = create_box_plots(

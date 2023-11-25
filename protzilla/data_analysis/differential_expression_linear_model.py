@@ -42,8 +42,8 @@ def linear_model(
     :type fc_threshold: float
 
     :return: a dataframe in typical protzilla long format with the differentially expressed
-    proteins and a dict, containing the corrected p-values and the log2 fold change (coefficients), the alpha used
-    and the corrected alpha, as well as filtered out proteins.
+        proteins and a dict, containing the corrected p-values and the log2 fold change (coefficients), the alpha used
+        and the corrected alpha, as well as filtered out proteins.
     :rtype: Tuple[pandas DataFrame, dict]
     """
     assert grouping in metadata_df.columns

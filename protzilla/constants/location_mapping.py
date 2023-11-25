@@ -20,11 +20,9 @@ from ..data_preprocessing import (
 )
 from ..importing import metadata_import, ms_data_import, peptide_import
 
-"""
-In this data structure, a method is associated with a location. The location is
-determined by the section, step, and method keys found in the workflow_meta 
-file that correspond to the method.
-"""
+# In this data structure, a method is associated with a location. The location is
+# determined by the section, step, and method keys found in the workflow_meta
+# file that correspond to the method.
 method_map = {
     (
         "importing",
@@ -41,6 +39,11 @@ method_map = {
         "metadata_import",
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
+    (
+        "importing",
+        "metadata_import",
+        "metadata_column_assignment",
+    ): metadata_import.metadata_column_assignment,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
     (
         "data_preprocessing",
@@ -127,6 +130,11 @@ method_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset,
+    (
+        "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling",
+    ): imputation.by_normal_distribution_sampling,
     (
         "data_preprocessing",
         "filter_peptides",
@@ -237,11 +245,10 @@ method_map = {
 # reversed mapping of method callable and location
 location_map = {v: k for k, v in method_map.items()}
 
-"""
-In this data structure, a plot for a given method is associated with a 
-location. The location is determined by the section, step, and method keys 
-found in the workflow_meta file that correspond to the method.
-"""
+
+# In this data structure, a plot for a given method is associated with a
+# location. The location is determined by the section, step, and method keys
+# found in the workflow_meta file that correspond to the method.
 plot_map = {
     (
         "data_preprocessing",
@@ -313,6 +320,11 @@ plot_map = {
         "imputation",
         "min_value_per_dataset",
     ): imputation.by_min_per_dataset_plot,
+    (
+        "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling",
+    ): imputation.by_normal_distribution_sampling_plot,
     (
         "data_preprocessing",
         "outlier_detection",

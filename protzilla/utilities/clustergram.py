@@ -65,6 +65,19 @@ def Clustergram(
     height=800,
     width=1000,
 ):
+    """
+    This is an adapted version of Plotly's clustergram found in the Dash Bio package.
+    In this adaptation, we've made it possible to display a vertical or horizontal
+    colorbar, as well as a legend for the color bar. To achieve this, we've made changes
+    to the "row_colors" parameter and introduced a new parameter called
+    "row_colors_to_label_dict."
+
+    The "row_colors" parameter now consists of a list with a length equal to the number
+    of samples, where each element represents a specific color corresponding to that
+    sample. The "row_colors_to_label_dict" is a dictionary that associates each color
+    in the "row_colors" list with a specific group. This mapping is used to create the
+    color bar legend.
+    """
     if color_threshold is None:
         color_threshold = dict(row=0, col=0)
 
