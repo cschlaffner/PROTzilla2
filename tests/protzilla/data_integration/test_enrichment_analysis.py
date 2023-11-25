@@ -35,7 +35,7 @@ from protzilla.data_integration.enrichment_analysis_gsea import (
 
 @pytest.fixture
 def data_folder_tests():
-    return PROJECT_PATH / "tests/test_data/enrichment_data"
+    return PROJECT_PATH / "tests" / "test_data" / "enrichment_data"
 
 
 @patch("restring.restring.get_functional_enrichment")
