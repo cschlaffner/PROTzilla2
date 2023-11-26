@@ -122,7 +122,6 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
         fc_threshold=test_fc_threshold,
-        log_base="",
     )
 
     fig = create_volcano_plot(
@@ -277,7 +276,6 @@ def test_differential_expression_t_test_with_zero_mean(
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
         fc_threshold=test_fc_threshold,
-        log_base="",
     )
 
     fig = create_volcano_plot(

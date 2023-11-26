@@ -13,6 +13,7 @@ def anova(
     selected_groups: list,
     multiple_testing_correction_method: str,
     alpha: float,
+    intensity_name: str = None,
 ):
     """
     A function that uses ANOVA to test the difference between two or more
@@ -35,6 +36,8 @@ def anova(
     :type multiple_testing_correction_method: str
     :param alpha: the alpha value for anova
     :type alpha: float
+    :param intensity_name: name of the column containing the protein group intensities
+    :type intensity_name: str / None
     :return: a dataframe with the intensity_df and the corrected p-values
         and a dict containing corrected_p_values and corrected_alphas
     :rtype: pandas DataFrame, dict
@@ -63,7 +66,11 @@ def anova(
 
     # Perform ANOVA and calculate p-values for each protein
     proteins = intensity_df["Protein ID"].unique()
-    intensity_name = intensity_df.columns[3]
+    intensity_name = (
+        intensity_df.columns.values.tolist()[3]
+        if intensity_name is None
+        else intensity_name
+    )
     p_values = []
     for protein in proteins:
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]

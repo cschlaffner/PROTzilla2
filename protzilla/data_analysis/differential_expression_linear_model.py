@@ -16,6 +16,7 @@ def linear_model(
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
+    intensity_name=None,
 ):
     """
     A function to fit a linear model using Ordinary Least Squares for each Protein.
@@ -39,6 +40,8 @@ def linear_model(
     :type alpha: float
     :param fc_threshold: the fold change threshold
     :type fc_threshold: float
+    :param intensity_name: name of the column containing the protein group intensities
+    :type intensity_name: str / None
 
     :return: a dataframe in typical protzilla long format with the differentially expressed
         proteins and a dict, containing the corrected p-values and the log2 fold change (coefficients), the alpha used
@@ -55,7 +58,11 @@ def linear_model(
         logging.warning("auto-selected second group in linear model")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
-    intensity_name = intensity_df.columns.values.tolist()[3]
+    intensity_name = (
+        intensity_df.columns.values.tolist()[3]
+        if intensity_name is None
+        else intensity_name
+    )
     intensity_df = pd.merge(
         left=intensity_df,
         right=metadata_df[["Sample", grouping]],
