@@ -259,7 +259,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         return dict(
             graph_path=None,
             filtered_blocks=filtered_blocks,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
         )
 
     output_folder_path = run_path / "graphs"
@@ -278,7 +278,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 
