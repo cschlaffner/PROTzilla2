@@ -14,9 +14,9 @@ from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 def by_knn(
     intensity_df: pd.DataFrame,
-    number_of_neighbours=5,
+    number_of_neighbours: int = 5,
     **kwargs  # quantile, default is median
-) -> tuple[pd.DataFrame, dict]:
+) -> (pd.DataFrame, dict):
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -61,7 +61,7 @@ def by_knn(
 
 def by_simple_imputer(
     intensity_df: pd.DataFrame,
-    strategy="mean",
+    strategy: str = "mean",
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-wise imputations
@@ -254,9 +254,6 @@ def by_normal_distribution_sampling(
     distribution used for imputation is scaled compared to dataset.
     Default: 1 (no scaling)
     :type down_shift: float
-    :param round_values: whether to round the imputed values to the nearest integer
-    Default: False
-    :type round_values: bool
     :return: returns an imputed dataframe in typical protzilla long format\
     and an empty dict
     :rtype: pd.DataFrame, int

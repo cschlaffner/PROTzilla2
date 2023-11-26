@@ -9,7 +9,9 @@ from django.contrib import messages
 from protzilla.data_integration.database_query import biomart_query
 
 
-def max_quant_import(_, file_path, intensity_name, map_to_uniprot=False):
+def max_quant_import(
+    _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
+) -> (pd.DataFrame, dict):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a Max Quant file."
@@ -36,7 +38,9 @@ def max_quant_import(_, file_path, intensity_name, map_to_uniprot=False):
     return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
-def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
+def ms_fragger_import(
+    _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
+) -> (pd.DataFrame, dict):
     assert intensity_name in [
         "Intensity",
         "MaxLFQ Total Intensity",
@@ -81,7 +85,33 @@ def ms_fragger_import(_, file_path, intensity_name, map_to_uniprot=False):
     return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
-def transform_and_clean(df, intensity_name, map_to_uniprot):
+def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a DIA-NN MS file."
+        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+
+    df = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+    df = df.drop(
+        columns=["Protein.Group", "Protein.Names", "Genes", "First.Protein.Description"]
+    )
+    # rename column names of samples, removing file path and ".raw" if present
+    intensity_df = df.rename(columns=lambda x: re.sub(r"(.*[/\\])|(.raw)", r"", x))
+    intensity_df = intensity_df.rename(columns={"Protein.Ids": "Protein ID"})
+
+    intensity_name = "Intensity"
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
+
+
+def transform_and_clean(
+    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool
+) -> (pd.DataFrame, dict):
     """
     Transforms a dataframe that is read from a file in wide format into long format,
     removing contaminant groups, and processing protein ids, removing invalid ones
@@ -97,7 +127,6 @@ def transform_and_clean(df, intensity_name, map_to_uniprot):
     :rtype: tuple[pd.DataFrame, list[str], list[str]]
     """
     assert "Protein ID" in df.columns
-
     contaminant_groups_mask = df["Protein ID"].map(
         lambda group: any(id_.startswith("CON__") for id_ in group.split(";"))
     )
