@@ -7,6 +7,19 @@ from protzilla.utilities import clean_uniprot_id, unique_justseen
 
 
 def add_uniprot_data(dataframe, database_name=None, fields=None):
+    """
+    Extend a protein dataframe with information from UniProt for each protein.
+
+    :param dataframe: the protein dataframe to be extendet
+    :type dataframe: pd.DataFrame
+    :param database_name: name of the database file that will be queried
+    :type database_name: str
+    :param fields: the fields of the database that will be added to the dataframe
+    :type fields: list[str]
+
+    :return: the extended dataframe, and a message if applicable
+    :rtype: dict
+    """
     if not fields:
         msg = "No fields that should be added specified."
         return dict(
@@ -69,6 +82,22 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
 
 
 def gene_mapping(dataframe, database_names, use_biomart=False):
+    """
+    Maps the protein ID groups to HGNC gene symbols, filtering out ones that are not
+    found.
+
+    :param dataframe: the protein dataframe of which the protein ID groups will be
+        mapped.
+    :type dataframe: pd.DataFrame
+    :param database_names: names of the database files that will be queried
+    :type database_names: list[str] | str
+    :param use_biomart: should biomart be used to map ids that could not be mapped with
+        databases
+    :type use_biomart: bool
+
+    :return: the gene mapping, consisting of group_to_genes, gene_to_groups and filtered
+    :rtype: dict
+    """
     try:
         groups = dataframe["Protein ID"].unique().tolist()
     except KeyError:

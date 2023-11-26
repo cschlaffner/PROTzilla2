@@ -10,6 +10,19 @@ from protzilla.utilities import clean_uniprot_id
 
 
 def biomart_query(queries, filter_name, attributes, use_grch37=False):
+    """
+    Construct an XML query for BioMart, send it, decode the result and return it as an
+    iterator.
+
+    :param queries: what entities to look for with the filter
+    :type queries: list[str]
+    :param filter_name: the name of the BioMart category the queries will be searched in
+    :type filter_name: str
+    :param attributes: what BioMart categories to return for each found entity
+    :type attributes: Iterable[str]
+    :param use_grch37: if truthy, use the outdated GRCh37 biomart endpoint
+    :type use_grch37: bool
+    """
     if not queries:
         return
 
@@ -86,12 +99,17 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
     First uses all uniprot databases that contain genes, then uses biomart to map
     proteins that have not been found with uniprot if biomart is enabled.
 
-    :param uniprot_ids: cleaned uniprot IDs, not containing isoforms or other modifications
+    :param uniprot_ids: cleaned uniprot IDs, not containing isoforms or other
+        modifications
     :type uniprot_ids: list[str]
     :param databases: names of uniprot databases that should be used for mapping
     :type databases: list[str]
-    :param use_biomart: should biomart be used to map ids that could not be mapped with databases
-    :return: a dict that maps uniprot ids to genes and a list of uniprot ids that were not found
+    :param use_biomart: if true, biomart should be used to map ids that could not be
+        mapped with databases
+    :type use_biomart: bool
+
+    :return: a dict that maps uniprot ids to genes and a list of uniprot ids that were
+        not found
     :rtype: tuple[dict[str, str], list[str]]
     """
 
@@ -125,7 +143,7 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
 
         if not ids_to_search:
             logger.info(
-                "All proteins mapped using uniprot, no biomart mapping will be performed."
+                "All proteins mapped using uniprot, no biomart mapping will be performed."  # noqa E501
             )
             return out_dict, []
     if not use_biomart:
@@ -151,6 +169,24 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
 
 
 def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
+    """
+    Maps uniprot ID groups to hgnc gene symbols. Also returns groups that could not be
+    mapped. Merges the mappings per group and creates a reverse mapping, from genes to
+    groups.
+
+    :param uniprot_groups: groups of UniProt IDs, as found in a protein dataframe, may
+        contain isoforms and modifications
+    :type uniprot_groups: list[str]
+    :param databases: names of uniprot databases that should be used for mapping
+    :type databases: list[str]
+    :param use_biomart: should biomart be used to map ids that could not be mapped with
+        databases
+    :type use_biomart: bool
+
+    :return: a dict that maps genes to groups, one that maps groups to genes and a list
+        of uniprot ids that were not found
+    :rtype: tuple[dict[str, list[str]], dict[str, list[str]], list[str]]
+    """
     proteins = set()
     for group in uniprot_groups:
         for protein in group.split(";"):

@@ -43,6 +43,7 @@ def GO_enrichment_bar_plot(
     :type colors: list, optional
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
+
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -163,6 +164,7 @@ def GO_enrichment_dot_plot(
     :type dot_size: int
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
+
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -277,6 +279,7 @@ def gsea_dot_plot(
     :type remove_library_names: bool
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
+
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -351,6 +354,7 @@ def gsea_enrichment_plot(
     :type neg_pheno_label: str, optional
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
+
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """

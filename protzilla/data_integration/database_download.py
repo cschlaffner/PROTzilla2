@@ -33,10 +33,15 @@ def get_batch(batch_url, session):
 
 def download_uniprot_paged(name):
     """
-    downloads basic info on all human proteins from the uniprot paged rest api.
+    Downloads basic info on all human proteins from the uniprot paged rest api.
     this will take very long due to limitations in the api, therefore stream should be used.
     code taken from https://www.uniprot.org/help/api_queries including get_next_link and get_batch
-    parameter name: str = name the database will be saved as
+
+    :param name: name the database will be saved as
+    :type name: str
+
+    :return: the number of proteins that were downloaded
+    :rtype: int
     """
 
     retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504])
@@ -60,9 +65,14 @@ def download_uniprot_paged(name):
 
 def download_uniprot_stream(name):
     """
-    downloads basic info on all human proteins from the streamed uniprot rest api.
+    Downloads basic info on all human proteins from the streamed uniprot rest api.
     can fail due to unstable internet connection or problems with the api.
-    parameter name: str = name the database will be saved as
+
+    :param name: name the database will be saved as
+    :type name: str
+
+    :return: nothing
+    :rtype: NoneType
     """
     with requests.get(
         "https://rest.uniprot.org/uniprotkb/stream",

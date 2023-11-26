@@ -14,14 +14,17 @@ def scatter_plot(
     color_df: pd.DataFrame | None = None,
 ):
     """
-    Function to create a scatter plot from data. 
-    
-    :param input_df: the dataframe that should be plotted. It should have either 2 \
-    or 3 dimension
+    Function to create a scatter plot from data.
+
+    :param input_df: the dataframe that should be plotted. It should have either 2
+        or 3 dimensions
     :type input_df: pd.Dataframe
-    :param color_df: the Dataframe with one column according to which the marks should \
-    be colored. This is an optional parameter
+    :param color_df: the Dataframe with one column according to which the marks should
+        be colored. This is an optional parameter
     :type color_df: pd.Dataframe
+
+    :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
+    :rtype: list[plotly figure]/dict
     """
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
@@ -84,6 +87,9 @@ def create_volcano_plot(
     :type alpha: float
     :param proteins_of_interest: the proteins that should be annotated in the plot
     :type proteins_of_interest: list or None
+
+    :return: returns a list with a plotly figure
+    :rtype: [plotly figure]
     """
 
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
@@ -150,11 +156,6 @@ def clustergram_plot(
     input_df: pd.DataFrame, sample_group_df: pd.DataFrame | None, flip_axes: str
 ):
     """
-
-    :param grouping: the column name of the grouping variable in the
-        metadata_df
-    :type grouping: str
-
     Creates a clustergram plot from a dataframe in protzilla wide format. The rows or
     columns of the clustergram are ordered according to the clustering resulting from
     the dendrogram. Optionally, a colorbar representing the different groups present
@@ -171,8 +172,9 @@ def clustergram_plot(
     :param flip_axes: If "yes", the rows and columns of the clustergram will be
         swapped. If "no", the default orientation is used.
     :type flip_axes: str
-    :return: returns a list with a figure or a list with a dictionary if an error occurs
-    :rtype: [go.Figure]
+
+    :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
+    :rtype: list[plotly figure]/dict
     """
     try:
         assert isinstance(input_df, pd.DataFrame) and not input_df.empty
@@ -189,7 +191,7 @@ def clustergram_plot(
             )
             # In the clustergram each row represents a sample that can pertain to a
             # group. In the following code the necessary data structures are created
-            # to assign eachgroup to a unique color.
+            # to assign each group to a unique color.
             sample_group_dict = dict(
                 zip(sample_group_df.index, sample_group_df[sample_group_df.columns[0]])
             )

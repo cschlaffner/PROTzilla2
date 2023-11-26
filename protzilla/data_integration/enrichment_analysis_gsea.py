@@ -36,6 +36,7 @@ def create_ranked_df(
     :type group_to_genes: dict
     :param filtered_groups: list of protein groups that were filtered out
     :type filtered_groups: list
+
     :return: ranked dataframe of genes
     :rtype: pd.DataFrame
     """
@@ -134,6 +135,7 @@ def gsea_preranked(
     :type seed: int
     :param threads: Number of threads
     :type threads: int
+
     :return: dictionary with results dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
@@ -242,6 +244,7 @@ def create_genes_intensity_wide_df(
     :type group_to_genes: dict
     :param filtered_groups: list of protein IDs that could not be mapped to gene symbols
     :type filtered_groups: list
+
     :return: dataframe with genes in rows and samples in columns with intensity values
     :rtype: pd.DataFrame
     """
@@ -349,6 +352,7 @@ def gsea(
     :type seed: int
     :param threads: Number of threads to use
     :type threads: int
+
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """

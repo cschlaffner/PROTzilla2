@@ -123,11 +123,11 @@ def create_box_plots(
     (for example before and after filtering/normalisation) and creates
     a visualisation for each one.
 
-    :param dataframe_a: First dataframe in protzilla long format for\
-    first boxplot
+    :param dataframe_a: First dataframe in protzilla long format for
+        first boxplot
     :type dataframe_a: pd.DataFrame
-    :param dataframe_b: Second dataframe in protzilla long format\
-    for second boxplot
+    :param dataframe_b: Second dataframe in protzilla long format
+        for second boxplot
     :type dataframe_b: pd.DataFrame
     :param name_a: Name of first boxplot
     :type name_a: str
@@ -139,12 +139,13 @@ def create_box_plots(
     :type y_title: str
     :param x_title: Optional x-axis title for graphs.
     :type x_title: str
-    :param group_by: Optional argument to create a grouped boxplot\
-    graph. Arguments can be either "Sample" to group by sample or\
-    "Protein ID" to group by protein. Leave "None" to get ungrouped\
-    conventional graphs. If set the function will ignore the\
-    graph_type argument. Default is "None".
+    :param group_by: Optional argument to create a grouped boxplot
+        graph. Arguments can be either "Sample" to group by sample or
+        "Protein ID" to group by protein. Leave "None" to get ungrouped
+        conventional graphs. If set the function will ignore the
+        graph_type argument. Default is "None".
     :type group_by: str
+
     :return: returns a boxplot of the data
     :rtype: Figure (plotly object)
     """
@@ -223,11 +224,11 @@ def create_histograms(
     (for example before and after filtering/normalisation) and creates
     a visualisation for each one.
 
-    :param dataframe_a: First dataframe in protzilla long format for\
-    first histogram
+    :param dataframe_a: First dataframe in protzilla long format for
+        first histogram
     :type dataframe_a: pd.DataFrame
-    :param dataframe_b: Second dataframe in protzilla long format\
-    for second histogram
+    :param dataframe_b: Second dataframe in protzilla long format
+        for second histogram
     :type dataframe_b: pd.DataFrame
     :param name_a: Name of first histogram
     :type name_a: str
@@ -239,6 +240,7 @@ def create_histograms(
     :type y_title: str
     :param x_title: Optional x axis title for graphs.
     :type x_title: str
+
     :return: returns a pie or bar chart of the data
     :rtype: Figure (plotly object)
     """
@@ -288,16 +290,17 @@ def create_anomaly_score_bar_plot(
     This function creates a graph visualising the outlier
     and non-outlier samples using the anomaly score.
 
-    :param anomaly_df: pandas Dataframe that contains the anomaly score for each\
-    sample, including outliers and on-outliers samples
+    :param anomaly_df: pandas Dataframe that contains the anomaly score for each
+        sample, including outliers and on-outliers samples
     :type anomaly_df: pd.DataFrame
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+        Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
     :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+        non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+        non-outlier colour
     :type colour_non_outlier: str
+
     :return: returns a plotly Figure object
     :rtype: Figure (plotly object)
     """
@@ -349,19 +352,20 @@ def create_pca_2d_scatter_plot(
     and non-outlier points by showing the principal components. It
     returns a ploty Figure object.
 
-    :param pca_df: a DataFrame that contains the projection of\
-    the intensity_df on first principal components
+    :param pca_df: a DataFrame that contains the projection of
+        the intensity_df on first principal components
     :type pca_df: pd.DataFrame
-    :param explained_variance_ratio: a list that contains the\
-    explained variation for each component
+    :param explained_variance_ratio: a list that contains the
+        explained variation for each component
     :type explained_variance_ratio: list
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+        Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
     :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+        non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+        non-outlier colour
     :type colour_non_outlier: str
+
     :return: returns a plotly Figure object
     :rtype: Figure (plotly object)
     """
@@ -403,19 +407,20 @@ def create_pca_3d_scatter_plot(
     and non-outlier points by showing the principal components. It
     returns a ploty Figure object.
 
-    :param pca_df: a DataFrame that contains the projection of\
-    the intensity_df on first principal components
+    :param pca_df: a DataFrame that contains the projection of
+        the intensity_df on first principal components
     :type pca_df: pd.DataFrame
-    :param explained_variance_ratio: a list that contains the\
-    explained variation for each component
+    :param explained_variance_ratio: a list that contains the
+        explained variation for each component
     :type explained_variance_ratio: list
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+        Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
     :type colour_outlier: str
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+        non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+        non-outlier colour
     :type colour_non_outlier: str
+
     :return: returns a plotly Figure object
     :rtype: Figure (plotly object)
     """
