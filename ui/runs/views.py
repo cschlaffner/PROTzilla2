@@ -334,7 +334,9 @@ def next_(request, run_name):
 
 def back(request, run_name):
     run = active_runs[run_name]
-    if run.step_index > 0:
+    if run.step_index == 0:
+        messages.warning(request, "You are already at the beginning of the run.")
+    else:
         run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
