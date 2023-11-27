@@ -80,7 +80,7 @@
                                                 <a href="{{ step.table_link }}" target="_blank"
                                                    class="col-4 btn btn-grey me-2">View table</a>
                                             {% endif %}
-                                            {%  if step.protein_graph_link %}
+                                            {% if step.protein_graph_link %}
                                                 <a href="{{ step.protein_graph_link }}" target="_blank"
                                                    class=" btn btn-grey me-2">View Protein Graph</a>
                                             {% endif %}
@@ -247,7 +247,7 @@
                                 {% csrf_token %}
                                 <div class="form-group">
                                     {% if show_back %}
-                                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto">Back</a>
+                                        <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto">Back</a>
                                     {% endif %}
                                     <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
                                     </button>

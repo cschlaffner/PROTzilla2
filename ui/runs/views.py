@@ -82,7 +82,6 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
-
     end_of_run = not step
 
     current_plots = []
@@ -132,7 +131,7 @@ def detail(request, run_name):
             name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
             current_plots=current_plots,
             show_next=allow_next,
-            show_back= bool(run.history.steps),
+            show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
             end_of_run=end_of_run,
@@ -442,8 +441,7 @@ def back(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
-    if run.step_index > 0:
-        run.back_step()
+    run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
