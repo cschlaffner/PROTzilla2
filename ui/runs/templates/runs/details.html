@@ -246,9 +246,9 @@
                             <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
                                 {% csrf_token %}
                                 <div class="form-group">
-                                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto"
-                                            {% if not show_back %}
-                                       disabled {% endif %}>Back</a>
+                                    {% if show_back %}
+                                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto">Back</a>
+                                    {% endif %}
                                     <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
                                     </button>
                                 </div>
