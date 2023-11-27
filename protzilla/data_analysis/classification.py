@@ -107,33 +107,33 @@ def random_forest(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+        the target variable (labels) for classification.
     :type labels_column: str
     :param train_test_split: The proportion of data to be used for testing. Default is
-     0.2 (80-20 train-test split).
+        0.2 (80-20 train-test split).
     :type train_test_split: int, optional
     :param n_estimators: The number of decision trees to be used in the random forest.
     :type n_estimators: int, optional
     :param criterion: The impurity measure used for tree construction.
     :type criterion: str, optional
     :param max_depth: The maximum depth of the decision trees. If not specified (None),
-     the trees will expand until all leaves are pure or contain minimum samples per leaf.
+        the trees will expand until all leaves are pure or contain minimum samples per leaf.
     :type max_depth: int or None, optional
     :param bootstrap: Whether bootstrap samples should be used when building trees.
     :type bootstrap: bool, optional
     :param random_state: The random seed for reproducibility.
-    :type random_state: int, optional
+    :type random_state: int
     :param model_selection: The model selection method for hyperparameter tuning.
-    :type model_selection: str, optional
+    :type model_selection: str
     :param validation_strategy: The strategy for model validation.
-    :type validation_strategy: str, optional
+    :type validation_strategy: str
     :param scoring: The scoring metric(s) used to evaluate the model's performance
-    during validation.
-    :type scoring: list[str], optional
+        during validation.
+    :type scoring: list[str]
     :param **kwargs: Additional keyword arguments to be passed to the function.
     :return: A RandomForestClassifier instance, a dataframe consisting of the model's
-     training parameters and the validation score, along with four dataframes containing
-     the respective test and training samples and labels.
+        training parameters and the validation score, along with four dataframes
+        containing the respective test and training samples and labels.
     :rtype: dict
 
     """
@@ -215,6 +215,49 @@ def svm(
     scoring: list[str] = ["accuracy"],
     **kwargs,
 ):
+    """
+    Perform classification using the support vector machine classifier from sklearn.
+
+    :param input_df: The dataframe that should be classified in wide or long format
+    :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+        the target variable (labels) for classification.
+    :type labels_column: str
+    :param C: Regularization parameter
+    :type C: float
+    :param kernel: Specifies the kernel type.
+    :type kernel: str, optional
+    :param gamma: Kernel coefficient (default: 'scale', relevant for 'rbf', 'poly', and
+        'sigmoid').
+    :type gamma: str
+    :param coef0: Independent term in the kernel function (relevant for 'poly' and
+        'sigmoid').
+    :type coef0: float
+    :param probability: Whether to enable probability estimates
+    :type probability: bool, optional
+    :param tol: Tolerance for stopping criterion
+    :type tol: float
+    :param class_weight: Weights associated with classes
+    :type class_weight: float
+    :param max_iter: Maximum number of iterations (default: -1, indicating no limit).
+    :type max_iter: int
+    :param random_state: The random seed for reproducibility.
+    :type random_state: int
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str
+    :param validation_strategy: The strategy for model validation.
+    :type validation_strategy: str
+    :param scoring: The scoring metric(s) used to evaluate the model's performance
+        during validation.
+    :type scoring: list[str]
+    :param **kwargs: Additional keyword arguments to be passed to the function.
+    :return: A dict containing: a SVC instance, a dataframe consisting of the model's
+        training parameters and the validation score, along with four dataframes
+        containing the respective test and training samples and labels.
+    :rtype: dict
+    """
     # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
