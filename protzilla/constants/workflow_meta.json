@@ -27,6 +27,22 @@
           }
         }
       },
+      "diann_import": {
+        "name": "DIA-NN",
+        "description": "DIA-NN Data Import",
+        "parameters": {
+          "file_path": {
+            "name": "DIA-NN intensities file:",
+            "type": "file",
+            "default": null
+          },
+          "map_to_uniprot": {
+            "name": "Map to Uniprot IDs using Biomart (online)",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
       "ms_fragger_import": {
         "name": "MS Fragger",
         "description": "MS Fragger Data Import",
@@ -79,6 +95,23 @@
             ],
             "default": "Columns (samples in rows, features in columns)"
           }
+        }
+      },
+      "metadata_import_method_diann": {
+        "name": "Metadata Import DIA-NN",
+        "description": "Import Metadata for run relationships of DIA-NN",
+        "parameters": {
+          "file_path": {
+            "name": "Run-Relationship Metadata file:",
+            "type": "file",
+            "default": null
+          },
+          "groupby_sample": {
+            "name": "Group Replicate Runs by Sample using Median",
+            "type": "boolean",
+            "default": false
+          }
+
         }
       },
       "metadata_column_assignment": {

@@ -40,9 +40,9 @@ def anova(
     :rtype: pandas DataFrame, dict
 
     :return: a dataframe in typical protzilla long format
-    with the differentially expressed proteins and a dict, containing
-    the corrected p-values and the log2 fold change, the alpha used
-    and the corrected alpha, as well as filtered out proteins.
+        with the differentially expressed proteins and a dict, containing
+        the corrected p-values and the log2 fold change, the alpha used
+        and the corrected alpha, as well as filtered out proteins.
     """
     # Check if the grouping variable is present in the metadata_df
     assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"

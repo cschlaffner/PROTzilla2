@@ -14,9 +14,9 @@ from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 def by_knn(
     intensity_df: pd.DataFrame,
-    number_of_neighbours=5,
+    number_of_neighbours: int = 5,
     **kwargs  # quantile, default is median
-) -> tuple[pd.DataFrame, dict]:
+) -> (pd.DataFrame, dict):
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -29,17 +29,18 @@ def by_knn(
     Implements an instance of the sklearn.impute KNNImputer
     class.
     https://scikit-learn.org/stable/modules/generated/sklearn.impute.KNNImputer.html
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param number_of_neighbours: number of neighbouring samples used for\
-    imputation. Default: 5
+    :param number_of_neighbours: number of neighbouring samples used for
+        imputation. Default: 5
     :type number_of_neighbours: int
-    :param **kwargs: additional keyword arguments passed to\
+    :param **kwargs: additional keyword arguments passed to
         KNNImputer.fit_transform
     :type kwargs: dict
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame
     """
 
@@ -60,7 +61,7 @@ def by_knn(
 
 def by_simple_imputer(
     intensity_df: pd.DataFrame,
-    strategy="mean",
+    strategy: str = "mean",
 ) -> tuple[pd.DataFrame, dict]:
     """
     A function to perform protein-wise imputations
@@ -74,14 +75,15 @@ def by_simple_imputer(
     no data will be imputed. This function automatically filters
     out such proteins from the DataFrame beforehand.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param strategy: Defines the imputation strategy. Can be "mean",\
-    "median" or "most_frequent" (for mode).
+    :param strategy: Defines the imputation strategy. Can be "mean",
+        "median" or "most_frequent" (for mode).
     :type strategy: str
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, int
     """
     assert strategy in ["mean", "median", "most_frequent"]
@@ -117,16 +119,17 @@ def by_min_per_sample(
     If not wanted, make sure to filter 0 intensity samples in the
     filtering step.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
@@ -156,16 +159,17 @@ def by_min_per_protein(
     take a fraction of that minimum value for imputation.
     CAVE: All proteins without any values will be filtered out.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     transformed_df = long_to_wide(intensity_df)
@@ -200,16 +204,17 @@ def by_min_per_dataset(
     the dataframe. The user can also assign a shrinking factor to
     take a fraction of that minimum value for imputation.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param shrinking_value: a factor to alter the minimum value\
-    used for imputation. With a shrinking factor of 0.1 for\
-    example, a tenth of the minimum value found will be used for\
-    imputation. Default: 1 (no shrinking)
+    :param shrinking_value: a factor to alter the minimum value
+        used for imputation. With a shrinking factor of 0.1 for
+        example, a tenth of the minimum value found will be used for
+        imputation. Default: 1 (no shrinking)
     :type shrinking_value: float
-    :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
+
+    :return: returns an imputed dataframe in typical protzilla long format
+        and an empty dict
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
@@ -249,9 +254,6 @@ def by_normal_distribution_sampling(
     distribution used for imputation is scaled compared to dataset.
     Default: 1 (no scaling)
     :type down_shift: float
-    :param round_values: whether to round the imputed values to the nearest integer
-    Default: False
-    :type round_values: bool
     :return: returns an imputed dataframe in typical protzilla long format\
     and an empty dict
     :rtype: pd.DataFrame, int

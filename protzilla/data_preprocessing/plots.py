@@ -122,6 +122,7 @@ def create_box_plots(
     first boxplot
     :param dataframe_b: Second dataframe in protzilla long format\
     for second boxplot
+
     :param name_a: Name of first boxplot
     :param name_b: Name of second boxplot
     :param heading: Header or title for the graph (optional)
@@ -218,6 +219,7 @@ def create_histograms(
     first histogram
     :param dataframe_b: Second dataframe in protzilla long format\
     for second histogram
+
     :param name_a: Name of first histogram
     :param name_b: Name of second histogram
     :param heading: Header or title for the graph (optional)
@@ -225,6 +227,7 @@ def create_histograms(
     :param x_title: Optional x axis title for graphs.
     :param overlay: Specifies whether to draw one Histogram with overlay or two separate histograms
     :param visual_transformation: Visual transformation of the y-axis data.
+
     :return: returns a pie or bar chart of the data
     """
     if visual_transformation not in {"linear", "log10"}:
@@ -382,6 +385,7 @@ def create_pca_2d_scatter_plot(
     :param colour_non_outlier: hex code for colour depicting the
     non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     non-outlier colour
+
     :return: returns a plotly Figure object
     """
     fig = go.Figure(
@@ -431,6 +435,7 @@ def create_pca_3d_scatter_plot(
     :param colour_non_outlier: hex code for colour depicting the
     non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     non-outlier colour
+
     :return: returns a plotly Figure object
     """
     fig = go.Figure(
