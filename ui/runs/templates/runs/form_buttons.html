@@ -71,7 +71,7 @@
     }
 
     function disable_plot_fields(bool) {
-        $('#graph_type').prop('disabled', bool);
+        $('#plotfields').prop('disabled', bool);
     }
 
     function isEmptyDict(obj) {
@@ -136,7 +136,7 @@
         $('#plot_form').change(function () {
             const selected_method = $('#chosen_method').val();
             if (!calc_form_data || selected_method !== calculated_method) {
-                disable_plot_fields(true);
+                //disable_plot_fields(true);
                 disable_plot_button(true);
                 return;
             }
