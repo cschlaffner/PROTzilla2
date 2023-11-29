@@ -129,11 +129,9 @@
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
                 disable_calc_button(true);
-                disable_plot_button(false);
                 disable_plot_fields(false);
             } else {
                 disable_calc_button(false);
-                disable_plot_button(true);
                 disable_plot_fields(true);
             }
             $('#plot_form').trigger("change");
