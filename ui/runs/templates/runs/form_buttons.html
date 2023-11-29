@@ -116,6 +116,26 @@
         );
     }
 
+    function update_buttons() {
+        console.log("update");
+        if (!equal_calc_parameters($(this))){
+            if (!calc_form_data  ){//|| !(calculated_method === selected_method)) {
+            disable_calc_button(false);
+            disable_plot_button(true);
+            disable_plot_fields(true);}
+        }
+        else {
+            disable_calc_button(true);
+            disable_plot_fields(false);
+            if (plotted_current_match()) {
+                disable_plot_button(true);
+            }
+            else {
+                disable_plot_button(false);
+            }
+        }
+    }
+
     $(document).ready(function () {
         disable_calc_button(false);
         // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
@@ -125,14 +145,7 @@
         }
 
         $('#calc_form').change(function () {
-            const selected_method = $('#chosen_method').val();
-            calc_form_data = get_clean_form_data($(this));
-            if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
-                disable_calc_button(true);
-            } else {
-                disable_calc_button(false);
-            }
-            $('#plot_form').trigger("change");
+            update_buttons();
         });
 
         $('#plot_form').change(function () {
