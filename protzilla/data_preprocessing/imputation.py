@@ -329,50 +329,116 @@ def by_normal_distribution_sampling(
 
 
 def by_knn_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
 def by_normal_distribution_sampling_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
 def by_simple_imputer_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
 def by_min_per_sample_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
 def by_min_per_protein_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
 def by_min_per_dataset_plot(
-    df, result_df, current_out, graph_type, graph_type_quantities, group_by
+    df,
+    result_df,
+    current_out,
+    graph_type,
+    graph_type_quantities,
+    group_by,
+    visual_transformation,
 ):
     return _build_box_hist_plot(
-        df, result_df, graph_type, graph_type_quantities, group_by
+        df,
+        result_df,
+        graph_type,
+        graph_type_quantities,
+        group_by,
+        visual_transformation,
     )
 
 
@@ -381,7 +447,12 @@ def number_of_imputed_values(input_df, result_df):
 
 
 def _build_box_hist_plot(
-    df, result_df, graph_type, graph_type_quantities, group_by
+    df: pd.DataFrame,
+    result_df: pd.DataFrame,
+    graph_type: str = "Boxplot",
+    graph_type_quantities: str = "Pie chart",
+    group_by: str = "None",
+    visual_transformation: str = "linear",
 ) -> list[Figure]:
     """
     This function creates two visualisations:
@@ -394,22 +465,39 @@ def _build_box_hist_plot(
     2. a graph summarising the amount of
     filtered proteins.
     """
+
+    intensity_name_df = df.columns[3]
+    intensity_name_result_df = result_df.columns[3]
+
+    imputed_df = result_df.copy()
+
+    imputed_df[intensity_name_result_df] = list(
+        map(
+            lambda x, y: y if np.isnan(x) else np.nan,
+            df[intensity_name_df],
+            result_df[intensity_name_result_df],
+        )
+    )
+
     if graph_type == "Boxplot":
         fig1 = create_box_plots(
             dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Imputation",
-            name_b="After Imputation",
+            dataframe_b=imputed_df,
+            name_a="Original Values",
+            name_b="Imputed Values",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
+            visual_transformation=visual_transformation,
         )
     elif graph_type == "Histogram":
         fig1 = create_histograms(
             dataframe_a=df,
-            dataframe_b=result_df,
-            name_a="Before Imputation",
-            name_b="After Imputation",
+            dataframe_b=imputed_df,
+            name_a="Original Values",
+            name_b="Imputed Values",
             heading="Distribution of Protein Intensities",
+            visual_transformation=visual_transformation,
+            overlay=True,
         )
 
     values_of_sectors = [
