@@ -6,6 +6,7 @@ from itertools import groupby
 from random import choices
 from string import ascii_letters
 
+import pandas as pd
 import psutil
 
 
@@ -48,3 +49,37 @@ def fig_to_base64(fig):
     fig.savefig(img, format="png", bbox_inches="tight")
     img.seek(0)
     return base64.b64encode(img.getvalue())
+
+
+def default_intensity_column(
+    intensity_df: pd.DataFrame, intensity_column_name: str = None
+) -> str:
+    """
+    Returns the default intensity column name if no column name is provided.
+
+    :param intensity_df: The column for which to determine the intensity column name
+    :param intensity_column_name: If provided, this column name is returned.
+    :return:
+    """
+
+    possible_substring_identifiers = ["intensity", "ibaq", "lfq", "spectral count"]
+
+    if intensity_column_name is not None:
+        return intensity_column_name
+    matched_columns = [
+        col
+        for col in intensity_df.columns
+        if any(
+            [substring in col.lower() for substring in possible_substring_identifiers]
+        )
+    ]
+    if matched_columns:
+        return matched_columns[0]
+
+    raise ValueError(
+        "No intensity column name provided and no default intensity column could be determined."
+        "Please provide the intensity column name manually to the function call."
+    )
+
+    # legacy magic number solution if all else fails
+    # return intensity_df.columns[3]

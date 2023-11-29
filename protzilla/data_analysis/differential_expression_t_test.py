@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from protzilla.utilities import default_intensity_column
+
 from .differential_expression_helper import apply_multiple_testing_correction
 
 
@@ -77,11 +79,7 @@ def t_test(
         logging.warning("auto-selected second group in t-test")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
-    intensity_name = (
-        intensity_df.columns.values.tolist()[3]
-        if intensity_name is None
-        else intensity_name
-    )
+    intensity_name = default_intensity_column(intensity_df, intensity_name)
 
     intensity_df = pd.merge(
         left=intensity_df,

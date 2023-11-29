@@ -3,6 +3,8 @@ import logging
 import pandas as pd
 from scipy import stats
 
+from protzilla.utilities import default_intensity_column
+
 from .differential_expression_helper import apply_multiple_testing_correction
 
 
@@ -66,11 +68,7 @@ def anova(
 
     # Perform ANOVA and calculate p-values for each protein
     proteins = intensity_df["Protein ID"].unique()
-    intensity_name = (
-        intensity_df.columns.values.tolist()[3]
-        if intensity_name is None
-        else intensity_name
-    )
+    intensity_name = default_intensity_column(intensity_df, intensity_name)
     p_values = []
     for protein in proteins:
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.constants.protzilla_logging import logger
+from protzilla.utilities import default_intensity_column
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
@@ -369,7 +370,7 @@ def gsea(
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
-    intensity_name = protein_df.columns[3]
+    intensity_name = default_intensity_column(protein_df)
     # cannot use log2_ratio_of_classes if there are negative values
     if (
         ranking_method == "log2_ratio_of_classes"

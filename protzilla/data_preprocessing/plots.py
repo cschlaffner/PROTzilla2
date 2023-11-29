@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
+from protzilla.utilities import default_intensity_column
+
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
     PROTZILLA_DISCRETE_COLOR_SEQUENCE,
@@ -154,8 +156,8 @@ def create_box_plots(
             f"""Group_by parameter  must be "None" or
                 "Sample" or "Protein ID" but is {group_by}"""
         )
-    intensity_name_a = dataframe_a.columns[3]
-    intensity_name_b = dataframe_b.columns[3]
+    intensity_name_a = default_intensity_column(dataframe_a)
+    intensity_name_b = default_intensity_column(dataframe_b)
     if group_by in {"Sample", "Protein ID"}:
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
@@ -244,8 +246,8 @@ def create_histograms(
     :return: returns a pie or bar chart of the data
     :rtype: Figure (plotly object)
     """
-    intensity_name_a = dataframe_a.columns[3]
-    intensity_name_b = dataframe_b.columns[3]
+    intensity_name_a = default_intensity_column(dataframe_a)
+    intensity_name_b = default_intensity_column(dataframe_b)
     fig = make_subplots(rows=1, cols=2)
     trace0 = go.Histogram(
         x=dataframe_a[intensity_name_a],

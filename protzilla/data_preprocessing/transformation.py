@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
+from protzilla.utilities import default_intensity_column
 
 
 def by_log(intensity_df: pd.DataFrame, log_base="log10"):
@@ -20,7 +21,7 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
         long format with the transformed data and an empty dict.
     :rtype: Tuple[pandas DataFrame, dict]
     """
-    intensity_name = intensity_df.columns.values.tolist()[3]
+    intensity_name = default_intensity_column(intensity_df)
     transformed_df = intensity_df.copy()
 
     # TODO 41 drop data when intensity is 0 and return them in dict
