@@ -6,6 +6,7 @@ from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
 from protzilla.data_preprocessing.plots_helper import generate_tics
+from protzilla.utilities import default_intensity_column
 
 from ..constants.colors import (
     PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
