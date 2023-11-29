@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from django.contrib import messages
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
@@ -258,14 +259,24 @@ def clustergram_plot(
         return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
 
 
-def prot_quant_plot(input_df: pd.DataFrame, protein_group: str, similarity: float, similarity_measure: str):
+def prot_quant_plot(input_df: pd.DataFrame, protein_group: str, similarity: float = 1.0, similarity_measure: str = "euclidian_distance"):
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    try:
+        if protein_group not in wide_df.columns:
+            raise ValueError("Please select a valid protein group.")
+        elif similarity_measure == "euclidean distance" and similarity < 0:
+            raise ValueError("Similarity for euclidean distance should be greater than or equal to 0.")
+        elif similarity_measure == "cosine similarity" and (similarity < -1 or similarity > 1):
+            raise ValueError("Similarity for cosine similarity should be between -1 and 1.")
+    except ValueError as error: 
+        return [dict(messages=[dict(level=messages.ERROR, msg=str(error))])]
 
     fig = go.Figure()
 
     color_mapping = {
-        'A': 'green',
-        'C': 'blue',
+        'A': PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+        'C': PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
     }
 
     lower_upper_x = []
@@ -295,8 +306,12 @@ def prot_quant_plot(input_df: pd.DataFrame, protein_group: str, similarity: floa
         if group_to_compare != protein_group:
             similarity_measure_method = euclidean_distances if similarity_measure == "euclidean distance" else cosine_similarity
             distance = similarity_measure_method(wide_df[protein_group].values.reshape(1, -1), wide_df[group_to_compare].values.reshape(1, -1))[0][0]
-            if distance <= similarity:
-                similar_groups.append(group_to_compare)
+            if similarity_measure == "euclidean distance":
+                if distance <= similarity:
+                    similar_groups.append(group_to_compare)
+            else:
+                if distance >= similarity:
+                    similar_groups.append(group_to_compare)
     
     
     for group in similar_groups:
