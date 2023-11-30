@@ -1,8 +1,9 @@
+import logging
+
 import dash_bio as dashbio
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from django.contrib import messages
 
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
@@ -66,7 +67,7 @@ def scatter_plot(
             )
         elif color_df.shape[1] != 1:
             msg = "The color dataframe should have 1 dimension only"
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
 
 
 def create_volcano_plot(
@@ -255,4 +256,4 @@ def clustergram_plot(
             msg = "The input dataframe and the grouping contain different samples"
         else:
             msg = f"An unknown error occurred: {e}"
-        return [dict(messages=[dict(level=messages.ERROR, msg=msg)])]
+        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]

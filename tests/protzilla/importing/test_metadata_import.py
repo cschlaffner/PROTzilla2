@@ -1,7 +1,7 @@
+import logging
 from shutil import rmtree
 
 import pandas as pd
-from django.contrib import messages
 
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import
@@ -91,7 +91,7 @@ def test_metadata_column_assignment():
         metadata_required_column="Group",
         metadata_unknown_column="Sample",
     )
-    assert out["messages"][0]["level"] == messages.ERROR
+    assert out["messages"][0]["level"] == logging.ERROR
     assert out["messages"][0]["msg"]
     df_new, out_new = metadata_import.metadata_column_assignment(
         df=run.df,

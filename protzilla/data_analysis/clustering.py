@@ -1,5 +1,6 @@
+import logging
+
 import pandas as pd
-from django.contrib import messages
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.mixture import GaussianMixture
 
@@ -141,7 +142,7 @@ def k_means(
         return dict(
             centroids=None,
             labels=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 

@@ -1,10 +1,11 @@
+import logging
 import traceback
 
 import pandas as pd
-from django.contrib import messages
 from sklearn.preprocessing import StandardScaler
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
+from protzilla.utilities import default_intensity_column
 
 
 def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -29,7 +30,7 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
 
@@ -76,7 +77,7 @@ def by_median(
 
     assert 0 <= percentile <= 1
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
     zeroed_samples = []
@@ -133,7 +134,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
     zeroed_samples_list = []
@@ -192,7 +193,7 @@ def by_reference_protein(
     """
     scaled_df = pd.DataFrame()
     dropped_samples = []
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     protein_groups = intensity_df["Protein ID"].unique().tolist()
     for group in protein_groups:
         if reference_protein in group.split(";"):
@@ -202,7 +203,7 @@ def by_reference_protein(
         msg = "The protein was not found"
         return scaled_df, dict(
             dropped_samples=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     samples = intensity_df["Sample"].unique().tolist()

@@ -1,10 +1,10 @@
+import logging
 import re
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 
 from protzilla.data_integration.database_query import biomart_query
 
@@ -15,7 +15,7 @@ def max_quant_import(
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a Max Quant file."
-        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
     df = pd.read_csv(
         file_path,
         sep="\t",
@@ -30,7 +30,7 @@ def max_quant_import(
 
     if intensity_df.empty:
         msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again"
-        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
     intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
@@ -54,7 +54,7 @@ def ms_fragger_import(
     ]
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a MS Fragger file."
-        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     df = pd.read_csv(
         file_path,
@@ -88,7 +88,7 @@ def ms_fragger_import(
 def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
     if not Path(file_path).is_file():
         msg = "The file upload is empty. Please provide a DIA-NN MS file."
-        return None, dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     df = pd.read_csv(
         file_path,
@@ -157,7 +157,7 @@ def transform_and_clean(
     return molten, dict(
         contaminants=contaminants,
         filtered_proteins=filtered_proteins,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 

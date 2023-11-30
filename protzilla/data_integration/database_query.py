@@ -4,8 +4,8 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 import pandas
 import requests
 
-from protzilla.constants.logging import logger
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
+from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities import clean_uniprot_id
 
 

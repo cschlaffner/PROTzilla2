@@ -1,5 +1,6 @@
+import logging
+
 import pandas as pd
-from django.contrib import messages
 
 from protzilla.data_integration import database_query
 from protzilla.utilities import clean_uniprot_id, unique_justseen
@@ -23,7 +24,7 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
         msg = "No fields that should be added specified."
         return dict(
             results_df=dataframe,
-            messages=[dict(level=messages.INFO, msg=msg)],
+            messages=[dict(level=logging.INFO, msg=msg)],
         )
     if isinstance(fields, str):
         fields = [fields]
@@ -102,7 +103,7 @@ def gene_mapping(dataframe, database_names, use_biomart=False):
     except KeyError:
         msg = "No Protein ID column found."
         return dict(
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
     if isinstance(database_names, str):
         database_names = [database_names]

@@ -1,10 +1,18 @@
 import pandas as pd
 
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
+from protzilla.utilities import default_intensity_column
 
 
-def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold):
-    intensity_name = intensity_df.columns.values.tolist()[3]
+def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold: float):
+    """
+    This function filters samples based on the sum of the protein intensities.
+
+    :param intensity_df: the intensity dataframe that should be filtered
+    :param threshold:  float, defining the allowed deviation from the median (in standard deviations) to keep a sample
+    :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
+    """
+    intensity_name = default_intensity_column(intensity_df)
 
     sample_protein_sum = intensity_df.groupby("Sample")[intensity_name].sum()
 
@@ -23,7 +31,7 @@ def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold):
 
 
 def by_protein_count(intensity_df: pd.DataFrame, threshold):
-    intensity_name = intensity_df.columns.values.tolist()[3]
+    intensity_name = default_intensity_column(intensity_df)
 
     sample_protein_count = (
         intensity_df[~intensity_df[intensity_name].isnull()]
@@ -49,9 +57,9 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
     This function filters samples based on the amount of nan values.
     If the percentage of existing values is below a threshold (percentage), the sample is filtered out.
 
-    :param df: the intensity dataframe that should be filtered
+    :param intensity_df: the intensity dataframe that should be filtered
         in long format
-    :type df: pd.DataFrame
+    :type intensity_df: pd.DataFrame
     :param percentage: float ranging from 0 to 1. Defining the
         relative share of proteins that were detected in the sample in inorder to be kept.
     :type percentage: float
@@ -61,7 +69,7 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
         that were kept
     :rtype: Tuple[pandas DataFrame, dict]
     """
-    intensity_name = intensity_df.columns.values.tolist()[3]
+    intensity_name = default_intensity_column(intensity_df)
 
     total_protein_count = intensity_df["Protein ID"].nunique()
     sample_protein_count = (

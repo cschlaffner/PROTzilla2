@@ -9,6 +9,7 @@ from protzilla.data_preprocessing.plots import (
     create_histograms,
     create_pie_plot,
 )
+from protzilla.utilities import default_intensity_column
 from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 
@@ -133,7 +134,7 @@ def by_min_per_sample(
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
-    intensity_name = intensity_df_copy.columns[3]
+    intensity_name = default_intensity_column(intensity_df_copy)
     samples = intensity_df_copy["Sample"].unique().tolist()
     for sample in samples:
         location = intensity_df_copy[intensity_name].loc[
@@ -218,7 +219,7 @@ def by_min_per_dataset(
     :rtype: pd.DataFrame, dict
     """
     intensity_df_copy = intensity_df.copy(deep=True)
-    intensity_name = intensity_df_copy.columns[3]
+    intensity_name = default_intensity_column(intensity_df_copy)
     intensity_df_copy[intensity_name].fillna(
         intensity_df_copy[intensity_name].min() * shrinking_value,
         inplace=True,
@@ -296,7 +297,7 @@ def by_normal_distribution_sampling(
 
     else:
         # determine column for protein intensities
-        intensity_type = intensity_df.columns[3]
+        intensity_type = default_intensity_column(intensity_df)
 
         number_of_nans = intensity_df[intensity_type].isnull().sum()
         assert number_of_nans <= len(intensity_df[intensity_type]) - 2
