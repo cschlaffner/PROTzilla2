@@ -504,7 +504,7 @@
         "description": "A function to impute missing values for each protein by taking into account data from the entire dataframe. Sets missing value to the smallest measured value in the dataframe. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation.",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -560,7 +560,7 @@
         "description": "A function to impute missing values for each protein by taking into account data from each protein. Sets missing value to the smallest measured value for each protein column. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without any values will be filtered out.",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -616,7 +616,7 @@
         "description": "Sets missing intensity values to the smallest measured value for each sample",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
