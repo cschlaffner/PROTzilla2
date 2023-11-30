@@ -1,0 +1,142 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          },
+          "output_name": null
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          },
+          "output_name": null
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": [
+        {
+          "name": "filter_proteins",
+          "method": "samples_missing_filter",
+          "parameters": {
+            "percentage": 0.2
+          },
+          "graphs": [
+            {
+              "graph_type": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "filter_samples",
+          "method": "protein_intensity_sum_filter",
+          "parameters": {
+            "threshold": 2
+          },
+          "graphs": [
+            {
+              "graph_type": "Bar chart"
+            }
+          ]
+        },
+        {
+          "name": "imputation",
+          "method": "knn",
+          "parameters": {
+            "number_of_neighbours": 10
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample",
+              "visual_transformation": "log10"
+            },
+            {
+              "graph_type_quantities": "Pie chart"
+            }
+          ]
+        },
+        {
+          "name": "outlier_detection",
+          "method": "local_outlier_factor",
+          "parameters": {
+            "number_of_neighbors": 3
+          }
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
+        },
+        {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ],
+          "output_name": "preprocessed_data"
+        }
+      ]
+    },
+    "data_analysis": {
+      "steps": [
+        {
+          "name": "differential_expression",
+          "method": "anova",
+          "parameters": {
+            "intensity_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "multiple_testing_correction_method": "Benjamini-Hochberg",
+            "alpha": 0.05,
+            "grouping": "Group",
+            "selected_groups": [],
+            "metadata_df": null
+          },
+          "output_name": "anova"
+        },
+        {
+          "name": "plot",
+          "method": "clustergram",
+          "parameters": {
+            "input_df": [
+              "anova",
+              "filtered_df"
+            ],
+            "sample_group_df": [
+              null,
+              null
+            ],
+            "flip_axes": "no"
+          }
+        }
+      ]
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}
