@@ -533,7 +533,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -589,7 +589,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -645,7 +645,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -704,7 +704,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -760,7 +760,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -832,7 +832,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
