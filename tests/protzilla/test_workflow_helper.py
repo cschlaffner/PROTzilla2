@@ -156,7 +156,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "filter_samples",
         "protein_intensity_sum_filter",
         0,
-        "threshold",
+        "deviation_threshold",
     )
 
     assert threshold_value is None

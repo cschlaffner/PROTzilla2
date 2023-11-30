@@ -199,7 +199,7 @@
         "name": "Protein Count",
         "description": "Filter by protein count per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
@@ -250,7 +250,7 @@
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
