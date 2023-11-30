@@ -128,7 +128,7 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
+            name_field=make_name_field(allow_next, run, end_of_run),
             current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
