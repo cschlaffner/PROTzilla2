@@ -70,6 +70,10 @@
         calc_params_match = bool;
     }
 
+    function disable_plot_fields(bool) {
+        $('#plotfields').prop('disabled', bool);
+    }
+
     function isEmptyDict(obj) {
         return Object.keys(obj).length == 0;
     }
@@ -113,9 +117,11 @@
     }
 
     $(document).ready(function () {
+        disable_calc_button(false);
         // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
         if($('#plot_form').find('input').length) {
             disable_plot_button(true);
+            disable_plot_fields(true);
         }
 
         $('#calc_form').change(function () {
@@ -123,16 +129,23 @@
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
                 disable_calc_button(true);
+                disable_plot_fields(false);
             } else {
                 disable_calc_button(false);
+                disable_plot_fields(true);
             }
             $('#plot_form').trigger("change");
         });
 
         $('#plot_form').change(function () {
             const selected_method = $('#chosen_method').val();
-            if (!calc_form_data || selected_method !== calculated_method) {
+
+            if (plotted_current_match() && equal_plot_parameters($(this))) {
                 disable_plot_button(true);
+            }
+
+            if (!calc_form_data || selected_method !== calculated_method) {
+                disable_plot_button(true)
                 return;
             }
 
@@ -143,7 +156,8 @@
 
             if (equal_plot_parameters($(this)) || !calc_params_match) {
                 disable_plot_button(true);
-            } else {
+            }
+            else {
                 disable_plot_button(false);
             }
         });
