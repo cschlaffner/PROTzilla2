@@ -34,14 +34,14 @@
 | protzilla/data\_integration/enrichment\_analysis\_gsea.py           |      132 |        4 |       54 |        6 |     95% |155, 158, 220->224, 385, 388, 457->461 |
 | protzilla/data\_integration/enrichment\_analysis\_helper.py         |       73 |        6 |       42 |        2 |     93% |137-139, 145, 150-151 |
 | protzilla/data\_preprocessing/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
-| protzilla/data\_preprocessing/filter\_proteins.py                   |       17 |        2 |        4 |        1 |     76% |     53-54 |
+| protzilla/data\_preprocessing/filter\_proteins.py                   |       18 |        2 |        4 |        1 |     77% |     53-54 |
 | protzilla/data\_preprocessing/filter\_samples.py                    |       35 |        0 |        4 |        0 |    100% |           |
 | protzilla/data\_preprocessing/imputation.py                         |      115 |        1 |       22 |        3 |     97% |144, 492->503, 513->519 |
 | protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |248->259, 260 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |176, 193, 248, 249->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
 | protzilla/data\_preprocessing/plots.py                              |       98 |       12 |       21 |        5 |     86% |164->179, 234, 246-247, 282, 293, 394-418 |
-| protzilla/data\_preprocessing/plots\_helper.py                      |       17 |       14 |        6 |        0 |     13% |     15-47 |
+| protzilla/data\_preprocessing/plots\_helper.py                      |       17 |       13 |        6 |        0 |     17% |15-24, 38-47 |
 | protzilla/data\_preprocessing/transformation.py                     |       21 |        2 |        8 |        3 |     83% |33, 42->51, 52 |
 | protzilla/history.py                                                |      134 |       11 |       60 |        7 |     91% |39, 113, 120, 130, 176-180, 222, 229 |
 | protzilla/importing/\_\_init\_\_.py                                 |        0 |        0 |        0 |        0 |    100% |           |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      320 |      264 |      112 |        0 |     13% |55, 80-119, 159-175, 206-227, 247-375, 388-395, 409-411, 426-428, 443-445, 460-469, 484-491, 506-514, 530-557, 575-604, 620-622, 638-639, 686-688, 704-719, 727-757, 776-791, 797-833 |
 | ui/runs/views\_helper.py                                            |       52 |        9 |       22 |        4 |     80% |14->16, 20, 33, 36-42 |
-|                                                           **TOTAL** | **4301** | **1166** | **1716** |  **218** | **70%** |           |
+|                                                           **TOTAL** | **4302** | **1165** | **1716** |  **218** | **70%** |           |
 
 
 ## Setup coverage badge
