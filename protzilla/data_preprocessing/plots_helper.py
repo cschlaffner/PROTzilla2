@@ -27,7 +27,8 @@ def generate_tics(lower_bound, upper_bound, log: bool):
         ticktext=ticktext,
     )
 
-def millify(n)->str:
+
+def millify(n) -> str:
     """
     Writes the number n in shortened style with shorthand symbol for every power of 1000
 
