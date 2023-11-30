@@ -83,7 +83,8 @@ def test_run_create(tests_folder_name):
         data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     run.calculate_and_next(
-        data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
     )
     # print([s.outputs for s in run.history.steps])
     # to get a history that can be used to create a worklow, the section, step, method
