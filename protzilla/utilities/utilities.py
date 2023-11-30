@@ -80,6 +80,3 @@ def default_intensity_column(
         "No intensity column name provided and no default intensity column could be determined."
         "Please provide the intensity column name manually to the function call."
     )
-
-    # legacy magic number solution if all else fails
-    # return intensity_df.columns[3]
