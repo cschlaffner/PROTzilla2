@@ -75,7 +75,11 @@
     }
 
     function isEmptyDict(obj) {
-        return Object.keys(obj).length == 0;
+        return Object.keys(obj).length === 0;
+    }
+
+    function plot_fields_exist() {
+        return document.getElementById('plot_form') !== null;
     }
 
     function trigger_plot_change() {
@@ -115,6 +119,9 @@
             form_data.hasOwnProperty(key) && form_data[key] == current_plot_parameters[key]
         );
     }
+    function tempelhof(formel){
+        return formel;
+    }
 
     $(document).ready(function () {
         disable_calc_button(false);
@@ -125,6 +132,7 @@
         }
 
         $('#calc_form').change(function () {
+            console.log("calc")
             const selected_method = $('#chosen_method').val();
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
@@ -133,6 +141,13 @@
             } else {
                 disable_calc_button(false);
                 disable_plot_fields(true);
+            }
+            if (!plot_fields_exist()) {
+                if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
+                    disable_plot_button(false);
+                } else {
+                    disable_plot_button(true);
+                }
             }
             $('#plot_form').trigger("change");
         });
