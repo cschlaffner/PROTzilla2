@@ -249,6 +249,7 @@ def change_field(request, run_name):
             active_runs[run_name] = Run.continue_existing(run_name)
         run = active_runs[run_name]
     except FileNotFoundError as e:
+        # TODO should use logging instead of printing
         print(str(e))
         response = JsonResponse({"error": f"Run '{run_name}' was not found"})
         response.status_code = 404  # not found
@@ -290,6 +291,7 @@ def change_field(request, run_name):
                 param_dict["categories"] = protein_iterable
             else:
                 param_dict["categories"] = []
+                # TODO should use logging instead of printing
                 print(
                     f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
                 )
