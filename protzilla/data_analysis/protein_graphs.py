@@ -264,64 +264,6 @@ def peptides_to_isoform(
     )
 
 
-def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
-    """
-    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
-    Included features are just `Variation`, digestion is skipped.
-    The Graph is saved in .graphml-Format.
-
-    This is designed, so it can be used for peptides_to_isoform but works independently
-    as well
-
-    ProtGraph: https://github.com/mpc-bioinformatics/ProtGraph/
-
-    :param protein_id: UniProt Protein-ID
-    :type protein_id: str
-    :param run_name: name of the run this is executed from. Used for saving the protein
-        file, graph
-    :type run_name: str
-    :param queue_size: Queue Size for ProtGraph, This is yet to be merged by ProtGraph
-    :type queue_size: int
-
-    :return: dict(graph_path, messages)
-    """
-
-    logger.info(f"Creating graph for protein {protein_id}")
-    run_path = RUNS_PATH / run_name
-    path_to_protein_file, filtered_blocks, request = _get_protein_file(
-        protein_id, run_path
-    )
-
-    path_to_protein_file = Path(path_to_protein_file)
-    if not path_to_protein_file.exists() and request.status_code != 200:
-        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
-        logger.error(msg)
-        return dict(
-            graph_path=None,
-            filtered_blocks=filtered_blocks,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
-        )
-
-    output_folder_path = run_path / "graphs"
-    output_csv = output_folder_path / f"{protein_id}.csv"
-    graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder_path} \
-                --output_csv={output_csv} \
-                -ft VARIANT \
-                -d skip"
-
-    subprocess.run(cmd_str, shell=True)
-
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
-    logger.info(msg)
-    return dict(
-        graph_path=str(graph_path),
-        filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
-    )
-
-
 def _create_graph_index(
     protein_graph: nx.DiGraph, seq_len: int
 ) -> tuple[list | None, str, dict | None]:
