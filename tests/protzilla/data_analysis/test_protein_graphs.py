@@ -1197,28 +1197,28 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
 def test_get_peptides_all_0(test_peptide_df):
     protein_id = "MadeUp"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["COOLSEQ", "SHOULDAPPEAR"]
 
 
 def test_get_peptides_nan_0(test_peptide_df):
     protein_id = "MadeDown"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["VCOOLSEQ1"]
 
 
 def test_get_peptides_all_nan(test_peptide_df):
     protein_id = "MadeRight"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == []
 
 
 def test_get_peptides_one_nan(test_peptide_df):
     protein_id = "MadeLeft"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["LCOOLSEQ2", "LCOOLSEQ3"]
 
 
@@ -1249,7 +1249,7 @@ def test_peptides_to_isoform_no_graph(critical_logger, tests_folder_name):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_no_graph"
 
     protein_id = "SomeID"
-    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, run_name)
+    out_dict = peptides_to_isoform(pd.DataFrame(), pd.DataFrame(), protein_id, run_name)
     assert out_dict["graph_path"] is None
     assert out_dict["messages"][0]["msg"] == "No graph found"
 

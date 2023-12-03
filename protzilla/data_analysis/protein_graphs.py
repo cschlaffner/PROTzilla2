@@ -119,6 +119,8 @@ def peptides_to_isoform(
 
     :param peptide_df: Peptide Dataframe with columns "sequence", "protein_id"
     :type peptide_df: pd.DataFrame
+    :param metadata_df: Metadata Dataframe, expected to have a column "Sample"
+    :type metadata_df: pd.DataFrame
     :param protein_id: UniProt Protein-ID
     :type protein_id: str
     :param run_name: name of the run this is executed from. Used for saving the protein
@@ -130,10 +132,14 @@ def peptides_to_isoform(
         peptide and the reference sequence at a given starting location of a potential
         match
     :type allowed_mismatches: int
+    :param grouping: column name of the metadata_df to group by, defaults to None
+    :type grouping: str, optional
+    :param selected_groups: list of groups to include in the analysis, defaults to None
+    :type selected_groups: list, optional
 
     :return: dict of path to graph - either the modified graph or the original graph if
-        the modification failed, the protein id, list of matched peptides, list of unmatched
-        peptides, messages passed to the frontend
+        the modification failed, the protein id, list of matched peptides, list of
+        unmatched peptides, messages passed to the frontend
     :rtype: dict[str, str, list, list, list]
     """
 
@@ -156,6 +162,7 @@ def peptides_to_isoform(
     print(
         f"grouping:{grouping}, type grouping: {type(grouping)}, selected groups: {selected_groups}"
     )
+    assert metadata_df, f"Metadata needs to be imported before using this Method"
     print(metadata_df)
     print(metadata_df[grouping])
 
