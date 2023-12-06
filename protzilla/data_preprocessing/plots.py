@@ -49,6 +49,7 @@ def create_pie_plot(
         },
         font=dict(size=14, family="Arial"),
     )
+    fig.update_traces(hovertemplate="%{label} <br>Amount: %{value}")
     return fig
 
 
