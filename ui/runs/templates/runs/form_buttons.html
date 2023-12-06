@@ -66,7 +66,17 @@
     }
 
     function disable_plot_button(bool) {
-        $('#plot_parameters_submit').prop('disabled', bool);
+        if (plot_fields_exist()) {
+            $('#plot_parameters_submit').prop('disabled', bool);
+        }
+        else {
+        if (bool) {
+            $('#plot_parameters_submit').prop('href', '');
+        }
+        else {
+            $('#plot_parameters_submit').prop('href', '{% url 'runs:plot' run_name %}');
+        }
+        }
     }
 
     function disable_plot_fields(bool) {
