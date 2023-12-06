@@ -67,6 +67,8 @@
 
     function disable_plot_button(bool) {
         plot_button = $('#plot_parameters_submit');
+        //When plot fields exist the Plot button is implemented as an input otherwise as a link,
+        //thus they have to be deactivated differently.
         if (plot_fields_exist()) {
             plot_button.prop('disabled', bool);
         }
