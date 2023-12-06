@@ -4,9 +4,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from django.contrib import messages
+from scipy import stats
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
@@ -263,7 +264,7 @@ def prot_quant_plot(
     input_df: pd.DataFrame,
     protein_group: str,
     similarity: float = 1.0,
-    similarity_measure: str = "euclidian_distance",
+    similarity_measure: str = "euclidean distance",
 ):
     """
     A function to create a graph visualising protein quantifications across all samples
@@ -331,15 +332,16 @@ def prot_quant_plot(
     similar_groups = []
     for group_to_compare in wide_df.columns:
         if group_to_compare != protein_group:
-            similarity_measure_method = (
-                euclidean_distances
-                if similarity_measure == "euclidean distance"
-                else cosine_similarity
-            )
-            distance = similarity_measure_method(
-                wide_df[protein_group].values.reshape(1, -1),
-                wide_df[group_to_compare].values.reshape(1, -1),
-            )[0][0]
+            if similarity_measure == "euclidean distance":
+                distance = euclidean_distances(
+                    stats.zscore(wide_df[protein_group]).values.reshape(1, -1),
+                    stats.zscore(wide_df[group_to_compare]).values.reshape(1, -1),
+                )[0][0]
+            else:
+                distance = cosine_similarity(
+                    stats.zscore(wide_df[protein_group]).values.reshape(1, -1),
+                    stats.zscore(wide_df[group_to_compare]).values.reshape(1, -1),
+                )[0][0]
             if similarity_measure == "euclidean distance":
                 if distance <= similarity:
                     similar_groups.append(group_to_compare)
