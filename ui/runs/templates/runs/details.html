@@ -147,9 +147,9 @@
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <fieldset id="plotfields">
-                                    <div id="plot_parameters" class="mb-2">
-                                        {% include "runs/fields.html" with fields=plot_fields %}
-                                    </div>
+                                        <div id="plot_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=plot_fields %}
+                                        </div>
                                     </fieldset>
                                     <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
                                 </form>
@@ -172,7 +172,9 @@
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                                    class="btn btn-red mr-auto">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
+                                                <fieldset id="plot_parameters_submit">
+                                                    <a href="{% url 'runs:plot' run_name %}" class="btn btn-close">Plot</a>
+                                                </fieldset>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"

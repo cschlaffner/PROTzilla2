@@ -59,15 +59,14 @@
         return formDataDict;
     }
 
-
-    function disable_plot_button(bool) {
-        $('#plot_parameters_submit').prop('disabled', bool);
-    }
-
     function disable_calc_button(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool);
         results_exist = bool;
         calc_params_match = bool;
+    }
+
+    function disable_plot_button(bool) {
+        $('#plot_parameters_submit').prop('disabled', bool);
     }
 
     function disable_plot_fields(bool) {
@@ -118,9 +117,6 @@
         return Object.keys(current_plot_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_plot_parameters[key]
         );
-    }
-    function tempelhof(formel){
-        return formel;
     }
 
     $(document).ready(function () {
