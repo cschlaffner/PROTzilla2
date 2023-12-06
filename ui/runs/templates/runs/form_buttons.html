@@ -66,16 +66,19 @@
     }
 
     function disable_plot_button(bool) {
+        plot_button = $('#plot_parameters_submit');
         if (plot_fields_exist()) {
-            $('#plot_parameters_submit').prop('disabled', bool);
+            plot_button.prop('disabled', bool);
         }
         else {
-        if (bool) {
-            $('#plot_parameters_submit').prop('href', '');
-        }
-        else {
-            $('#plot_parameters_submit').prop('href', '{% url 'runs:plot' run_name %}');
-        }
+            if (bool) {
+                plot_button.prop('href', '');
+                plot_button.prop('style', 'background-color:#EFF3F7');
+                plot_button.prop('style', 'color:#6E7073');
+            }
+            else {
+                plot_button.prop('href', '{% url 'runs:plot' run_name %}');
+            }
         }
     }
 
