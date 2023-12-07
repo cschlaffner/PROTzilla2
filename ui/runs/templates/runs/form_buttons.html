@@ -99,7 +99,6 @@
         }
 
         let form_data = get_clean_form_data(form);
-
         calc_form_data = form_data;
         return Object.keys(current_parameters).every(key =>
             form_data.hasOwnProperty(key) && form_data[key] == current_parameters[key]
