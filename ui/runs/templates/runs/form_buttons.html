@@ -59,15 +59,29 @@
         return formDataDict;
     }
 
-
-    function disable_plot_button(bool) {
-        $('#plot_parameters_submit').prop('disabled', bool);
-    }
-
     function disable_calc_button(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool);
         results_exist = bool;
         calc_params_match = bool;
+    }
+
+    function disable_plot_button(bool) {
+        plot_button = $('#plot_parameters_submit');
+        //When plot fields exist the Plot button is implemented as an input otherwise as a link,
+        //thus they have to be deactivated differently.
+        if (plot_fields_exist()) {
+            plot_button.prop('disabled', bool);
+        }
+        else {
+            if (bool) {
+                plot_button.prop('href', '');
+                plot_button.prop('style', 'background-color:#EFF3F7');
+                plot_button.prop('style', 'color:#6E7073');
+            }
+            else {
+                plot_button.prop('href', '{% url 'runs:plot' run_name %}');
+            }
+        }
     }
 
     function disable_plot_fields(bool) {
@@ -75,7 +89,11 @@
     }
 
     function isEmptyDict(obj) {
-        return Object.keys(obj).length == 0;
+        return Object.keys(obj).length === 0;
+    }
+
+    function plot_fields_exist() {
+        return document.getElementById('plot_form') !== null;
     }
 
     function trigger_plot_change() {
@@ -125,6 +143,7 @@
         }
 
         $('#calc_form').change(function () {
+            console.log("calc")
             const selected_method = $('#chosen_method').val();
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
@@ -133,6 +152,13 @@
             } else {
                 disable_calc_button(false);
                 disable_plot_fields(true);
+            }
+            if (!plot_fields_exist()) {
+                if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
+                    disable_plot_button(false);
+                } else {
+                    disable_plot_button(true);
+                }
             }
             $('#plot_form').trigger("change");
         });
