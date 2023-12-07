@@ -509,6 +509,7 @@ def _build_box_hist_plot(
             names_of_sectors=["Non-imputed values", "Imputed values"],
             values_of_sectors=values_of_sectors,
             heading="Number of Imputed Values",
+            y_title="Number of Values",
         )
     elif graph_type_quantities == "Pie chart":
         fig2 = create_pie_plot(

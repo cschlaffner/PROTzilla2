@@ -123,5 +123,6 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
             ],
             names_of_sectors=["Samples kept", "Samples filtered"],
             heading="Number of Filtered Samples",
+            y_title="Number of Samples",
         )
     return [fig]
