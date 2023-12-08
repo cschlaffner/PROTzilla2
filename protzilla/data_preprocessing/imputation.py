@@ -488,6 +488,7 @@ def _build_box_hist_plot(
             heading="Distribution of Protein Intensities",
             group_by=group_by,
             visual_transformation=visual_transformation,
+            y_title="Intensity",
         )
     elif graph_type == "Histogram":
         fig1 = create_histograms(
@@ -498,6 +499,7 @@ def _build_box_hist_plot(
             heading="Distribution of Protein Intensities",
             visual_transformation=visual_transformation,
             overlay=True,
+            y_title="Frequency of Protein Intensities",
         )
 
     values_of_sectors = [
