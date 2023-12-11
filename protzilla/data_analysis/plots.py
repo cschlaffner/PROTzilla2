@@ -355,7 +355,7 @@ def prot_quant_plot(
                 x=wide_df.index,
                 y=wide_df[group],
                 mode="lines",
-                name=group,
+                name=group[:15] + "..." if len(group) > 15 else group,
                 line=dict(color="rgba(102,51,153,0.5)"),
                 showlegend=len(similar_groups) <= 7,
             )
