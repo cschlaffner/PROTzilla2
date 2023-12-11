@@ -390,7 +390,7 @@ def prot_quant_plot(
             x=[None],
             y=[None],
             mode="markers",
-            marker=dict(color="green"),
+            marker=dict(color=color_mapping.get("A")),
             name="Experimental Group",
         )
     )
@@ -400,7 +400,7 @@ def prot_quant_plot(
             x=[None],
             y=[None],
             mode="markers",
-            marker=dict(color="blue"),
+            marker=dict(color=color_mapping.get("C")),
             name="Control Group",
         )
     )
