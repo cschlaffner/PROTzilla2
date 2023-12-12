@@ -499,6 +499,7 @@ def _build_box_hist_plot(
             heading="Distribution of Protein Intensities",
             visual_transformation=visual_transformation,
             overlay=True,
+            x_title="Protein Intensities",
             y_title="Frequency of Protein Intensities",
         )
 
