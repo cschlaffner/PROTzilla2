@@ -180,6 +180,8 @@ def create_box_plots(
     fig.update_layout(
         xaxis_title=x_title,
         yaxis_title=y_title,
+        xaxis2_title=x_title,
+        yaxis2_title=y_title,
         font=dict(size=14, family="Arial"),
         plot_bgcolor="white",
         yaxis1={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
@@ -279,6 +281,7 @@ def create_histograms(
         fig = make_subplots(rows=1, cols=2)
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
+        fig.update_layout(xaxis2_title=x_title, yaxis2_title=y_title)
         if visual_transformation == "log10":
             fig.update_layout(
                 xaxis=generate_tics(0, max_value, True),
@@ -310,7 +313,6 @@ def create_histograms(
         },
     )
     fig.update_yaxes(rangemode="tozero")
-
     return fig
 
 
