@@ -279,6 +279,7 @@ def create_histograms(
         fig = make_subplots(rows=1, cols=2)
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
+        fig.update_layout(xaxis2_title=x_title, yaxis2_title=y_title)
         if visual_transformation == "log10":
             fig.update_layout(
                 xaxis=generate_tics(0, max_value, True),
@@ -310,7 +311,6 @@ def create_histograms(
         },
     )
     fig.update_yaxes(rangemode="tozero")
-
     return fig
 
 

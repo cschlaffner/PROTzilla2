@@ -56,6 +56,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             name_a="Before Transformation",
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
-            y_title="Frequency of Protein Intensites",
+            x_title="Protein Intensities",
+            y_title="Frequency of Protein Intensities",
         )
     return [fig]
