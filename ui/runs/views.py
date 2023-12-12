@@ -816,17 +816,33 @@ def protein_graph(request, run_name, index: int):
 
     graph = nx.read_graphml(graph_path)
 
-    nodes = [
-        {
-            "data": {
-                "id": node,
-                "label": graph.nodes[node].get("aminoacid", "####### ERROR #######"),
-                "match": graph.nodes[node].get("match", "false"),
-                "peptides": graph.nodes[node].get("peptides", ""),
+    max_peptides = 0
+    min_peptides = 0
+    nodes = []
+
+    # count number of peptides for each node, set max_peptides and min_peptides
+    for node in graph.nodes():
+        peptides = graph.nodes[node].get("peptides", "")
+        if peptides != "":
+            peptides = peptides.split(";")
+            if len(peptides) > max_peptides:
+                max_peptides = len(peptides)
+            elif len(peptides) < min_peptides:
+                min_peptides = len(peptides)
+        nodes.append(
+            {
+                "data": {
+                    "id": node,
+                    "label": graph.nodes[node].get(
+                        "aminoacid", "####### ERROR #######"
+                    ),
+                    "match": graph.nodes[node].get("match", "false"),
+                    "peptides": graph.nodes[node].get("peptides", ""),
+                    "peptides_count": len(peptides),
+                }
             }
-        }
-        for node in graph.nodes()
-    ]
+        )
+
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
 
@@ -839,6 +855,8 @@ def protein_graph(request, run_name, index: int):
             "peptide_mismatches": peptide_mismatches,
             "protein_id": protein_id,
             "filtered_blocks": outputs.get("filtered_blocks", []),
+            "max_peptides": max_peptides,
+            "min_peptides": min_peptides,
             "run_name": run_name,
             "used_memory": get_memory_usage(),
         },
