@@ -180,6 +180,8 @@ def create_box_plots(
     fig.update_layout(
         xaxis_title=x_title,
         yaxis_title=y_title,
+        xaxis2_title=x_title,
+        yaxis2_title=y_title,
         font=dict(size=14, family="Arial"),
         plot_bgcolor="white",
         yaxis1={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
