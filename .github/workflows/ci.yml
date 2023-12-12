@@ -20,22 +20,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3.3.0
-      - name: Setup Python
-        uses: actions/setup-python@v4.5.0
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: "3.11"
-      
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            !~/.cache/pip/log
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          auto-update-conda: true
+          python-version: 3.11
+          miniconda-version: 'latest'
+          activate-environment: myenv
+          environment-file: environment.yml
+          auto-activate-base: false
       - name: Install dependencies
-        run: |
+        run: conda activate myenv
           python -m pip install --upgrade pip
           pip install flake8 pytest pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi

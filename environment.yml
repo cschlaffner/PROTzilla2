@@ -1,0 +1,11 @@
+name: myenv
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+    - flake8
+    - pytest
+    - pytest-cov
