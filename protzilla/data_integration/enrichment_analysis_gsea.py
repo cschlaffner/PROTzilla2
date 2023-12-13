@@ -1,9 +1,11 @@
+import logging
+
 import gseapy
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 
-from protzilla.constants.logging import logger
+from protzilla.constants.protzilla_logging import logger
+from protzilla.utilities import default_intensity_column
 from protzilla.utilities.transform_dfs import is_intensity_df, long_to_wide
 
 from .enrichment_analysis_helper import read_protein_or_gene_sets_file
@@ -35,6 +37,7 @@ def create_ranked_df(
     :type group_to_genes: dict
     :param filtered_groups: list of protein groups that were filtered out
     :type filtered_groups: list
+
     :return: ranked dataframe of genes
     :rtype: pd.DataFrame
     """
@@ -133,6 +136,7 @@ def gsea_preranked(
     :type seed: int
     :param threads: Number of threads
     :type threads: int
+
     :return: dictionary with results dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
@@ -143,7 +147,7 @@ def gsea_preranked(
         or not protein_df[ranking_column].dtype == np.number
     ):
         msg = "Proteins must be a dataframe with Protein ID and numeric ranking column (e.g. p values)"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
@@ -156,7 +160,7 @@ def gsea_preranked(
             gene_sets = gene_sets_enrichr
     else:
         msg = "No gene sets provided"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
@@ -168,7 +172,7 @@ def gsea_preranked(
         msg = "No proteins could be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     ranked_df = create_ranked_df(
@@ -199,7 +203,7 @@ def gsea_preranked(
         )
     except Exception as e:
         msg = "An error occurred while running GSEA. Please check your input and try again. Try to lower min_size or increase max_size."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
     enrichment_df = preranked_result.res2d
@@ -216,7 +220,7 @@ def gsea_preranked(
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_dict["filtered_groups"] = filtered_groups
-        out_dict["messages"] = [dict(level=messages.WARNING, msg=msg)]
+        out_dict["messages"] = [dict(level=logging.WARNING, msg=msg)]
     return out_dict
 
 
@@ -241,6 +245,7 @@ def create_genes_intensity_wide_df(
     :type group_to_genes: dict
     :param filtered_groups: list of protein IDs that could not be mapped to gene symbols
     :type filtered_groups: list
+
     :return: dataframe with genes in rows and samples in columns with intensity values
     :rtype: pd.DataFrame
     """
@@ -348,30 +353,31 @@ def gsea(
     :type seed: int
     :param threads: Number of threads to use
     :type threads: int
+
     :return: dict with enriched dataframe, ranking, enrichment detail dataframe per enriched gene set and messages
     :rtype: dict
     """
     if grouping not in metadata_df.columns:
         msg = "Grouping column not in metadata df"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     groups = metadata_df[grouping].unique().tolist()
     if group1 not in groups or group2 not in groups:
         msg = "Group names should be in metadata df but are not"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if not is_intensity_df(protein_df):
         msg = "Input must be a dataframe with protein IDs, samples and intensities"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
-    intensity_name = protein_df.columns[3]
+    intensity_name = default_intensity_column(protein_df)
     # cannot use log2_ratio_of_classes if there are negative values
     if (
         ranking_method == "log2_ratio_of_classes"
         and (protein_df[intensity_name] < 0).any()
     ):
         msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
@@ -384,7 +390,7 @@ def gsea(
             gene_sets = gene_sets_enrichr
     else:
         msg = "No gene sets provided"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # only keep samples from the two groups
     group_samples = metadata_df.loc[
@@ -402,7 +408,7 @@ def gsea(
         msg = "No proteins could be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     df = create_genes_intensity_wide_df(
@@ -434,7 +440,7 @@ def gsea(
         )
     except Exception as e:
         msg = "GSEA failed. Please check your input data and parameters. Try to lower min_size or increase max_size"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
 
     # add proteins to output df
     enrichment_df = gsea_result.res2d
@@ -451,5 +457,5 @@ def gsea(
     if filtered_groups:
         msg = "Some proteins could not be mapped to gene symbols and were excluded from the analysis"
         out_dict["filtered_groups"] = filtered_groups
-        out_dict["messages"] = [dict(level=messages.WARNING, msg=msg)]
+        out_dict["messages"] = [dict(level=logging.WARNING, msg=msg)]
     return out_dict

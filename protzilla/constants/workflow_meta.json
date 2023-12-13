@@ -27,6 +27,22 @@
           }
         }
       },
+      "diann_import": {
+        "name": "DIA-NN",
+        "description": "DIA-NN Data Import",
+        "parameters": {
+          "file_path": {
+            "name": "DIA-NN intensities file:",
+            "type": "file",
+            "default": null
+          },
+          "map_to_uniprot": {
+            "name": "Map to Uniprot IDs using Biomart (online)",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
       "ms_fragger_import": {
         "name": "MS Fragger",
         "description": "MS Fragger Data Import",
@@ -79,6 +95,23 @@
             ],
             "default": "Columns (samples in rows, features in columns)"
           }
+        }
+      },
+      "metadata_import_method_diann": {
+        "name": "Metadata Import DIA-NN",
+        "description": "Import Metadata for run relationships of DIA-NN",
+        "parameters": {
+          "file_path": {
+            "name": "Run-Relationship Metadata file:",
+            "type": "file",
+            "default": null
+          },
+          "groupby_sample": {
+            "name": "Group Replicate Runs by Sample using Median",
+            "type": "boolean",
+            "default": false
+          }
+
         }
       },
       "metadata_column_assignment": {
@@ -166,7 +199,7 @@
         "name": "Protein Count",
         "description": "Filter by protein count per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
@@ -217,7 +250,7 @@
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
@@ -498,6 +531,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -545,6 +587,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -592,6 +643,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -642,6 +702,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -689,6 +758,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
@@ -752,6 +830,15 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {

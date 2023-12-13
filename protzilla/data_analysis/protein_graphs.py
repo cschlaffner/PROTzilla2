@@ -1,3 +1,4 @@
+import logging
 import re
 import subprocess
 from collections import defaultdict
@@ -6,10 +7,9 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 import requests
-from django.contrib import messages
 
-from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
+from protzilla.constants.protzilla_logging import logger
 
 
 def variation_graph(protein_id: str, run_name: str):
@@ -32,7 +32,7 @@ def variation_graph(protein_id: str, run_name: str):
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
         )
 
     out = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
@@ -73,7 +73,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         return dict(
             graph_path=None,
             filtered_blocks=filtered_blocks,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
         )
 
     output_folder_path = run_path / "graphs"
@@ -92,7 +92,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 
@@ -129,8 +129,8 @@ def peptides_to_isoform(
     :type allowed_mismatches: int
 
     :return: dict of path to graph - either the modified graph or the original graph if
-    the modification failed, the protein id, list of matched peptides, list of unmatched
-    peptides, messages passed to the frontend
+        the modification failed, the protein id, list of matched peptides, list of unmatched
+        peptides, messages passed to the frontend
     :rtype: dict[str, str, list, list, list]
     """
 
@@ -147,7 +147,7 @@ def peptides_to_isoform(
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
         )
 
     peptides = _get_peptides(peptide_df=peptide_df, protein_id=protein_id)
@@ -157,7 +157,7 @@ def peptides_to_isoform(
         logger.error(msg)
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
@@ -187,7 +187,7 @@ def peptides_to_isoform(
     if msg:
         return dict(
             graph_path=graph_path,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
@@ -220,7 +220,65 @@ def peptides_to_isoform(
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
+    )
+
+
+def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
+    """
+    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
+    Included features are just `Variation`, digestion is skipped.
+    The Graph is saved in .graphml-Format.
+
+    This is designed, so it can be used for peptides_to_isoform but works independently
+    as well
+
+    ProtGraph: https://github.com/mpc-bioinformatics/ProtGraph/
+
+    :param protein_id: UniProt Protein-ID
+    :type protein_id: str
+    :param run_name: name of the run this is executed from. Used for saving the protein
+        file, graph
+    :type run_name: str
+    :param queue_size: Queue Size for ProtGraph, This is yet to be merged by ProtGraph
+    :type queue_size: int
+
+    :return: dict(graph_path, messages)
+    """
+
+    logger.info(f"Creating graph for protein {protein_id}")
+    run_path = RUNS_PATH / run_name
+    path_to_protein_file, filtered_blocks, request = _get_protein_file(
+        protein_id, run_path
+    )
+
+    path_to_protein_file = Path(path_to_protein_file)
+    if not path_to_protein_file.exists() and request.status_code != 200:
+        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
+        logger.error(msg)
+        return dict(
+            graph_path=None,
+            filtered_blocks=filtered_blocks,
+            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
+        )
+
+    output_folder_path = run_path / "graphs"
+    output_csv = output_folder_path / f"{protein_id}.csv"
+    graph_path = output_folder_path / f"{protein_id}.graphml"
+    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                --export_output_folder={output_folder_path} \
+                --output_csv={output_csv} \
+                -ft VARIANT \
+                -d skip"
+
+    subprocess.run(cmd_str, shell=True)
+
+    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
+    logger.info(msg)
+    return dict(
+        graph_path=str(graph_path),
+        filtered_blocks=filtered_blocks,
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 
@@ -228,7 +286,7 @@ def _create_graph_index(
     protein_graph: nx.DiGraph, seq_len: int
 ) -> tuple[list | None, str, dict | None]:
     """
-    create a mapping from the position in the protein (using the longest path) to
+    Create a mapping from the position in the protein (using the longest path) to
     node(s) in the graph
 
     For information about _longest_path() please see the docstring of that function.
@@ -314,7 +372,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                                   n4
         longest_paths: {n1: 0, n2: 3, n3: 5, n4: 5, n5: 6, __end__: 8}
 
-    :param protein_graph: Protein-Graph as created by ProtGraph \
+    :param protein_graph: Protein-Graph as created by ProtGraph
         (-> _create_protein_variation_graph)
     :type protein_graph: nx.DiGraph
     :param start_node: Source of protein_graph
@@ -442,13 +500,14 @@ def _create_reference_sequence_index(
     protein_path: str, k: int = 5
 ) -> tuple[dict, str, int]:
     """
-    Create mapping from kmer of reference_sequence of protein to starting position(s) \
+    Create mapping from kmer of reference_sequence of protein to starting position(s)
     of kmer in reference_sequence
 
     :param protein_path: Path to protein file from UniProt (.txt)
     :type protein_path: str
     :param k: length of kmers
     :type k: int
+
     :return: index {kmer: [starting positions]}, reference sequence, length of reference
         sequence
     :rtype: tuple(dict, str, int)
@@ -554,8 +613,9 @@ def _potential_peptide_matches(
     :type peptides: list
     :param ref_index: mapping from kmer to match-positions on reference sequence
     :type ref_index: dict(kmer: [starting position]}
+
     :return: dict(peptide: [match start on reference sequence]),
-    list(peptides without match)
+        list(peptides without match)
     :rtype: dict, list
     """
 
@@ -604,11 +664,11 @@ def _create_contigs_dict(node_start_end: dict):
     peptide(s) that is responsible for the match.
 
     :param node_start_end: dict of peptide to dict of start index of peptide match to
-    dict of node to tuple of start and end positions of matches within the node
+        dict of node to tuple of start and end positions of matches within the node
     :type node_start_end: dict[str, dict[int, dict[str, tuple[int, int]]]]
 
     :return: dict of node to list of triple of start position, end position and
-    peptide(s) responsible for match
+        peptide(s) responsible for match
     """
 
     node_match_data = defaultdict(lambda: {"match_locations": []})
@@ -666,22 +726,22 @@ def _match_potential_matches(
     :param potential_peptide_matches: dict of peptide to list of starting positions
     :type potential_peptide_matches: dict[str, list[int]]
     :param graph_index: list of lists, each list contains the nodes and AAs at that
-    given index along the longest path through the graph
+        given index along the longest path through the graph
     :type graph_index: list[list[tuple[str, str]]]
     :param peptide_mismatches: list of peptides that did not match to the reference
-    sequence
+        sequence
     :type peptide_mismatches: list[str]
     :param allowed_mismatches: number of mismatches allowed for a peptide to be
-    considered a match
+        considered a match
     :type allowed_mismatches: int
     :param graph: protein variation graph, as created by ProtGraph
-    (-> _create_protein_variation_graph)
+        (-> _create_protein_variation_graph)
     :type graph: networkx.DiGraph
     :param longest_paths: length of longest path through the graph to each node
     :type longest_paths: dict[str, int]
 
     :return: dict of peptide to dict of start index of peptide match to dict of node to
-    tuple of start and end position of match in this node
+        tuple of start and end position of match in this node
     :rtype: dict[str, dict[int, dict[str, tuple[int, int]]]]
     """
 
@@ -713,7 +773,7 @@ def _match_potential_matches(
         :param allowed_mismatches: number of mismatches allowed per start position
         :type allowed_mismatches: int
         :param graph: protein variation graph, as created by ProtGraph
-        (-> _create_protein_variation_graph)
+            (-> _create_protein_variation_graph)
         :type graph: networkx.DiGraph
         :param current_node: current node in the graph, starting with the node of the
             match start
@@ -721,12 +781,13 @@ def _match_potential_matches(
         :param left_over_peptide: peptide that still needs to be matched to the graph
         :type left_over_peptide: str
         :param node_match_data: dict of node to tuple of start position, end position
+        :type node_match_data: dict
         :param current_index: index of the amino acid in the current node that is being
-        matched to the peptide
+            matched to the peptide
         :type current_index: int
 
         :return: tuple of bool, dict of node to tuple of start position, end position,
-        number of mismatches
+            number of mismatches
         :rtype: tuple[bool, dict[str, tuple[int, int]], int]
         """
 
@@ -829,12 +890,16 @@ def _modify_graph(graph, contig_positions):
     will end up without `match`-attribute.
 
     :param graph: Protein Graph to be modified
-    :type: nx.DiGraph
+    :type graph: nx.DiGraph
     :param contig_positions: Dict from current_node to contig-positions
         {current_node: [(start, end)]}.
-    :type: dict(list[tuple])
+    :type contig_positions: dict(list[tuple])
+    :param longest_paths: mapping from current_node to the longest path to current_node
+        (-> _longest_paths())
+    :type longest_paths: dict
+
     :return: modified protein graph, with contigs & not-matched AAs as nodes, indicated
-    by current_node attribute `matched`
+        by current_node attribute `matched`
     """
 
     def _node_length(node):

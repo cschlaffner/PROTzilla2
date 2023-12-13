@@ -54,7 +54,8 @@
           "graphs": [
             {
               "graph_type": "Boxplot",
-              "group_by": "Sample"
+              "group_by": "Sample",
+              "visual_transformation": "log10"
             },
             {
               "graph_type_quantities": "Pie chart"
