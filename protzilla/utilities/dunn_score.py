@@ -34,6 +34,7 @@ def dunn_score(X, labels=None):
     :type X: pd.DataFrame
     :param labels: the predicted labels/classes by the clustering algorithm
     :type labels: pd.DataFrame
+
     :returns: the dunn index for the clusters found for a given data set X
     :rtype: float
     """

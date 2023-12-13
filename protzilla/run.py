@@ -10,8 +10,8 @@ import plotly
 from PIL import Image
 
 from .constants.location_mapping import location_map, method_map, plot_map
-from .constants.logging import MESSAGE_TO_LOGGING_FUNCTION
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
+from .constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from .history import History
 from .workflow_helper import (
     get_parameter_type,
@@ -22,24 +22,52 @@ from .workflow_helper import (
 
 class Run:
     """
-    :ivar run_path: the path to this runs' dir
-    :ivar workflow_config
-    :ivar run_name
-    :ivar history
-    :ivar step_index
-    :ivar workflow_meta
+    A class to represent a complete data analysis run in protzilla.
 
-    :ivar section
-    :ivar step
-    :ivar method
-    :ivar df: dataframe that will be used as input for the next data preprocessing step, not used in data analysis
-    :ivar result_df
-    :ivar current_out
-    :ivar current_parameters: calculation parameters that were used to calculate for each method
-    :ivar current_plot_parameters: plot parameters that were used to generate plots for each method, not used in data analysis
-    :ivar calculated_method: method that was last used to calculate
-    :ivar plots
-    :ivar plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate plots, not used in data analysis
+    :param run_path: the path to this runs' dir
+    :type run_path: str
+    :param workflow_config: Contains the contents of the workflow .json
+        that was selected for this run at first. It is always updated when
+        the workflow gets changed throughout the run (e.g. change of a parameter).
+    :type workflow_config: dict
+    :param run_name: name of the run
+    :type run_name: str
+    :param history: an instance of the history class to access the history of this run
+    :type history: protzilla.History
+    :param step_index: index of the current step over all steps in the workflow
+    :type step_index: int
+    :param workflow_meta: contains contents of the workflow meta file that contains all
+        methods and parameters that exist in protzilla
+    :type workflow_meta: dict
+
+    :param section: current section
+    :type section: str
+    :param step: current step
+    :type step: str
+    :param method: current method
+    :type method: str
+    :param df: dataframe that will be used as input for the next data preprocessing step
+        (Not used in data analysis! Due to the more flexible dataflow during analysis
+        the input dataframe for an analysis step needs to be selectable in the frontend and is an
+        input parameter for each new step)
+    :type df: pandas.DataFrame
+    :param result_df: contains the modified intensity dataframe after a step
+    :type result_df: pandas.DataFrame
+    :param current_out: contains other outputs from the current step
+    :type current_out: dict
+    :param current_parameters: calculation parameters that were used to calculate the current step
+        (e.g. to update workflow_config correctly)
+    :type current_parameters: dict
+    :param current_plot_parameters: plot parameters that were used to generate plots for the
+        current step (Not used in data analysis! A plot is its own step in that section
+        to allow for more flexibility)
+    :type current_plot_parameters: dict
+    :param calculated_method: method that was used to calculate the current step
+    :type calculated_method: str
+    :param plots: contains the plots generated in the current step
+    :type plots: list[Figure]
+    :param plotted_for_parameters: calculation parameters that were used to generate the results that were used to generate current plots, not used in data analysis
+    :type plotted_for_parameters: dict
     """
 
     @classmethod

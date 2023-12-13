@@ -21,7 +21,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 
-from protzilla.constants.logging import logger
+from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
@@ -43,6 +43,15 @@ active_runs = {}
 
 
 def index(request):
+    """
+    Renders the main index page of the PROTzilla application.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page
+    :rtype: HttpResponse
+    """
     return render(
         request,
         "runs/index.html",
@@ -54,6 +63,20 @@ def index(request):
 
 
 def detail(request, run_name):
+    """
+    Renders the details page of a specific run.
+    For rendering a context dict is created that contains all the dynamic information
+    that is needed to display the page. This wraps other methods that provide subparts
+    for the page e.g. make_displayed_history() to show the history.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered details page
+    :rtype: HttpResponse
+    """
     if run_name not in active_runs:
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
@@ -120,7 +143,19 @@ def detail(request, run_name):
 
 
 def change_method(request, run_name):
-    # TODO 92 extract into a seperate method like try_reactivate_run
+    """
+    Changes the method during a step of a run.
+    This is called when the user selects a new method in the first dropdown of a step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the new fields for the selected method
+    :rtype: JsonResponse
+    """
+    # TODO 92 extract into a separate method like try_reactivate_run
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -153,6 +188,21 @@ def change_method(request, run_name):
 
 
 def change_dynamic_fields(request, run_name):
+    """
+    Renders fields that depend on the value of another field e.g. a dropdown, the value
+    being the dynamic_trigger_value below. The field is specified by its key and part of
+    the request.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the new fields depending on the value of
+        the dynamic trigger
+    :rtype: JsonResponse
+    """
+
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -178,6 +228,22 @@ def change_dynamic_fields(request, run_name):
 
 
 def change_field(request, run_name):
+    """
+    Changes the value of one or multiple fields during a method of a run depending on a
+    selected value in another field. The field that triggers this method is identified by
+    the post_id variable.
+    In contrast to change_dynamic_fields, this method changes the value of the field itself
+    instead of rendering new fields.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the updated fields depending on the value of the
+        dynamic trigger field
+    :rtype: JsonResponse
+    """
     try:
         if run_name not in active_runs:
             active_runs[run_name] = Run.continue_existing(run_name)
@@ -310,6 +376,15 @@ def change_field(request, run_name):
 
 
 def create(request):
+    """
+    Creates a new run. The user is then redirected to the detail page of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the new run
+    :rtype: HttpResponse
+    """
     run_name = request.POST["run_name"]
     run = Run.create(
         run_name,
@@ -321,24 +396,67 @@ def create(request):
 
 
 def continue_(request):
+    """
+    Continues an existing run. The user is redirected to the detail page of the run and
+    can resume working on the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
     run_name = request.POST["run_name"]
     active_runs[run_name] = Run.continue_existing(run_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def next_(request, run_name):
+    """
+    Skips to and renders the next step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the next step/method
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.next_step(request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def back(request, run_name):
+    """
+    Goes back to and renders the previous step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the previous step/method
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.back_step()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def add(request, run_name):
+    """
+    Adds a new method to the run. The method is added as the next step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, new method visible in sidebar
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -352,6 +470,17 @@ def add(request, run_name):
 
 
 def delete_step(request, run_name):
+    """
+    Deletes a step/method from the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, deleted method no longer visible in sidebar
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -363,6 +492,17 @@ def delete_step(request, run_name):
 
 
 def export_workflow(request, run_name):
+    """
+    Exports the workflow of the run as a JSON file so that it can be reused and shared.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     post = dict(request.POST)
     del post["csrfmiddlewaretoken"]
@@ -375,6 +515,18 @@ def export_workflow(request, run_name):
 
 
 def calculate(request, run_name):
+    """
+    Performs the current methods calculation during the run. Django messages are used to
+    display additional information, warnings and errors to the user.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     parameters = parameters_from_post(request.POST)
     del parameters["chosen_method"]
@@ -406,6 +558,20 @@ def calculate(request, run_name):
 
 
 def plot(request, run_name):
+    """
+    Creates a plot from the current step/method of the run.
+    This is only called by the plot button in the data preprocessing section aka when a plot is
+    simultaneously a step on its own.
+    Django messages are used to display additional information, warnings and errors to the user.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, now with the plot
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     parameters = parameters_from_post(request.POST)
@@ -439,17 +605,54 @@ def plot(request, run_name):
 
 
 def add_name(request, run_name):
+    """
+    Adds a name to the results of a calculated method of the run. The name can be used
+    to identify the result and use them later.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     run = active_runs[run_name]
     run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def results_exist(request, run_name):
+    """
+    Checks if the results of the run exist. This is used to determine if the Next button
+    should be enabled or not.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with a boolean value
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     return JsonResponse(dict(results_exist=run.result_df is not None))
 
 
 def all_button_parameters(request, run_name):
+    """
+    Returns all parameters that are needed to render the buttons as enabled or disabled
+    in the run detail page.
+    See ui/runs/templates/runs/form_buttons.html for detailed documentation.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with the parameters
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     d = dict()
     d["current_plot_parameters"] = run.current_plot_parameters.get(run.method, {})
@@ -468,12 +671,36 @@ def all_button_parameters(request, run_name):
 
 
 def outputs_of_step(request, run_name):
+    """
+    Returns the output keys of a named step of the run. This is used to determine which
+    parameters can be used as input for future steps.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response with the output keys
+    :rtype: JsonResponse
+    """
     run = active_runs[run_name]
     step_name = request.POST["step_name"]
     return JsonResponse(run.history.output_keys_of_named_step(step_name), safe=False)
 
 
 def download_plots(request, run_name):
+    """
+    Downloads all plots of the current method in the run. If multiple plots are created,
+    they are zipped together. The format of the plots is specified in the request.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a FileResponse with the plots
+    :rtype: FileResponse
+    """
     run = active_runs[run_name]
     format_ = request.GET["format"]
     exported = run.export_plots(format_=format_)
@@ -589,17 +816,33 @@ def protein_graph(request, run_name, index: int):
 
     graph = nx.read_graphml(graph_path)
 
-    nodes = [
-        {
-            "data": {
-                "id": node,
-                "label": graph.nodes[node].get("aminoacid", "####### ERROR #######"),
-                "match": graph.nodes[node].get("match", "false"),
-                "peptides": graph.nodes[node].get("peptides", ""),
+    max_peptides = 0
+    min_peptides = 0
+    nodes = []
+
+    # count number of peptides for each node, set max_peptides and min_peptides
+    for node in graph.nodes():
+        peptides = graph.nodes[node].get("peptides", "")
+        if peptides != "":
+            peptides = peptides.split(";")
+            if len(peptides) > max_peptides:
+                max_peptides = len(peptides)
+            elif len(peptides) < min_peptides:
+                min_peptides = len(peptides)
+        nodes.append(
+            {
+                "data": {
+                    "id": node,
+                    "label": graph.nodes[node].get(
+                        "aminoacid", "####### ERROR #######"
+                    ),
+                    "match": graph.nodes[node].get("match", "false"),
+                    "peptides": graph.nodes[node].get("peptides", ""),
+                    "peptides_count": len(peptides),
+                }
             }
-        }
-        for node in graph.nodes()
-    ]
+        )
+
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
 
@@ -612,6 +855,8 @@ def protein_graph(request, run_name, index: int):
             "peptide_mismatches": peptide_mismatches,
             "protein_id": protein_id,
             "filtered_blocks": outputs.get("filtered_blocks", []),
+            "max_peptides": max_peptides,
+            "min_peptides": min_peptides,
             "run_name": run_name,
             "used_memory": get_memory_usage(),
         },

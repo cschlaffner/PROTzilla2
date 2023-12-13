@@ -80,12 +80,23 @@ def test_create_histograms(
     if show_figures:
         fig.show()
 
+    fig = create_histograms(
+        dataframe_a=input_imputation_df,
+        dataframe_b=assertion_df_knn,
+        name_a="input_imputation_df",
+        name_b="assertion_df_knn",
+        heading="heading",
+        overlay=True,
+    )
+    if show_figures:
+        fig.show()
+
     # should throw Value Error
     with pytest.raises(ValueError):
-        create_box_plots(
+        create_histograms(
             dataframe_a=input_imputation_df,
             dataframe_b=assertion_df_knn,
-            group_by="wrong_group_by",
+            visual_transformation="wrong_visual_transformation",
         )
     return
 
@@ -103,7 +114,12 @@ def test_build_box_hist_plot(
     show_figures, input_imputation_df, assertion_df_knn, assertion_df_min_value_per_df
 ):
     fig1, fig2 = imputation._build_box_hist_plot(
-        input_imputation_df, assertion_df_knn, "Boxplot", "Bar chart", "Sample"
+        input_imputation_df,
+        assertion_df_knn,
+        "Boxplot",
+        "Bar chart",
+        "Sample",
+        "linear",
     )
     fig3, fig4 = imputation._build_box_hist_plot(
         input_imputation_df,
@@ -111,6 +127,7 @@ def test_build_box_hist_plot(
         "Histogram",
         "Pie chart",
         "Protein ID",
+        "linear",
     )
 
     if show_figures:

@@ -1,7 +1,7 @@
+import logging
 from shutil import rmtree
 
 import pandas as pd
-from django.contrib import messages
 
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import
@@ -19,6 +19,21 @@ def test_metadata_import():
         feature_orientation="Columns (samples in rows, features in columns)",
     )
     test_metadata = pd.read_csv(f"{PROJECT_PATH}/tests/metadata_cut_columns.csv")
+    pd.testing.assert_frame_equal(test_metadata, run.metadata)
+    rmtree(RUNS_PATH / name)
+
+
+def test_metadata_import_diann():
+    name = "test_run" + random_string()
+    run = Run.create(name)
+    run.step_index += 1
+    run.calculate_and_next(
+        metadata_import.metadata_import_method_diann,
+        file_path=f"{PROJECT_PATH}/tests/diann_run_relationship_metadata.xlsx",
+    )
+    test_metadata = pd.read_excel(
+        f"{PROJECT_PATH}/tests/diann_run_relationship_metadata.xlsx"
+    )
     pd.testing.assert_frame_equal(test_metadata, run.metadata)
     rmtree(RUNS_PATH / name)
 
@@ -76,7 +91,7 @@ def test_metadata_column_assignment():
         metadata_required_column="Group",
         metadata_unknown_column="Sample",
     )
-    assert out["messages"][0]["level"] == messages.ERROR
+    assert out["messages"][0]["level"] == logging.ERROR
     assert out["messages"][0]["msg"]
     df_new, out_new = metadata_import.metadata_column_assignment(
         df=run.df,
