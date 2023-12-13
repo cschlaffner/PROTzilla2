@@ -1115,7 +1115,7 @@
       },
       "prot_quant": {
           "name": "Prot Quant",
-          "description": "todo",
+          "description": "Creates a line chart for intensity across samples for proteingroups",
           "parameters": {
             "input_df": {
               "name": "Input dataframe: choose dataframe to be plotted",
