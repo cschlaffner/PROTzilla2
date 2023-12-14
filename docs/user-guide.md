@@ -13,6 +13,10 @@ PROTzilla is split into four sections, **Importing**, **Data Preprocessing**, **
 
 
 # Using PROTzilla
+
+> [!NOTE]
+> DO NOT use your browsers "back" and "forth" buttons, especially while the website is loading (when calculating a method). It is quite likely to break the run you are working on and is hard to recover.
+
 ## Starting the UI
 To start using PROTzilla, please take a look at the README.md. This is where you'll find an install-guide and some basic information.
 After installing PROTzilla, starting the webserver and opening the address/link you are presented with (usually http://127.0.0.1:8000) you directed to the startpage of PROTzilla.
