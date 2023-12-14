@@ -68,6 +68,11 @@ def get_workflow_default_param_value(
             return None
     return None
 
+def is_last_step_in_section(
+    workflow_config, section, step_index_in_section
+) -> bool:
+    amount_steps_in_section = workflow_config["sections"][section]["steps"].__len__()
+    return amount_steps_in_section <= step_index_in_section + 1
 
 def validate_workflow_parameters(workflow_config, workflow_meta):
     # checks if all parameters in workflow_config exist in workflow_meta

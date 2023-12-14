@@ -8,7 +8,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run_helper import get_parameters
-from protzilla.workflow_helper import get_workflow_default_param_value
+from protzilla.workflow_helper import get_workflow_default_param_value, is_last_step_in_section
 from ui.runs.views_helper import get_displayed_steps
 
 
@@ -335,14 +335,22 @@ def make_name_field(allow_next, form, run, end_of_run):
     """
     if end_of_run:
         return ""
-    default = get_workflow_default_param_value(
+    output_name = get_workflow_default_param_value(
         run.workflow_config,
         *run.current_run_location(),
         run.step_index_in_current_section(),
         "output_name",
     )
-    if not default:
-        default = ""
+    if not output_name:
+        output_name = ""
+    if is_last_step_in_section(
+        run.workflow_config,
+        run.section,
+        run.step_index_in_current_section()
+    ):
+        default_final_output_name = run.workflow_config["sections"][run.section]['final_output_name']
+        if default_final_output_name:
+            output_name = default_final_output_name
 
     return render_to_string(
         "runs/field_name_output_text.html",
@@ -351,6 +359,6 @@ def make_name_field(allow_next, form, run, end_of_run):
             key="name",
             name="Name:",
             form=form,
-            default=default,
+            default=output_name,
         ),
     )
