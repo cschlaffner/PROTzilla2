@@ -1200,6 +1200,40 @@
           }
         }
       },
+      "prot_quant": {
+          "name": "Prot Quant",
+          "description": "Creates a line chart for intensity across samples for proteingroups",
+          "parameters": {
+            "input_df": {
+              "name": "Input dataframe: choose dataframe to be plotted",
+              "type": "named_output",
+              "default": [
+                null,
+                null
+              ]
+            },
+            "protein_group": {
+              "name": "Protein group: choose highlighted protein group",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null
+            },
+            "similarity_measure": {
+              "name": "Similarity Measurement: choose how to compare protein groups",
+              "type": "categorical",
+              "categories": ["euclidean distance", "cosine similarity"],
+              "default": "euclidean_distance"
+            },
+            "similarity": {
+              "name": "Similarity",
+              "type": "numeric",
+              "min": -1,
+              "max": 999,
+              "default": 1
+            }
+          }
+      },
       "precision_recall_curve": {
         "name": "Precision recall curve",
         "description": "The precision-recall curve shows the tradeoff between precision and recall for different threshold",

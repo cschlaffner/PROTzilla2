@@ -113,6 +113,13 @@ def test_clustergram(show_figures, wide_4d_df, color_df):
     return
 
 
+def test_prot_quant_plot(show_figures, wide_4d_df):
+    fig = prot_quant_plot(wide_4d_df, "")[0]
+    if show_figures:
+        fig.show()
+    return
+
+
 def test_clustergram_no_sample_group_df(show_figures, wide_4d_df):
     fig = clustergram_plot(wide_4d_df, "", "no")[0]
     if show_figures:

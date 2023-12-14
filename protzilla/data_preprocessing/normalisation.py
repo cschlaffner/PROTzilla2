@@ -253,7 +253,7 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
             x_title="",
-            y_title="",
+            y_title="Intensity",
             group_by=group_by,
         )
     if graph_type == "Histogram":
@@ -263,7 +263,7 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             name_a="Before Normalisation",
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
+            x_title="Protein Intensities",
+            y_title="Frequency of Protein Intensities",
         )
     return [fig]

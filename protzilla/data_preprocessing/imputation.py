@@ -488,6 +488,7 @@ def _build_box_hist_plot(
             heading="Distribution of Protein Intensities",
             group_by=group_by,
             visual_transformation=visual_transformation,
+            y_title="Intensity",
         )
     elif graph_type == "Histogram":
         fig1 = create_histograms(
@@ -498,6 +499,8 @@ def _build_box_hist_plot(
             heading="Distribution of Protein Intensities",
             visual_transformation=visual_transformation,
             overlay=True,
+            x_title="Protein Intensities",
+            y_title="Frequency of Protein Intensities",
         )
 
     values_of_sectors = [
@@ -509,6 +512,7 @@ def _build_box_hist_plot(
             names_of_sectors=["Non-imputed values", "Imputed values"],
             values_of_sectors=values_of_sectors,
             heading="Number of Imputed Values",
+            y_title="Number of Values",
         )
     elif graph_type_quantities == "Pie chart":
         fig2 = create_pie_plot(

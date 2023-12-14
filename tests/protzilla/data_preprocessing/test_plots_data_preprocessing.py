@@ -93,11 +93,10 @@ def test_create_histograms(
 
     # should throw Value Error
     with pytest.raises(ValueError):
-        # TODO: 304
-        create_box_plots(
+        create_histograms(
             dataframe_a=input_imputation_df,
             dataframe_b=assertion_df_knn,
-            group_by="wrong_group_by",
+            visual_transformation="wrong_visual_transformation",
         )
     return
 

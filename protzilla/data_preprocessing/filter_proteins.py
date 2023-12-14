@@ -58,6 +58,7 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
             ],
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
+            y_title="Number of Proteins",
         )
     return [fig]
 

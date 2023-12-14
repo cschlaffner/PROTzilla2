@@ -101,6 +101,18 @@
     "data_analysis": {
       "steps": [
         {
+          "name": "plot",
+          "method": "prot_quant",
+          "parameters": {
+            "input_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "protein_group": null
+          },
+          "output_name": "prot_quant_plot"
+        },
+        {
           "name": "dimension_reduction",
           "method": "umap",
           "parameters": {

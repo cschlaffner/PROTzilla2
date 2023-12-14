@@ -70,6 +70,8 @@ def insert_special_params(param_dict, run):
             server = BiomartServer("http://www.ensembl.org/biomart")
             database = server.databases["ENSEMBL_MART_ENSEMBL"]
             param_dict["categories"] = database.datasets
+        elif param_dict["fill"] == "protein_group_column":
+            param_dict["categories"] = run.df["Protein ID"].unique()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"

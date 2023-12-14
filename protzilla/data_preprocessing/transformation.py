@@ -47,6 +47,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
+            y_title="Intensity",
         )
     if graph_type == "Histogram":
         fig = create_histograms(
@@ -55,5 +56,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             name_a="Before Transformation",
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
+            x_title="Protein Intensities",
+            y_title="Frequency of Protein Intensities",
         )
     return [fig]
