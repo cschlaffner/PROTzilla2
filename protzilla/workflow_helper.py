@@ -28,7 +28,13 @@ def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]
 
 
 def step_name(step):
-    return step.replace("_", " ").title()
+    """This checks if the step is in the workflow_meta and returns the step_name if it is.
+    If it is not, it returns the step string with underscores replaced by spaces and title cased.
+    """
+    if step == "ms_data_import":
+        return "MS Data Import"
+    else:
+        return step.replace("_", " ").title()
 
 
 def section_name(section):

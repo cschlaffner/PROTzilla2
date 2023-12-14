@@ -894,7 +894,7 @@
         "description": "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -948,7 +948,7 @@
         "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -1910,7 +1910,7 @@
             "default": null
           },
           "validation_strategy": {
-            "name": "Validation Strategy",
+            "name": "Validation strategy",
             "type": "categorical_dynamic",
             "categories": [
               "K-Fold",
@@ -2884,7 +2884,7 @@
             "fill": "enrichment_categories"
           },
           "value": {
-            "name": "Value (bars will be plotted as -log10(value)), fdr only for GO Analysis with STRING, p_value is adjusted if available",
+            "name": "Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
             "type": "categorical",
             "categories": [
               "p_value",
