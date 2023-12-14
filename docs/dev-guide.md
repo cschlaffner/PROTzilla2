@@ -4,13 +4,13 @@ This is a guide for developers starting to work on PROTzilla and will provide an
 
 ### Project Structure
 PROTzilla is structured as follows:
-- [PROTzilla2/protzilla](./protzilla) package: contains all methods to perform calculations and generate plots. It can be used without the UI. You can find more information about each method in the corresponding docstring.
--  [PROTzilla2/protzilla/constants/workflow_meta.json](./protzilla/constants/workflow_meta.json): contains the metadata of all available methods in PROTzilla. 
-- [PROTzilla2/run.py](./run.py): The Run class oversees run management, calculations, workflow configuration, and history tracking, including result accumulation upon calling next.
-- [PROTzilla2/history.py](./history.py): the History class stores the chosen method, parameters, plots, output dataframe and specific outputs of all already calculated steps.
-- [PROTzilla2/runner.py](./runner.py): the runner is able to execute a given workflow without the the UI.
-- [PROTzilla2/ui](./ui): contains the Django apps main and runs, therefore all code that has to do with the frontend. 
-- [PROTzilla2/user_data](./user_data): contains all data produced by the user, including the user's workflows and the processed data and plots produced by a run. For each run a new folder is created
+- [PROTzilla2/protzilla](../protzilla) package: contains all methods to perform calculations and generate plots. It can be used without the UI. You can find more information about each method in the corresponding docstring.
+-  [PROTzilla2/protzilla/constants/workflow_meta.json](../protzilla/constants/workflow_meta.json): contains the metadata of all available methods in PROTzilla. 
+- [PROTzilla2/run.py](../protzilla/run.py): The Run class oversees run management, calculations, workflow configuration, and history tracking, including result accumulation upon calling next.
+- [PROTzilla2/history.py](../protzilla/history.py): the History class stores the chosen method, parameters, plots, output dataframe and specific outputs of all already calculated steps.
+- [PROTzilla2/runner.py](../protzilla/runner.py): the runner is able to execute a given workflow without the the UI.
+- [PROTzilla2/ui](../ui): contains the Django apps main and runs, therefore all code that has to do with the frontend. 
+- [PROTzilla2/user_data](../user_data): contains all data produced by the user, including the user's workflows and the processed data and plots produced by a run. For each run a new folder is created
 
 
 ### Concept of a Workflow and Workflow Structure
