@@ -27,6 +27,22 @@
           }
         }
       },
+      "diann_import": {
+        "name": "DIA-NN",
+        "description": "DIA-NN Data Import",
+        "parameters": {
+          "file_path": {
+            "name": "DIA-NN intensities file:",
+            "type": "file",
+            "default": null
+          },
+          "map_to_uniprot": {
+            "name": "Map to Uniprot IDs using Biomart (online)",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
       "ms_fragger_import": {
         "name": "MS Fragger",
         "description": "MS Fragger Data Import",
@@ -79,6 +95,49 @@
             ],
             "default": "Columns (samples in rows, features in columns)"
           }
+        }
+      },
+      "metadata_import_method_diann": {
+        "name": "Metadata Import DIA-NN",
+        "description": "Import Metadata for run relationships of DIA-NN",
+        "parameters": {
+          "file_path": {
+            "name": "Run-Relationship Metadata file:",
+            "type": "file",
+            "default": null
+          },
+          "groupby_sample": {
+            "name": "Group Replicate Runs by Sample using Median",
+            "type": "boolean",
+            "default": false
+          }
+
+        }
+      },
+      "metadata_column_assignment": {
+        "name": "Metadata Column Assignment",
+        "description": "Assign columns to metadata categories, repeatable for each category",
+        "parameters": {
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "default": null
+          },
+          "metadata_required_column": {
+            "name": "Missing, but required Metadata Columns",
+            "fill": "metadata_required_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          },
+          "metadata_unknown_column": {
+            "name": "Existing, but unknown Metadata Columns",
+            "fill": "metadata_unknown_columns",
+            "type": "categorical",
+            "categories": [],
+            "default": null
+          }
+
         }
       }
     },
@@ -140,7 +199,7 @@
         "name": "Protein Count",
         "description": "Filter by protein count per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
@@ -191,7 +250,7 @@
         "name": "Sum of Intensities",
         "description": "Filter by sum of protein intensities per sample",
         "parameters": {
-          "threshold": {
+          "deviation_threshold": {
             "name": "Number of standard deviations from the median:",
             "type": "numeric",
             "min": 0,
@@ -472,10 +531,19 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
-            "graph_type_quantites": {
+            "graph_type_quantities": {
               "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -519,10 +587,19 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
-            "graph_type_quantites": {
+            "graph_type_quantities": {
               "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -566,10 +643,19 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
-            "graph_type_quantites": {
+            "graph_type_quantities": {
               "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -616,10 +702,19 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
-            "graph_type_quantites": {
+            "graph_type_quantities": {
               "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
@@ -663,11 +758,92 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
             }
           },
           {
-            "graph_type_quantites": {
+            "graph_type_quantities": {
               "name": "Graph type - Imputed Values:",
+              "type": "categorical",
+              "categories": [
+                "Bar chart",
+                "Pie chart"
+              ],
+              "default": "Pie chart"
+            }
+          }
+        ]
+      },
+      "normal_distribution_sampling": {
+        "name": "Normal Distribution Sampling",
+        "description": "Imputation methods include normal distribution sampling per Protein or over Dataset",
+        "parameters": {
+          "strategy": {
+            "name": "Strategy:",
+            "type": "categorical",
+            "categories": [
+              "perProtein",
+              "perDataset"
+            ],
+            "default": "perProtein"
+          },
+          "down_shift": {
+            "name": "Downshift:",
+            "type": "numeric",
+            "min": -10,
+            "max": 10,
+            "default": -1
+          },
+           "scaling_factor": {
+            "name": "Scaling Factor:",
+            "type": "numeric",
+            "min": 0,
+            "max": 1,
+            "default": 1
+          }
+        },
+        "graphs": [
+          {
+            "graph_type": {
+              "name": "Graph type:",
+              "type": "categorical",
+              "categories": [
+                "Boxplot",
+                "Histogram"
+              ],
+              "default": "Boxplot"
+            },
+            "group_by": {
+              "name": "Group by:",
+              "type": "categorical",
+              "categories": [
+                "None",
+                "Sample",
+                "Protein ID"
+              ],
+              "default": "None"
+            },
+            "visual_transformation": {
+              "name": "Visual Transformation:",
+              "type": "categorical",
+              "categories": [
+                "linear",
+                "log10"
+              ],
+              "default": "linear"
+            }
+          },
+          {
+            "graph_type_quantities": {
+              "name": "Graph type Imputed Values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -744,7 +920,7 @@
           "grouping": {
             "name": "Grouping:",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "selected_groups"
             ],
@@ -810,7 +986,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -876,7 +1052,7 @@
           "grouping": {
             "name": "Grouping",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"
@@ -1024,6 +1200,40 @@
           }
         }
       },
+      "prot_quant": {
+          "name": "Prot Quant",
+          "description": "Creates a line chart for intensity across samples for proteingroups",
+          "parameters": {
+            "input_df": {
+              "name": "Input dataframe: choose dataframe to be plotted",
+              "type": "named_output",
+              "default": [
+                null,
+                null
+              ]
+            },
+            "protein_group": {
+              "name": "Protein group: choose highlighted protein group",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null
+            },
+            "similarity_measure": {
+              "name": "Similarity Measurement: choose how to compare protein groups",
+              "type": "categorical",
+              "categories": ["euclidean distance", "cosine similarity"],
+              "default": "euclidean_distance"
+            },
+            "similarity": {
+              "name": "Similarity",
+              "type": "numeric",
+              "min": -1,
+              "max": 999,
+              "default": 1
+            }
+          }
+      },
       "precision_recall_curve": {
         "name": "Precision recall curve",
         "description": "The precision-recall curve shows the tradeoff between precision and recall for different threshold",
@@ -1109,7 +1319,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1245,7 +1455,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1381,7 +1591,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1502,7 +1712,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "positive_label"
             ],
@@ -1708,7 +1918,7 @@
           "labels_column": {
             "name": "Choose labels column from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "categories": [],
             "default": null
           },
@@ -2457,7 +2667,7 @@
           "grouping": {
             "name": "Grouping from metadata",
             "type": "categorical",
-            "fill": "metadata_columns",
+            "fill": "metadata_non_sample_columns",
             "fill_dynamic": [
               "group1",
               "group2"

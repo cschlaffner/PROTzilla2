@@ -83,7 +83,8 @@ def test_run_create(tests_folder_name):
         data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     run.calculate_and_next(
-        data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
     )
     # print([s.outputs for s in run.history.steps])
     # to get a history that can be used to create a worklow, the section, step, method
@@ -251,7 +252,12 @@ def test_export_plot(tests_folder_name):
     run.perform_calculation(data_preprocessing.imputation.by_min_per_sample, {})
     run.create_plot(
         data_preprocessing.imputation.by_min_per_sample_plot,
-        dict(graph_type="Boxplot", graph_type_quantites="Bar chart", group_by="Sample"),
+        dict(
+            graph_type="Boxplot",
+            graph_type_quantities="Bar chart",
+            group_by="Sample",
+            visual_transformation="linear",
+        ),
     )
     assert len(run.plots) > 1
     for plot in run.export_plots("tiff"):
@@ -302,6 +308,7 @@ def test_name_step(example_workflow_short, tests_folder_name):
         "importing",
         "ms_data_import",
         "max_quant_import",
+        run.step_index_in_current_section(),
         "output_name",
     )
 

@@ -37,7 +37,7 @@
           "name": "filter_samples",
           "method": "protein_intensity_sum_filter",
           "parameters": {
-            "threshold": 2
+            "deviation_threshold": 2
           },
           "graphs": [
             {
@@ -57,7 +57,7 @@
               "group_by": "Sample"
             },
             {
-              "graph_type_quantites": "Pie chart"
+              "graph_type_quantities": "Pie chart"
             }
           ]
         },

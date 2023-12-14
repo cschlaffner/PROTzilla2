@@ -1,5 +1,6 @@
+import logging
+
 import pandas as pd
-from django.contrib import messages
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -21,16 +22,17 @@ def by_isolation_forest(
     isolation forest approach.
 
     :param intensity_df: a dataframe in typical protzilla long format
-    on which the outlier detection is performed
+        on which the outlier detection is performed
     :type intensity_df: pandas DataFrame
     :param n_estimators: the number of estimators used by the algorithm,
-    default: 100
+        default: 100
     :type n_estimators: integer
     :param n_jobs: Number kernels used by algorithm, default:
-    all kernels (-1)
+        all kernels (-1)
     :type n_jobs: integer
-    :return: returns a Dataframe containing all samples that are not outliers and a\
-    dict with list of outlier sample names
+
+    :return: returns a Dataframe containing all samples that are not outliers and a
+        dict with list of outlier sample names
     :rtype: Tuple[pandas DataFrame, dict]
     """
     try:
@@ -69,7 +71,7 @@ def by_isolation_forest(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -85,16 +87,17 @@ def by_local_outlier_factor(
     https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html
 
     :param intensity_df: a dataframe in typical protzilla long format
-    on which the outlier detection is performed
+        on which the outlier detection is performed
     :type intensity_df: pandas DataFrame
     :param number_of_neighbors: number of neighbors used by the
-    algorithm, default: 20
+        algorithm, default: 20
     :type number_of_neighbors: int
     :param n_jobs: Number kernels used by algorithm, default:
-    all kernels (-1)
+        all kernels (-1)
     :type n_jobs: int
-    :return: returns a Dataframe containing all samples that are not outliers and a\
-    dict with list of outlier sample names
+
+    :return: returns a Dataframe containing all samples that are not outliers and a
+        dict with list of outlier sample names
     :rtype: Tuple[pandas DataFrame, dict]
     """
     try:
@@ -123,7 +126,7 @@ def by_local_outlier_factor(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 
@@ -141,20 +144,21 @@ def by_pca(
     https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
 
     :param intensity_df: a dataframe in typical protzilla long format
-    on which the outlier detection is performed
+        on which the outlier detection is performed
     :type intensity_df: pandas DataFrame
     :param threshold: distance from the median in
-    number of standard deviations to be included,
-    default: 2
+        number of standard deviations to be included,
+        default: 2
     :type threshold: float
     :param number_of_components: number of principal components
-    used in the PCA. Allowed: 2 or 3. Default: 3
+        used in the PCA. Allowed: 2 or 3. Default: 3
     :type number_of_components: integer (2 or 3)
+
     :return: returns a Dataframe containing all samples that are not outliers.
-    A dict with list of inlier sample names, a DataFrame that contains the projection \
-    of the intensity_df on first principal components, a list that contains the \
-    explained variation for each component and an int, the number of components \
-    the calculations were executed with
+        A dict with list of inlier sample names, a DataFrame that contains the projection
+        of the intensity_df on first principal components, a list that contains the
+        explained variation for each component and an int, the number of components
+        the calculations were executed with
     :rtype: Tuple[pandas DataFrame, dict]
     """
     try:
@@ -224,7 +228,7 @@ def by_pca(
         return intensity_df, dict(
             outlier_list=None,
             anomaly_df=None,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=str(e))],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
         )
 
 

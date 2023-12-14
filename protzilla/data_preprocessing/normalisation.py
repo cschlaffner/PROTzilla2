@@ -1,10 +1,11 @@
+import logging
 import traceback
 
 import pandas as pd
-from django.contrib import messages
 from sklearn.preprocessing import StandardScaler
 
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
+from protzilla.utilities import default_intensity_column
 
 
 def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -14,11 +15,12 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     Scales the data to zero mean and unit variance. This is often also
     called z-score normalisation/transformation.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pd.DataFrame
-    :return: returns a scaled dataframe in typical protzilla long format and an empty\
-     dictionary
+
+    :return: returns a scaled dataframe in typical protzilla long format and an empty
+        dictionary
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -28,7 +30,7 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
 
@@ -55,14 +57,15 @@ def by_median(
     Divides each intensity by the chosen intensity quartile of the
     respective sample. By default, the median (50%-quartile) is used.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :param percentile: the chosen quartile of the sample intensities for\
-    normalisation
+    :param percentile: the chosen quartile of the sample intensities for
+        normalisation
     :type percentile: float
-    :return: returns a scaled dataframe in typical protzilla long format\
-    and a dict, containing all zeroed samples due to quantile being 0
+
+    :return: returns a scaled dataframe in typical protzilla long format
+        and a dict, containing all zeroed samples due to quantile being 0
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -74,7 +77,7 @@ def by_median(
 
     assert 0 <= percentile <= 1
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
     zeroed_samples = []
@@ -116,11 +119,12 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     Normalises the data on the level of each sample.
     Divides each intensity by the total sum of sample intensities.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
-    :return: returns a scaled dataframe in typical protzilla long format\
-    and a dict, containing all zeroed samples due to sum being 0
+
+    :return: returns a scaled dataframe in typical protzilla long format
+        and a dict, containing all zeroed samples due to sum being 0
     :rtype: Tuple[pandas DataFrame, dict]
     """
 
@@ -130,7 +134,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     scaled_df = pd.DataFrame()
     samples = intensity_df["Sample"].unique().tolist()
     zeroed_samples_list = []
@@ -178,18 +182,18 @@ def by_reference_protein(
     protein in each sample. Samples where this value is zero will be
     removed and returned separately.
 
-    :param intensity_df: the dataframe that should be filtered in\
-    long format
+    :param intensity_df: the dataframe that should be filtered in
+        long format
     :type intensity_df: pandas DataFrame
     :param reference_protein: Protein ID of the protein to normalise by
-    type reference_protein_id: str
-    :return: returns a scaled dataframe in typical protzilla long format \
-    and dict with a list of the indices of the dropped samples
+        type reference_protein_id: str
+    :return: returns a scaled dataframe in typical protzilla long format
+        and dict with a list of the indices of the dropped samples
     :rtype: Tuple[pandas DataFrame, dict]
     """
     scaled_df = pd.DataFrame()
     dropped_samples = []
-    intensity_name = intensity_df.columns[3]
+    intensity_name = default_intensity_column(intensity_df)
     protein_groups = intensity_df["Protein ID"].unique().tolist()
     for group in protein_groups:
         if reference_protein in group.split(";"):
@@ -199,7 +203,7 @@ def by_reference_protein(
         msg = "The protein was not found"
         return scaled_df, dict(
             dropped_samples=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     samples = intensity_df["Sample"].unique().tolist()
@@ -249,7 +253,7 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
             x_title="",
-            y_title="",
+            y_title="Intensity",
             group_by=group_by,
         )
     if graph_type == "Histogram":
@@ -259,7 +263,7 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             name_a="Before Normalisation",
             name_b="After Normalisation",
             heading="Distribution of Protein Intensities",
-            x_title="",
-            y_title="",
+            x_title="Protein Intensities",
+            y_title="Frequency of Protein Intensities",
         )
     return [fig]

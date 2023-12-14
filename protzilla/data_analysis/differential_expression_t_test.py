@@ -2,8 +2,9 @@ import logging
 
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from scipy import stats
+
+from protzilla.utilities import default_intensity_column
 
 from .differential_expression_helper import apply_multiple_testing_correction
 
@@ -21,7 +22,8 @@ def t_test(
     multiple_testing_correction_method,
     alpha,
     fc_threshold,
-    log_base,
+    log_base=None,
+    intensity_name=None,
 ):
     """
     A function to conduct a two sample t-test between groups defined in the
@@ -45,20 +47,26 @@ def t_test(
     :type multiple_testing_correction_method: str
     :param alpha: the alpha value for the t-test
     :type alpha: float
+    :param fc_threshold: threshold for the abs(log_2(fold_change)) (vertical line in a volcano plot).
+        Only proteins with a larger abs(log_2(fold_change)) than the fc_threshold are seen as differentially expressed
+    :type fc_threshold: float
+    :param log_base: in case the data was previously log transformed this parameter contains the base (e.g. 2 if the data was log_2 transformed).
+    :type log_base: int / None
+    :param intensity_name: name of the column containing the protein group intensities
+    :type intensity_name: str / None
 
     :return: a dict containing
-    a df corrected_p_values, containing the p_values after application of multiple testing correction,
-    a df log2_fold_change, containing the log2 fold changes per protein,
-    a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
-    a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
-    a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
-    a df fold_change_df, containing the fold_changes per protein,
-    a df t_statistic_df, containing the t-statistic per protein,
-    a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
-        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
-    a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
-        corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
-
+        a df corrected_p_values, containing the p_values after application of multiple testing correction,
+        a df log2_fold_change, containing the log2 fold changes per protein,
+        a float fc_threshold, containing the absolute threshold for the log fold change, above which a protein is considered differentially expressed,
+        a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
+        a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
+        a df fold_change_df, containing the fold_changes per protein,
+        a df t_statistic_df, containing the t-statistic per protein,
+        a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
+            corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
+        a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
+            corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
     :rtype: dict
     """
     assert grouping in metadata_df.columns
@@ -71,7 +79,8 @@ def t_test(
         logging.warning("auto-selected second group in t-test")
 
     proteins = intensity_df.loc[:, "Protein ID"].unique().tolist()
-    intensity_name = intensity_df.columns.values.tolist()[3]
+    intensity_name = default_intensity_column(intensity_df, intensity_name)
+
     intensity_df = pd.merge(
         left=intensity_df,
         right=metadata_df[["Sample", grouping]],
@@ -108,7 +117,7 @@ def t_test(
         t, p = stats.ttest_ind(group1_intensities, group2_intensities)
         p_values.append(p)
         t_statistic.append(t)
-        if log_base == "":
+        if log_base is None:
             fc = np.mean(group2_intensities) / np.mean(group1_intensities)
         else:
             fc = log_base ** (np.mean(group2_intensities) - np.mean(group1_intensities))
@@ -186,7 +195,7 @@ def t_test(
         fold_change_df=fold_change_df,
         t_statistic_df=t_statistic_df,
         significant_proteins_df=significant_proteins_df,
-        messages=[dict(level=messages.WARNING, msg=proteins_filtered_warning_msg)]
+        messages=[dict(level=logging.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
     )

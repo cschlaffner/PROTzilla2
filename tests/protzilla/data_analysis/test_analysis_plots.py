@@ -63,7 +63,6 @@ def ttest_output():
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
         fc_threshold=test_fc_threshold,
-        log_base="",
     )
 
 

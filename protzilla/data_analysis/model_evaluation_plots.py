@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from protzilla.data_analysis.classification_helper import encode_labels
@@ -9,6 +8,7 @@ from protzilla.utilities.utilities import fig_to_base64
 def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None):
     """
     Calculate and plot the precision-recall curve for a classification model.
+
     :param model: The trained classification model instance to be evaluated.
     :type model: BaseEstimator
     :param input_test_df: The input features of the testing data as a DataFrame.
@@ -16,7 +16,7 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
     :param labels_test_df: The true labels of the testing data as a DataFrame.
     :type labels_test_df: pd.DataFrame
     :param title: The title of the precision-recall curve plot. This is an optional
-     parameter.
+        parameter.
     :type title: str, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
@@ -35,6 +35,7 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
 def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
     """
     Calculate and plot the roc curve for a classification model.
+
     :param model: The trained classification model instance to be evaluated.
     :type model: BaseEstimator
     :param input_test_df: The input features of the testing data as a DataFrame.
@@ -42,7 +43,7 @@ def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
     :param labels_test_df: The true labels of the testing data as a DataFrame.
     :type labels_test_df: pd.DataFrame
     :param title: The title of the precision-recall curve plot. This is an optional
-     parameter.
+        parameter.
     :type title: str, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes

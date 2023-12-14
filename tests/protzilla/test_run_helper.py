@@ -54,6 +54,7 @@ def test_get_parameters():
             }
         }
     }
+    run.step_index_in_current_section.return_value = 0
     expected = {
         "param1": {"default": "current1", "type": ""},
         "param2": {"default": "config2", "type": ""},
@@ -67,6 +68,7 @@ def test_get_parameters_no_side_effects(workflow_meta, example_workflow):
     run.workflow_meta = copy.deepcopy(workflow_meta)
     run.current_parameters = {"strategy": "median"}
     run.workflow_config = copy.deepcopy(example_workflow)
+    run.step_index_in_current_section.return_value = 5
     get_parameters(
         run, "data_preprocessing", "imputation", "simple_imputation_per_protein"
     )
