@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - "*"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,7 +46,8 @@ jobs:
       
       - name: run tests, build coverage file
         run: |
-          export PYTHONPATH=. pytest
+          pip install pytest-xdist
+          export PYTHONPATH=. pytest -n auto --dist=loadfile
           pytest --cache-clear --cov=. --cov-branch --cov-report term-missing tests/
       
       - name: format with black
