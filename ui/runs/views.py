@@ -25,7 +25,12 @@ from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
+from protzilla.utilities import (
+    clean_uniprot_id,
+    get_memory_usage,
+    name_to_title,
+    unique_justseen,
+)
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -123,7 +128,7 @@ def detail(request, run_name):
             run_name=run_name,
             section=section,
             step=step,
-            display_name=f"{run.step.replace('_', ' ').title()}",
+            display_name=f"{name_to_title(run.step)}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
@@ -138,6 +143,7 @@ def detail(request, run_name):
             show_table=show_table,
             used_memory=get_memory_usage(),
             show_protein_graph=show_protein_graph,
+            # workflow_meta=workflow_meta,
         ),
     )
 

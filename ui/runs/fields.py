@@ -1,3 +1,6 @@
+"""
+Module for generating the html for the fields of the run detail page.
+"""
 import sys
 from pathlib import Path
 
@@ -9,6 +12,7 @@ from main.settings import BASE_DIR
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
+from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import get_workflow_default_param_value
 from ui.runs.views_helper import get_displayed_steps
 
@@ -192,7 +196,7 @@ def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
         context=dict(
             disabled=False,
             key="chosen_method",
-            name=f"{step.replace('_', ' ').title()} Method:",
+            name=f"{name_to_title(step)} Method:",
             default=method,
             categories=list(zip(methods, method_names)),
         ),
@@ -215,9 +219,11 @@ def make_displayed_history(run: Run) -> str:
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
         ]["parameters"]
-        name = f"{history_step.step.replace('_', ' ').title()}: {history_step.method.replace('_', ' ').title()}"
+        name = (
+            f"{name_to_title(history_step.step)}: {name_to_title(history_step.method)}"
+        )
         section_heading = (
-            history_step.section.replace("_", " ").title()
+            name_to_title(history_step.section)
             if run.history.steps[i - 1].section != history_step.section
             else None
         )
