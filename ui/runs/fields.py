@@ -348,9 +348,8 @@ def make_name_field(allow_next, form, run, end_of_run):
         run.section,
         run.step_index_in_current_section()
     ):
-        default_final_output_name = run.workflow_config["sections"][run.section]['final_output_name']
-        if default_final_output_name:
-            output_name = default_final_output_name
+        if 'final_output_name' in run.workflow_config["sections"][run.section]:
+            output_name = run.workflow_config["sections"][run.section]['final_output_name']
 
     return render_to_string(
         "runs/field_name_output_text.html",
