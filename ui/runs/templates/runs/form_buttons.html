@@ -123,6 +123,19 @@
         );
     }
 
+
+    function showCalculationInProgressModal() {
+        console.log("modal where art thou?")
+        $('#calculationInProgressModal').modal('show');
+    }
+
+    // Function to hide the calculation in progress modal
+    function hideCalculationInProgressModal() {
+        console.log("gone, now")
+        $('#calculationInProgressModal').modal('hide');
+    }
+
+
     function equal_plot_parameters(form) {
         if (isEmptyDict(current_plot_parameters)) {
             return false;
@@ -144,6 +157,8 @@
 
         $('#calc_form').change(function () {
             console.log("calc")
+            $('#calculationInProgressModal').modal('show');
+            showCalculationInProgressModal();
             const selected_method = $('#chosen_method').val();
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
@@ -160,7 +175,20 @@
                     disable_plot_button(true);
                 }
             }
-            $('#plot_form').trigger("change");
+            
+
+            //(this).unbind('submit').submit();
+            //$('#calculationInProgressModal').on('shown.bs.modal', function () {
+
+            //setTimeout(function () {
+               // console.log("Executed after 10 seconds");
+                hideCalculationInProgressModal();
+           // }, 10000);
+
+
+        //});
+        $('#plot_form').trigger("change");
+            
         });
 
         $('#plot_form').change(function () {

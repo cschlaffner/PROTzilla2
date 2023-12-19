@@ -124,8 +124,19 @@
 
                 {# show current step #}
                 {% if not end_of_run %}
-                    <div class="row justify-content-center d-flex">
-                        <h3>{{ display_name }}</h3>
+                    <!--<div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="calculationInProgressModalLabel">Calculation in Progress</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        Calculation is in progress...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    -->
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_fields %}
                             <div class="col">
