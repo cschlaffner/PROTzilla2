@@ -934,7 +934,7 @@
             "categories": [],
             "default": "None",
             "multiple": true,
-            "default_select_all": false
+            "default_select_all": true
           },
           "metadata_df": {
             "type": "empty",

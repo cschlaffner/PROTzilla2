@@ -11,12 +11,12 @@ from .differential_expression_helper import apply_multiple_testing_correction
 def anova(
     intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
-    grouping: str,
-    selected_groups: list,
     multiple_testing_correction_method: str,
     alpha: float,
+    grouping: str,
+    selected_groups: list = None,
     intensity_name: str = None,
-):
+) -> dict:
     """
     A function that uses ANOVA to test the difference between two or more
     groups defined in the clinical data. The ANOVA test is conducted on
@@ -25,25 +25,15 @@ def anova(
 
     :param intensity_df: the dataframe that should be tested in long
         format
-    :type intensity_df: pandas DataFrame
     :param metadata_df: the dataframe that contains the clinical data
-    :type metadata_df: pandas DataFrame
     :param grouping: the column name of the grouping variable in the
         metadata_df
-    :type grouping: str
     :param selected_groups: groups to test against each other
     :type selected_groups: list, if None or empty: first two groups will be selected
     :param multiple_testing_correction_method: the method for multiple
         testing correction
-    :type multiple_testing_correction_method: str
     :param alpha: the alpha value for anova
-    :type alpha: float
     :param intensity_name: name of the column containing the protein group intensities
-    :type intensity_name: str / None
-    :return: a dataframe with the intensity_df and the corrected p-values
-        and a dict containing corrected_p_values and corrected_alphas
-    :rtype: pandas DataFrame, dict
-
     :return: a dataframe in typical protzilla long format
         with the differentially expressed proteins and a dict, containing
         the corrected p-values and the log2 fold change, the alpha used
@@ -51,11 +41,17 @@ def anova(
     """
     # Check if the grouping variable is present in the metadata_df
     assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
+    messages = []
 
     # Select the first two groups if none or an empty list is provided
     if not selected_groups:
         selected_groups = metadata_df[grouping].unique()
-        logging.warning("auto-selected all groups in anova")
+        messages.append(
+            dict(
+                level=logging.INFO,
+                msg="Auto-selected all groups for calculation because none were selected.",
+            )
+        )
 
     # Merge the intensity and metadata dataframes in order to assign to each Sample
     # their corresponding group
@@ -105,4 +101,5 @@ def anova(
         "corrected_p_values_df": corrected_p_values_df,
         "corrected_alpha": corrected_alpha,
         "sample_group_df": sample_group_df,
+        "messages": messages,
     }
