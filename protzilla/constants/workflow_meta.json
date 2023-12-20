@@ -981,7 +981,7 @@
             "name": "base of log transformation (leave empty if no log transformation was performed on the data)",
             "type": "numeric",
             "min": 2,
-            "default": null
+            "default": 2
           },
           "grouping": {
             "name": "Grouping",
