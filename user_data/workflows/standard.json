@@ -176,10 +176,10 @@
           "method": "clustergram",
           "parameters": {
             "input_df": [
-              "anova",
-              "filtered_df"
+              "ttest",
+              "de_proteins_df"
             ],
-            "sample_group_df": [null, null],
+            "sample_group_df": ["None", null],
             "flip_axes": "no"
           }
         }
