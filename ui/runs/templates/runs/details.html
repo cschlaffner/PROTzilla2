@@ -126,6 +126,7 @@
                 {% if not end_of_run %}
                     <div class="row justify-content-center d-flex">
                         <h3>{{ display_name }}</h3>
+                        <div class="row mb-3" id="description">{{ description }}</div>
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_fields %}
                             <div class="col">
