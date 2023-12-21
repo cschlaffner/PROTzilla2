@@ -259,16 +259,15 @@
                                                         <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <!-- You can add additional content or messages here -->
                                                         Going a step back during calculation may lead to unforseen behavior and loss in data.
-                                                        Do you want to go ahead?
+                                                        Do you want to proceed?
                                                         <hr>
-                                                        <a href="{% url 'runs:back' run_name %}" id = "backButton2" class="btn btn-red mr-auto">Back</a>
-                                                        <button id = "cancel" class="btn btn-grey mr-auto">Cancel
-                                                    </div>
+                                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
+                                                        <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
                                     {% endif %}
                                     <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
                                     </button>
@@ -280,4 +279,5 @@
             </div>
         </div>
     </div>
-{% endblock %}
+
+    {% endblock %}
