@@ -41,7 +41,8 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = [
                 col
                 for col in ["Sample", "Group", "Batch"]
-                if col not in run.metadata.columns
+                if col not
+                   in run.metadata.columns
             ]
         elif param_dict["fill"] == "metadata_columns":
             param_dict["categories"] = run.metadata.columns.unique()

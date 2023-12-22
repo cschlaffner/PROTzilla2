@@ -1249,7 +1249,7 @@ def test_peptides_to_isoform_no_graph(critical_logger, tests_folder_name):
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_no_graph"
 
     protein_id = "SomeID"
-    out_dict = peptides_to_isoform(pd.DataFrame(), pd.DataFrame(), protein_id, run_name)
+    out_dict = peptides_to_isoform(pd.DataFrame(), protein_id, run_name)
     assert out_dict["graph_path"] is None
     assert out_dict["messages"][0]["msg"] == "No graph found"
 

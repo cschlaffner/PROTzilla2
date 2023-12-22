@@ -98,11 +98,11 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
 
 def peptides_to_isoform(
     peptide_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
     protein_id: str,
     run_name: str,
     k: int = 5,
     allowed_mismatches: int = 2,
+    metadata_df: pd.DataFrame = None,
     grouping: str = None,
     selected_groups: list = None,
 ):
@@ -162,11 +162,11 @@ def peptides_to_isoform(
     print(
         f"grouping:{grouping}, type grouping: {type(grouping)}, selected groups: {selected_groups}"
     )
-    assert metadata_df, f"Metadata needs to be imported before using this Method"
-    print(metadata_df)
-    print(metadata_df[grouping])
 
     if grouping:
+        assert (
+            metadata_df
+        ), f"When selecting Peptides by grouping, Metadata has to be imported"
         assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
     if selected_groups:
         # convert to always deal with list, will be string if only one category was selected  # noqa E501
@@ -175,12 +175,7 @@ def peptides_to_isoform(
         for group in selected_groups:
             assert (
                 group in metadata_df[grouping].unique()
-            ), f"'{group}' not found in metadata_df column '{grouping}'"
-
-    print("pre merge:")
-    print(peptide_df.head(5))
-    print(peptide_df.columns)
-    print(peptide_df["Sample"])
+            ), f"Group '{group}' not found in metadata_df column '{grouping}'"
 
     if grouping is not None and grouping != "Sample":
         peptide_df = pd.merge(
@@ -190,8 +185,6 @@ def peptides_to_isoform(
             copy=False,
         )
 
-    print("post merge:")
-    print(peptide_df)
     peptides = _get_peptides(
         peptide_df=peptide_df,
         protein_id=protein_id,
