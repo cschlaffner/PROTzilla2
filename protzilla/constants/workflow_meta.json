@@ -945,7 +945,7 @@
       },
       "t_test": {
         "name": "t-Test",
-        "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
+        "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1.",
         "parameters": {
           "intensity_df": {
             "name": "Input Dataframe",
