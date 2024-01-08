@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import patch
 
 import numpy as np
@@ -186,49 +185,6 @@ def diann_import_intensity_df():
         },
     }
     return pd.DataFrame(data=diann_intensity_df)
-
-
-def test_max_quant_import_different_intensity_names():
-    for intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]:
-        df, msg = ms_data_import.max_quant_import(
-            _=None,
-            file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small.tsv",
-            intensity_name=intensity_name,
-        )
-        assert df is not None
-        assert intensity_name in df.columns
-
-
-def test_max_quant_import_file_not_exist():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
-        file_path="non_existent_file_path",
-        intensity_name="Intensity",
-    )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "found" in msg["messages"][0]["msg"].lower()
-
-
-def test_max_quant_import_no_protein_ids_column():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
-        file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_noproteincolumn.tsv",
-        intensity_name="Intensity",
-    )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "Protein IDs" in msg["messages"][0]["msg"]
-
-
-def test_max_quant_import_invalid_data():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
-        file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_invalid.tsv",
-        intensity_name="Intensity",
-    )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
 
 
 @pytest.mark.parametrize(

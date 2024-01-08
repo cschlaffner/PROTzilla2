@@ -1,10 +1,10 @@
 import logging
 import re
 from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pandas.errors
 
 from protzilla.data_integration.database_query import biomart_query
 
@@ -13,30 +13,29 @@ def max_quant_import(
     _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
 ) -> (pd.DataFrame, dict):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
-    try:
-        df = pd.read_csv(
-            file_path,
-            sep="\t",
-            low_memory=False,
-            na_values=["", 0],
-            keep_default_na=True,
-        )
-        protein_groups = df["Protein IDs"]
-        intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
-
-        if intensity_df.empty:
-            msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again or verify your file."
-            return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
-
-        intensity_df.columns = [
-            c[len(intensity_name) + 1 :] for c in intensity_df.columns
-        ]
-        intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
-
-    except Exception as e:
-        msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid Max Quant file."
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a Max Quant file."
         return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+    df = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+    protein_groups = df["Protein IDs"]
+
+    df = df.drop(columns=["Intensity", "iBAQ", "iBAQ peptides"], errors="ignore")
+    intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
+
+    if intensity_df.empty:
+        msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again"
+        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+    intensity_df.columns = [c[len(intensity_name) + 1 :] for c in intensity_df.columns]
+    intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
 def ms_fragger_import(
@@ -53,66 +52,61 @@ def ms_fragger_import(
         "Spectral Count",
         "Total Spectral Count",
     ]
-    try:
-        df = pd.read_csv(
-            file_path,
-            sep="\t",
-            low_memory=False,
-            na_values=["", 0],
-            keep_default_na=True,
-        )
-        protein_groups = df["Protein ID"]
-        df = df.drop(
-            columns=[
-                "Combined Spectral Count",
-                "Combined Unique Spectral Count",
-                "Combined Total Spectral Count",
-            ]
-        )
-        intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
-        intensity_df.columns = [
-            c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
-        ]
-        intensity_df = intensity_df.drop(
-            columns=intensity_df.filter(
-                regex="MaxLFQ Total$|MaxLFQ$|Total$|MaxLFQ Unique$|Unique$", axis=1
-            ).columns
-        )
-        intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
-
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
-    except Exception as e:
-        msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid MS Fragger file."
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a MS Fragger file."
         return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+    df = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+    protein_groups = df["Protein ID"]
+    df = df.drop(
+        columns=[
+            "Combined Spectral Count",
+            "Combined Unique Spectral Count",
+            "Combined Total Spectral Count",
+        ]
+    )
+    intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
+    intensity_df.columns = [
+        c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
+    ]
+    intensity_df = intensity_df.drop(
+        columns=intensity_df.filter(
+            regex="MaxLFQ Total$|MaxLFQ$|Total$|MaxLFQ Unique$|Unique$", axis=1
+        ).columns
+    )
+    intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
 def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
-    try:
-        df = pd.read_csv(
-            file_path,
-            sep="\t",
-            low_memory=False,
-            na_values=["", 0],
-            keep_default_na=True,
-        )
-        df = df.drop(
-            columns=[
-                "Protein.Group",
-                "Protein.Names",
-                "Genes",
-                "First.Protein.Description",
-            ]
-        )
-        # rename column names of samples, removing file path and ".raw" if present
-        intensity_df = df.rename(columns=lambda x: re.sub(r"(.*[/\\])|(.raw)", r"", x))
-        intensity_df = intensity_df.rename(columns={"Protein.Ids": "Protein ID"})
-
-        intensity_name = "Intensity"
-
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
-    except Exception as e:
-        msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid DIA-NN MS file."
+    if not Path(file_path).is_file():
+        msg = "The file upload is empty. Please provide a DIA-NN MS file."
         return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+    df = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+    df = df.drop(
+        columns=["Protein.Group", "Protein.Names", "Genes", "First.Protein.Description"]
+    )
+    # rename column names of samples, removing file path and ".raw" if present
+    intensity_df = df.rename(columns=lambda x: re.sub(r"(.*[/\\])|(.raw)", r"", x))
+    intensity_df = intensity_df.rename(columns={"Protein.Ids": "Protein ID"})
+
+    intensity_name = "Intensity"
+
+    return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
 
 
 def transform_and_clean(
