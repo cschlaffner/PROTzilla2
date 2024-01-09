@@ -59,19 +59,41 @@
         return formDataDict;
     }
 
-
-    function disable_plot_button(bool) {
-        $('#plot_parameters_submit').prop('disabled', bool);
-    }
-
     function disable_calc_button(bool) {
         $('#calculate_parameters_submit').prop('disabled', bool);
         results_exist = bool;
         calc_params_match = bool;
     }
 
+    function disable_plot_button(bool) {
+        plot_button = $('#plot_parameters_submit');
+        //When plot fields exist the Plot button is implemented as an input otherwise as a link,
+        //thus they have to be deactivated differently.
+        if (plot_fields_exist()) {
+            plot_button.prop('disabled', bool);
+        }
+        else {
+            if (bool) {
+                plot_button.prop('href', '');
+                plot_button.prop('style', 'background-color:#EFF3F7');
+                plot_button.prop('style', 'color:#6E7073');
+            }
+            else {
+                plot_button.prop('href', '{% url 'runs:plot' run_name %}');
+            }
+        }
+    }
+
+    function disable_plot_fields(bool) {
+        $('#plotfields').prop('disabled', bool);
+    }
+
     function isEmptyDict(obj) {
-        return Object.keys(obj).length == 0;
+        return Object.keys(obj).length === 0;
+    }
+
+    function plot_fields_exist() {
+        return document.getElementById('plot_form') !== null;
     }
 
     function trigger_plot_change() {
@@ -101,6 +123,16 @@
         );
     }
 
+
+    function showCalculationInProgressModal() {
+        $('#calculationInProgressModal').modal('show');
+    }
+
+    function hideCalculationInProgressModal() {
+        $('#calculationInProgressModal').modal('hide');
+    }
+
+
     function equal_plot_parameters(form) {
         if (isEmptyDict(current_plot_parameters)) {
             return false;
@@ -113,26 +145,55 @@
     }
 
     $(document).ready(function () {
-        // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
+        disable_calc_button(false);
+        calculationInProgress = false;
+        $('#backButton').click(function () {
+            if (calculationInProgress) {
+                event.preventDefault();
+                showCalculationInProgressModal();
+                $('#cancel').click(function () {
+                    hideCalculationInProgressModal();
+            });
+    }
+    });
         if($('#plot_form').find('input').length) {
             disable_plot_button(true);
+            disable_plot_fields(true);
         }
 
         $('#calc_form').change(function () {
+            console.log("calc is pressed");
+            calculationInProgress = true;
             const selected_method = $('#chosen_method').val();
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
                 disable_calc_button(true);
+                disable_plot_fields(false);
             } else {
                 disable_calc_button(false);
+                disable_plot_fields(true);
             }
+            if (!plot_fields_exist()) {
+                if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
+                    disable_plot_button(false);
+                } else {
+                    disable_plot_button(true);
+                }
+            }
+            calculationInProgress = false;
             $('#plot_form').trigger("change");
+            
         });
 
         $('#plot_form').change(function () {
             const selected_method = $('#chosen_method').val();
-            if (!calc_form_data || selected_method !== calculated_method) {
+
+            if (plotted_current_match() && equal_plot_parameters($(this))) {
                 disable_plot_button(true);
+            }
+
+            if (!calc_form_data || selected_method !== calculated_method) {
+                disable_plot_button(true)
                 return;
             }
 
@@ -143,7 +204,8 @@
 
             if (equal_plot_parameters($(this)) || !calc_params_match) {
                 disable_plot_button(true);
-            } else {
+            }
+            else {
                 disable_plot_button(false);
             }
         });

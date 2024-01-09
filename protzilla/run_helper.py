@@ -3,7 +3,9 @@ import copy
 import gseapy
 import matplotlib.colors as mcolors
 import restring
+from biomart import BiomartServer
 
+from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -18,13 +20,31 @@ def insert_special_params(param_dict, run):
         else:
             selected = param_dict["steps"][0] if param_dict["steps"] else None
         param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        if "sorted" in param_dict and param_dict["sorted"]:
+            param_dict["outputs"].sort()
 
     if "fill" in param_dict:
-        if param_dict["fill"] == "metadata_columns":
+        if param_dict["fill"] == "metadata_non_sample_columns":
             # Sample not needed for anova and t-test
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
             ].unique()
+        elif param_dict["fill"] == "metadata_unknown_columns":
+            # give selection of existing columns without ["Sample", "Group", "Batch"]
+            # as they are already named correctly for our purposes
+            param_dict["categories"] = run.metadata.columns[
+                ~run.metadata.columns.isin(["Sample", "Group", "Batch"])
+            ].unique()
+
+        elif param_dict["fill"] == "metadata_required_columns":
+            # TODO add other possible metadata columns
+            # exclude columns that are already in metadata and known to be required
+            param_dict["categories"] = [
+                col
+                for col in ["Sample", "Group", "Batch"]
+                if col not in run.metadata.columns
+            ]
+
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
@@ -34,6 +54,24 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = gseapy.get_library_name()
         elif param_dict["fill"] == "matplotlib_colors":
             param_dict["categories"] = mcolors.CSS4_COLORS
+        elif param_dict["fill"] == "uniprot_fields":
+            databases = uniprot_databases()
+            if databases:
+                # use the first database as a default, only used to initalize
+                param_dict["categories"] = uniprot_columns(databases[0]) + ["Links"]
+            else:
+                param_dict["categories"] = ["Links"]
+        elif param_dict["fill"] == "uniprot_databases":
+            databases = uniprot_databases()
+            param_dict["default"] = databases[0] if databases else ""
+            param_dict["categories"] = databases
+        elif param_dict["fill"] == "biomart_datasets":
+            # retrieve datasets from BioMart server
+            server = BiomartServer("http://www.ensembl.org/biomart")
+            database = server.databases["ENSEMBL_MART_ENSEMBL"]
+            param_dict["categories"] = database.datasets
+        elif param_dict["fill"] == "protein_group_column":
+            param_dict["categories"] = run.df["Protein ID"].unique()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
@@ -60,7 +98,12 @@ def get_parameters(run, section, step, method):
 
     for key, param_dict in parameters.items():
         workflow_default = get_workflow_default_param_value(
-            run.workflow_config, section, step, method, key
+            run.workflow_config,
+            section,
+            step,
+            method,
+            run.step_index_in_current_section(),
+            key,
         )
         if method in run.current_parameters and key in run.current_parameters[method]:
             param_dict["default"] = run.current_parameters[method][key]

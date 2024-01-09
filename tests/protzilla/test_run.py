@@ -1,14 +1,16 @@
 import json
 from shutil import rmtree
 
+import numpy as np
+import pandas as pd
 import pytest
 from PIL import Image
 
-from protzilla import data_preprocessing
+from protzilla import data_integration, data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import ms_data_import
 from protzilla.run import Run
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -81,7 +83,8 @@ def test_run_create(tests_folder_name):
         data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     run.calculate_and_next(
-        data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
     )
     # print([s.outputs for s in run.history.steps])
     # to get a history that can be used to create a worklow, the section, step, method
@@ -100,9 +103,7 @@ def test_run_back(tests_folder_name):
     )
     df1 = run.df
     run.step_index += 1
-    run.calculate_and_next(
-        data_preprocessing.filter_proteins.by_samples_missing, percentage=1
-    )
+    run.calculate_and_next(data_preprocessing.transformation.by_log)
     df2 = run.df
     assert not df1.equals(df2)
     run.back_step()
@@ -161,6 +162,7 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
         file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
         intensity_name="Intensity",
     )
+    run.df["Intensity"] = np.nan
 
     run.perform_calculation_from_location(
         "data_preprocessing",
@@ -250,9 +252,41 @@ def test_export_plot(tests_folder_name):
     run.perform_calculation(data_preprocessing.imputation.by_min_per_sample, {})
     run.create_plot(
         data_preprocessing.imputation.by_min_per_sample_plot,
-        dict(graph_type="Boxplot", graph_type_quantites="Bar chart", group_by="Sample"),
+        dict(
+            graph_type="Boxplot",
+            graph_type_quantities="Bar chart",
+            group_by="Sample",
+            visual_transformation="linear",
+        ),
     )
     assert len(run.plots) > 1
+    for plot in run.export_plots("tiff"):
+        Image.open(plot).verify()
+    for plot in run.export_plots("eps"):
+        Image.open(plot).verify()
+
+
+def test_export_plot_base64(tests_folder_name):
+    run_name = tests_folder_name + "/test_export_plot_" + random_string()
+    input_df_path = (
+        PROJECT_PATH
+        / "tests/test_data/enrichment_data"
+        / "Reactome_enrichment_enrichr.csv"
+    )
+
+    run = Run.create(run_name)
+    run.create_step_plot(
+        data_integration.di_plots.GO_enrichment_bar_plot,
+        dict(
+            input_df=pd.read_csv(input_df_path, sep="\t"),
+            gene_sets=["Reactome_2013"],
+            top_terms=10,
+            cutoff=0.05,
+            value="p_value",
+        ),
+    )
+    for plot in run.export_plots("png"):
+        Image.open(plot).verify()
     for plot in run.export_plots("tiff"):
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):
@@ -274,6 +308,7 @@ def test_name_step(example_workflow_short, tests_folder_name):
         "importing",
         "ms_data_import",
         "max_quant_import",
+        run.step_index_in_current_section(),
         "output_name",
     )
 

@@ -5,7 +5,7 @@ import pytest
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.history import History
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 
 
 @pytest.fixture

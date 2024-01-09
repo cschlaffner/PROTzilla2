@@ -3,9 +3,12 @@ from ..data_analysis import (
     clustering,
     differential_expression,
     dimension_reduction,
+    model_evaluation,
+    model_evaluation_plots,
     plots,
+    protein_graphs,
 )
-from ..data_integration import di_plots, enrichment_analysis
+from ..data_integration import database_integration, di_plots, enrichment_analysis
 from ..data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -17,11 +20,9 @@ from ..data_preprocessing import (
 )
 from ..importing import metadata_import, ms_data_import, peptide_import
 
-"""
-In this data structure, a method is associated with a location. The location is
-determined by the section, step, and method keys found in the workflow_meta 
-file that correspond to the method.
-"""
+# In this data structure, a method is associated with a location. The location is
+# determined by the section, step, and method keys found in the workflow_meta
+# file that correspond to the method.
 method_map = {
     (
         "importing",
@@ -35,9 +36,24 @@ method_map = {
     ): ms_data_import.ms_fragger_import,
     (
         "importing",
+        "ms_data_import",
+        "diann_import",
+    ): ms_data_import.diann_import,
+    (
+        "importing",
         "metadata_import",
         "metadata_import_method",
     ): metadata_import.metadata_import_method,
+    (
+        "importing",
+        "metadata_import",
+        "metadata_import_method_diann",
+    ): metadata_import.metadata_import_method_diann,
+    (
+        "importing",
+        "metadata_import",
+        "metadata_column_assignment",
+    ): metadata_import.metadata_column_assignment,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
     (
         "data_preprocessing",
@@ -126,6 +142,11 @@ method_map = {
     ): imputation.by_min_per_dataset,
     (
         "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling",
+    ): imputation.by_normal_distribution_sampling,
+    (
+        "data_preprocessing",
         "filter_peptides",
         "pep_filter",
     ): peptide_filter.by_pep_value,
@@ -151,9 +172,29 @@ method_map = {
     ): clustering.k_means,
     (
         "data_analysis",
+        "clustering",
+        "expectation_maximisation",
+    ): clustering.expectation_maximisation,
+    (
+        "data_analysis",
+        "clustering",
+        "hierarchical_agglomerative_clustering",
+    ): clustering.hierarchical_agglomerative_clustering,
+    (
+        "data_analysis",
         "classification",
         "random_forest",
     ): classification.random_forest,
+    (
+        "data_analysis",
+        "classification",
+        "svm",
+    ): classification.svm,
+    (
+        "data_analysis",
+        "model_evaluation",
+        "evaluate_classification_model",
+    ): model_evaluation.evaluate_classification_model,
     (
         "data_analysis",
         "dimension_reduction",
@@ -165,35 +206,59 @@ method_map = {
         "umap",
     ): dimension_reduction.umap,
     (
-        "data_integration",
-        "enrichment_analysis",
-        "go_analysis_with_STRING",
-    ): enrichment_analysis.go_analysis_with_STRING,
+        "data_analysis",
+        "protein_graphs",
+        "peptides_to_isoform",
+    ): protein_graphs.peptides_to_isoform,
+    (
+        "data_analysis",
+        "protein_graphs",
+        "variation_graph",
+    ): protein_graphs.variation_graph,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_with_enrichr",
-    ): enrichment_analysis.go_analysis_with_enrichr,
+        "GO_analysis_with_STRING",
+    ): enrichment_analysis.GO_analysis_with_STRING,
     (
         "data_integration",
         "enrichment_analysis",
-        "go_analysis_offline",
-    ): enrichment_analysis.go_analysis_offline,
+        "GO_analysis_with_Enrichr",
+    ): enrichment_analysis.GO_analysis_with_Enrichr,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "GO_analysis_offline",
+    ): enrichment_analysis.GO_analysis_offline,
     (
         "data_integration",
         "enrichment_analysis",
         "gsea",
     ): enrichment_analysis.gsea,
+    (
+        "data_integration",
+        "enrichment_analysis",
+        "gsea_preranked",
+    ): enrichment_analysis.gsea_preranked,
+    (
+        "data_integration",
+        "database_integration",
+        "uniprot",
+    ): database_integration.add_uniprot_data,
+    (
+        "data_integration",
+        "database_integration",
+        "gene_mapping",
+    ): database_integration.gene_mapping,
 }
 
 # reversed mapping of method callable and location
 location_map = {v: k for k, v in method_map.items()}
 
-"""
-In this data structure, a plot for a given method is associated with a 
-location. The location is determined by the section, step, and method keys 
-found in the workflow_meta file that correspond to the method.
-"""
+
+# In this data structure, a plot for a given method is associated with a
+# location. The location is determined by the section, step, and method keys
+# found in the workflow_meta file that correspond to the method.
 plot_map = {
     (
         "data_preprocessing",
@@ -267,6 +332,11 @@ plot_map = {
     ): imputation.by_min_per_dataset_plot,
     (
         "data_preprocessing",
+        "imputation",
+        "normal_distribution_sampling",
+    ): imputation.by_normal_distribution_sampling_plot,
+    (
+        "data_preprocessing",
         "outlier_detection",
         "pca",
     ): outlier_detection.by_pca_plot,
@@ -301,13 +371,38 @@ plot_map = {
         "clustergram",
     ): plots.clustergram_plot,
     (
-        "data_integration",
+        "data_analysis",
         "plot",
-        "go_enrichment_bar_plot",
-    ): di_plots.go_enrichment_bar_plot,
+        "prot_quant",
+    ): plots.prot_quant_plot,
+    (
+        "data_analysis",
+        "plot",
+        "precision_recall_curve",
+    ): model_evaluation_plots.precision_recall_curve_plot,
+    (
+        "data_analysis",
+        "plot",
+        "roc_curve",
+    ): model_evaluation_plots.roc_curve_plot,
     (
         "data_integration",
         "plot",
-        "go_enrichment_dot_plot",
-    ): di_plots.go_enrichment_dot_plot,
+        "GO_enrichment_bar_plot",
+    ): di_plots.GO_enrichment_bar_plot,
+    (
+        "data_integration",
+        "plot",
+        "GO_enrichment_dot_plot",
+    ): di_plots.GO_enrichment_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_dot_plot",
+    ): di_plots.gsea_dot_plot,
+    (
+        "data_integration",
+        "plot",
+        "gsea_enrichment_plot",
+    ): di_plots.gsea_enrichment_plot,
 }

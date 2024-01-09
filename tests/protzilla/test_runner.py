@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.utilities.random import random_string
+from protzilla.utilities import random_string
 
 sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")
@@ -176,7 +176,7 @@ def test_serialize_workflow_graphs():
     serial_imputation_graphs = {
         "graph_type": "Bar chart",
         "group_by": "Sample",
-        "graph_type_quantites": "Pie chart",
+        "graph_type_quantities": "Pie chart",
     }
 
     serial_filter_graphs = {"graph_type": "Pie chart"}

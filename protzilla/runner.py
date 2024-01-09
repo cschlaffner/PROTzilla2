@@ -5,7 +5,7 @@ from pathlib import Path
 from .constants.paths import RUNS_PATH
 from .run import Run
 from .run_helper import get_parameters
-from .utilities.random import random_string
+from .utilities import random_string
 from .workflow_helper import get_defaults
 
 

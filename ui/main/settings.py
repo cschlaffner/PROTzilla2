@@ -135,14 +135,14 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # This configures the django logger
-# to adjust the protzilla-logger, see protzilla.constants.logging for more info
+# to adjust the protzilla-logger, see protzilla.constants.protzilla_logging for more info
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
         "django": {
             "level": "INFO",
-            "class": "protzilla.constants.logging.ProtzillaLoggingHandler",
+            "class": "protzilla.constants.protzilla_logging.ProtzillaLoggingHandler",
         },
     },
     "loggers": {

@@ -3,13 +3,11 @@ name: Issue Template
 about: Standard Issue Template
 title: 
 labels: 
-project: PROTzilla 2
+project: "PROTzilla"
 
 ---
 
-<Useful Description>
-  
-  
-  
+Useful Description
+
 ## Acceptance Criteria
 - [ ] 

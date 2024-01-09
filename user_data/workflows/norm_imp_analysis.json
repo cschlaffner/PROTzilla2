@@ -22,6 +22,15 @@
     "data_preprocessing": {
       "steps": [
         {
+          "name": "normalisation",
+          "method": "median",
+          "parameters": {
+            "percentile": 0.4,
+            "graph_one_type": "Boxplot",
+            "graph_one_group_by": "Sample"
+          }
+        },
+        {
           "name": "imputation",
           "method": "knn",
           "parameters": {
@@ -29,15 +38,6 @@
             "graph_one_type": "Bar chart",
             "graph_one_group_by": "Sample",
             "graph_two_type": "Pie chart"
-          }
-        },
-        {
-          "name": "normalisation",
-          "method": "median",
-          "parameters": {
-            "percentile": 0.4,
-            "graph_one_type": "Boxplot",
-            "graph_one_group_by": "Sample"
           }
         }
       ]
@@ -53,16 +53,11 @@
           "name": "plot",
           "method": "volcano",
           "parameters": {}
-        },
-        {
-          "name": "plot",
-          "method": "volcano",
-          "parameters": {}
         }
       ]
     },
     "data_integration": {
-      "steps": {}
+      "steps": []
     }
   }
 }

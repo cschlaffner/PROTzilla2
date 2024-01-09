@@ -54,10 +54,11 @@
           "graphs": [
             {
               "graph_type": "Boxplot",
-              "group_by": "Sample"
+              "group_by": "Sample",
+              "visual_transformation": "log10"
             },
             {
-              "graph_type_quantites": "Pie chart"
+              "graph_type_quantities": "Pie chart"
             }
           ]
         },
@@ -100,6 +101,18 @@
     "data_analysis": {
       "steps": [
         {
+          "name": "plot",
+          "method": "prot_quant",
+          "parameters": {
+            "input_df": [
+              "preprocessed_data",
+              "dataframe"
+            ],
+            "protein_group": null
+          },
+          "output_name": "prot_quant_plot"
+        },
+        {
           "name": "dimension_reduction",
           "method": "umap",
           "parameters": {
@@ -114,23 +127,6 @@
             "random_state": 42
           },
           "output_name": "umap"
-        },
-        {
-          "name": "clustering",
-          "method": "k_means",
-          "parameters": {
-            "input_df": [
-              "umap",
-              "embedded_data"
-            ],
-            "n_clusters": 8,
-            "random_state": 6,
-            "init_centroid_strategy": "random",
-            "n_init": 10,
-            "max_iter": 300,
-            "tolerance": 0.0001
-          },
-          "output_name": "k_means"
         },
         {
           "name": "plot",

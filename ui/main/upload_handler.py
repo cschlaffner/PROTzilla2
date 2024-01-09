@@ -9,6 +9,10 @@ from . import settings
 
 # copied from TemporaryFileUploadHandler
 class CustomFileUploadHandler(FileUploadHandler):
+    """
+    The same as Django's TemporaryFileUploadHandler, except for writing to a CustomUploadedFile.
+    """
+
     def new_file(self, *args, **kwargs):
         """
         Create the file object to append to as data is coming in.
@@ -39,11 +43,12 @@ class CustomFileUploadHandler(FileUploadHandler):
 # copied from TemporaryUploadedFile
 class CustomUploadedFile(UploadedFile):
     """
-    A file uploaded to a temporary location (i.e. stream-to-disk).
+    The same as Django's TemporaryUploadedFile, except for passing different arguments when creating the file
     """
 
     def __init__(self, name, content_type, size, charset, content_type_extra=None):
         start, ext = os.path.splitext(name)
+        # the NamedTemporaryFile arguments were actually changed
         file = tempfile.NamedTemporaryFile(
             suffix=ext,
             prefix=start + "_",

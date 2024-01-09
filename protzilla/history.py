@@ -1,5 +1,4 @@
 import json
-import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,7 +8,6 @@ from joblib import dump, load
 from sklearn.base import BaseEstimator
 
 from .constants.paths import RUNS_PATH
-from .utilities.random import random_string
 
 
 class History:
@@ -17,13 +15,17 @@ class History:
     This class has the responsibility to save what methods were previously executed
     in a Run. Each Run has one History. It is responsible for saving dataframes to
     disk.
-    :ivar steps is a list of the steps that have been executed, represented by
+
+    :param steps: is a list of the steps that have been executed, represented by
         ExecutedStep instances.
-    :ivar df_mode determines if the dataframe of a completed step that is added to the
+    :type steps: list[ExecutedStep]
+    :param df_mode: determines if the dataframe of a completed step that is added to the
         history is saved to disk and not held im memory ("disk" mode), held in memory
         but not saved to disk ("memory" mode) or both ("disk_memory" mode).
-    :ivar run_name is the name of the run a history instance belongs to. It is used to
+    :type df_mode: str
+    :param run_name: is the name of the run a history instance belongs to. It is used to
         save things at the correct disk location.
+    :type run_name: str
     """
 
     @classmethod
@@ -163,7 +165,7 @@ class History:
     def serialize(self, d, index, section, step, method):
         cleaned = {}
         for key, value in d.items():
-            if isinstance(value, pd.DataFrame):
+            if isinstance(value, pd.DataFrame) or isinstance(value, pd.Series):
                 filename = f"{index}-{section}-{step}-{method}-{key}.csv"
 
                 path = RUNS_PATH / self.run_name / "history_dfs" / filename

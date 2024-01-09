@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.svm import SVC
 
 from protzilla.data_analysis.classification_helper import (
     create_dict_with_lists_as_values,
@@ -8,9 +9,9 @@ from protzilla.data_analysis.classification_helper import (
     create_model_evaluation_df_grid_search_manual,
     decode_labels,
     encode_labels,
+    evaluate_with_scoring,
     perform_cross_validation,
     perform_grid_search_cv,
-    perform_grid_search_manual,
     perform_train_test_split,
 )
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
@@ -24,75 +25,70 @@ def perform_classification(
     clf,
     clf_parameters,
     scoring,
+    model_selection_scoring="accuracy",
     test_validate_split=None,
     **parameters,
 ):
-    # work with function set_params or create param_grid depending on the case
-    # check returns, what to return clf, scores, already fit and predict here? Take
-    # into account that scores are not always called using score() function
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
             input_df, labels_df, test_size=test_validate_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
-        train_scores = model.score(X_train, y_train)
-        val_scores = model.score(X_val, y_val)
 
+        y_pred_train = model.predict(X_train)
+        train_scores = evaluate_with_scoring(scoring, y_train, y_pred_train)
+        y_pred_val = model.predict(X_val)
+        val_scores = evaluate_with_scoring(scoring, y_val, y_pred_val)
+
+        # create model evaluation dataframe
+        train_scores = {"train_" + key: value for key, value in train_scores.items()}
+        val_scores = {"test_" + key: value for key, value in val_scores.items()}
+        scores = {**train_scores, **val_scores}
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
             clf_parameters,
-            train_scores,
-            val_scores,
+            scores,
         )
         return model, model_evaluation_df
     elif validation_strategy == "Manual" and grid_search_method != "Manual":
-        train_val_split = perform_train_test_split(
-            input_df, labels_df, test_size=test_validate_split
-        )
-        clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        model = perform_grid_search_manual(
-            grid_search_method,
-            clf,
-            clf_parameters,
-            scoring,
-        )
-        model.fit(train_val_split)
-        model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.results), clf_parameters
-        )
-        return model, model_evaluation_df
+        return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
+
+        # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search_manual(
-            clf_parameters,
-            scores["train_score"],
-            scores["test_score"],
+            clf_parameters, scores
         )
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, n_splits=2, **parameters)
+        cv = perform_cross_validation(validation_strategy, **parameters)
         model = perform_grid_search_cv(
-            grid_search_method, clf, clf_parameters, scoring, cv=cv
+            grid_search_method,
+            clf,
+            clf_parameters,
+            scoring,
+            model_selection_scoring,
+            cv=cv,
         )
         model.fit(input_df, labels_df)
 
         # create model evaluation dataframe
         model_evaluation_df = create_model_evaluation_df_grid_search(
-            pd.DataFrame(model.cv_results_), clf_parameters
+            pd.DataFrame(model.cv_results_), clf_parameters, scoring
         )
-        return model, model_evaluation_df
+        return model.best_estimator_, model_evaluation_df
 
 
 def random_forest(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     labels_column: str,
-    train_test_split: int = 0.2,
+    positive_label: str = None,
     n_estimators=100,
     criterion="gini",
     max_depth=None,
@@ -100,7 +96,7 @@ def random_forest(
     random_state=42,
     model_selection: str = "Grid search",
     validation_strategy: str = "Cross Validation",
-    scoring: list[str] = "accuracy",
+    scoring: list[str] = ["accuracy"],
     **kwargs,
 ):
     """
@@ -111,33 +107,33 @@ def random_forest(
     :param metadata_df: A separate dataframe containing additional metadata information.
     :type metadata_df: pd.DataFrame
     :param labels_column: The column name in the `metadata_df` dataframe that contains
-     the target variable (labels) for classification.
+        the target variable (labels) for classification.
     :type labels_column: str
     :param train_test_split: The proportion of data to be used for testing. Default is
-     0.2 (80-20 train-test split).
+        0.2 (80-20 train-test split).
     :type train_test_split: int, optional
     :param n_estimators: The number of decision trees to be used in the random forest.
     :type n_estimators: int, optional
     :param criterion: The impurity measure used for tree construction.
     :type criterion: str, optional
     :param max_depth: The maximum depth of the decision trees. If not specified (None),
-     the trees will expand until all leaves are pure or contain minimum samples per leaf.
+        the trees will expand until all leaves are pure or contain minimum samples per leaf.
     :type max_depth: int or None, optional
     :param bootstrap: Whether bootstrap samples should be used when building trees.
     :type bootstrap: bool, optional
     :param random_state: The random seed for reproducibility.
-    :type random_state: int, optional
+    :type random_state: int
     :param model_selection: The model selection method for hyperparameter tuning.
-    :type model_selection: str, optional
+    :type model_selection: str
     :param validation_strategy: The strategy for model validation.
-    :type validation_strategy: str, optional
+    :type validation_strategy: str
     :param scoring: The scoring metric(s) used to evaluate the model's performance
-    during validation.
-    :type scoring: list[str], optional
+        during validation.
+    :type scoring: list[str]
     :param **kwargs: Additional keyword arguments to be passed to the function.
     :return: A RandomForestClassifier instance, a dataframe consisting of the model's
-     training parameters and the validation score, along with four dataframes containing
-     the respective test and training samples and labels.
+        training parameters and the validation score, along with four dataframes
+        containing the respective test and training samples and labels.
     :rtype: dict
 
     """
@@ -145,15 +141,21 @@ def random_forest(
 
     input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    labels_df = metadata_df[["Sample", labels_column]]
-    label_encoder, y_encoded = encode_labels(input_df_wide, labels_df)
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
 
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
-        y_encoded,
-        test_size=train_test_split,
-        random_state=random_state,
-        shuffle=True,
+        labels_df["Encoded Label"],
+        **kwargs,
     )
 
     clf = RandomForestClassifier()
@@ -165,6 +167,10 @@ def random_forest(
         bootstrap=bootstrap,
         random_state=random_state,
     )
+    # Transform scoring to list if scoring is a string
+    # (multiselect returns a string when only one value is selected)
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
     model, model_evaluation_df = perform_classification(
         X_train,
         y_train,
@@ -178,13 +184,137 @@ def random_forest(
 
     X_test.reset_index(inplace=True)
     X_train.reset_index(inplace=True)
-    y_test = decode_labels(label_encoder, X_test, y_test)
-    y_train = decode_labels(label_encoder, X_train, y_train)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
     return dict(
         model=model,
         model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
         X_test_df=X_test,
-        y_test_df=y_test,
-        X_train_df=X_test,
         y_train_df=y_train,
+        y_test_df=y_test,
+    )
+
+
+def svm(
+    input_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    labels_column: str,
+    positive_label: str = None,
+    C=1.0,
+    kernel="rbf",
+    gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
+    coef0=0.0,  # relevant for "poly" and "sigmoid"
+    probability=True,
+    tol=0.001,
+    class_weight=None,
+    max_iter=-1,
+    random_state=42,
+    model_selection: str = "Grid search",
+    validation_strategy: str = "Cross Validation",
+    scoring: list[str] = ["accuracy"],
+    **kwargs,
+):
+    """
+    Perform classification using the support vector machine classifier from sklearn.
+
+    :param input_df: The dataframe that should be classified in wide or long format
+    :type input_df: pd.DataFrame
+    :param metadata_df: A separate dataframe containing additional metadata information.
+    :type metadata_df: pd.DataFrame
+    :param labels_column: The column name in the `metadata_df` dataframe that contains
+        the target variable (labels) for classification.
+    :type labels_column: str
+    :param C: Regularization parameter
+    :type C: float
+    :param kernel: Specifies the kernel type.
+    :type kernel: str, optional
+    :param gamma: Kernel coefficient (default: 'scale', relevant for 'rbf', 'poly', and
+        'sigmoid').
+    :type gamma: str
+    :param coef0: Independent term in the kernel function (relevant for 'poly' and
+        'sigmoid').
+    :type coef0: float
+    :param probability: Whether to enable probability estimates
+    :type probability: bool, optional
+    :param tol: Tolerance for stopping criterion
+    :type tol: float
+    :param class_weight: Weights associated with classes
+    :type class_weight: float
+    :param max_iter: Maximum number of iterations (default: -1, indicating no limit).
+    :type max_iter: int
+    :param random_state: The random seed for reproducibility.
+    :type random_state: int
+    :param model_selection: The model selection method for hyperparameter tuning.
+    :type model_selection: str
+    :param validation_strategy: The strategy for model validation.
+    :type validation_strategy: str
+    :param scoring: The scoring metric(s) used to evaluate the model's performance
+        during validation.
+    :type scoring: list[str]
+    :param **kwargs: Additional keyword arguments to be passed to the function.
+    :return: A dict containing: a SVC instance, a dataframe consisting of the model's
+        training parameters and the validation score, along with four dataframes
+        containing the respective test and training samples and labels.
+    :rtype: dict
+    """
+    # TODO 216 add warning to user that data should be to shuffled, give that is being sorted at the beginning!
+
+    input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
+
+    # prepare X and y dataframes for classification
+    input_df_wide.sort_values(by="Sample", inplace=True)
+    labels_df = (
+        metadata_df[["Sample", labels_column]]
+        .set_index("Sample")
+        .sort_values(by="Sample")
+    )
+    encoding_mapping, labels_df = encode_labels(
+        labels_df, labels_column, positive_label
+    )
+
+    X_train, X_test, y_train, y_test = perform_train_test_split(
+        input_df_wide,
+        labels_df["Encoded Label"],
+        **kwargs,
+    )
+
+    clf = SVC()
+
+    clf_parameters = dict(
+        C=C,
+        kernel=kernel,
+        gamma=gamma,
+        coef0=coef0,
+        probability=probability,
+        tol=tol,
+        class_weight=class_weight,
+        max_iter=max_iter,
+        random_state=random_state,
+    )
+    # multiselect returns a string when only one value is selected
+    scoring = [scoring] if isinstance(scoring, str) else scoring
+
+    model, model_evaluation_df = perform_classification(
+        X_train,
+        y_train,
+        validation_strategy,
+        model_selection,
+        clf,
+        clf_parameters,
+        scoring,
+        **kwargs,
+    )
+
+    X_test.reset_index(inplace=True)
+    X_train.reset_index(inplace=True)
+    y_test = decode_labels(encoding_mapping, y_test)
+    y_train = decode_labels(encoding_mapping, y_train)
+    return dict(
+        model=model,
+        model_evaluation_df=model_evaluation_df,
+        X_train_df=X_train,
+        X_test_df=X_test,
+        y_train_df=y_train,
+        y_test_df=y_test,
     )

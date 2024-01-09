@@ -1,6 +1,5 @@
+"""This module contains the logging configuration for the protzilla app."""
 import logging
-
-from django.contrib import messages
 
 
 class ProtzillaLoggingHandler(logging.Handler):
@@ -73,8 +72,9 @@ logger = logging.getLogger("protzilla")
 logger.setLevel(protzilla_logging_level)
 logger.addHandler(ProtzillaLoggingHandler(protzilla_logging_level))
 
+# Map the error levels to the logging functions
 MESSAGE_TO_LOGGING_FUNCTION = {
-    messages.ERROR: logger.error,
-    messages.WARNING: logger.warning,
-    messages.INFO: logger.info,
+    logging.ERROR: logging.error,
+    logging.WARNING: logging.warning,
+    logging.INFO: logging.info,
 }

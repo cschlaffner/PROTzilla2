@@ -1,74 +1,13 @@
 import csv
 import json
+import logging
 from pathlib import Path
 
-from django.contrib import messages
+import pandas as pd
+import requests
 
-from .database_query import biomart_query
-
-
-def uniprot_ids_to_uppercase_gene_symbols(proteins):
-    """
-    A method that converts a list of uniprot ids to uppercase gene symbols.
-    This is done by querying the biomart database. If a protein group is not found
-    in the database, it is added to the filtered_groups list. For every protein group
-    all resulting gene symbols are added to the group_to_genes dict.
-    :param proteins: list of uniprot ids
-    :type proteins: list
-    :return: dict gene_to_groups with keys uppercase gene symbols and values list of protein_groups,
-        dict group_to_genes with keys protein_groups and values list of gene symbols and
-        a list of uniprot ids that were not found.
-    :rtype: tuple
-    """
-    proteins_set = set()
-    for group in proteins:
-        group = group.split(";")
-        # isoforms map to the same gene symbol, that is only found with base protein
-        for protein in group:
-            if "-" in protein:
-                proteins_set.add(protein.split("-")[0])
-            elif "_VAR_" in protein:
-                proteins_set.add(protein.split("_VAR_")[0])
-            else:
-                proteins_set.add(protein)
-    proteins_list = list(proteins_set)
-    q = list(
-        biomart_query(
-            proteins_list, "uniprotswissprot", ["uniprotswissprot", "hgnc_symbol"]
-        )
-    )
-    q += list(
-        biomart_query(
-            proteins_list, "uniprotsptrembl", ["uniprotsptrembl", "hgnc_symbol"]
-        )
-    )
-    uniprotID_to_hgnc_symbol = dict(set(map(tuple, q)))
-    # check per group in proteins if all proteins have the same gene symbol
-    # if yes, use that gene symbol, otherwise use all gene symbols
-    filtered_groups = []
-    gene_to_groups = {}
-    group_to_genes = {}
-    for group in proteins:
-        symbols = set()
-        for protein in group.split(";"):
-            if "-" in protein:
-                protein = protein.split("-")[0]
-            elif "_VAR_" in protein:
-                protein = protein.split("_VAR_")[0]
-            if result := uniprotID_to_hgnc_symbol.get(protein):
-                symbols.add(result)
-
-        if not symbols:  # no gene symbol for any protein in group
-            filtered_groups.append(group)
-        else:
-            for symbol in symbols:
-                if symbol.upper() in gene_to_groups:
-                    gene_to_groups[symbol.upper()].append(group)
-                else:
-                    gene_to_groups[symbol.upper()] = [group]
-            group_to_genes[group] = list(symbols)
-
-    return gene_to_groups, group_to_genes, filtered_groups
+from protzilla.constants.protzilla_logging import logger
+from protzilla.utilities.utilities import random_string
 
 
 def read_protein_or_gene_sets_file(path):
@@ -77,22 +16,25 @@ def read_protein_or_gene_sets_file(path):
     The file can be a .csv, .txt, .json or .gmt file.
     The file must have one set per line with the set name and the proteins or genes.
     .gmt files are not parsed because GSEApy can handle them directly.
-        - .txt:
-            Set_name: Protein1, Protein2, ...
-            Set_name2: Protein2, Protein3, ...
-        - .csv:
+        - .txt: Setname or identifier followed by a tab-separated list of genes
+            Set_name    Protein1    Protein2...
+            Set_name    Protein1    Protein2...
+        - .csv: Setname or identifier followed by a comma-separated list of genes
             Set_name, Protein1, Protein2, ...
             Set_name2, Protein2, Protein3, ...
         - .json:
             {Set_name: [Protein1, Protein2, ...], Set_name2: [Protein2, Protein3, ...]}
+    Empty strings are removed from the list of proteins or genes.
+
     :param path: path to file
     :type path: str
+
     :return: dict with protein or gene sets, a path to a gmt file or error message
     :rtype: dict
     """
     if not path:
         msg = "No file uploaded for protein sets."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     file_extension = Path(path).suffix
     if file_extension == ".csv":
@@ -101,19 +43,22 @@ def read_protein_or_gene_sets_file(path):
             sets = {}
             for row in reader:
                 key, *values = row
-                sets[key] = values
+                sets[key] = [value for value in values if value.strip()]
 
     elif file_extension == ".txt":
         with open(path, "r") as f:
             sets = {}
-            for line in f:
-                key, value_str = line.strip().split(":")
-                values = [v.strip() for v in value_str.split(",")]
-                sets[key] = values
+            for line in f.readlines():
+                key, *values = line.strip().split("\t")
+                sets[key] = [value for value in values if value.strip()]
 
     elif file_extension == ".json":
         with open(path, "r") as f:
             sets = json.load(f)
+            sets = {
+                key: [value for value in values if value.strip()]
+                for key, values in sets.items()
+            }
 
     elif file_extension == ".gmt":
         # gseapy can handle gmt files
@@ -121,6 +66,91 @@ def read_protein_or_gene_sets_file(path):
 
     else:
         msg = "Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     return sets
+
+
+def read_background_file(path):
+    """
+    Reads a file of background proteins or genes.
+    Accepts .csv and .txt files with one protein or gene per line.
+    Empty strings are removed from the list of proteins or genes.
+
+    :param path: path to file
+    :type path: str or None
+
+    :return: list of background proteins or genes or error message
+    :rtype: list
+    """
+    if not path:
+        return None
+    else:
+        file_extension = Path(path).suffix
+        if file_extension == ".csv":
+            background = pd.read_csv(path, low_memory=False, header=None)
+            # if multiple columns, use first
+            background = background.iloc[:, 0].dropna().tolist()
+            logger.warning(
+                "You provided a background file with multiple columns. Only the first will be used."
+            )
+        elif file_extension == ".txt":
+            with open(path, "r") as f:
+                background = [line.strip() for line in f if line.strip()]
+        else:
+            msg = "Invalid file type for background. Must be .csv, .txt or no upload"
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+        return background
+
+
+def map_to_STRING_ids(proteins_list, organism):
+    """
+    This method maps a list of protein IDs to STRING IDs using the STRING API.
+    The mapping is done as suggested by STRING documentation:
+    https://string-db.org/cgi/help.pl?subpage=api%23mapping-identifiers
+
+    :param proteins_list: list of protein IDs
+    :type proteins_list: list
+    :param organism: organism NCBI identifier
+    :type organism: str
+
+    :return: list of STRING IDs or None if no IDs could be found
+    :rtype: list or None
+    """
+    logger.info("Mapping proteins to STRING IDs")
+    string_api_url = "https://string-db.org/api"  # latest version while in development
+    output_format = "tsv-no-header"
+    method = "get_string_ids"
+
+    params = {
+        "identifiers": "\r".join(proteins_list),
+        "species": organism,  # species NCBI identifier
+        "limit": 1,  # only one (best) identifier per input protein
+        "echo_query": 1,  # see input identifiers in the output
+        "caller_identity": f"PROTzilla-{random_string()}",
+    }
+
+    request_url = "/".join([string_api_url, output_format, method])
+    try:
+        results = requests.post(request_url, data=params)  # call STRING API
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Calling STRING DB API failed. {e}")
+        return None
+
+    mapped = []
+    for line in results.text.strip().split("\n"):
+        split_line = line.split("\t")
+        if len(split_line) < 3:  # no identifier found
+            continue
+        string_identifier = split_line[2]
+        mapped.append(string_identifier)
+
+    if not mapped:
+        logger.warning("No STRING IDs could be found")
+        mapped = None
+    else:
+        logger.info(
+            f"Mapped {len(mapped)} proteins to STRING IDs. {len(proteins_list) - len(mapped)} could not be mapped."
+        )
+    return mapped
