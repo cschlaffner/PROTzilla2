@@ -17,8 +17,7 @@
             "feature_orientation": "Columns (samples in rows, features in columns)"
           }
         }
-      ],
-      "final_output_name": ""
+      ]
     },
     "data_preprocessing": {
       "steps": [
@@ -96,8 +95,7 @@
             }
           ]
         }
-      ],
-      "final_output_name": "preprocessed_data"
+      ]
     },
     "data_analysis": {
       "steps": [
@@ -184,13 +182,11 @@
             "flip_axes": "no"
           }
         }
-      ],
-      "final_output_name": ""
+      ]
     },
     "data_integration": {
       "steps": [
-      ],
-      "final_output_name": ""
+      ]
     }
   }
 }

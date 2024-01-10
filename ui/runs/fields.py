@@ -335,21 +335,24 @@ def make_name_field(allow_next, form, run, end_of_run):
     """
     if end_of_run:
         return ""
-    output_name = get_workflow_default_param_value(
-        run.workflow_config,
-        *run.current_run_location(),
-        run.step_index_in_current_section(),
-        "output_name",
-    )
-    if not output_name:
-        output_name = ""
+
+    output_name = ""
     if is_last_step_in_section(
         run.workflow_config,
         run.section,
         run.step_index_in_current_section()
     ):
-        if 'final_output_name' in run.workflow_config["sections"][run.section]:
-            output_name = run.workflow_config["sections"][run.section]['final_output_name']
+        if 'output_name' in run.workflow_meta[run.section]:
+            output_name = run.workflow_meta[run.section]["output_name"]
+
+    workflow_output_name = get_workflow_default_param_value(
+        run.workflow_config,
+        *run.current_run_location(),
+        run.step_index_in_current_section(),
+        "output_name",
+    )
+    if workflow_output_name:
+        output_name = workflow_output_name
 
     return render_to_string(
         "runs/field_name_output_text.html",
