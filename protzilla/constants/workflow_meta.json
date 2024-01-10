@@ -1136,6 +1136,22 @@
             "categories": [],
             "default": null,
             "multiple": true
+          },
+          "group1": {
+            "name": "Group 1",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
+          },
+          "group2": {
+            "name": "Group 2",
+            "type": "named_output",
+            "default": [
+              null,
+              null
+            ]
           }
         }
       },

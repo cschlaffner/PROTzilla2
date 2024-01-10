@@ -76,7 +76,13 @@ def scatter_plot(
 
 
 def create_volcano_plot(
-    p_values, log2_fc, fc_threshold, alpha, proteins_of_interest=None
+    p_values,
+    log2_fc,
+    fc_threshold,
+    alpha,
+    group1: str,
+    group2: str,
+    proteins_of_interest=None,
 ):
     """
     Function to create a volcano plot from p values and log2 fold change with the
@@ -106,7 +112,7 @@ def create_volcano_plot(
         gene=None,
         genomewideline_value=-np.log10(alpha),
         effect_size_line=[-fc_threshold, fc_threshold],
-        xlabel="log2(fc)",
+        xlabel=f"log2(fc) ({group1} vs. {group2})",
         ylabel="-log10(p)",
         title="Volcano Plot",
         annotation="Protein ID",
