@@ -123,6 +123,16 @@
         );
     }
 
+
+    function showCalculationInProgressModal() {
+        $('#calculationInProgressModal').modal('show');
+    }
+
+    function hideCalculationInProgressModal() {
+        $('#calculationInProgressModal').modal('hide');
+    }
+
+
     function equal_plot_parameters(form) {
         if (isEmptyDict(current_plot_parameters)) {
             return false;
@@ -136,14 +146,24 @@
 
     $(document).ready(function () {
         disable_calc_button(false);
-        // disable only when a plot-form exists, so it can be reactivated by appropriate change (-> Outlier Detection)
+        calculationInProgress = false;
+        $('#backButton').click(function () {
+            if (calculationInProgress) {
+                event.preventDefault();
+                showCalculationInProgressModal();
+                $('#cancel').click(function () {
+                    hideCalculationInProgressModal();
+            });
+    }
+    });
         if($('#plot_form').find('input').length) {
             disable_plot_button(true);
             disable_plot_fields(true);
         }
 
         $('#calc_form').change(function () {
-            console.log("calc")
+            console.log("calc is pressed");
+            calculationInProgress = true;
             const selected_method = $('#chosen_method').val();
             calc_form_data = get_clean_form_data($(this));
             if (equal_calc_parameters($(this)) && (calculated_method === selected_method)) {
@@ -160,7 +180,9 @@
                     disable_plot_button(true);
                 }
             }
+            calculationInProgress = false;
             $('#plot_form').trigger("change");
+            
         });
 
         $('#plot_form').change(function () {
