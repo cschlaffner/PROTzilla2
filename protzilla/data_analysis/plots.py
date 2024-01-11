@@ -31,6 +31,12 @@ def scatter_plot(
     :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
     :rtype: list[plotly figure]/dict
     """
+    colors = {
+        "plot_bgcolor": "white",
+        "gridcolor": "#F1F1F1",
+        "linecolor": "#F1F1F1",
+    }
+
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         color_df = (
@@ -56,9 +62,9 @@ def scatter_plot(
             raise ValueError(
                 "The dimensions of the DataFrame are either too high or too low."
             )
-        fig.update_layout(plot_bgcolor="white")
-        fig.update_xaxes(gridcolor="lightgrey", linecolor="lightgrey")
-        fig.update_yaxes(gridcolor="lightgrey", linecolor="lightgrey")
+        fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
+        fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
+        fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
         return [fig]
     except ValueError as e:
         msg = ""
@@ -295,6 +301,13 @@ def prot_quant_plot(
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
     """
+
+    colors = {
+        "plot_bgcolor": "white",
+        "gridcolor": "#F1F1F1",
+        "linecolor": "#F1F1F1",
+    }
+
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     try:
@@ -422,6 +435,11 @@ def prot_quant_plot(
 
     fig.update_layout(
         title=f"Intensity of {formatted_protein_name} in all samples",
+        plot_bgcolor=colors["plot_bgcolor"],
+        xaxis_gridcolor=colors["gridcolor"],
+        yaxis_gridcolor=colors["gridcolor"],
+        xaxis_linecolor=colors["linecolor"],
+        yaxis_linecolor=colors["linecolor"],
         xaxis_title="Sample",
         yaxis_title="Intensity",
         legend_title="Legend",
