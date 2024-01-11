@@ -93,7 +93,8 @@
               "graph_type": "Boxplot",
               "group_by": "Sample"
             }
-          ]
+          ],
+            "output_name": "preprocessed_data"
         }
       ]
     },
