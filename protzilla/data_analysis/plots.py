@@ -56,7 +56,9 @@ def scatter_plot(
             raise ValueError(
                 "The dimensions of the DataFrame are either too high or too low."
             )
-
+        fig.update_layout(plot_bgcolor="white")
+        fig.update_xaxes(gridcolor="lightgrey", linecolor="lightgrey")
+        fig.update_yaxes(gridcolor="lightgrey", linecolor="lightgrey")
         return [fig]
     except ValueError as e:
         msg = ""
@@ -97,6 +99,13 @@ def create_volcano_plot(
     :rtype: [plotly figure]
     """
 
+    colors = {
+        "plot_bgcolor": "#ffffff",
+        "gridcolor": "#F1F1F1",
+        "annotation_text_color": "#ffffff",
+        "annotation_proteins_of_interest": "#4A536A",
+    }
+
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
@@ -110,8 +119,10 @@ def create_volcano_plot(
         ylabel="-log10(p)",
         title="Volcano Plot",
         annotation="Protein ID",
+        plot_bgcolor=colors["plot_bgcolor"],
+        xaxis_gridcolor=colors["gridcolor"],
+        yaxis_gridcolor=colors["gridcolor"],
     )
-
     if proteins_of_interest is None:
         proteins_of_interest = []
     elif not isinstance(proteins_of_interest, list):
@@ -133,10 +144,10 @@ def create_volcano_plot(
             text=protein,
             showarrow=True,
             arrowhead=1,
-            font=dict(color="#ffffff"),
+            font=dict(color=colors["annotation_text_color"]),
             align="center",
-            arrowcolor="#4A536A",
-            bgcolor="#4A536A",
+            arrowcolor=colors["annotation_proteins_of_interest"],
+            bgcolor=colors["annotation_proteins_of_interest"],
             opacity=0.8,
             ax=0,
             ay=-20,
