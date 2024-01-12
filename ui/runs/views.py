@@ -88,6 +88,7 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+    description = run.workflow_meta[section][step][method]["description"]
 
     current_plots = []
     for plot in run.plots:
@@ -143,7 +144,7 @@ def detail(request, run_name):
             show_table=show_table,
             used_memory=get_memory_usage(),
             show_protein_graph=show_protein_graph,
-            # workflow_meta=workflow_meta,
+            description=description,
         ),
     )
 

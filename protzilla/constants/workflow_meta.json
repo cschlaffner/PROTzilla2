@@ -978,7 +978,7 @@
             "default": 0
           },
           "log_base": {
-            "name": "base of log transformation (leave empty if no log transformation was performed on the data)",
+            "name": "base of log transformation",
             "type": "numeric",
             "min": 2,
             "default": null
