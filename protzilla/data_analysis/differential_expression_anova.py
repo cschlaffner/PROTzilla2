@@ -1,4 +1,5 @@
 import logging
+import math
 
 import pandas as pd
 from scipy import stats
@@ -39,19 +40,31 @@ def anova(
         the corrected p-values and the log2 fold change, the alpha used
         and the corrected alpha, as well as filtered out proteins.
     """
-    # Check if the grouping variable is present in the metadata_df
+
     assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
     messages = []
+    # Check if the selected groups are present in the metadata_df
 
-    # Select the first two groups if none or an empty list is provided
-    if not selected_groups:
+    # Select all groups if none or less than two were selected
+    if not selected_groups or isinstance(selected_groups, str):
         selected_groups = metadata_df[grouping].unique()
+        selected_groups_str = "".join([" " + str(group) for group in selected_groups])
         messages.append(
-            dict(
-                level=logging.INFO,
-                msg="Auto-selected all groups for calculation because none were selected.",
-            )
+            {
+                "level": logging.INFO,
+                "msg": f"Auto-selected the groups {selected_groups_str} for comparison because none or only one group was selected.",
+            }
         )
+    elif len(selected_groups) >= 2:
+        for group in selected_groups:
+            if group not in metadata_df[grouping].unique():
+                messages.append(
+                    {
+                        "level": logging.ERROR,
+                        "msg": f"Group {group} not found in metadata_df.",
+                    }
+                )
+                return {"messages": messages}
 
     # Merge the intensity and metadata dataframes in order to assign to each Sample
     # their corresponding group
@@ -74,7 +87,17 @@ def anova(
                 protein_df[protein_df[grouping] == group][intensity_name].to_numpy()
             )
         p = stats.f_oneway(*all_group_intensities)[1]
-        p_values.append(p)
+        if not math.isnan(p):
+            p_values.append(p)
+        else:
+            messages.append(
+                {
+                    "level": logging.ERROR,
+                    "msg": f"Protein {protein} contains NaN or completely identical values values, indicating missing or faulty \
+             preprocessing. The calculation has been aborted.",
+                }
+            )
+            return {"messages": messages}
 
     # Apply multiple testing correction and create a dataframe with corrected p-values
     corrected_p_values, corrected_alpha = apply_multiple_testing_correction(

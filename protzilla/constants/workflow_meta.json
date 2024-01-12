@@ -928,7 +928,7 @@
             "default": "None"
           },
           "selected_groups": {
-            "name": "Selected Groups:",
+            "name": "Selected Groups (add / remove while holding CTRL-Key):",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
