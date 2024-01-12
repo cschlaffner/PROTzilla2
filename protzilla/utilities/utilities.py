@@ -2,6 +2,7 @@ import base64
 import io
 import operator
 import os
+import re
 from itertools import groupby
 from random import choices
 from string import ascii_letters
@@ -59,7 +60,7 @@ def default_intensity_column(
 
     :param intensity_df: The column for which to determine the intensity column name
     :param intensity_column_name: If provided, this column name is returned.
-    :return:
+    :return: The default intensity column name
     """
 
     possible_substring_identifiers = ["intensity", "ibaq", "lfq", "spectral count"]
@@ -80,3 +81,14 @@ def default_intensity_column(
         "No intensity column name provided and no default intensity column could be determined."
         "Please provide the intensity column name manually to the function call."
     )
+
+
+def name_to_title(step: str) -> str:
+    """
+    Returns a name in title format. Exceptions where the .title() method is not enough are handled here.
+    """
+    name = step.replace("_", " ").title()
+    # Exceptions where .title() does not work
+    name = re.sub(r"(ms)", "MS", name, flags=re.IGNORECASE)
+
+    return name

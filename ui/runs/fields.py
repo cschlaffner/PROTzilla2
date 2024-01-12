@@ -1,3 +1,6 @@
+"""
+Module for generating the html for the fields of the run detail page.
+"""
 import sys
 from pathlib import Path
 
@@ -7,27 +10,24 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+from protzilla.run import Run
 from protzilla.run_helper import get_parameters
+from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import get_workflow_default_param_value
 from ui.runs.views_helper import get_displayed_steps
 
 
-def make_current_fields(run, section, step, method):
+def make_current_fields(run: Run, section: str, step: str, method: str) -> list:
     """
     Wrapper method that generates the fields for the current method
     based on the data in the workflow_meta.json file.
 
     :param run: The current run object
-    :type run: Run
     :param section: The current section
-    :type section: str
     :param step: The current step
-    :type step: str
     :param method: The current method
-    :type method: str
 
     :return: A list of fields for the current method
-    :rtype: list
     """
     if not step:
         return []
@@ -43,7 +43,9 @@ def make_current_fields(run, section, step, method):
     return current_fields
 
 
-def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
+def make_parameter_input(
+    key: str, param_dict: dict, all_parameters_dict: dict, disabled: bool
+) -> str:
     """
     Generates the html for a single parameter input field. The
     type of the input field is determined by the type of the parameter as specified
@@ -51,18 +53,10 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     May be called recursively by make_dynamic_fields if the parameter is a dynamic parameter.
 
     :param key: The name of the parameter, matches the key in the workflow_meta.json
-    :type key: str
-    :param param_dict: The dictionary containing all meta information about the parameter
-        e.g. type, default value
-    :type param_dict: dict
-    :param all_parameters_dict: The dictionary containing all parameters for the current method
-        with corresponding meta information
-    :type all_parameters_dict: dict
+    :param param_dict: The dictionary containing all meta information about the parameter e.g. type, default value
+    :param all_parameters_dict: The dictionary containing all parameters for the current method with corresponding meta information
     :param disabled: Should the input field be disabled
-    :type disabled: bool
-
     :return: The html for the input field
-    :rtype: str
     """
     if param_dict["type"] == "numeric":
         param_dict["multiple"] = param_dict.get("multiple", False)
@@ -102,21 +96,20 @@ def make_parameter_input(key, param_dict, all_parameters_dict, disabled):
     )
 
 
-def make_dynamic_fields(param_dict, selected_category, all_parameters_dict, disabled):
+def make_dynamic_fields(
+    param_dict: dict, selected_category: str, all_parameters_dict: dict, disabled: bool
+) -> list:
     """
     Generates the html for the dynamic fields of a "categorical_dynamic" type parameter.
     This is used to dynamically add fields based on the selected_category.
 
     :param param_dict: The dictionary containing all meta information about the parameter
         e.g. type, default value
-    :type param_dict: dict
     :param selected_category: The currently selected category of the field described by param_dict
-    :type selected_category: str
     :param all_parameters_dict: The dictionary containing all parameters for the current method
         with corresponding meta information
-    :type all_parameters_dict: dict
     :param disabled: Should the fields be disabled
-    :type disabled: bool
+    :return: The html for the dynamic fields
     """
     dynamic_fields = []
     if selected_category in param_dict["dynamic_parameters"]:
@@ -131,19 +124,15 @@ def make_dynamic_fields(param_dict, selected_category, all_parameters_dict, disa
     return dynamic_fields
 
 
-def make_sidebar(request, run, run_name):
+def make_sidebar(request, run: Run, run_name: str) -> str:
     """
     Renders the sidebar of the run detail page.
 
-    :param request: The current request
-    :type request: HttpRequest
+    :param request: The current http request
     :param run: The current run object
-    :type run: Run
     :param run_name: The name of the current run
-    :type run_name: str
 
     :return: The html for the sidebar
-    :rtype: str
     """
     csrf_token = request.META["CSRF_COOKIE"]
     template = "runs/sidebar.html"
@@ -159,23 +148,18 @@ def make_sidebar(request, run, run_name):
     )
 
 
-def make_plot_fields(run, section, step, method):
+def make_plot_fields(run: Run, section: str, step: str, method: str) -> str:
     """
     Generates the html for the plot fields of the current method.
     This is only used when a plot is a part of a step and not its own step
     as is the case for the data preprocessing section.
 
     :param run: The current run object
-    :type run: Run
     :param section: The current section
-    :type section: str
     :param step: The current step
-    :type step: str
     :param method: The current method
-    :type method: str
 
     :return: The html for the plot fields
-    :rtype: str
     """
     if not step:
         return
@@ -191,21 +175,16 @@ def make_plot_fields(run, section, step, method):
     return plot_fields
 
 
-def make_method_dropdown(run, section, step, method):
+def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
     """
     Generates the html for the method dropdown of the current step.
 
     :param run: The current run object
-    :type run: Run
     :param section: The current section
-    :type section: str
     :param step: The current step
-    :type step: str
     :param method: The current method
-    :type method: str
 
     :return: The html for the method dropdown
-    :rtype: str
     """
     if not step:
         return ""
@@ -217,23 +196,21 @@ def make_method_dropdown(run, section, step, method):
         context=dict(
             disabled=False,
             key="chosen_method",
-            name=f"{step.replace('_', ' ').title()} Method:",
+            name=f"{name_to_title(step)} Method:",
             default=method,
             categories=list(zip(methods, method_names)),
         ),
     )
 
 
-def make_displayed_history(run):
+def make_displayed_history(run: Run) -> str:
     """
     Generates the html for the displayed history that is displayed at the
     top of the current run.
 
     :param run: The current run object
-    :type run: Run
 
     :return: The html for the displayed history
-    :rtype: str
     """
     displayed_history = []
     for i, history_step in enumerate(run.history.steps):
@@ -242,9 +219,11 @@ def make_displayed_history(run):
         parameters = run.workflow_meta[history_step.section][history_step.step][
             history_step.method
         ]["parameters"]
-        name = f"{history_step.step.replace('_', ' ').title()}: {history_step.method.replace('_', ' ').title()}"
+        name = (
+            f"{name_to_title(history_step.step)}: {name_to_title(history_step.method)}"
+        )
         section_heading = (
-            history_step.section.replace("_", " ").title()
+            name_to_title(history_step.section)
             if run.history.steps[i - 1].section != history_step.section
             else None
         )
@@ -316,22 +295,19 @@ def make_displayed_history(run):
     return displayed_history
 
 
-def make_name_field(allow_next, form, run, end_of_run):
+def make_name_field(
+    allow_next: bool, run: Run, end_of_run: bool, form: str = "runs_next"
+) -> str:
     """
     Generates the html for the field that allows to name the output of the
     current method.
 
     :param allow_next: Whether the next button should be enabled
-    :type allow_next: bool
     :param form: The form that the field belongs to
-    :type form: Form
     :param run: The current run object
-    :type run: Run
     :param end_of_run: Whether the current step is the last step of the run
-    :type end_of_run: bool
 
     :return: The html for the name field
-    :rtype: str
     """
     if end_of_run:
         return ""
