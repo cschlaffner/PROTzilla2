@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from plotly.graph_objs import Figure
@@ -13,11 +15,45 @@ from protzilla.utilities import default_intensity_column
 from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 
+def flag_invalid_values(df: pd.DataFrame, messages: list) -> (pd.DataFrame, list):
+    """
+    A function to check if there are any NaN values in the dataframe.
+    Also checks if some Protein groups have completely identical values for each sample.
+    If so, add a warning to the messages list.
+    :param df: the dataframe that should be checked
+    :return: True if there are NaN values in the dataframe, False otherwise
+    """
+    if df.isnull().values.any():
+        columns_with_nan = df.columns[df.isna().any()].tolist()
+        messages.append(
+            {
+                "level": logging.WARNING,
+                "msg": f"Some NaN values remain in {columns_with_nan} of the imputed dataframe, indicating an unfiltered dataset and / or insufficient data. "
+                "Possible solutions to this include adding a filtering step before this imputation step in the preprocessing section to your workflow, "
+                "or using a different imputation method.",
+            }
+        )
+
+    # Group by 'Protein ID' and check if all values in each group are identical
+    identical_values_warning_given = False
+    for protein_id, group in df.groupby("Protein ID"):
+        if group.nunique().nunique() == 1 and not identical_values_warning_given:
+            messages.append(
+                {
+                    "level": logging.WARNING,
+                    "msg": f"Some Protein groups have completely identical values for each sample.",
+                }
+            )
+            identical_values_warning_given = True
+
+    return df, {"messages": messages}
+
+
 def by_knn(
     intensity_df: pd.DataFrame,
     number_of_neighbours: int = 5,
-    **kwargs  # quantile, default is median
-) -> (pd.DataFrame, dict):
+    **kwargs,  # quantile, default is median
+) -> (pd.DataFrame, list):
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -41,7 +77,7 @@ def by_knn(
         KNNImputer.fit_transform
     :type kwargs: dict
     :return: returns an imputed dataframe in typical protzilla long format
-        and an empty dict
+        and a list of messages
     :rtype: pd.DataFrame
     """
 
@@ -57,13 +93,13 @@ def by_knn(
     # Turn the wide format into the long format
     imputed_df = wide_to_long(transformed_df, intensity_df)
 
-    return imputed_df, dict()
+    return flag_invalid_values(imputed_df, [])
 
 
 def by_simple_imputer(
     intensity_df: pd.DataFrame,
     strategy: str = "mean",
-) -> tuple[pd.DataFrame, dict]:
+) -> (pd.DataFrame, list):
     """
     A function to perform protein-wise imputations
     on your dataframe. Imputes missing values for each protein
@@ -78,14 +114,11 @@ def by_simple_imputer(
 
     :param intensity_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
     :param strategy: Defines the imputation strategy. Can be "mean",
         "median" or "most_frequent" (for mode).
-    :type strategy: str
 
     :return: returns an imputed dataframe in typical protzilla long format
-        and an empty dict
-    :rtype: pd.DataFrame, int
+        a list of messages
     """
     assert strategy in ["mean", "median", "most_frequent"]
     transformed_df = long_to_wide(intensity_df)
@@ -100,13 +133,13 @@ def by_simple_imputer(
 
     # Turn the wide format into the long format
     imputed_df = wide_to_long(transformed_df, intensity_df)
-    return imputed_df, dict()
+    return flag_invalid_values(imputed_df, [])
 
 
 def by_min_per_sample(
     intensity_df: pd.DataFrame,
-    shrinking_value=1,
-) -> tuple[pd.DataFrame, dict]:
+    shrinking_value: float = 1,
+) -> (pd.DataFrame, list):
     """
     A function to perform  minimal value imputation on the level
     of samples of your dataframe. Imputes missing values for each
@@ -122,16 +155,13 @@ def by_min_per_sample(
 
     :param intensity_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
         example, a tenth of the minimum value found will be used for
         imputation. Default: 1 (no shrinking)
-    :type shrinking_value: float
 
     :return: returns an imputed dataframe in typical protzilla long format
-        and an empty dict
-    :rtype: pd.DataFrame, dict
+        a list of messages
     """
     intensity_df_copy = intensity_df.copy(deep=True)
     intensity_name = default_intensity_column(intensity_df_copy)
@@ -145,13 +175,13 @@ def by_min_per_sample(
         else:
             location.fillna(location.min() * shrinking_value, inplace=True)
             intensity_df_copy[intensity_name].update(location)
-    return intensity_df_copy, dict()
+    return flag_invalid_values(intensity_df_copy, [])
 
 
 def by_min_per_protein(
     intensity_df: pd.DataFrame,
-    shrinking_value=1,
-) -> tuple[pd.DataFrame, dict]:
+    shrinking_value: float = 1,
+) -> (pd.DataFrame, list):
     """
     A function to impute missing values for each protein
     by taking into account data from each protein.
@@ -162,16 +192,13 @@ def by_min_per_protein(
 
     :param intensity_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
         example, a tenth of the minimum value found will be used for
         imputation. Default: 1 (no shrinking)
-    :type shrinking_value: float
 
     :return: returns an imputed dataframe in typical protzilla long format
-        and an empty dict
-    :rtype: pd.DataFrame, dict
+        a list of messages
     """
     transformed_df = long_to_wide(intensity_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
@@ -191,13 +218,13 @@ def by_min_per_protein(
     # Turn the wide format into the long format
     imputed_df = wide_to_long(transformed_df, intensity_df)
 
-    return imputed_df, dict()
+    return flag_invalid_values(imputed_df, list)
 
 
 def by_min_per_dataset(
     intensity_df: pd.DataFrame,
-    shrinking_value=1,
-) -> tuple[pd.DataFrame, dict]:
+    shrinking_value: float = 1,
+) -> (pd.DataFrame, list):
     """
     A function to impute missing values for each protein
     by taking into account data from the entire dataframe.
@@ -207,16 +234,13 @@ def by_min_per_dataset(
 
     :param intensity_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
         example, a tenth of the minimum value found will be used for
         imputation. Default: 1 (no shrinking)
-    :type shrinking_value: float
 
     :return: returns an imputed dataframe in typical protzilla long format
-        and an empty dict
-    :rtype: pd.DataFrame, dict
+        a list of messages
     """
     intensity_df_copy = intensity_df.copy(deep=True)
     intensity_name = default_intensity_column(intensity_df_copy)
@@ -224,15 +248,15 @@ def by_min_per_dataset(
         intensity_df_copy[intensity_name].min() * shrinking_value,
         inplace=True,
     )
-    return intensity_df_copy, dict()
+    return flag_invalid_values(intensity_df_copy, [])
 
 
 def by_normal_distribution_sampling(
     intensity_df: pd.DataFrame,
-    strategy="perProtein",
-    down_shift=0,
-    scaling_factor=1,
-) -> tuple[pd.DataFrame, dict]:
+    strategy: str = "perProtein",
+    down_shift: float = 0,
+    scaling_factor: float = 1,
+) -> (pd.DataFrame, list):
     """
     A function to perform imputation via sampling of a normal distribution
     defined by the existing datapoints and user-defined parameters for down-
@@ -243,21 +267,16 @@ def by_normal_distribution_sampling(
     Will not impute if insufficient data is available for sampling.
     :param intensity_df: the dataframe that should be filtered in
     long format
-    :type intensity_df: pandas DataFrame
     :param strategy: which strategy to use for definition of the normal
     distribution to be sampled. Can be "perProtein", "perDataset" or "most_frequent"
-    :type strategy: str
     :param down_shift: a factor defining how many dataset standard deviations
     to shift the mean of the normal distribution used for imputation.
     Default: 0 (no shift)
-    :type down_shift: float
     :param scaling_factor: a factor determining how the variance of the normal
     distribution used for imputation is scaled compared to dataset.
     Default: 1 (no scaling)
-    :type down_shift: float
     :return: returns an imputed dataframe in typical protzilla long format\
-    and an empty dict
-    :rtype: pd.DataFrame, int
+    a list of messages
     """
     assert strategy in ["perProtein", "perDataset"]
 
@@ -267,7 +286,6 @@ def by_normal_distribution_sampling(
         for protein_grp in transformed_df.columns:
             number_of_nans = transformed_df[protein_grp].isnull().sum()
 
-            # don't impute values if there not enough values (> 1) to sample from
             if number_of_nans > len(transformed_df[protein_grp]) - 2:
                 continue
 
@@ -293,7 +311,7 @@ def by_normal_distribution_sampling(
             transformed_df[protein_grp].fillna(impute_value_series, inplace=True)
 
         imputed_df = wide_to_long(transformed_df, intensity_df)
-        return imputed_df, dict()
+        return flag_invalid_values(imputed_df, [])
 
     else:
         # determine column for protein intensities
@@ -325,7 +343,7 @@ def by_normal_distribution_sampling(
         impute_value_series = pd.Series(impute_values, index=indices_of_nans)
         intensity_df[intensity_type].fillna(impute_value_series, inplace=True)
 
-        return intensity_df, dict()
+        return flag_invalid_values(intensity_df, [])
 
 
 def by_knn_plot(
