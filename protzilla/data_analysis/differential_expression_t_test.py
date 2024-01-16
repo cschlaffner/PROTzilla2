@@ -97,8 +97,8 @@ def t_test(
     proteins = intensity_df["Protein ID"].unique()
     p_values = []
     valid_protein_groups = []
-    fold_change = []
-    log2_fold_change = []
+    fold_changes = []
+    log2_fold_changes = []
     t_statistic = []
     intensity_name = default_intensity_column(intensity_df, intensity_name)
     for protein in proteins:
@@ -123,8 +123,8 @@ def t_test(
             valid_protein_groups.append(protein)
             p_values.append(p)
             t_statistic.append(t)
-            fold_change.append(fold_change)
-            log2_fold_change.append(log2_fold_change)
+            fold_changes.append(fold_change)
+            log2_fold_changes.append(log2_fold_change)
         elif not any(message["level"] == logging.WARNING for message in messages):
             messages.append(
                 {
@@ -144,11 +144,11 @@ def t_test(
         columns=["Protein ID", "corrected_p_value"],
     )
     log2_fold_change_df = pd.DataFrame(
-        list(zip(valid_protein_groups, log2_fold_change)),
+        list(zip(valid_protein_groups, log2_fold_changes)),
         columns=["Protein ID", "log2_fold_change"],
     )
     fold_change_df = pd.DataFrame(
-        list(zip(valid_protein_groups, fold_change)),
+        list(zip(valid_protein_groups, fold_changes)),
         columns=["Protein ID", "fold_change"],
     )
     t_statistic_df = pd.DataFrame(
@@ -170,7 +170,7 @@ def t_test(
     de_proteins = [
         protein
         for protein, p, fc in zip(
-            valid_protein_groups, corrected_p_values, log2_fold_change
+            valid_protein_groups, corrected_p_values, log2_fold_changes
         )
         if p < corrected_alpha and abs(fc) > fc_threshold
     ]
