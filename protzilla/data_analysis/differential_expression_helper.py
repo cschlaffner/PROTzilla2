@@ -20,10 +20,10 @@ def apply_multiple_testing_correction(
         "Bonferroni",
         "Benjamini-Hochberg",
     ], "Invalid multiple testing correction method"
-    assert all(
-        isinstance(i, (int, float)) and not math.isnan(i) and i is not None
-        for i in p_values
-    ), "List contains non-number or NaN values"
+    # assert all(
+    #     isinstance(i, (int, float)) and not math.isnan(i) and i is not None
+    #     for i in p_values
+    # ), "List contains non-number or NaN values"
     assert 0 <= alpha <= 1, "Alpha value must be between 0 and 1"
 
     to_param = {"Bonferroni": "bonferroni", "Benjamini-Hochberg": "fdr_bh"}
@@ -35,4 +35,4 @@ def apply_multiple_testing_correction(
      dataset / incorrect imputation"
     if method == "Bonferroni":
         return correction[1], correction[3]
-    return correction[1], alpha
+    return correction[1], correction[3]
