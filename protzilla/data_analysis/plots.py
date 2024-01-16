@@ -13,6 +13,14 @@ from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
+colors = {
+    "plot_bgcolor": "white",
+    "gridcolor": "#F1F1F1",
+    "linecolor": "#F1F1F1",
+    "annotation_text_color": "#ffffff",
+    "annotation_proteins_of_interest": "#4A536A",
+}
+
 
 def scatter_plot(
     input_df: pd.DataFrame,
@@ -31,6 +39,7 @@ def scatter_plot(
     :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
     :rtype: list[plotly figure]/dict
     """
+
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         color_df = (
@@ -56,7 +65,9 @@ def scatter_plot(
             raise ValueError(
                 "The dimensions of the DataFrame are either too high or too low."
             )
-
+        fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
+        fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
+        fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
         return [fig]
     except ValueError as e:
         msg = ""
@@ -110,8 +121,10 @@ def create_volcano_plot(
         ylabel="-log10(p)",
         title="Volcano Plot",
         annotation="Protein ID",
+        plot_bgcolor=colors["plot_bgcolor"],
+        xaxis_gridcolor=colors["gridcolor"],
+        yaxis_gridcolor=colors["gridcolor"],
     )
-
     if proteins_of_interest is None:
         proteins_of_interest = []
     elif not isinstance(proteins_of_interest, list):
@@ -133,10 +146,10 @@ def create_volcano_plot(
             text=protein,
             showarrow=True,
             arrowhead=1,
-            font=dict(color="#ffffff"),
+            font=dict(color=colors["annotation_text_color"]),
             align="center",
-            arrowcolor="#4A536A",
-            bgcolor="#4A536A",
+            arrowcolor=colors["annotation_proteins_of_interest"],
+            bgcolor=colors["annotation_proteins_of_interest"],
             opacity=0.8,
             ax=0,
             ay=-20,
@@ -284,6 +297,7 @@ def prot_quant_plot(
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
     """
+
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     try:
@@ -411,6 +425,11 @@ def prot_quant_plot(
 
     fig.update_layout(
         title=f"Intensity of {formatted_protein_name} in all samples",
+        plot_bgcolor=colors["plot_bgcolor"],
+        xaxis_gridcolor=colors["gridcolor"],
+        yaxis_gridcolor=colors["gridcolor"],
+        xaxis_linecolor=colors["linecolor"],
+        yaxis_linecolor=colors["linecolor"],
         xaxis_title="Sample",
         yaxis_title="Intensity",
         legend_title="Legend",
