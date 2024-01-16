@@ -981,7 +981,7 @@
             "name": "base of log transformation",
             "type": "numeric",
             "min": 2,
-            "default": null
+            "default": 2
           },
           "grouping": {
             "name": "Grouping",

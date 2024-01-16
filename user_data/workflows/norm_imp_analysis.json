@@ -38,7 +38,8 @@
             "graph_one_type": "Bar chart",
             "graph_one_group_by": "Sample",
             "graph_two_type": "Pie chart"
-          }
+          },
+           "output_name": "preprocessed_data"
         }
       ]
     },
