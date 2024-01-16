@@ -23,7 +23,7 @@
 | protzilla/data\_analysis/dimension\_reduction.py                    |       33 |        4 |       10 |        2 |     86% |67-72, 100, 179 |
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
-| protzilla/data\_analysis/plots.py                                   |      127 |       41 |       64 |        5 |     62% |64, 73->75, 118, 263, 292-299, 305-436 |
+| protzilla/data\_analysis/plots.py                                   |      131 |       41 |       64 |        5 |     63% |75, 84->86, 131, 276, 306-313, 319-455 |
 | protzilla/data\_analysis/protein\_graphs.py                         |      409 |       46 |      196 |       15 |     89% |32-40, 63-92, 148, 173-174, 188, 319-321, 330-332, 350-351, 400, 425-429, 473, 487, 556, 587, 594, 795, 853->852, 857-860 |
 | protzilla/data\_integration/\_\_init\_\_.py                         |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_integration/database\_download.py                   |       63 |       63 |       28 |        0 |      0% |     1-116 |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      332 |      276 |      118 |        0 |     13% |60, 85-125, 166-182, 213-234, 254-382, 395-402, 416-418, 433-435, 450-452, 467-476, 491-498, 513-521, 537-564, 582-611, 627-629, 645-646, 693-695, 711-726, 734-764, 783-798, 804-856 |
 | ui/runs/views\_helper.py                                            |       53 |        9 |       22 |        4 |     80% |13->15, 19, 32, 35-41 |
-|                                                           **TOTAL** | **4374** | **1208** | **1746** |  **221** | **70%** |           |
+|                                                           **TOTAL** | **4378** | **1208** | **1746** |  **221** | **70%** |           |
 
 
 ## Setup coverage badge
