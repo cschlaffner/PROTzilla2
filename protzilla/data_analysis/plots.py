@@ -13,6 +13,14 @@ from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
 
+colors = {
+    "plot_bgcolor": "white",
+    "gridcolor": "#F1F1F1",
+    "linecolor": "#F1F1F1",
+    "annotation_text_color": "#ffffff",
+    "annotation_proteins_of_interest": "#4A536A",
+}
+
 
 def scatter_plot(
     input_df: pd.DataFrame,
@@ -31,11 +39,6 @@ def scatter_plot(
     :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
     :rtype: list[plotly figure]/dict
     """
-    colors = {
-        "plot_bgcolor": "white",
-        "gridcolor": "#F1F1F1",
-        "linecolor": "#F1F1F1",
-    }
 
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
@@ -104,13 +107,6 @@ def create_volcano_plot(
     :return: returns a list with a plotly figure
     :rtype: [plotly figure]
     """
-
-    colors = {
-        "plot_bgcolor": "#ffffff",
-        "gridcolor": "#F1F1F1",
-        "annotation_text_color": "#ffffff",
-        "annotation_proteins_of_interest": "#4A536A",
-    }
 
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
     fig = dashbio.VolcanoPlot(
@@ -301,12 +297,6 @@ def prot_quant_plot(
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
     """
-
-    colors = {
-        "plot_bgcolor": "white",
-        "gridcolor": "#F1F1F1",
-        "linecolor": "#F1F1F1",
-    }
 
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
