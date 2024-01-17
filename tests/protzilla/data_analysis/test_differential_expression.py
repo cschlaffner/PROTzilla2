@@ -92,7 +92,7 @@ def test_differential_expression_linear_model(
 
     corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
     log2_fc = [-5, -0.5, 0, -2.5]
-    de_proteins = ["Protein1", "Protein4"]
+    differentially_expressed_proteins = ["Protein1", "Protein4"]
 
     p_values_rounded = [
         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
@@ -103,7 +103,10 @@ def test_differential_expression_linear_model(
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert (current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins).all()
+    assert (
+        current_out["differentially_expressed_proteins_df"]["Protein ID"].unique()
+        == differentially_expressed_proteins
+    ).all()
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["corrected_alpha"] == test_alpha
 
@@ -135,7 +138,7 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
 
     corrected_p_values = [0.0072, 0.3838, 1.0, 0.0072]
     log2_fc = [-1, -0.0995, 0, -0.585]
-    de_proteins = ["Protein1"]
+    differentially_expressed_proteins = ["Protein1"]
     significant_proteins = ["Protein1", "Protein4"]
 
     p_values_rounded = [
@@ -147,7 +150,10 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
+    assert (
+        current_out["differentially_expressed_proteins_df"]["Protein ID"].unique()
+        == differentially_expressed_proteins
+    )
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["corrected_alpha"] == test_alpha
     assert (
@@ -289,7 +295,7 @@ def test_differential_expression_t_test_with_zero_mean(
 
     corrected_p_values = [0.0072, 1.000]
     log2_fc = [-1, 0]
-    de_proteins = ["Protein1"]
+    differentially_expressed_proteins = ["Protein1"]
 
     p_values_rounded = [
         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
@@ -300,7 +306,10 @@ def test_differential_expression_t_test_with_zero_mean(
 
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
-    assert current_out["de_proteins_df"]["Protein ID"].unique() == de_proteins
+    assert (
+        current_out["differentially_expressed_proteins_df"]["Protein ID"].unique()
+        == differentially_expressed_proteins
+    )
     assert current_out["fc_threshold"] == test_fc_threshold
     assert current_out["corrected_alpha"] == test_alpha
 
