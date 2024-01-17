@@ -53,7 +53,7 @@ def t_test(
         a df filtered_proteins, containing the filtered out proteins (proteins where the mean of a group was 0),
         a df fold_change_df, containing the fold_changes per protein,
         a df t_statistic_df, containing the t-statistic per protein,
-        a df de_proteins_df in typical protzilla long format containing the differentially expressed proteins;
+        a df differentially_expressed_proteins_df in typical protzilla long format containing the differentially expressed proteins;
             corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
         a df significant_proteins_df, containing the proteins where the p-values are smaller than alpha (if fc_threshold = 0, the significant proteins equal the differentially expressed ones)
             corrected_p_value, log2_fold_change, fold_change and t_statistic per protein,
@@ -68,7 +68,7 @@ def t_test(
         messages.append(
             {
                 "level": logging.INFO,
-                "msg": f"Group1 was not in unique groups. Auto-selected {group1} as group1.",
+                "msg": f"Group 1 was invalid. Auto-selected {group1} as group1.",
             }
         )
 
@@ -81,7 +81,7 @@ def t_test(
         messages.append(
             {
                 "level": logging.INFO,
-                "msg": f"Group2 was not in unique groups or was the same as group1. Auto-selected {group2} as group2.",
+                "msg": f"Group 2 was invalid. Auto-selected {group2} as group 2.",
             }
         )
     # somehow the frontend sucks at returning None instead of empty string
@@ -166,15 +166,16 @@ def t_test(
     for df in dataframes:
         intensity_df = pd.merge(intensity_df, df, on="Protein ID", how="left")
 
-    # TODO find better name than de_proteins
-    de_proteins = [
+    differentially_expressed_proteins = [
         protein
         for protein, p, fc in zip(
             valid_protein_groups, corrected_p_values, log2_fold_changes
         )
         if p < corrected_alpha and abs(fc) > fc_threshold
     ]
-    de_proteins_df = intensity_df.loc[intensity_df["Protein ID"].isin(de_proteins)]
+    differentially_expressed_proteins_df = intensity_df.loc[
+        intensity_df["Protein ID"].isin(differentially_expressed_proteins)
+    ]
     significant_proteins = [
         protein for i, protein in enumerate(valid_protein_groups) if p_values[i] < alpha
     ]
@@ -184,7 +185,7 @@ def t_test(
     filtered_proteins = list(set(proteins) - set(valid_protein_groups))
 
     return dict(
-        de_proteins_df=de_proteins_df,
+        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
         corrected_p_values_df=corrected_p_values_df,
         log2_fold_change_df=log2_fold_change_df,
         fc_threshold=fc_threshold,
