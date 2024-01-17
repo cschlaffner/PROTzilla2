@@ -62,13 +62,17 @@ def ms_fragger_import(
             keep_default_na=True,
         )
         protein_groups = df["Protein ID"]
-        df = df.drop(
-            columns=[
-                "Combined Spectral Count",
-                "Combined Unique Spectral Count",
-                "Combined Total Spectral Count",
-            ]
-        )
+        columns_to_drop = [
+            "Combined Spectral Count",
+            "Combined Unique Spectral Count",
+            "Combined Total Spectral Count",
+        ]
+        existing_columns = set(df.columns)
+        columns_to_drop_existing = [
+            col for col in columns_to_drop if col in existing_columns
+        ]
+        df = df.drop(columns=columns_to_drop_existing)
+
         intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
         intensity_df.columns = [
             c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
