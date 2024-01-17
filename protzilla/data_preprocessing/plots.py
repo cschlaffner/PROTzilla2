@@ -239,8 +239,8 @@ def create_histograms(
                 "log10" but is {visual_transformation}"""
         )
 
-    intensity_name_a = dataframe_a.columns[3]
-    intensity_name_b = dataframe_b.columns[3]
+    intensity_name_a = default_intensity_column(dataframe_a)
+    intensity_name_b = default_intensity_column(dataframe_b)
 
     intensities_a = dataframe_a[intensity_name_a]
     intensities_b = dataframe_b[intensity_name_b]

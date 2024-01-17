@@ -288,7 +288,7 @@ class Run:
         self.write_local_workflow()
 
     def next_step(self, name=None):
-        if not name:
+        if name is None:
             name = get_workflow_default_param_value(
                 self.workflow_config,
                 *self.current_run_location(),
