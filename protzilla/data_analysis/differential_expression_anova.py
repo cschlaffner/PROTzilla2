@@ -79,6 +79,7 @@ def anova(
     proteins = intensity_df["Protein ID"].unique()
     intensity_name = default_intensity_column(intensity_df, intensity_name)
     p_values = []
+    valid_protein_groups = []
     for protein in proteins:
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]
         all_group_intensities = []
@@ -89,22 +90,22 @@ def anova(
         p = stats.f_oneway(*all_group_intensities)[1]
         if not math.isnan(p):
             p_values.append(p)
-        else:
+            valid_protein_groups.append(protein)
+        elif not any(message["level"] == logging.WARNING for message in messages):
             messages.append(
                 {
-                    "level": logging.ERROR,
-                    "msg": f"Protein {protein} contains NaN or completely identical values values, indicating missing or faulty \
-             preprocessing. The calculation has been aborted.",
+                    "level": logging.WARNING,
+                    "msg": "Due do missing or identical values, the p-values for some protein groups could not be calculated. These groups were omitted from the analysis. "
+                    "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
                 }
             )
-            return {"messages": messages}
 
     # Apply multiple testing correction and create a dataframe with corrected p-values
     corrected_p_values, corrected_alpha = apply_multiple_testing_correction(
         p_values, multiple_testing_correction_method, alpha
     )
     corrected_p_values_df = pd.DataFrame(
-        list(zip(proteins, corrected_p_values)),
+        list(zip(valid_protein_groups, corrected_p_values)),
         columns=["Protein ID", "corrected_p_values"],
     )
     if corrected_alpha is None:
