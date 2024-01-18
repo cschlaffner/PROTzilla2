@@ -636,7 +636,13 @@ def results_exist(run: Run) -> bool:
 
     :return: True if the results are valid, False otherwise
     """
-    return run.result_df is not None or (run.step == "plot" and run.plots)
+    if run.section == "importing":
+        return run.result_df is not None or (run.step == "plot" and run.plots)
+    if run.section == "data_preprocessing":
+        return run.result_df is not None or (run.step == "plot" and run.plots)
+    if run.section == "data_analysis" or run.section == "data_integration":
+        return run.calculated_method is not None or (run.step == "plot" and run.plots)
+    return True
 
 def results_exist_json(request, run_name):
     """
