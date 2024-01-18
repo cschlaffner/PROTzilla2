@@ -86,7 +86,7 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
+    allow_next = run.result_df is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
     description = run.workflow_meta[section][step][method]["description"]
 
