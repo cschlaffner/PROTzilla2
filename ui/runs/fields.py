@@ -296,7 +296,9 @@ def make_displayed_history(run: Run) -> str:
 
 
 def make_name_field(
-    allow_next: bool, run: Run, end_of_run: bool, form: str = "runs_next"
+    allow_next: bool,
+    run: Run, end_of_run: bool,
+    form: str = "runs_next"
 ) -> str:
     """
     Generates the html for the field that allows to name the output of the

@@ -86,7 +86,6 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.result_df is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
     description = run.workflow_meta[section][step][method]["description"]
 
@@ -134,9 +133,9 @@ def detail(request, run_name):
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, run, end_of_run),
+            name_field=make_name_field(results_exist(run), run, end_of_run),
             current_plots=current_plots,
-            show_next=allow_next,
+            results_exist=results_exist(run),
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
@@ -629,7 +628,17 @@ def add_name(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
-def results_exist(request, run_name):
+def results_exist(run: Run) -> bool:
+    """
+    Checks if the last step has produced valid results.
+
+    :param run: the run to check
+
+    :return: True if the results are valid, False otherwise
+    """
+    return run.result_df is not None or (run.step == "plot" and run.plots)
+
+def results_exist_json(request, run_name):
     """
     Checks if the results of the run exist. This is used to determine if the Next button
     should be enabled or not.
@@ -643,7 +652,7 @@ def results_exist(request, run_name):
     :rtype: JsonResponse
     """
     run = active_runs[run_name]
-    return JsonResponse(dict(results_exist=run.result_df is not None))
+    return JsonResponse(dict(results_exist=results_exist(run)))
 
 
 def all_button_parameters(request, run_name):
