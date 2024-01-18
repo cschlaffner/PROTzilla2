@@ -885,7 +885,8 @@
           }
         ]
       }
-    }
+    },
+    "output_name": "preprocessed_data"
   },
   "data_analysis": {
     "differential_expression": {

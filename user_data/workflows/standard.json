@@ -94,7 +94,7 @@
               "group_by": "Sample"
             }
           ],
-          "output_name": "preprocessed_data"
+            "output_name": "preprocessed_data"
         }
       ]
     },
