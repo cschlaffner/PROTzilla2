@@ -40,7 +40,7 @@
 | protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |248->259, 260 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |176, 193, 248, 249->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
-| protzilla/data\_preprocessing/plots.py                              |      100 |       11 |       21 |        4 |     88% |165->180, 249-250, 286, 297, 397-421 |
+| protzilla/data\_preprocessing/plots.py                              |       97 |       11 |       21 |        4 |     87% |165->180, 249-250, 283, 294, 394-418 |
 | protzilla/data\_preprocessing/plots\_helper.py                      |       17 |       13 |        6 |        0 |     17% |15-24, 38-47 |
 | protzilla/data\_preprocessing/transformation.py                     |       21 |        2 |        8 |        3 |     83% |33, 42->52, 53 |
 | protzilla/history.py                                                |      134 |       10 |       60 |        6 |     92% |39, 120, 130, 176-180, 222, 229 |
@@ -56,7 +56,7 @@
 | protzilla/utilities/dunn\_score.py                                  |       10 |        6 |        6 |        0 |     25% | 25, 41-48 |
 | protzilla/utilities/transform\_dfs.py                               |       25 |        0 |        9 |        0 |    100% |           |
 | protzilla/utilities/utilities.py                                    |       40 |        4 |       10 |        2 |     88% |27-28, 69, 80 |
-| protzilla/workflow\_helper.py                                       |       48 |        0 |       34 |        0 |    100% |           |
+| protzilla/workflow\_helper.py                                       |       51 |        2 |       34 |        0 |     98% |    64, 66 |
 | runner\_cli.py                                                      |       21 |        5 |        2 |        1 |     74% | 55-58, 62 |
 | ui/\_\_init\_\_.py                                                  |        0 |        0 |        0 |        0 |    100% |           |
 | ui/\_\_main\_\_.py                                                  |       11 |       11 |        2 |        0 |      0% |      2-21 |
@@ -70,7 +70,7 @@
 | ui/manage.py                                                        |       14 |       14 |        2 |        0 |      0% |      2-24 |
 | ui/runs/\_\_init\_\_.py                                             |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/apps.py                                                     |        4 |        4 |        0 |        0 |      0% |       1-6 |
-| ui/runs/fields.py                                                   |      118 |       98 |       66 |        0 |     11% |32-43, 61-89, 114-124, 137-139, 164-175, 189-194, 215-295, 312-323 |
+| ui/runs/fields.py                                                   |      123 |      104 |       72 |        0 |     10% |23-42, 49-90, 102-122, 130-141, 154-175, 181-195, 209-286, 301-340 |
 | ui/runs/migrations/\_\_init\_\_.py                                  |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/templatetags/\_\_init\_\_.py                                |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/templatetags/id\_tags.py                                    |       10 |       10 |        4 |        0 |      0% |      1-13 |
@@ -78,8 +78,8 @@
 | ui/runs/utilities/\_\_init\_\_.py                                   |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      332 |      276 |      118 |        0 |     13% |60, 85-125, 166-182, 213-234, 254-382, 395-402, 416-418, 433-435, 450-452, 467-476, 491-498, 513-521, 537-564, 582-611, 627-629, 645-646, 693-695, 711-726, 734-764, 783-798, 804-856 |
-| ui/runs/views\_helper.py                                            |       53 |        9 |       22 |        4 |     80% |13->15, 19, 32, 35-41 |
-|                                                           **TOTAL** | **4381** | **1207** | **1748** |  **220** | **70%** |           |
+| ui/runs/views\_helper.py                                            |       54 |       11 |       24 |        7 |     74% |13->15, 19, 32, 35-41, 76->92, 88, 102 |
+|                                                           **TOTAL** | **4387** | **1217** | **1756** |  **223** | **69%** |           |
 
 
 ## Setup coverage badge
