@@ -83,6 +83,7 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+    description = run.workflow_meta[section][step][method]["description"]
 
     current_plots = []
     for plot in run.plots:
@@ -138,6 +139,7 @@ def detail(request, run_name):
             show_table=show_table,
             used_memory=get_memory_usage(),
             show_protein_graph=show_protein_graph,
+            description=description,
         ),
     )
 
@@ -170,8 +172,9 @@ def change_method(request, run_name):
     section, step, _ = run.current_workflow_location()
     run.update_workflow_config([], update_params=False)
 
-    current_fields = make_current_fields(run, run.section, run.step, run.method)
-    plot_fields = make_plot_fields(run, run.section, run.step, run.method)
+    current_fields = make_current_fields(run, section, step, run.method)
+    plot_fields = make_plot_fields(run, section, step, run.method)
+    description = run.workflow_meta[section][step][run.method]["description"]
     return JsonResponse(
         dict(
             parameters=render_to_string(
@@ -182,6 +185,7 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
+            description=description,
         ),
         safe=False,
     )
