@@ -17,8 +17,10 @@
                 success: function (response) {
                     $("#method_parameters").html(response.parameters);
                     $("#plot_parameters").html(response.plot_parameters);
+                    $("#description").html(response.description);
                     $('#calc_form').trigger('change');
                     $('#plot_form').trigger('change');
+                    $("#description").trigger('change');
                 }
             }).fail(function (e) {
                 console.log('Error:', e);

@@ -137,7 +137,7 @@
               "embedded_data"
             ],
             "color_df": [
-              null,
+              "None",
               null
             ]
           }
@@ -179,7 +179,7 @@
               "anova",
               "filtered_df"
             ],
-            "sample_group_df": [null, null],
+            "sample_group_df": ["None", null],
             "flip_axes": "no"
           }
         }

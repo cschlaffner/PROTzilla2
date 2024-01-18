@@ -25,7 +25,12 @@ from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
+from protzilla.utilities import (
+    clean_uniprot_id,
+    get_memory_usage,
+    name_to_title,
+    unique_justseen,
+)
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -83,6 +88,7 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
+    description = run.workflow_meta[section][step][method]["description"]
 
     current_plots = []
     for plot in run.plots:
@@ -123,12 +129,12 @@ def detail(request, run_name):
             run_name=run_name,
             section=section,
             step=step,
-            display_name=f"{run.step.replace('_', ' ').title()}",
+            display_name=f"{name_to_title(run.step)}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
+            name_field=make_name_field(allow_next, run, end_of_run),
             current_plots=current_plots,
             show_next=allow_next,
             show_back=bool(run.history.steps),
@@ -138,6 +144,7 @@ def detail(request, run_name):
             show_table=show_table,
             used_memory=get_memory_usage(),
             show_protein_graph=show_protein_graph,
+            description=description,
         ),
     )
 

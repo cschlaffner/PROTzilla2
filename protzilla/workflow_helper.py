@@ -27,14 +27,6 @@ def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]
     return workflow_steps
 
 
-def step_name(step):
-    return step.replace("_", " ").title()
-
-
-def section_name(section):
-    return section.replace("_", " ").title()
-
-
 def method_name(workflow_meta, section, step, method):
     return workflow_meta[section][step][method]["name"]
 

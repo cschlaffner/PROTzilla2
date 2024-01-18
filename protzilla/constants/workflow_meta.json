@@ -2,8 +2,8 @@
   "importing": {
     "ms_data_import": {
       "max_quant_import": {
-        "name": "Max Quant",
-        "description": "Max Quant Data Import",
+        "name": "MaxQuant",
+        "description": "MaxQuant data import",
         "parameters": {
           "file_path": {
             "name": "MaxQuant intensities file:",
@@ -11,7 +11,7 @@
             "default": null
           },
           "intensity_name": {
-            "name": "intensity parameter",
+            "name": "Intensity parameter",
             "type": "categorical",
             "categories": [
               "LFQ intensity",
@@ -29,7 +29,7 @@
       },
       "diann_import": {
         "name": "DIA-NN",
-        "description": "DIA-NN Data Import",
+        "description": "DIA-NN data import",
         "parameters": {
           "file_path": {
             "name": "DIA-NN intensities file:",
@@ -45,7 +45,7 @@
       },
       "ms_fragger_import": {
         "name": "MS Fragger",
-        "description": "MS Fragger Data Import",
+        "description": "MS Fragger data import",
         "parameters": {
           "file_path": {
             "name": "MSFragger intensities file:",
@@ -78,8 +78,8 @@
     },
     "metadata_import": {
       "metadata_import_method": {
-        "name": "Metadata Import",
-        "description": "Import Metadata",
+        "name": "Metadata import",
+        "description": "Import metadata",
         "parameters": {
           "file_path": {
             "name": "Metadata file:",
@@ -87,7 +87,7 @@
             "default": null
           },
           "feature_orientation": {
-            "name": "feature orientation",
+            "name": "Feature orientation",
             "type": "categorical",
             "categories": [
               "Rows (features in rows, samples in columns)",
@@ -98,16 +98,16 @@
         }
       },
       "metadata_import_method_diann": {
-        "name": "Metadata Import DIA-NN",
-        "description": "Import Metadata for run relationships of DIA-NN",
+        "name": "Metadata import DIA-NN",
+        "description": "Import metadata for run relationships of DIA-NN",
         "parameters": {
           "file_path": {
-            "name": "Run-Relationship Metadata file:",
+            "name": "Run-Relationship metadata file:",
             "type": "file",
             "default": null
           },
           "groupby_sample": {
-            "name": "Group Replicate Runs by Sample using Median",
+            "name": "Group replicate runs by sample using median",
             "type": "boolean",
             "default": false
           }
@@ -115,7 +115,7 @@
         }
       },
       "metadata_column_assignment": {
-        "name": "Metadata Column Assignment",
+        "name": "Metadata column assignment",
         "description": "Assign columns to metadata categories, repeatable for each category",
         "parameters": {
           "metadata_df": {
@@ -124,14 +124,14 @@
             "default": null
           },
           "metadata_required_column": {
-            "name": "Missing, but required Metadata Columns",
+            "name": "Missing, but required metadata columns",
             "fill": "metadata_required_columns",
             "type": "categorical",
             "categories": [],
             "default": null
           },
           "metadata_unknown_column": {
-            "name": "Existing, but unknown Metadata Columns",
+            "name": "Existing, but unknown metadata columns",
             "fill": "metadata_unknown_columns",
             "type": "categorical",
             "categories": [],
@@ -143,16 +143,16 @@
     },
     "peptide_import": {
       "peptide_import": {
-        "name": "Peptide Import",
-        "description": "Import Peptide-Data",
+        "name": "Peptide import",
+        "description": "Import peptide data",
         "parameters": {
           "file_path": {
-            "name": "Peptide File",
+            "name": "Peptide file",
             "type": "file",
             "default": null
           },
           "intensity_name": {
-            "name": "Intensity Parameter (same as MS-Data)",
+            "name": "Intensity parameter (same as MS-Data)",
             "type": "categorical",
             "categories": [
               "LFQ intensity",
@@ -168,7 +168,7 @@
   "data_preprocessing": {
     "filter_proteins": {
       "samples_missing_filter": {
-        "name": "Samples Missing",
+        "name": "Samples missing",
         "description": "Filters all proteins that are contained in less than a set percentage of samples",
         "parameters": {
           "percentage": {
@@ -221,7 +221,7 @@
         ]
       },
       "proteins_missing_filter": {
-        "name": "Proteins Missing",
+        "name": "Proteins missing",
         "description": "Filters all samples that contain less than a set percentage of proteins",
         "parameters": {
           "percentage": {
@@ -247,7 +247,7 @@
         ]
       },
       "protein_intensity_sum_filter": {
-        "name": "Sum of Intensities",
+        "name": "Sum of intensities",
         "description": "Filter by sum of protein intensities per sample",
         "parameters": {
           "deviation_threshold": {
@@ -297,7 +297,7 @@
         ]
       },
       "isolation_forest": {
-        "name": "Isolation Forest",
+        "name": "Isolation forest",
         "description": "This function filters out outliers using a clustering isolation forest approach.",
         "parameters": {
           "n_estimators": {
@@ -313,7 +313,7 @@
         ]
       },
       "local_outlier_factor": {
-        "name": "Local Outlier Factor",
+        "name": "Local outlier factor",
         "description": "This function filters out outliers using a clustering Local Outlier Factor approach based on k nearest neighbors clustering.",
         "parameters": {
           "number_of_neighbors": {
@@ -399,7 +399,7 @@
         ]
       },
       "totalsum": {
-        "name": "Total Sum",
+        "name": "Total sum",
         "description": "A function to perform normalisation using the total sum of sample intensities on your dataframe. Normalises the data on the level of each sample. Divides each intensity by the total sum of sample intensities.",
         "parameters": {},
         "graphs": [
@@ -463,7 +463,7 @@
         ]
       },
       "ref_protein": {
-        "name": "Protein Reference",
+        "name": "Protein reference",
         "description": "A function to perform protein-intensity normalisation in reference to a selected protein on your dataframe. Normalises the data on the level of each sample. Divides each intensity by the intensity of the chosen reference protein in each sample. Samples where this value is zero will be removed and returned separately.",
         "parameters": {
           "reference_protein": {
@@ -500,11 +500,11 @@
     },
     "imputation": {
       "min_value_per_dataset": {
-        "name": "Min per Dataset",
+        "name": "Min per dataset",
         "description": "A function to impute missing values for each protein by taking into account data from the entire dataframe. Sets missing value to the smallest measured value in the dataframe. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation.",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -533,7 +533,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -544,7 +544,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -556,11 +556,11 @@
         ]
       },
       "min_value_per_protein": {
-        "name": "Min per Protein",
+        "name": "Min per protein",
         "description": "A function to impute missing values for each protein by taking into account data from each protein. Sets missing value to the smallest measured value for each protein column. The user can also assign a shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without any values will be filtered out.",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -589,7 +589,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -600,7 +600,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -612,11 +612,11 @@
         ]
       },
       "min_value_per_sample": {
-        "name": "Min per Sample",
+        "name": "Min per sample",
         "description": "Sets missing intensity values to the smallest measured value for each sample",
         "parameters": {
           "shrinking_value": {
-            "name": "Shrinking Value:",
+            "name": "Shrinking value:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -645,7 +645,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -656,7 +656,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -704,7 +704,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -715,7 +715,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -760,7 +760,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -771,7 +771,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type - Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -783,8 +783,8 @@
         ]
       },
       "normal_distribution_sampling": {
-        "name": "Normal Distribution Sampling",
-        "description": "Imputation methods include normal distribution sampling per Protein or over Dataset",
+        "name": "Normal distribution sampling",
+        "description": "Imputation methods include normal distribution sampling per protein or per dataset",
         "parameters": {
           "strategy": {
             "name": "Strategy:",
@@ -803,7 +803,7 @@
             "default": -1
           },
            "scaling_factor": {
-            "name": "Scaling Factor:",
+            "name": "Scaling factor:",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -832,7 +832,7 @@
               "default": "None"
             },
             "visual_transformation": {
-              "name": "Visual Transformation:",
+              "name": "Visual transformation:",
               "type": "categorical",
               "categories": [
                 "linear",
@@ -843,7 +843,7 @@
           },
           {
             "graph_type_quantities": {
-              "name": "Graph type Imputed Values:",
+              "name": "Graph type - imputed values:",
               "type": "categorical",
               "categories": [
                 "Bar chart",
@@ -857,11 +857,11 @@
     },
     "filter_peptides": {
       "pep_filter": {
-        "name": "PEP Threshold",
-        "description": "Filter by PEP-Threshold",
+        "name": "PEP threshold",
+        "description": "Filter by PEP-threshold",
         "parameters": {
           "threshold": {
-            "name": "Threshold Value for PEP",
+            "name": "Threshold value for PEP",
             "type": "numeric",
             "min": 0,
             "default": 0
@@ -895,7 +895,7 @@
         "description": "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -903,7 +903,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -912,7 +912,7 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -949,7 +949,7 @@
         "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -957,7 +957,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -966,7 +966,7 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -979,10 +979,10 @@
             "default": 0
           },
           "log_base": {
-            "name": "base of log transformation (leave empty if no log transformation was performed on the data)",
+            "name": "base of log transformation",
             "type": "numeric",
             "min": 2,
-            "default": null
+            "default": 2
           },
           "grouping": {
             "name": "Grouping",
@@ -1017,11 +1017,11 @@
         }
       },
       "linear_model": {
-        "name": "linear model",
-        "description": "A function to fit a linear model using Ordinary Least Squares for each Protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
+        "name": "Linear model",
+        "description": "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -1029,7 +1029,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -1038,7 +1038,7 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -1085,7 +1085,7 @@
     },
     "plot": {
       "volcano": {
-        "name": "Volcano Plot",
+        "name": "Volcano plot",
         "description": "",
         "parameters": {
           "p_values": {
@@ -1121,7 +1121,7 @@
             ]
           },
           "proteins_of_interest_input": {
-            "name": "Proteins of Interest",
+            "name": "Proteins of interest",
             "type": "named_output",
             "default": [
               null,
@@ -1306,7 +1306,7 @@
     },
     "clustering": {
       "k_means": {
-        "name": "K-Means",
+        "name": "K-means",
         "description": "Partitions a number of samples in k clusters using k-means",
         "parameters": {
           "input_df": {
@@ -1699,7 +1699,7 @@
     },
     "classification": {
       "random_forest": {
-        "name": "Random Forest",
+        "name": "Random forest",
         "description": "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting.",
         "parameters": {
           "input_df": {
@@ -1742,7 +1742,7 @@
             "default": "yes"
           },
           "validation_strategy": {
-            "name": "Validation Strategy",
+            "name": "Validation strategy",
             "type": "categorical_dynamic",
             "categories": [
               "K-Fold",
@@ -1905,7 +1905,7 @@
         }
       },
       "svm": {
-        "name": "Support Vector Machine (SVM)",
+        "name": "Support vector machine (SVM)",
         "description": "",
         "parameters": {
           "input_df": {
@@ -1945,7 +1945,7 @@
             "default": null
           },
           "validation_strategy": {
-            "name": "Validation Strategy",
+            "name": "Validation strategy",
             "type": "categorical_dynamic",
             "categories": [
               "K-Fold",
@@ -2070,7 +2070,7 @@
             "dynamic": true
           },
           "C": {
-            "name": "C: Regularization parameter (the strength of the regularization is inversely proportional to C)",
+            "name": "C: regularization parameter (the strength of the regularization is inversely proportional to C)",
             "type": "numeric",
             "min": 0.0,
             "default": 1.0,
@@ -2275,7 +2275,7 @@
     },
     "protein_graphs": {
       "peptides_to_isoform": {
-        "name": "Peptide to Isoform",
+        "name": "Peptide to isoform",
         "description": "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
@@ -2302,7 +2302,7 @@
             "default": 5
           },
           "allowed_mismatches": {
-            "name": "Number of allowed mismatched Amino Acids per Peptide. For many allowed mismatches, this can take a long time.",
+            "name": "Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
             "type": "numeric",
             "min": 0,
             "step": 1,
@@ -2311,8 +2311,8 @@
         }
       },
       "variation_graph": {
-        "name": "Protein Variation Graph",
-        "description": "Create a variation graph (.graphml) for a Protein, including Variation-Features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "name": "Protein variation graph",
+        "description": "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
@@ -2332,11 +2332,11 @@
   "data_integration": {
     "enrichment_analysis": {
       "GO_analysis_with_STRING": {
-        "name": "GO Analysis with STRING",
-        "description": "Online GO Analysis using STRING API",
+        "name": "GO analysis with STRING",
+        "description": "Online GO analysis using STRING API",
         "parameters": {
           "proteins_df": {
-            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
+            "name": "Dataframe with protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
               null,
@@ -2390,11 +2390,11 @@
         }
       },
       "GO_analysis_with_Enrichr": {
-        "name": "GO Analysis with Enrichr",
-        "description": "Online GO Analysis using Enrichr API",
+        "name": "GO analysis with Enrichr",
+        "description": "Online GO analysis using Enrichr API",
         "parameters": {
           "proteins_df": {
-            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
+            "name": "Dataframe with protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
               null,
@@ -2411,7 +2411,7 @@
             "default": null
           },
           "differential_expression_threshold": {
-            "name": "Threshold for differential expression: Proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
+            "name": "Threshold for differential expression: proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
             "type": "numeric",
             "min": 0,
             "max": 4294967295,
@@ -2443,13 +2443,13 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload gene sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
           },
           "gene_sets_enrichr": {
-            "name": "Gene Set Libraries",
+            "name": "Gene set libraries",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
@@ -2528,11 +2528,11 @@
         }
       },
       "GO_analysis_offline": {
-        "name": "GO Analysis offline",
+        "name": "GO analysis offline",
         "description": "Offline GO Analysis using a hypergeometric test",
         "parameters": {
           "proteins_df": {
-            "name": "Dataframe with Protein IDs and direction of expression change column (e.g. log2FC)",
+            "name": "Dataframe with protein IDs and direction of expression change column (e.g. log2FC)",
             "type": "named_output",
             "default": [
               null,
@@ -2549,7 +2549,7 @@
             "default": null
           },
           "differential_expression_threshold": {
-            "name": "Threshold for differential expression: Proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
+            "name": "Threshold for differential expression: proteins with values > threshold are upregulated, proteins values < threshold downregulated. If \"log\" is in the name of differential_expression_col, threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, if log2_fold_change < -threshold downregulated",
             "type": "numeric",
             "min": 0,
             "max": 4294967295,
@@ -2564,7 +2564,7 @@
             ]
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload gene sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null
           },
@@ -2615,10 +2615,10 @@
       },
       "gsea": {
         "name": "GSEA",
-        "description": "Perform Gene Set Enrichment Analysis",
+        "description": "Perform gene set enrichment analysis",
         "parameters": {
           "protein_df": {
-            "name": "Dataframe with Protein IDs, Samples and intensities",
+            "name": "Dataframe with protein IDs, samples and intensities",
             "type": "named_output",
             "default": [
               null,
@@ -2651,13 +2651,13 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload Gene Sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
           },
           "gene_sets_enrichr": {
-            "name": "Gene Sets",
+            "name": "Gene sets",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
@@ -2739,11 +2739,11 @@
         }
       },
       "gsea_preranked": {
-        "name": "GSEA Preranked",
+        "name": "GSEA preranked",
         "description": "Maps proteins to genes and performs GSEA according using provided numerical column for ranking",
         "parameters": {
           "protein_df": {
-            "name": "Dataframe with Protein IDs and a column to use for ranking (e.g. p values)",
+            "name": "Dataframe with protein IDs and a column to use for ranking (e.g. p values)",
             "type": "named_output",
             "default": [
               null,
@@ -2795,13 +2795,13 @@
             }
           },
           "gene_sets_path": {
-            "name": "Upload Gene Sets with Uppercase Gene Symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
+            "name": "Upload gene sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})",
             "type": "file",
             "default": null,
             "dynamic": true
           },
           "gene_sets_enrichr": {
-            "name": "Gene Set Libraries",
+            "name": "Gene set libraries",
             "type": "categorical",
             "fill": "dbs_gseapy",
             "categories": [],
@@ -2843,7 +2843,7 @@
     },
     "database_integration": {
       "gene_mapping": {
-        "name": "Gene Mapping",
+        "name": "Gene mapping",
         "description": "Map protein groups to genes",
         "parameters": {
           "dataframe": {
@@ -2855,7 +2855,7 @@
             ]
           },
           "database_names": {
-            "name": "Uniprot Databases (offline)",
+            "name": "Uniprot databases (offline)",
             "type": "categorical",
             "multiple": true,
             "fill": "uniprot_databases"
@@ -2880,7 +2880,7 @@
             ]
           },
           "database_name": {
-            "name": "Database Name",
+            "name": "Database name",
             "type": "categorical",
             "fill": "uniprot_databases",
             "fill_dynamic": [
@@ -2919,7 +2919,7 @@
             "fill": "enrichment_categories"
           },
           "value": {
-            "name": "Value (bars will be plotted as -log10(value)), fdr only for GO Analysis with STRING, p_value is adjusted if available",
+            "name": "Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
             "type": "categorical",
             "categories": [
               "p_value",
@@ -2936,7 +2936,7 @@
             "default": 10
           },
           "cutoff": {
-            "name": "Only terms with Adjusted P-value (or FDR) < cutoff will be shown",
+            "name": "Only terms with adjusted p-value (or FDR) < cutoff will be shown",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -2994,7 +2994,7 @@
             "default": 5
           },
           "cutoff": {
-            "name": "Only terms with Adjusted P-value < cutoff will be shown",
+            "name": "Only terms with adjusted p-value < cutoff will be shown",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -3037,7 +3037,7 @@
             ]
           },
           "gene_sets": {
-            "name": "Gene Sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
+            "name": "Gene sets/libraries to be plotted (if this is empty, try reselecting the input enrichment dataframe from your chosen input)",
             "type": "categorical",
             "multiple": true,
             "fill": "gsea_enrichment_categories"
@@ -3089,7 +3089,7 @@
         }
       },
       "gsea_enrichment_plot": {
-        "name": "Enrichment Plot for (pre-ranked) GSEA",
+        "name": "Enrichment plot for (pre-ranked) GSEA",
         "description": "Creates an enrichment plot from (pre-ranked) GSEA data with the enrichment score, ranked_metric, gene rank and hits",
         "parameters": {
           "term_dict": {
