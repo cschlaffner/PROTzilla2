@@ -1,10 +1,12 @@
 import copy
+import logging
 
 import gseapy
 import matplotlib.colors as mcolors
 import restring
 from biomart import BiomartServer
 
+from protzilla.constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -28,7 +30,7 @@ def insert_special_params(param_dict, run):
             # Sample not needed for anova and t-test
             param_dict["categories"] = run.metadata.columns[
                 run.metadata.columns != "Sample"
-            ].unique()
+                ].unique()
         elif param_dict["fill"] == "metadata_unknown_columns":
             # give selection of existing columns without ["Sample", "Group", "Batch"]
             # as they are already named correctly for our purposes
@@ -80,9 +82,9 @@ def insert_special_params(param_dict, run):
         param_dict["default"] = list(param_dict.get("categories", []))
 
     if (
-        param_dict["type"] == "numeric"
-        and ("multiple" in param_dict and param_dict["multiple"])
-        and isinstance(param_dict["default"], list)
+            param_dict["type"] == "numeric"
+            and ("multiple" in param_dict and param_dict["multiple"])
+            and isinstance(param_dict["default"], list)
     ):
         # The default value of a multiselect numeric input is saved as a list of
         # numbers, but it needs to be shown in the frontend in the format "1|2|0.12"
@@ -113,3 +115,15 @@ def get_parameters(run, section, step, method):
         insert_special_params(param_dict, run)
         output[key] = param_dict
     return output
+
+
+def notify_user(level=logging.ERROR, msg="", trace=None):
+    log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
+    if log_function:
+        trace = f"\nTrace: {trace}" if trace is not None and trace != "" else ""
+        log_function(f"{msg}{trace}")
+
+
+def notify_user_batch(massages: dict):
+    for message in massages:
+        notify_user(message["level"], message['msg'], message['trace'] if "trace" in message else "")
