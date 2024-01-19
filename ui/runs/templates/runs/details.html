@@ -13,7 +13,7 @@
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
-        {% include 'runs/form_buttons.html' with results_exist=show_next %}
+        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
     {% endif %}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
 
@@ -239,7 +239,7 @@
                     <div class="col">
                         {# navigation between steps #}
                         <div class="justify-content-end d-flex">
-                            {% if show_next %}
+                            {% if results_exist %}
                                 <div class="col-5 mb-2">
                                     <div class="form-group mb-0">
                                         {{ name_field }}
@@ -270,7 +270,7 @@
                                         </div>
                                     </div>
                                     {% endif %}
-                                    <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
+                                    <button class="btn btn-red"  {% if not results_exist %} disabled {% endif %}>Next
                                     </button>
                                 </div>
                             </form>
