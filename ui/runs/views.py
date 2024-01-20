@@ -42,7 +42,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import parameters_from_post, display_message
 
 active_runs = {}
 
@@ -545,20 +545,7 @@ def calculate(request, run_name):
     result = run.current_out
     if "messages" in result:
         for message in result["messages"]:
-            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
-
-            # map error level to bootstrap css class
-            lvl_to_css_class = {
-                40: "alert-danger",
-                30: "alert-warning",
-                20: "alert-info",
-            }
-            messages.add_message(
-                request,
-                message["level"],
-                f"{message['msg']} {trace}",
-                lvl_to_css_class[message["level"]],
-            )
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -590,22 +577,7 @@ def plot(request, run_name):
     for index, p in enumerate(run.plots):
         if isinstance(p, dict) and "messages" in p:
             for message in run.plots[index]["messages"]:
-                trace = (
-                    build_trace_alert(message["trace"]) if "trace" in message else ""
-                )
-
-                # map error level to bootstrap css class
-                lvl_to_css_class = {
-                    40: "alert-danger",
-                    30: "alert-warning",
-                    20: "alert-info",
-                }
-                messages.add_message(
-                    request,
-                    message["level"],
-                    f"{message['msg']} {trace}",
-                    lvl_to_css_class[message["level"]],
-                )
+                display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
