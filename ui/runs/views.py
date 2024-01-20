@@ -115,10 +115,10 @@ def detail(request, run_name):
     )
 
     show_protein_graph = (
-        run.current_out
-        and "graph_path" in run.current_out
-        and run.current_out["graph_path"] is not None
-        and Path(run.current_out["graph_path"]).exists()
+            run.current_out
+            and "graph_path" in run.current_out
+            and run.current_out["graph_path"] is not None
+            and Path(run.current_out["graph_path"]).exists()
     )
 
     return render(
@@ -340,8 +340,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "Gene_set" in protein_iterable.columns
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "Gene_set" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -360,8 +360,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "NES" in protein_iterable.columns
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "NES" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -431,6 +431,15 @@ def next_(request, run_name):
     """
     run = active_runs[run_name]
     run.next_step(request.POST["name"])
+
+    # This is a temporary solution and should be removed when the problem in the referenced step is fixed
+    if run.section == "<hier könnte ihre section stehen>" and run.step == "<hier könnte ihr step stehen>":
+        message = {
+            'level': 30,
+            'msg': '<hier könnte ihr Disclaimer stehen>'
+        }
+        display_message(message, request)
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -615,6 +624,7 @@ def results_exist(run: Run) -> bool:
     if run.section == "data_analysis" or run.section == "data_integration":
         return run.calculated_method is not None or (run.step == "plot" and run.plots)
     return True
+
 
 def results_exist_json(request, run_name):
     """
