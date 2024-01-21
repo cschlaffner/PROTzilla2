@@ -11,8 +11,8 @@ from PIL import Image
 
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
-from .constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from .history import History
+from .run_helper import log_messages
 from .workflow_helper import (
     get_parameter_type,
     get_workflow_default_param_value,
@@ -195,11 +195,7 @@ class Run:
         self.calculated_method = self.method
         # error handling for CLI
         if "messages" in self.current_out:
-            for message in self.current_out["messages"]:
-                log_function = MESSAGE_TO_LOGGING_FUNCTION.get(message["level"])
-                if log_function:
-                    trace = f"\nTrace: {message['trace']}" if "trace" in message else ""
-                    log_function(f"{message['msg']}{trace}")
+            log_messages(self.current_out["messages"])
 
     def calculate_and_next(
         self, method_callable, name=None, **parameters
