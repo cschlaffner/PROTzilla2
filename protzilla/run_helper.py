@@ -116,7 +116,7 @@ def get_parameters(run, section, step, method):
     return output
 
 
-def log_message(level, msg: str = "", trace: str = ""):
+def log_message(level: int = 40, msg: str = "", trace: str = ""):
     log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
     if log_function:
         trace = f"\nTrace: {trace}" if trace != "" else ""

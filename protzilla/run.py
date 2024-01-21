@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import shutil
 import traceback
 from io import BytesIO
@@ -183,9 +184,13 @@ class Run:
             call_parameters["run_name"] = self.run_name
 
         if self.section in ["importing", "data_preprocessing"]:
-            self.result_df, self.current_out = method_callable(
-                self.df, **call_parameters
-            )
+            try:
+                self.result_df, self.current_out = method_callable(
+                    self.df, **call_parameters
+                )
+            except Exception as e:
+                msg = f"An error occurred while calculating the step: {e.__class__.__name__} {e}. Please check your parameters."
+                self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
         else:
             self.result_df = None
             self.current_out = method_callable(**call_parameters)
@@ -193,9 +198,16 @@ class Run:
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
-        # error handling for CLI
+
         if "messages" in self.current_out:
+            # error handling for CLI
             log_messages(self.current_out["messages"])
+            if self.current_out["messages"][-1]["level"] == 40:
+                # method was not calculated successfully so the parameters are reset
+                self.result_df = None
+                self.current_parameters.pop(self.method, None)
+                self.calculated_method = None
+
 
     def calculate_and_next(
         self, method_callable, name=None, **parameters
