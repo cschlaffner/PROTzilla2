@@ -127,4 +127,4 @@ def log_messages(messages: dict = None):
     if messages is None:
         messages = {}
     for message in messages:
-        log_message(message["level"], message["msg"], message["trace"])
+        log_message(message["level"], message["msg"], message["trace"] if "trace" in message else "")
