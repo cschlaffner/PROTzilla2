@@ -894,7 +894,7 @@
         "description": "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
-            "name": "Input Dataframe",
+            "name": "Input dataframe",
             "type": "named_output",
             "default": [
               null,
@@ -902,7 +902,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -911,7 +911,7 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
@@ -928,7 +928,7 @@
             "default": "None"
           },
           "selected_groups": {
-            "name": "Selected Groups (add / remove while holding CTRL-Key):",
+            "name": "Selected groups (add / remove while holding CTRL-Key):",
             "type": "categorical",
             "fill": "metadata_column_data",
             "categories": [],
@@ -956,7 +956,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -965,14 +965,14 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
             "default": 0.05
           },
           "log_base": {
-            "name": "base of log transformation",
+            "name": "Base of log transformation",
             "type": "categorical",
             "categories": [
               "None",
@@ -1016,7 +1016,7 @@
       },
       "linear_model": {
         "name": "linear model",
-        "description": "A function to fit a linear model using Ordinary Least Squares for each Protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
+        "description": "A function to fit a linear model using Ordinary Least Squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing.",
         "parameters": {
           "intensity_df": {
             "name": "Input Dataframe",
@@ -1027,7 +1027,7 @@
             ]
           },
           "multiple_testing_correction_method": {
-            "name": "Multiple Testing Correction Method:",
+            "name": "Multiple testing correction method:",
             "type": "categorical",
             "categories": [
               "Benjamini-Hochberg",
@@ -1036,14 +1036,14 @@
             "default": "Benjamini-Hochberg"
           },
           "alpha": {
-            "name": "Error Rate (alpha)",
+            "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
             "max": 1,
             "default": 0.05
           },
           "log_base": {
-            "name": "base of log transformation",
+            "name": "Base of log transformation",
             "type": "categorical",
             "categories": [
               "None",
@@ -1122,7 +1122,7 @@
             ]
           },
           "proteins_of_interest_input": {
-            "name": "Proteins of Interest",
+            "name": "proteins of interest df to highlight in plot",
             "type": "named_output",
             "default": [
               null,
