@@ -97,6 +97,7 @@ def exists_message(messages, msg):
     """
     return any(message == msg for message in messages)
 
+
 def name_to_title(step: str) -> str:
     """
     Returns a name in title format. Exceptions where the .title() method is not enough are handled here.
@@ -106,4 +107,3 @@ def name_to_title(step: str) -> str:
     name = re.sub(r"(ms)", "MS", name, flags=re.IGNORECASE)
 
     return name
-n
