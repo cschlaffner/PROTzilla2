@@ -644,6 +644,7 @@ def results_exist(run: Run) -> bool:
         return run.calculated_method is not None or (run.step == "plot" and run.plots)
     return True
 
+
 def results_exist_json(request, run_name):
     """
     Checks if the results of the run exist. This is used to determine if the Next button

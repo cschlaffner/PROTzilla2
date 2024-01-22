@@ -13,7 +13,10 @@ sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
 from protzilla.utilities import name_to_title
-from protzilla.workflow_helper import get_workflow_default_param_value, is_last_step_in_section
+from protzilla.workflow_helper import (
+    get_workflow_default_param_value,
+    is_last_step_in_section,
+)
 from ui.runs.views_helper import get_displayed_steps
 
 
@@ -296,9 +299,7 @@ def make_displayed_history(run: Run) -> str:
 
 
 def make_name_field(
-    allow_next: bool,
-    run: Run, end_of_run: bool,
-    form: str = "runs_next"
+    allow_next: bool, run: Run, end_of_run: bool, form: str = "runs_next"
 ) -> str:
     """
     Generates the html for the field that allows to name the output of the
@@ -322,15 +323,15 @@ def make_name_field(
     )
 
     if is_last_step_in_section(
-        run.workflow_config,
-        run.section,
-        run.step_index_in_current_section()
+        run.workflow_config, run.section, run.step_index_in_current_section()
     ):
-        if not output_name and 'output_name' in run.workflow_meta[run.section]:
+        if not output_name and "output_name" in run.workflow_meta[run.section]:
             output_name = run.workflow_meta[run.section]["output_name"]
     else:
-        if ('output_name' in run.workflow_meta[run.section] and
-           output_name == run.workflow_meta[run.section]["output_name"]):
+        if (
+            "output_name" in run.workflow_meta[run.section]
+            and output_name == run.workflow_meta[run.section]["output_name"]
+        ):
             output_name = ""
 
     if not output_name:
