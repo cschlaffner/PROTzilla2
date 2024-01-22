@@ -25,7 +25,12 @@ from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.utilities import clean_uniprot_id, get_memory_usage, unique_justseen
+from protzilla.utilities import (
+    clean_uniprot_id,
+    get_memory_usage,
+    name_to_title,
+    unique_justseen,
+)
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -81,7 +86,6 @@ def detail(request, run_name):
         active_runs[run_name] = Run.continue_existing(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
-    allow_next = run.calculated_method is not None or (run.step == "plot" and run.plots)
     end_of_run = not step
     description = run.workflow_meta[section][step][method]["description"]
 
@@ -124,14 +128,14 @@ def detail(request, run_name):
             run_name=run_name,
             section=section,
             step=step,
-            display_name=f"{run.step.replace('_', ' ').title()}",
+            display_name=f"{name_to_title(run.step)}",
             displayed_history=make_displayed_history(run),
             method_dropdown=make_method_dropdown(run, section, step, method),
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(allow_next, "runs_next", run, end_of_run),
+            name_field=make_name_field(results_exist(run), run, end_of_run),
             current_plots=current_plots,
-            show_next=allow_next,
+            results_exist=results_exist(run),
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
@@ -172,9 +176,8 @@ def change_method(request, run_name):
     section, step, _ = run.current_workflow_location()
     run.update_workflow_config([], update_params=False)
 
-    current_fields = make_current_fields(run, section, step, run.method)
-    plot_fields = make_plot_fields(run, section, step, run.method)
-    description = run.workflow_meta[section][step][run.method]["description"]
+    current_fields = make_current_fields(run, run.section, run.step, run.method)
+    plot_fields = make_plot_fields(run, run.section, run.step, run.method)
     return JsonResponse(
         dict(
             parameters=render_to_string(
@@ -185,7 +188,6 @@ def change_method(request, run_name):
                 "runs/fields.html",
                 context=dict(fields=plot_fields),
             ),
-            description=description,
         ),
         safe=False,
     )
@@ -626,7 +628,23 @@ def add_name(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
-def results_exist(request, run_name):
+def results_exist(run: Run) -> bool:
+    """
+    Checks if the last step has produced valid results.
+
+    :param run: the run to check
+
+    :return: True if the results are valid, False otherwise
+    """
+    if run.section == "importing":
+        return run.result_df is not None or (run.step == "plot" and run.plots)
+    if run.section == "data_preprocessing":
+        return run.result_df is not None or (run.step == "plot" and run.plots)
+    if run.section == "data_analysis" or run.section == "data_integration":
+        return run.calculated_method is not None or (run.step == "plot" and run.plots)
+    return True
+
+def results_exist_json(request, run_name):
     """
     Checks if the results of the run exist. This is used to determine if the Next button
     should be enabled or not.
@@ -640,7 +658,7 @@ def results_exist(request, run_name):
     :rtype: JsonResponse
     """
     run = active_runs[run_name]
-    return JsonResponse(dict(results_exist=run.result_df is not None))
+    return JsonResponse(dict(results_exist=results_exist(run)))
 
 
 def all_button_parameters(request, run_name):
