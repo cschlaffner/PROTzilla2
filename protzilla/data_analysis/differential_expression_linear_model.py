@@ -4,9 +4,20 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from protzilla.utilities import default_intensity_column
+from protzilla.data_preprocessing.transformation import by_log
+from protzilla.utilities import default_intensity_column, exists_message
 
-from .differential_expression_helper import apply_multiple_testing_correction
+from .differential_expression_helper import (
+    INVALID_PROTEINGROUP_DATA,
+    _map_log_base,
+    apply_multiple_testing_correction,
+)
+
+# messages that are used to inform the user about the analysis
+LOG_TRANSFORMATION_MESSAGE = {
+    "level": logging.INFO,
+    "msg": "Because the data was not log-transformed, it was log2-transformed for the analysis. If this is incorrect, please select the correct log base.",
+}
 
 
 def linear_model(
@@ -17,8 +28,8 @@ def linear_model(
     group2: str,
     multiple_testing_correction_method: str,
     alpha: float,
-    fc_threshold: float,
-    intensity_name=None,
+    log_base: str = None,
+    intensity_name: str = None,
 ) -> dict:
     """
     A function to fit a linear model using Ordinary Least Squares for each Protein.
@@ -33,7 +44,7 @@ def linear_model(
     :param group2: the name of the second group for the linear model
     :param multiple_testing_correction_method: the method for multiple testing correction
     :param alpha: the alpha value for the linear model
-    :param fc_threshold: the fold change threshold
+    :param log_base: in case the data was previously log transformed this parameter contains the base as a string
     :param intensity_name: name of the column containing the protein group intensities
 
     :return: a dataframe in typical protzilla long format with the differentially expressed
@@ -67,10 +78,17 @@ def linear_model(
         on="Sample",
         copy=False,
     )
+
+    log_base = _map_log_base(log_base)
+    if log_base == None:
+        # if the data is not log-transformed, we need to do so first for the analysis
+        intensity_df, _ = by_log(intensity_df, log_base="log2")
+        messages.append(LOG_TRANSFORMATION_MESSAGE)
+        log_base = "log2"
+
     proteins = intensity_df.loc[:, "Protein ID"].unique()
     p_values = []
     valid_protein_groups = []
-    fold_changes = []
     log2_fold_changes = []
     intensity_name = default_intensity_column(intensity_df, intensity_name)
     for protein in proteins:
@@ -89,21 +107,23 @@ def linear_model(
             results = model.fit()
             group1_avg = protein_df[protein_df[grouping] == -1][intensity_name].mean()
             group2_avg = protein_df[protein_df[grouping] == 1][intensity_name].mean()
-            fold_change = group2_avg / group1_avg
-            log2_fold_change = np.log2(fold_change)
+
+            log2_fold_change = None
+            if log_base == 2:
+                log2_fold_change = group2_avg - group1_avg
+            elif log_base == 10:
+                log2_fold_change = (group2_avg - group1_avg) / np.log10(2)
+            else:
+                raise ValueError("Invalid log base in linear model. Contact the devs.")
 
             valid_protein_groups.append(protein)
             p_values.append(results.pvalues[grouping])
-            fold_changes.append(fold_change)
             log2_fold_changes.append(log2_fold_change)
-        elif not any(message["level"] == logging.WARNING for message in messages):
-            messages.append(
-                {
-                    "level": logging.WARNING,
-                    "msg": "Due do missing or identical values, the p-values for some protein groups could not be calculated. These groups were omitted from the analysis. "
-                    "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
-                }
-            )
+        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA):
+            messages.append(INVALID_PROTEINGROUP_DATA)
+        else:
+            # if the protein has a NaN value in a sample, we just skip it
+            pass
 
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
@@ -116,35 +136,35 @@ def linear_model(
         columns=["Protein ID", "corrected_p_value"],
     )
 
-    fold_change_df = pd.DataFrame(
-        list(zip(valid_protein_groups, fold_changes)),
-        columns=["Protein ID", "fold_change"],
-    )
-
     log2_fold_change_df = pd.DataFrame(
         list(zip(valid_protein_groups, log2_fold_changes)),
         columns=["Protein ID", "log2_fold_change"],
     )
+    dataframes = [corrected_p_values_df, log2_fold_change_df]
+
+    for df in dataframes:
+        intensity_df = pd.merge(intensity_df, df, on="Protein ID", copy=False)
 
     differentially_expressed_proteins = [
         protein
         for protein, p, fc in zip(
             valid_protein_groups, corrected_p_values, log2_fold_changes
         )
-        if p < corrected_alpha and abs(fc) > fc_threshold
     ]
     differentially_expressed_proteins_df = intensity_df.loc[
         intensity_df["Protein ID"].isin(differentially_expressed_proteins)
+    ]
+    significant_proteins_df = differentially_expressed_proteins_df[
+        differentially_expressed_proteins_df["corrected_p_value"] <= corrected_alpha
     ]
 
     filtered_proteins = list(set(proteins) - set(valid_protein_groups))
 
     return dict(
         differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        significant_proteins_df=significant_proteins_df,
         corrected_p_values_df=corrected_p_values_df,
-        fold_change_df=fold_change_df,
         log2_fold_change_df=log2_fold_change_df,
-        fc_threshold=fc_threshold,
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
         messages=messages,

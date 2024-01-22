@@ -1,3 +1,4 @@
+import logging
 import math
 
 from statsmodels.stats.multitest import multipletests
@@ -36,3 +37,15 @@ def apply_multiple_testing_correction(
     if method == "Bonferroni":
         return correction[1], correction[3]
     return correction[1], correction[3]
+
+
+def _map_log_base(log_base):
+    log_base_mapping = {"log2": 2, "log10": 10, "None": None}
+    return log_base_mapping.get(log_base, None)
+
+
+INVALID_PROTEINGROUP_DATA = {
+    "level": logging.WARNING,
+    "msg": "Due do missing or identical values, the p-values for some protein groups could not be calculated. These groups were omitted from the analysis. "
+    "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
+}

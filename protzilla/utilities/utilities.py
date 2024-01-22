@@ -80,3 +80,18 @@ def default_intensity_column(
         "No intensity column name provided and no default intensity column could be determined."
         "Please provide the intensity column name manually to the function call."
     )
+
+
+def exists_message(messages, msg):
+    """
+    Checks if a message exists in a list of messages.
+
+    :param messages: a list of messages
+    :type messages: list
+    :param msg: the message to check
+    :type msg: dict
+
+    :return: True if the message exists, False otherwise
+    :rtype: bool
+    """
+    return any(message == msg for message in messages)

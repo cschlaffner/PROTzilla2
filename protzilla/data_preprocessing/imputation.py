@@ -218,7 +218,7 @@ def by_min_per_protein(
     # Turn the wide format into the long format
     imputed_df = wide_to_long(transformed_df, intensity_df)
 
-    return flag_invalid_values(imputed_df, list)
+    return flag_invalid_values(imputed_df, [])
 
 
 def by_min_per_dataset(
