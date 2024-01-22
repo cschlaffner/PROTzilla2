@@ -84,7 +84,7 @@ def linear_model(
         # if the data is not log-transformed, we need to do so first for the analysis
         intensity_df, _ = by_log(intensity_df, log_base="log2")
         messages.append(LOG_TRANSFORMATION_MESSAGE)
-        log_base = "log2"
+        log_base = 2
 
     proteins = intensity_df.loc[:, "Protein ID"].unique()
     p_values = []
