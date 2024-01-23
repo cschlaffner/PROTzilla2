@@ -190,11 +190,16 @@ class Run:
                     self.df, **call_parameters
                 )
             except Exception as e:
-                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issues."
+                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
                 self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
         else:
-            self.result_df = None
-            self.current_out = method_callable(**call_parameters)
+            try:
+                self.result_df = None
+                self.current_out = method_callable(**call_parameters)
+            except Exception as e:
+                self.result_df = None
+                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+                self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
@@ -243,7 +248,7 @@ class Run:
             self.current_messages = []
         except Exception as e:
             self.plots = []
-            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issues."
+            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
             self.current_messages = [dict(level=logging.ERROR, msg=msg)]
 
     def create_step_plot(self, method_callable, parameters):
@@ -252,11 +257,20 @@ class Run:
         call_parameters = self.exchange_named_outputs_with_data(parameters)
         if "proteins_of_interest_input" in call_parameters:
             del call_parameters["proteins_of_interest_input"]
-        self.plots = method_callable(**call_parameters)
-        self.result_df = self.df
-        self.current_out = {}
-        self.current_parameters[self.method] = parameters
-        self.calculated_method = self.method
+        try:
+            self.plots = method_callable(**call_parameters)
+            self.result_df = self.df
+            self.current_out = {}
+            self.current_parameters[self.method] = parameters
+            self.calculated_method = self.method
+        except Exception as e:
+            self.plots = []
+            self.result_df = None
+            self.current_out = {}
+            self.current_parameters.pop(self.method, None)
+            self.calculated_method = None
+            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+            self.current_messages = [dict(level=logging.ERROR, msg=msg)]
 
     def insert_step(self, step_to_be_inserted, section, method, index):
         step_dict = dict(name=step_to_be_inserted, method=method, parameters={})
