@@ -433,10 +433,12 @@ def next_(request, run_name):
     run.next_step(request.POST["name"])
 
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-    if run.section == "<hier könnte ihre section stehen>" and run.step == "<hier könnte ihr step stehen>":
+    if run.section == "data_integration" and run.step == "enrichment_analysis":
         message = {
             'level': 30,
-            'msg': '<hier könnte ihr Disclaimer stehen>'
+            'msg': 'Warning! To select a column name, you must first change'
+                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
+                   'back again to select values in the field "Column name...".'
         }
         display_message(message, request)
 
