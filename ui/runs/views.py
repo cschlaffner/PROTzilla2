@@ -318,6 +318,8 @@ def change_field(request, run_name):
                 param_dict["categories"] = categories
             elif isinstance(protein_iterable, pd.Series):
                 param_dict["categories"] = protein_iterable.index
+            elif isinstance(protein_iterable, dict):
+                param_dict["categories"] = protein_iterable.keys()
             else:
                 param_dict["categories"] = []
                 logger.warning(
