@@ -574,10 +574,9 @@ def plot(request, run_name):
 
     run.create_plot_from_current_location(parameters)
 
-    for index, p in enumerate(run.plots):
-        if isinstance(p, dict) and "messages" in p:
-            for message in run.plots[index]["messages"]:
-                display_message(message, request)
+    for index, message in enumerate(run.current_messages):
+        if isinstance(message, dict):
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

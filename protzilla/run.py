@@ -134,6 +134,7 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
+        self.current_messages = []
         self.calculated_method = None
         self.current_parameters = {}
         self.current_plot_parameters = {}
@@ -235,9 +236,15 @@ class Run:
             self.current_plot_parameters = {}  # expected dict for all_button_parameters
 
     def create_plot(self, method_callable, parameters):
-        self.plots = method_callable(
-            self.df, self.result_df, self.current_out, **parameters
-        )
+        try:
+            self.plots = method_callable(
+                self.df, self.result_df, self.current_out, **parameters
+            )
+            self.current_messages = []
+        except Exception as e:
+            self.plots = []
+            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issues."
+            self.current_messages = [dict(level=logging.ERROR, msg=msg)]
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
