@@ -44,8 +44,12 @@ def _map_log_base(log_base):
     return log_base_mapping.get(log_base, None)
 
 
-INVALID_PROTEINGROUP_DATA = {
+INVALID_PROTEINGROUP_DATA_MSG = {
     "level": logging.WARNING,
     "msg": "Due do missing or identical values, the p-values for some protein groups could not be calculated. These groups were omitted from the analysis. "
     "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
+}
+LOG_TRANSFORMATION_MESSAGE_MSG = {
+    "level": logging.INFO,
+    "msg": "Because the data was not log-transformed, it was log2-transformed for the analysis. If this is incorrect, please select the correct log base.",
 }

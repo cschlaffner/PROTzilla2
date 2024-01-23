@@ -1,13 +1,16 @@
 import logging
-import math
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
+from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
 
 from .differential_expression_helper import (
-    INVALID_PROTEINGROUP_DATA,
+    INVALID_PROTEINGROUP_DATA_MSG,
+    LOG_TRANSFORMATION_MESSAGE_MSG,
+    _map_log_base,
     apply_multiple_testing_correction,
 )
 
@@ -18,6 +21,7 @@ def anova(
     multiple_testing_correction_method: str,
     alpha: float,
     grouping: str,
+    log_base: str = None,
     selected_groups: list = None,
     intensity_name: str = None,
 ) -> dict:
@@ -42,6 +46,7 @@ def anova(
         :param selected_groups: groups to test against each other
         :param multiple_testing_correction_method: the method for multiple testing correction
         :param alpha: the alpha value for anova
+        :param log_base: in case the data was previously log transformed this parameter contains the base as a string
         :param intensity_name: name of the column containing the protein group intensities
         :return: a dict containing
     - a df differentially_expressed_proteins_df in typical protzilla long format containing the anova results
@@ -87,6 +92,12 @@ def anova(
         on="Sample",
         copy=False,
     )
+    log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
+    if log_base == None:
+        # if the data is not log-transformed, we need to do so first for the analysis
+        intensity_df, _ = by_log(intensity_df, log_base="log2")
+        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
+        log_base = 2
 
     # Perform ANOVA and calculate p-values for each protein
     proteins = intensity_df["Protein ID"].unique()
@@ -101,11 +112,11 @@ def anova(
                 protein_df[protein_df[grouping] == group][intensity_name].to_numpy()
             )
         p = stats.f_oneway(*all_group_intensities)[1]
-        if not math.isnan(p):
+        if not np.isnan(p):
             p_values.append(p)
             valid_protein_groups.append(protein)
-        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA):
-            messages.append(INVALID_PROTEINGROUP_DATA)
+        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
+            messages.append(INVALID_PROTEINGROUP_DATA_MSG)
 
     # Apply multiple testing correction and create a dataframe with corrected p-values
     corrected_p_values, corrected_alpha = apply_multiple_testing_correction(

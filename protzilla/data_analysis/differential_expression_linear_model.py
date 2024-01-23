@@ -8,16 +8,11 @@ from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
 
 from .differential_expression_helper import (
-    INVALID_PROTEINGROUP_DATA,
+    INVALID_PROTEINGROUP_DATA_MSG,
+    LOG_TRANSFORMATION_MESSAGE_MSG,
     _map_log_base,
     apply_multiple_testing_correction,
 )
-
-# messages that are used to inform the user about the analysis
-LOG_TRANSFORMATION_MESSAGE = {
-    "level": logging.INFO,
-    "msg": "Because the data was not log-transformed, it was log2-transformed for the analysis. If this is incorrect, please select the correct log base.",
-}
 
 
 def linear_model(
@@ -79,11 +74,11 @@ def linear_model(
         copy=False,
     )
 
-    log_base = _map_log_base(log_base)
+    log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
     if log_base == None:
         # if the data is not log-transformed, we need to do so first for the analysis
         intensity_df, _ = by_log(intensity_df, log_base="log2")
-        messages.append(LOG_TRANSFORMATION_MESSAGE)
+        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
         log_base = 2
 
     proteins = intensity_df.loc[:, "Protein ID"].unique()
@@ -114,13 +109,13 @@ def linear_model(
             elif log_base == 10:
                 log2_fold_change = (group2_avg - group1_avg) / np.log10(2)
             else:
-                raise ValueError("Invalid log base in linear model. Contact the devs.")
+                raise ValueError(f"Invalid log base {log_base}. Contact the devs.")
 
             valid_protein_groups.append(protein)
             p_values.append(results.pvalues[grouping])
             log2_fold_changes.append(log2_fold_change)
-        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA):
-            messages.append(INVALID_PROTEINGROUP_DATA)
+        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
+            messages.append(INVALID_PROTEINGROUP_DATA_MSG)
         else:
             # if the protein has a NaN value in a sample, we just skip it
             pass

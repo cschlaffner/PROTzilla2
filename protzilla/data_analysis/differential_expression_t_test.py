@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
 
 from .differential_expression_helper import (
-    INVALID_PROTEINGROUP_DATA,
+    INVALID_PROTEINGROUP_DATA_MSG,
+    LOG_TRANSFORMATION_MESSAGE_MSG,
     _map_log_base,
     apply_multiple_testing_correction,
 )
@@ -87,6 +89,14 @@ def t_test(
         on="Sample",
         copy=False,
     )
+
+    log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
+    if log_base == None:
+        # if the data is not log-transformed, we need to do so first for the analysis
+        intensity_df, _ = by_log(intensity_df, log_base="log2")
+        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
+        log_base = 2
+
     proteins = intensity_df["Protein ID"].unique()
     p_values = []
     valid_protein_groups = []
@@ -110,16 +120,18 @@ def t_test(
                     np.mean(group2_intensities) - np.mean(group1_intensities)
                 ) / np.log10(2)
             else:
-                log2_fold_change = np.log2(np.mean(group2_intensities)) - np.log2(
-                    np.mean(group1_intensities)
-                )
+                raise ValueError(f"Invalid log base {log_base}. Contact the devs.")
 
             valid_protein_groups.append(protein)
             p_values.append(p)
             t_statistic.append(t)
             log2_fold_changes.append(log2_fold_change)
-        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA):
-            messages.append(INVALID_PROTEINGROUP_DATA)
+        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
+            messages.append(INVALID_PROTEINGROUP_DATA_MSG)
+        else:
+            # if the protein has a NaN value in a sample, we just skip it
+            pass
+
     (corrected_p_values, corrected_alpha) = apply_multiple_testing_correction(
         p_values=p_values,
         method=multiple_testing_correction_method,

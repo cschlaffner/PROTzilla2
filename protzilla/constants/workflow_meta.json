@@ -918,6 +918,17 @@
             "max": 1,
             "default": 0.05
           },
+          "log_base": {
+            "name": "Base of log transformation",
+            "type": "categorical",
+            "categories": [
+              "None",
+              "log2",
+              "log10"
+            ],
+            "default": "None"
+
+          },
           "grouping": {
             "name": "Grouping:",
             "type": "categorical",
