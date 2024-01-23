@@ -189,7 +189,7 @@ class Run:
                     self.df, **call_parameters
                 )
             except Exception as e:
-                msg = f"An error occurred while calculating the step: {e.__class__.__name__} {e}. Please check your parameters."
+                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issues."
                 self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
         else:
             self.result_df = None
@@ -202,7 +202,7 @@ class Run:
         if "messages" in self.current_out:
             # error handling for CLI
             log_messages(self.current_out["messages"])
-            if self.current_out["messages"][-1]["level"] == 40:
+            if any(message["level"] == 40 for message in self.current_out["messages"]):
                 # method was not calculated successfully so the parameters are reset
                 self.result_df = None
                 self.current_parameters.pop(self.method, None)
