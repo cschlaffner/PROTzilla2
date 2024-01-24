@@ -120,3 +120,13 @@ def display_message(message: dict, request):
         lvl_to_css_class[message["level"]],
     )
 
+def clear_messages(request):
+    """
+    Clears all messages from the request object in the frontend.
+
+    :param request: request object
+    """
+    storage = messages.get_messages(request)
+    for message in messages.get_messages(request):
+        pass
+    storage.used = True

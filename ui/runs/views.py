@@ -42,7 +42,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post, display_message
+from ui.runs.views_helper import parameters_from_post, display_message, clear_messages
 
 active_runs = {}
 
@@ -88,7 +88,25 @@ def detail(request, run_name):
     section, step, method = run.current_run_location()
     end_of_run = not step
     description = run.workflow_meta[section][step][method]["description"]
+    # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
+   # clear_messages(request)
+    if run.section == "data_integration" and run.step == "enrichment_analysis":
+        message = {
+            'level': 30,
+            'msg': 'To select a column name, you have to first change'
+                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
+                   'back to select values in the field "Column name...".'
+        }
+        display_message(message, request)
+    elif run.section == "data_analysis" and run.method == "anova":
+        message = {
+            'level': 30,
+            'msg': 'Please select one or more groups before calculation'
+        }
+        display_message(message, request)
+    clear_messages(request)
+    #print(message)
     current_plots = []
     for plot in run.plots:
         if isinstance(plot, bytes):
@@ -435,14 +453,14 @@ def next_(request, run_name):
     run.next_step(request.POST["name"])
 
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-    if run.section == "data_integration" and run.step == "enrichment_analysis":
-        message = {
-            'level': 30,
-            'msg': 'Warning! To select a column name, you must first change'
-                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
-                   'back again to select values in the field "Column name...".'
-        }
-        display_message(message, request)
+    #if run.section == "data_integration" and run.step == "enrichment_analysis":
+     #   message = {
+      #      'level': 30,
+       #     'msg': 'Warning! To select a column name, you must first change'
+        #           ' the entry in the "Dataframe with protein IDs..." field and then change it '
+         #          'back again to select values in the field "Column name...".'
+       # }
+       # display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
