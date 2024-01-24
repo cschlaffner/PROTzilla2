@@ -190,7 +190,7 @@ def diann_import_intensity_df():
 
 def test_max_quant_import_different_intensity_names():
     for intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]:
-        df, msg = ms_data_import.max_quant_import(
+        df, out, msg = ms_data_import.max_quant_import(
             _=None,
             file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small.tsv",
             intensity_name=intensity_name,
@@ -200,35 +200,35 @@ def test_max_quant_import_different_intensity_names():
 
 
 def test_max_quant_import_file_not_exist():
-    df, msg = ms_data_import.max_quant_import(
+    df, out, msg = ms_data_import.max_quant_import(
         _=None,
         file_path="non_existent_file_path",
         intensity_name="Intensity",
     )
     assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "found" in msg["messages"][0]["msg"].lower()
+    assert msg[0]["level"] == logging.ERROR
+    assert "found" in msg[0]["msg"].lower()
 
 
 def test_max_quant_import_no_protein_ids_column():
-    df, msg = ms_data_import.max_quant_import(
+    df, out, msg = ms_data_import.max_quant_import(
         _=None,
         file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_noproteincolumn.tsv",
         intensity_name="Intensity",
     )
     assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "Protein IDs" in msg["messages"][0]["msg"]
+    assert msg[0]["level"] == logging.ERROR
+    assert "Protein IDs" in msg[0]["msg"]
 
 
 def test_max_quant_import_invalid_data():
-    df, msg = ms_data_import.max_quant_import(
+    df, out, msg = ms_data_import.max_quant_import(
         _=None,
         file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_invalid.tsv",
         intensity_name="Intensity",
     )
     assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
+    assert msg[0]["level"] == logging.ERROR
 
 
 @pytest.mark.parametrize(
@@ -246,7 +246,7 @@ def test_max_quant_import_invalid_data():
     ],
 )
 def test_ms_fragger_import(intensity_name):
-    test_intensity_df, _ = ms_data_import.ms_fragger_import(
+    test_intensity_df, _, _ = ms_data_import.ms_fragger_import(
         _=None,
         file_path=f"{PROJECT_PATH}/tests/combined_protein_method_small_cut.tsv",
         intensity_name=intensity_name,
@@ -262,7 +262,7 @@ def test_ms_fragger_import(intensity_name):
 
 
 def test_diann_import():
-    test_intensity_df, _ = ms_data_import.diann_import(
+    test_intensity_df, _, _ = ms_data_import.diann_import(
         _=None,
         file_path=f"{PROJECT_PATH}/tests/diann_intensities.tsv",
     )
@@ -276,7 +276,7 @@ def test_diann_import():
 
 
 def test_filter_rev_con():
-    intensity_df, other = ms_data_import.max_quant_import(
+    intensity_df, other, messages = ms_data_import.max_quant_import(
         _=None,
         file_path=PROJECT_PATH / "tests" / "proteinGroups_small_cut.txt",
         intensity_name="Intensity",
@@ -312,7 +312,7 @@ def test_transform_and_clean():
         ["C", "Q11111", np.nan],
     ]
     df = pd.DataFrame(data, columns=columns)
-    res, other = ms_data_import.transform_and_clean(
+    res, other, messages = ms_data_import.transform_and_clean(
         df, "intensity", map_to_uniprot=False
     )
     expected_df = pd.DataFrame(expected_output, columns=out_col)

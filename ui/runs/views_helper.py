@@ -104,6 +104,12 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
 
 def display_message(message: dict, request):
+    """
+    Displays a message in the frontend.
+
+    :param message: dict with keys "level", "msg" and optionally "trace"
+    :param request: request object
+    """
 
     trace = build_trace_alert(message["trace"]) if "trace" in message else ""
 
@@ -120,3 +126,12 @@ def display_message(message: dict, request):
         lvl_to_css_class[message["level"]],
     )
 
+
+def clear_messages(request):
+    """
+    Clears all messages from the request object in the frontend.
+
+    :param request: request object
+    """
+    for message in messages.get_messages(request):
+        pass

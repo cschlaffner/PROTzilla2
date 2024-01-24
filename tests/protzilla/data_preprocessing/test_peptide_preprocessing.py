@@ -32,13 +32,13 @@ def filtered_peptides_list():
 
 
 def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
-    _, import_out = peptide_import.peptide_import(
+    _, import_out, _ = peptide_import.peptide_import(
         ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
         intensity_name="Intensity",
     )
     threshold = 0.0014
-    _, out = by_pep_value(
+    _, out, _ = by_pep_value(
         intensity_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
     )
 

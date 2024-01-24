@@ -61,7 +61,7 @@ def peptide_df(intensity_name):
 
 @pytest.mark.parametrize("intensity_name", ["LFQ intensity", "Intensity"])
 def test_peptide_import(intensity_name):
-    _, out = peptide_import.peptide_import(
+    _, out, _ = peptide_import.peptide_import(
         ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
         intensity_name=intensity_name,
@@ -73,7 +73,7 @@ def test_peptide_import(intensity_name):
 
 
 def test_peptide_import_ibaq():
-    _, out = peptide_import.peptide_import(
+    _, out, _ = peptide_import.peptide_import(
         ms_df=None,
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
         intensity_name="iBAQ",

@@ -11,7 +11,7 @@ from protzilla.data_integration.database_query import biomart_query
 
 def max_quant_import(
     _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
-) -> (pd.DataFrame, dict):
+) -> (pd.DataFrame, dict, list[dict]):
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
         df = pd.read_csv(
@@ -26,7 +26,7 @@ def max_quant_import(
 
         if intensity_df.empty:
             msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again or verify your file."
-            return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+            return None, {}, [dict(level=logging.ERROR, msg=msg)]
 
         intensity_df.columns = [
             c[len(intensity_name) + 1 :] for c in intensity_df.columns
@@ -36,12 +36,12 @@ def max_quant_import(
 
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid Max Quant file."
-        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+        return None, {}, [dict(level=logging.ERROR, msg=msg)]
 
 
 def ms_fragger_import(
     _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
-) -> (pd.DataFrame, dict):
+) -> (pd.DataFrame, dict, list[dict]):
     assert intensity_name in [
         "Intensity",
         "MaxLFQ Total Intensity",
@@ -87,7 +87,7 @@ def ms_fragger_import(
         return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid MS Fragger file."
-        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+        return None, dict(), [dict(level=logging.ERROR, msg=msg)]
 
 
 def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
@@ -116,12 +116,12 @@ def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
         return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid DIA-NN MS file."
-        return None, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+        return None, dict(), [dict(level=logging.ERROR, msg=msg)]
 
 
 def transform_and_clean(
     df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool
-) -> (pd.DataFrame, dict):
+) -> (pd.DataFrame, dict, list[dict]):
     """
     Transforms a dataframe that is read from a file in wide format into long format,
     removing contaminant groups, and processing protein ids, removing invalid ones
@@ -164,10 +164,11 @@ def transform_and_clean(
     molten.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     msg = f"Successfully imported {len(df)} protein groups for {int(len(molten)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
-    return molten, dict(
-        contaminants=contaminants,
-        filtered_proteins=filtered_proteins,
-        messages=[dict(level=logging.INFO, msg=msg)],
+    return (
+        molten,
+        dict(contaminants=contaminants,
+             filtered_proteins=filtered_proteins),
+        [dict(level=logging.INFO, msg=msg)],
     )
 
 

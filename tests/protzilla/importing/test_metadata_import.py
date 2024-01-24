@@ -85,15 +85,15 @@ def test_metadata_column_assignment():
         metadata_unknown_column="Sample_renamed",
     )
     assert run.metadata.columns[0] == "Sample"
-    df, out = metadata_import.metadata_column_assignment(
+    df, out, messages = metadata_import.metadata_column_assignment(
         df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="Group",
         metadata_unknown_column="Sample",
     )
-    assert out["messages"][0]["level"] == logging.ERROR
-    assert out["messages"][0]["msg"]
-    df_new, out_new = metadata_import.metadata_column_assignment(
+    assert messages[0]["level"] == logging.ERROR
+    assert messages[0]["msg"]
+    df_new, out_new, messages_new = metadata_import.metadata_column_assignment(
         df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="",
