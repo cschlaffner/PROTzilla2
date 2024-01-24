@@ -84,6 +84,8 @@ def diff_expr_test_data():
 #         current_out["log2_fold_change_df"],
 #         test_fc_threshold,
 #         current_out["corrected_alpha"],
+#         current_out["group1"],
+#         current_out["group2"],
 #     )
 #     if show_figures:
 #         fig.show()
@@ -130,6 +132,8 @@ def diff_expr_test_data():
 #         current_out["log2_fold_change_df"],
 #         test_fc_threshold,
 #         current_out["corrected_alpha"],
+#         current_out["group1"],
+#         current_out["group2"]
 #     )
 #     if show_figures:
 #         fig.show()
@@ -159,6 +163,16 @@ def diff_expr_test_data():
 #         == significant_proteins
 #     ).all()
 
+#    current_out = t_test(
+#        test_intensity_df,
+#        test_metadata_df,
+#        grouping="Group",
+#        group1="Group1",
+#        group2="Group2",
+#        multiple_testing_correction_method="Benjamini-Hochberg",
+#        alpha=test_alpha,
+#        fc_threshold=test_fc_threshold,
+#    )
 
 # def test_differential_expression_t_test_with_log_data(show_figures):
 #     test_intensity_list = (
@@ -287,6 +301,8 @@ def diff_expr_test_data():
 #         current_out["log2_fold_change_df"],
 #         current_out["fc_threshold"],
 #         current_out["corrected_alpha"],
+#          current_out["group1"],
+#          current_out["group2"]
 #     )
 #     if show_figures:
 #         fig.show()

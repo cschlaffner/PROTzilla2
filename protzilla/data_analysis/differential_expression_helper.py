@@ -51,5 +51,5 @@ INVALID_PROTEINGROUP_DATA_MSG = {
 }
 LOG_TRANSFORMATION_MESSAGE_MSG = {
     "level": logging.INFO,
-    "msg": "Because the data was not log-transformed, it was log2-transformed for the analysis. If this is incorrect, please select the correct log base.",
+    "msg": "Because the data was not log-transformed, it was log2-transformed for this analysis. If this is incorrect, please select the correct log base.",
 }

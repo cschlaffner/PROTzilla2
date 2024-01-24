@@ -58,7 +58,6 @@ def t_test(
     assert grouping in metadata_df.columns
     messages = []
     # User input handling
-    log_base = _map_log_base(log_base)
     unique_groups = metadata_df[grouping].unique()
     # Check if group1 is in unique_groups, if not assign the first unique group
     if group1 not in unique_groups:
@@ -183,4 +182,6 @@ def t_test(
         corrected_alpha=corrected_alpha,
         # filtered_proteins=filtered_proteins,
         messages=messages,
+        group1=group1,
+        group2=group2,
     )

@@ -70,6 +70,8 @@ def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=0,
         alpha=ttest_output["corrected_alpha"],
+        group1=ttest_output["group1"],
+        group2=ttest_output["group2"],
     )
     if show_figures:
         fig.show()
@@ -82,6 +84,8 @@ def test_plots_volcano_plot_multiple_annotations(ttest_output, show_figures):
         fc_threshold=0,
         alpha=0,
         proteins_of_interest=["Protein1", "Protein2"],
+        group1=ttest_output["group1"],
+        group2=ttest_output["group2"],
     )
     if show_figures:
         fig.show()
