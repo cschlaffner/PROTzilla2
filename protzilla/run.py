@@ -186,34 +186,33 @@ class Run:
 
         if self.section in ["importing", "data_preprocessing"]:
             try:
-                self.result_df, self.current_out, self.current_messages = method_callable(
+                self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
             except Exception as e:
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-                self.current_out = {}
-                self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+                self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
         else:
-            self.result_df = None
             try:
+                self.result_df = None
                 self.current_out = method_callable(**call_parameters)
             except Exception as e:
-                self.current_out = {}
+                self.result_df = None
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-                self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+                self.current_out = dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
 
-        # error handling for CLI
-        log_messages(self.current_messages)
-
-        if any(message["level"] == 40 for message in self.current_messages):
-            # method was not calculated successfully so the parameters are reset
-            self.result_df = None
-            self.current_parameters.pop(self.method, None)
-            self.calculated_method = None
+        if "messages" in self.current_out:
+            # error handling for CLI
+            log_messages(self.current_out["messages"])
+            if any(message["level"] == 40 for message in self.current_out["messages"]):
+                # method was not calculated successfully so the parameters are reset
+                self.result_df = None
+                self.current_parameters.pop(self.method, None)
+                self.calculated_method = None
 
 
     def calculate_and_next(
@@ -262,14 +261,12 @@ class Run:
             self.plots = method_callable(**call_parameters)
             self.result_df = self.df
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters[self.method] = parameters
             self.calculated_method = self.method
         except Exception as e:
             self.plots = []
             self.result_df = None
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
@@ -336,7 +333,6 @@ class Run:
                 parameters,
                 self.result_df,
                 self.current_out,
-                self.current_messages,
                 self.plots,
                 name=name,
             )
@@ -358,7 +354,6 @@ class Run:
             self.result_df = None
             self.calculated_method = None
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters = {}
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None
@@ -374,7 +369,6 @@ class Run:
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
         self.result_df = result_df
         self.current_out = popped_step.outputs
-        self.current_messages = popped_step.messages
         self.current_parameters = {self.method: popped_step.parameters}
         self.current_plot_parameters = {}
         # TODO: add plotted_for_parameter to History?

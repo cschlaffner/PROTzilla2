@@ -110,9 +110,8 @@ def detail(request, run_name):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-    show_table = (
-        run.current_out
-        and any(isinstance(v, pd.DataFrame) for v in run.current_out.values())
+    show_table = run.current_out and any(
+        isinstance(v, pd.DataFrame) for v in run.current_out.values()
     )
 
     show_protein_graph = (
@@ -543,8 +542,10 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_current_calculation_step(parameters)
 
-    for message in run.current_messages:
-        display_message(message, request)
+    result = run.current_out
+    if "messages" in result:
+        for message in result["messages"]:
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

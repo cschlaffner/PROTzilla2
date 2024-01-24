@@ -5,9 +5,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(
-        intensity_df: pd.DataFrame, log_base="log10"
-) -> tuple[pd.DataFrame, dict, list[dict]]:
+def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     """
     This function log-transforms intensity
     DataFrames. Supports log-transformation to the base
@@ -33,7 +31,7 @@ def by_log(
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
     else:
         raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
-    return transformed_df, dict(), []
+    return transformed_df, dict()
 
 
 def by_log_plot(df, result_df, out, graph_type, group_by):

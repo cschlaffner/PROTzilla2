@@ -302,7 +302,7 @@ def expected_df_by_ref_protein_normalisation():
 def test_normalisation_by_z_score(
     normalisation_df, expected_df_by_z_score_normalisation, show_figures
 ):
-    result_df, dropouts, messages = by_z_score(normalisation_df)
+    result_df, dropouts = by_z_score(normalisation_df)
 
     fig = by_z_score_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[0]
     if show_figures:
@@ -318,7 +318,7 @@ def test_normalisation_by_z_score(
 def test_normalisation_by_median(
     normalisation_df, expected_df_by_median_normalisation, show_figures
 ):
-    result_df, dropouts, messages = by_median(normalisation_df)
+    result_df, dropouts = by_median(normalisation_df)
 
     fig = by_median_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[0]
     if show_figures:
@@ -342,7 +342,7 @@ def test_normalisation_by_median_invalid_percentile(normalisation_df):
 def test_totalsum_normalisation(
     normalisation_df, expected_df_by_totalsum_normalisation, show_figures
 ):
-    result_df, dropouts, messages = by_totalsum(normalisation_df)
+    result_df, dropouts = by_totalsum(normalisation_df)
 
     fig = by_totalsum_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[
         0
@@ -366,7 +366,7 @@ def test_ref_protein_normalisation(
     expected_df = expected_df_by_ref_protein_normalisation[0]
     expected_dropped_samples = expected_df_by_ref_protein_normalisation[1]
 
-    (result_df, dropouts, messages) = by_reference_protein(
+    (result_df, dropouts) = by_reference_protein(
         normalisation_by_ref_protein_df, "ABC32"
     )
 
@@ -386,9 +386,9 @@ def test_ref_protein_normalisation(
 
 
 def test_ref_protein_missing(capsys, normalisation_by_ref_protein_df):
-    _, _, messages = by_reference_protein(
+    _, current_out = by_reference_protein(
         normalisation_by_ref_protein_df, "non_existing_Protein"
     )
 
-    assert messages
-    assert "The protein was not found" in messages[0]["msg"]
+    assert "messages" in current_out
+    assert "The protein was not found" in current_out["messages"][0]["msg"]

@@ -6,7 +6,7 @@ from protzilla.utilities import default_intensity_column
 
 def by_protein_intensity_sum(
     intensity_df: pd.DataFrame, deviation_threshold: float
-) -> tuple[pd.DataFrame, dict, list[dict]]:
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters samples based on the sum of the protein intensities.
 
@@ -27,15 +27,14 @@ def by_protein_intensity_sum(
             (median + deviation_threshold * sd),
         )
     ].index.tolist()
-    return (intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
-        dict(filtered_samples=filtered_samples_list),
-        [],
+    return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
+        filtered_samples=filtered_samples_list
     )
 
 
 def by_protein_count(
     intensity_df: pd.DataFrame, deviation_threshold: float
-) -> tuple[pd.DataFrame, dict, list[dict]]:
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters samples based on their deviation of amount of proteins with a non-nan value from
     the median across all samples.
@@ -61,16 +60,14 @@ def by_protein_count(
             (median + deviation_threshold * sd),
         )
     ].index.tolist()
-    return (
-        intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
-        dict(filtered_samples=filtered_samples_list),
-        [],
+    return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
+        filtered_samples=filtered_samples_list
     )
 
 
 def by_proteins_missing(
     intensity_df: pd.DataFrame, percentage: float
-) -> tuple[pd.DataFrame, dict, list[dict]]:
+) -> tuple[pd.DataFrame, dict]:
     """
     This function filters samples based on the amount of proteins with nan values, if the percentage of nan values
     is below a threshold (percentage).
@@ -91,10 +88,8 @@ def by_proteins_missing(
     filtered_samples_list = sample_protein_count[
         ~sample_protein_count.ge(total_protein_count * percentage)
     ].index.tolist()
-    return (
-        intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
-        dict(filtered_samples=filtered_samples_list),
-        [],
+    return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
+        filtered_samples=filtered_samples_list
     )
 
 
