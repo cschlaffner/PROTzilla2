@@ -117,14 +117,26 @@ def get_parameters(run, section, step, method):
 
 
 def log_message(level: int = 40, msg: str = "", trace: str = ""):
+    """
+    Logs a message to the console.
+
+    :param level: The logging level of the message. See https://docs.python.org/3/library/logging.html#logging-levels
+    :param msg: The message to log.
+    :param trace: The trace to log.
+    """
     log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
     if log_function:
         trace = f"\nTrace: {trace}" if trace != "" else ""
         log_function(f"{msg}{trace}")
 
 
-def log_messages(messages: dict = None):
+def log_messages(messages: list[dict] = None):
+    """
+    Logs a list of messages to the console.
+
+    :param messages: A list of messages to log, each message is a dict with the keys "level", "msg" and optional "trace".
+    """
     if messages is None:
-        messages = {}
+        messages = []
     for message in messages:
         log_message(message["level"], message["msg"], message["trace"] if "trace" in message else "")
