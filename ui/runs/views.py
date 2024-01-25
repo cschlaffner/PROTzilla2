@@ -7,7 +7,6 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from django.http import (
     FileResponse,
     HttpResponseBadRequest,
@@ -41,8 +40,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post
+from ui.runs.views_helper import display_message, parameters_from_post
 
 active_runs = {}
 
@@ -542,23 +540,8 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_current_calculation_step(parameters)
 
-    result = run.current_out
-    if "messages" in result:
-        for message in result["messages"]:
-            trace = build_trace_alert(message["trace"]) if "trace" in message else ""
-
-            # map error level to bootstrap css class
-            lvl_to_css_class = {
-                40: "alert-danger",
-                30: "alert-warning",
-                20: "alert-info",
-            }
-            messages.add_message(
-                request,
-                message["level"],
-                f"{message['msg']} {trace}",
-                lvl_to_css_class[message["level"]],
-            )
+    for message in run.current_messages:
+        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -587,25 +570,9 @@ def plot(request, run_name):
 
     run.create_plot_from_current_location(parameters)
 
-    for index, p in enumerate(run.plots):
-        if isinstance(p, dict) and "messages" in p:
-            for message in run.plots[index]["messages"]:
-                trace = (
-                    build_trace_alert(message["trace"]) if "trace" in message else ""
-                )
-
-                # map error level to bootstrap css class
-                lvl_to_css_class = {
-                    40: "alert-danger",
-                    30: "alert-warning",
-                    20: "alert-info",
-                }
-                messages.add_message(
-                    request,
-                    message["level"],
-                    f"{message['msg']} {trace}",
-                    lvl_to_css_class[message["level"]],
-                )
+    for index, message in enumerate(run.current_messages):
+        if isinstance(message, dict):
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
