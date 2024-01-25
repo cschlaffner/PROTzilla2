@@ -86,7 +86,7 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     end_of_run = not step
-    last_step = is_last_step(run.workflow_config, section, run.step_index)
+    last_step = is_last_step(run.workflow_config, run.step_index)
     description = run.workflow_meta[section][step][method]["description"]
 
     current_plots = []
