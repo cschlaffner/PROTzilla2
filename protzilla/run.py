@@ -186,9 +186,10 @@ class Run:
 
         if self.section in ["importing", "data_preprocessing"]:
             try:
-                self.result_df, self.current_out, self.current_messages = method_callable(
+                self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
+                self.current_messages = self.current_out.pop("messages", [])
             except Exception as e:
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
                 self.current_out = {}
@@ -197,6 +198,7 @@ class Run:
             self.result_df = None
             try:
                 self.current_out = method_callable(**call_parameters)
+                self.current_messages = self.current_out.pop("messages", [])
             except Exception as e:
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."

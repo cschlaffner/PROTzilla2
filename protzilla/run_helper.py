@@ -123,6 +123,8 @@ def log_message(level: int = 40, msg: str = "", trace: str = ""):
         log_function(f"{msg}{trace}")
 
 
-def log_messages(messages: list[dict] = []):
+def log_messages(messages: dict = None):
+    if messages is None:
+        messages = {}
     for message in messages:
         log_message(message["level"], message["msg"], message["trace"] if "trace" in message else "")

@@ -49,7 +49,7 @@ def file_importer(file_path: str) -> tuple[pd.DataFrame, str]:
 
 def metadata_import_method(
         df: pd.DataFrame, file_path: str, feature_orientation: str
-) -> tuple[pd.DataFrame, dict, list[dict]]:
+) -> tuple[pd.DataFrame, dict]:
     """
         Imports a metadata file and returns the intensity dataframe and a dict with a message if the file import failed,
         and the metadata dataframe if the import was successful.
@@ -60,8 +60,10 @@ def metadata_import_method(
     if meta_df.empty:
         return (
             None,
-            dict(metadata=None),
-            [dict(level=logging.ERROR, msg=msg)],
+            dict(
+                metadata=None,
+                messages=[dict(level=logging.ERROR, msg=msg)],
+            )
         )
     # always return metadata in the same orientation (features as columns)
     # as the dtype get lost when transposing, we save the df to disk after
@@ -95,7 +97,7 @@ def metadata_import_method(
         )
         res.groupby(["Protein ID", "sample name"], as_index=False).median()
 
-    return df, {"metadata": meta_df}, [dict(level=logging.INFO, msg=msg)]
+    return df, {"metadata": meta_df, "messages": [dict(level=logging.INFO, msg=msg)]}
 
 
 def metadata_import_method_diann(
@@ -110,8 +112,10 @@ def metadata_import_method_diann(
     if meta_df.empty:
         return (
             None,
-            dict(metadata=None),
-            [dict(level=logging.ERROR, msg=msg)],
+            dict(
+                metadata=None,
+                messages=[dict(level=logging.ERROR, msg=msg)],
+            )
         )
 
     if file_path.startswith(
@@ -131,9 +135,9 @@ def metadata_import_method_diann(
         )
         res = res.groupby(["Protein ID", "sample name"], as_index=False).median()
         res.rename(columns={"sample name": "Sample"}, inplace=True)
-        return res, {"metadata": meta_df}, []
+        return res, {"metadata": meta_df}
 
-    return df, {"metadata": meta_df}, []
+    return df, {"metadata": meta_df}
 
 
 def metadata_column_assignment(
@@ -162,14 +166,14 @@ def metadata_column_assignment(
     # check if required column already in metadata, if so give error message
     if metadata_required_column is None or metadata_unknown_column is None:
         msg = f"You can proceed, as there is nothing that needs to be changed."
-        return df, dict(), [dict(level=logging.INFO, msg=msg)]
+        return df, dict(messages=[dict(level=logging.INFO, msg=msg)])
 
     if metadata_required_column in metadata_df.columns:
         msg = f"Metadata already contains column '{metadata_required_column}'. \
         Please rename the column or select another column."
-        return df, dict(), [dict(level=logging.ERROR, msg=msg)]
+        return df, dict(messages=[dict(level=logging.ERROR, msg=msg)])
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
         columns={metadata_unknown_column: metadata_required_column}, inplace=True
     )
-    return df, dict(), []
+    return df, dict()
