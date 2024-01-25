@@ -217,7 +217,6 @@ class Run:
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
-
     def calculate_and_next(
         self, method_callable, name=None, **parameters
     ):  # to be used for CLI

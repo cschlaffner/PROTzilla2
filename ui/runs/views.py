@@ -7,7 +7,6 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from django.http import (
     FileResponse,
     HttpResponseBadRequest,
@@ -41,8 +40,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post, display_message
+from ui.runs.views_helper import display_message, parameters_from_post
 
 active_runs = {}
 
@@ -110,9 +108,8 @@ def detail(request, run_name):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-    show_table = (
-        run.current_out
-        and any(isinstance(v, pd.DataFrame) for v in run.current_out.values())
+    show_table = run.current_out and any(
+        isinstance(v, pd.DataFrame) for v in run.current_out.values()
     )
 
     show_protein_graph = (
@@ -613,6 +610,7 @@ def results_exist(run: Run) -> bool:
     if run.section == "data_analysis" or run.section == "data_integration":
         return run.calculated_method is not None or (run.step == "plot" and run.plots)
     return True
+
 
 def results_exist_json(request, run_name):
     """

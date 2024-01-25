@@ -175,6 +175,7 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
     assert "LocalOutlierFactor" in caplog.text
     assert "NaN values" in caplog.text
 
+
 def test_perform_calculation_error_handling(caplog, tests_folder_name):
     # test specific error handling
     run_name = tests_folder_name + "/test_run_error_handling_" + random_string()
