@@ -151,4 +151,6 @@ def linear_model(
         messages=[dict(level=logging.WARNING, msg=proteins_filtered_warning_msg)]
         if proteins_filtered
         else [],
+        group1=group1,
+        group2=group2,
     )

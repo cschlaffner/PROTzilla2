@@ -86,6 +86,8 @@ def test_differential_expression_linear_model(
         current_out["log2_fold_change_df"],
         current_out["fc_threshold"],
         current_out["corrected_alpha"],
+        current_out["group1"],
+        current_out["group2"],
     )
     if show_figures:
         fig.show()
@@ -129,6 +131,8 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
         current_out["log2_fold_change_df"],
         current_out["fc_threshold"],
         current_out["corrected_alpha"],
+        current_out["group1"],
+        current_out["group2"],
     )
     if show_figures:
         fig.show()
@@ -283,6 +287,8 @@ def test_differential_expression_t_test_with_zero_mean(
         current_out["log2_fold_change_df"],
         current_out["fc_threshold"],
         current_out["corrected_alpha"],
+        current_out["group1"],
+        current_out["group2"],
     )
     if show_figures:
         fig.show()

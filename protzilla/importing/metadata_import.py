@@ -48,7 +48,7 @@ def file_importer(file_path: str) -> tuple[pd.DataFrame, str]:
 
 
 def metadata_import_method(
-        df: pd.DataFrame, file_path: str, feature_orientation: str
+    df: pd.DataFrame, file_path: str, feature_orientation: str
 ) -> tuple[pd.DataFrame, dict]:
     """
         Imports a metadata file and returns the intensity dataframe and a dict with a message if the file import failed,
@@ -63,7 +63,7 @@ def metadata_import_method(
             dict(
                 metadata=None,
                 messages=[dict(level=logging.ERROR, msg=msg)],
-            )
+            ),
         )
     # always return metadata in the same orientation (features as columns)
     # as the dtype get lost when transposing, we save the df to disk after
@@ -80,7 +80,7 @@ def metadata_import_method(
         return metadata_import_method(df, file_path, "Columns")
 
     elif file_path.startswith(
-            f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
+        f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
     ):
         os.remove(file_path)
     if "replicate" in meta_df.columns:
@@ -101,7 +101,7 @@ def metadata_import_method(
 
 
 def metadata_import_method_diann(
-        df: DataFrame, file_path: str, groupby_sample: bool = False
+    df: DataFrame, file_path: str, groupby_sample: bool = False
 ) -> (DataFrame, dict):
     """
     This method imports a metadata file with run relationship information and returns the intensity dataframe and the
@@ -115,11 +115,11 @@ def metadata_import_method_diann(
             dict(
                 metadata=None,
                 messages=[dict(level=logging.ERROR, msg=msg)],
-            )
+            ),
         )
 
     if file_path.startswith(
-            f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
+        f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
     ):
         os.remove(file_path)
 
@@ -141,10 +141,10 @@ def metadata_import_method_diann(
 
 
 def metadata_column_assignment(
-        df: pd.DataFrame,
-        metadata_df: pd.DataFrame,
-        metadata_required_column: str = None,
-        metadata_unknown_column: str = None,
+    df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
+    metadata_required_column: str = None,
+    metadata_unknown_column: str = None,
 ):
     """
     This function renames a column in the metadata dataframe to the required column name.
