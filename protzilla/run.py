@@ -249,6 +249,11 @@ class Run:
                 self.df, self.result_df, self.current_out, **parameters
             )
             self.current_messages = []
+            for plot in self.plots:
+                if "messages" in plot:
+                    self.current_messages.extend(plot["messages"])
+                    self.plots.remove(plot)
+
         except Exception as e:
             self.plots = []
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
@@ -267,15 +272,19 @@ class Run:
             self.current_messages = []
             self.current_parameters[self.method] = parameters
             self.calculated_method = self.method
+
+            for plot in self.plots:
+                if "messages" in plot:
+                    self.current_messages.extend(plot["messages"])
+                    self.plots.remove(plot)
         except Exception as e:
             self.plots = []
             self.result_df = None
             self.current_out = {}
-            self.current_messages = []
-            self.current_parameters.pop(self.method, None)
-            self.calculated_method = None
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
             self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+            self.current_parameters.pop(self.method, None)
+            self.calculated_method = None
 
     def insert_step(self, step_to_be_inserted, section, method, index):
         step_dict = dict(name=step_to_be_inserted, method=method, parameters={})
