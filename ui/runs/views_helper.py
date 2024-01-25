@@ -1,11 +1,10 @@
 import re
 
+from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (
     get_steps_of_workflow,
     get_steps_of_workflow_meta,
     method_name,
-    section_name,
-    step_name,
 )
 
 
@@ -61,7 +60,7 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             workflow_steps.append(
                 {
                     "id": step["name"],
-                    "name": step_name(step["name"]),
+                    "name": name_to_title(step["name"]),
                     "index": i,
                     "method_name": method_name(
                         workflow_meta, section, step["name"], step["method"]
@@ -75,22 +74,24 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
         possible_steps = []
         for step in possible_section["possible_steps"]:
-            methods = [
-                {
-                    "id": method,
-                    "name": method_params["name"],
-                    "description": method_params["description"],
-                }
-                for method, method_params in list(workflow_meta[section][step].items())
-            ]
-            possible_steps.append(
-                {"id": step, "methods": methods, "name": step_name(step)}
-            )
+            if step != "output_name":
+                methods = [
+                    {
+                      "id": method,
+                      "name": method_params["name"],
+                      "description": method_params["description"],
+                    }
+                    for method, method_params in list(workflow_meta[section][step].items())
+                ]
+                possible_steps.append(
+                  {"id": step, "methods": methods, "name": name_to_title(step)}
+                )
+
 
         displayed_steps.append(
             {
                 "id": section,
-                "name": section_name(section),
+                "name": name_to_title(section),
                 "possible_steps": possible_steps,
                 "steps": workflow_steps,
                 "selected": section_selected,

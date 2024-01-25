@@ -239,8 +239,8 @@ def create_histograms(
                 "log10" but is {visual_transformation}"""
         )
 
-    intensity_name_a = dataframe_a.columns[3]
-    intensity_name_b = dataframe_b.columns[3]
+    intensity_name_a = default_intensity_column(dataframe_a)
+    intensity_name_b = default_intensity_column(dataframe_b)
 
     intensities_a = dataframe_a[intensity_name_a]
     intensities_b = dataframe_b[intensity_name_b]
@@ -254,9 +254,6 @@ def create_histograms(
 
     binsize_factor = 0.0005 if visual_transformation == "linear" else 0.02
 
-    intensity_name_a = default_intensity_column(dataframe_a)
-    intensity_name_b = default_intensity_column(dataframe_b)
-    fig = make_subplots(rows=1, cols=2)
     trace0 = go.Histogram(
         x=intensities_a,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],

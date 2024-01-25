@@ -13,7 +13,7 @@
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
-        {% include 'runs/form_buttons.html' with results_exist=show_next %}
+        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
     {% endif %}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
 
@@ -44,6 +44,8 @@
             </div>
 
             <div id="main-content">
+                
+                
                 {# show history #}
                 {% if displayed_history %}
                     <div class="row d-flex justify-content-between align-items-center">
@@ -237,7 +239,7 @@
                     <div class="col">
                         {# navigation between steps #}
                         <div class="justify-content-end d-flex">
-                            {% if show_next %}
+                            {% if results_exist %}
                                 <div class="col-5 mb-2">
                                     <div class="form-group mb-0">
                                         {{ name_field }}
@@ -250,9 +252,25 @@
                                 {% csrf_token %}
                                 <div class="form-group">
                                     {% if show_back %}
-                                        <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto">Back</a>
+                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-grey mr-auto">Back</a>
+                                        <div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true" style="display: none;" >
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Going a step back during calculation may lead to unforseen behavior and loss in data.
+                                                        Do you want to proceed?
+                                                        <hr>
+                                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
+                                                        <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     {% endif %}
-                                    <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
+                                    <button class="btn btn-red"  {% if not results_exist %} disabled {% endif %}>Next
                                     </button>
                                 </div>
                             </form>
@@ -262,4 +280,5 @@
             </div>
         </div>
     </div>
-{% endblock %}
+
+    {% endblock %}
