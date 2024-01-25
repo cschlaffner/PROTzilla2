@@ -198,12 +198,6 @@ def clustergram_plot(
         assert isinstance(input_df, pd.DataFrame) and not input_df.empty
         assert isinstance(sample_group_df, pd.DataFrame) or not sample_group_df
 
-        if not input_df.index.name == "Sample" or "Protein ID" not in input_df.columns:
-            raise AssertionError(
-                "Please select a valid input Dataframe, where each row "
-                "represents a sample and each column represents a feature"
-            )
-
         input_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
         if isinstance(sample_group_df, pd.DataFrame):
