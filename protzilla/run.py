@@ -338,6 +338,7 @@ class Run:
                 "output_name",
             )
         try:
+            self.current_messages = []
             parameters = self.current_parameters.get(self.calculated_method, {})
             self.history.add_step(
                 self.section,
@@ -356,11 +357,23 @@ class Run:
                 "method"
             ] = self.calculated_method
             self.name_step(-1, name)
-        except TypeError:  # catch error when serializing json
+        except TypeError as e:  # catch error when serializing json
             # remove "broken" step from history again
             self.history.pop_step()
             traceback.print_exc()
-            # TODO 100 add message to user?
+            # TODO 100 add specific message to user?
+            msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+        except AssertionError as e:
+            # remove "broken" step from history again
+            self.history.pop_step()
+            msg = f"An error occurred while saving this step: {e}. Please check your parameters or report a potential program issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+        except Exception as e:
+            # remove "broken" step from history again
+            self.history.pop_step()
+            msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
         else:  # continue normally when no error occurs
             self.step_index += 1
             self.section, self.step, self.method = self.current_workflow_location()
@@ -368,11 +381,12 @@ class Run:
             self.result_df = None
             self.calculated_method = None
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters = {}
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None
             self.plots = []
+
+        log_messages(self.current_messages)
 
     def back_step(self):
         assert self.history.steps

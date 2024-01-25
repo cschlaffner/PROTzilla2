@@ -428,7 +428,11 @@ def next_(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
+
     run.next_step(request.POST["name"])
+    for message in run.current_messages:
+        display_message(message, request)
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
