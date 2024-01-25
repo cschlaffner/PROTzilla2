@@ -8,7 +8,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict, list[dict]]:
     """
     A function to run the sklearn StandardScaler class on your dataframe.
     Normalises the data on the level of each sample.
@@ -44,13 +44,13 @@ def by_z_score(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
     pd.reset_option("mode.chained_assignment")
-    return scaled_df, dict()
+    return scaled_df, dict(), []
 
 
 def by_median(
     intensity_df: pd.DataFrame,
     percentile=0.5,  # quartile, default is median
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict, list[dict]]:
     """
     A function to perform a quartile/percentile normalisation on your
     dataframe. Normalises the data on the level of each sample.
@@ -109,10 +109,11 @@ def by_median(
     return (
         scaled_df,
         dict(zeroed_samples=zeroed_samples),
+        [],
     )
 
 
-def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict, list[dict]]:
     """
     A function to perform normalisation using the total sum
     of sample intensities on your dataframe.
@@ -167,13 +168,14 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return (
         scaled_df,
         dict(zeroed_samples=zeroed_samples_list),
+        [],
     )
 
 
 def by_reference_protein(
     intensity_df: pd.DataFrame,
     reference_protein: str,
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict, list[dict]]:
     """
     A function to perform protein-intensity normalisation in reference
     to a selected protein on your dataframe.
@@ -201,9 +203,10 @@ def by_reference_protein(
             break
     else:
         msg = "The protein was not found"
-        return scaled_df, dict(
-            dropped_samples=None,
-            messages=[dict(level=logging.ERROR, msg=msg)],
+        return (
+            scaled_df,
+            dict(dropped_samples=None),
+            [dict(level=logging.ERROR, msg=msg)],
         )
 
     samples = intensity_df["Sample"].unique().tolist()
@@ -225,7 +228,7 @@ def by_reference_protein(
 
         scaled_df = pd.concat([scaled_df, df_sample], ignore_index=True)
 
-    return scaled_df, dict(dropped_samples=dropped_samples)
+    return scaled_df, dict(dropped_samples=dropped_samples), []
 
 
 def by_z_score_plot(df, result_df, current_out, graph_type, group_by):

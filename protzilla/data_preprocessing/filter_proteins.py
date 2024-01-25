@@ -7,7 +7,7 @@ from ..utilities.transform_dfs import long_to_wide
 
 def by_samples_missing(
     intensity_df: pd.DataFrame, percentage: float
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict, list[dict]]:
     """
     This function filters proteins based on the amount of samples with nan values, if the percentage of nan values
     is below a threshold (percentage).
@@ -37,6 +37,7 @@ def by_samples_missing(
             filtered_proteins=filtered_proteins_list,
             remaining_proteins=remaining_proteins_list,
         ),
+        [],
     )
 
 
