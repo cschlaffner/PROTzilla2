@@ -175,6 +175,26 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
     assert "LocalOutlierFactor" in caplog.text
     assert "NaN values" in caplog.text
 
+def test_perform_calculation_error_handling(caplog, tests_folder_name):
+    # test specific error handling
+    run_name = tests_folder_name + "/test_run_error_handling_" + random_string()
+    run = Run.create(run_name, df_mode="disk")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.df["Intensity"] = np.nan
+
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "outlier_detection",
+        "local_outlier_factor",
+        {"number_of_neighbors": 3},
+    )
+
+    assert any(message["level"] == 40 for message in run.current_messages)
+
 
 def test_insert_step(example_workflow_short, tests_folder_name):
     run_name = tests_folder_name + "/test_insert_as_next_step_" + random_string()
