@@ -2,7 +2,6 @@ import base64
 import json
 import logging
 import shutil
-import traceback
 from io import BytesIO
 from pathlib import Path
 from shutil import rmtree
@@ -357,24 +356,13 @@ class Run:
                 "method"
             ] = self.calculated_method
             self.name_step(-1, name)
-        except TypeError as e:  # catch error when serializing json
-            # remove "broken" step from history again
-            self.history.pop_step()
-            traceback.print_exc()
-            # TODO 100 add specific message to user?
-            msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
-        except AssertionError as e:
-            # remove "broken" step from history again
-            self.history.pop_step()
-            msg = f"An error occurred while saving this step: {e}. Please check your parameters or report a potential program issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+
         except Exception as e:
-            # remove "broken" step from history again
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
             self.current_messages.append(dict(level=logging.ERROR, msg=msg))
-        else:  # continue normally when no error occurs
+
+        else:
             self.step_index += 1
             self.section, self.step, self.method = self.current_workflow_location()
             self.df = self.result_df
