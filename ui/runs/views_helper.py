@@ -1,11 +1,14 @@
 import re
 
+from django.contrib import messages
+
 from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (
     get_steps_of_workflow,
     get_steps_of_workflow_meta,
     method_name,
 )
+from ui.runs.utilities.alert import build_trace_alert
 
 
 def parameters_from_post(post):
@@ -77,16 +80,17 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             if step != "output_name":
                 methods = [
                     {
-                      "id": method,
-                      "name": method_params["name"],
-                      "description": method_params["description"],
+                        "id": method,
+                        "name": method_params["name"],
+                        "description": method_params["description"],
                     }
-                    for method, method_params in list(workflow_meta[section][step].items())
+                    for method, method_params in list(
+                        workflow_meta[section][step].items()
+                    )
                 ]
                 possible_steps.append(
-                  {"id": step, "methods": methods, "name": name_to_title(step)}
+                    {"id": step, "methods": methods, "name": name_to_title(step)}
                 )
-
 
         displayed_steps.append(
             {
@@ -99,3 +103,37 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             }
         )
     return displayed_steps
+
+
+def display_message(message: dict, request):
+    """
+    Displays a message in the frontend.
+
+    :param message: dict with keys "level", "msg" and optionally "trace"
+    :param request: request object
+    """
+
+    trace = build_trace_alert(message["trace"]) if "trace" in message else ""
+
+    # map error level to bootstrap css class
+    lvl_to_css_class = {
+        40: "alert-danger",
+        30: "alert-warning",
+        20: "alert-info",
+    }
+    messages.add_message(
+        request,
+        message["level"],
+        f"{message['msg']} {trace}",
+        lvl_to_css_class[message["level"]],
+    )
+
+
+def clear_messages(request):
+    """
+    Clears all messages from the request object in the frontend.
+
+    :param request: request object
+    """
+    for message in messages.get_messages(request):
+        pass
