@@ -1,4 +1,5 @@
 import re
+
 from django.contrib import messages
 
 from protzilla.utilities import name_to_title
@@ -79,16 +80,17 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             if step != "output_name":
                 methods = [
                     {
-                      "id": method,
-                      "name": method_params["name"],
-                      "description": method_params["description"],
+                        "id": method,
+                        "name": method_params["name"],
+                        "description": method_params["description"],
                     }
-                    for method, method_params in list(workflow_meta[section][step].items())
+                    for method, method_params in list(
+                        workflow_meta[section][step].items()
+                    )
                 ]
                 possible_steps.append(
-                  {"id": step, "methods": methods, "name": name_to_title(step)}
+                    {"id": step, "methods": methods, "name": name_to_title(step)}
                 )
-
 
         displayed_steps.append(
             {
@@ -104,6 +106,12 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
 
 def display_message(message: dict, request):
+    """
+    Displays a message in the frontend.
+
+    :param message: dict with keys "level", "msg" and optionally "trace"
+    :param request: request object
+    """
 
     trace = build_trace_alert(message["trace"]) if "trace" in message else ""
 
@@ -120,6 +128,7 @@ def display_message(message: dict, request):
         lvl_to_css_class[message["level"]],
     )
 
+
 def clear_messages(request):
     """
     Clears all messages from the request object in the frontend.
@@ -130,3 +139,4 @@ def clear_messages(request):
     for message in messages.get_messages(request):
         pass
     storage.used = True
+

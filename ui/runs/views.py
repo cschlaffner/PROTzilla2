@@ -7,7 +7,6 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from django.http import (
     FileResponse,
     HttpResponseBadRequest,
@@ -450,17 +449,11 @@ def next_(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
+
     run.next_step(request.POST["name"])
 
-    # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-    #if run.section == "data_integration" and run.step == "enrichment_analysis":
-     #   message = {
-      #      'level': 30,
-       #     'msg': 'Warning! To select a column name, you must first change'
-        #           ' the entry in the "Dataframe with protein IDs..." field and then change it '
-         #          'back again to select values in the field "Column name...".'
-       # }
-       # display_message(message, request)
+    for message in run.current_messages:
+        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -573,10 +566,8 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_current_calculation_step(parameters)
 
-    result = run.current_out
-    if "messages" in result:
-        for message in result["messages"]:
-            display_message(message, request)
+    for message in run.current_messages:
+        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -605,10 +596,9 @@ def plot(request, run_name):
 
     run.create_plot_from_current_location(parameters)
 
-    for index, p in enumerate(run.plots):
-        if isinstance(p, dict) and "messages" in p:
-            for message in run.plots[index]["messages"]:
-                display_message(message, request)
+    for index, message in enumerate(run.current_messages):
+        if isinstance(message, dict):
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
