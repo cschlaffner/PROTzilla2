@@ -111,7 +111,7 @@ def diff_expr_test_data():
 #     assert current_out["corrected_alpha"] == test_alpha
 
 
-# TODO update test to work with new t-test function
+# TODO update test to work with new t-test function, probably only adding parameters and log_base
 # def test_differential_expression_t_test(diff_expr_test_data, show_figures):
 #     test_intensity_df, test_metadata_df = diff_expr_test_data
 #     test_alpha = 0.05
@@ -376,6 +376,7 @@ def test_differential_expression_anova(show_figures):
         intensity_df=test_intensity_df,
         metadata_df=test_metadata_df,
         grouping="Group",
+        log_base="log2",
         selected_groups=test_metadata_df["Group"].unique().tolist(),
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=0.05,
