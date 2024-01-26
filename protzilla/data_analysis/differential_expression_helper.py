@@ -34,9 +34,11 @@ def apply_multiple_testing_correction(
         for i in correction[1]
     ), "Corrected p-Values contain non-number or NaN values, indicating an unfiltered\
      dataset / incorrect imputation"
+    # for Bonferroni: alpha values are changed, p-values stay the same
+    # for Benjamin-Hochberg: alpha values stay the same, p-values are changed
     if method == "Bonferroni":
-        return correction[1], correction[3]
-    return correction[1], correction[3]
+        return p_values, correction[3]
+    return correction[1], alpha
 
 
 def _map_log_base(log_base):
