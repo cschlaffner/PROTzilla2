@@ -49,6 +49,7 @@ class History:
                     _dataframe=df,
                     dataframe_path=df_path if df_path.exists() else None,
                     outputs=step["outputs"],
+                    messages=[],
                     plots=[],
                 )
             )
@@ -71,7 +72,8 @@ class History:
         parameters: dict,
         dataframe: pd.DataFrame | None,
         outputs: dict,
-        plots: list,
+        messages: list[dict] = [],
+        plots: list = [],
         name: str | None = None,
     ):
         assert "dataframe" not in outputs, "output can not be named 'dataframe'"
@@ -92,6 +94,7 @@ class History:
             df,
             df_path,
             outputs,
+            messages,
             plots,
         )
         self.steps.append(executed_step)
@@ -203,6 +206,7 @@ class ExecutedStep:
     _dataframe: pd.DataFrame | None
     dataframe_path: Path | None
     outputs: dict
+    messages: list[dict]
     plots: list
 
     @property

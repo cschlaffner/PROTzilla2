@@ -134,6 +134,14 @@
             "alpha": [
               "linear_model",
               "corrected_alpha"
+            ],
+            "group1": [
+              "linear_model",
+              "group1"
+            ],
+            "group2": [
+              "linear_model",
+              "group2"
             ]
           }
         }

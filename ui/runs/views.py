@@ -40,7 +40,8 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.views_helper import clear_messages, display_message, parameters_from_post
+from ui.runs.utilities.alert import build_trace_alert
+from ui.runs.views_helper import parameters_from_post, display_message, clear_messages
 
 active_runs = {}
 
@@ -88,23 +89,23 @@ def detail(request, run_name):
     description = run.workflow_meta[section][step][method]["description"]
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
-    # clear_messages(request)
+   # clear_messages(request)
     if run.section == "data_integration" and run.step == "enrichment_analysis":
         message = {
-            "level": 30,
-            "msg": "To select a column name, you have to first change"
-            ' the entry in the "Dataframe with protein IDs..." field and then change it '
-            'back to select values in the field "Column name...".',
+            'level': 30,
+            'msg': 'To select a column name, you have to first change'
+                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
+                   'back to select values in the field "Column name...".'
         }
         display_message(message, request)
     elif run.section == "data_analysis" and run.method == "anova":
         message = {
-            "level": 30,
-            "msg": "Please select one or more groups before calculation",
+            'level': 30,
+            'msg': 'Please select one or more groups before calculation'
         }
         display_message(message, request)
     clear_messages(request)
-    # print(message)
+    #print(message)
     current_plots = []
     for plot in run.plots:
         if isinstance(plot, bytes):
@@ -131,10 +132,10 @@ def detail(request, run_name):
     )
 
     show_protein_graph = (
-        run.current_out
-        and "graph_path" in run.current_out
-        and run.current_out["graph_path"] is not None
-        and Path(run.current_out["graph_path"]).exists()
+            run.current_out
+            and "graph_path" in run.current_out
+            and run.current_out["graph_path"] is not None
+            and Path(run.current_out["graph_path"]).exists()
     )
 
     return render(
@@ -358,8 +359,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "Gene_set" in protein_iterable.columns
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "Gene_set" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -378,8 +379,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "NES" in protein_iterable.columns
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "NES" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -448,17 +449,11 @@ def next_(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
+
     run.next_step(request.POST["name"])
 
-    # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-    # if run.section == "data_integration" and run.step == "enrichment_analysis":
-    #   message = {
-    #      'level': 30,
-    #     'msg': 'Warning! To select a column name, you must first change'
-    #           ' the entry in the "Dataframe with protein IDs..." field and then change it '
-    #          'back again to select values in the field "Column name...".'
-    # }
-    # display_message(message, request)
+    for message in run.current_messages:
+        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -571,10 +566,8 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_current_calculation_step(parameters)
 
-    result = run.current_out
-    if "messages" in result:
-        for message in result["messages"]:
-            display_message(message, request)
+    for message in run.current_messages:
+        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -603,10 +596,9 @@ def plot(request, run_name):
 
     run.create_plot_from_current_location(parameters)
 
-    for index, p in enumerate(run.plots):
-        if isinstance(p, dict) and "messages" in p:
-            for message in run.plots[index]["messages"]:
-                display_message(message, request)
+    for index, message in enumerate(run.current_messages):
+        if isinstance(message, dict):
+            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 

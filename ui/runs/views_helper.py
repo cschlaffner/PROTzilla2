@@ -106,6 +106,13 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
 
 def display_message(message: dict, request):
+    """
+    Displays a message in the frontend.
+
+    :param message: dict with keys "level", "msg" and optionally "trace"
+    :param request: request object
+    """
+
     trace = build_trace_alert(message["trace"]) if "trace" in message else ""
 
     # map error level to bootstrap css class
@@ -132,3 +139,4 @@ def clear_messages(request):
     for message in messages.get_messages(request):
         pass
     storage.used = True
+
