@@ -49,28 +49,19 @@ def biomart_query(queries, filter_name, attributes, use_grch37=False):
     for attribute in attributes:
         SubElement(dataset, "Attribute", attrib={"name": attribute})
 
-    biomart_urls = [
-        "https://ensembl.org",
-        "https://asia.ensembl.org",
-        "https://useast.ensembl.org",
-    ]
     if use_grch37:
-        biomart_urls = "http://grch37.ensembl.org/biomart/martservice"
-
-    for biomart_url in biomart_urls:
-        try:
-            response = requests.post(
-                url=biomart_url,
-                data={"query": tostring(root)},
-                stream=True,
-            )
-            break
-        except requests.ConnectionError:
-            continue
+        biomart_url = "http://grch37.ensembl.org/biomart/martservice"
     else:
-        logger.warning("biomart server not available at the moment")
-        return
+        biomart_url = "https://www.ensembl.org/biomart/martservice"
 
+    try:
+        response = requests.post(
+            url=biomart_url,
+            data={"query": tostring(root)},
+            stream=True,
+        )
+    except requests.ConnectionError:
+        return
     for line in response.iter_lines():
         decoded = line.decode("utf-8")
         if decoded == "<html>" or len(tabbed := decoded.split("\t")) != len(attributes):
