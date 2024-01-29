@@ -1,6 +1,5 @@
 import base64
 import json
-import logging
 import shutil
 import traceback
 from io import BytesIO
@@ -10,7 +9,6 @@ from shutil import rmtree
 import plotly
 from PIL import Image
 
-from ui.runs.views_helper import display_message
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION

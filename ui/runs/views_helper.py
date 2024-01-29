@@ -1,4 +1,5 @@
 import re
+
 from django.contrib import messages
 
 from protzilla.utilities import name_to_title
@@ -79,16 +80,17 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
             if step != "output_name":
                 methods = [
                     {
-                      "id": method,
-                      "name": method_params["name"],
-                      "description": method_params["description"],
+                        "id": method,
+                        "name": method_params["name"],
+                        "description": method_params["description"],
                     }
-                    for method, method_params in list(workflow_meta[section][step].items())
+                    for method, method_params in list(
+                        workflow_meta[section][step].items()
+                    )
                 ]
                 possible_steps.append(
-                  {"id": step, "methods": methods, "name": name_to_title(step)}
+                    {"id": step, "methods": methods, "name": name_to_title(step)}
                 )
-
 
         displayed_steps.append(
             {
@@ -104,7 +106,6 @@ def get_displayed_steps(workflow_config_dict, workflow_meta, step_index):
 
 
 def display_message(message: dict, request):
-
     trace = build_trace_alert(message["trace"]) if "trace" in message else ""
 
     # map error level to bootstrap css class
@@ -119,6 +120,7 @@ def display_message(message: dict, request):
         f"{message['msg']} {trace}",
         lvl_to_css_class[message["level"]],
     )
+
 
 def clear_messages(request):
     """

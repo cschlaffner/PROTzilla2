@@ -7,7 +7,6 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
-from django.contrib import messages
 from django.http import (
     FileResponse,
     HttpResponseBadRequest,
@@ -41,8 +40,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post, display_message, clear_messages
+from ui.runs.views_helper import clear_messages, display_message, parameters_from_post
 
 active_runs = {}
 
@@ -90,23 +88,23 @@ def detail(request, run_name):
     description = run.workflow_meta[section][step][method]["description"]
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
-   # clear_messages(request)
+    # clear_messages(request)
     if run.section == "data_integration" and run.step == "enrichment_analysis":
         message = {
-            'level': 30,
-            'msg': 'To select a column name, you have to first change'
-                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
-                   'back to select values in the field "Column name...".'
+            "level": 30,
+            "msg": "To select a column name, you have to first change"
+            ' the entry in the "Dataframe with protein IDs..." field and then change it '
+            'back to select values in the field "Column name...".',
         }
         display_message(message, request)
     elif run.section == "data_analysis" and run.method == "anova":
         message = {
-            'level': 30,
-            'msg': 'Please select one or more groups before calculation'
+            "level": 30,
+            "msg": "Please select one or more groups before calculation",
         }
         display_message(message, request)
     clear_messages(request)
-    #print(message)
+    # print(message)
     current_plots = []
     for plot in run.plots:
         if isinstance(plot, bytes):
@@ -133,10 +131,10 @@ def detail(request, run_name):
     )
 
     show_protein_graph = (
-            run.current_out
-            and "graph_path" in run.current_out
-            and run.current_out["graph_path"] is not None
-            and Path(run.current_out["graph_path"]).exists()
+        run.current_out
+        and "graph_path" in run.current_out
+        and run.current_out["graph_path"] is not None
+        and Path(run.current_out["graph_path"]).exists()
     )
 
     return render(
@@ -360,8 +358,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                    not isinstance(protein_iterable, pd.DataFrame)
-                    or not "Gene_set" in protein_iterable.columns
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "Gene_set" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -380,8 +378,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                    not isinstance(protein_iterable, pd.DataFrame)
-                    or not "NES" in protein_iterable.columns
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "NES" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -453,14 +451,14 @@ def next_(request, run_name):
     run.next_step(request.POST["name"])
 
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-    #if run.section == "data_integration" and run.step == "enrichment_analysis":
-     #   message = {
-      #      'level': 30,
-       #     'msg': 'Warning! To select a column name, you must first change'
-        #           ' the entry in the "Dataframe with protein IDs..." field and then change it '
-         #          'back again to select values in the field "Column name...".'
-       # }
-       # display_message(message, request)
+    # if run.section == "data_integration" and run.step == "enrichment_analysis":
+    #   message = {
+    #      'level': 30,
+    #     'msg': 'Warning! To select a column name, you must first change'
+    #           ' the entry in the "Dataframe with protein IDs..." field and then change it '
+    #          'back again to select values in the field "Column name...".'
+    # }
+    # display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
