@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.differential_expression import anova, t_test
+from protzilla.data_analysis.differential_expression import anova, linear_model, t_test
 from protzilla.data_analysis.plots import create_volcano_plot
 
 
@@ -61,56 +61,55 @@ def diff_expr_test_data():
     return test_intensity_df, test_metadata_df
 
 
-# TODO update tests to work with new linear model code
-# def test_differential_expression_linear_model(
-#     diff_expr_test_data,
-#     show_figures,
-# ):
-#     test_intensity_df, test_metadata_df = diff_expr_test_data
-#     test_alpha = 0.05
-#     test_fc_threshold = 0
-#
-#     current_out = linear_model(
-#         test_intensity_df,
-#         test_metadata_df,
-#         grouping="Group",
-#         group1="Group1",
-#         group2="Group2",
-#         multiple_testing_correction_method="Benjamini-Hochberg",
-#         alpha=test_alpha,
-#         log_base="None",
-#     )
-#
-#     fig = create_volcano_plot(
-#         current_out["corrected_p_values_df"],
-#         current_out["log2_fold_change_df"],
-#         test_fc_threshold,
-#         current_out["corrected_alpha"],
-#         current_out["group1"],
-#         current_out["group2"],
-#     )
-#     if show_figures:
-#         fig.show()
-#
-#     corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
-#     log2_fc = [-5, -0.5, 0, -2.5]
-#     differentially_expressed_proteins = ["Protein1", "Protein4"]
-#
-#     p_values_rounded = [
-#         round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
-#     ]
-#     log2fc_rounded = [
-#         round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
-#     ]
-#
-#     assert p_values_rounded == corrected_p_values
-#     assert log2fc_rounded == log2_fc
-#     assert (
-#         current_out["differentially_expressed_proteins_df"]["Protein ID"].unique()
-#         == differentially_expressed_proteins
-#     ).all()
-#     assert current_out["fc_threshold"] == test_fc_threshold
-#     assert current_out["corrected_alpha"] == test_alpha
+def test_differential_expression_linear_model(
+    diff_expr_test_data,
+    show_figures,
+):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+    test_fc_threshold = 0
+
+    current_out = linear_model(
+        test_intensity_df,
+        test_metadata_df,
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+        log_base="log2",
+    )
+
+    fig = create_volcano_plot(
+        p_values=current_out["corrected_p_values_df"],
+        log2_fc=current_out["log2_fold_change_df"],
+        alpha=current_out["corrected_alpha"],
+        group1=current_out["group1"],
+        group2=current_out["group2"],
+        fc_threshold=test_fc_threshold,
+    )
+
+    if show_figures:
+        fig.show()
+
+    corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
+    log2_fc = [-10.0, -1.0, 0, -5.0]
+    differentially_expressed_proteins = ["Protein1", "Protein2", "Protein3", "Protein4"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    log2fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
+
+    assert p_values_rounded == corrected_p_values
+    assert log2fc_rounded == log2_fc
+    assert (
+        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+        == differentially_expressed_proteins
+    )
+    assert current_out["corrected_alpha"] == test_alpha
 
 
 def test_differential_expression_t_test(diff_expr_test_data, show_figures):
@@ -285,6 +284,7 @@ def test_differential_expression_t_test_with_zero_mean(
         group2="Group2",
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
+        log_base="None",
     )
 
     fig = create_volcano_plot(
