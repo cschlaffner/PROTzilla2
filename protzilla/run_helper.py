@@ -24,6 +24,25 @@ def insert_special_params(param_dict, run):
         if "sorted" in param_dict and param_dict["sorted"]:
             param_dict["outputs"].sort()
 
+    if param_dict["type"] == "multi_named_output":
+        all_steps = [name for name in run.history.step_names if name][::-1]
+        required_outputs = list(param_dict["mapping"].values())
+        param_dict["steps"] = [step for step in all_steps if set(required_outputs).issubset(set(run.history.output_keys_of_named_step(step)))]
+        param_dict["class"] = "dynamic_trigger"
+        
+        for output_key in run.history.output_keys_of_named_step(param_dict["steps"][0]):
+            run.current_out_sources[output_key] = param_dict["steps"][0]
+
+    if param_dict["type"] == "named_output_v2":
+        param_dict["steps"] = [name for name in run.history.step_names if name][::-1]
+        if param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
+            selected = param_dict["default"][0]
+        else:
+            selected = param_dict["steps"][0] if param_dict["steps"] else None
+        param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        if "sorted" in param_dict and param_dict["sorted"]:
+            param_dict["outputs"].sort()
+
     if "fill" in param_dict:
         if param_dict["fill"] == "metadata_non_sample_columns":
             # Sample not needed for anova and t-test
