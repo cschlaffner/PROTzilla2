@@ -1095,7 +1095,9 @@
               "p_values": "corrected_p_values_df",
               "log2_fc": "log2_fold_change_df",
               "fc_threshold": "fc_threshold",
-              "alpha": "corrected_alpha"
+              "alpha": "corrected_alpha",
+              "group1": "group1",
+              "group2": "group2"
             }
           },
           "proteins_of_interest_input": {
@@ -1118,22 +1120,6 @@
             "categories": [],
             "default": null,
             "multiple": true
-          },
-          "group1": {
-            "name": "Group 1",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
-          },
-          "group2": {
-            "name": "Group 2",
-            "type": "named_output",
-            "default": [
-              null,
-              null
-            ]
           }
         }
       },
