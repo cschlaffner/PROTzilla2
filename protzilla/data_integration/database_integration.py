@@ -81,25 +81,26 @@ def add_uniprot_data(dataframe, database_name=None, fields=None):
     return {"results_df": dataframe}
 
 
-def gene_mapping(dataframe, database_names, use_biomart=False):
+def gene_mapping(
+    dataframe: pd.DataFrame, database_names: list[str] | str, use_biomart: bool = False
+):
     """
     Maps the protein ID groups to HGNC gene symbols, filtering out ones that are not
     found.
 
-    :param dataframe: the protein dataframe of which the protein ID groups will be
-        mapped.
+    :param dataframe: the dataframe of which the protein groups will be mapped.
     :type dataframe: pd.DataFrame
     :param database_names: names of the database files that will be queried
     :type database_names: list[str] | str
-    :param use_biomart: should biomart be used to map ids that could not be mapped with
-        databases
+    :param use_biomart: should biomart be used to map ids that could not be mapped with databases
     :type use_biomart: bool
 
-    :return: the gene mapping, consisting of group_to_genes, gene_to_groups and filtered
+    :return: the gene mapping, consisting of protein_group_to_genes, gene_to_protein_groups, filtered and
+        the dataframes of the mappings
     :rtype: dict
     """
     try:
-        groups = dataframe["Protein ID"].unique().tolist()
+        protein_groups = dataframe["Protein ID"].unique().tolist()
     except KeyError:
         msg = "No Protein ID column found."
         return dict(
@@ -107,13 +108,38 @@ def gene_mapping(dataframe, database_names, use_biomart=False):
         )
     if isinstance(database_names, str):
         database_names = [database_names]
-    gene_to_groups, groups_to_genes, filtered = database_query.uniprot_groups_to_genes(
-        groups, database_names, use_biomart=use_biomart
+    (
+        gene_to_protein_groups,
+        protein_groups_to_genes,
+        filtered,
+    ) = database_query.uniprot_groups_to_genes(
+        protein_groups, database_names, use_biomart=use_biomart
+    )
+
+    # We need to unpack the dictionaries to be able to create a dataframe, as this is potentially a many-to-many mapping
+    gene_to_protein_groups_unpacked = [
+        (key, value)
+        for key, values in gene_to_protein_groups.items()
+        for value in values
+    ]
+    gene_to_protein_groups_df = pd.DataFrame.from_records(
+        gene_to_protein_groups_unpacked, columns=["Gene", "Protein ID"]
+    )
+
+    protein_groups_to_genes_unpacked = [
+        (key, value)
+        for key, values in protein_groups_to_genes.items()
+        for value in values
+    ]
+    protein_groups_to_groups_df = pd.DataFrame.from_records(
+        protein_groups_to_genes_unpacked, columns=["Protein ID", "Gene"]
     )
     return {
+        "gene_to_protein_groups_df": gene_to_protein_groups_df,
+        "protein_groups_to_genes_df": protein_groups_to_groups_df,
         "gene_mapping": {
-            "group_to_genes": groups_to_genes,
-            "gene_to_groups": gene_to_groups,
+            "group_to_genes": protein_groups_to_genes,
+            "gene_to_protein_groups": gene_to_protein_groups,
             "filtered": filtered,
-        }
+        },
     }
