@@ -185,15 +185,23 @@ class Run:
             call_parameters["run_name"] = self.run_name
 
         if self.section in ["importing", "data_preprocessing"]:
-            try:
+            debugging = True
+
+            if not debugging:
+                try:
+                    self.result_df, self.current_out = method_callable(
+                        self.df, **call_parameters
+                    )
+                    self.current_messages = self.current_out.pop("messages", [])
+                except Exception as e:
+                    msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+                    self.current_out = {}
+                    self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+            else:
                 self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
                 self.current_messages = self.current_out.pop("messages", [])
-            except Exception as e:
-                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-                self.current_out = {}
-                self.current_messages = [dict(level=logging.ERROR, msg=msg)]
         else:
             self.result_df = None
             try:
@@ -249,7 +257,7 @@ class Run:
             )
             self.current_messages = []
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
@@ -273,7 +281,7 @@ class Run:
             self.calculated_method = self.method
 
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
