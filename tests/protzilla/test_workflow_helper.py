@@ -70,7 +70,7 @@ def test_get_steps_of_workflow_no_side_effects(example_workflow):
 
 
 def test_get_steps_amount_of_workflow(example_workflow):
-    assert workflow_helper.get_steps_amount_of_workflow(example_workflow) == 9
+    assert workflow_helper.get_steps_amount_of_workflow(example_workflow) == 10
 
 
 def test_get_defaults():
