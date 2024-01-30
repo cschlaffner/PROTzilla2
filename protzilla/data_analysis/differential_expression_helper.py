@@ -1,7 +1,10 @@
 import logging
 import math
 
+import pandas as pd
 from statsmodels.stats.multitest import multipletests
+
+from protzilla.utilities import default_intensity_column
 
 
 def apply_multiple_testing_correction(
@@ -41,9 +44,25 @@ def apply_multiple_testing_correction(
     return correction[1], alpha
 
 
-def _map_log_base(log_base):
+def _map_log_base(log_base: str) -> int | None:
     log_base_mapping = {"log2": 2, "log10": 10, "None": None}
     return log_base_mapping.get(log_base, None)
+
+
+def log_transformed_check(
+    intensity_df: pd.DataFrame,
+    intensity_name: str = None,
+    value_threshold: int = 100,
+):
+    """This function checks a intensity dataframe for a previous log transformation based on the intensity values.
+    Returns true if the df was likely previously log-transformed, else false."""
+    if intensity_name is None:
+        intensity_name = default_intensity_column(intensity_df)
+
+    if intensity_df[intensity_name].max() > value_threshold:
+        return False
+
+    return True
 
 
 INVALID_PROTEINGROUP_DATA_MSG = {
@@ -54,4 +73,8 @@ INVALID_PROTEINGROUP_DATA_MSG = {
 LOG_TRANSFORMATION_MESSAGE_MSG = {
     "level": logging.INFO,
     "msg": "Because the data was not log-transformed, it was log2-transformed for this analysis. If this is incorrect, please select the correct log base.",
+}
+BAD_LOG_BASE_INPUT_MSG = {
+    "level": logging.WARNING,
+    "msg": "The log-base is likely wrong, as the value range of the intensity does not match the given log-base. Please make sure that you have selected the correct log-base.",
 }
