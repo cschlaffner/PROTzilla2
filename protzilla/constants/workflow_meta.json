@@ -1156,12 +1156,6 @@
           }
         }
       },
-      "heatmap": {
-        "name": "Heatmap",
-        "description": "",
-        "parameters": {
-        }
-      },
       "scatter_plot": {
         "name": "Scatter plot",
         "description": "Creates a scatter plot from data",
