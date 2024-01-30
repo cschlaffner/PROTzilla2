@@ -86,7 +86,9 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     end_of_run = not step
-    description = run.workflow_meta[section][step][method]["description"]
+    if not end_of_run:
+        description = run.workflow_meta[section][step][method]["description"]
+    else: description = ""
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
    # clear_messages(request)
