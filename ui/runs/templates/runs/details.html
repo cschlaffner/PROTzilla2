@@ -270,7 +270,7 @@
                                         </div>
                                     </div>
                                     {% endif %}
-                                    <button class="btn btn-red"  {% if not results_exist %} disabled {% endif %}>Next
+                                    <button class="btn btn-red"  {% if not results_exist or last_step %} disabled {% endif %}>Next
                                     </button>
                                 </div>
                             </form>

@@ -24,6 +24,7 @@ from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
+from protzilla.workflow_helper import is_last_step
 from protzilla.utilities import (
     clean_uniprot_id,
     get_memory_usage,
@@ -85,6 +86,7 @@ def detail(request, run_name):
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     end_of_run = not step
+    last_step = is_last_step(run.workflow_config, run.step_index)
     description = run.workflow_meta[section][step][method]["description"]
 
     current_plots = []
@@ -137,6 +139,7 @@ def detail(request, run_name):
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
+            last_step=last_step,
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),
