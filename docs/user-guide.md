@@ -24,16 +24,19 @@ After installing PROTzilla, starting the webserver and opening the address/link 
 ## Start Page
 Here is where you start new runs, continue previously worked-on ones and can manage your databases.
 
-When creating a run give it a name that is easy to remember and expressive. You have to choose a workflow as basis for the run. Take a look at the names and select one that sounds appropriate for your usage. At last, you can select the memory mode for the run. This determines if dataframes are written to disk after every step, kept in memory or both. Generally, there is almost no reason to use any other mode than "Standard". "Low Memory" doesn't keep data frames in memory and will make stepping through a workflow and inspecting dataframes much slower.
+When creating a run give it a name that is easy to remember and expressive. You have to choose a workflow as basis for the run. Take a look at the names and select one that sounds appropriate for your usage. If you are unsure, select the standard workflow. You can add and remove any step to any workflow in a given run. At last, you can select the memory mode for the run. This determines if dataframes are written to disk after every step, kept in memory or both. Generally, there is almost no reason to use any other mode than "Standard". "Low Memory" doesn't keep data frames in memory and will make stepping through a workflow and inspecting dataframes much slower but might save some memory.
 
 Continuing a run does exactly what it sounds like. You are presented with a list of runs that have previously been created and can be continued where they were left of.
 
 Lastly, you can manage databases for the UniProt integration into PROTzilla. Please refer to the corresponding section in this document ([UniProt usage in PROTzilla](#uniprot-usage-in-protzilla)).
 
+![PROTzilla Startpage](images/user_docu-startpage_overview.png)
+ 
+
 ## Working on a Run
 When creating a new Run or continuing an old one, you will be presented with something similar to the following:
 
-![PROTzilla UI](images/run_basic_overview.png)
+![PROTzilla UI](images/user_docu-run__basic_overview.png)
 
 ### The Current Step
 Here you can pick the method and set the input values of the step you are currently working on. This will look different, depending on the step and method you selected. The "Calculate", "Back" and "Next" buttons are always present but not always active, depending on the state of the caluclation and input values.
@@ -46,8 +49,10 @@ In this (collapsible) part of the UI, you can look at past steps and chosen para
 
 
 ### The Sidebar
-The Sidebar, also collapsible using the "Hamburger Menu" is located at the right side of the UI and the place where you can get an overview of the already chosen steps to come, what you have computed so far. You can look at future and past sections by clicking on them; they are collapsible. Using the small cross next to future steps, you can remove them. You can also add steps from the current section as the next upcoming step when pressing "+ add steps".
+The Sidebar, also collapsible using the "Hamburger Menu", is located at the right side of the UI and the place where you can get an overview of the already chosen steps to come, what you have computed so far. You can look at future and past sections by clicking on them; they are collapsible. Using the small cross next to future steps, you can remove them. You can also add steps from the current section as the next upcoming step when pressing "+ add steps".
 Finally, at the bottom of the sidebar, you can name and export the workflow of the run you are currently working on as is. It will be saved alongside the other workflows in `<Path to PROTzilla>/user_data/workflows/<run name>`.
+> [!NOTE]
+> Make sure you add steps that are dependent on each other in the correct order and potentially ahead of time. For example, the is no way of importing meta-data after you leave the  import  section. You, therefore, either have to import the meta data right at the beginning of your run or you will have to step back all the way to the  import section when you later on realize you need it.
 
 
 ### Miscellaneous
@@ -57,13 +62,9 @@ Finally, at the bottom of the sidebar, you can name and export the workflow of t
 
 
 # UniProt usage in PROTzilla
-To make use of the UniProt integration in PROTzilla, tables with information on
-proteins need to be added to PROTzilla via the Databases page. Afterward, they
-can be used for Gene mapping if they contain a `Gene Names` or `Gene Names 
-(primary)` column, or for adding UniProt data to a PROTzilla table.
+To make use of the UniProt integration in PROTzilla, tables with information onproteins need to be added to PROTzilla via the Databases page. Afterward, theycan be used for Gene mapping if they contain a `Gene Names` or `Gene Names (primary)` column, or for adding UniProt data to a PROTzilla table.
 
-By using the [UniProt website](https://www.uniprot.org/uniprotkb?query=), tables, that contain the proteins that interest you with the columns that you
-need, can be downloaded.
+By using the [UniProt website](https://www.uniprot.org/uniprotkb?query=), tables, that contain the proteins that interest you with the columns that you need, can be downloaded.
 
 
 ### How to query UniProt
