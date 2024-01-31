@@ -25,14 +25,20 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> (pd.DataFrame, list
     """
     if df.isnull().values.any():
         columns_with_nan = df.columns[df.isna().any()].tolist()
-        messages.append(
-            {
-                "level": logging.WARNING,
-                "msg": f"Some NaN values remain in {columns_with_nan} of the imputed dataframe, indicating an unfiltered dataset and / or insufficient data. "
-                "Possible solutions to this include adding a filtering step before this imputation step in the preprocessing section to your workflow, "
-                "or using a different imputation method.",
-            }
-        )
+        try:
+            columns_with_nan.remove("Gene")
+        except ValueError:
+            pass
+
+        if len(columns_with_nan) > 0:
+            messages.append(
+                {
+                    "level": logging.WARNING,
+                    "msg": f"Some NaN values remain in {columns_with_nan} of the imputed dataframe, indicating an unfiltered dataset and / or insufficient data. "
+                    "Possible solutions to this include adding a filtering step before this imputation step in the preprocessing section to your workflow, "
+                    "or using a different imputation method.",
+                }
+            )
 
     # Group by 'Protein ID' and check if all values in each group are identical
     identical_values_warning_given = False
