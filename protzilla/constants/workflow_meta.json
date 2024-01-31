@@ -1109,7 +1109,6 @@
             "mapping": {
               "p_values": "corrected_p_values_df",
               "log2_fc": "log2_fold_change_df",
-              "fc_threshold": "fc_threshold",
               "alpha": "corrected_alpha",
               "group1": "group1",
               "group2": "group2"

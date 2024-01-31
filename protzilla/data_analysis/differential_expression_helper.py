@@ -52,7 +52,7 @@ def _map_log_base(log_base: str) -> int | None:
 def log_transformed_check(
     intensity_df: pd.DataFrame,
     intensity_name: str = None,
-    value_threshold: int = 100,
+    value_threshold: int = 1000,
 ):
     """This function checks a intensity dataframe for a previous log transformation based on the intensity values.
     Returns true if the df was likely previously log-transformed, else false."""
