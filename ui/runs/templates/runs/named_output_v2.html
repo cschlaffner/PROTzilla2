@@ -1,0 +1,11 @@
+{# params: key name disabled default steps outputs #}
+{% if class %}
+    <div class="{{ class }}" id="{{ key }}"> {% endif %}
+<label for="{{ key }}">{{ name }}</label>
+<select name="{{ key }}" class="form-select"{% if not disabled %} id="{{ key }}_outputs" {% endif %} {% if disabled %}
+        disabled {% endif %} >
+    {% for option in outputs %}
+        <option value="{{ option }}" {% if option == default.1 %} selected {% endif %} >{{ option }}</option>
+    {% endfor %}
+</select>
+{% if class %}</div>{% endif %}

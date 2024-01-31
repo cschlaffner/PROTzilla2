@@ -83,6 +83,21 @@ def default_intensity_column(
     )
 
 
+def exists_message(messages, msg):
+    """
+    Checks if a message exists in a list of messages.
+
+    :param messages: a list of messages
+    :type messages: list
+    :param msg: the message to check
+    :type msg: dict
+
+    :return: True if the message exists, False otherwise
+    :rtype: bool
+    """
+    return any(message == msg for message in messages)
+
+
 def name_to_title(step: str) -> str:
     """
     Returns a name in title format. Exceptions where the .title() method is not enough are handled here.

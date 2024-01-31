@@ -170,18 +170,6 @@
             "grouping": "Group"
           },
           "output_name": "ttest"
-        },
-        {
-          "name": "plot",
-          "method": "clustergram",
-          "parameters": {
-            "input_df": [
-              "anova",
-              "filtered_df"
-            ],
-            "sample_group_df": ["None", null],
-            "flip_axes": "no"
-          }
         }
       ]
     },

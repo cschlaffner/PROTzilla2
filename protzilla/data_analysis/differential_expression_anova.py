@@ -1,61 +1,90 @@
 import logging
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
-from protzilla.utilities import default_intensity_column
+from protzilla.data_preprocessing.transformation import by_log
+from protzilla.utilities import default_intensity_column, exists_message
 
-from .differential_expression_helper import apply_multiple_testing_correction
+from .differential_expression_helper import (
+    BAD_LOG_BASE_INPUT_MSG,
+    INVALID_PROTEINGROUP_DATA_MSG,
+    LOG_TRANSFORMATION_MESSAGE_MSG,
+    _map_log_base,
+    apply_multiple_testing_correction,
+    log_transformed_check,
+)
 
 
 def anova(
     intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
-    grouping: str,
-    selected_groups: list,
     multiple_testing_correction_method: str,
     alpha: float,
+    grouping: str,
+    log_base: str = None,
+    selected_groups: list = None,
     intensity_name: str = None,
-):
+) -> dict:
     """
-    A function that uses ANOVA to test the difference between two or more
-    groups defined in the clinical data. The ANOVA test is conducted on
-    the level of each protein. The p-values are corrected for multiple
-    testing.
+        return dict(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            corrected_p_values_df=corrected_p_values_df,
+            sample_group_df=sample_group_df,
+            corrected_alpha=corrected_alpha,
+            filtered_proteins=filtered_proteins,
+            messages=messages,
+        )
+        A function that uses ANOVA to test the difference between two or more
+        groups defined in the clinical data. The ANOVA test is conducted on
+        the level of each protein. The p-values are corrected for multiple
+        testing.
 
-    :param intensity_df: the dataframe that should be tested in long
-        format
-    :type intensity_df: pandas DataFrame
-    :param metadata_df: the dataframe that contains the clinical data
-    :type metadata_df: pandas DataFrame
-    :param grouping: the column name of the grouping variable in the
-        metadata_df
-    :type grouping: str
-    :param selected_groups: groups to test against each other
-    :type selected_groups: list, if None or empty: first two groups will be selected
-    :param multiple_testing_correction_method: the method for multiple
-        testing correction
-    :type multiple_testing_correction_method: str
-    :param alpha: the alpha value for anova
-    :type alpha: float
-    :param intensity_name: name of the column containing the protein group intensities
-    :type intensity_name: str / None
-    :return: a dataframe with the intensity_df and the corrected p-values
-        and a dict containing corrected_p_values and corrected_alphas
-    :rtype: pandas DataFrame, dict
-
-    :return: a dataframe in typical protzilla long format
-        with the differentially expressed proteins and a dict, containing
-        the corrected p-values and the log2 fold change, the alpha used
-        and the corrected alpha, as well as filtered out proteins.
+        :param intensity_df: the dataframe that should be tested in long format
+        :param metadata_df: the dataframe that contains the clinical data
+        :param grouping: the column name of the grouping variable in the metadata_df
+        :param selected_groups: groups to test against each other
+        :param multiple_testing_correction_method: the method for multiple testing correction
+        :param alpha: the alpha value for anova
+        :param log_base: in case the data was previously log transformed this parameter contains the base as a string
+        :param intensity_name: name of the column containing the protein group intensities
+        :return: a dict containing
+    - a df differentially_expressed_proteins_df in typical protzilla long format containing the anova results
+                corrected_p_value per non-filtered protein
+            - a df corrected_p_values, containing the p_values after application of multiple testing correction,
+            - a df fold_change_df, containing the fold_changes per protein,
+            - a df log2_fold_change, containing the log2 fold changes per protein,
+            - a df t_statistic_df, containing the t-statistic per protein,
+            - a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
+            - a df filtered_proteins, containing the filtered out proteins (due to missing values or identical values),
     """
-    # Check if the grouping variable is present in the metadata_df
+
     assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
+    messages = []
+    # Check if the selected groups are present in the metadata_df
 
-    # Select the first two groups if none or an empty list is provided
-    if not selected_groups:
+    # Select all groups if none or less than two were selected
+    if not selected_groups or isinstance(selected_groups, str):
         selected_groups = metadata_df[grouping].unique()
-        logging.warning("auto-selected all groups in anova")
+        selected_groups_str = "".join([" " + str(group) for group in selected_groups])
+        messages.append(
+            {
+                "level": logging.INFO,
+                "msg": f"Auto-selected the groups {selected_groups_str} for comparison because none or only one group was selected.",
+            }
+        )
+    elif len(selected_groups) >= 2:
+        for group in selected_groups:
+            if group not in metadata_df[grouping].unique():
+                messages.append(
+                    {
+                        "level": logging.ERROR,
+                        "msg": f"Group {group} not found in metadata_df.",
+                    }
+                )
+                return {"messages": messages}
 
     # Merge the intensity and metadata dataframes in order to assign to each Sample
     # their corresponding group
@@ -65,11 +94,25 @@ def anova(
         on="Sample",
         copy=False,
     )
+    intensity_name = default_intensity_column(intensity_df, intensity_name)
+
+    log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
+    was_likely_log_transformed = log_transformed_check(intensity_df, intensity_name)
+    if log_base == None:
+        if was_likely_log_transformed:
+            messages.append(BAD_LOG_BASE_INPUT_MSG)
+        # if the data is not log-transformed, we need to do so first for the analysis
+        intensity_df, _ = by_log(intensity_df, log_base="log2")
+        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
+        log_base = 2
+    else:
+        if not was_likely_log_transformed:
+            messages.append(BAD_LOG_BASE_INPUT_MSG)
 
     # Perform ANOVA and calculate p-values for each protein
     proteins = intensity_df["Protein ID"].unique()
-    intensity_name = default_intensity_column(intensity_df, intensity_name)
     p_values = []
+    valid_protein_groups = []
     for protein in proteins:
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]
         all_group_intensities = []
@@ -78,31 +121,51 @@ def anova(
                 protein_df[protein_df[grouping] == group][intensity_name].to_numpy()
             )
         p = stats.f_oneway(*all_group_intensities)[1]
-        p_values.append(p)
+        if not np.isnan(p):
+            p_values.append(p)
+            valid_protein_groups.append(protein)
+        elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
+            messages.append(INVALID_PROTEINGROUP_DATA_MSG)
 
     # Apply multiple testing correction and create a dataframe with corrected p-values
     corrected_p_values, corrected_alpha = apply_multiple_testing_correction(
         p_values, multiple_testing_correction_method, alpha
     )
     corrected_p_values_df = pd.DataFrame(
-        list(zip(proteins, corrected_p_values)),
+        list(zip(valid_protein_groups, corrected_p_values)),
         columns=["Protein ID", "corrected_p_values"],
     )
     if corrected_alpha is None:
         corrected_alpha = alpha
 
-    # Merge the corrected p-values with the original data
-    # and filter out non-significant proteins
-    tested_df = intensity_df.merge(corrected_p_values_df, on="Protein ID")
-    filtered_df = tested_df.loc[tested_df["corrected_p_values"] < corrected_alpha]
-    filtered_df.drop("corrected_p_values", axis=1, inplace=True)
+    dataframes = [corrected_p_values_df]
+
+    # add the calculated information to the dataframe
+    for df in dataframes:
+        intensity_df = pd.merge(intensity_df, df, on="Protein ID", copy=False)
+
+    differentially_expressed_proteins = [
+        protein for protein, p in zip(valid_protein_groups, corrected_p_values)
+    ]
+    differentially_expressed_proteins_df = intensity_df[
+        intensity_df["Protein ID"].isin(differentially_expressed_proteins)
+    ]
+
+    significant_proteins_df = differentially_expressed_proteins_df[
+        differentially_expressed_proteins_df["corrected_p_values"] < corrected_alpha
+    ]
 
     # Create mapping from sample to group
-    sample_group_df = filtered_df[["Sample", grouping]].drop_duplicates()
-    sample_group_df.set_index("Sample", inplace=True)
-    return {
-        "filtered_df": filtered_df,
-        "corrected_p_values_df": corrected_p_values_df,
-        "corrected_alpha": corrected_alpha,
-        "sample_group_df": sample_group_df,
-    }
+    sample_group_df = differentially_expressed_proteins_df[
+        ["Sample", grouping]
+    ].drop_duplicates()
+    filtered_proteins = list(set(proteins) - set(valid_protein_groups))
+    return dict(
+        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        significant_proteins_df=significant_proteins_df,
+        corrected_p_values_df=corrected_p_values_df,
+        sample_group_df=sample_group_df,
+        corrected_alpha=corrected_alpha,
+        filtered_proteins=filtered_proteins,
+        messages=messages,
+    )
