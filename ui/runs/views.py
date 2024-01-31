@@ -18,6 +18,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
+from protzilla.workflow_helper import is_last_step
+
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.constants.protzilla_logging import logger
@@ -89,6 +91,7 @@ def detail(request, run_name):
     if not end_of_run:
         description = run.workflow_meta[section][step][method]["description"]
     else: description = ""
+    last_step = is_last_step(run.workflow_config, run.step_index)
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
     if run.section == "data_integration" and run.step == "enrichment_analysis":
@@ -159,6 +162,7 @@ def detail(request, run_name):
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
             sidebar=make_sidebar(request, run, run_name),
+            last_step=last_step,
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),
@@ -288,37 +292,45 @@ def change_field(request, run_name):
         post_id = post_id[:-4]
 
     parameters = run.workflow_meta[run.section][run.step][run.method]["parameters"]
-    fields_to_fill = parameters[post_id]["fill_dynamic"]
+    if "fill_dynamic" in parameters[post_id]:
+        fields_to_fill = parameters[post_id]["fill_dynamic"]
+    else:
+        fields_to_fill = [k for k in parameters.keys() if parameters[k]["type"] == "named_output_v2"]
 
     fields = {}
     for key in fields_to_fill:
         param_dict = parameters[key]
 
-        if param_dict["fill"] == "metadata_column_data":
-            param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
-        elif param_dict["fill"] == "uniprot_fields":
-            param_dict["categories"] = uniprot_columns(selected[0]) + ["Links"]
-        elif param_dict["fill"] == "protein_ids":
-            named_output = selected[0]
-            output_item = selected[1]
-            # KeyError is expected when named_output triggers the fill
-            try:
-                protein_iterable = run.history.output_of_named_step(
-                    named_output, output_item
-                )
-            except KeyError:
-                protein_iterable = None
-            if isinstance(protein_iterable, pd.DataFrame):
-                param_dict["categories"] = protein_iterable["Protein ID"].unique()
-            elif isinstance(protein_iterable, pd.Series):
-                param_dict["categories"] = protein_iterable.unique()
-            elif isinstance(protein_iterable, list):
-                param_dict["categories"] = protein_iterable
-            else:
-                param_dict["categories"] = []
-                print(
-                    f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
-                )
+        if "fill" in param_dict:
+            if param_dict["fill"] == "metadata_column_data":
+                param_dict["categories"] = run.metadata[selected[0]].unique().tolist()
+            elif param_dict["fill"] == "uniprot_fields":
+                param_dict["categories"] = uniprot_columns(selected[0]) + ["Links"]
+            elif param_dict["fill"] == "protein_ids":
+                if len(selected) == 1:
+                    named_output = run.current_out_sources[selected[0]]
+                    output_item = selected[0]
+                else:
+                    named_output = selected[0]
+                    output_item = selected[1]
+                # KeyError is expected when named_output triggers the fill
+                try:
+                    protein_iterable = run.history.output_of_named_step(
+                        named_output, output_item
+                    )
+                except KeyError:
+                    protein_iterable = None
+                if isinstance(protein_iterable, pd.DataFrame):
+                    param_dict["categories"] = protein_iterable["Protein ID"].unique()
+                elif isinstance(protein_iterable, pd.Series):
+                    param_dict["categories"] = protein_iterable.unique()
+                elif isinstance(protein_iterable, list):
+                    param_dict["categories"] = protein_iterable
+                else:
+                    param_dict["categories"] = []
+                    print(
+                        f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
+                    )
 
         elif param_dict["fill"] == "protein_df_columns":
             named_output = selected[0]
@@ -362,8 +374,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                    not isinstance(protein_iterable, pd.DataFrame)
-                    or not "Gene_set" in protein_iterable.columns
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "Gene_set" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -382,8 +394,8 @@ def change_field(request, run_name):
                 protein_iterable = None
 
             if (
-                    not isinstance(protein_iterable, pd.DataFrame)
-                    or not "NES" in protein_iterable.columns
+                not isinstance(protein_iterable, pd.DataFrame)
+                or not "NES" in protein_iterable.columns
             ):
                 param_dict["categories"] = []
             else:
@@ -397,6 +409,12 @@ def change_field(request, run_name):
                     else:
                         gene_set_libraries.add("all")
                 param_dict["categories"] = list(gene_set_libraries)
+
+        elif "select_from" in param_dict:
+            param_dict["outputs"] = run.history.output_keys_of_named_step(selected[0])
+
+            for out_key in param_dict["outputs"]:
+                run.current_out_sources[out_key] = selected[0]
 
         fields[key] = make_parameter_input(key, param_dict, parameters, disabled=False)
 
