@@ -100,29 +100,37 @@ def linear_model(
         protein_df = intensity_df.loc[intensity_df["Protein ID"] == protein]
         protein_df = protein_df[protein_df[grouping].isin([group1, group2])]
         protein_df[grouping] = protein_df[grouping].replace([group1, group2], [-1, 1])
+        group1_intensities = protein_df[protein_df[grouping] == -1][
+            intensity_name
+        ].values
+        group2_intensities = protein_df[protein_df[grouping] == 1][
+            intensity_name
+        ].values
 
         # if a protein has a NaN value in a sample, user should remove it
-        if not protein_df[intensity_name].isnull().values.any():
+        if (
+            not np.isnan(group1_intensities).any()
+            and not np.isnan(group2_intensities).any()
+            and len(group1_intensities) > 0
+            and len(group2_intensities) > 0
+        ):
             # lm(intensity ~ group + constant)
             Y = protein_df[[intensity_name]]
             X = protein_df[[grouping]]
             X = sm.add_constant(X)
             model = sm.OLS(Y, X)
             results = model.fit()
-            group1_avg = protein_df[protein_df[grouping] == -1][intensity_name].mean()
-            group2_avg = protein_df[protein_df[grouping] == 1][intensity_name].mean()
+            log2_fold_change = np.log2(
+                np.power(log_base, group2_intensities).mean()
+                / np.power(log_base, group1_intensities).mean()
+            )
 
-            log2_fold_change = None
-            if log_base == 2:
-                log2_fold_change = group2_avg - group1_avg
-            elif log_base == 10:
-                log2_fold_change = (group2_avg - group1_avg) / np.log10(2)
-            else:
-                raise ValueError(f"Invalid log base {log_base}. Contact the devs.")
-
-            valid_protein_groups.append(protein)
-            p_values.append(results.pvalues[grouping])
-            log2_fold_changes.append(log2_fold_change)
+            if not np.isnan(results.pvalues[grouping]):
+                valid_protein_groups.append(protein)
+                p_values.append(results.pvalues[grouping])
+                log2_fold_changes.append(log2_fold_change)
+            elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
+                messages.append(INVALID_PROTEINGROUP_DATA_MSG)
         elif not exists_message(messages, INVALID_PROTEINGROUP_DATA_MSG):
             messages.append(INVALID_PROTEINGROUP_DATA_MSG)
         else:

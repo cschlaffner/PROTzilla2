@@ -118,17 +118,10 @@ def t_test(
         t, p = stats.ttest_ind(group1_intensities, group2_intensities)
 
         if not np.isnan(p):
-            log2_fold_change = None
-            if log_base == 2:
-                log2_fold_change = np.mean(group2_intensities) - np.mean(
-                    group1_intensities
-                )
-            elif log_base == 10:
-                log2_fold_change = (
-                    np.mean(group2_intensities) - np.mean(group1_intensities)
-                ) / np.log10(2)
-            else:
-                raise ValueError(f"Invalid log base {log_base}. Contact the devs.")
+            log2_fold_change = np.log2(
+                np.power(log_base, group2_intensities).mean()
+                / np.power(log_base, group1_intensities).mean()
+            )
 
             valid_protein_groups.append(protein)
             p_values.append(p)
