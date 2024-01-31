@@ -926,7 +926,7 @@
               "log2",
               "log10"
             ],
-            "default": "None"
+            "default": "log2"
 
           },
           "grouping": {
@@ -991,7 +991,7 @@
               "log2",
               "log10"
             ],
-            "default": "None"
+            "default": "log2"
 
           },
 
@@ -1063,7 +1063,7 @@
               "log2",
               "log10"
             ],
-            "default": "None"
+            "default": "log2"
 
           },
           "grouping": {
