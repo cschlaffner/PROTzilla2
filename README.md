@@ -16,10 +16,10 @@
 | protzilla/data\_analysis/classification\_helper.py                  |       80 |       15 |       40 |        5 |     73% |41, 81-82, 103-114, 131, 166-169 |
 | protzilla/data\_analysis/clustering.py                              |       69 |       11 |        6 |        2 |     83% |141, 365-380, 384-388 |
 | protzilla/data\_analysis/differential\_expression.py                |        7 |        3 |        0 |        0 |     57% |      9-11 |
-| protzilla/data\_analysis/differential\_expression\_anova.py         |       31 |        1 |        8 |        1 |     95% |        92 |
-| protzilla/data\_analysis/differential\_expression\_helper.py        |        7 |        1 |        2 |        1 |     78% |        22 |
-| protzilla/data\_analysis/differential\_expression\_linear\_model.py |       47 |        6 |       12 |        3 |     85% |56-57, 59-60, 85-87 |
-| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       59 |        0 |       18 |        0 |    100% |           |
+| protzilla/data\_analysis/differential\_expression\_anova.py         |       58 |       14 |       30 |        7 |     69% |70-72, 78->91, 81-87, 102-107, 110, 127-128, 139 |
+| protzilla/data\_analysis/differential\_expression\_helper.py        |       27 |        2 |       10 |        2 |     89% |    43, 60 |
+| protzilla/data\_analysis/differential\_expression\_linear\_model.py |       66 |       15 |       24 |        6 |     70% |56-57, 64-65, 83-89, 92, 132-138 |
+| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       24 |        2 |     95% |21, 76->80, 107 |
 | protzilla/data\_analysis/dimension\_reduction.py                    |       33 |        4 |       10 |        2 |     86% |67-72, 100, 179 |
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
@@ -36,7 +36,7 @@
 | protzilla/data\_preprocessing/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_preprocessing/filter\_proteins.py                   |       18 |        2 |        4 |        1 |     77% |     53-54 |
 | protzilla/data\_preprocessing/filter\_samples.py                    |       35 |        0 |        4 |        0 |    100% |           |
-| protzilla/data\_preprocessing/imputation.py                         |      115 |        1 |       22 |        3 |     97% |144, 493->506, 517->523 |
+| protzilla/data\_preprocessing/imputation.py                         |      131 |        3 |       30 |        4 |     96% |47-53, 180, 517->530, 541->547 |
 | protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |248->259, 260 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |176, 193, 248, 249->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
@@ -49,13 +49,13 @@
 | protzilla/importing/ms\_data\_import.py                             |      115 |       22 |       48 |        1 |     79% |28-29, 88-90, 117-119, 231-249 |
 | protzilla/importing/peptide\_import.py                              |       22 |        2 |        2 |        0 |     92% |     15-16 |
 | protzilla/run.py                                                    |      329 |       61 |      125 |       18 |     75% |75-81, 85-91, 151->162, 183, 185, 193-196, 202-205, 253-259, 263, 266, 325-326, 411, 425->444, 436, 440, 443, 448->451, 449-450, 453-457, 462->491, 468, 471, 474-476, 479-488, 489->462, 490, 502 |
-| protzilla/run\_helper.py                                            |       95 |       35 |       74 |       16 |     59% |25, 28-45, 48-55, 66, 73, 83, 85, 87, 89-94, 96-98, 101-103, 104->107, 111, 120, 158->exit, 170 |
+| protzilla/run\_helper.py                                            |       95 |       34 |       74 |       15 |     60% |25, 28-45, 48-55, 66, 73, 83, 85, 87, 89-94, 96-98, 101-103, 104->107, 120, 158->exit, 170 |
 | protzilla/runner.py                                                 |       89 |        4 |       38 |        4 |     94% |115, 124, 142->140, 156-157 |
 | protzilla/utilities/\_\_init\_\_.py                                 |        1 |        0 |        0 |        0 |    100% |           |
 | protzilla/utilities/clustergram.py                                  |      375 |       99 |      194 |       55 |     67% |82, 97, 99, 106, 150-151, 153, 155, 161->164, 164->171, 190, 205, 209, 213, 217, 227, 231-236, 241->243, 244, 246, 248, 252->254, 254->258, 259-270, 273, 275, 277-296, 315-318, 321->323, 328->330, 331, 383-384, 386-387, 402-403, 405-406, 474->480, 486, 503, 523, 526->549, 531->534, 568->574, 574->587, 662->667, 675->679, 696, 698, 728-735, 744-757, 767-771, 825->842, 842->862, 894->902, 902->911, 929-941, 944-956, 982-998, 1012-1028 |
 | protzilla/utilities/dunn\_score.py                                  |       10 |        6 |        6 |        0 |     25% | 25, 41-48 |
 | protzilla/utilities/transform\_dfs.py                               |       25 |        0 |        9 |        0 |    100% |           |
-| protzilla/utilities/utilities.py                                    |       40 |        4 |       10 |        2 |     88% |27-28, 69, 80 |
+| protzilla/utilities/utilities.py                                    |       42 |        4 |       12 |        2 |     89% |27-28, 69, 80 |
 | protzilla/workflow\_helper.py                                       |       58 |       14 |       36 |       20 |     62% |26-28, 37, 41, 46, 50->exit, 50->exit, 57, 65->66, 65->67, 67->70, 68, 71, 76-88, 94, 96->102, 106, 112->111, 113->112, 115->112, 118->115, 119->120, 123 |
 | runner\_cli.py                                                      |       21 |        5 |        2 |        1 |     74% | 55-58, 62 |
 | ui/\_\_init\_\_.py                                                  |        0 |        0 |        0 |        0 |    100% |           |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      344 |      309 |      134 |        2 |      7% |59, 84-124, 166-182, 213-234, 254-655, 677, 680, 683-862 |
 | ui/runs/views\_helper.py                                            |       63 |       14 |       26 |        4 |     75% |16->18, 22, 35, 38-44, 116-124, 138-139 |
-|                                                           **TOTAL** | **4497** | **1311** | **1813** |  **255** | **67%** |           |
+|                                                           **TOTAL** | **4586** | **1337** | **1871** |  **267** | **67%** |           |
 
 
 ## Setup coverage badge
