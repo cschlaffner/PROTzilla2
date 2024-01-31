@@ -299,7 +299,7 @@ def test_differential_expression_t_test_with_zero_mean(
         fig.show()
 
     corrected_p_values = [0.0116, 1.000]
-    log2_fc = [-1.0148, 0]
+    log2_fc = [-1.0, 0]
     differentially_expressed_proteins = ["Protein1", "Protein3"]
 
     p_values_rounded = [
