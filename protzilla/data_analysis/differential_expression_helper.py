@@ -59,7 +59,10 @@ def log_transformed_check(
     if intensity_name is None:
         intensity_name = default_intensity_column(intensity_df)
 
-    if intensity_df[intensity_name].max() > value_threshold:
+    if (
+        intensity_df[intensity_name].max() > value_threshold
+        or intensity_df[intensity_name].min() < 0
+    ):
         return False
 
     return True
