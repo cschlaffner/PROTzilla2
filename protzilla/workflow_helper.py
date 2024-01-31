@@ -17,6 +17,15 @@ def get_steps_of_workflow(
         )
     return workflow_steps
 
+def get_steps_amount_of_workflow(
+    workflow_config_dict,
+) -> int:
+    amount = 0
+    for section, steps in workflow_config_dict["sections"].items():
+        amount += steps["steps"].__len__()
+
+    return amount
+
 
 def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]]:
     workflow_steps = []
@@ -25,14 +34,6 @@ def get_steps_of_workflow_meta(workflow_meta) -> list[dict[str, str | list[str]]
             {"section": section, "possible_steps": list(steps.keys())}
         )
     return workflow_steps
-
-
-def step_name(step):
-    return step.replace("_", " ").title()
-
-
-def section_name(section):
-    return section.replace("_", " ").title()
 
 
 def method_name(workflow_meta, section, step, method):
@@ -67,6 +68,22 @@ def get_workflow_default_param_value(
         else:
             return None
     return None
+
+
+def is_last_step_in_section(workflow_config, section, step_index_in_section) -> bool:
+    amount_steps_in_section = workflow_config["sections"][section]["steps"].__len__()
+    return amount_steps_in_section <= step_index_in_section + 1
+
+def is_last_step(workflow_config, index) -> bool:
+    """
+    Checks if the step is the last step in the workflow.
+
+    :param workflow_config: The workflow config
+    :param section: The section of the step
+    :param index: The global index of the step
+    """
+
+    return get_steps_amount_of_workflow(workflow_config) <= index + 1
 
 
 def validate_workflow_parameters(workflow_config, workflow_meta):

@@ -74,8 +74,12 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
 
 
 def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
-    result_df1, method_output1 = by_protein_count(filter_samples_df, threshold=0.3)
-    result_df2, method_output2 = by_protein_count(filter_samples_df, threshold=1)
+    result_df1, method_output1 = by_protein_count(
+        filter_samples_df, deviation_threshold=0.3
+    )
+    result_df2, method_output2 = by_protein_count(
+        filter_samples_df, deviation_threshold=1
+    )
 
     list_samples_excluded_1 = method_output1["filtered_samples"]
     list_samples_excluded_2 = method_output2["filtered_samples"]
@@ -100,10 +104,10 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
 
 def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
     result_df1, method_output1 = by_protein_intensity_sum(
-        filter_samples_df, threshold=1
+        filter_samples_df, deviation_threshold=1
     )
     result_df2, method_output2 = by_protein_intensity_sum(
-        filter_samples_df, threshold=0.3
+        filter_samples_df, deviation_threshold=0.3
     )
 
     list_samples_excluded_1 = method_output1["filtered_samples"]

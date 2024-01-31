@@ -5,6 +5,7 @@ import matplotlib.colors as mcolors
 import restring
 from biomart import BiomartServer
 
+from protzilla.constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -15,6 +16,36 @@ def insert_special_params(param_dict, run):
         if param_dict.get("optional", False):
             param_dict["steps"].append("None")
 
+        if param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
+            selected = param_dict["default"][0]
+        else:
+            selected = param_dict["steps"][0] if param_dict["steps"] else None
+        param_dict["outputs"] = run.history.output_keys_of_named_step(selected)
+        if "sorted" in param_dict and param_dict["sorted"]:
+            param_dict["outputs"].sort()
+
+    if param_dict["type"] == "multi_named_output":
+        all_steps = [name for name in run.history.step_names if name][::-1]
+        required_outputs = list(param_dict["mapping"].values())
+        param_dict["steps"] = [
+            step
+            for step in all_steps
+            if set(required_outputs).issubset(
+                set(run.history.output_keys_of_named_step(step))
+            )
+        ]
+        param_dict["class"] = "dynamic_trigger"
+
+        try:
+            for output_key in run.history.output_keys_of_named_step(
+                param_dict["steps"][0]
+            ):
+                run.current_out_sources[output_key] = param_dict["steps"][0]
+        except IndexError:
+            pass
+
+    if param_dict["type"] == "named_output_v2":
+        param_dict["steps"] = [name for name in run.history.step_names if name][::-1]
         if param_dict["default"] and param_dict["default"][0] in param_dict["steps"]:
             selected = param_dict["default"][0]
         else:
@@ -72,6 +103,8 @@ def insert_special_params(param_dict, run):
             server = BiomartServer("http://www.ensembl.org/biomart")
             database = server.databases["ENSEMBL_MART_ENSEMBL"]
             param_dict["categories"] = database.datasets
+        elif param_dict["fill"] == "protein_group_column":
+            param_dict["categories"] = run.df["Protein ID"].unique()
 
     if "fill_dynamic" in param_dict:
         param_dict["class"] = "dynamic_trigger"
@@ -113,3 +146,33 @@ def get_parameters(run, section, step, method):
         insert_special_params(param_dict, run)
         output[key] = param_dict
     return output
+
+
+def log_message(level: int = 40, msg: str = "", trace: str = ""):
+    """
+    Logs a message to the console.
+
+    :param level: The logging level of the message. See https://docs.python.org/3/library/logging.html#logging-levels
+    :param msg: The message to log.
+    :param trace: The trace to log.
+    """
+    log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
+    if log_function:
+        trace = f"\nTrace: {trace}" if trace != "" else ""
+        log_function(f"{msg}{trace}")
+
+
+def log_messages(messages: list[dict] = None):
+    """
+    Logs a list of messages to the console.
+
+    :param messages: A list of messages to log, each message is a dict with the keys "level", "msg" and optional "trace".
+    """
+    if messages is None:
+        messages = []
+    for message in messages:
+        log_message(
+            message["level"],
+            message["msg"],
+            message["trace"] if "trace" in message else "",
+        )

@@ -8,8 +8,8 @@ import pandas as pd
 import requests
 from django.contrib import messages
 
-from protzilla.constants.logging import logger
 from protzilla.constants.paths import RUNS_PATH
+from protzilla.constants.protzilla_logging import logger
 
 
 def variation_graph(protein_id: str, run_name: str):
@@ -32,7 +32,7 @@ def variation_graph(protein_id: str, run_name: str):
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
         )
 
     out = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
@@ -73,7 +73,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         return dict(
             graph_path=None,
             filtered_blocks=filtered_blocks,
-            messages=[dict(level=messages.ERROR, msg=msg, trace=request.__dict__)],
+            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
         )
 
     output_folder_path = run_path / "graphs"
@@ -92,7 +92,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 
@@ -156,7 +156,7 @@ def peptides_to_isoform(
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
         )
 
     print(
@@ -197,7 +197,7 @@ def peptides_to_isoform(
         logger.error(msg)
         return dict(
             graph_path=None,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
@@ -227,7 +227,7 @@ def peptides_to_isoform(
     if msg:
         return dict(
             graph_path=graph_path,
-            messages=[dict(level=messages.ERROR, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
@@ -260,7 +260,7 @@ def peptides_to_isoform(
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=messages.INFO, msg=msg)],
+        messages=[dict(level=logging.INFO, msg=msg)],
     )
 
 

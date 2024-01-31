@@ -1,11 +1,21 @@
 import pandas as pd
 
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
+from protzilla.utilities import default_intensity_column
 
 
-def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold):
-    intensity_name = intensity_df.columns.values.tolist()[3]
+def by_protein_intensity_sum(
+    intensity_df: pd.DataFrame, deviation_threshold: float
+) -> tuple[pd.DataFrame, dict]:
+    """
+    This function filters samples based on the sum of the protein intensities.
 
+    :param intensity_df: the intensity dataframe that should be filtered
+    :param deviation_threshold: defining the maximally allowed deviation from the median (in standard deviations)
+        to keep a sample
+    :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
+    """
+    intensity_name = default_intensity_column(intensity_df)
     sample_protein_sum = intensity_df.groupby("Sample")[intensity_name].sum()
 
     median = sample_protein_sum.median()
@@ -13,8 +23,8 @@ def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold):
 
     filtered_samples_list = sample_protein_sum[
         ~sample_protein_sum.between(
-            (median - threshold * sd),
-            (median + threshold * sd),
+            (median - deviation_threshold * sd),
+            (median + deviation_threshold * sd),
         )
     ].index.tolist()
     return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
@@ -22,9 +32,19 @@ def by_protein_intensity_sum(intensity_df: pd.DataFrame, threshold):
     )
 
 
-def by_protein_count(intensity_df: pd.DataFrame, threshold):
-    intensity_name = intensity_df.columns.values.tolist()[3]
+def by_protein_count(
+    intensity_df: pd.DataFrame, deviation_threshold: float
+) -> tuple[pd.DataFrame, dict]:
+    """
+    This function filters samples based on their deviation of amount of proteins with a non-nan value from
+    the median across all samples.
 
+    :param intensity_df: the intensity dataframe that should be filtered
+    :param deviation_threshold: float, defining the allowed deviation (in standard deviations) from the median number
+        of non-nan values to keep a sample
+    :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
+    """
+    intensity_name = default_intensity_column(intensity_df)
     sample_protein_count = (
         intensity_df[~intensity_df[intensity_name].isnull()]
         .groupby("Sample")["Protein ID"]
@@ -33,10 +53,11 @@ def by_protein_count(intensity_df: pd.DataFrame, threshold):
 
     median = sample_protein_count.median()
     sd = sample_protein_count.std()
+
     filtered_samples_list = sample_protein_count[
         ~sample_protein_count.between(
-            (median - threshold * sd),
-            (median + threshold * sd),
+            (median - deviation_threshold * sd),
+            (median + deviation_threshold * sd),
         )
     ].index.tolist()
     return intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))], dict(
@@ -44,25 +65,20 @@ def by_protein_count(intensity_df: pd.DataFrame, threshold):
     )
 
 
-def by_proteins_missing(intensity_df: pd.DataFrame, percentage):
+def by_proteins_missing(
+    intensity_df: pd.DataFrame, percentage: float
+) -> tuple[pd.DataFrame, dict]:
     """
-    This function filters samples based on the amount of nan values.
-    If the percentage of existing values is below a threshold (percentage), the sample is filtered out.
+    This function filters samples based on the amount of proteins with nan values, if the percentage of nan values
+    is below a threshold (percentage).
 
-    :param df: the intensity dataframe that should be filtered
-        in long format
-    :type df: pd.DataFrame
-    :param percentage: float ranging from 0 to 1. Defining the
-        relative share of proteins that were detected in the sample in inorder to be kept.
-    :type percentage: float
-
-    :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs
-        that were discarded and a list of Protein IDs
-        that were kept
-    :rtype: Tuple[pandas DataFrame, dict]
+    :param intensity_df: the intensity dataframe that should be filtered
+    :param percentage: ranging from 0 to 1. Defining the relative share of proteins that were detected in the
+        sample in inorder to be kept.
+    :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
     """
-    intensity_name = intensity_df.columns.values.tolist()[3]
 
+    intensity_name = default_intensity_column(intensity_df)
     total_protein_count = intensity_df["Protein ID"].nunique()
     sample_protein_count = (
         intensity_df[~intensity_df[intensity_name].isnull()]
@@ -107,5 +123,6 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
             ],
             names_of_sectors=["Samples kept", "Samples filtered"],
             heading="Number of Filtered Samples",
+            y_title="Number of Samples",
         )
     return [fig]

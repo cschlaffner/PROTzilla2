@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 
 import numpy as np
@@ -113,6 +114,123 @@ def ms_fragger_import_intensity_df(intensity_name):
     return ms_fragger_df
 
 
+def diann_import_intensity_df():
+    diann_intensity_df = {
+        "Sample": {
+            0: "LM07061",
+            1: "LM07061",
+            2: "LM07061",
+            3: "LM07061",
+            4: "LM07061",
+            5: "LM07062",
+            6: "LM07062",
+            7: "LM07062",
+            8: "LM07062",
+            9: "LM07062",
+            10: "LM07063",
+            11: "LM07063",
+            12: "LM07063",
+            13: "LM07063",
+            14: "LM07063",
+        },
+        "Protein ID": {
+            0: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
+            1: "A0A0B4J2A2;P0DN37",
+            2: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            3: "A0A0U1RQV3",
+            4: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
+            5: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
+            6: "A0A0B4J2A2;P0DN37",
+            7: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            8: "A0A0U1RQV3",
+            9: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
+            10: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
+            11: "A0A0B4J2A2;P0DN37",
+            12: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            13: "A0A0U1RQV3",
+            14: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
+        },
+        "Gene": {
+            0: np.nan,
+            1: np.nan,
+            2: np.nan,
+            3: np.nan,
+            4: np.nan,
+            5: np.nan,
+            6: np.nan,
+            7: np.nan,
+            8: np.nan,
+            9: np.nan,
+            10: np.nan,
+            11: np.nan,
+            12: np.nan,
+            13: np.nan,
+            14: np.nan,
+        },
+        "Intensity": {
+            0: 329042.0,
+            1: 138322.0,
+            2: np.nan,
+            3: 122984.0,
+            4: 36317.0,
+            5: 367477.0,
+            6: 572539.0,
+            7: np.nan,
+            8: 59042.7,
+            9: np.nan,
+            10: 381325.0,
+            11: 96522.7,
+            12: np.nan,
+            13: 72372.5,
+            14: 27456.7,
+        },
+    }
+    return pd.DataFrame(data=diann_intensity_df)
+
+
+def test_max_quant_import_different_intensity_names():
+    for intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]:
+        df, msg = ms_data_import.max_quant_import(
+            _=None,
+            file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small.tsv",
+            intensity_name=intensity_name,
+        )
+        assert df is not None
+        assert intensity_name in df.columns
+
+
+def test_max_quant_import_file_not_exist():
+    df, msg = ms_data_import.max_quant_import(
+        _=None,
+        file_path="non_existent_file_path",
+        intensity_name="Intensity",
+    )
+    assert df is None
+    assert msg["messages"][0]["level"] == logging.ERROR
+    assert "found" in msg["messages"][0]["msg"].lower()
+
+
+def test_max_quant_import_no_protein_ids_column():
+    df, msg = ms_data_import.max_quant_import(
+        _=None,
+        file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_noproteincolumn.tsv",
+        intensity_name="Intensity",
+    )
+    assert df is None
+    assert msg["messages"][0]["level"] == logging.ERROR
+    assert "Protein IDs" in msg["messages"][0]["msg"]
+
+
+def test_max_quant_import_invalid_data():
+    df, msg = ms_data_import.max_quant_import(
+        _=None,
+        file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_invalid.tsv",
+        intensity_name="Intensity",
+    )
+    assert df is None
+    assert msg["messages"][0]["level"] == logging.ERROR
+
+
 @pytest.mark.parametrize(
     "intensity_name",
     [
@@ -140,6 +258,20 @@ def test_ms_fragger_import(intensity_name):
     intensity_df = intensity_df.drop(columns=["Gene"])
     test_intensity_df = test_intensity_df.drop(columns=["Gene"])
 
+    pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
+
+
+def test_diann_import():
+    test_intensity_df, _ = ms_data_import.diann_import(
+        _=None,
+        file_path=f"{PROJECT_PATH}/tests/diann_intensities.tsv",
+    )
+
+    intensity_df = diann_import_intensity_df()
+
+    # we do not care about the genes column, it is never used (and replaced by nan)
+    intensity_df = intensity_df.drop(columns=["Gene"])
+    test_intensity_df = test_intensity_df.drop(columns=["Gene"])
     pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
 
 

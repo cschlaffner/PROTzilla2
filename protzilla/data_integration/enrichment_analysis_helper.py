@@ -1,12 +1,12 @@
 import csv
 import json
+import logging
 from pathlib import Path
 
 import pandas as pd
 import requests
-from django.contrib import messages
 
-from protzilla.constants.logging import logger
+from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import random_string
 
 
@@ -34,7 +34,7 @@ def read_protein_or_gene_sets_file(path):
     """
     if not path:
         msg = "No file uploaded for protein sets."
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     file_extension = Path(path).suffix
     if file_extension == ".csv":
@@ -66,7 +66,7 @@ def read_protein_or_gene_sets_file(path):
 
     else:
         msg = "Invalid file type for protein sets. Must be .csv, .txt, .json or .gmt"
-        return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     return sets
 
@@ -99,7 +99,7 @@ def read_background_file(path):
                 background = [line.strip() for line in f if line.strip()]
         else:
             msg = "Invalid file type for background. Must be .csv, .txt or no upload"
-            return dict(messages=[dict(level=messages.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
         return background
 

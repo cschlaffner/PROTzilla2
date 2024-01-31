@@ -13,7 +13,7 @@
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% if section == "data_preprocessing" %}
-        {% include 'runs/form_buttons.html' with results_exist=show_next %}
+        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
     {% endif %}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
 
@@ -44,6 +44,8 @@
             </div>
 
             <div id="main-content">
+                
+                
                 {# show history #}
                 {% if displayed_history %}
                     <div class="row d-flex justify-content-between align-items-center">
@@ -80,7 +82,7 @@
                                                 <a href="{{ step.table_link }}" target="_blank"
                                                    class="col-4 btn btn-grey me-2">View table</a>
                                             {% endif %}
-                                            {%  if step.protein_graph_link %}
+                                            {% if step.protein_graph_link %}
                                                 <a href="{{ step.protein_graph_link }}" target="_blank"
                                                    class=" btn btn-grey me-2">View Protein Graph</a>
                                             {% endif %}
@@ -126,6 +128,7 @@
                 {% if not end_of_run %}
                     <div class="row justify-content-center d-flex">
                         <h3>{{ display_name }}</h3>
+                        <div class="row mb-3" id="description">{{ description }}</div>
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_fields %}
                             <div class="col">
@@ -146,9 +149,11 @@
                                 <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
-                                    <div id="plot_parameters" class="mb-2">
-                                        {% include "runs/fields.html" with fields=plot_fields %}
-                                    </div>
+                                    <fieldset id="plotfields">
+                                        <div id="plot_parameters" class="mb-2">
+                                            {% include "runs/fields.html" with fields=plot_fields %}
+                                        </div>
+                                    </fieldset>
                                     <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
                                 </form>
                             </div>
@@ -170,7 +175,7 @@
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                                    class="btn btn-red mr-auto">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs:plot' run_name %}" class="btn btn-grey">Plot</a>
+                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey">Plot</a>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
@@ -234,7 +239,7 @@
                     <div class="col">
                         {# navigation between steps #}
                         <div class="justify-content-end d-flex">
-                            {% if show_next %}
+                            {% if results_exist %}
                                 <div class="col-5 mb-2">
                                     <div class="form-group mb-0">
                                         {{ name_field }}
@@ -246,10 +251,26 @@
                             <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
                                 {% csrf_token %}
                                 <div class="form-group">
-                                    <a href="{% url 'runs:back' run_name %}" class="btn btn-grey mr-auto"
-                                            {% if not show_back %}
-                                       disabled {% endif %}>Back</a>
-                                    <button class="btn btn-red" {% if not show_next %} disabled {% endif %}>Next
+                                    {% if show_back %}
+                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-grey mr-auto">Back</a>
+                                        <div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true" style="display: none;" >
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Going a step back during calculation may lead to unforseen behavior and loss in data.
+                                                        Do you want to proceed?
+                                                        <hr>
+                                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
+                                                        <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <button class="btn btn-red"  {% if not results_exist or last_step %} disabled {% endif %}>Next
                                     </button>
                                 </div>
                             </form>
@@ -259,4 +280,5 @@
             </div>
         </div>
     </div>
-{% endblock %}
+
+    {% endblock %}

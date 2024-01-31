@@ -99,6 +99,14 @@
             "alpha": [
               "ttest",
               "corrected_alpha"
+            ],
+            "group1": [
+              "ttest",
+              "group1"
+            ],
+            "group2": [
+              "ttest",
+              "group2"
             ]
           }
         }

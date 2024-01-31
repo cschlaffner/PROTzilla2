@@ -69,6 +69,10 @@ def test_get_steps_of_workflow_no_side_effects(example_workflow):
     assert example_workflow == example_workflow_copy
 
 
+def test_get_steps_amount_of_workflow(example_workflow):
+    assert workflow_helper.get_steps_amount_of_workflow(example_workflow) == 10
+
+
 def test_get_defaults():
     method_params = {
         "test1": {"default": 1},
@@ -156,7 +160,7 @@ def test_get_workflow_default_param_value_nonexistent(example_workflow_short):
         "filter_samples",
         "protein_intensity_sum_filter",
         0,
-        "threshold",
+        "deviation_threshold",
     )
 
     assert threshold_value is None
@@ -174,6 +178,23 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
     )
     assert example_workflow == example_workflow_copy
 
+
+def test_is_last_step_in_section(example_workflow):
+    assert workflow_helper.is_last_step_in_section(
+        example_workflow, "data_preprocessing", 5
+    )
+    assert not workflow_helper.is_last_step_in_section(
+        example_workflow, "data_preprocessing", 4
+    )
+
+
+def test_is_last_step(example_workflow):
+    assert workflow_helper.is_last_step(
+        example_workflow,  9
+    )
+    assert not workflow_helper.is_last_step(
+        example_workflow, 8
+    )
 
 def test_validate_workflow(example_workflow, workflow_meta):
     assert validate_workflow_parameters(example_workflow, workflow_meta)

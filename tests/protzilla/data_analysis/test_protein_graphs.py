@@ -1,3 +1,4 @@
+import logging
 import pprint
 import re
 import shutil
@@ -8,7 +9,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
-from django.contrib import messages
 
 from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
 from protzilla.data_analysis.protein_graphs import (
@@ -798,7 +798,7 @@ def test_create_prot_variation_graph(
     planned_out_dict = {
         "graph_path": str(output_folder / f"{protein_id}.graphml"),
         "filtered_blocks": [],
-        "messages": [dict(level=messages.INFO, msg=planned_msg)],
+        "messages": [dict(level=logging.INFO, msg=planned_msg)],
     }
 
     assert out_dict == planned_out_dict
@@ -829,7 +829,7 @@ def test_create_protein_variation_graph_bad_request(
         graph_path=None,
         filtered_blocks=[],
         messages=[
-            dict(level=messages.ERROR, msg=planned_msg, trace=mock_request.__dict__)
+            dict(level=logging.ERROR, msg=planned_msg, trace=mock_request.__dict__)
         ],
     )
 
@@ -1241,7 +1241,7 @@ def test_peptides_to_isoform_no_peptides(mock_get_peptides, critical_logger):
         return_value=dict(
             graph_path=None,
             filtered_blocks=[],
-            messages=[{"level": messages.ERROR, "msg": "No graph found"}],
+            messages=[{"level": logging.ERROR, "msg": "No graph found"}],
         )
     ),
 )

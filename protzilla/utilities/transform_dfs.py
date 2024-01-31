@@ -1,5 +1,7 @@
 import pandas as pd
 
+from protzilla.utilities import default_intensity_column
+
 
 def long_to_wide(intensity_df: pd.DataFrame):
     """
@@ -15,7 +17,7 @@ def long_to_wide(intensity_df: pd.DataFrame):
         packages such as sklearn
     :rtype: pd.DataFrame
     """
-    values_name = intensity_df.columns[3]
+    values_name = default_intensity_column(intensity_df)
     return pd.pivot(
         intensity_df, index="Sample", columns="Protein ID", values=values_name
     )
@@ -37,7 +39,7 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     :rtype: pd.DataFrame
     """
     # Read out info from original dataframe
-    intensity_name = original_long_df.columns[3]
+    intensity_name = default_intensity_column(original_long_df)
     gene_info = original_long_df["Gene"]
     # Turn the wide format into the long format
     intensity_df = pd.melt(

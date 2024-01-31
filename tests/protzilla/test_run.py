@@ -8,7 +8,7 @@ from PIL import Image
 
 from protzilla import data_integration, data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import ms_data_import
+from protzilla.importing import ms_data_import, metadata_import
 from protzilla.run import Run
 from protzilla.utilities import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
@@ -83,7 +83,8 @@ def test_run_create(tests_folder_name):
         data_preprocessing.filter_proteins.by_samples_missing, percentage=1
     )
     run.calculate_and_next(
-        data_preprocessing.filter_samples.by_protein_intensity_sum, threshold=1
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
     )
     # print([s.outputs for s in run.history.steps])
     # to get a history that can be used to create a worklow, the section, step, method
@@ -175,6 +176,27 @@ def test_perform_calculation_logging(caplog, tests_folder_name):
     assert "NaN values" in caplog.text
 
 
+def test_perform_calculation_error_handling(caplog, tests_folder_name):
+    # test specific error handling
+    run_name = tests_folder_name + "/test_run_error_handling_" + random_string()
+    run = Run.create(run_name, df_mode="disk")
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+    run.df["Intensity"] = np.nan
+
+    run.perform_calculation_from_location(
+        "data_preprocessing",
+        "outlier_detection",
+        "local_outlier_factor",
+        {"number_of_neighbors": 3},
+    )
+
+    assert any(message["level"] == 40 for message in run.current_messages)
+
+
 def test_insert_step(example_workflow_short, tests_folder_name):
     run_name = tests_folder_name + "/test_insert_as_next_step_" + random_string()
     run = Run.create(run_name)
@@ -252,7 +274,10 @@ def test_export_plot(tests_folder_name):
     run.create_plot(
         data_preprocessing.imputation.by_min_per_sample_plot,
         dict(
-            graph_type="Boxplot", graph_type_quantities="Bar chart", group_by="Sample"
+            graph_type="Boxplot",
+            graph_type_quantities="Bar chart",
+            group_by="Sample",
+            visual_transformation="linear",
         ),
     )
     assert len(run.plots) > 1
@@ -288,6 +313,25 @@ def test_export_plot_base64(tests_folder_name):
     for plot in run.export_plots("eps"):
         Image.open(plot).verify()
 
+
+def test_next_step_error_handling(caplog, tests_folder_name):
+    run_name = tests_folder_name + "/test_next_step_error_handling_" + random_string()
+    run = Run.create(run_name)
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        "duplicate_name",
+        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
+        intensity_name="Intensity",
+    )
+
+    run.calculate_and_next(
+        metadata_import.metadata_import_method,
+        "duplicate_name",
+        file_path=str(PROJECT_PATH / "tests/metadata_cut_columns.csv"),
+        feature_orientation="Columns (samlpes in rows, features in columns)",
+    )
+
+    assert any(message["level"] == 40 for message in run.current_messages)
 
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow, test_get_workflow_default_param_value
