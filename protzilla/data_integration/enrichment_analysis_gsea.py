@@ -16,7 +16,7 @@ def create_ranked_df(
     protein_df,
     ranking_column,
     ranking_direction,
-    group_to_genes,
+    protein_group_to_genes,
     filtered_groups,
 ):
     """
@@ -33,8 +33,8 @@ def create_ranked_df(
     :type ranking_column: str
     :param ranking_direction: direction of ranking, either ascending or descending
     :type ranking_direction: str
-    :param group_to_genes: dictionary mapping protein groups to list of genes
-    :type group_to_genes: dict
+    :param protein_group_to_genes: dictionary mapping protein groups to list of genes
+    :type protein_group_to_genes: dict
     :param filtered_groups: list of protein groups that were filtered out
     :type filtered_groups: list
 
@@ -50,7 +50,7 @@ def create_ranked_df(
     for group in protein_groups:
         if group in filtered_groups:
             continue
-        for gene in group_to_genes[group]:
+        for gene in protein_group_to_genes[group]:
             # if multiple genes per group, use same score value
             ranking_value = protein_df.loc[
                 protein_df["Protein ID"] == group, ranking_column
@@ -164,11 +164,11 @@ def gsea_preranked(
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    group_to_genes = gene_mapping.get("group_to_genes", {})
-    gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
+    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
+    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    filtered_groups = list(set(protein_groups) - set(protein_group_to_genes.keys()))
 
-    if not gene_to_groups:
+    if not gene_to_protein_groups:
         msg = "No proteins could be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
@@ -180,7 +180,7 @@ def gsea_preranked(
         protein_df,
         ranking_column,
         ranking_direction,
-        group_to_genes,
+        protein_group_to_genes,
         filtered_groups,
     )
 
@@ -208,7 +208,9 @@ def gsea_preranked(
     # add proteins to output df
     enrichment_df = preranked_result.res2d
     enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
-        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
+        lambda x: ";".join(
+            ";".join(gene_to_protein_groups[gene]) for gene in x.split(";")
+        )
     )
 
     out_dict = {
@@ -225,11 +227,11 @@ def gsea_preranked(
 
 
 def create_genes_intensity_wide_df(
-    protein_df, protein_groups, samples, group_to_genes, filtered_groups
+    protein_df, protein_groups, samples, protein_group_to_genes, filtered_groups
 ):
     """
     Creates a wide dataframe with genes in rows and samples in columns with intensity values.
-    This is done by transforming the protein_df and using the group_to_genes dict
+    This is done by transforming the protein_df and using the protein_group_to_genes dict
     to map the protein IDs to gene names.
     Protein groups that could not be mapped to gene symbols will not be included in the dataframe.
     If a protein group maps to multiple genes, the same intensity values are used for all.
@@ -241,8 +243,8 @@ def create_genes_intensity_wide_df(
     :type protein_groups: list
     :param samples: list of sample names
     :type samples: list
-    :param group_to_genes: dict with protein IDs as keys and gene symbols as values
-    :type group_to_genes: dict
+    :param protein_group_to_genes: dict with protein IDs as keys and gene symbols as values
+    :type protein_group_to_genes: dict
     :param filtered_groups: list of protein IDs that could not be mapped to gene symbols
     :type filtered_groups: list
 
@@ -257,7 +259,7 @@ def create_genes_intensity_wide_df(
     for group in protein_groups:
         if group in filtered_groups:
             continue
-        for gene in group_to_genes[group]:
+        for gene in protein_group_to_genes[group]:
             # if multiple genes per group, use same intensity value
             intensity_values = protein_df_wide.loc[group, :].tolist()
             row_data = [gene] + intensity_values
@@ -400,11 +402,11 @@ def gsea(
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    group_to_genes = gene_mapping.get("group_to_genes", {})
-    gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    filtered_groups = list(set(protein_groups) - set(group_to_genes.keys()))
+    protein_group_to_genes = gene_mapping.get("protein_groups_to_genes", {})
+    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    filtered_groups = list(set(protein_groups) - set(protein_group_to_genes.keys()))
 
-    if not gene_to_groups:
+    if not gene_to_protein_groups:
         msg = "No proteins could be mapped to gene symbols"
         return dict(
             filtered_groups=filtered_groups,
@@ -412,7 +414,7 @@ def gsea(
         )
 
     df = create_genes_intensity_wide_df(
-        protein_df, protein_groups, samples, group_to_genes, filtered_groups
+        protein_df, protein_groups, samples, protein_group_to_genes, filtered_groups
     )
 
     class_labels = []
@@ -445,7 +447,9 @@ def gsea(
     # add proteins to output df
     enrichment_df = gsea_result.res2d
     enrichment_df["Lead_proteins"] = enrichment_df["Lead_genes"].apply(
-        lambda x: ";".join([";".join(gene_to_groups[gene]) for gene in x.split(";")])
+        lambda x: ";".join(
+            [";".join(gene_to_protein_groups[gene]) for gene in x.split(";")]
+        )
     )
 
     out_dict = {

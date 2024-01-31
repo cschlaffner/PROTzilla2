@@ -135,10 +135,8 @@ def gene_mapping(
         protein_groups_to_genes_unpacked, columns=["Protein ID", "Gene"]
     )
     return {
-        "gene_to_protein_groups_df": gene_to_protein_groups_df,
-        "protein_groups_to_genes_df": protein_groups_to_groups_df,
         "gene_mapping": {
-            "group_to_genes": protein_groups_to_genes,
+            "protein_groups_to_genes": protein_groups_to_genes,
             "gene_to_protein_groups": gene_to_protein_groups,
             "filtered": filtered,
         },

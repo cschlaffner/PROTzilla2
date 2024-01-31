@@ -192,8 +192,8 @@ def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
         for protein in group.split(";"):
             proteins.add(clean_uniprot_id(protein))
     id_to_gene, not_found = uniprot_to_genes(list(proteins), databases, use_biomart)
-    group_to_genes = {}
-    gene_to_groups = defaultdict(list)
+    protein_group_to_genes = {}
+    gene_to_protein_groups = defaultdict(list)
     filtered = []
     for group in uniprot_groups:
         clean = set(clean_uniprot_id(protein) for protein in group.split(";"))
@@ -201,7 +201,7 @@ def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
         if not results:
             filtered.append(group)
         else:
-            group_to_genes[group] = results
+            protein_group_to_genes[group] = results
             for result in results:
-                gene_to_groups[result].append(group)
-    return dict(gene_to_groups), group_to_genes, filtered
+                gene_to_protein_groups[result].append(group)
+    return dict(gene_to_protein_groups), protein_group_to_genes, filtered

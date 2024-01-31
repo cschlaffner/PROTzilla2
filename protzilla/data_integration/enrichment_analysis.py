@@ -377,13 +377,13 @@ def gseapy_enrichment(
     :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
     :rtype: tuple[pandas.DataFrame, list, dict]
     """
-    gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
     genes = set()
     filtered_groups = set()
     for group in protein_list:
-        if group in group_to_genes:
-            genes.update(group_to_genes[group])
+        if group in protein_group_to_genes:
+            genes.update(protein_group_to_genes[group])
         else:
             filtered_groups.add(group)
 
@@ -430,7 +430,9 @@ def gseapy_enrichment(
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
-        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
+        lambda x: ";".join(
+            ";".join(gene_to_protein_groups[gene]) for gene in x.split(";")
+        )
     )
     logger.info(f"Finished analysis for {direction}regulated proteins")
     return enriched, list(filtered_groups), None
