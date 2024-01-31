@@ -139,6 +139,7 @@ class Run:
         self.current_plot_parameters = {}
         self.plotted_for_parameters = None
         self.plots = []
+        self.current_out_sources = {}
 
     def update_workflow_config(self, params, location=None, update_params=True):
         if not location:
@@ -373,6 +374,7 @@ class Run:
             self.current_plot_parameters = {}
             self.plotted_for_parameters = None
             self.plots = []
+            self.current_out_sources = {}
 
         log_messages(self.current_messages)
 
@@ -430,6 +432,11 @@ class Run:
                     v is not None
                 ), f"please set default values for the named_output: {k} in workflow file"
                 call_parameters[k] = self.history.output_of_named_step(*v)
+            elif param_dict and param_dict.get("type") == "multi_named_output":
+                for call_parameter, output_name in param_dict.get("mapping").items():
+                    call_parameters[call_parameter] = self.history.output_of_named_step(v, output_name)
+            elif param_dict and param_dict.get("type") == "named_output_v2":
+                call_parameters[k] = self.current_out_sources[v]
             else:
                 call_parameters[k] = v
         return call_parameters
