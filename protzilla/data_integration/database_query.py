@@ -135,7 +135,7 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
             out_dict, found_proteins = merge_dict(out_dict, mapping)
             ids_to_search -= found_proteins
         elif "Gene Names" in cols:
-            df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"])
+            df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"]).dropna()
             mapping = df.to_dict()["Gene Names"]
             first_gene_dict = {k: v and v.split()[0] for k, v in mapping.items()}
             out_dict, found_proteins = merge_dict(out_dict, first_gene_dict)
