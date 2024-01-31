@@ -91,7 +91,6 @@ def detail(request, run_name):
     else: description = ""
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
-   # clear_messages(request)
     if run.section == "data_integration" and run.step == "enrichment_analysis":
         message = {
             'level': 30,
@@ -100,14 +99,16 @@ def detail(request, run_name):
                    'back to select values in the field "Column name...".'
         }
         display_message(message, request)
-    elif run.section == "data_analysis" and run.method == "anova":
+    elif run.section == "data_integration" and run.method == "GO_enrichment_bar_plot":
         message = {
             'level': 30,
-            'msg': 'Please select one or more groups before calculation'
+            'msg': 'To select sets to be plotted, you have to first change'
+                   ' the entry in the dataframe-field and then change it '
+                   'back to select sets.'
         }
         display_message(message, request)
     clear_messages(request)
-    #print(message)
+
     current_plots = []
     for plot in run.plots:
         if isinstance(plot, bytes):
