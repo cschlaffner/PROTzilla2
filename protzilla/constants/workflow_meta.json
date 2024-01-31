@@ -3074,16 +3074,6 @@
             "name": "Scale the size of the dots",
             "type": "numeric",
             "default": 5
-          },
-          "show_ring": {
-            "name": "Show ring around the dots",
-            "type": "boolean",
-            "default": false
-          },
-          "remove_library_names": {
-            "name": "Remove library names from gene sets (e.g. 'KEGG_2013__')",
-            "type": "boolean",
-            "default": false
           }
         }
       },
