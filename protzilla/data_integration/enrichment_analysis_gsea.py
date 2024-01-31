@@ -402,7 +402,7 @@ def gsea(
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    protein_group_to_genes = gene_mapping.get("protein_groups_to_genes", {})
+    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
     gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
     filtered_groups = list(set(protein_groups) - set(protein_group_to_genes.keys()))
 

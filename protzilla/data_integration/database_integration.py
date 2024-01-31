@@ -110,7 +110,7 @@ def gene_mapping(
         database_names = [database_names]
     (
         gene_to_protein_groups,
-        protein_groups_to_genes,
+        protein_group_to_genes,
         filtered,
     ) = database_query.uniprot_groups_to_genes(
         protein_groups, database_names, use_biomart=use_biomart
@@ -126,17 +126,17 @@ def gene_mapping(
         gene_to_protein_groups_unpacked, columns=["Gene", "Protein ID"]
     )
 
-    protein_groups_to_genes_unpacked = [
+    protein_group_to_genes_unpacked = [
         (key, value)
-        for key, values in protein_groups_to_genes.items()
+        for key, values in protein_group_to_genes.items()
         for value in values
     ]
     protein_groups_to_groups_df = pd.DataFrame.from_records(
-        protein_groups_to_genes_unpacked, columns=["Protein ID", "Gene"]
+        protein_group_to_genes_unpacked, columns=["Protein ID", "Gene"]
     )
     return {
         "gene_mapping": {
-            "protein_groups_to_genes": protein_groups_to_genes,
+            "protein_group_to_genes": protein_group_to_genes,
             "gene_to_protein_groups": gene_to_protein_groups,
             "filtered": filtered,
         },
