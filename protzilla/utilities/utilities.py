@@ -98,6 +98,13 @@ def exists_message(messages, msg):
     return any(message == msg for message in messages)
 
 
+def format_trace(trace: list[str] = []):
+    trace_string = ""
+    for t in trace:
+        trace_string += f"{t}\n"
+    return trace_string
+
+
 def name_to_title(step: str) -> str:
     """
     Returns a name in title format. Exceptions where the .title() method is not enough are handled here.

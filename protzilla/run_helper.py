@@ -7,6 +7,7 @@ from biomart import BiomartServer
 
 from protzilla.constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
 from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
+from protzilla.utilities import format_trace
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -178,9 +179,3 @@ def log_messages(messages: list[dict] = None):
             message["msg"],
             message["trace"] if "trace" in message else "",
         )
-
-def format_trace(trace: list[str] = []):
-    trace_string = ""
-    for t in trace:
-        trace_string += f"{t}\n"
-    return trace_string
