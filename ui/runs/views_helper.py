@@ -115,7 +115,9 @@ def display_message(message: dict, request):
 
     trace = ""
     if isinstance(message["trace"], list):
-        trace = build_trace_alert(format_trace(message["trace"]).replace('\n', '<br/>'))
+        trace = format_trace(message["trace"]).replace('\n', '<br/>')
+        trace = trace.replace(' ', '&nbsp')
+        trace = build_trace_alert(trace)
     elif isinstance(trace, str) and trace != "":
         trace = build_trace_alert(message["trace"])
 
