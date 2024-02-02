@@ -7,6 +7,7 @@ import pandas as pd
 from restring import restring
 
 from protzilla.constants.protzilla_logging import logger
+from protzilla.data_integration.database_query import biomart_database
 from protzilla.utilities.utilities import clean_uniprot_id
 
 # Import enrichment analysis gsea methods to remove redundant function definition
@@ -537,6 +538,12 @@ def GO_analysis_with_Enrichr(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
+    # we need to map the biomart dataset name to the internal name
+    database = biomart_database("ENSEMBL_MART_ENSEMBL")
+    for dataset in database.datasets:
+        if database.datasets[dataset].display_name == background_biomart:
+            background_biomart = dataset
+            break
     # if gene sets from Enrichr are used, ignore background parameter because gseapy does not support it
     if gene_sets_enrichr and (
         background_path or background_number or background_biomart
@@ -554,6 +561,13 @@ def GO_analysis_with_Enrichr(
     elif background_number:
         background = background_number
     elif background_biomart:
+        # we need to map the biomart dataset name to the internal name
+        database = biomart_database("ENSEMBL_MART_ENSEMBL")
+        for dataset in database.datasets:
+            if database.datasets[dataset].display_name == background_biomart:
+                background = dataset
+                break
+
         background = background_biomart
     else:
         background = None

@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 import pandas
 import requests
+from biomart import BiomartServer
 
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.constants.protzilla_logging import logger
@@ -49,19 +50,28 @@ def biomart_query(queries, filter_name, attributes, use_grch37=False):
     for attribute in attributes:
         SubElement(dataset, "Attribute", attrib={"name": attribute})
 
+    biomart_urls = [
+        "https://ensembl.org",
+        "https://asia.ensembl.org",
+        "https://useast.ensembl.org",
+    ]
     if use_grch37:
-        biomart_url = "http://grch37.ensembl.org/biomart/martservice"
-    else:
-        biomart_url = "https://www.ensembl.org/biomart/martservice"
+        biomart_urls = ["http://grch37.ensembl.org/biomart/martservice"]
 
-    try:
-        response = requests.post(
-            url=biomart_url,
-            data={"query": tostring(root)},
-            stream=True,
-        )
-    except requests.ConnectionError:
+    for biomart_url in biomart_urls:
+        try:
+            response = requests.post(
+                url=biomart_url,
+                data={"query": tostring(root)},
+                stream=True,
+            )
+            break
+        except requests.ConnectionError:
+            continue
+    else:
+        logger.warning("biomart server not available at the moment")
         return
+
     for line in response.iter_lines():
         decoded = line.decode("utf-8")
         if decoded == "<html>" or len(tabbed := decoded.split("\t")) != len(attributes):
@@ -80,6 +90,28 @@ def uniprot_columns(filename):
     return pandas.read_csv(
         EXTERNAL_DATA_PATH / "uniprot" / f"{filename}.tsv", sep="\t", nrows=0
     ).columns.tolist()
+
+
+def biomart_database(
+    database_name: str = "ENSEMBL_MART_ENSEMBL", max_attempts: int = 3
+):
+    mirror_list = [
+        "http://ensembl.org/biomart",
+        "http://asia.ensembl.org/biomart",
+        "http://useast.ensembl.org/biomart",
+    ]
+    for _ in range(0, max_attempts):
+        for url in mirror_list:
+            try:
+                server = BiomartServer(url)
+                if not server is None:
+                    db = server.databases[database_name]
+                    return db
+                else:
+                    continue
+
+            except requests.ConnectionError:
+                continue
 
 
 def uniprot_databases():
@@ -135,7 +167,9 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
             out_dict, found_proteins = merge_dict(out_dict, mapping)
             ids_to_search -= found_proteins
         elif "Gene Names" in cols:
-            df = uniprot_query_dataframe(db_name, ids_to_search, ["Gene Names"])
+            df = uniprot_query_dataframe(
+                db_name, ids_to_search, ["Gene Names"]
+            ).dropna()
             mapping = df.to_dict()["Gene Names"]
             first_gene_dict = {k: v and v.split()[0] for k, v in mapping.items()}
             out_dict, found_proteins = merge_dict(out_dict, first_gene_dict)
