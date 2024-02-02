@@ -114,9 +114,9 @@ def display_message(message: dict, request):
     """
 
     trace = ""
-    if isinstance(message["trace"], list):
+    if trace in message and isinstance(message["trace"], list):
         trace = build_trace_alert(format_trace(message["trace"]))
-    elif isinstance(trace, str) and trace != "":
+    elif trace in message and isinstance(trace, str) and message["trace"] != "":
         trace = build_trace_alert(message["trace"])
 
     # map error level to bootstrap css class

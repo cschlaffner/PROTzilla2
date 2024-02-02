@@ -359,6 +359,10 @@ class Run:
             ] = self.calculated_method
             self.name_step(-1, name)
 
+        except AssertionError as e:
+            self.history.pop_step()
+            msg = f"An error occurred while saving this step: {e}. Please check your parameters or report a potential program issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
         except Exception as e:
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
