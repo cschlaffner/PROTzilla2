@@ -100,15 +100,13 @@ def biomart_database(
         "http://asia.ensembl.org/biomart",
         "http://useast.ensembl.org/biomart",
     ]
-    for _ in range(0, max_attempts):
+    for _ in range(max_attempts):
         for url in mirror_list:
             try:
                 server = BiomartServer(url)
-                if not server is None:
+                if server:
                     db = server.databases[database_name]
                     return db
-                else:
-                    continue
 
             except requests.ConnectionError:
                 continue
