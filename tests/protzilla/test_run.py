@@ -8,7 +8,7 @@ from PIL import Image
 
 from protzilla import data_integration, data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import ms_data_import, metadata_import
+from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
@@ -332,6 +332,7 @@ def test_next_step_error_handling(caplog, tests_folder_name):
     )
 
     assert any(message["level"] == 40 for message in run.current_messages)
+
 
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow, test_get_workflow_default_param_value

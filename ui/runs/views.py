@@ -24,13 +24,13 @@ from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
-from protzilla.workflow_helper import is_last_step
 from protzilla.utilities import (
     clean_uniprot_id,
     get_memory_usage,
     name_to_title,
     unique_justseen,
 )
+from protzilla.workflow_helper import is_last_step
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -272,7 +272,9 @@ def change_field(request, run_name):
     if "fill_dynamic" in parameters[post_id]:
         fields_to_fill = parameters[post_id]["fill_dynamic"]
     else:
-        fields_to_fill = [k for k in parameters.keys() if parameters[k]["type"] == "named_output_v2"]
+        fields_to_fill = [
+            k for k in parameters.keys() if parameters[k]["type"] == "named_output_v2"
+        ]
 
     fields = {}
     for key in fields_to_fill:
@@ -287,7 +289,7 @@ def change_field(request, run_name):
                 if len(selected) == 1:
                     named_output = run.current_out_sources[selected[0]]
                     output_item = selected[0]
-                else: 
+                else:
                     named_output = selected[0]
                     output_item = selected[1]
                 # KeyError is expected when named_output triggers the fill
@@ -384,7 +386,7 @@ def change_field(request, run_name):
                         else:
                             gene_set_libraries.add("all")
                     param_dict["categories"] = list(gene_set_libraries)
-            
+
         elif "select_from" in param_dict:
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected[0])
 
