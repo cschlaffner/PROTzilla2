@@ -434,7 +434,9 @@ class Run:
                 call_parameters[k] = self.history.output_of_named_step(*v)
             elif param_dict and param_dict.get("type") == "multi_named_output":
                 for call_parameter, output_name in param_dict.get("mapping").items():
-                    call_parameters[call_parameter] = self.history.output_of_named_step(v, output_name)
+                    call_parameters[call_parameter] = self.history.output_of_named_step(
+                        v, output_name
+                    )
             elif param_dict and param_dict.get("type") == "named_output_v2":
                 call_parameters[k] = self.current_out_sources[v]
             else:

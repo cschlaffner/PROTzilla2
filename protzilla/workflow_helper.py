@@ -17,6 +17,7 @@ def get_steps_of_workflow(
         )
     return workflow_steps
 
+
 def get_steps_amount_of_workflow(
     workflow_config_dict,
 ) -> int:
@@ -73,6 +74,7 @@ def get_workflow_default_param_value(
 def is_last_step_in_section(workflow_config, section, step_index_in_section) -> bool:
     amount_steps_in_section = workflow_config["sections"][section]["steps"].__len__()
     return amount_steps_in_section <= step_index_in_section + 1
+
 
 def is_last_step(workflow_config, index) -> bool:
     """
