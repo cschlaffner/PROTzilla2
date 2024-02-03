@@ -158,9 +158,7 @@ def log_message(level: int = 40, msg: str = "", trace: str | list[str] = ""):
     log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
     if log_function:
         formated_trace = ""
-        if isinstance(trace, list):
-            formated_trace = format_trace(trace)
-        elif isinstance(trace, str) and trace != "":
+        if trace != "":
             formated_trace = f"\nTrace: {trace}"
         log_function(f"{msg}{formated_trace}")
 
