@@ -9,7 +9,7 @@ from protzilla.data_integration.database_query import (
     biomart_database,
     uniprot_columns,
     uniprot_databases,
-from protzilla.utilities import format_trace
+)
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
