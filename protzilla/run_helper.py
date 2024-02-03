@@ -3,10 +3,12 @@ import copy
 import gseapy
 import matplotlib.colors as mcolors
 import restring
-from biomart import BiomartServer
 
 from protzilla.constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
-from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
+from protzilla.data_integration.database_query import (
+    biomart_database,
+    uniprot_columns,
+    uniprot_databases,
 from protzilla.utilities import format_trace
 from protzilla.workflow_helper import get_workflow_default_param_value
 
@@ -99,9 +101,12 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = databases
         elif param_dict["fill"] == "biomart_datasets":
             # retrieve datasets from BioMart server
-            server = BiomartServer("http://www.ensembl.org/biomart")
-            database = server.databases["ENSEMBL_MART_ENSEMBL"]
-            param_dict["categories"] = database.datasets
+            database = biomart_database("ENSEMBL_MART_ENSEMBL")
+            # get the display names instead if the internal names, then map them back
+            param_dict["categories"] = [
+                database.datasets[dataset].display_name for dataset in database.datasets
+            ]
+            # param_dict["categories"] = database.datasets
         elif param_dict["fill"] == "protein_group_column":
             param_dict["categories"] = run.df["Protein ID"].unique()
 

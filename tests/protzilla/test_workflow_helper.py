@@ -189,12 +189,9 @@ def test_is_last_step_in_section(example_workflow):
 
 
 def test_is_last_step(example_workflow):
-    assert workflow_helper.is_last_step(
-        example_workflow,  9
-    )
-    assert not workflow_helper.is_last_step(
-        example_workflow, 8
-    )
+    assert workflow_helper.is_last_step(example_workflow, 9)
+    assert not workflow_helper.is_last_step(example_workflow, 8)
+
 
 def test_validate_workflow(example_workflow, workflow_meta):
     assert validate_workflow_parameters(example_workflow, workflow_meta)
