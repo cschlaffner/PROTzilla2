@@ -9,7 +9,6 @@ from shutil import rmtree
 import plotly
 from PIL import Image
 
-from ui.runs.views_helper import display_message
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
@@ -435,7 +434,9 @@ class Run:
                 call_parameters[k] = self.history.output_of_named_step(*v)
             elif param_dict and param_dict.get("type") == "multi_named_output":
                 for call_parameter, output_name in param_dict.get("mapping").items():
-                    call_parameters[call_parameter] = self.history.output_of_named_step(v, output_name)
+                    call_parameters[call_parameter] = self.history.output_of_named_step(
+                        v, output_name
+                    )
             elif param_dict and param_dict.get("type") == "named_output_v2":
                 call_parameters[k] = self.current_out_sources[v]
             else:

@@ -32,6 +32,7 @@ from protzilla.utilities import (
     name_to_title,
     unique_justseen,
 )
+from protzilla.workflow_helper import is_last_step
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -42,8 +43,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.utilities.alert import build_trace_alert
-from ui.runs.views_helper import parameters_from_post, display_message, clear_messages
+from ui.runs.views_helper import clear_messages, display_message, parameters_from_post
 
 active_runs = {}
 
@@ -90,24 +90,25 @@ def detail(request, run_name):
     end_of_run = not step
     if not end_of_run:
         description = run.workflow_meta[section][step][method]["description"]
-    else: description = ""
+    else:
+        description = ""
     last_step = is_last_step(run.workflow_config, run.step_index)
     # This is a temporary solution and should be removed when the problem in the referenced step is fixed
 
     if run.section == "data_integration" and run.step == "enrichment_analysis":
         message = {
-            'level': 30,
-            'msg': 'To select a column name, you have to first change'
-                   ' the entry in the "Dataframe with protein IDs..." field and then change it '
-                   'back to select values in the field "Column name...".'
+            "level": 30,
+            "msg": "To select a column name, you have to first change"
+            ' the entry in the "Dataframe with protein IDs..." field and then change it '
+            'back to select values in the field "Column name...".',
         }
         display_message(message, request)
     elif run.section == "data_integration" and run.method == "GO_enrichment_bar_plot":
         message = {
-            'level': 30,
-            'msg': 'To select sets to be plotted, you have to first change'
-                   ' the entry in the dataframe-field and then change it '
-                   'back to select sets.'
+            "level": 30,
+            "msg": "To select sets to be plotted, you have to first change"
+            " the entry in the dataframe-field and then change it "
+            "back to select sets.",
         }
         display_message(message, request)
     clear_messages(request)
@@ -138,10 +139,10 @@ def detail(request, run_name):
     )
 
     show_protein_graph = (
-            run.current_out
-            and "graph_path" in run.current_out
-            and run.current_out["graph_path"] is not None
-            and Path(run.current_out["graph_path"]).exists()
+        run.current_out
+        and "graph_path" in run.current_out
+        and run.current_out["graph_path"] is not None
+        and Path(run.current_out["graph_path"]).exists()
     )
 
     return render(
@@ -295,7 +296,9 @@ def change_field(request, run_name):
     if "fill_dynamic" in parameters[post_id]:
         fields_to_fill = parameters[post_id]["fill_dynamic"]
     else:
-        fields_to_fill = [k for k in parameters.keys() if parameters[k]["type"] == "named_output_v2"]
+        fields_to_fill = [
+            k for k in parameters.keys() if parameters[k]["type"] == "named_output_v2"
+        ]
 
     fields = {}
     for key in fields_to_fill:

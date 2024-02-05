@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 import pandas
 import requests
+from biomart import BiomartServer
 
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.constants.protzilla_logging import logger
@@ -89,6 +90,26 @@ def uniprot_columns(filename):
     return pandas.read_csv(
         EXTERNAL_DATA_PATH / "uniprot" / f"{filename}.tsv", sep="\t", nrows=0
     ).columns.tolist()
+
+
+def biomart_database(
+    database_name: str = "ENSEMBL_MART_ENSEMBL", max_attempts: int = 3
+):
+    mirror_list = [
+        "http://ensembl.org/biomart",
+        "http://asia.ensembl.org/biomart",
+        "http://useast.ensembl.org/biomart",
+    ]
+    for _ in range(max_attempts):
+        for url in mirror_list:
+            try:
+                server = BiomartServer(url)
+                if server:
+                    db = server.databases[database_name]
+                    return db
+
+            except requests.ConnectionError:
+                continue
 
 
 def uniprot_databases():
@@ -203,8 +224,8 @@ def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
         for protein in group.split(";"):
             proteins.add(clean_uniprot_id(protein))
     id_to_gene, not_found = uniprot_to_genes(list(proteins), databases, use_biomart)
-    group_to_genes = {}
-    gene_to_groups = defaultdict(list)
+    protein_group_to_genes = {}
+    gene_to_protein_groups = defaultdict(list)
     filtered = []
     for group in uniprot_groups:
         clean = set(clean_uniprot_id(protein) for protein in group.split(";"))
@@ -212,7 +233,7 @@ def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
         if not results:
             filtered.append(group)
         else:
-            group_to_genes[group] = results
+            protein_group_to_genes[group] = results
             for result in results:
-                gene_to_groups[result].append(group)
-    return dict(gene_to_groups), group_to_genes, filtered
+                gene_to_protein_groups[result].append(group)
+    return dict(gene_to_protein_groups), protein_group_to_genes, filtered
