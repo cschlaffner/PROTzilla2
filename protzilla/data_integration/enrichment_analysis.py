@@ -189,7 +189,7 @@ def GO_analysis_with_STRING(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
@@ -598,7 +598,7 @@ def GO_analysis_with_Enrichr(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and not down_protein_list:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
@@ -768,7 +768,7 @@ def GO_analysis_offline(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
