@@ -152,7 +152,7 @@ def get_parameters(run, section, step, method):
     return output
 
 
-def log_message(level: int = 40, msg: str = "", trace: str = ""):
+def log_message(level: int = 40, msg: str = "", trace: str | list[str] = ""):
     """
     Logs a message to the console.
 
@@ -162,8 +162,10 @@ def log_message(level: int = 40, msg: str = "", trace: str = ""):
     """
     log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
     if log_function:
-        trace = f"\nTrace: {trace}" if trace != "" else ""
-        log_function(f"{msg}{trace}")
+        formated_trace = ""
+        if trace != "":
+            formated_trace = f"\nTrace: {trace}"
+        log_function(f"{msg}{formated_trace}")
 
 
 def log_messages(messages: list[dict] = None):
