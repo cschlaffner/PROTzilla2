@@ -251,7 +251,7 @@ class Run:
             )
             self.current_messages = []
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
@@ -275,7 +275,7 @@ class Run:
             self.calculated_method = self.method
 
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:

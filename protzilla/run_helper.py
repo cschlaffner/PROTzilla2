@@ -167,6 +167,7 @@ def log_message(level: int = 40, msg: str = "", trace: str | list[str] = ""):
         log_function(f"{msg}{trace}")
 
 
+
 def log_messages(messages: list[dict] = None):
     """
     Logs a list of messages to the console.

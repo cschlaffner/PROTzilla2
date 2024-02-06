@@ -137,5 +137,8 @@ def clear_messages(request):
 
     :param request: request object
     """
+    storage = messages.get_messages(request)
     for message in messages.get_messages(request):
         pass
+    storage.used = True
+
