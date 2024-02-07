@@ -109,25 +109,16 @@ class Run:
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         with open(f"{run_path}/run_config.json", "r") as f:
             run_config = json.load(f)
-        current_messages = []
-        try:
-            history = History.from_disk(run_name, run_config["df_mode"])
-        except FileNotFoundError:
-            history = History(run_name, run_config["df_mode"])
-            msg = "Missing calculated Data. Restarted Run."
-            current_messages.append(dict(level=logging.ERROR, msg=msg))
-            log_messages(current_messages)
-
+        history = History.from_disk(run_name, run_config["df_mode"])
         return cls(
             run_name,
             run_config["workflow_config_name"],
             run_config["df_mode"],
             history,
             run_path,
-            current_messages,
         )
 
-    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path, current_messages=[]):
+    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
@@ -144,7 +135,7 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
-        self.current_messages = current_messages
+        self.current_messages = []
         self.calculated_method = None
         self.current_parameters = {}
         self.current_plot_parameters = {}
