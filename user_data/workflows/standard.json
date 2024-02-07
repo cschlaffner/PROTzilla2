@@ -203,6 +203,11 @@
     },
     "data_integration": {
       "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "GO_analysis_with_STRING",
+          "parameters": {}
+        }
       ]
     }
   }
