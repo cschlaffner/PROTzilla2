@@ -207,6 +207,11 @@
           "name": "enrichment_analysis",
           "method": "GO_analysis_with_STRING",
           "parameters": {}
+        },
+        {
+          "name": "plot",
+          "method": "GO_enrichment_bar_plot",
+          "parameters": {}
         }
       ]
     }
