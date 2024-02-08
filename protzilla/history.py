@@ -31,8 +31,12 @@ class History:
     @classmethod
     def from_disk(cls, run_name: str, df_mode: str):
         instance = cls(run_name, df_mode)
-        with open(RUNS_PATH / run_name / "history.json", "r") as f:
-            history_json = json.load(f, object_hook=load_objects)
+        try:
+            with open(RUNS_PATH / run_name / "history.json", "r") as f:
+                history_json = json.load(f, object_hook=load_objects)
+        except FileNotFoundError:
+            return instance
+
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
