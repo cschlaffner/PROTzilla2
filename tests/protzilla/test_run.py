@@ -144,7 +144,6 @@ def test_run_continue(tests_folder_name):
     # run should be started at the beginning
     run3 = Run.continue_existing(run_name)
     assert run3.df is None
-    assert run3.current_messages != []
     assert any("Restarted" in message["msg"] for message in run3.current_messages)
 
 

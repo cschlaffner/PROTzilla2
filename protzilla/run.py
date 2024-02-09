@@ -371,8 +371,7 @@ class Run:
 
         except AssertionError as e:
             self.history.pop_step()
-            msg = f"An error occurred while saving this step: {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+            self.current_messages.append(dict(level=logging.ERROR, msg=f"{e}"))
         except Exception as e:
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
