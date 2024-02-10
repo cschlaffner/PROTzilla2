@@ -200,20 +200,20 @@ class Run:
                 self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
-                self.current_messages = self.current_out.pop("messages", [])
+                self.current_messages.append(self.current_out.pop("messages", []))
             except Exception as e:
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
+                self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
         else:
             self.result_df = None
             try:
                 self.current_out = method_callable(**call_parameters)
-                self.current_messages = self.current_out.pop("messages", [])
+                self.current_messages.append(self.current_out.pop("messages", []))
             except Exception as e:
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
+                self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
@@ -258,16 +258,15 @@ class Run:
             self.plots = method_callable(
                 self.df, self.result_df, self.current_out, **parameters
             )
-            self.current_messages = []
             for plot in self.plots:
                 if plot is dict and "messages" in plot:
-                    self.current_messages.extend(plot["messages"])
+                    self.current_messages.append(plot["messages"])
                     self.plots.remove(plot)
 
         except Exception as e:
             self.plots = []
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
@@ -279,20 +278,19 @@ class Run:
             self.plots = method_callable(**call_parameters)
             self.result_df = self.df
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters[self.method] = parameters
             self.calculated_method = self.method
 
             for plot in self.plots:
                 if plot is dict and "messages" in plot:
-                    self.current_messages.extend(plot["messages"])
+                    self.current_messages.append(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
             self.plots = []
             self.result_df = None
             self.current_out = {}
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
@@ -349,7 +347,6 @@ class Run:
                 "output_name",
             )
         try:
-            self.current_messages = []
             parameters = self.current_parameters.get(self.calculated_method, {})
             self.history.add_step(
                 self.section,
