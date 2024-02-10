@@ -176,6 +176,8 @@
           "method": "volcano",
           "parameters": {
             "proteins_of_interest": [],
+            "proteins_of_interest_input": "differentially_expressed_proteins_df",
+            "input_dict": "ttest",
             "p_values": [
               "ttest",
               "corrected_p_values_df"
@@ -206,12 +208,15 @@
         {
           "name": "enrichment_analysis",
           "method": "GO_analysis_with_STRING",
-          "parameters": {}
+          "parameters": {},
+          "output_name": "GO_analysis_with_STRING"
         },
         {
           "name": "plot",
           "method": "GO_enrichment_bar_plot",
-          "parameters": {}
+          "parameters": {
+            "gene_sets_restring": "Component"
+          }
         }
       ]
     }
