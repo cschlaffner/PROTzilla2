@@ -24,7 +24,7 @@ def example_workflow():
 @pytest.fixture
 def example_workflow_short_updated():
     with open(
-            f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
     ) as f:
         return json.load(f)
 

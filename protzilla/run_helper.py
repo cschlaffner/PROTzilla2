@@ -75,8 +75,7 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = [
                 col
                 for col in ["Sample", "Group", "Batch"]
-                if col not
-                   in run.metadata.columns
+                if col not in run.metadata.columns
             ]
         elif param_dict["fill"] == "metadata_columns":
             param_dict["categories"] = run.metadata.columns.unique()
@@ -167,7 +166,6 @@ def log_message(level: int = 40, msg: str = "", trace: str | list[str] = ""):
         if trace != "":
             trace = f"\nTrace: {trace}"
         log_function(f"{msg}{trace}")
-
 
 
 def log_messages(messages: list[dict] = None):

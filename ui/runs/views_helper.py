@@ -114,7 +114,11 @@ def display_message(message: dict, request):
     """
 
     trace = ""
-    if "trace" in message and isinstance(message["trace"], str) and message["trace"] != "":
+    if (
+        "trace" in message
+        and isinstance(message["trace"], str)
+        and message["trace"] != ""
+    ):
         trace = build_trace_alert(message["trace"])
 
     # map error level to bootstrap css class
@@ -141,4 +145,3 @@ def clear_messages(request):
     for message in messages.get_messages(request):
         pass
     storage.used = True
-
