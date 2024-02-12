@@ -135,6 +135,13 @@ def get_parameters(run, section, step, method):
     output = {}
 
     for key, param_dict in parameters.items():
+        # allow for conditional parameters that are only shown if a certain condition
+        # is met all parameters that depend on the condition need to have a "condition"
+        # key and the fitting value
+        if "condition" in param_dict:
+            if param_dict["condition"] == "metadata":
+                if not run.has_metadata():
+                    continue
         workflow_default = get_workflow_default_param_value(
             run.workflow_config,
             section,

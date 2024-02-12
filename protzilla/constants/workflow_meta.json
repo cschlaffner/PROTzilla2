@@ -2305,9 +2305,16 @@
             "step": 1,
             "default": 2
           },
+          "metadata_df": {
+            "type": "empty",
+            "name": "metadata_df",
+            "condition": "metadata",
+            "default": null
+          },
           "grouping": {
             "name": "Category by which Peptides should be selected.",
             "type": "categorical",
+            "condition": "metadata",
             "fill": "metadata_columns",
             "fill_dynamic": [
               "selected_groups"
@@ -2318,16 +2325,12 @@
           "selected_groups": {
             "name": "Select group(s) from which Peptides should be selected for mapping to the Protein Graph.",
             "type": "categorical",
+            "condition": "metadata",
             "fill": "metadata_column_data",
             "categories": [],
             "default": "None",
             "multiple": true,
             "default_select_all": false
-          },
-          "metadata_df": {
-            "type": "empty",
-            "name": "metadata_df",
-            "default": null
           }
         }
       },
