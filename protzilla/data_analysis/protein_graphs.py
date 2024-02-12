@@ -1030,6 +1030,17 @@ def _get_peptides(
     :rtype: list[str]
     """
 
+    if grouping is not None:
+        assert grouping in peptide_df.columns, f"{grouping} not found in peptide_df"
+
+    if selected_groups is not None:
+        if grouping is None:
+            raise ValueError("grouping must be set if selected_groups is set")
+        for group in selected_groups:
+            assert (
+                group in peptide_df[grouping].unique()
+            ), f"Group '{group}' not found in peptide_df column '{grouping}'"
+
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     pattern = rf"^({protein_id}-\d+)$"
     protein_id_filter = df["Protein ID"].str.contains(pattern)
