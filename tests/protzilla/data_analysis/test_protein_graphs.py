@@ -1271,7 +1271,7 @@ def test_get_peptides_group_by_non_existent_grouping(test_peptide_df):
     protein_id = "MadeUp"
     peptide_df = test_peptide_df
     grouping = "NonExistent"
-    error_msg = f"{grouping} not found in peptide_df"
+    error_msg = f"Grouping '{grouping}' not found in peptide_df"
     with pytest.raises(AssertionError, match=re.escape(error_msg)):
         _get_peptides(peptide_df, protein_id, grouping, ["D"])
 
@@ -1279,7 +1279,7 @@ def test_get_peptides_group_by_non_existent_grouping(test_peptide_df):
 def test_get_peptides_no_grouping_selected_groups(test_peptide_df):
     protein_id = "MadeUp"
     peptide_df = test_peptide_df
-    error_msg = "grouping must be set if selected_groups is set"
+    error_msg = "Grouping must be set if selected_groups is set"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _get_peptides(peptide_df, protein_id, None, ["D"])
 
