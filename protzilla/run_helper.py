@@ -3,10 +3,13 @@ import copy
 import gseapy
 import matplotlib.colors as mcolors
 import restring
-from biomart import BiomartServer
 
 from protzilla.constants.protzilla_logging import MESSAGE_TO_LOGGING_FUNCTION
-from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
+from protzilla.data_integration.database_query import (
+    biomart_database,
+    uniprot_columns,
+    uniprot_databases,
+)
 from protzilla.workflow_helper import get_workflow_default_param_value
 
 
@@ -100,9 +103,12 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = databases
         elif param_dict["fill"] == "biomart_datasets":
             # retrieve datasets from BioMart server
-            server = BiomartServer("http://www.ensembl.org/biomart")
-            database = server.databases["ENSEMBL_MART_ENSEMBL"]
-            param_dict["categories"] = database.datasets
+            database = biomart_database("ENSEMBL_MART_ENSEMBL")
+            # get the display names instead if the internal names, then map them back
+            param_dict["categories"] = [
+                database.datasets[dataset].display_name for dataset in database.datasets
+            ]
+            # param_dict["categories"] = database.datasets
         elif param_dict["fill"] == "protein_group_column":
             param_dict["categories"] = run.df["Protein ID"].unique()
 
@@ -148,7 +154,7 @@ def get_parameters(run, section, step, method):
     return output
 
 
-def log_message(level: int = 40, msg: str = "", trace: str = ""):
+def log_message(level: int = 40, msg: str = "", trace: str | list[str] = ""):
     """
     Logs a message to the console.
 
@@ -158,8 +164,10 @@ def log_message(level: int = 40, msg: str = "", trace: str = ""):
     """
     log_function = MESSAGE_TO_LOGGING_FUNCTION.get(level)
     if log_function:
-        trace = f"\nTrace: {trace}" if trace != "" else ""
+        if trace != "":
+            trace = f"\nTrace: {trace}"
         log_function(f"{msg}{trace}")
+
 
 
 def log_messages(messages: list[dict] = None):

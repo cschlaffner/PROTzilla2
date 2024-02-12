@@ -1,5 +1,5 @@
 {
-    "group_to_genes": {
+    "protein_group_to_genes": {
         "A4D1B5-3;A4D1B5-2;A4D1B5": [
             "GSAP"
         ],
@@ -449,7 +449,7 @@
         "P16112;P16112-2;P16112-3",
         "P22626-2"
     ],
-    "gene_to_groups": {
+    "gene_to_protein_groups": {
         "GSAP": [
             "A4D1B5-3;A4D1B5-2;A4D1B5"
         ],

@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import shutil
+import traceback
 from io import BytesIO
 from pathlib import Path
 from shutil import rmtree
@@ -13,6 +14,7 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .run_helper import log_messages
+from .utilities import format_trace
 from .workflow_helper import (
     get_parameter_type,
     get_workflow_default_param_value,
@@ -107,16 +109,25 @@ class Run:
         run_path = Path(f"{RUNS_PATH}/{run_name}")
         with open(f"{run_path}/run_config.json", "r") as f:
             run_config = json.load(f)
-        history = History.from_disk(run_name, run_config["df_mode"])
+        current_messages = []
+        try:
+            history = History.from_disk(run_name, run_config["df_mode"])
+        except FileNotFoundError:
+            history = History(run_name, run_config["df_mode"])
+            msg = "Missing calculated Data. Restarted Run."
+            current_messages.append(dict(level=logging.ERROR, msg=msg))
+            log_messages(current_messages)
+
         return cls(
             run_name,
             run_config["workflow_config_name"],
             run_config["df_mode"],
             history,
             run_path,
+            current_messages,
         )
 
-    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path):
+    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path, current_messages=[]):
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
@@ -133,7 +144,7 @@ class Run:
         self.section, self.step, self.method = self.current_workflow_location()
         self.result_df = None
         self.current_out = None
-        self.current_messages = []
+        self.current_messages = current_messages
         self.calculated_method = None
         self.current_parameters = {}
         self.current_plot_parameters = {}
@@ -191,9 +202,9 @@ class Run:
                 )
                 self.current_messages = self.current_out.pop("messages", [])
             except Exception as e:
-                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
+                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
         else:
             self.result_df = None
             try:
@@ -201,8 +212,8 @@ class Run:
                 self.current_messages = self.current_out.pop("messages", [])
             except Exception as e:
                 self.current_out = {}
-                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-                self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+                msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
+                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
@@ -249,14 +260,14 @@ class Run:
             )
             self.current_messages = []
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
         except Exception as e:
             self.plots = []
-            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-            self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+            msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
+            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
@@ -273,15 +284,15 @@ class Run:
             self.calculated_method = self.method
 
             for plot in self.plots:
-                if "messages" in plot:
+                if plot is dict and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
             self.plots = []
             self.result_df = None
             self.current_out = {}
-            msg = f"An error occurred while plotting: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-            self.current_messages = [dict(level=logging.ERROR, msg=msg)]
+            msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
+            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
@@ -358,10 +369,14 @@ class Run:
             ] = self.calculated_method
             self.name_step(-1, name)
 
+        except AssertionError as e:
+            self.history.pop_step()
+            msg = f"An error occurred while saving this step: {e} Please check your parameters or report a potential programming issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
         except Exception as e:
             self.history.pop_step()
-            msg = f"An error occurred while saving this step: {e.__class__.__name__} {e}. Please check your parameters or report a potential program issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+            msg = f"An error occurred while saving this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
 
         else:
             self.step_index += 1
@@ -434,7 +449,9 @@ class Run:
                 call_parameters[k] = self.history.output_of_named_step(*v)
             elif param_dict and param_dict.get("type") == "multi_named_output":
                 for call_parameter, output_name in param_dict.get("mapping").items():
-                    call_parameters[call_parameter] = self.history.output_of_named_step(v, output_name)
+                    call_parameters[call_parameter] = self.history.output_of_named_step(
+                        v, output_name
+                    )
             elif param_dict and param_dict.get("type") == "named_output_v2":
                 call_parameters[k] = self.current_out_sources[v]
             else:

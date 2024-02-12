@@ -6,4 +6,4 @@ def build_trace_alert(trace):
         aria-expanded="false" aria-controls="flush-collapseOne">\
         Trace</button></h2><div id="flush-collapseOne" class="accordion-collapse collapse" \
         aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">\
-        <div class="accordion-body bg-white">{trace}</div></div></div></div>'
+        <div class="accordion-body bg-white"><pre>{trace}</pre></div></div></div></div>'

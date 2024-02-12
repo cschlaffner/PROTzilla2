@@ -3,12 +3,13 @@ from shutil import rmtree
 
 import numpy as np
 import pandas as pd
+import os
 import pytest
 from PIL import Image
 
 from protzilla import data_integration, data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.importing import ms_data_import, metadata_import
+from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities import random_string
 from protzilla.workflow_helper import get_workflow_default_param_value
@@ -23,7 +24,7 @@ def example_workflow():
 @pytest.fixture
 def example_workflow_short_updated():
     with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
+            f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
     ) as f:
         return json.load(f)
 
@@ -119,13 +120,32 @@ def test_run_continue(tests_folder_name):
 
     run.calculate_and_next(
         ms_data_import.max_quant_import,
+        name="ms_import",
         file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
+    run.calculate_and_next(
+        metadata_import.metadata_import_method,
+        name="metadata_import",
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
+        feature_orientation="Columns (samlpes in rows, features in columns)",
+    )
     df = run.df
     del run
+
     run2 = Run.continue_existing(run_name)
     assert df.equals(run2.df)
+
+    del run2
+    # delete dataframes and history_dfs folder of run
+    folder_path = RUNS_PATH / run_name
+    rmtree(folder_path / "dataframes")
+    rmtree(folder_path / "history_dfs")
+    # run should be started at the beginning
+    run3 = Run.continue_existing(run_name)
+    assert run3.df is None
+    assert run3.current_messages != []
+    assert any("Restarted" in message["msg"] for message in run3.current_messages)
 
 
 def test_current_run_location(tests_folder_name):
@@ -332,6 +352,7 @@ def test_next_step_error_handling(caplog, tests_folder_name):
     )
 
     assert any(message["level"] == 40 for message in run.current_messages)
+
 
 def test_name_step(example_workflow_short, tests_folder_name):
     # depends on test_read_write_local_workflow, test_get_workflow_default_param_value

@@ -7,6 +7,7 @@ import pandas as pd
 from restring import restring
 
 from protzilla.constants.protzilla_logging import logger
+from protzilla.data_integration.database_query import biomart_database
 from protzilla.utilities.utilities import clean_uniprot_id
 
 # Import enrichment analysis gsea methods to remove redundant function definition
@@ -188,7 +189,7 @@ def GO_analysis_with_STRING(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
@@ -377,13 +378,13 @@ def gseapy_enrichment(
     :return: enrichment results, filtered groups, error message if occurred {level, msg, trace(optional)}
     :rtype: tuple[pandas.DataFrame, list, dict]
     """
-    gene_to_groups = gene_mapping.get("gene_to_groups", {})
-    group_to_genes = gene_mapping.get("group_to_genes", {})
+    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
     genes = set()
     filtered_groups = set()
     for group in protein_list:
-        if group in group_to_genes:
-            genes.update(group_to_genes[group])
+        if group in protein_group_to_genes:
+            genes.update(protein_group_to_genes[group])
         else:
             filtered_groups.add(group)
 
@@ -430,7 +431,9 @@ def gseapy_enrichment(
             )
 
     enriched["Proteins"] = enriched["Genes"].apply(
-        lambda x: ";".join(";".join(gene_to_groups[gene]) for gene in x.split(";"))
+        lambda x: ";".join(
+            ";".join(gene_to_protein_groups[gene]) for gene in x.split(";")
+        )
     )
     logger.info(f"Finished analysis for {direction}regulated proteins")
     return enriched, list(filtered_groups), None
@@ -535,6 +538,12 @@ def GO_analysis_with_Enrichr(
         msg = "No gene sets provided"
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
+    # we need to map the biomart dataset name to the internal name
+    database = biomart_database("ENSEMBL_MART_ENSEMBL")
+    for dataset in database.datasets:
+        if database.datasets[dataset].display_name == background_biomart:
+            background_biomart = dataset
+            break
     # if gene sets from Enrichr are used, ignore background parameter because gseapy does not support it
     if gene_sets_enrichr and (
         background_path or background_number or background_biomart
@@ -552,6 +561,13 @@ def GO_analysis_with_Enrichr(
     elif background_number:
         background = background_number
     elif background_biomart:
+        # we need to map the biomart dataset name to the internal name
+        database = biomart_database("ENSEMBL_MART_ENSEMBL")
+        for dataset in database.datasets:
+            if database.datasets[dataset].display_name == background_biomart:
+                background = dataset
+                break
+
         background = background_biomart
     else:
         background = None
@@ -582,7 +598,7 @@ def GO_analysis_with_Enrichr(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and not down_protein_list:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."
@@ -752,7 +768,7 @@ def GO_analysis_offline(
             msg = "No upregulated proteins found. Check your input or select 'down' direction."
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both" and len(down_protein_list) == 0:
-            msg = "No proteins found. Check your input."
+            msg = "No proteins found for given threshold. Check your input. "
             return dict(messages=[dict(level=logging.ERROR, msg=msg)])
         elif direction == "both":
             msg = "No upregulated proteins found. Running analysis for 'down' direction only."

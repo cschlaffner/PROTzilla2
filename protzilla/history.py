@@ -33,6 +33,7 @@ class History:
         instance = cls(run_name, df_mode)
         with open(RUNS_PATH / run_name / "history.json", "r") as f:
             history_json = json.load(f, object_hook=load_objects)
+
         for index, step in enumerate(history_json):
             df_path = instance.df_path(index)
             if df_path.exists() and "memory" in instance.df_mode:
