@@ -1031,11 +1031,14 @@ def _get_peptides(
     """
 
     if grouping is not None:
-        assert grouping in peptide_df.columns, f"{grouping} not found in peptide_df"
+        assert(
+            grouping in peptide_df.columns,
+            f"Grouping '{grouping}' not found in peptide_df"
+        )
 
     if selected_groups is not None:
         if grouping is None:
-            raise ValueError("grouping must be set if selected_groups is set")
+            raise ValueError("Grouping must be set if selected_groups is set")
         for group in selected_groups:
             assert (
                 group in peptide_df[grouping].unique()

@@ -251,7 +251,9 @@ def test_peptide_df() -> pd.DataFrame:
         columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP", "Group"],
     )
 
-    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP", "Group"]]
+    peptide_df = peptide_df[
+        ["Sample", "Protein ID", "Sequence", "Intensity", "PEP", "Group"]
+    ]
     peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return peptide_df
