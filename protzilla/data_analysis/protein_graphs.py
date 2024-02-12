@@ -1030,7 +1030,9 @@ def _get_peptides(
     """
 
     if grouping is not None:
-        assert grouping in peptide_df.columns, f"Grouping '{grouping}' not found in peptide_df"
+        assert (
+            grouping in peptide_df.columns
+        ), f"Grouping '{grouping}' not found in peptide_df"
 
     if selected_groups is not None:
         if grouping is None:
