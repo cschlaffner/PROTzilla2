@@ -39,7 +39,9 @@ def make_current_fields(run: Run, section: str, step: str, method: str) -> list:
     for key, param_dict in parameters.items():
         if "dynamic" in param_dict:
             continue
-        current_fields.append(make_parameter_input(key, param_dict, parameters, disabled=False))
+        current_fields.append(
+            make_parameter_input(key, param_dict, parameters, disabled=False)
+        )
 
     return current_fields
 
