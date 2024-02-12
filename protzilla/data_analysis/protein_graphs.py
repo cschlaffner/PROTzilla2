@@ -6,7 +6,6 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 import requests
-from django.contrib import messages
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.constants.protzilla_logging import logger
@@ -1031,9 +1030,9 @@ def _get_peptides(
     """
 
     if grouping is not None:
-        assert(
+        assert (
             grouping in peptide_df.columns,
-            f"Grouping '{grouping}' not found in peptide_df"
+            f"Grouping '{grouping}' not found in peptide_df",
         )
 
     if selected_groups is not None:
