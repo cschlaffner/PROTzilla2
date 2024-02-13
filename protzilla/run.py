@@ -200,20 +200,20 @@ class Run:
                 self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
-                self.current_messages.append(self.current_out.pop("messages", []))
+                self.current_messages.extend(self.current_out.pop("messages", {}))
             except Exception as e:
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+                self.current_messages.extend(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
         else:
             self.result_df = None
             try:
                 self.current_out = method_callable(**call_parameters)
-                self.current_messages.append(self.current_out.pop("messages", []))
+                self.current_messages.extend(self.current_out.pop("messages", []))
             except Exception as e:
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-                self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+                self.current_messages.extend(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
@@ -260,7 +260,7 @@ class Run:
             )
             for plot in self.plots:
                 if plot is dict and "messages" in plot:
-                    self.current_messages.append(plot["messages"])
+                    self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
         except Exception as e:
@@ -283,7 +283,7 @@ class Run:
 
             for plot in self.plots:
                 if plot is dict and "messages" in plot:
-                    self.current_messages.append(plot["messages"])
+                    self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
             self.plots = []
