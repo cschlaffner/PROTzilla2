@@ -1142,7 +1142,7 @@
       },
       "scatter_plot": {
         "name": "Scatter plot",
-        "description": "Creates a scatter plot from data",
+        "description": "Creates a scatter plot from data. This requires a dimension reduction for the input dataframe, such as t-SNE.",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
