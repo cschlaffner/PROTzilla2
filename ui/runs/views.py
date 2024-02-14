@@ -457,6 +457,10 @@ def continue_(request):
     """
     run_name = request.POST["run_name"]
     active_runs[run_name] = Run.continue_existing(run_name)
+
+    for message in active_runs[run_name].current_messages:
+        display_message(message, request)
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
