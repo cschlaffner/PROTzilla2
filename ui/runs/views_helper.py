@@ -2,7 +2,7 @@ import re
 
 from django.contrib import messages
 
-from protzilla.utilities import name_to_title, format_trace
+from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (
     get_steps_of_workflow,
     get_steps_of_workflow_meta,
@@ -114,7 +114,11 @@ def display_message(message: dict, request):
     """
 
     trace = ""
-    if "trace" in message and isinstance(message["trace"], str) and message["trace"] != "":
+    if (
+        "trace" in message
+        and isinstance(message["trace"], str)
+        and message["trace"] != ""
+    ):
         trace = build_trace_alert(message["trace"])
 
     # map error level to bootstrap css class
@@ -141,4 +145,3 @@ def clear_messages(request):
     for message in messages.get_messages(request):
         pass
     storage.used = True
-
