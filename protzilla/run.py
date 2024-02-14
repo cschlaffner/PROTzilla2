@@ -127,15 +127,7 @@ class Run:
             current_messages,
         )
 
-    def __init__(
-        self,
-        run_name,
-        workflow_config_name,
-        df_mode,
-        history,
-        run_path,
-        current_messages=[],
-    ):
+    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path, current_messages=[]):
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
@@ -212,13 +204,7 @@ class Run:
             except Exception as e:
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages = [
-                    dict(
-                        level=logging.ERROR,
-                        msg=msg,
-                        trace=format_trace(traceback.format_exception(e)),
-                    )
-                ]
+                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
         else:
             self.result_df = None
             try:
@@ -227,13 +213,7 @@ class Run:
             except Exception as e:
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-                self.current_messages = [
-                    dict(
-                        level=logging.ERROR,
-                        msg=msg,
-                        trace=format_trace(traceback.format_exception(e)),
-                    )
-                ]
+                self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
@@ -255,9 +235,9 @@ class Run:
         self.next_step(name=name)
 
     def create_plot_from_current_location(self, parameters):
-        location = (section, step, method) = self.current_run_location()
+        location = (section, step, method) = self.current_workflow_location()
         if step == "plot":
-            self.update_workflow_config(parameters, location=location)
+            self.update_workflow_config(parameters)
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
             self.workflow_config["sections"][section]["steps"][
@@ -287,13 +267,7 @@ class Run:
         except Exception as e:
             self.plots = []
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [
-                dict(
-                    level=logging.ERROR,
-                    msg=msg,
-                    trace=format_trace(traceback.format_exception(e)),
-                )
-            ]
+            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
@@ -318,13 +292,7 @@ class Run:
             self.result_df = None
             self.current_out = {}
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [
-                dict(
-                    level=logging.ERROR,
-                    msg=msg,
-                    trace=format_trace(traceback.format_exception(e)),
-                )
-            ]
+            self.current_messages = [dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))]
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
@@ -408,13 +376,7 @@ class Run:
         except Exception as e:
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(
-                dict(
-                    level=logging.ERROR,
-                    msg=msg,
-                    trace=format_trace(traceback.format_exception(e)),
-                )
-            )
+            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
 
         else:
             self.step_index += 1
