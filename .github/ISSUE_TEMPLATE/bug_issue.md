@@ -8,7 +8,7 @@ project: 'PROTzilla'
 ---
 
 # What is the issue?
-<!-- A clear and concise description of what the bug is. -->
+<!-- A clear and concise description of what the bug is. Stack-trace goes here.-->
 
 # How to reproduce the issue?
 <!-- Steps to reproduce the behavior: -->
