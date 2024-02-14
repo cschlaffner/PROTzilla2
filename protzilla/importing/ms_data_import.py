@@ -23,6 +23,7 @@ def max_quant_import(
         )
         protein_groups = df["Protein IDs"]
         intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
+        intensity_df = intensity_df.filter(regex=r"^(?!.*peptides).*$", axis=1)
 
         if intensity_df.empty:
             msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again or verify your file."
