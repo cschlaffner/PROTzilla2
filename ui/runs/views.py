@@ -18,14 +18,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.workflow_helper import is_last_step
-
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
-from protzilla.run_helper import get_parameters
+from protzilla.run_helper import get_parameters, log_messages
 from protzilla.utilities import (
     clean_uniprot_id,
     get_memory_usage,
@@ -43,7 +41,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.views_helper import clear_messages, display_message, parameters_from_post
+from ui.runs.views_helper import clear_messages, parameters_from_post, display_messages
 
 active_runs = {}
 
@@ -113,8 +111,8 @@ def detail(request, run_name):
         display_message(message, request)
     clear_messages(request)
 
-    for message in run.current_messages:
-        display_message(message, request)
+    log_messages(run.current_messages)
+    display_messages(run.current_messages, request)
     run.current_messages = []
 
     current_plots = []
