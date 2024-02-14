@@ -1142,7 +1142,7 @@
       },
       "scatter_plot": {
         "name": "Scatter plot",
-        "description": "Creates a scatter plot from data",
+        "description": "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns.",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",
