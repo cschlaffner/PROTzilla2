@@ -1116,8 +1116,6 @@
             "default": 0
           },
           "proteins_of_interest_input": {
-            "name": "proteins of interest df to highlight in plot",
-            "type": "named_output",
             "name": "Proteins of interest",
             "select_from": [
               "input_dict"

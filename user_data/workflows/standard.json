@@ -170,11 +170,54 @@
             "grouping": "Group"
           },
           "output_name": "ttest"
+        },
+        {
+          "name": "plot",
+          "method": "volcano",
+          "parameters": {
+            "proteins_of_interest": [],
+            "proteins_of_interest_input": "differentially_expressed_proteins_df",
+            "input_dict": "ttest",
+            "p_values": [
+              "ttest",
+              "corrected_p_values_df"
+            ],
+            "log2_fc": [
+              "ttest",
+              "log2_fold_change_df"
+            ],
+            "fc_threshold": 0,
+            "alpha": [
+              "ttest",
+              "corrected_alpha"
+            ],
+            "group1": [
+              "ttest",
+              "group1"
+            ],
+            "group2": [
+              "ttest",
+              "group2"
+            ]
+          }
         }
       ]
     },
     "data_integration": {
       "steps": [
+        {
+          "name": "enrichment_analysis",
+          "method": "GO_analysis_with_STRING",
+          "parameters": {},
+          "output_name": "GO_analysis_with_STRING"
+        },
+        {
+          "name": "plot",
+          "method": "GO_enrichment_bar_plot",
+          "parameters": {
+            "gene_sets_restring": "Component"
+          }
+        }
       ]
     }
   }

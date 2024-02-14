@@ -43,7 +43,7 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.views_helper import clear_messages, display_message, parameters_from_post
+from ui.runs.views_helper import display_message, parameters_from_post
 
 active_runs = {}
 
@@ -93,25 +93,6 @@ def detail(request, run_name):
     else:
         description = ""
     last_step = is_last_step(run.workflow_config, run.step_index)
-    # This is a temporary solution and should be removed when the problem in the referenced step is fixed
-
-    if run.section == "data_integration" and run.step == "enrichment_analysis":
-        message = {
-            "level": 30,
-            "msg": "To select a column name, you have to first change"
-            ' the entry in the "Dataframe with protein IDs..." field and then change it '
-            'back to select values in the field "Column name...".',
-        }
-        display_message(message, request)
-    elif run.section == "data_integration" and run.method == "GO_enrichment_bar_plot":
-        message = {
-            "level": 30,
-            "msg": "To select sets to be plotted, you have to first change"
-            " the entry in the dataframe-field and then change it "
-            "back to select sets.",
-        }
-        display_message(message, request)
-    clear_messages(request)
 
     current_plots = []
     for plot in run.plots:
@@ -335,83 +316,83 @@ def change_field(request, run_name):
                         f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
                     )
 
-        elif param_dict["fill"] == "protein_df_columns":
-            named_output = selected[0]
-            output_item = selected[1]
-            # KeyError is expected when named_output triggers the fill
-            try:
-                protein_iterable = run.history.output_of_named_step(
-                    named_output, output_item
-                )
-            except KeyError:
-                protein_iterable = None
-            if isinstance(protein_iterable, pd.DataFrame):
-                categories = []
-                for column in protein_iterable.columns:
-                    if column not in ["Protein ID", "Sample"]:
-                        categories.append(column)
-                param_dict["categories"] = categories
-            elif isinstance(protein_iterable, pd.Series):
-                param_dict["categories"] = protein_iterable.index
-            elif isinstance(protein_iterable, dict):
-                param_dict["categories"] = protein_iterable.keys()
-            else:
-                param_dict["categories"] = []
-                logger.warning(
-                    f"Warning: expected protein_iterable to be a DataFrame or Series, but got {type(protein_iterable)}. Proceeding with empty list."
-                )
+            elif param_dict["fill"] == "protein_df_columns":
+                named_output = selected[0]
+                output_item = selected[1]
+                # KeyError is expected when named_output triggers the fill
+                try:
+                    protein_iterable = run.history.output_of_named_step(
+                        named_output, output_item
+                    )
+                except KeyError:
+                    protein_iterable = None
+                if isinstance(protein_iterable, pd.DataFrame):
+                    categories = []
+                    for column in protein_iterable.columns:
+                        if column not in ["Protein ID", "Sample"]:
+                            categories.append(column)
+                    param_dict["categories"] = categories
+                elif isinstance(protein_iterable, pd.Series):
+                    param_dict["categories"] = protein_iterable.index
+                elif isinstance(protein_iterable, dict):
+                    param_dict["categories"] = protein_iterable.keys()
+                else:
+                    param_dict["categories"] = []
+                    logger.warning(
+                        f"Warning: expected protein_iterable to be a DataFrame or Series, but got {type(protein_iterable)}. Proceeding with empty list."
+                    )
 
-        elif param_dict["fill"] == "enrichment_categories":
-            named_output = selected[0]
-            output_item = selected[1]
+            elif param_dict["fill"] == "enrichment_categories":
+                named_output = selected[0]
+                output_item = selected[1]
 
-            # TODO: this is a bit hacky, but it works for now
-            # should be refactored when we rework the named input handling
-            # KeyError is expected here because named_output trigger change_field
-            # twice to make sure that the categories are updated after the named_output has updated
-            try:
-                protein_iterable = run.history.output_of_named_step(
-                    named_output, output_item
-                )
-            except KeyError:
-                protein_iterable = None
+                # TODO: this is a bit hacky, but it works for now
+                # should be refactored when we rework the named input handling
+                # KeyError is expected here because named_output trigger change_field
+                # twice to make sure that the categories are updated after the named_output has updated
+                try:
+                    protein_iterable = run.history.output_of_named_step(
+                        named_output, output_item
+                    )
+                except KeyError:
+                    protein_iterable = None
 
-            if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "Gene_set" in protein_iterable.columns
-            ):
-                param_dict["categories"] = []
-            else:
-                param_dict["categories"] = (
-                    protein_iterable["Gene_set"].unique().tolist()
-                )
-        elif param_dict["fill"] == "gsea_enrichment_categories":
-            named_output = selected[0]
-            output_item = selected[1]
+                if (
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "Gene_set" in protein_iterable.columns
+                ):
+                    param_dict["categories"] = []
+                else:
+                    param_dict["categories"] = (
+                        protein_iterable["Gene_set"].unique().tolist()
+                    )
+            elif param_dict["fill"] == "gsea_enrichment_categories":
+                named_output = selected[0]
+                output_item = selected[1]
 
-            try:
-                protein_iterable = run.history.output_of_named_step(
-                    named_output, output_item
-                )
-            except KeyError:
-                protein_iterable = None
+                try:
+                    protein_iterable = run.history.output_of_named_step(
+                        named_output, output_item
+                    )
+                except KeyError:
+                    protein_iterable = None
 
-            if (
-                not isinstance(protein_iterable, pd.DataFrame)
-                or not "NES" in protein_iterable.columns
-            ):
-                param_dict["categories"] = []
-            else:
-                # gene_set_libraries are all prefixes for Term column in gsea output
-                # if no prefix is found, a single gmt file was used
-                gene_set_libraries = set()
-                for term in protein_iterable["Term"].unique():
-                    if "__" in term:
-                        gene_set_lib = term.split("__")[0]
-                        gene_set_libraries.add(gene_set_lib)
-                    else:
-                        gene_set_libraries.add("all")
-                param_dict["categories"] = list(gene_set_libraries)
+                if (
+                    not isinstance(protein_iterable, pd.DataFrame)
+                    or not "NES" in protein_iterable.columns
+                ):
+                    param_dict["categories"] = []
+                else:
+                    # gene_set_libraries are all prefixes for Term column in gsea output
+                    # if no prefix is found, a single gmt file was used
+                    gene_set_libraries = set()
+                    for term in protein_iterable["Term"].unique():
+                        if "__" in term:
+                            gene_set_lib = term.split("__")[0]
+                            gene_set_libraries.add(gene_set_lib)
+                        else:
+                            gene_set_libraries.add("all")
+                    param_dict["categories"] = list(gene_set_libraries)
 
         elif "select_from" in param_dict:
             param_dict["outputs"] = run.history.output_keys_of_named_step(selected[0])
