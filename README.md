@@ -18,8 +18,8 @@
 | protzilla/data\_analysis/differential\_expression.py                |        7 |        3 |        0 |        0 |     57% |      9-11 |
 | protzilla/data\_analysis/differential\_expression\_anova.py         |       58 |       14 |       30 |        7 |     69% |70-72, 78->91, 81-87, 102-107, 110, 127-128, 139 |
 | protzilla/data\_analysis/differential\_expression\_helper.py        |       27 |        2 |       10 |        2 |     89% |    43, 60 |
-| protzilla/data\_analysis/differential\_expression\_linear\_model.py |       66 |       15 |       24 |        6 |     70% |56-57, 64-65, 83-89, 92, 132-138 |
-| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       24 |        2 |     95% |21, 76->80, 107 |
+| protzilla/data\_analysis/differential\_expression\_linear\_model.py |       66 |       15 |       24 |        6 |     70% |55-56, 63-64, 82-88, 91, 131-137 |
+| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       24 |        2 |     95% |20, 75->79, 106 |
 | protzilla/data\_analysis/dimension\_reduction.py                    |       33 |        4 |       10 |        2 |     86% |67-72, 100, 179 |
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
