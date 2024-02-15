@@ -288,7 +288,7 @@ class Run:
                 self.df, self.result_df, self.current_out, **parameters
             )
             for plot in self.plots:
-                if plot is dict and "messages" in plot:
+                if isinstance(plot, dict) and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
@@ -317,7 +317,7 @@ class Run:
             self.calculated_method = self.method
 
             for plot in self.plots:
-                if plot is dict and "messages" in plot:
+                if isinstance(plot, dict) and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
