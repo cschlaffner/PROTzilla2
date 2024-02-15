@@ -210,7 +210,8 @@ class Run:
                     self.df, **call_parameters
                 )
                 if "messages" in self.current_out and any(
-                        messages["level"] == logging.ERROR for messages in self.current_out["messages"]
+                        messages["level"] == logging.ERROR
+                        for messages in self.current_out["messages"]
                 ):
                     calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", {}))
@@ -230,7 +231,8 @@ class Run:
             try:
                 self.current_out = method_callable(**call_parameters)
                 if "messages" in self.current_out and any(
-                        messages["level"] == logging.ERROR for messages in self.current_out["messages"]
+                        messages["level"] == logging.ERROR
+                        for messages in self.current_out["messages"]
                 ):
                     calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", []))
