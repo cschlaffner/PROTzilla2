@@ -424,7 +424,7 @@ class Run:
         else:
             self.step_index += 1
             self.section, self.step, self.method = self.current_workflow_location()
-            self.df = self.result_df if self.result_df is not None else self.df
+            self.df = self.result_df
             self.result_df = None
             self.calculated_method = None
             self.current_out = {}
