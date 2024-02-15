@@ -41,7 +41,12 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.views_helper import clear_messages, parameters_from_post, display_messages
+from ui.runs.views_helper import (
+    clear_messages,
+    parameters_from_post,
+    display_messages,
+    display_message,
+)
 
 active_runs = {}
 
