@@ -13,7 +13,6 @@ from PIL import Image
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
-from .run_helper import log_messages
 from .utilities import format_trace
 from .workflow_helper import (
     get_parameter_type,
@@ -116,7 +115,6 @@ class Run:
             history = History(run_name, run_config["df_mode"])
             msg = "Missing calculated Data. Restarted Run."
             current_messages.append(dict(level=logging.ERROR, msg=msg))
-            log_messages(current_messages)
 
         return cls(
             run_name,
@@ -127,7 +125,17 @@ class Run:
             current_messages,
         )
 
-    def __init__(self, run_name, workflow_config_name, df_mode, history, run_path, current_messages=[]):
+    def __init__(
+        self,
+        run_name,
+        workflow_config_name,
+        df_mode,
+        history,
+        run_path,
+        current_messages=None,
+    ):
+        if current_messages is None:
+            current_messages = []
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
@@ -195,35 +203,54 @@ class Run:
         if "run_name" in call_parameters:
             call_parameters["run_name"] = self.run_name
 
+        calculation_failed = False
         if self.section in ["importing", "data_preprocessing"]:
             try:
                 self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
+                if "messages" in self.current_out and any(
+                    messages["level"] == 40 for messages in self.current_out["messages"]
+                ):
+                    calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", {}))
             except Exception as e:
+                calculation_failed = True
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages.extend(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+                self.current_messages.append(
+                    dict(
+                        level=logging.ERROR,
+                        msg=msg,
+                        trace=format_trace(traceback.format_exception(e)),
+                    )
+                )
         else:
             self.result_df = None
             try:
                 self.current_out = method_callable(**call_parameters)
+                if "messages" in self.current_out and any(
+                    messages["level"] == 40 for messages in self.current_out["messages"]
+                ):
+                    calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", []))
             except Exception as e:
+                calculation_failed = True
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-                self.current_messages.extend(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+                self.current_messages.append(
+                    dict(
+                        level=logging.ERROR,
+                        msg=msg,
+                        trace=format_trace(traceback.format_exception(e)),
+                    )
+                )
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
 
-        # error handling for CLI
-        log_messages(self.current_messages)
-
-        if any(message["level"] == 40 for message in self.current_messages):
-            # method was not calculated successfully so the parameters are reset
+        if calculation_failed:
             self.result_df = None
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
@@ -266,7 +293,13 @@ class Run:
         except Exception as e:
             self.plots = []
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+            self.current_messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=msg,
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
@@ -290,7 +323,13 @@ class Run:
             self.result_df = None
             self.current_out = {}
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+            self.current_messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=msg,
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
@@ -372,7 +411,13 @@ class Run:
         except Exception as e:
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e))))
+            self.current_messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=msg,
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
 
         else:
             self.step_index += 1
@@ -386,8 +431,6 @@ class Run:
             self.plotted_for_parameters = None
             self.plots = []
             self.current_out_sources = {}
-
-        log_messages(self.current_messages)
 
     def back_step(self):
         assert self.history.steps
