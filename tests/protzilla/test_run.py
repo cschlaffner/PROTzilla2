@@ -3,7 +3,6 @@ from shutil import rmtree
 
 import numpy as np
 import pandas as pd
-import os
 import pytest
 from PIL import Image
 
@@ -24,7 +23,7 @@ def example_workflow():
 @pytest.fixture
 def example_workflow_short_updated():
     with open(
-            f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
     ) as f:
         return json.load(f)
 
@@ -144,7 +143,6 @@ def test_run_continue(tests_folder_name):
     # run should be started at the beginning
     run3 = Run.continue_existing(run_name)
     assert run3.df is None
-    assert run3.current_messages != []
     assert any("Restarted" in message["msg"] for message in run3.current_messages)
 
 
@@ -172,28 +170,6 @@ def test_current_run_location(tests_folder_name):
         "filter_proteins",
         "samples_missing_filter",
     )
-
-
-def test_perform_calculation_logging(caplog, tests_folder_name):
-    run_name = tests_folder_name + "/test_run_logging_" + random_string()
-    run = Run.create(run_name, df_mode="disk")
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
-    )
-    run.df["Intensity"] = np.nan
-
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "outlier_detection",
-        "local_outlier_factor",
-        {"number_of_neighbors": 3},
-    )
-
-    assert "ERROR" in caplog.text
-    assert "LocalOutlierFactor" in caplog.text
-    assert "NaN values" in caplog.text
 
 
 def test_perform_calculation_error_handling(caplog, tests_folder_name):

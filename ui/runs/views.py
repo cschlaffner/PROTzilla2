@@ -18,14 +18,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from main.settings import BASE_DIR
 
-from protzilla.workflow_helper import is_last_step
-
 sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
 from protzilla.run import Run
-from protzilla.run_helper import get_parameters
+from protzilla.run_helper import get_parameters, log_messages
 from protzilla.utilities import (
     clean_uniprot_id,
     get_memory_usage,
@@ -43,7 +41,12 @@ from ui.runs.fields import (
     make_plot_fields,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, parameters_from_post
+from ui.runs.views_helper import (
+    clear_messages,
+    parameters_from_post,
+    display_messages,
+    display_message,
+)
 
 active_runs = {}
 
@@ -93,6 +96,10 @@ def detail(request, run_name):
     else:
         description = ""
     last_step = is_last_step(run.workflow_config, run.step_index)
+
+    log_messages(run.current_messages)
+    display_messages(run.current_messages, request)
+    run.current_messages = []
 
     current_plots = []
     for plot in run.plots:
@@ -439,9 +446,6 @@ def continue_(request):
     run_name = request.POST["run_name"]
     active_runs[run_name] = Run.continue_existing(run_name)
 
-    for message in active_runs[run_name].current_messages:
-        display_message(message, request)
-
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -460,9 +464,6 @@ def next_(request, run_name):
     run = active_runs[run_name]
 
     run.next_step(request.POST["name"])
-
-    for message in run.current_messages:
-        display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
@@ -575,9 +576,6 @@ def calculate(request, run_name):
         parameters[k] = v[0].temporary_file_path()
     run.perform_current_calculation_step(parameters)
 
-    for message in run.current_messages:
-        display_message(message, request)
-
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -604,10 +602,6 @@ def plot(request, run_name):
         del parameters["chosen_method"]
 
     run.create_plot_from_current_location(parameters)
-
-    for index, message in enumerate(run.current_messages):
-        if isinstance(message, dict):
-            display_message(message, request)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
