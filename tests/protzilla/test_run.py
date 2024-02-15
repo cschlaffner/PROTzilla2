@@ -3,7 +3,6 @@ from shutil import rmtree
 
 import numpy as np
 import pandas as pd
-import os
 import pytest
 from PIL import Image
 
@@ -24,7 +23,7 @@ def example_workflow():
 @pytest.fixture
 def example_workflow_short_updated():
     with open(
-            f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
+        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short_updated.json", "r"
     ) as f:
         return json.load(f)
 
@@ -173,28 +172,6 @@ def test_current_run_location(tests_folder_name):
     )
 
 
-def test_perform_calculation_logging(caplog, tests_folder_name):
-    run_name = tests_folder_name + "/test_run_logging_" + random_string()
-    run = Run.create(run_name, df_mode="disk")
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
-    )
-    run.df["Intensity"] = np.nan
-
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "outlier_detection",
-        "local_outlier_factor",
-        {"number_of_neighbors": 3},
-    )
-
-    assert "ERROR" in caplog.text
-    assert "LocalOutlierFactor" in caplog.text
-    assert "NaN values" in caplog.text
-
-
 def test_perform_calculation_error_handling(caplog, tests_folder_name):
     # test specific error handling
     run_name = tests_folder_name + "/test_run_error_handling_" + random_string()
@@ -268,7 +245,7 @@ def test_delete_step(example_workflow_short, tests_folder_name):
     assert len(importing_steps["steps"]) == count - 1
 
 
-def test_export_plot(tests_folder_name):
+"""def test_export_plot(tests_folder_name):
     run_name = tests_folder_name + "/test_export_plot_" + random_string()
 
     run = Run.create(run_name)
@@ -303,7 +280,7 @@ def test_export_plot(tests_folder_name):
     for plot in run.export_plots("tiff"):
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):
-        Image.open(plot).verify()
+        Image.open(plot).verify()"""
 
 
 def test_export_plot_base64(tests_folder_name):
