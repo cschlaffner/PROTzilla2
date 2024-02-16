@@ -13,7 +13,7 @@
 | protzilla/constants/protzilla\_logging.py                           |       42 |       10 |       10 |        0 |     62% |46-47, 50-51, 54-55, 58-59, 62-63 |
 | protzilla/data\_analysis/\_\_init\_\_.py                            |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/classification.py                          |       65 |       32 |       12 |        4 |     48% |33-52, 54, 56-66, 67->exit, 263-313 |
-| protzilla/data\_analysis/classification\_helper.py                  |       80 |       15 |       40 |        5 |     73% |41, 81-82, 103-114, 131, 166-169 |
+| protzilla/data\_analysis/classification\_helper.py                  |       82 |       15 |       40 |        5 |     74% |41, 81-82, 104-115, 132, 167-170 |
 | protzilla/data\_analysis/clustering.py                              |       69 |       11 |        6 |        2 |     83% |141, 365-380, 384-388 |
 | protzilla/data\_analysis/differential\_expression.py                |        7 |        3 |        0 |        0 |     57% |      9-11 |
 | protzilla/data\_analysis/differential\_expression\_anova.py         |       58 |       14 |       30 |        7 |     69% |70-72, 78->91, 81-87, 102-107, 110, 127-128, 139 |
@@ -46,7 +46,7 @@
 | protzilla/history.py                                                |      135 |       10 |       60 |        6 |     92% |40, 124, 134, 180-184, 227, 234 |
 | protzilla/importing/\_\_init\_\_.py                                 |        0 |        0 |        0 |        0 |    100% |           |
 | protzilla/importing/metadata\_import.py                             |       64 |       15 |       28 |        7 |     76% |29, 31, 45-47, 91-98, 113, 124, 129-138, 168-169 |
-| protzilla/importing/ms\_data\_import.py                             |      115 |       22 |       48 |        1 |     79% |28-29, 88-90, 117-119, 231-249 |
+| protzilla/importing/ms\_data\_import.py                             |      115 |       22 |       48 |        1 |     79% |28-29, 89-91, 119-121, 233-251 |
 | protzilla/importing/peptide\_import.py                              |       22 |        2 |        2 |        0 |     92% |     15-16 |
 | protzilla/run.py                                                    |      343 |       51 |      134 |       11 |     83% |76-82, 86-92, 170->181, 202, 204, 239-243, 292-298, 308, 321-336, 375-376, 413-416, 467, 507, 511-514, 533, 545->518 |
 | protzilla/run\_helper.py                                            |       94 |       21 |       78 |       11 |     74% |28, 47-48, 53, 58, 69, 76, 88, 92-97, 99-101, 104-106, 126, 164->exit, 170-176, 178 |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      344 |      286 |      130 |        1 |     13% |62, 87-134, 176-192, 223-244, 264-410, 423-430, 444-447, 462-466, 481-483, 498-507, 522-529, 544-552, 568-577, 595-604, 620-622, 635-639, 655-656, 703-705, 721-736, 744-774, 793-808, 814-866 |
 | ui/runs/views\_helper.py                                            |       70 |       20 |       30 |        4 |     68% |16->18, 22, 35, 38-44, 116-130, 145-146, 155-158 |
-|                                                           **TOTAL** | **4643** | **1300** | **1904** |  **238** | **69%** |           |
+|                                                           **TOTAL** | **4645** | **1300** | **1904** |  **238** | **69%** |           |
 
 
 ## Setup coverage badge
