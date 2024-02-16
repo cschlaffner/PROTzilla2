@@ -1203,12 +1203,15 @@
             "default": [
               null,
               null
+            ],
+            "fill_dynamic": [
+              "protein_group"
             ]
           },
           "protein_group": {
             "name": "Protein group: choose highlighted protein group",
             "type": "categorical",
-            "fill": "protein_group_column",
+            "fill": "protein_ids",
             "categories": [],
             "default": null
           },
