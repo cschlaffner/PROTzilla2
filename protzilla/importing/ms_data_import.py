@@ -74,7 +74,7 @@ def ms_fragger_import(
         df = df.drop(columns=columns_to_drop_existing)
 
         intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
-        # TODO 423 check if anny samples are misinterpreted as intensities (see max_quant_import)
+        # TODO 423 check if any samples are misinterpreted as intensities (see max_quant_import)
         intensity_df.columns = [
             c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
         ]

@@ -97,8 +97,8 @@ def perform_cross_validation(
     p_samples=None,
     **parameters,
 ):
-    shuffle = True if shuffle == "yes" else False
-    random_state_cv = 42 if shuffle else None
+    shuffle = shuffle == "yes"
+    random_state_cv = None if not shuffle else random_state_cv
     if cross_validation_estimator == "K-Fold":
         return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv)
     elif cross_validation_estimator == "Repeated K-Fold":
@@ -215,9 +215,9 @@ def perform_train_test_split(
     split_stratify="yes",
     **kwargs,
 ):
+    # by default this contains already filtered samples from metadata, we need to remove those
     labels_df = labels_df[labels_df.index.isin(input_df.index)]
     split_stratify = labels_df if split_stratify == "yes" else None
-    # by default this contains already filtered samples from metadata, we need to remove those
     return train_test_split(
         input_df,
         labels_df,
