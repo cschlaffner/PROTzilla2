@@ -7,7 +7,8 @@ project: "PROTzilla"
 
 ---
 
-Useful Description
+## Issue description
+<!-- A clear and concise description of the issue. -->
 
 ## Acceptance Criteria
 - [ ] 

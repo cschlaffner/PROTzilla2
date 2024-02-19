@@ -537,7 +537,7 @@
                 "linear",
                 "log10"
               ],
-              "default": "linear"
+              "default": "log10"
             }
           },
           {

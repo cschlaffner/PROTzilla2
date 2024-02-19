@@ -1,13 +1,24 @@
-- fixes #<Issue Number>
+## Description
+fixes #<Issue Number>
+<!-- Description of the change made in the pull-request. -->
 
-Description (what might a Reviewer want to know)
-  - **what methods did you move** somewhere else (not written by yourself and therefore might not be related to the PR topic, this is no excuse for bad code!)
-  - **how can the changes be tested** - please provide a guideline on what steps need to be taken to "reach" the new changes / feature
+## Changes
+<!-- Where and what about the code was changed. The most important files and changes should be listed here. -->
+
+
+## Testing
+<!-- How to test the changes made in the pull-request, e.g. a walkthrough with steps of a sample workflow. -->
 
 ## PR checklist
-
+**Development**
+- [ ] If necessary, I have updated the documentation (README, docstrings, etc.)
+- [ ] If necessary, I have created / updated tests.
+ 
+**Mergeability**
 - [ ] main-branch has been merged into local branch to resolve conflicts
-- [ ] tests and linter have passed AFTER local merge
-- [ ] at least one other dev reviewed and approved
-- [ ] documentation
-- [ ] tests
+- [ ] The tests and linter have passed AFTER local merge
+- [ ] The code has been formatted with `black`
+ 
+**Code review**
+- [ ] I have self-reviewed my code.
+- [ ] At least one other developer reviewed and approved the changes

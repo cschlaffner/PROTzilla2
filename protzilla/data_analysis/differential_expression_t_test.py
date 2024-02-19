@@ -6,7 +6,6 @@ from scipy import stats
 
 from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
-
 from .differential_expression_helper import (
     BAD_LOG_BASE_INPUT_MSG,
     INVALID_PROTEINGROUP_DATA_MSG,
@@ -66,7 +65,7 @@ def t_test(
         group1 = unique_groups[0]
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 1 was invalid. Auto-selected {group1} as group1.",
             }
         )
@@ -79,7 +78,7 @@ def t_test(
                 break
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 2 was invalid. Auto-selected {group2} as group 2.",
             }
         )

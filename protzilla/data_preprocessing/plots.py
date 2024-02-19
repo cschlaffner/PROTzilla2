@@ -252,27 +252,28 @@ def create_histograms(
     min_value = min(intensities_a.min(skipna=True), intensities_b.min(skipna=True))
     max_value = max(intensities_a.max(skipna=True), intensities_b.max(skipna=True))
 
-    binsize_factor = 0.0005 if visual_transformation == "linear" else 0.02
+    number_of_bins = 100
+    binsize_a = (
+        intensities_a.max(skipna=True) - intensities_a.min(skipna=True)
+    ) / number_of_bins
+    binsize_b = (
+        intensities_b.max(skipna=True) - intensities_b.min(skipna=True)
+    ) / number_of_bins
+
+    if overlay:
+        binsize_a = binsize_b = max(binsize_a, binsize_b)
 
     trace0 = go.Histogram(
         x=intensities_a,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
         name=name_a,
-        xbins=dict(
-            start=min_value,
-            end=max_value,
-            size=(max_value - min_value) * binsize_factor,
-        ),
+        xbins=dict(start=min_value, end=max_value, size=binsize_a),
     )
     trace1 = go.Histogram(
         x=intensities_b,
         marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
         name=name_b,
-        xbins=dict(
-            start=min_value,
-            end=max_value,
-            size=(max_value - min_value) * binsize_factor,
-        ),
+        xbins=dict(start=min_value, end=max_value, size=binsize_b),
     )
     if not overlay:
         fig = make_subplots(rows=1, cols=2)
