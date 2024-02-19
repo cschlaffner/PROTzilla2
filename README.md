@@ -40,7 +40,7 @@
 | protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |248->259, 260 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |176, 193, 248, 249->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
-| protzilla/data\_preprocessing/plots.py                              |       97 |       11 |       21 |        4 |     87% |165->180, 249-250, 283, 294, 394-418 |
+| protzilla/data\_preprocessing/plots.py                              |      101 |       11 |       23 |        4 |     88% |165->180, 249-250, 284, 295, 395-419 |
 | protzilla/data\_preprocessing/plots\_helper.py                      |       17 |       13 |        6 |        0 |     17% |15-24, 38-47 |
 | protzilla/data\_preprocessing/transformation.py                     |       21 |        2 |        8 |        3 |     83% |33, 42->52, 53 |
 | protzilla/history.py                                                |      135 |       10 |       60 |        6 |     92% |40, 124, 134, 180-184, 227, 234 |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      344 |      286 |      130 |        1 |     13% |62, 87-134, 176-192, 223-244, 264-410, 423-430, 444-447, 462-466, 481-483, 498-507, 522-529, 544-552, 568-577, 595-604, 620-622, 635-639, 655-656, 703-705, 721-736, 744-774, 793-808, 814-866 |
 | ui/runs/views\_helper.py                                            |       70 |       20 |       30 |        4 |     68% |16->18, 22, 35, 38-44, 116-130, 145-146, 155-158 |
-|                                                           **TOTAL** | **4645** | **1300** | **1904** |  **238** | **69%** |           |
+|                                                           **TOTAL** | **4649** | **1300** | **1906** |  **238** | **69%** |           |
 
 
 ## Setup coverage badge
