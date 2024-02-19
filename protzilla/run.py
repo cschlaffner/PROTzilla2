@@ -210,8 +210,8 @@ class Run:
                     self.df, **call_parameters
                 )
                 if "messages" in self.current_out and any(
-                        messages["level"] == logging.ERROR
-                        for messages in self.current_out["messages"]
+                    messages["level"] == logging.ERROR
+                    for messages in self.current_out["messages"]
                 ):
                     calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", {}))
@@ -231,8 +231,8 @@ class Run:
             try:
                 self.current_out = method_callable(**call_parameters)
                 if "messages" in self.current_out and any(
-                        messages["level"] == logging.ERROR
-                        for messages in self.current_out["messages"]
+                    messages["level"] == logging.ERROR
+                    for messages in self.current_out["messages"]
                 ):
                     calculation_failed = True
                 self.current_messages.extend(self.current_out.pop("messages", []))
@@ -264,9 +264,9 @@ class Run:
         self.next_step(name=name)
 
     def create_plot_from_current_location(self, parameters):
-        location = (section, step, method) = self.current_workflow_location()
+        location = (section, step, method) = self.current_run_location()
         if step == "plot":
-            self.update_workflow_config(parameters)
+            self.update_workflow_config(parameters, location=location)
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
             self.workflow_config["sections"][section]["steps"][
