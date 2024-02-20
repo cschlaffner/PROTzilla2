@@ -201,11 +201,6 @@ method_map = {
     ): model_selection.random_sampling,
     (
         "data_analysis",
-        "model_selection",
-        "cluster_multiple_sample_sizes_and_k",
-    ): model_selection.cluster_multiple_sample_sizes_and_k,
-    (
-        "data_analysis",
         "dimension_reduction",
         "t_sne",
     ): dimension_reduction.t_sne,
@@ -392,19 +387,9 @@ plot_map = {
     ): model_evaluation_plots.confusion_matrix_plot,
     (
         "data_analysis",
-        "model_selection",
-        "cluster_multiple_sample_sizes_and_k",
-    ): model_selection.elbow_plot_multiple_sample_sizes,
-    (
-        "data_analysis",
         "plot",
         "learning_curve_plot",
     ): model_selection_plots.learning_curve_plot,
-    (
-        "data_analysis",
-        "plot",
-        "elbow_method_n_clusters",
-    ): model_selection_plots.elbow_method_n_clusters,
     (
         "data_analysis",
         "plot",
