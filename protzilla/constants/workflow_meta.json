@@ -537,7 +537,7 @@
                 "linear",
                 "log10"
               ],
-              "default": "linear"
+              "default": "log10"
             }
           },
           {
@@ -1117,8 +1117,6 @@
           },
           "proteins_of_interest_input": {
             "name": "proteins of interest df to highlight in plot",
-            "type": "named_output",
-            "name": "Proteins of interest",
             "select_from": [
               "input_dict"
             ],
@@ -1142,7 +1140,7 @@
       },
       "scatter_plot": {
         "name": "Scatter plot",
-        "description": "Creates a scatter plot from data",
+        "description": "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns.",
         "parameters": {
           "input_df": {
             "name": "Choose dataframe to be plotted",

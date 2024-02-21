@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .constants.paths import RUNS_PATH
 from .run import Run
-from .run_helper import get_parameters
+from .run_helper import get_parameters, log_messages
 from .utilities import random_string
 from .workflow_helper import get_defaults
 
@@ -70,6 +70,9 @@ class Runner:
         self.plots_path.mkdir()
         logging.info(f"Saving plots at {self.plots_path}")
 
+        log_messages(self.run.current_messages)
+        self.run.current_messages = []
+
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
         for section, steps in self.run.workflow_config["sections"].items():
@@ -92,6 +95,9 @@ class Runner:
                     if self.all_plots:
                         self._create_plots_for_step(section, step)
                 self.run.next_step()
+
+                log_messages(self.run.current_messages)
+                self.run.current_messages = []
 
     def _importing(self, step):
         if step["name"] == "ms_data_import":
