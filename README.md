@@ -37,7 +37,7 @@
 | protzilla/data\_preprocessing/filter\_proteins.py                   |       18 |        2 |        4 |        1 |     77% |     53-54 |
 | protzilla/data\_preprocessing/filter\_samples.py                    |       35 |        0 |        4 |        0 |    100% |           |
 | protzilla/data\_preprocessing/imputation.py                         |      131 |        3 |       30 |        4 |     96% |47-53, 180, 517->530, 541->547 |
-| protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |248->259, 260 |
+| protzilla/data\_preprocessing/normalisation.py                      |       98 |        1 |       22 |        2 |     98% |250->261, 262 |
 | protzilla/data\_preprocessing/outlier\_detection.py                 |       67 |        3 |       12 |        4 |     89% |176, 193, 248, 249->exit |
 | protzilla/data\_preprocessing/peptide\_filter.py                    |       16 |        2 |        4 |        1 |     75% |     50-51 |
 | protzilla/data\_preprocessing/plots.py                              |      101 |       11 |       23 |        4 |     88% |165->180, 249-250, 284, 295, 395-419 |
