@@ -74,7 +74,7 @@ def ms_fragger_import(
         df = df.drop(columns=columns_to_drop_existing)
 
         intensity_df = df.filter(regex=f"{intensity_name}$", axis=1)
-        # TODO 423 check if anny samples are misinterpreted as intensities (see max_quant_import)
+        # TODO 423 check if any samples are misinterpreted as intensities (see max_quant_import)
         intensity_df.columns = [
             c[: -(len(intensity_name) + 1)] for c in intensity_df.columns
         ]
@@ -111,7 +111,7 @@ def diann_import(_, file_path, map_to_uniprot=False) -> (pd.DataFrame, dict):
         # rename column names of samples, removing file path and ".raw" if present
         intensity_df = df.rename(columns=lambda x: re.sub(r"(.*[/\\])|(.raw)", r"", x))
         intensity_df = intensity_df.rename(columns={"Protein.Ids": "Protein ID"})
-        # TODO 423 check if anny samples are misinterpreted as intensities (see max_quant_import)
+        # TODO 423 check if any samples are misinterpreted as intensities (see max_quant_import)
 
         intensity_name = "Intensity"
 
