@@ -91,6 +91,7 @@ def by_median(
                 quantile
             )
         else:
+            # TODO 428
             try:
                 raise ValueError(
                     "\nCareful, your median is zero - we recommend\
@@ -148,6 +149,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                 totalsum
             )
         else:
+            # TODO 428
             try:
                 raise ValueError(
                     "\nCareful, your total sum is zero. Try using other\
