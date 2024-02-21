@@ -8,7 +8,7 @@ from protzilla.utilities import default_intensity_column
 
 
 def apply_multiple_testing_correction(
-    p_values: list, method: str, alpha: float
+        p_values: list, method: str, alpha: float
 ) -> tuple:
     """
     Applies a multiple testing correction method to a list of p-values
@@ -50,12 +50,15 @@ def _map_log_base(log_base: str) -> int | None:
 
 
 def log_transformed_check(
-    intensity_df: pd.DataFrame,
-    intensity_name: str = None,
-    value_threshold: int = 1000,
-):
-    """This function checks a intensity dataframe for a previous log transformation based on the intensity values.
-    Returns true if the df was likely previously log-transformed, else false."""
+        intensity_df: pd.DataFrame,
+        intensity_name: str = None,
+        value_threshold: int = 1000,
+) -> bool:
+    """
+    This function checks a intensity dataframe for a previous log transformation based on the intensity values.
+
+    :return: Returns true if the df was likely previously log-transformed, else false.
+    """
     if intensity_name is None:
         intensity_name = default_intensity_column(intensity_df)
 
@@ -71,7 +74,7 @@ def log_transformed_check(
 INVALID_PROTEINGROUP_DATA_MSG = {
     "level": logging.WARNING,
     "msg": "Due do missing or identical values, the p-values for some protein groups could not be calculated. These groups were omitted from the analysis. "
-    "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
+           "To prevent this, please add filtering and imputation steps to your workflow before running the analysis.",
 }
 LOG_TRANSFORMATION_MESSAGE_MSG = {
     "level": logging.INFO,
