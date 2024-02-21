@@ -60,12 +60,12 @@ def log_transformed_check(
         intensity_name = default_intensity_column(intensity_df)
 
     if (
-        intensity_df[intensity_name].max() > value_threshold
+            intensity_df[intensity_name].max() < value_threshold
         or intensity_df[intensity_name].min() < 0
     ):
-        return False
+        return True
 
-    return True
+    return False
 
 
 INVALID_PROTEINGROUP_DATA_MSG = {
