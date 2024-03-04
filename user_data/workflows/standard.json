@@ -70,19 +70,6 @@
           }
         },
         {
-          "name": "transformation",
-          "method": "log_transformation",
-          "parameters": {
-            "log_base": "log2"
-          },
-          "graphs": [
-            {
-              "graph_type": "Boxplot",
-              "group_by": "Sample"
-            }
-          ]
-        },
-        {
           "name": "normalisation",
           "method": "median",
           "parameters": {
@@ -95,6 +82,19 @@
             }
           ],
             "output_name": "preprocessed_data"
+        },
+        {
+          "name": "transformation",
+          "method": "log_transformation",
+          "parameters": {
+            "log_base": "log2"
+          },
+          "graphs": [
+            {
+              "graph_type": "Boxplot",
+              "group_by": "Sample"
+            }
+          ]
         }
       ]
     },
