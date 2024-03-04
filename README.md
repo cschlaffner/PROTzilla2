@@ -17,9 +17,9 @@
 | protzilla/data\_analysis/clustering.py                              |       69 |       11 |        6 |        2 |     83% |141, 365-380, 384-388 |
 | protzilla/data\_analysis/differential\_expression.py                |        7 |        3 |        0 |        0 |     57% |      9-11 |
 | protzilla/data\_analysis/differential\_expression\_anova.py         |       58 |       14 |       26 |        7 |     70% |70-72, 78->91, 81-87, 102-107, 110, 127-128, 139 |
-| protzilla/data\_analysis/differential\_expression\_helper.py        |       27 |        2 |       10 |        2 |     89% |    43, 60 |
+| protzilla/data\_analysis/differential\_expression\_helper.py        |       27 |        3 |       10 |        3 |     84% |43, 63, 71 |
 | protzilla/data\_analysis/differential\_expression\_linear\_model.py |       66 |       15 |       22 |        6 |     69% |55-56, 63-64, 82-88, 91, 131-137 |
-| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       22 |        2 |     95% |20, 75->79, 106 |
+| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       22 |        3 |     94% |20, 75->79, 98->101, 106 |
 | protzilla/data\_analysis/dimension\_reduction.py                    |       33 |        4 |       10 |        2 |     86% |67-72, 100, 179 |
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      344 |      286 |      124 |        1 |     13% |62, 87-134, 176-192, 223-244, 264-410, 423-430, 444-447, 462-466, 481-483, 498-507, 522-529, 544-552, 568-577, 595-604, 620-622, 635-639, 655-656, 703-705, 721-736, 744-774, 793-808, 814-866 |
 | ui/runs/views\_helper.py                                            |       70 |       20 |       28 |        4 |     67% |16->18, 22, 35, 38-44, 116-130, 145-146, 155-158 |
-|                                                           **TOTAL** | **4649** | **1299** | **1772** |  **239** | **69%** |           |
+|                                                           **TOTAL** | **4649** | **1300** | **1772** |  **241** | **69%** |           |
 
 
 ## Setup coverage badge
