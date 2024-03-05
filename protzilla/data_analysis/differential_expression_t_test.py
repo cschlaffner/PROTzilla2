@@ -6,6 +6,7 @@ from scipy import stats
 
 from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
+
 from .differential_expression_helper import (
     BAD_LOG_BASE_INPUT_MSG,
     INVALID_PROTEINGROUP_DATA_MSG,
