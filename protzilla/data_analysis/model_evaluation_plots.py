@@ -1,11 +1,11 @@
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plot
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from protzilla.data_analysis.classification_helper import encode_labels
 from protzilla.utilities.utilities import fig_to_base64
 
 
-def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None):
+def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the precision-recall curve for a classification model.
 
@@ -28,11 +28,11 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, title=None
         model, input_test_df, labels_test_df["Encoded Label"]
     )
     display.plot()
-    plt.title(title)
+    plot.title(plot_title)
     return [fig_to_base64(display.figure_)]
 
 
-def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
+def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     """
     Calculate and plot the roc curve for a classification model.
 
@@ -55,5 +55,5 @@ def roc_curve_plot(model, input_test_df, labels_test_df, title=None):
         model, input_test_df, labels_test_df["Encoded Label"]
     )
     display.plot()
-    plt.title(title)
+    plot.title(plot_title)
     return [fig_to_base64(display.figure_)]
