@@ -166,7 +166,6 @@
               "preprocessed_data",
               "dataframe"
             ],
-            "log_base": 2,
             "grouping": "Group"
           },
           "output_name": "ttest"
@@ -208,7 +207,13 @@
         {
           "name": "enrichment_analysis",
           "method": "GO_analysis_with_STRING",
-          "parameters": {},
+          "parameters": {
+            "input_df": [
+              "ttest",
+              "differentially_expressed_proteins_df"
+            ],
+            "differential_expression_col": "log2_fold_change"
+          },
           "output_name": "GO_analysis_with_STRING"
         },
         {
