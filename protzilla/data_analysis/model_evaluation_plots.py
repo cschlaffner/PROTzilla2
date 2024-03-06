@@ -16,9 +16,9 @@ def precision_recall_curve_plot(model, input_test_df, labels_test_df, plot_title
     :type input_test_df: pd.DataFrame
     :param labels_test_df: The true labels of the testing data as a DataFrame.
     :type labels_test_df: pd.DataFrame
-    :param title: The title of the precision-recall curve plot. This is an optional
+    :param plot_title: The title of the precision-recall curve plot. This is an optional
         parameter.
-    :type title: str, optional
+    :type plot_title: str, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
@@ -43,9 +43,9 @@ def roc_curve_plot(model, input_test_df, labels_test_df, plot_title=None):
     :type input_test_df: pd.DataFrame
     :param labels_test_df: The true labels of the testing data as a DataFrame.
     :type labels_test_df: pd.DataFrame
-    :param title: The title of the precision-recall curve plot. This is an optional
+    :param plot_title: The title of the precision-recall curve plot. This is an optional
         parameter.
-    :type title: str, optional
+    :type plot_title: str, optional
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
