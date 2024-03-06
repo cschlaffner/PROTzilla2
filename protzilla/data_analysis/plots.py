@@ -54,12 +54,18 @@ def scatter_plot(
             x_name, y_name = intensity_df_wide.columns[:2]
             color_name = color_df.columns[0] if not color_df.empty else None
             fig = px.scatter(intensity_df_wide, x=x_name, y=y_name, color=color_name)
+            fig.update_traces(
+                marker=dict(color=colors["annotation_proteins_of_interest"])
+            )
         elif intensity_df_wide.shape[1] == 3:
             intensity_df_wide = pd.concat([intensity_df_wide, color_df], axis=1)
             x_name, y_name, z_name = intensity_df_wide.columns[:3]
             color_name = color_df.columns[0] if not color_df.empty else None
             fig = px.scatter_3d(
                 intensity_df_wide, x=x_name, y=y_name, z=z_name, color=color_name
+            )
+            fig.update_traces(
+                marker=dict(color=colors["annotation_proteins_of_interest"])
             )
         else:
             raise ValueError(
@@ -171,6 +177,14 @@ def create_volcano_plot(
             name=new_names[t.name],
             legendgroup=new_names[t.name],
         )
+    )
+    fig.update_traces(
+        marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
+        selector=dict(name="Significant Proteins"),
+    )
+    fig.update_traces(
+        marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
+        selector=dict(name="Not Significant Proteins"),
     )
 
     return [fig]
@@ -405,7 +419,7 @@ def prot_quant_plot(
             y=wide_df[protein_group],
             mode="lines",
             name=formatted_protein_name,
-            line=dict(color="orangered"),
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
         )
     )
 
