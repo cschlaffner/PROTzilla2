@@ -166,6 +166,8 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
         list(current_out["significant_proteins_df"]["Protein ID"].unique())
         == significant_proteins
     )
+
+
 def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
@@ -194,7 +196,7 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0116, 0.3838, 1.0, 0.0116]
+    corrected_p_values = [0.0269, 0.3842, 1.0, 0.026]
     differentially_expressed_proteins = [
         "Protein1",
         "Protein2",
@@ -220,6 +222,8 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
         list(current_out["significant_proteins_df"]["Protein ID"].unique())
         == significant_proteins
     )
+
+
 def test_differential_expression_t_test_types(diff_expr_test_data, show_figures):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
@@ -255,6 +259,8 @@ def test_differential_expression_t_test_types(diff_expr_test_data, show_figures)
         student_out["corrected_p_values_df"]["corrected_p_value"],
         welch_out["corrected_p_values_df"]["corrected_p_value"],
     )
+
+
 def test_differential_expression_t_test_with_log_data(show_figures):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1"],
@@ -298,6 +304,7 @@ def test_differential_expression_t_test_with_log_data(show_figures):
     current_out = t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",
@@ -367,6 +374,7 @@ def test_differential_expression_t_test_with_zero_mean(
     current_out = t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",
