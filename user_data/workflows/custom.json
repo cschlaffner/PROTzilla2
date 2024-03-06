@@ -1,0 +1,33 @@
+{
+  "analysis_level": "protein",
+  "sections": {
+    "importing": {
+      "steps": [
+        {
+          "name": "ms_data_import",
+          "method": "max_quant_import",
+          "parameters": {
+            "intensity_name": "iBAQ"
+          }
+        },
+        {
+          "name": "metadata_import",
+          "method": "metadata_import_method",
+          "parameters": {
+            "feature_orientation": "Columns (samples in rows, features in columns)"
+          }
+        }
+      ]
+    },
+    "data_preprocessing": {
+      "steps": []
+    },
+    "data_analysis": {
+      "steps": []
+    },
+    "data_integration": {
+      "steps": []
+    }
+  }
+}
+
