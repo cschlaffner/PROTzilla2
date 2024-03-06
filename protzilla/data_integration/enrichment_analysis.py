@@ -107,8 +107,8 @@ def merge_up_down_regulated_dfs_restring(up_df, down_df):
 
 def GO_analysis_with_STRING(
     proteins_df,
-    gene_sets_restring,
     organism,
+    gene_sets_restring=None,
     differential_expression_col=None,
     differential_expression_threshold=0,
     background_path=None,
@@ -164,6 +164,10 @@ def GO_analysis_with_STRING(
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
+    if gene_sets_restring is None:
+        msg = "No knowledge databases selected. Using all knowledge databases."
+        out_messages.append(dict(level=logging.INFO, msg=msg))
+        gene_sets_restring = ["KEGG", "Component", "Function", "Process", "RCTM"]
 
     # remove all columns but "Protein ID" and differential_expression_col column
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
