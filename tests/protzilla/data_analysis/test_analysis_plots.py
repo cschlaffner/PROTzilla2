@@ -56,6 +56,7 @@ def ttest_output():
     return t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",

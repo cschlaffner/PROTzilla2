@@ -958,6 +958,15 @@
         "name": "t-Test",
         "description": "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1.",
         "parameters": {
+          "ttest_type": {
+            "name": "t-Test type:",
+            "type": "categorical",
+            "categories": [
+              "Student's t-Test",
+              "Welch's t-Test"
+            ],
+            "default": "Welch's t-Test"
+          },
           "intensity_df": {
             "name": "Input dataframe",
             "type": "named_output",
