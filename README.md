@@ -19,7 +19,7 @@
 | protzilla/data\_analysis/differential\_expression\_anova.py         |       58 |       14 |       26 |        7 |     70% |70-72, 78->91, 81-87, 102-107, 110, 127-128, 139 |
 | protzilla/data\_analysis/differential\_expression\_helper.py        |       27 |        3 |       10 |        3 |     84% |43, 63, 71 |
 | protzilla/data\_analysis/differential\_expression\_linear\_model.py |       66 |       15 |       22 |        6 |     69% |56-57, 64-65, 83-89, 92, 132-138 |
-| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       64 |        2 |       22 |        3 |     94% |21, 76->80, 99->102, 107 |
+| protzilla/data\_analysis/differential\_expression\_t\_test.py       |       66 |        2 |       24 |        3 |     94% |21, 77->81, 100->103, 108 |
 | protzilla/data\_analysis/dimension\_reduction.py                    |       33 |        4 |       10 |        2 |     86% |67-72, 100, 179 |
 | protzilla/data\_analysis/model\_evaluation.py                       |       10 |        0 |        0 |        0 |    100% |           |
 | protzilla/data\_analysis/model\_evaluation\_plots.py                |       18 |        0 |        0 |        0 |    100% |           |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      344 |      286 |      124 |        1 |     13% |59, 84-131, 173-189, 220-241, 261-407, 420-427, 441-444, 459-463, 478-480, 495-504, 519-526, 541-549, 565-574, 592-601, 617-619, 632-636, 652-653, 700-702, 718-733, 741-771, 790-805, 811-863 |
 | ui/runs/views\_helper.py                                            |       70 |       20 |       28 |        4 |     67% |16->18, 22, 35, 38-44, 116-130, 145-146, 155-158 |
-|                                                           **TOTAL** | **4653** | **1295** | **1774** |  **240** | **69%** |           |
+|                                                           **TOTAL** | **4655** | **1295** | **1776** |  **240** | **69%** |           |
 
 
 ## Setup coverage badge
