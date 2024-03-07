@@ -173,6 +173,7 @@
             "name": "Percentage of minimum non-missing samples per protein",
             "type": "numeric",
             "min": 0,
+            "step": 0.1,
             "max": 1,
             "default": 0.5
           }
@@ -432,6 +433,7 @@
             "name": "Percentile for normalisation:",
             "type": "numeric",
             "min": 0,
+            "step": 0.1,
             "max": 1,
             "default": 0.5
           }
@@ -977,6 +979,7 @@
             "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
+            "step": 0.05,
             "max": 1,
             "default": 0.05
           },
@@ -1047,6 +1050,7 @@
             "name": "Error rate (alpha)",
             "type": "numeric",
             "min": 0,
+            "step": 0.05,
             "max": 1,
             "default": 0.05
           },
@@ -2248,6 +2252,7 @@
             "name": "The effective minimum distance between embedded points.",
             "type": "numeric",
             "min": 0.1,
+            "step": 0.1,
             "default": 0.1
           },
           "metric": {
@@ -2938,6 +2943,7 @@
             "name": "Only terms with adjusted p-value (or FDR) < cutoff will be shown",
             "type": "numeric",
             "min": 0,
+            "step": 0.01,
             "max": 1,
             "default": 0.05
           },
@@ -2996,6 +3002,7 @@
             "name": "Only terms with adjusted p-value < cutoff will be shown",
             "type": "numeric",
             "min": 0,
+            "step": 0.01,
             "max": 1,
             "default": 0.05
           },
@@ -3063,6 +3070,7 @@
             "name": "Cutoff value for fdr q-value or nominal p-value",
             "type": "numeric",
             "min": 0,
+            "step": 0.01,
             "max": 1,
             "default": 0.05
           },
