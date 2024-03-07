@@ -280,6 +280,29 @@ def test_GO_analysis_with_STRING_no_downregulated_proteins():
     assert "No downregulated proteins" in current_out["messages"][0]["msg"]
 
 
+def test_GO_analysis_with_STRING_no_knowledge_base():
+    proteins_df = pd.DataFrame(
+        {
+            "Protein ID": ["Protein1", "Protein2", "Protein3"],
+            "log2_fold_change": [1.0, 0.5, 0.0],
+        }
+    )
+
+    current_out = GO_analysis_with_STRING(
+        proteins_df=proteins_df,
+        gene_sets_restring=None,
+        organism=9606,
+        differential_expression_col="log2_fold_change",
+        direction="both",
+    )
+
+    assert "messages" in current_out
+    assert any(
+        "No knowledge databases" in message["msg"]
+        for message in current_out["messages"]
+    )
+
+
 def test_GO_analysis_with_STRING_no_proteins():
     proteins_df = pd.DataFrame(
         {
