@@ -458,7 +458,7 @@ class Run:
         Navigates to a specific step in the run.
 
         :param step_index: the index of the step to navigate to within the section
-        :param section_name: the name of the section
+        :param section_name: the name of the section in which the step is located
         """
         # Find the global index of the step within the specified section
         global_index = get_global_index_of_step(
