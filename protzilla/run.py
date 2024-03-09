@@ -436,22 +436,35 @@ class Run:
             self.current_out_sources = {}
 
     def back_step(self):
-        assert self.history.steps
-        popped_step, result_df = self.history.pop_step()
-        self.section = popped_step.section
-        self.step = popped_step.step
-        self.method = popped_step.method
-        self.calculated_method = self.method
-        self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        self.result_df = result_df
-        self.current_out = popped_step.outputs
-        self.current_messages = popped_step.messages
-        self.current_parameters = {self.method: popped_step.parameters}
-        self.current_plot_parameters = {}
-        # TODO: add plotted_for_parameter to History?
-        self.plotted_for_parameters = None
-        self.plots = popped_step.plots
-        self.step_index -= 1
+        self.navigate_relative(-1)
+
+    def navigate_relative(self, steps: int):
+        """
+        Navigates to a step relative to the current step.
+
+        :param steps: the number of steps to navigate. Negative values navigate backwards.
+        """
+        if steps > 0:
+            raise Exception(f"Can not navigate to future step.")
+        elif steps < 0:
+            assert self.history.steps
+            for i in range(-steps - 1):
+                self.history.pop_step()
+            popped_step, popped_result_df = self.history.pop_step()
+            self.section = popped_step.section
+            self.step = popped_step.step
+            self.method = popped_step.method
+            self.calculated_method = self.method
+            self.df = self.history.steps[-1].dataframe if self.history.steps else None
+            self.result_df = popped_result_df
+            self.current_out = popped_step.outputs
+            self.current_messages = popped_step.messages
+            self.current_parameters = {self.method: popped_step.parameters}
+            self.current_plot_parameters = {}
+            # TODO: add plotted_for_parameter to History?
+            self.plotted_for_parameters = None
+            self.plots = popped_step.plots
+            self.step_index += steps
 
     def navigate(self, section_name: str, step_index: int):
         """
@@ -465,15 +478,7 @@ class Run:
             self.workflow_config, section_name, step_index
         )
 
-        if global_index < len(self.history.steps):
-            assert self.history.steps
-            for i in range(len(self.history.steps) - global_index - 1):
-                self.history.pop_step()
-                self.step_index -= 1
-            self.back_step()
-
-        else:
-            raise Exception(f"step {self.step} not found")
+        self.navigate_relative(global_index - self.step_index)
 
     def current_workflow_location(self):
         try:
