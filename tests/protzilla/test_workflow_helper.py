@@ -199,11 +199,18 @@ def test_get_global_index_of_step(example_workflow):
         workflow_helper.get_global_index_of_step(example_workflow, "data_analysis", 0)
         == 8
     )
+
     assert (
         workflow_helper.get_global_index_of_step(
-            example_workflow, "data_integration", 0
+            example_workflow, "data_integration", 4
         )
-        == 10
+        == -1
+    )
+    assert (
+        workflow_helper.get_global_index_of_step(
+            example_workflow, "nonexisting_section", 4
+        )
+        == -1
     )
 
 

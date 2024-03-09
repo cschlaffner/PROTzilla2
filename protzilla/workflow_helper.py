@@ -82,7 +82,11 @@ def get_global_index_of_step(workflow_config, section: str, step_index_in_sectio
     index = 0
     for s, steps in workflow_config["sections"].items():
         if s == section:
-            return index + step_index_in_section
+            return (
+                index + step_index_in_section
+                if step_index_in_section < steps["steps"].__len__()
+                else -1
+            )
         index += steps["steps"].__len__()
     return -1
 
