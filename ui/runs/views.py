@@ -480,6 +480,12 @@ def back(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
+def navigate(request, run_name):
+    run = active_runs[run_name]
+    run.navigate(request.POST["section_name"], int(request.POST["index"]))
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
 def add(request, run_name):
     """
     Adds a new method to the run. The method is added as the next step.

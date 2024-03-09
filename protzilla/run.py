@@ -18,6 +18,7 @@ from .workflow_helper import (
     get_parameter_type,
     get_workflow_default_param_value,
     set_output_name,
+    get_global_index_of_step,
 )
 
 
@@ -451,6 +452,28 @@ class Run:
         self.plotted_for_parameters = None
         self.plots = popped_step.plots
         self.step_index -= 1
+
+    def navigate(self, section_name: str, step_index: int):
+        """
+        Navigates to a specific step in the run.
+
+        :param step_index: the index of the step to navigate to within the section
+        :param section_name: the name of the section
+        """
+        # Find the global index of the step within the specified section
+        global_index = get_global_index_of_step(
+            self.workflow_config, section_name, step_index
+        )
+
+        if global_index < len(self.history.steps):
+            assert self.history.steps
+            for i in range(len(self.history.steps) - global_index - 1):
+                self.history.pop_step()
+                self.step_index -= 1
+            self.back_step()
+
+        else:
+            raise Exception(f"step {self.step} not found")
 
     def current_workflow_location(self):
         try:
