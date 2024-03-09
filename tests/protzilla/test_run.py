@@ -293,7 +293,7 @@ def test_delete_step(example_workflow_short, tests_folder_name):
     assert len(importing_steps["steps"]) == count - 1
 
 
-"""def test_export_plot(tests_folder_name):
+def test_export_plot(tests_folder_name):
     run_name = tests_folder_name + "/test_export_plot_" + random_string()
 
     run = Run.create(run_name)
@@ -328,7 +328,7 @@ def test_delete_step(example_workflow_short, tests_folder_name):
     for plot in run.export_plots("tiff"):
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):
-        Image.open(plot).verify()"""
+        Image.open(plot).verify()
 
 
 def test_export_plot_base64(tests_folder_name):

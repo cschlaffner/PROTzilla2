@@ -179,6 +179,34 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
     assert example_workflow == example_workflow_copy
 
 
+def test_get_global_index_of_step(example_workflow):
+    assert (
+        workflow_helper.get_global_index_of_step(example_workflow, "importing", 0) == 0
+    )
+    assert (
+        workflow_helper.get_global_index_of_step(
+            example_workflow, "data_preprocessing", 0
+        )
+        == 2
+    )
+    assert (
+        workflow_helper.get_global_index_of_step(
+            example_workflow, "data_preprocessing", 5
+        )
+        == 7
+    )
+    assert (
+        workflow_helper.get_global_index_of_step(example_workflow, "data_analysis", 0)
+        == 8
+    )
+    assert (
+        workflow_helper.get_global_index_of_step(
+            example_workflow, "data_integration", 0
+        )
+        == 10
+    )
+
+
 def test_is_last_step_in_section(example_workflow):
     assert workflow_helper.is_last_step_in_section(
         example_workflow, "data_preprocessing", 5
