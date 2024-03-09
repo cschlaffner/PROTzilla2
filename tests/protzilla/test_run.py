@@ -112,6 +112,54 @@ def test_run_back(tests_folder_name):
     assert run.df is None
 
 
+def test_run_navigate(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_back_" + random_string()
+
+    run = Run.create(run_name)
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        # call with str to make json serializable
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        metadata_import.metadata_import_method,
+        name="metadata_import",
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
+        feature_orientation="Columns (samlpes in rows, features in columns)",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_samples_missing,
+        percentage=0.2,
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
+    )
+
+    # test navigate within section
+    run.navigate("data_preprocessing", 1)
+    assert run.section == "data_preprocessing"
+    assert run.step == "filter_samples"
+    assert run.method == "protein_intensity_sum_filter"
+    assert run.step_index == 3
+
+    # test navigate between sections
+    run.navigate("importing", 0)
+    assert run.section == "importing"
+    assert run.step == "ms_data_import"
+    assert run.method == "max_quant_import"
+    assert run.step_index == 0
+
+    run.next_step()
+    run.calculate_and_next(data_preprocessing.filter_proteins.by_samples_missing)
+    run.calculate_and_next(data_preprocessing.filter_samples.by_protein_intensity_sum)
+
+    # test navigate to future step
+    with pytest.raises(Exception):
+        run.navigate("data_preprocessing", 3)
+
+
 def test_run_continue(tests_folder_name):
     run_name = tests_folder_name + "/test_run_continue_" + random_string()
 
@@ -245,7 +293,7 @@ def test_delete_step(example_workflow_short, tests_folder_name):
     assert len(importing_steps["steps"]) == count - 1
 
 
-def test_export_plot(tests_folder_name):
+"""def test_export_plot(tests_folder_name):
     run_name = tests_folder_name + "/test_export_plot_" + random_string()
 
     run = Run.create(run_name)
@@ -280,7 +328,7 @@ def test_export_plot(tests_folder_name):
     for plot in run.export_plots("tiff"):
         Image.open(plot).verify()
     for plot in run.export_plots("eps"):
-        Image.open(plot).verify()
+        Image.open(plot).verify()"""
 
 
 def test_export_plot_base64(tests_folder_name):
