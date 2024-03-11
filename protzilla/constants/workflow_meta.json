@@ -2273,13 +2273,13 @@
     "protein_graphs": {
       "peptides_to_isoform": {
         "name": "Peptide to isoform",
-        "description": "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online.",
+        "description": "Create a variation graph (.graphml) for a protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-features are included in the graph. This, currently, only works with Uniprot-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
             "type": "text",
             "default": "",
-            "placeholder": "Enter the Uniprot-ID of the Protein"
+            "placeholder": "Enter the Uniprot-ID of the protein"
           },
           "run_name": {
             "type": "empty",
@@ -2312,7 +2312,7 @@
             "default": null
           },
           "grouping": {
-            "name": "Category by which Peptides should be selected.",
+            "name": "Category by which peptides should be selected.",
             "type": "categorical",
             "condition": "metadata",
             "fill": "metadata_columns",
@@ -2323,7 +2323,7 @@
             "default": "None"
           },
           "selected_groups": {
-            "name": "Select group(s) from which Peptides should be selected for mapping to the Protein Graph.",
+            "name": "Select group(s) from which peptides should be selected for mapping to the protein graph.",
             "type": "categorical",
             "condition": "metadata",
             "fill": "metadata_column_data",
@@ -2336,13 +2336,13 @@
       },
       "variation_graph": {
         "name": "Protein variation graph",
-        "description": "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online.",
+        "description": "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniprot-IDs and while you are online.",
         "parameters": {
           "protein_id": {
             "name": "Protein ID",
             "type": "text",
             "default": "",
-            "placeholder": "Enter the Uniprot-ID of the Protein"
+            "placeholder": "Enter the Uniprot-ID of the protein"
           },
           "run_name": {
             "type": "empty",
