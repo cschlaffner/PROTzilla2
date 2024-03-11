@@ -503,6 +503,7 @@ class Run:
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
 
+    @property
     def has_metadata(self):
         try:
             _ = self.metadata

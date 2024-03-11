@@ -79,7 +79,6 @@ def insert_special_params(param_dict, run):
             ]
         elif param_dict["fill"] == "metadata_columns":
             param_dict["categories"] = run.metadata.columns.unique()
-
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
@@ -140,7 +139,7 @@ def get_parameters(run, section, step, method):
         # key and the fitting value
         if "condition" in param_dict:
             if param_dict["condition"] == "metadata":
-                if not run.has_metadata():
+                if not run.has_metadata:
                     continue
         workflow_default = get_workflow_default_param_value(
             run.workflow_config,
