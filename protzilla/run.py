@@ -15,10 +15,10 @@ from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities import format_trace
 from .workflow_helper import (
+    get_global_index_of_step,
     get_parameter_type,
     get_workflow_default_param_value,
     set_output_name,
-    get_global_index_of_step,
 )
 
 
