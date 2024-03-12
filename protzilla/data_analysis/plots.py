@@ -65,7 +65,7 @@ def scatter_plot(
                 intensity_df_wide, x=x_name, y=y_name, z=z_name, color=color_name
             )
             fig.update_traces(
-                marker=dict(color=colors["annotation_proteins_of_interest"])
+                marker_color=colors["annotation_proteins_of_interest"]
             )
         else:
             raise ValueError(
@@ -394,7 +394,7 @@ def prot_quant_plot(
                 y=wide_df[group],
                 mode="lines",
                 name=group[:15] + "..." if len(group) > 15 else group,
-                line=dict(color="rgba(102,51,153,0.5)"),
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
                 showlegend=len(similar_groups) <= 7,
             )
         )
@@ -405,7 +405,7 @@ def prot_quant_plot(
                 x=[None],
                 y=[None],
                 mode="lines",
-                marker=dict(color="rgba(102,51,153,0.5)"),
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
                 name="Similar Protein Groups",
             )
         )

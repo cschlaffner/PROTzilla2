@@ -21,7 +21,7 @@ def create_pie_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param colour: Optional argument to specify the colour of the pie chart
+    :param color: Optional argument to specify the colour of the pie chart
     :param names_of_sectors: Name of parts (so-called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
@@ -64,7 +64,7 @@ def create_bar_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param colour: Optional argument to specify the colour of the bar chart
+    :param color: Optional argument to specify the colour of the bar chart
     :param names_of_sectors: Name of parts (so called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
