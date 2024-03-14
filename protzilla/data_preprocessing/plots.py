@@ -55,7 +55,7 @@ def create_bar_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
     heading: str = "",
-    colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+    color: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
     y_title: str = "",
     x_title: str = "",
 ) -> Figure:
@@ -76,7 +76,7 @@ def create_bar_plot(
     fig = px.bar(
         x=names_of_sectors,
         y=values_of_sectors,
-        color=colour[: len(values_of_sectors)],
+        color=color[: len(values_of_sectors)],
         color_discrete_map="identity",
     )
 
