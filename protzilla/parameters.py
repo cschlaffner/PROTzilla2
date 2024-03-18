@@ -110,6 +110,10 @@ class ContainerParameter:
     def __iter__(self):
         return iter(self.parameters.values())
 
+    @property
+    def empty(self):
+        return len(self.parameters) == 0
+
 
 class ParameterFile(Parameter):
     """

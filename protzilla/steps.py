@@ -51,7 +51,7 @@ class Step:
         """
         Calculates the step.
         """
-        if self.parameters is None:
+        if self.parameters.empty:
             raise ValueError("No parameters were given")
         self.call_method()
 
