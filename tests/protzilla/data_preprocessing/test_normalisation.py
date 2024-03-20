@@ -304,7 +304,7 @@ def test_normalisation_by_z_score(
 ):
     result_df, dropouts = by_z_score(normalisation_df)
 
-    fig = by_z_score_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[0]
+    fig = by_z_score_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample", ["Protein1", "Protein2"],)[0]
     if show_figures:
         fig.show()
 
@@ -320,7 +320,7 @@ def test_normalisation_by_median(
 ):
     result_df, dropouts = by_median(normalisation_df)
 
-    fig = by_median_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[0]
+    fig = by_median_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample", ["Protein1", "Protein2"],)[0]
     if show_figures:
         fig.show()
 
@@ -344,7 +344,7 @@ def test_totalsum_normalisation(
 ):
     result_df, dropouts = by_totalsum(normalisation_df)
 
-    fig = by_totalsum_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample")[
+    fig = by_totalsum_plot(normalisation_df, result_df, dropouts, "Boxplot", "Sample", ["Protein1", "Protein2"],)[
         0
     ]
     if show_figures:
@@ -371,8 +371,7 @@ def test_ref_protein_normalisation(
     )
 
     fig = by_reference_protein_plot(
-        normalisation_by_ref_protein_df, result_df, dropouts, "Boxplot", "Sample"
-    )[0]
+        normalisation_by_ref_protein_df, result_df, dropouts, "Boxplot", "Sample", ["Protein1", "Protein2"])[0]
     if show_figures:
         fig.show()
 
