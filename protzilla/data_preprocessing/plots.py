@@ -110,6 +110,7 @@ def create_box_plots(
     y_title: str = "",
     x_title: str = "",
     group_by: str = "None",
+    proteins_of_interest =None,
     visual_transformation: str = "linear",
 ) -> Figure:
     """
@@ -129,6 +130,7 @@ def create_box_plots(
     :param y_title: Optional y-axis title for graphs.
     :param x_title: Optional x-axis title for graphs.
     :param group_by: Optional argument to create a grouped boxplot\
+    :param proteins_of_interest: List of proteins to be included in the boxplot
     :param visual_transformation: Visual transformation of the y-axis data.
     graph. Arguments can be either "Sample" to group by sample or\
     "Protein ID" to group by protein. Leave "None" to get ungrouped\
@@ -141,19 +143,21 @@ def create_box_plots(
             f"""Group_by parameter  must be "None" or
                 "Sample" or "Protein ID" but is {group_by}"""
         )
-    intensity_name_a = default_intensity_column(dataframe_a)
-    intensity_name_b = default_intensity_column(dataframe_b)
+    filtered_df = dataframe_a[dataframe_a["Protein ID"].isin(proteins_of_interest)]
+    filtered_result_df = dataframe_b[dataframe_b["Protein ID"].isin(proteins_of_interest)]
+    intensity_name_a = default_intensity_column(filtered_df)
+    intensity_name_b = default_intensity_column(filtered_result_df)
     if group_by in {"Sample", "Protein ID"}:
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
-            y=dataframe_a[intensity_name_a],
-            x=dataframe_a[group_by],
+            y=filtered_df[intensity_name_a],
+            x=filtered_df[group_by],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
             name=name_a,
         )
         trace1 = go.Box(
-            y=dataframe_b[intensity_name_b],
-            x=dataframe_b[group_by],
+            y=filtered_result_df[intensity_name_b],
+            x=filtered_result_df[group_by],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
             name=name_b,
         )
@@ -164,12 +168,12 @@ def create_box_plots(
     elif group_by == "None":
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
-            y=dataframe_a[intensity_name_a],
+            y=filtered_df[intensity_name_a],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
             name=name_a,
         )
         trace1 = go.Box(
-            y=dataframe_b[intensity_name_b],
+            y=filtered_result_df[intensity_name_b],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
             name=name_b,
         )

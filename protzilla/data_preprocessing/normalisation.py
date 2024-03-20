@@ -4,6 +4,7 @@ import traceback
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
+from protzilla.run_helper import get_parameters
 from protzilla.data_preprocessing.plots import create_box_plots, create_histograms
 from protzilla.utilities import default_intensity_column
 
@@ -230,23 +231,23 @@ def by_reference_protein(
     return scaled_df, dict(dropped_samples=dropped_samples)
 
 
-def by_z_score_plot(df, result_df, current_out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+def by_z_score_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def by_median_plot(df, result_df, current_out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+def by_median_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def by_totalsum_plot(df, result_df, current_out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+def by_totalsum_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by)
+def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
+def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
@@ -257,6 +258,8 @@ def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by):
             x_title="",
             y_title="Intensity",
             group_by=group_by,
+            proteins_of_interest=proteins_of_interest,
+
         )
     if graph_type == "Histogram":
         fig = create_histograms(

@@ -363,6 +363,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             }
           }
         ]
@@ -393,6 +401,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             }
           }
         ]
@@ -421,6 +437,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             }
           }
         ]
@@ -458,6 +482,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             }
           }
         ]
@@ -493,6 +525,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             }
           }
         ]
@@ -531,6 +571,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             },
             "visual_transformation": {
               "name": "Visual transformation:",
@@ -588,6 +636,14 @@
               ],
               "default": "None"
             },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
+            },
             "visual_transformation": {
               "name": "Visual transformation:",
               "type": "categorical",
@@ -643,6 +699,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             },
             "visual_transformation": {
               "name": "Visual transformation:",
@@ -703,6 +767,14 @@
               ],
               "default": "None"
             },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
+            },
             "visual_transformation": {
               "name": "Visual transformation:",
               "type": "categorical",
@@ -758,6 +830,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             },
             "visual_transformation": {
               "name": "Visual transformation:",
@@ -830,6 +910,14 @@
                 "Protein ID"
               ],
               "default": "None"
+            },
+            "proteins_of_interest": {
+              "name": "Proteins of interest",
+              "type": "categorical",
+              "fill": "protein_group_column",
+              "categories": [],
+              "default": null,
+              "multiple": true
             },
             "visual_transformation": {
               "name": "Visual transformation:",

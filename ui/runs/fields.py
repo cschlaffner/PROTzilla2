@@ -11,7 +11,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
-from protzilla.run_helper import get_parameters
+from protzilla.run_helper import get_parameters, insert_special_params
 from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (
     get_workflow_default_param_value,
@@ -177,6 +177,7 @@ def make_plot_fields(run: Run, section: str, step: str, method: str) -> str:
         for key, param_dict in plot.items():
             if method in run.current_plot_parameters:
                 param_dict["default"] = run.current_plot_parameters[method][key]
+            insert_special_params(param_dict, run)
             plot_fields.append(
                 make_parameter_input(key, param_dict, plot, disabled=False)
             )
