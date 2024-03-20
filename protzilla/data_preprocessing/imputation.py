@@ -359,6 +359,7 @@ def by_knn_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -367,6 +368,7 @@ def by_knn_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -378,6 +380,7 @@ def by_normal_distribution_sampling_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -386,6 +389,7 @@ def by_normal_distribution_sampling_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -397,6 +401,7 @@ def by_simple_imputer_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -405,6 +410,7 @@ def by_simple_imputer_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -416,6 +422,7 @@ def by_min_per_sample_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -424,6 +431,7 @@ def by_min_per_sample_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -435,6 +443,7 @@ def by_min_per_protein_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -443,6 +452,7 @@ def by_min_per_protein_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -454,6 +464,7 @@ def by_min_per_dataset_plot(
     graph_type,
     graph_type_quantities,
     group_by,
+    proteins_of_interest,
     visual_transformation,
 ):
     return _build_box_hist_plot(
@@ -462,6 +473,7 @@ def by_min_per_dataset_plot(
         graph_type,
         graph_type_quantities,
         group_by,
+        proteins_of_interest,
         visual_transformation,
     )
 
@@ -476,6 +488,7 @@ def _build_box_hist_plot(
     graph_type: str = "Boxplot",
     graph_type_quantities: str = "Pie chart",
     group_by: str = "None",
+    proteins_of_interest =None,
     visual_transformation: str = "linear",
 ) -> list[Figure]:
     """
@@ -511,6 +524,7 @@ def _build_box_hist_plot(
             name_b="Imputed Values",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
+            proteins_of_interest=proteins_of_interest,
             visual_transformation=visual_transformation,
             y_title="Intensity",
         )
