@@ -50,3 +50,54 @@ def peptide_import(ms_df, file_path, intensity_name):
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return ms_df, dict(peptide_df=ordered)
+
+
+def evidence_import(ms_df, file_path, intensity_name):
+    try:
+        assert intensity_name in [
+            "Intensity",
+            "iBAQ",
+            "LFQ intensity",
+        ], f"Unknown intensity name: {intensity_name}"
+        assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
+    except AssertionError as e:
+        return ms_df, dict(peptide_df=None, messages=[dict(level=logging.ERROR, msg=e)])
+
+    # Intensity -> Intensity, iBAQ -> LFQ, LFQ -> LFQ
+    peptide_intensity_name = (
+        "LFQ intensity" if intensity_name == "iBAQ" else intensity_name
+    )
+
+    id_columns = [
+        "Experiment",
+        "Proteins",
+        "Sequence",
+        peptide_intensity_name,
+        "Modifications",
+        "Modified sequence",
+        "Missed cleavages",
+        "PEP",
+        "Raw file",
+    ]
+
+    read = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+
+    df = read[id_columns]
+
+    df = df.rename(columns={"Proteins": "Protein ID"})
+    df = df.rename(columns={"Experiment": "Sample"})
+
+    df.dropna(subset=["Protein ID"], inplace=True)
+    df.sort_values(
+        by=["Sample", "Protein ID", "Sequence", "Modifications"],
+        ignore_index=True,
+        inplace=True,
+    )
+
+    return ms_df, dict(peptide_df=df)
