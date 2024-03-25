@@ -1,0 +1,72 @@
+html, body {
+    height: 100%;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#content {
+    order: 1;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+#main-content {
+    padding-left: 8%;
+    padding-right: 8%;
+}
+
+#sidebar {
+    order: 2;
+    flex-basis: 300px;
+    max-width: 400px;
+    min-height: 100vh;
+    flex-grow: 1;
+    transition: 100ms;
+}
+
+#sidebar.active {
+    margin-right: -400px;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-right: -400px;
+    }
+
+    #sidebar.active {
+        margin-right: 0;
+    }
+}
+
+#sidebarCollapse {
+    width: 35px;
+    height: 35px;
+}
+
+#header_toggle {
+    margin-top: -0.25rem
+}
+
+.plot-wrapper div:nth-child(2) {
+    width: 100%;
+}
+
+.form-select[multiple] {
+    max-width: 800px !important;
+}
+
+.rotate-icon {
+    transform: rotate(180deg);
+}
+
+#go_enrichment_dot_plot_img {
+    width: 700px;
+}
+
+#gsea_enrichment_plot_img {
+    width: 800px;
+}
