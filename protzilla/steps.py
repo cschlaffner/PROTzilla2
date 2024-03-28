@@ -1,358 +1,188 @@
-"""
-Contains the abstract class for the steps of the pipeline.
-Also contains the implementation of the steps, e.g. the parameters and such. 
-"""
-from pathlib import Path
+from __future__ import annotations
 
-import pandas as pd
+import logging
 
-from protzilla.importing import metadata_import, ms_data_import
-from protzilla.parameters import (
-    ContainerParameter,
-    ParameterBoolean,
-    ParameterCategorical,
-    ParameterDataframe,
-    ParameterFile,
-)
-
-TEMP_FOLDER = Path("./temp").resolve()
-
-
-class STEP_TYPE:
-    """
-    Enum for the type of the step
-    """
-
-    IMPORTMAXQUANT = "ImportMaxQuant"
-    IMPORTMSFRAGGER = "ImportMSFragger"
-    IMPORTDIANN = "ImportDIANN"
-    METADATAIMPORT = "MetadataImport"
+from protzilla.data_preprocessing.imputation import by_min_per_protein
+from protzilla.importing.ms_data_import import max_quant_import
 
 
 class Step:
-    """
-    Abstract class for the steps of the pipeline.
-    """
-
     def __init__(self):
-        """
-        :param name: The name of the step
-        :param method: The method of the step
-        """
-        self.section = None
-        self.name = None
-        self.method = None
-        self.method_function = None
-        self.step_type = None
-        self.output = None
-        self.parameters = ContainerParameter()
+        self.inputs: dict = {}
+        self.messages: Messages = Messages([])
+        self.output: Output = Output()
+
+    def __repr__(self):
+        return self.__class__.__name__
 
     def calculate(self):
-        """
-        Calculates the step.
-        """
-        if self.parameters.empty:
-            raise ValueError("No parameters were given")
-        self.call_method()
+        raise NotImplementedError
+
+    def validate_inputs(self, required_keys: list[str]):
+        for key in required_keys:
+            if key not in self.inputs:
+                raise ValueError(f"Missing input {key} in inputs")
+
+    def validate_outputs(self, required_keys: list[str]):
+        for key in required_keys:
+            if key not in self.output.output:
+                raise ValueError(f"Missing output {key} in output")
+
+
+class Output:
+    def __init__(self, output: dict = None):
+        if output is None:
+            output = {}
+
+        self.output = output
 
     @property
-    def output_path(self):
-        if self.output is not None:
-            return TEMP_FOLDER / (f"./{self.method}")
-        return None
-
-    @property
-    def dataframe(self):
-        if self.output is not None:
-            return self.output.dataframe
+    def intensity_df(self):
+        if "intensity_df" in self.output:
+            return self.output["intensity_df"]
         else:
             return None
 
-    def call_method(self):
-        """
-        Calls the method of the step.
-        """
-        raise NotImplementedError
+    @property
+    def is_empty(self):
+        return len(self.output) == 0 or all(
+            value is None for value in self.output.values()
+        )
 
-    def initialize(self):
-        """
-        Initializes the step.
-        """
-        raise NotImplementedError
 
-    def dynamic_update(self, run):
-        """
-        Updates the parameters of the step based on the run object
-        """
-        raise NotImplementedError
+class Messages:
+    def __init__(self, messages: list[dict] = None):
+        if messages is None:
+            messages = []
+        self.messages = messages
 
-    def plot(self):
-        """
-        Plots the output of the step
-        """
-        raise NotImplementedError
 
-    def plot_method(self):
-        """
-        Calls the plot method of the step
-        """
-        raise NotImplementedError
+class MaxQuantImport(Step):
+    section = "importing"
+    step = "msdataimport"
+    method = "max_quant_import"
 
-    def finished(self):
-        """
-        Method that is called when the step is finished
-        """
-        raise NotImplementedError
+    def calculate(self, steps: StepManager, inputs: dict = None):
+        if inputs is not None:
+            self.inputs = inputs
 
-    def to_dict(self):
-        """
-        Convert the step to a dictionary
-        """
-        if self.output_path is not None:
-            self.output.write_to_path(self.output_path)
-        return {
-            "name": self.name,
-            "method": self.method,
-            "section": self.section,
-            "step_type": self.step_type,
-            "parameters": self.parameters.to_dict(),
-            "output_path": self.output_path,
-        }
+        # validate the inputs for the step
+        self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
 
-    @classmethod
-    def from_dict(cls, data):
-        """
-        Factory: Create a step from a dictionary
-        """
-        name = data["name"]
-        method = data["method"]
-        section = data["section"]
-        step_type = data["step_type"]
-        parameters = ContainerParameter.from_dict(data["parameters"])
-        output_path = None if data["output_path"] is None else Path(data["output_path"])
-        if step_type == STEP_TYPE.IMPORTMAXQUANT:
-            step = ImportMaxQuant()
-        elif step_type == STEP_TYPE.IMPORTMSFRAGGER:
-            step = ImportMSFragger()
-        elif step_type == STEP_TYPE.IMPORTDIANN:
-            step = ImportDIANN()
-        elif step_type == STEP_TYPE.METADATAIMPORT:
-            step = MetadataImport()
+        # calculate the step
+        output, messages = max_quant_import(None, **self.inputs)
+
+        # store the output and messages
+        self.output = Output({"intensity_df": output})
+        self.messages = Messages(messages)
+
+        # validate the output
+        self.validate_outputs(["intensity_df"])
+
+
+class ImputationMinPerProtein(Step):
+    section = "data_preprocessing"
+    step = "imputation"
+    method = "by_min_per_protein"
+
+    def calculate(self, steps: StepManager, inputs: dict = None):
+        if inputs is not None:
+            self.inputs = inputs
+
+        # validate the inputs for the step
+        self.validate_inputs(["shrinking_value"])
+        if steps.intensity_df is None:
+            raise ValueError("No data to impute")
+        # calculate the step
+        output, messages = by_min_per_protein(steps.intensity_df, **self.inputs)
+
+        # store the output and messages
+        self.output = Output({"intensity_df": output})
+        self.messages = Messages(messages)
+
+        # validate the output
+        self.validate_outputs(["intensity_df"])
+
+
+class StepFactory:
+    @staticmethod
+    def create_step(step_type: str) -> Step:
+        if step_type == "MaxQuantImport":
+            return MaxQuantImport()
+        elif step_type == "ImputationMinPerProtein":
+            return ImputationMinPerProtein()
         else:
             raise ValueError(f"Unknown step type {step_type}")
 
-        step.name = name
-        step.method = method
-        step.section = section
-        step.step_type = step_type
-        step.parameters = parameters
-        # Further processing, like reading files etc.
-        if output_path is not None:
-            step.output = Output.from_path(output_path)
-        return step
 
+class StepManager:
+    def __repr__(self):
+        return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
 
-class Importing(Step):
-    """
-    Represents the importing section.
-    """
+    def __init__(self, steps: list[Step] = None):
+        self.importing = []
+        self.data_preprocessing = []
+        self.data_analysis = []
+        self.data_integration = []
+        self.current_step_index = 0
 
-    def __init__(self):
-        super().__init__()
-        self.section = "Importing"
-        self.parameters.add(ParameterFile("file", "Please enter a file"))
+        if steps is not None:
+            for step in steps:
+                self.add_step(step)
 
-
-class MSDataImport(Importing):
-    def __init__(self):
-        super().__init__()
-        self.step = "MS Data Import"
-        self.parameters.add(
-            ParameterCategorical(
-                "intensity_name",
-                "Please select an intensity",
-                ["LFQ intensity", "iBAQ", "Intensity"],
-            ),
-        )
-        self.parameters.add(
-            ParameterBoolean(
-                "map_to_uniprot", "Map to Uniprot IDs using Biomart (online)", False
-            )
+    @property
+    def all_steps(self):
+        return (
+            self.importing
+            + self.data_preprocessing
+            + self.data_analysis
+            + self.data_integration
         )
 
-    def call_method(self):
-        self.output = self.method_function(
-            _=None,
-            file_path=self.parameters["file"].value,
-            intensity_name=self.parameters["intensity_name"].value,
-            map_to_uniprot=self.parameters["map_to_uniprot"].value,
-        )
-        self.dataframe = self.output[0]
+    @property
+    def previous_steps(self):
+        return self.all_steps[: self.current_step_index]
 
+    @property
+    def current_step(self):
+        return self.all_steps[self.current_step_index]
 
-class ImportMaxQuant(MSDataImport):
-    def __init__(self):
-        super().__init__()
-        self.method = method = "MaxQuant"
-        self.method_function = ms_data_import.max_quant_import
-        self.step_type = STEP_TYPE.IMPORTMAXQUANT
+    @property
+    def intensity_df(self):
+        # find the last step that has an intensity_df
+        for step in reversed(self.all_steps):
+            if step.output.intensity_df is not None:
+                return step.output.intensity_df
+        logging.warning("No intensity_df found in steps")
 
-    def call_method(self):
-        calculation_result = self.method_function(
-            _=None,
-            file_path=self.parameters["file"].value,
-            intensity_name=self.parameters["intensity_name"].value,
-            map_to_uniprot=self.parameters["map_to_uniprot"].value,
-        )
-        output_dict = {
-            "dataframe": calculation_result[0],
-            "messages": calculation_result[1],
-        }
-        self.output = Output(output_dict)
+    @property
+    def metadata_df(self):
+        # find the last step that has a metadata_df
+        for step in reversed(self.all_steps):
+            if hasattr(step.output, "metadata_df"):
+                return step.output.metadata_df
+        logging.warning("No metadata_df found in steps")
 
+    def add_step(self, step, index=None):
+        # TODO add support for index
+        if step.section == "importing":
+            self.importing.append(step)
+        elif step.section == "data_preprocessing":
+            self.data_preprocessing.append(step)
+        elif step.section == "data_analysis":
+            self.data_analysis.append(step)
+        elif step.section == "data_integration":
+            self.data_integration.append(step)
+        else:
+            raise ValueError(f"Unknown section {step.section}")
 
-class ImportMSFragger(MSDataImport):
-    def __init__(self):
-        super().__init__()
-        self.method = method = "MS Fragger"
-        self.method_function = ms_data_import.ms_fragger_import
-        self.step_type = STEP_TYPE.IMPORTMSFRAGGER
-        self.parameters.intensity_name.set_options(
-            [
-                "Intensity",
-                "MaxLFQ Total Intensity",
-                "MaxLFQ Intensity",
-                "Total Intensity",
-                "MaxLFQ Unique Intensity",
-                "Unique Spectral Count",
-                "Unique Intensity",
-                "Spectral Count",
-                "Total Spectral Count",
-            ]
-        )
-
-
-class ImportDIANN(MSDataImport):
-    def __init__(self):
-        super().__init__()
-        self.method = method = "DIA-NN"
-        self.method_function = ms_data_import.diann_import
-        self.step_type = STEP_TYPE.IMPORTDIANN
-
-    def call_method(self):
-        # TODO convert to new output datatype
-        self.output = self.method_function(
-            _=None,
-            file_path=self.parameters["file"].value,
-            map_to_uniprot=self.parameters["map_to_uniprot"].value,
-        )
-
-
-class MetadataImport(Importing):
-    def __init__(self):
-        super().__init__()
-        self.step = "Metadata Import"
-        self.method = "Normal"
-        self.method_function = metadata_import.metadata_import_method
-        self.step_type = STEP_TYPE.METADATAIMPORT
-        self.parameters.add(
-            ParameterCategorical(
-                "feature_orientation",
-                "Please select columns",
-                [
-                    "Columns (samples in rows, features in columns)",
-                    "Rows (features in rows, samples in columns)",
-                ],
-            )
-        )
-        self.parameters.add(ParameterDataframe("df"))
-
-    def call_method(self):
-        self.output = self.method_function(
-            df=self.parameters.df.value,
-            file_path=self.parameters.file.value,
-            feature_orientation=self.parameters.feature_orientation.value,
-        )
-
-
-class Output:  # pylint: disable=too-few-public-methods
-    """
-    Represents a named output of a step.
-    responsibilities:
-
-    """
-
-    def __init__(self, data=None):
-        if isinstance(data, pd.DataFrame):
-            self.data = {"dataframe": data}
-        elif isinstance(data, dict):
-            self.data = data
-        elif isinstance(data, tuple):
-            raise ValueError(
-                "Tuple not supported as output of a step. Please convert it to a dictionary before passing it to the output class, or change the return type."
-            )
-        elif data is None:
-            self.data = {}
-
-    @classmethod
-    def from_path(cls, path):
-        output = cls()
-        output.read_from_path(path)
-        return output
-
-    def write_to_path(self, path: Path):
-        """
-        Write the output to a file
-        """
-        Path(path).mkdir(exist_ok=True, parents=True)
-        for key, value in self.data.items():
-            if isinstance(value, pd.DataFrame):
-                filename = f"{path}/{key}.csv"
-                value.to_csv(filename, index=False)
-        return path
-
-    def read_from_path(self, path: Path):
-        """
-        Read the output from a file
-        """
-        self.data = {}
-        for file in path.iterdir():
-            if file.suffix == ".csv":
-                self.data[file.stem] = pd.read_csv(file)
-
-    def __getattr__(self, item):
-        return self.data[item]
-
-    def __getitem__(self, item):
-        return self.data[item]
-
-
-if __name__ == "__main__":
-    # attempt to create a data import step
-    # creation
-    step = ImportMaxQuant()
-    for parameter in step.parameters:
-        print(parameter)
-
-    # front-end value insertion
-    print("Front end insertion... \n")
-    step.parameters[
-        "file"
-    ] = "/home/henning/BP2023BR1/PROTzilla2/example/proteinGroups.txt"
-
-    step.calculate()
-    dic = step.to_dict()
-    step2 = Step.from_dict(dic)
-    step2.calculate()
-
-    # General workflow
-    """
-    1. Initialize the step, this should happen when the workflow is created from a template and when the user adds a new step in the front-end
-    2. When the step is reached, a "initialize" method is called, which fills necessary parameters (e.g. the intensity df)
-        this could maybe be done by passing the run object into the step and letting it decide what is needs
-    3. The information is inputted via the front-end
-    4. the post-processing is done, again include a way to access the run object
-    5. The step is calculated, which calls the method of the step
-    6. the output is returned / the class calls some "finsihsed" method and manipulates the run object
-    7. the next step is initialized and the process starts again
-    """
+    def remove_step(self, step: Step, step_index: int = None):
+        if step_index is not None:
+            if step_index < self.current_step_index:
+                self.current_step_index -= 1
+            self.all_steps.pop(step_index)
+        else:
+            if step in self.all_steps:
+                self.all_steps.remove(step)
+            else:
+                raise ValueError(f"Step {step} not found in steps")
