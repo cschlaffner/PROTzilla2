@@ -5,10 +5,9 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from protzilla.run import Run
+from protzilla.Run import Run
 from protzilla.run_helper import log_messages
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
-from protzilla.workflow_helper import is_last_step
 from ui.runs.fields import (
     make_displayed_history,
     make_method_dropdown,
@@ -38,12 +37,10 @@ def detail(request: HttpRequest, run_name: str):
     :rtype: HttpResponse
     """
     if run_name not in active_runs:
-        active_runs[run_name] = Run.continue_existing(run_name)
+        active_runs[run_name] = Run.run_read(run_name)
     run = active_runs[run_name]
     section, step, method = run.current_run_location()
     end_of_run = not step
-
-    last_step = is_last_step(run.workflow_config, run.step_index)
 
     if request.POST:
         method_form = get_filled_form_by_request(request, run)
@@ -59,7 +56,7 @@ def detail(request: HttpRequest, run_name: str):
     run.current_messages = []
 
     current_plots = []
-    for plot in run.plots:
+    for plot in run.current_plots:
         if isinstance(plot, bytes):
             # Base64 encoded image
             current_plots.append(
@@ -79,15 +76,15 @@ def detail(request: HttpRequest, run_name: str):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-    show_table = run.current_out and any(
-        isinstance(v, pd.DataFrame) for v in run.current_out.values()
+    show_table = not run.current_outputs.is_empty and any(
+        isinstance(v, pd.DataFrame) for _, v in run.current_outputs.values()
     )
 
     show_protein_graph = (
-        run.current_out
-        and "graph_path" in run.current_out
-        and run.current_out["graph_path"] is not None
-        and Path(run.current_out["graph_path"]).exists()
+        run.current_outputs
+        and "graph_path" in run.current_outputs
+        and run.current_outputs["graph_path"] is not None
+        and Path(run.current_outputs["graph_path"]).exists()
     )
 
     return render(
@@ -96,7 +93,7 @@ def detail(request: HttpRequest, run_name: str):
         context=dict(
             run_name=run_name,
             section=section,
-            step=step,
+            step=run.current_step.step,
             display_name=f"{name_to_title(run.step)}",
             displayed_history=make_displayed_history(
                 run
@@ -114,7 +111,7 @@ def detail(request: HttpRequest, run_name: str):
             sidebar=make_sidebar(
                 request, run, run_name
             ),  # TODO: make NewRun compatible
-            last_step=last_step,
+            last_step=run.is_at_last_step,
             end_of_run=end_of_run,
             show_table=show_table,
             used_memory=get_memory_usage(),

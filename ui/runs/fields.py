@@ -10,7 +10,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.run import Run
+from protzilla.Run import Run
 from protzilla.run_helper import get_parameters
 from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (

@@ -3,14 +3,20 @@ from __future__ import annotations
 import logging
 
 from protzilla.data_preprocessing.imputation import by_min_per_protein
-from protzilla.importing.ms_data_import import max_quant_import
+from protzilla.importing.ms_data_import import max_quant_import, ms_fragger_import
 
 
 class Step:
+    section = None
+    step = None
+    method = None
+    description = None
+
     def __init__(self):
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
+        self.plots = []  # TODO maybe convert do class with __iter__ ?
 
     def __repr__(self):
         return self.__class__.__name__
@@ -21,12 +27,12 @@ class Step:
     def validate_inputs(self, required_keys: list[str]):
         for key in required_keys:
             if key not in self.inputs:
-                raise ValueError(f"Missing input {key} in inputs")
+                raise ValueError(f"Missing input {key} in inputs for {self}")
 
     def validate_outputs(self, required_keys: list[str]):
         for key in required_keys:
             if key not in self.output.output:
-                raise ValueError(f"Missing output {key} in output")
+                raise ValueError(f"Missing output {key} in output for {self}")
 
 
 class Output:
@@ -35,6 +41,12 @@ class Output:
             output = {}
 
         self.output = output
+
+    def __iter__(self):
+        return iter(self.output.items())
+
+    def __getitem__(self, item):
+        return self.output[item]
 
     @property
     def intensity_df(self):
@@ -56,59 +68,15 @@ class Messages:
             messages = []
         self.messages = messages
 
-
-class MaxQuantImport(Step):
-    section = "importing"
-    step = "msdataimport"
-    method = "max_quant_import"
-
-    def calculate(self, steps: StepManager, inputs: dict = None):
-        if inputs is not None:
-            self.inputs = inputs
-
-        # validate the inputs for the step
-        self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
-
-        # calculate the step
-        output, messages = max_quant_import(None, **self.inputs)
-
-        # store the output and messages
-        self.output = Output({"intensity_df": output})
-        self.messages = Messages(messages)
-
-        # validate the output
-        self.validate_outputs(["intensity_df"])
-
-
-class ImputationMinPerProtein(Step):
-    section = "data_preprocessing"
-    step = "imputation"
-    method = "by_min_per_protein"
-
-    def calculate(self, steps: StepManager, inputs: dict = None):
-        if inputs is not None:
-            self.inputs = inputs
-
-        # validate the inputs for the step
-        self.validate_inputs(["shrinking_value"])
-        if steps.intensity_df is None:
-            raise ValueError("No data to impute")
-        # calculate the step
-        output, messages = by_min_per_protein(steps.intensity_df, **self.inputs)
-
-        # store the output and messages
-        self.output = Output({"intensity_df": output})
-        self.messages = Messages(messages)
-
-        # validate the output
-        self.validate_outputs(["intensity_df"])
+    def __iter__(self):
+        return iter(self.messages)
 
 
 class StepFactory:
     @staticmethod
     def create_step(step_type: str) -> Step:
         if step_type == "MaxQuantImport":
-            return MaxQuantImport()
+            return ImportMaxQuant()
         elif step_type == "ImputationMinPerProtein":
             return ImputationMinPerProtein()
         else:
@@ -130,6 +98,9 @@ class StepManager:
             for step in steps:
                 self.add_step(step)
 
+    def __iter__(self):
+        return iter(self.all_steps)
+
     @property
     def all_steps(self):
         return (
@@ -144,8 +115,11 @@ class StepManager:
         return self.all_steps[: self.current_step_index]
 
     @property
-    def current_step(self):
-        return self.all_steps[self.current_step_index]
+    def current_step(self) -> Step:
+        if len(self.all_steps) > 0:
+            return self.all_steps[self.current_step_index]
+        else:
+            return Step()
 
     @property
     def intensity_df(self):
@@ -186,3 +160,82 @@ class StepManager:
                 self.all_steps.remove(step)
             else:
                 raise ValueError(f"Step {step} not found in steps")
+
+
+class Importing:
+    class ImportMaxQuant(Step):
+        section = "importing"
+        step = "msdataimport"
+        method = "max_quant_import"
+
+        def calculate(self, steps: StepManager, inputs: dict = None):
+            if inputs is not None:
+                self.inputs = inputs
+
+            # validate the inputs for the step
+            self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
+
+            # calculate the step
+            output, messages = max_quant_import(None, **self.inputs)
+
+            # store the output and messages
+            self.output = Output({"intensity_df": output})
+            self.messages = Messages(messages)
+
+            # validate the output
+            self.validate_outputs(["intensity_df"])
+
+    class ImportMSFragger(Step):
+        section = "importing"
+        step = "msdataimport"
+        method = "ms_fragger_import"
+
+        def calculate(self, steps: StepManager, inputs: dict = None):
+            if inputs is not None:
+                self.inputs = inputs
+
+            # validate the inputs for the step
+            self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
+
+            # calculate the step
+            output, messages = ms_fragger_import(None, **self.inputs)
+
+            # store the output and messages
+            self.output = Output({"intensity_df": output})
+            self.messages = Messages(messages)
+
+            # validate the output
+            self.validate_outputs(["intensity_df"])
+
+
+class Preprocessing:
+    class ImputationMinPerProtein(Step):
+        section = "data_preprocessing"
+        step = "imputation"
+        method = "by_min_per_protein"
+
+        def calculate(self, steps: StepManager, inputs: dict = None):
+            if inputs is not None:
+                self.inputs = inputs
+
+            # validate the inputs for the step
+            self.validate_inputs(["shrinking_value"])
+            if steps.intensity_df is None:
+                raise ValueError("No data to impute")
+            # calculate the step
+            output, messages = by_min_per_protein(steps.intensity_df, **self.inputs)
+
+            # store the output and messages
+            self.output = Output({"intensity_df": output})
+            self.messages = Messages(messages)
+
+            # validate the output
+            self.validate_outputs(["intensity_df"])
+
+
+class Analysis:
+    pass
+
+
+class Integration:
+    pass

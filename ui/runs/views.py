@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import tempfile
 import traceback
@@ -22,7 +24,7 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
-from protzilla.run import Run
+from protzilla.Run import Run, WorkflowManager
 from protzilla.run_helper import get_parameters, log_messages
 from protzilla.utilities import (
     clean_uniprot_id,
@@ -30,7 +32,6 @@ from protzilla.utilities import (
     name_to_title,
     unique_justseen,
 )
-from protzilla.workflow_helper import is_last_step
 from ui.runs.fields import (
     make_current_fields,
     make_displayed_history,
@@ -43,7 +44,7 @@ from ui.runs.fields import (
 )
 from ui.runs.views_helper import display_messages, parameters_from_post
 
-active_runs = {}
+active_runs: dict[str, Run] = {}
 
 
 def index(request):
@@ -60,7 +61,7 @@ def index(request):
         request,
         "runs/index.html",
         context={
-            "available_workflows": Run.available_workflows(),
+            "available_workflows": WorkflowManager.available_workflows(),
             "available_runs": Run.available_runs(),
         },
     )
@@ -82,22 +83,18 @@ def detail(request, run_name):
     :rtype: HttpResponse
     """
     if run_name not in active_runs:
-        active_runs[run_name] = Run.continue_existing(run_name)
+        active_runs[run_name] = Run.run_read(run_name)
     run = active_runs[run_name]
-    section, step, method = run.current_run_location()
-    end_of_run = not step
-    if not end_of_run:
-        description = run.workflow_meta[section][step][method]["description"]
-    else:
-        description = ""
-    last_step = is_last_step(run.workflow_config, run.step_index)
+    # TODO we do not need current_run_location anymore in that style
+    # section, step, method = run.steps.current_step_long()
+    last_step = run.steps.current_step_index == len(run.steps.all_steps) - 1
 
-    log_messages(run.current_messages)
-    display_messages(run.current_messages, request)
-    run.current_messages = []
+    log_messages(run.steps.current_step.messages)
+    display_messages(run.steps.current_step.messages, request)
+    run.steps.current_step.messages = []
 
     current_plots = []
-    for plot in run.plots:
+    for plot in run.current_plots:
         if isinstance(plot, bytes):
             # Base64 encoded image
             current_plots.append(
@@ -117,14 +114,14 @@ def detail(request, run_name):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-    show_table = run.current_out and any(
-        isinstance(v, pd.DataFrame) for v in run.current_out.values()
+    show_table = not run.current_outputs.is_empty and any(
+        isinstance(v, pd.DataFrame) for _, v in run.current_outputs
     )
 
     show_protein_graph = (
-        run.current_out
-        and "graph_path" in run.current_out
-        and run.current_out["graph_path"] is not None
+        run.current_outputs
+        and "graph_path" in run.current_outputs
+        and run.current_outputs["graph_path"] is not None
         and Path(run.current_out["graph_path"]).exists()
     )
 
@@ -133,19 +130,19 @@ def detail(request, run_name):
         "runs/details.html",
         context=dict(
             run_name=run_name,
-            section=section,
-            step=step,
+            section=run.steps.current_step.section,
+            step=run.steps.current_step.step,
             display_name=f"{name_to_title(run.step)}",
-            displayed_history=make_displayed_history(run),
-            method_dropdown=make_method_dropdown(run, section, step, method),
+            displayed_history=make_displayed_history(run),  # TODO
+            method_dropdown=make_method_dropdown(run, section, step, method),  # TODO
             fields=make_current_fields(run, section, step, method),
-            plot_fields=make_plot_fields(run, section, step, method),
-            name_field=make_name_field(results_exist(run), run, end_of_run),
+            plot_fields=make_plot_fields(run, section, step, method),  # TODO
+            name_field=make_name_field(results_exist(run), run, end_of_run),  # TODo
             current_plots=current_plots,
-            results_exist=results_exist(run),
-            show_back=bool(run.history.steps),
-            show_plot_button=run.result_df is not None,
-            sidebar=make_sidebar(request, run, run_name),
+            results_exist=results_exist(run),  # TODO
+            show_back=run.steps.current_step_index > 0,
+            show_plot_button=not run.current_outputs.is_empty,
+            sidebar=make_sidebar(request, run, run_name),  # TODO
             last_step=last_step,
             end_of_run=end_of_run,
             show_table=show_table,
@@ -439,7 +436,8 @@ def continue_(request):
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
-    active_runs[run_name] = Run.continue_existing(run_name)
+
+    active_runs[run_name] = Run.run_read(run_name)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
