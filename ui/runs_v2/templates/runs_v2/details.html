@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
+
+    {% include 'runs/dynamic_methods.html' %}
+    {# TODO 129 Better buttons for analysis and importing #}
+    {% if section == "data_preprocessing" %}
+        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
+    {% endif %}
+    {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
+
+{% endblock %}
+
+{% block title %}
+    <title>PROTzilla - {{ run_name }}</title>
+{% endblock %}
+
+{% block navbar %}
+    {% include "navbar.html" with run_name=run_name used_memory=used_memory %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="wrapper">
+        {# include sidebar #}
+        <nav id="sidebar" class="border border-end-0 border-top-0 border-bottom-0">
+            {{ sidebar }}
+        </nav>
+
+        <div id="content">
+            <div class="header justify-content-end d-flex" id="header-content">
+                <button type="button" id="sidebarCollapse" class="btn btn-blue p-1 d-inline">
+                    <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="22" height="22"
+                         id="header_toggle">
+                </button>
+            </div>
+
+            <div id="main-content">
+                
+                
+                {# show history #}
+                {% if displayed_history %}
+                    <div class="row d-flex justify-content-between align-items-center">
+                        <h3 class="col-11">History</h3>
+                        <svg data-bs-toggle="collapse" id="toggleChevron" href="#collapseHistory" role="button"
+                             aria-expanded="false" aria-controls="collapseHistory" xmlns="http://www.w3.org/2000/svg"
+                             width="27" height="27" fill="#4A536A" class="bi bi-chevron-down col" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"></path>
+                        </svg>
+                    </div>
+
+                    <div id="collapseHistory" class="collapse">
+                        {% for step in displayed_history %}
+                            <div class="row justify-content-center d-flex">
+                                <div class="col-7">
+                                    {% if step.section_heading %}
+                                        <h4 {% if not forloop.first %}class="mt-4"{% endif %}>{{ step.section_heading }}</h4>
+                                    {% endif %}
+
+                                    <b>{{ step.display_name }}</b><br>
+                                    {% if step.name %}
+                                        Name: {{ step.name }}<br>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        {% if "Classification" in step.display_name %}
+                                            {% include "runs/fields_classification_methods.html" with fields=step.fields history=True %}
+                                        {% else %}
+                                            {% include "runs/fields.html" with fields=step.fields %}
+                                        {% endif %}
+                                        <div class="d-flex flex-nowrap">
+                                            {% if step.table_link %}
+                                                <a href="{{ step.table_link }}" target="_blank"
+                                                   class="col-4 btn btn-grey me-2">View table</a>
+                                            {% endif %}
+                                            {% if step.protein_graph_link %}
+                                                <a href="{{ step.protein_graph_link }}" target="_blank"
+                                                   class=" btn btn-grey me-2">View Protein Graph</a>
+                                            {% endif %}
+                                            {% if not step.name %}
+                                                {% include "runs/form_add_name.html" with index=step.index %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if step.plots %}
+                                <div class="mb-4">
+                                    {# display history plots #}
+                                    {% for plot in step.plots %}
+                                        <div class="plot-wrapper">
+                                            {{ plot|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <hr class="my-4">
+                {% endif %}
+
+                {# include django messages for alerting user #}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                                 role="alert">
+                                {{ message | safe }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <br>
+                {% endif %}
+
+                {# show current step #}
+                {% if not end_of_run %}
+                    <div class="row justify-content-center d-flex">
+                        <h3>{{ display_name }}</h3>
+                        <div class="row mb-3" id="description">{{ description }}</div>
+                        {# if there are plot parameters, display method and plot parameters next to each other #}
+                        {% if plot_form %}
+                            <div class="col">
+                                <form action="{% url 'runs_v2:detail' run_name %}" id="calc_form" method="post"
+                                      enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="mb-1">
+                                        {{ method_dropdown }}
+                                    </div>
+                                    <div class="mb-2">
+                                        {{ method_form }}
+                                    </div>
+                                    <input type="submit" id="calculate_parameters_submit" value="Calculate"
+                                           class="btn btn-red">
+                                </form>
+                            </div>
+                            <div class="col">
+                                <form action="{% url 'runs_v2:plot' run_name %}" id="plot_form" method="post"
+                                      enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <fieldset id="plotfields">
+                                        <div id="plot_parameters" class="mb-2">
+                                            {{ plot_form }}
+                                        </div>
+                                    </fieldset>
+                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="col-7">
+                                {% if step != "plot" %}
+                                    <form action="{% url 'runs_v2:detail' run_name %}" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="mb-2">
+                                            {{ method_dropdown }}
+                                        </div>
+                                        <div class="mb-2">
+                                            {{ method_form }}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" value="Calculate" id="calculate_parameters_submit"
+                                                   class="btn btn-red mr-auto">
+                                            {% if section == "data_preprocessing" %}
+                                                <a href="{% url 'runs_v2:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey">Plot</a>
+                                            {% endif %}
+                                            {% if show_table %}
+                                                <a href="{% url 'runs_v2:tables_nokey' run_name displayed_history|length %}"
+                                                   target="_blank"
+                                                   class="col btn btn-grey me-2">View table</a>
+                                            {% endif %}
+                                            {% if show_protein_graph %}
+                                                <a href="{% url 'runs_v2:protein_graph' run_name displayed_history|length %}"
+                                                   class="btn btn-grey" target="_blank">View Protein Graph</a>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <form action="{% url 'runs_v2:plot' run_name %}" id="plot_form" method="post"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{ method_dropdown }}
+                                        <div class="mb-2">
+                                            {method_form %}
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" id="plot_parameters_submit" value="Plot"
+                                                   class="btn btn-grey">
+                                        </div>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p>You are at the end of the run. Go back to add more steps of the same section, or add steps of
+                        the next sections on the right.</p>
+                {% endif %}
+
+                {# show current plots #}
+                {% if current_plots %}
+                    <div class="mt-4" id="plots">
+                        {% for plot in current_plots %}
+                            <div class="plot-wrapper">
+                                {{ plot|safe }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="d-flex col">
+                        {% if current_plots %}
+                            <form action="{% url 'runs_v2:download_plots' run_name %}">
+                                <select class="form-select mb-2" name="format">
+                                    <option value="png" selected="selected">png</option>
+                                    <option value="tiff">tiff</option>
+                                    <option value="svg">svg</option>
+                                    <option value="pdf">pdf</option>
+                                    <option value="eps">eps</option>
+                                    <option value="jpg">jpg</option>
+                                </select>
+                                <button class="btn btn-grey">Download plots</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        {# navigation between steps #}
+                        <div class="justify-content-end d-flex">
+                            {% if results_exist %}
+                                <div class="col-5 mb-2">
+                                    <div class="form-group mb-0">
+                                        {{ name_field }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="justify-content-end d-flex">
+                            <form action="{% url 'runs_v2:next' run_name %}" method="post" id="runs_next">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    {% if show_back %}
+                                        <a href="{% url 'runs_v2:back' run_name %}" id = "backButton" class="btn btn-grey mr-auto">Back</a>
+                                        <div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true" style="display: none;" >
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Going a step back during calculation may lead to unforseen behavior and loss in data.
+                                                        Do you want to proceed?
+                                                        <hr>
+                                                        <a href="{% url 'runs_v2:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
+                                                        <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <button class="btn btn-red"  {% if not results_exist or last_step %} disabled {% endif %}>Next
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
