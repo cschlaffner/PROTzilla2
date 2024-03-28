@@ -7,7 +7,6 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from protzilla.constants import paths
 from protzilla.steps import Messages, Output, Step, StepFactory, StepManager
 
 
@@ -32,7 +31,7 @@ class DiskOperator:
             data = yaml.safe_load(file)
             return data[self.KEYS.CURRENT_STEP_INDEX]
 
-    def _read_step(self, step_type: str, step_data: dict, base_dir: Path) -> Step:
+    def read_step(self, step_type: str, step_data: dict, base_dir: Path) -> Step:
         try:
             step = StepFactory.create_step(step_type)
             step.inputs = step_data[self.KEYS.STEP_INPUTS]
@@ -68,7 +67,7 @@ class DiskOperator:
             steps = [None] * len(data[self.KEYS.STEPS])
             for step_type, step_data in data[self.KEYS.STEPS].items():
                 step_index = step_data[self.KEYS.STEP_INDEX]
-                step = self._read_step(step_type, step_data, base_dir)
+                step = self.read_step(step_type, step_data, base_dir)
                 steps[step_index] = step
             return StepManager(steps)
 
@@ -96,13 +95,13 @@ class DiskOperator:
             self.KEYS.STEP_MESSAGES: {},
         }
         if not step.output.is_empty:
-            self._write_outputs(step, base_dir)
+            self.write_outputs(step, base_dir)
 
         if step.inputs:
-            self._write_inputs(step)
+            self.write_inputs(step)
         return self.step_dictionary
 
-    def _write_outputs(self, step: Step, base_dir: Path):
+    def write_outputs(self, step: Step, base_dir: Path):
         dataframe_dir = base_dir / "dataframes"
         for key, value in step.output.output.items():
             if isinstance(value, pd.DataFrame):
@@ -118,18 +117,10 @@ class DiskOperator:
             else:
                 self.step_dictionary[self.KEYS.STEP_OUTPUTS][key] = value
 
-    def _write_inputs(self, step: Step):
+    def write_inputs(self, step: Step):
         for key, value in step.inputs.items():
             self.step_dictionary[self.KEYS.STEP_INPUTS][key] = value
 
-    def _write_messages(self, step: Step):
+    def write_messages(self, step: Step):
         for message in step.messages:
             self.step_dictionary[self.KEYS.STEP_MESSAGES].append(message)
-
-    @staticmethod
-    def get_available_runs():
-        return [path.name for path in paths.RUNS_PATH.iterdir()]
-
-    @staticmethod
-    def get_available_workflows():
-        return [path.name for path in paths.WORKFLOWS_PATH.iterdir()]
