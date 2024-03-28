@@ -3,10 +3,11 @@ from django.http import HttpRequest
 from protzilla.run import Run
 
 from .forms.base import MethodForm
-from .forms.importing import MaxQuantImportForm
+from .forms.importing import MaxQuantImportForm, MetadataImportForm
 
 form_map = {
     "max_quant_import": MaxQuantImportForm,
+    "metadata_import_method": MetadataImportForm,
 }
 
 

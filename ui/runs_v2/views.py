@@ -98,14 +98,22 @@ def detail(request: HttpRequest, run_name: str):
             section=section,
             step=step,
             display_name=f"{name_to_title(run.step)}",
-            displayed_history=make_displayed_history(run),
-            method_dropdown=make_method_dropdown(run, section, step, method),
-            name_field=make_name_field(results_exist(run), run, end_of_run),
+            displayed_history=make_displayed_history(
+                run
+            ),  # TODO: make NewRun compatible
+            method_dropdown=make_method_dropdown(
+                run, section, step, method
+            ),  # TODO: make NewRun compatible
+            name_field=make_name_field(
+                results_exist(run), run, end_of_run
+            ),  # TODO: make NewRun compatible
             current_plots=current_plots,
             results_exist=results_exist(run),
             show_back=bool(run.history.steps),
             show_plot_button=run.result_df is not None,
-            sidebar=make_sidebar(request, run, run_name),
+            sidebar=make_sidebar(
+                request, run, run_name
+            ),  # TODO: make NewRun compatible
             last_step=last_step,
             end_of_run=end_of_run,
             show_table=show_table,
@@ -138,6 +146,7 @@ def index(request: HttpRequest):
     )
 
 
+# TODO: make NewRun compatible
 def create(request: HttpRequest):
     """
     Creates a new run. The user is then redirected to the detail page of the run.
@@ -175,6 +184,7 @@ def continue_(request: HttpRequest):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
+# TODO: make NewRun compatible
 def results_exist(run: Run) -> bool:
     """
     Checks if the last step has produced valid results.
@@ -190,3 +200,41 @@ def results_exist(run: Run) -> bool:
     if run.section == "data_analysis" or run.section == "data_integration":
         return run.calculated_method is not None or (run.step == "plot" and run.plots)
     return True
+
+
+# TODO: make NewRun compatible
+def next_(request, run_name):
+    """
+    Skips to and renders the next step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the next step/method
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+
+    run.next_step(request.POST["name"])
+
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+# TODO: make NewRun compatible
+def back(request, run_name):
+    """
+    Goes back to and renders the previous step/method of the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run with the previous step/method
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    run.back_step()
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

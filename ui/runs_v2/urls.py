@@ -9,4 +9,5 @@ urlpatterns = [
     path("continue", views.continue_, name="continue"),
     path("<str:run_name>", views.detail, name="detail"),
     path("<str:run_name>/next", views.next_, name="next"),
+    path("<str:run_name>/back", views.back, name="back"),
 ]

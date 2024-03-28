@@ -25,3 +25,20 @@ class MaxQuantImportForm(MethodForm):
 
     def submit(self, run: RunNew):
         run.step_calculate(self.cleaned_data)
+
+
+class FeatureOrientationType(Enum):
+    COLUMNS = "Columns (samples in rows, features in columns)"
+    ROWS = "Rows (features in rows, samples in columns)"
+
+
+class MetadataImportForm(MethodForm):
+    file = CustomFileField(label="Metadata file")
+    feature_orientation = CustomChoiceField(
+        choices=FeatureOrientationType, label="Feature orientation"
+    )
+
+    description = "Import metadata"
+
+    def submit(self, run: RunNew):
+        run.step_calculate(self.cleaned_data)
