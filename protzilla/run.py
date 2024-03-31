@@ -13,6 +13,7 @@ from PIL import Image
 from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
+from .run_helper import log_messages
 from .utilities import format_trace
 from .workflow_helper import (
     get_global_index_of_step,
@@ -533,6 +534,15 @@ class Run:
             if step.step == "metadata_import":
                 return step.outputs["metadata"]
         raise AttributeError("Metadata was not yet imported.")
+
+    @property
+    def has_metadata(self):
+        try:
+            _ = self.metadata
+        except AttributeError:
+            return False
+        else:
+            return True
 
     @property
     def peptide_data(self):
