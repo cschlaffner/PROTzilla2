@@ -24,6 +24,7 @@ def _is_valid(value):
 def t_test(
     intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
+    ttest_type: str,
     grouping: str,
     group1: str,
     group2: str,
@@ -36,7 +37,7 @@ def t_test(
     A function to conduct a two sample t-test between groups defined in the
     clinical data. The t-test is conducted on the level of each protein.
     The p-values are corrected for multiple testing.
-
+    :param ttest_type: the type of t-test to be used. Either "Student's t-Test" or "Welch's t-Test"
     :param intensity_df: the dataframe that should be tested in long format
     :param metadata_df: the dataframe that contains the clinical data
     :param grouping: the column name of the grouping variable in the metadata_df
@@ -66,7 +67,7 @@ def t_test(
         group1 = unique_groups[0]
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 1 was invalid. Auto-selected {group1} as group1.",
             }
         )
@@ -79,7 +80,7 @@ def t_test(
                 break
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 2 was invalid. Auto-selected {group2} as group 2.",
             }
         )
@@ -115,7 +116,12 @@ def t_test(
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]
         group1_intensities = protein_df[protein_df[grouping] == group1][intensity_name]
         group2_intensities = protein_df[protein_df[grouping] == group2][intensity_name]
-        t, p = stats.ttest_ind(group1_intensities, group2_intensities)
+        if ttest_type == "Student's t-Test":
+            t, p = stats.ttest_ind(group1_intensities, group2_intensities)
+        else:
+            t, p = stats.ttest_ind(
+                group1_intensities, group2_intensities, equal_var=False
+            )
 
         if not np.isnan(p):
             log2_fold_change = np.log2(

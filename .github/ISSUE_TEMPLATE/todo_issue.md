@@ -7,6 +7,8 @@ project: 'PROTzilla'
 
 ---
 
-<Description>
+## TODO description
+<!-- A clear and concise description of the TODO. -->
+TODO number: #<issue_nr>
 
-search for # TODO <issue_nr>
+File: #<file_path>

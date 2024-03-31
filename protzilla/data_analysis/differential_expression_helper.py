@@ -53,19 +53,22 @@ def log_transformed_check(
     intensity_df: pd.DataFrame,
     intensity_name: str = None,
     value_threshold: int = 1000,
-):
-    """This function checks a intensity dataframe for a previous log transformation based on the intensity values.
-    Returns true if the df was likely previously log-transformed, else false."""
+) -> bool:
+    """
+    This function checks a intensity dataframe for a previous log transformation based on the intensity values.
+
+    :return: Returns true if the df was likely previously log-transformed, else false.
+    """
     if intensity_name is None:
         intensity_name = default_intensity_column(intensity_df)
 
     if (
-        intensity_df[intensity_name].max() > value_threshold
+        intensity_df[intensity_name].max() < value_threshold
         or intensity_df[intensity_name].min() < 0
     ):
-        return False
+        return True
 
-    return True
+    return False
 
 
 INVALID_PROTEINGROUP_DATA_MSG = {

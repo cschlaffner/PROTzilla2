@@ -2,7 +2,7 @@ import re
 
 from django.contrib import messages
 
-from protzilla.utilities import name_to_title, format_trace
+from protzilla.utilities import name_to_title
 from protzilla.workflow_helper import (
     get_steps_of_workflow,
     get_steps_of_workflow_meta,
@@ -109,7 +109,7 @@ def display_message(message: dict, request):
     """
     Displays a message in the frontend.
 
-    :param message: dict with keys "level", "msg" and optionally "trace"
+    :param message: dict with keys "level", "msg" and optionally "trace" of the message to message
     :param request: request object
     """
 
@@ -133,6 +133,17 @@ def display_message(message: dict, request):
         f"{message['msg']} {trace}",
         lvl_to_css_class[message["level"]],
     )
+
+
+def display_messages(messages: list[dict], request):
+    """
+    Displays a list of messages in the frontend.
+
+    :param messages: list with a dicts for each message to display containing keys "level", "msg" and optionally "trace"
+    :param request: request object
+    """
+    for message in messages:
+        display_message(message, request)
 
 
 def clear_messages(request):

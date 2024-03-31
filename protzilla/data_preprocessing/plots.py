@@ -8,10 +8,7 @@ from plotly.subplots import make_subplots
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
 
-from ..constants.colors import (
-    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
-    PROTZILLA_DISCRETE_COLOR_SEQUENCE,
-)
+from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
 
 def create_pie_plot(
@@ -24,6 +21,7 @@ def create_pie_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
+    :param color: Optional argument to specify the colour of the pie chart
     :param names_of_sectors: Name of parts (so-called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
@@ -57,7 +55,7 @@ def create_bar_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
     heading: str = "",
-    colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+    colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
     y_title: str = "",
     x_title: str = "",
 ) -> Figure:
@@ -66,6 +64,7 @@ def create_bar_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
+    :param color: Optional argument to specify the colour of the bar chart
     :param names_of_sectors: Name of parts (so called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
@@ -149,13 +148,13 @@ def create_box_plots(
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
             x=dataframe_a[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
             name=name_a,
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
             x=dataframe_b[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
             name=name_b,
         )
         fig.add_trace(trace0, 1, 1)
@@ -166,12 +165,12 @@ def create_box_plots(
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
-            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
             name=name_a,
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
-            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
             name=name_b,
         )
         fig.add_trace(trace0, 1, 1)
@@ -252,27 +251,28 @@ def create_histograms(
     min_value = min(intensities_a.min(skipna=True), intensities_b.min(skipna=True))
     max_value = max(intensities_a.max(skipna=True), intensities_b.max(skipna=True))
 
-    binsize_factor = 0.0005 if visual_transformation == "linear" else 0.02
+    number_of_bins = 100
+    binsize_a = (
+        intensities_a.max(skipna=True) - intensities_a.min(skipna=True)
+    ) / number_of_bins
+    binsize_b = (
+        intensities_b.max(skipna=True) - intensities_b.min(skipna=True)
+    ) / number_of_bins
+
+    if overlay:
+        binsize_a = binsize_b = max(binsize_a, binsize_b)
 
     trace0 = go.Histogram(
         x=intensities_a,
-        marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
+        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
         name=name_a,
-        xbins=dict(
-            start=min_value,
-            end=max_value,
-            size=(max_value - min_value) * binsize_factor,
-        ),
+        xbins=dict(start=min_value, end=max_value, size=binsize_a),
     )
     trace1 = go.Histogram(
         x=intensities_b,
-        marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
         name=name_b,
-        xbins=dict(
-            start=min_value,
-            end=max_value,
-            size=(max_value - min_value) * binsize_factor,
-        ),
+        xbins=dict(start=min_value, end=max_value, size=binsize_b),
     )
     if not overlay:
         fig = make_subplots(rows=1, cols=2)

@@ -16,6 +16,7 @@ from .history import History
 from .run_helper import log_messages
 from .utilities import format_trace
 from .workflow_helper import (
+    get_global_index_of_step,
     get_parameter_type,
     get_workflow_default_param_value,
     set_output_name,
@@ -116,7 +117,6 @@ class Run:
             history = History(run_name, run_config["df_mode"])
             msg = "Missing calculated Data. Restarted Run."
             current_messages.append(dict(level=logging.ERROR, msg=msg))
-            log_messages(current_messages)
 
         return cls(
             run_name,
@@ -134,8 +134,10 @@ class Run:
         df_mode,
         history,
         run_path,
-        current_messages=[],
+        current_messages=None,
     ):
+        if current_messages is None:
+            current_messages = []
         self.run_name = run_name
         self.history = history
         self.df = self.history.steps[-1].dataframe if self.history.steps else None
@@ -203,47 +205,56 @@ class Run:
         if "run_name" in call_parameters:
             call_parameters["run_name"] = self.run_name
 
+        calculation_failed = False
         if self.section in ["importing", "data_preprocessing"]:
             try:
                 self.result_df, self.current_out = method_callable(
                     self.df, **call_parameters
                 )
-                self.current_messages = self.current_out.pop("messages", [])
+                if "messages" in self.current_out and any(
+                    messages["level"] == logging.ERROR
+                    for messages in self.current_out["messages"]
+                ):
+                    calculation_failed = True
+                self.current_messages.extend(self.current_out.pop("messages", {}))
             except Exception as e:
+                calculation_failed = True
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
                 self.current_out = {}
-                self.current_messages = [
+                self.current_messages.append(
                     dict(
                         level=logging.ERROR,
                         msg=msg,
                         trace=format_trace(traceback.format_exception(e)),
                     )
-                ]
+                )
         else:
             self.result_df = None
             try:
                 self.current_out = method_callable(**call_parameters)
-                self.current_messages = self.current_out.pop("messages", [])
+                if "messages" in self.current_out and any(
+                    messages["level"] == logging.ERROR
+                    for messages in self.current_out["messages"]
+                ):
+                    calculation_failed = True
+                self.current_messages.extend(self.current_out.pop("messages", []))
             except Exception as e:
+                calculation_failed = True
                 self.current_out = {}
                 msg = f"An error occurred while calculating this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-                self.current_messages = [
+                self.current_messages.append(
                     dict(
                         level=logging.ERROR,
                         msg=msg,
                         trace=format_trace(traceback.format_exception(e)),
                     )
-                ]
+                )
 
         self.plots = []  # reset as not up to date anymore
         self.current_parameters[self.method] = parameters
         self.calculated_method = self.method
 
-        # error handling for CLI
-        log_messages(self.current_messages)
-
-        if any(message["level"] == 40 for message in self.current_messages):
-            # method was not calculated successfully so the parameters are reset
+        if calculation_failed:
             self.result_df = None
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
@@ -255,9 +266,9 @@ class Run:
         self.next_step(name=name)
 
     def create_plot_from_current_location(self, parameters):
-        location = (section, step, method) = self.current_workflow_location()
+        location = (section, step, method) = self.current_run_location()
         if step == "plot":
-            self.update_workflow_config(parameters)
+            self.update_workflow_config(parameters, location=location)
             self.create_step_plot(plot_map[location], parameters)
         elif plot_map.get(location):
             self.workflow_config["sections"][section]["steps"][
@@ -278,22 +289,21 @@ class Run:
             self.plots = method_callable(
                 self.df, self.result_df, self.current_out, **parameters
             )
-            self.current_messages = []
             for plot in self.plots:
-                if plot is dict and "messages" in plot:
+                if isinstance(plot, dict) and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
 
         except Exception as e:
             self.plots = []
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [
+            self.current_messages.append(
                 dict(
                     level=logging.ERROR,
                     msg=msg,
                     trace=format_trace(traceback.format_exception(e)),
                 )
-            ]
+            )
 
     def create_step_plot(self, method_callable, parameters):
         if "term_name" in parameters:
@@ -305,12 +315,11 @@ class Run:
             self.plots = method_callable(**call_parameters)
             self.result_df = self.df
             self.current_out = {}
-            self.current_messages = []
             self.current_parameters[self.method] = parameters
             self.calculated_method = self.method
 
             for plot in self.plots:
-                if plot is dict and "messages" in plot:
+                if isinstance(plot, dict) and "messages" in plot:
                     self.current_messages.extend(plot["messages"])
                     self.plots.remove(plot)
         except Exception as e:
@@ -318,13 +327,13 @@ class Run:
             self.result_df = None
             self.current_out = {}
             msg = f"An error occurred while plotting: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
-            self.current_messages = [
+            self.current_messages.append(
                 dict(
                     level=logging.ERROR,
                     msg=msg,
                     trace=format_trace(traceback.format_exception(e)),
                 )
-            ]
+            )
             self.current_parameters.pop(self.method, None)
             self.calculated_method = None
 
@@ -381,7 +390,6 @@ class Run:
                 "output_name",
             )
         try:
-            self.current_messages = []
             parameters = self.current_parameters.get(self.calculated_method, {})
             self.history.add_step(
                 self.section,
@@ -403,8 +411,7 @@ class Run:
 
         except AssertionError as e:
             self.history.pop_step()
-            msg = f"An error occurred while saving this step: {e} Please check your parameters or report a potential programming issue."
-            self.current_messages.append(dict(level=logging.ERROR, msg=msg))
+            self.current_messages.append(dict(level=logging.ERROR, msg=f"{e}"))
         except Exception as e:
             self.history.pop_step()
             msg = f"An error occurred while saving this step: {e.__class__.__name__} {e} Please check your parameters or report a potential programming issue."
@@ -429,25 +436,50 @@ class Run:
             self.plots = []
             self.current_out_sources = {}
 
-        log_messages(self.current_messages)
-
     def back_step(self):
-        assert self.history.steps
-        popped_step, result_df = self.history.pop_step()
-        self.section = popped_step.section
-        self.step = popped_step.step
-        self.method = popped_step.method
-        self.calculated_method = self.method
-        self.df = self.history.steps[-1].dataframe if self.history.steps else None
-        self.result_df = result_df
-        self.current_out = popped_step.outputs
-        self.current_messages = popped_step.messages
-        self.current_parameters = {self.method: popped_step.parameters}
-        self.current_plot_parameters = {}
-        # TODO: add plotted_for_parameter to History?
-        self.plotted_for_parameters = None
-        self.plots = popped_step.plots
-        self.step_index -= 1
+        self.navigate_relative(-1)
+
+    def navigate_relative(self, steps: int):
+        """
+        Navigates to a step relative to the current step.
+
+        :param steps: the number of steps to navigate. Negative values navigate backwards.
+        """
+        if steps > 0:
+            raise Exception(f"Can not navigate to future step.")
+        elif steps < 0:
+            assert self.history.steps
+            for i in range(-steps - 1):
+                self.history.pop_step()
+            popped_step, popped_result_df = self.history.pop_step()
+            self.section = popped_step.section
+            self.step = popped_step.step
+            self.method = popped_step.method
+            self.calculated_method = self.method
+            self.df = self.history.steps[-1].dataframe if self.history.steps else None
+            self.result_df = popped_result_df
+            self.current_out = popped_step.outputs
+            self.current_messages = popped_step.messages
+            self.current_parameters = {self.method: popped_step.parameters}
+            self.current_plot_parameters = {}
+            # TODO: add plotted_for_parameter to History?
+            self.plotted_for_parameters = None
+            self.plots = popped_step.plots
+            self.step_index += steps
+
+    def navigate(self, section_name: str, step_index: int):
+        """
+        Navigates to a specific step in the run.
+
+        :param step_index: the index of the step to navigate to within the section
+        :param section_name: the name of the section in which the step is located
+        """
+        # Find the global index of the step within the specified section
+        global_index = get_global_index_of_step(
+            self.workflow_config, section_name, step_index
+        )
+
+        self.navigate_relative(global_index - self.step_index)
 
     def current_workflow_location(self):
         try:

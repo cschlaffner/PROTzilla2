@@ -3,7 +3,6 @@ from shutil import rmtree
 
 import numpy as np
 import pandas as pd
-import os
 import pytest
 from PIL import Image
 
@@ -113,6 +112,54 @@ def test_run_back(tests_folder_name):
     assert run.df is None
 
 
+def test_run_navigate(tests_folder_name):
+    run_name = tests_folder_name + "/test_run_back_" + random_string()
+
+    run = Run.create(run_name)
+    run.calculate_and_next(
+        ms_data_import.max_quant_import,
+        # call with str to make json serializable
+        file_path=f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
+        intensity_name="Intensity",
+    )
+    run.calculate_and_next(
+        metadata_import.metadata_import_method,
+        name="metadata_import",
+        file_path=f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
+        feature_orientation="Columns (samlpes in rows, features in columns)",
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_proteins.by_samples_missing,
+        percentage=0.2,
+    )
+    run.calculate_and_next(
+        data_preprocessing.filter_samples.by_protein_intensity_sum,
+        deviation_threshold=1,
+    )
+
+    # test navigate within section
+    run.navigate("data_preprocessing", 1)
+    assert run.section == "data_preprocessing"
+    assert run.step == "filter_samples"
+    assert run.method == "protein_intensity_sum_filter"
+    assert run.step_index == 3
+
+    # test navigate between sections
+    run.navigate("importing", 0)
+    assert run.section == "importing"
+    assert run.step == "ms_data_import"
+    assert run.method == "max_quant_import"
+    assert run.step_index == 0
+
+    run.next_step()
+    run.calculate_and_next(data_preprocessing.filter_proteins.by_samples_missing)
+    run.calculate_and_next(data_preprocessing.filter_samples.by_protein_intensity_sum)
+
+    # test navigate to future step
+    with pytest.raises(Exception):
+        run.navigate("data_preprocessing", 3)
+
+
 def test_run_continue(tests_folder_name):
     run_name = tests_folder_name + "/test_run_continue_" + random_string()
 
@@ -144,7 +191,6 @@ def test_run_continue(tests_folder_name):
     # run should be started at the beginning
     run3 = Run.continue_existing(run_name)
     assert run3.df is None
-    assert run3.current_messages != []
     assert any("Restarted" in message["msg"] for message in run3.current_messages)
 
 
@@ -172,28 +218,6 @@ def test_current_run_location(tests_folder_name):
         "filter_proteins",
         "samples_missing_filter",
     )
-
-
-def test_perform_calculation_logging(caplog, tests_folder_name):
-    run_name = tests_folder_name + "/test_run_logging_" + random_string()
-    run = Run.create(run_name, df_mode="disk")
-    run.calculate_and_next(
-        ms_data_import.max_quant_import,
-        file_path=str(PROJECT_PATH / "tests/proteinGroups_small_cut.txt"),
-        intensity_name="Intensity",
-    )
-    run.df["Intensity"] = np.nan
-
-    run.perform_calculation_from_location(
-        "data_preprocessing",
-        "outlier_detection",
-        "local_outlier_factor",
-        {"number_of_neighbors": 3},
-    )
-
-    assert "ERROR" in caplog.text
-    assert "LocalOutlierFactor" in caplog.text
-    assert "NaN values" in caplog.text
 
 
 def test_perform_calculation_error_handling(caplog, tests_folder_name):

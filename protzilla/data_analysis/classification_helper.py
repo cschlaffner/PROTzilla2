@@ -97,7 +97,8 @@ def perform_cross_validation(
     p_samples=None,
     **parameters,
 ):
-    shuffle = True if shuffle == "yes" else False
+    shuffle = shuffle == "yes"
+    random_state_cv = None if not shuffle else random_state_cv
     if cross_validation_estimator == "K-Fold":
         return KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state_cv)
     elif cross_validation_estimator == "Repeated K-Fold":
@@ -173,8 +174,9 @@ def evaluate_clustering_with_scoring(
 
 # maybe add option to hide or show certain columns
 def create_model_evaluation_df_grid_search(raw_evaluation_df, clf_parameters, scoring):
-    # The function transforms the cv_results_ dictionary obtained from a grid search cv
-    # methods into a model_evaluation_df, where each column represents an estimator
+    """The function transforms the cv_results_ dictionary obtained from a grid
+    search cv methods into a model_evaluation_df, where each column represents
+     an estimator"""
     # parameter and its corresponding validation score.
     columns_names = ["param_" + key for key in clf_parameters.keys()]
     columns_names.extend([f"mean_test_{score}" for score in scoring])
@@ -213,6 +215,8 @@ def perform_train_test_split(
     split_stratify="yes",
     **kwargs,
 ):
+    # by default this contains already filtered samples from metadata, we need to remove those
+    labels_df = labels_df[labels_df.index.isin(input_df.index)]
     split_stratify = labels_df if split_stratify == "yes" else None
     return train_test_split(
         input_df,

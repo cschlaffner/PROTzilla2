@@ -112,7 +112,7 @@ def test_differential_expression_linear_model(
     assert current_out["corrected_alpha"] == test_alpha
 
 
-def test_differential_expression_t_test(diff_expr_test_data, show_figures):
+def test_differential_expression_student_t_test(diff_expr_test_data, show_figures):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
     test_fc_threshold = 0.9
@@ -120,6 +120,7 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
     current_out = t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",
@@ -167,6 +168,99 @@ def test_differential_expression_t_test(diff_expr_test_data, show_figures):
     )
 
 
+def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+    test_fc_threshold = 0.9
+
+    current_out = t_test(
+        test_intensity_df,
+        test_metadata_df,
+        ttest_type="Welch's t-Test",
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        log_base="None",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+    )
+
+    fig = create_volcano_plot(
+        current_out["corrected_p_values_df"],
+        current_out["log2_fold_change_df"],
+        test_fc_threshold,
+        current_out["corrected_alpha"],
+        current_out["group1"],
+        current_out["group2"],
+    )
+    if show_figures:
+        fig.show()
+
+    corrected_p_values = [0.0269, 0.3842, 1.0, 0.026]
+    differentially_expressed_proteins = [
+        "Protein1",
+        "Protein2",
+        "Protein3",
+        "Protein4",
+    ]
+    significant_proteins = ["Protein1", "Protein4"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    log2fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
+
+    assert p_values_rounded == corrected_p_values
+    assert (
+        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+        == differentially_expressed_proteins
+    )
+    assert current_out["corrected_alpha"] == test_alpha
+    assert (
+        list(current_out["significant_proteins_df"]["Protein ID"].unique())
+        == significant_proteins
+    )
+
+
+def test_differential_expression_t_test_types(diff_expr_test_data, show_figures):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+
+    # Run Student's t-test
+    student_out = t_test(
+        test_intensity_df,
+        test_metadata_df,
+        ttest_type="Student's t-Test",
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        log_base="None",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+    )
+
+    # Run Welch's t-test
+    welch_out = t_test(
+        test_intensity_df,
+        test_metadata_df,
+        ttest_type="Welch's t-Test",
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        log_base="None",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+    )
+
+    # Check if the p-values are different
+    assert not np.array_equal(
+        student_out["corrected_p_values_df"]["corrected_p_value"],
+        welch_out["corrected_p_values_df"]["corrected_p_value"],
+    )
+
+
 def test_differential_expression_t_test_with_log_data(show_figures):
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1"],
@@ -210,6 +304,7 @@ def test_differential_expression_t_test_with_log_data(show_figures):
     current_out = t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",
@@ -279,6 +374,7 @@ def test_differential_expression_t_test_with_zero_mean(
     current_out = t_test(
         test_intensity_df,
         test_metadata_df,
+        ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
         group2="Group2",

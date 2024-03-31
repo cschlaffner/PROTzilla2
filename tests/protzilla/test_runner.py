@@ -125,6 +125,21 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
     mock_plot.assert_not_called()
 
 
+def test_runner_calculates_logging(caplog, tests_folder_name):
+    calculating_args = [
+        "only_import_and_filter_proteins",
+        "wrong_ms_data_path",
+        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+    ]
+    kwargs = args_parser().parse_args(calculating_args).__dict__
+    runner = Runner(**kwargs)
+
+    runner.compute_workflow()
+
+    assert "ERROR" in caplog.text
+    assert "FileNotFoundError" in caplog.text
+
+
 def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
     plot_args = [
         "only_import_and_filter_proteins",

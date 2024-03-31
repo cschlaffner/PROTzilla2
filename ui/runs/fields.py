@@ -88,7 +88,7 @@ def make_parameter_input(
         template = "runs/field_checkbox.html"
     elif param_dict["type"] == "multi_named_output":
         template = "runs/field_multi_named.html"
-        param_dict["mapping_keys"] = param_dict["mapping"].keys()
+        param_dict["mapping_keys"] = list(param_dict["mapping"].keys())
     elif param_dict["type"] == "named_output_v2":
         template = "runs/named_output_v2.html"
     else:

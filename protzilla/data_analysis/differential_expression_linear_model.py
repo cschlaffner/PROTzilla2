@@ -56,7 +56,7 @@ def linear_model(
         group1 = unique_groups[0]
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 1 was invalid. Auto-selected the group {group1} as group 1.",
             }
         )
@@ -64,7 +64,7 @@ def linear_model(
         group2 = unique_groups[1]
         messages.append(
             {
-                "level": logging.INFO,
+                "level": logging.WARNING,
                 "msg": f"Group 2 was invalid. Auto-selected the group {group2} as group 2.",
             }
         )
