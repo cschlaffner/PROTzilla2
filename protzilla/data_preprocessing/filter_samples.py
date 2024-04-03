@@ -8,7 +8,7 @@ def by_protein_intensity_sum(
     intensity_df: pd.DataFrame = None,
     peptide_df: pd.DataFrame = None,
     deviation_threshold: float = 2.0,
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     This function filters samples based on the sum of the protein intensities.
 
@@ -95,7 +95,7 @@ def by_proteins_missing(
     intensity_df: pd.DataFrame = None,
     peptide_df: pd.DataFrame = None,
     percentage: float = 0.5,
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     This function filters samples based on the amount of proteins with nan values, if the percentage of nan values
     is below a threshold (percentage).
