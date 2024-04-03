@@ -5,18 +5,18 @@ from ..utilities.transform_dfs import long_to_wide
 
 
 def by_samples_missing(
-        intensity_df: pd.DataFrame = None,
-        peptide_df: pd.DataFrame = None,
-        percentage: float = 0.5,
-) -> tuple[pd.DataFrame, dict]:
+    intensity_df: pd.DataFrame = None,
+    peptide_df: pd.DataFrame = None,
+    percentage: float = 0.5,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     This function filters proteins based on the amount of samples with nan values, if the percentage of nan values
     is below a threshold (percentage).
 
-    :param df: the intensity dataframe that should be filtered
+    :param intensity_df: the intensity dataframe that should be filtered
     :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
     :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present
-        in in order for the protein to be kept.
+        inorder for the protein to be kept.
     :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs that were discarded
         and a list of Protein IDs that were kept
     """

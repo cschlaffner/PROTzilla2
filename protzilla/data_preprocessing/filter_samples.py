@@ -49,7 +49,7 @@ def by_protein_count(
     intensity_df: pd.DataFrame = None,
     peptide_df: pd.DataFrame = None,
     deviation_threshold: float = 2.0,
-) -> tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     This function filters samples based on their deviation of amount of proteins with a non-nan value from
     the median across all samples.
