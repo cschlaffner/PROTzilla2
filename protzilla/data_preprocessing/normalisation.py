@@ -231,23 +231,31 @@ def by_reference_protein(
     return scaled_df, dict(dropped_samples=dropped_samples)
 
 
-def by_z_score_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+def by_z_score_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None):
+    if proteins_of_interest is None:
+        proteins_of_interest = []
     return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def by_median_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+def by_median_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None):
+    if proteins_of_interest is None:
+        proteins_of_interest = []
     return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
 
 
-def by_totalsum_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
+def by_totalsum_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None):
+    if proteins_of_interest is None:
+        proteins_of_interest = []
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None)
 
 
-def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
-    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest)
+def by_reference_protein_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None):
+    if proteins_of_interest is None:
+        proteins_of_interest = []
+    return _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None)
 
 
-def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest):
+def _build_box_hist_plot(df, result_df, current_out, graph_type, group_by, proteins_of_interest = None):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,

@@ -369,7 +369,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             }
           }
@@ -407,7 +407,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             }
           }
@@ -443,7 +443,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             }
           }
@@ -488,7 +488,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             }
           }
@@ -531,7 +531,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             }
           }
@@ -577,7 +577,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {
@@ -641,7 +641,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {
@@ -705,7 +705,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {
@@ -772,7 +772,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {
@@ -836,7 +836,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {
@@ -916,7 +916,7 @@
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
-              "default": null,
+              "default": [],
               "multiple": true
             },
             "visual_transformation": {

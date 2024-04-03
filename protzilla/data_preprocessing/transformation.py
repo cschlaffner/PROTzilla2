@@ -34,7 +34,9 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     return transformed_df, dict()
 
 
-def by_log_plot(df, result_df, out, graph_type, group_by, proteins_of_interest,):
+def by_log_plot(df, result_df, out, graph_type, group_by, proteins_of_interest = None,):
+    if proteins_of_interest is None:
+        proteins_of_interest = []
     return _build_box_hist_plot(df, result_df, graph_type, group_by, proteins_of_interest,)
 
 

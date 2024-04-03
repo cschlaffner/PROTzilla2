@@ -175,7 +175,7 @@ def make_plot_fields(run: Run, section: str, step: str, method: str) -> str:
     plot_fields = []
     for plot in plots:
         for key, param_dict in plot.items():
-            if method in run.current_plot_parameters:
+            if method in run.current_plot_parameters and key in run.current_plot_parameters[method]:
                 param_dict["default"] = run.current_plot_parameters[method][key]
             insert_special_params(param_dict, run)
             plot_fields.append(

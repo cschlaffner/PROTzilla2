@@ -110,7 +110,7 @@ def create_box_plots(
     y_title: str = "",
     x_title: str = "",
     group_by: str = "None",
-    proteins_of_interest =None,
+    proteins_of_interest=None,
     visual_transformation: str = "linear",
 ) -> Figure:
     """
@@ -143,6 +143,11 @@ def create_box_plots(
             f"""Group_by parameter  must be "None" or
                 "Sample" or "Protein ID" but is {group_by}"""
         )
+    if len(proteins_of_interest) == 0:
+        proteins_of_interest = dataframe_a["Protein ID"].iloc[:1]
+    elif not isinstance(proteins_of_interest, list):
+        proteins_of_interest = [proteins_of_interest]
+
     filtered_df = dataframe_a[dataframe_a["Protein ID"].isin(proteins_of_interest)]
     filtered_result_df = dataframe_b[dataframe_b["Protein ID"].isin(proteins_of_interest)]
     intensity_name_a = default_intensity_column(filtered_df)
