@@ -138,22 +138,35 @@ def test_filter_proteins_by_missing_samples(
     assert method_output["filtered_proteins"] == []
 
 
+@pytest.mark.parametrize(
+    "filtering_method",
+    [by_samples_missing],
+)
 def test_proteins_by_missing_samples_with_peptides(
-    filter_proteins_df, peptides_df, show_figures
+    filtering_method, filter_proteins_df, peptides_df, show_figures
 ):
-    result_df, result_peptide_df, method_output = by_samples_missing(
+    result_df1, result_peptide_df1, method_output1 = filtering_method(
         filter_proteins_df, percentage=1.0
     )
-
-    assert result_peptide_df is None
-
-    result_df, result_peptide_df, method_output = by_samples_missing(
+    result_df2, result_peptide_df2, method_output2 = filtering_method(
         filter_proteins_df, peptides_df, percentage=1.0
     )
 
-    assert result_peptide_df is not None
     assert (
-        not result_peptide_df["Protein ID"]
-        .isin(method_output["filtered_proteins"])
+        result_peptide_df1 is None
+    ), "Output peptide dataframe should be None, if no input peptide dataframe is provided"
+
+    assert (
+        result_peptide_df2 is not None
+    ), "Peptide dataframe should not be None, if an input peptide dataframe is provided"
+    assert (
+        not result_peptide_df2["Protein ID"]
+        .isin(method_output2["filtered_proteins"])
         .any()
-    )
+    ), "Peptide dataframe should not contain any proteins that were filtered out"
+    assert (
+        peptides_df[peptides_df["Protein ID"].isin(result_df2["Protein ID"])]
+        .isin(result_peptide_df2)
+        .all()
+        .all()
+    ), "Peptide dataframe should contain all entry's on samples that are in the filtered dataframe"
