@@ -9,6 +9,10 @@ from protzilla.data_preprocessing.filter_samples import (
     by_proteins_missing,
     by_proteins_missing_plot,
 )
+from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
+    peptides_df,
+    assert_peptide_filtering_matches_protein_filtering
+)
 
 
 @pytest.fixture
@@ -42,44 +46,14 @@ def filter_samples_df():
     return filter_samples_df
 
 
-@pytest.fixture
-def peptides_df():
-    df = pd.DataFrame(
-        (
-            ["Sample1", "Protein1", "SEQA", 1000000, 0.00001],
-            ["Sample1", "Protein2", "SEQB", 2000000, 0.00002],
-            ["Sample1", "Protein2", "SEQC", 3000000, 0.00003],
-            ["Sample1", "Protein2", "SEQD", 4000000, 0.00004],
-            ["Sample1", "Protein3", "SEQE", 5000000, 0.00005],
-            ["Sample1", "Protein3", "SEQF", 6000000, 0.00006],
-            ["Sample1", "Protein3", "SEQG", 7000000, 0.00007],
-            ["Sample1", "Protein4", "SEQH", 8000000, 0.00008],
-            ["Sample1", "Protein5", "SEQI", 9000000, 0.00009],
-            ["Sample2", "Protein1", "SEQJ", 10000000, 0.0001],
-            ["Sample2", "Protein2", "SEQK", 11000000, 0.00011],
-            ["Sample2", "Protein3", "SEQL", 12000000, 0.00012],
-            ["Sample2", "Protein4", "SEQM", 13000000, 0.00013],
-            ["Sample2", "Protein5", "SEQN", 14000000, 0.00014],
-            ["Sample3", "Protein1", "SEQO", 15000000, 0.00015],
-            ["Sample3", "Protein2", "SEQP", 16000000, 0.00016],
-            ["Sample3", "Protein3", "SEQQ", 17000000, 0.00017],
-            ["Sample3", "Protein4", "SEQR", 18000000, 0.00018],
-            ["Sample3", "Protein5", "SEQS", 19000000, 0.00019],
-        ),
-        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
-    )
-
-    return df
-
-
 def test_by_proteins_missing(filter_samples_df, show_figures):
-    result_df1, _, method_output1 = by_proteins_missing(
+    result_df1, result_peptide_df1, method_output1 = by_proteins_missing(
         filter_samples_df, percentage=0.5
     )
-    result_df2, _, method_output2 = by_proteins_missing(
-        filter_samples_df, percentage=0.6
+    result_df2, result_peptide_df2, method_output2 = by_proteins_missing(
+        filter_samples_df, peptides_df(), percentage=0.6
     )
-    result_df3, _, method_output3 = by_proteins_missing(
+    result_df3, result_peptide_df3, method_output3 = by_proteins_missing(
         filter_samples_df, percentage=0.65
     )
 
@@ -108,13 +82,26 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
     ], f"excluded samples do not match \
                     Sample2 and Sample3, but are {list_samples_excluded_3}"
 
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df1,
+        pd.DataFrame(None),
+        result_peptide_df1,
+        "Sample",
+    )
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df2,
+        peptides_df(),
+        result_peptide_df2,
+        "Sample",
+    )
+
 
 def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
-    result_df1, _, method_output1 = by_protein_count(
+    result_df1, result_peptide_df1, method_output1 = by_protein_count(
         filter_samples_df, deviation_threshold=0.3
     )
-    result_df2, _, method_output2 = by_protein_count(
-        filter_samples_df, deviation_threshold=1
+    result_df2, result_peptide_df2, method_output2 = by_protein_count(
+        filter_samples_df, peptides_df(), deviation_threshold=1
     )
 
     list_samples_excluded_1 = method_output1["filtered_samples"]
@@ -137,12 +124,25 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
     ], f"excluded samples do not match \
             Sample1, but are {list_samples_excluded_2}"
 
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df1,
+        pd.DataFrame(None),
+        result_peptide_df1,
+        "Sample",
+    )
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df2,
+        peptides_df(),
+        result_peptide_df2,
+        "Sample",
+    )
+
 
 def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
-    result_df1, _, method_output1 = by_protein_intensity_sum(
+    result_df1, result_peptide_df1, method_output1 = by_protein_intensity_sum(
         filter_samples_df, deviation_threshold=1
     )
-    result_df2, _, method_output2 = by_protein_intensity_sum(
+    result_df2, result_peptide_df2, method_output2 = by_protein_intensity_sum(
         filter_samples_df, deviation_threshold=0.3
     )
 
@@ -166,31 +166,15 @@ def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures
     ], f"excluded samples do not match \
             Sample2 and Sample3, but are {list_samples_excluded_2}"
 
-
-@pytest.mark.parametrize(
-    "filtering_method",
-    [by_protein_intensity_sum, by_protein_count, by_proteins_missing],
-)
-def test_peptide_filtering(filtering_method, filter_samples_df, peptides_df):
-    result_df1, result_peptide_df1, method_output1 = filtering_method(
-        filter_samples_df, None, 0.5
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df1,
+        pd.DataFrame(None),
+        result_peptide_df1,
+        "Sample",
     )
-    result_df2, result_peptide_df2, method_output2 = filtering_method(
-        filter_samples_df, peptides_df, 0.5
+    assert_peptide_filtering_matches_protein_filtering(
+        result_df2,
+        peptides_df(),
+        result_peptide_df2,
+        "Sample",
     )
-
-    assert (
-        result_peptide_df1 is None
-    ), "Output peptide dataframe should be None, if no input peptide dataframe is provided"
-    assert (
-        result_peptide_df2 is not None
-    ), "Peptide dataframe should not be None, if an input peptide dataframe is provided"
-    assert (
-        result_peptide_df2["Sample"].isin(result_df2["Sample"]).all()
-    ), "Peptide dataframe should only contain samples that are in the filtered dataframe"
-    assert (
-        peptides_df[peptides_df["Sample"].isin(result_df2["Sample"])]
-        .isin(result_peptide_df2)
-        .all()
-        .all()
-    ), "Peptide dataframe should contain all entry's on samples that are in the filtered dataframe"
