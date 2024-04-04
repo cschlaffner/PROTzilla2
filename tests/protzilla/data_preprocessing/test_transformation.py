@@ -114,7 +114,14 @@ def test_log2_transformation(
 ):
     result_df = by_log(log2_transformation_df, log_base="log2")[0]
 
-    fig = by_log_plot(log2_transformation_df, result_df, {}, "Boxplot", "Protein ID", ["Protein1", "Protein2"],)[0]
+    fig = by_log_plot(
+        log2_transformation_df,
+        result_df,
+        {},
+        "Boxplot",
+        "Protein ID",
+        ["Protein1", "Protein2"],
+    )[0]
     if show_figures:
         fig.show()
 

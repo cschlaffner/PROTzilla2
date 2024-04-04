@@ -149,7 +149,9 @@ def create_box_plots(
         proteins_of_interest = [proteins_of_interest]
 
     filtered_df = dataframe_a[dataframe_a["Protein ID"].isin(proteins_of_interest)]
-    filtered_result_df = dataframe_b[dataframe_b["Protein ID"].isin(proteins_of_interest)]
+    filtered_result_df = dataframe_b[
+        dataframe_b["Protein ID"].isin(proteins_of_interest)
+    ]
     intensity_name_a = default_intensity_column(filtered_df)
     intensity_name_b = default_intensity_column(filtered_result_df)
     if group_by in {"Sample", "Protein ID"}:

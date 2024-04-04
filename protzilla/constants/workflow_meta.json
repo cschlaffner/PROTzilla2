@@ -365,7 +365,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -403,7 +403,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -439,7 +439,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -484,7 +484,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -527,7 +527,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -573,7 +573,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -637,7 +637,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -701,7 +701,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -768,7 +768,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -832,7 +832,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
@@ -912,7 +912,7 @@
               "default": "None"
             },
             "proteins_of_interest": {
-              "name": "Proteins of interest",
+              "name": "Proteins of interest (Only for Boxplot)",
               "type": "categorical",
               "fill": "protein_group_column",
               "categories": [],
