@@ -64,9 +64,7 @@ def scatter_plot(
             fig = px.scatter_3d(
                 intensity_df_wide, x=x_name, y=y_name, z=z_name, color=color_name
             )
-            fig.update_traces(
-                marker_color=colors["annotation_proteins_of_interest"]
-            )
+            fig.update_traces(marker_color=colors["annotation_proteins_of_interest"])
         else:
             raise ValueError(
                 "The dimensions of the DataFrame are either too high or too low."
