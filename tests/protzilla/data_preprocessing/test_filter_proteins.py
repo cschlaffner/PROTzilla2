@@ -75,7 +75,7 @@ def filter_proteins_by_samples_missing_df():
 
 
 def test_filter_proteins_by_missing_samples(
-    filter_proteins_by_samples_missing_df, show_figures
+        filter_proteins_by_samples_missing_df, peptides_df, show_figures
 ):
     result_df, result_peptide_df, method_output = by_samples_missing(
         filter_proteins_by_samples_missing_df, percentage=1.0
@@ -107,8 +107,8 @@ def test_filter_proteins_by_missing_samples(
 
     assert method_output["filtered_proteins"] == ["Protein4", "Protein5"]
 
-    result_df, _, method_output = by_samples_missing(
-        filter_proteins_by_samples_missing_df, percentage=0.0
+    result_df, result_peptide_df, method_output = by_samples_missing(
+        filter_proteins_by_samples_missing_df, peptides_df, percentage=0.0
     )
     method_output["filtered_proteins"]
 
