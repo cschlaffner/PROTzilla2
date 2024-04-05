@@ -11,7 +11,7 @@ from protzilla.data_preprocessing.filter_samples import (
 )
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
     peptides_df,
-    assert_peptide_filtering_matches_protein_filtering
+    assert_peptide_filtering_matches_protein_filtering,
 )
 
 
@@ -46,12 +46,12 @@ def filter_samples_df():
     return filter_samples_df
 
 
-def test_by_proteins_missing(filter_samples_df, show_figures):
+def test_by_proteins_missing(filter_samples_df, peptides_df, show_figures):
     result_df1, result_peptide_df1, method_output1 = by_proteins_missing(
         filter_samples_df, percentage=0.5
     )
     result_df2, result_peptide_df2, method_output2 = by_proteins_missing(
-        filter_samples_df, peptides_df(), percentage=0.6
+        filter_samples_df, peptides_df, percentage=0.6
     )
     result_df3, result_peptide_df3, method_output3 = by_proteins_missing(
         filter_samples_df, percentage=0.65
@@ -84,24 +84,24 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
 
     assert_peptide_filtering_matches_protein_filtering(
         result_df1,
-        pd.DataFrame(None),
+        None,
         result_peptide_df1,
         "Sample",
     )
     assert_peptide_filtering_matches_protein_filtering(
         result_df2,
-        peptides_df(),
+        peptides_df,
         result_peptide_df2,
         "Sample",
     )
 
 
-def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
+def test_filter_samples_by_protein_count(filter_samples_df, peptides_df, show_figures):
     result_df1, result_peptide_df1, method_output1 = by_protein_count(
         filter_samples_df, deviation_threshold=0.3
     )
     result_df2, result_peptide_df2, method_output2 = by_protein_count(
-        filter_samples_df, peptides_df(), deviation_threshold=1
+        filter_samples_df, peptides_df, deviation_threshold=1
     )
 
     list_samples_excluded_1 = method_output1["filtered_samples"]
@@ -126,19 +126,21 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
 
     assert_peptide_filtering_matches_protein_filtering(
         result_df1,
-        pd.DataFrame(None),
+        None,
         result_peptide_df1,
         "Sample",
     )
     assert_peptide_filtering_matches_protein_filtering(
         result_df2,
-        peptides_df(),
+        peptides_df,
         result_peptide_df2,
         "Sample",
     )
 
 
-def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
+def test_filter_samples_by_protein_intensity_sum(
+    filter_samples_df, peptides_df, show_figures
+):
     result_df1, result_peptide_df1, method_output1 = by_protein_intensity_sum(
         filter_samples_df, deviation_threshold=1
     )
@@ -168,13 +170,13 @@ def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures
 
     assert_peptide_filtering_matches_protein_filtering(
         result_df1,
-        pd.DataFrame(None),
+        None,
         result_peptide_df1,
         "Sample",
     )
     assert_peptide_filtering_matches_protein_filtering(
         result_df2,
-        peptides_df(),
+        peptides_df,
         result_peptide_df2,
         "Sample",
     )
