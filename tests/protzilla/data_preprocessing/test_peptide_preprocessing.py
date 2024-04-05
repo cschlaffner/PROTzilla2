@@ -73,7 +73,7 @@ def assert_peptide_filtering_matches_protein_filtering(
 ) -> bool:
     if initial_peptide_df is None:
         assert (
-            result_protein_df is None
+                result_peptide_df is None
         ), "Output peptide dataframe should be None, if no input peptide dataframe is provided"
     else:
         assert (
