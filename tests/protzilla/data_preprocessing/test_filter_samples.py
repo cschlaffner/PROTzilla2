@@ -33,6 +33,11 @@ def filter_samples_df():
         ["Sample3", "Protein3", "Gene3", 10],
         ["Sample3", "Protein4", "Gene4", 20],
         ["Sample3", "Protein5", "Gene5", 20],
+        ["Sample4", "Protein1", "Gene1", 0],
+        ["Sample4", "Protein2", "Gene2"],
+        ["Sample4", "Protein3", "Gene3"],
+        ["Sample4", "Protein4", "Gene4"],
+        ["Sample4", "Protein5", "Gene5"],
     )
 
     filter_samples_df = pd.DataFrame(
@@ -68,17 +73,20 @@ def test_by_proteins_missing(filter_samples_df, peptides_df, show_figures):
         fig.show()
 
     assert list_samples_excluded_1 == [
-        "Sample2"
+        "Sample2",
+        "Sample4",
     ], f"excluded samples do not match \
                 Sample2, but are {list_samples_excluded_1}"
 
     assert list_samples_excluded_2 == [
         "Sample2",
+        "Sample4",
     ], f"excluded samples do not match \
                 Sample2 and Sample3, but are {list_samples_excluded_2}"
     assert list_samples_excluded_3 == [
         "Sample2",
         "Sample3",
+        "Sample4",
     ], f"excluded samples do not match \
                     Sample2 and Sample3, but are {list_samples_excluded_3}"
 
@@ -115,12 +123,12 @@ def test_filter_samples_by_protein_count(filter_samples_df, peptides_df, show_fi
 
     assert list_samples_excluded_1 == [
         "Sample1",
-        "Sample2",
+        "Sample4",
     ], f"excluded samples do not match \
             Sample1 and Sample2, but are {list_samples_excluded_1}"
 
     assert list_samples_excluded_2 == [
-        "Sample1"
+        "Sample1",
     ], f"excluded samples do not match \
             Sample1, but are {list_samples_excluded_2}"
 
@@ -145,7 +153,7 @@ def test_filter_samples_by_protein_intensity_sum(
         filter_samples_df, deviation_threshold=1
     )
     result_df2, result_peptide_df2, method_output2 = by_protein_intensity_sum(
-        filter_samples_df, deviation_threshold=0.3
+        filter_samples_df, peptides_df, deviation_threshold=0.3
     )
 
     list_samples_excluded_1 = method_output1["filtered_samples"]
@@ -158,13 +166,13 @@ def test_filter_samples_by_protein_intensity_sum(
         fig.show()
 
     assert list_samples_excluded_1 == [
-        "Sample3"
+        "Sample3",
     ], f"excluded samples do not match \
             Sample3, but are {list_samples_excluded_1}"
 
     assert list_samples_excluded_2 == [
-        "Sample2",
         "Sample3",
+        "Sample4",
     ], f"excluded samples do not match \
             Sample2 and Sample3, but are {list_samples_excluded_2}"
 
