@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
+from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH, GRAPH_DATA_PATH
 from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
@@ -619,14 +619,14 @@ def test_get_ref_seq_test_protein():
 
 
 def test_get_ref_seq_empty_seq():
-    protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
+    protein_path = TEST_DATA_PATH / "proteins" / "empty_seq.txt"
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _get_reference_sequence(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
-    protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
+    protein_path = TEST_DATA_PATH / "proteins" / "no_seq_len.txt"
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _get_reference_sequence(str(protein_path))
@@ -1325,8 +1325,8 @@ def test_peptides_to_isoform_integration_test(
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
-    test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
+    test_protein_path = TEST_DATA_PATH / "proteins" / "test_protein_variation.txt"
+    test_protein_destination = GRAPH_DATA_PATH / "test_protein_variation.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     protein_id = "test_protein_variation"
@@ -1370,6 +1370,9 @@ def test_peptides_to_isoform_integration_test(
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)
 
+    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
+        file.unlink()
+
 
 def test_peptides_to_isoform_integration_test_shortcut(
     integration_test_peptides,
@@ -1382,8 +1385,8 @@ def test_peptides_to_isoform_integration_test_shortcut(
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
     protein_id = "test_protein-shortcut"
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
-    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
+    test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
+    test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     out_dict = peptides_to_isoform(
@@ -1442,6 +1445,9 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert planned_graph.nodes == created_graph.nodes
     assert nx.utils.graphs_equal(planned_graph, created_graph)
 
+    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
+        file.unlink()
+
 
 def test_graph_index_longer_variations():
     planned_index = [
@@ -1496,8 +1502,8 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
 
     protein_id = "test_protein_variation_long"
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
-    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
+    test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
+    test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     peptide_protein_list = (
@@ -1562,6 +1568,9 @@ def test_peptides_to_isoform_integration_test_longer_variations(
 
     assert created_graph.nodes == planned_graph.nodes
     nx.utils.graphs_equal(planned_graph, created_graph)
+
+    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
+        file.unlink()
 
 
 def pprint_graphs(graph, planned_graph):

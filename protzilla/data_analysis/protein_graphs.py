@@ -7,7 +7,7 @@ import networkx as nx
 import pandas as pd
 import requests
 
-from protzilla.constants.paths import RUNS_PATH
+from protzilla.constants.paths import RUNS_PATH, GRAPH_DATA_PATH
 from protzilla.constants.protzilla_logging import logger
 from logging import INFO, ERROR
 
@@ -65,6 +65,8 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     path_to_protein_file, filtered_blocks, request = _get_protein_file(
         protein_id, run_path
     )
+
+    # TODO: handle new situation when file alreday exists -> file, [], None
 
     path_to_protein_file = Path(path_to_protein_file)
     if not path_to_protein_file.exists() and request.status_code != 200:
@@ -210,7 +212,7 @@ def peptides_to_isoform(
         graph_path = potential_graph_path
 
     protein_graph = nx.read_graphml(graph_path)
-    protein_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.txt"
+    protein_path = GRAPH_DATA_PATH / f"{protein_id}.txt"
     matched_graph_path = (
         RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
     )
@@ -376,8 +378,7 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"
-                # noqa E501
+                f"The node {node} was not visited in the topological order (distance should be set already)"  # noqa E501
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -388,28 +389,56 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 def _get_protein_file(
     protein_id: str, run_path: Path
 ) -> (Path, list, requests.models.Response | None):
-    path_to_graphs = run_path / "graphs"
-    protein_file_path = path_to_graphs / f"{protein_id}.txt"
-    filtered_protein_file_path = path_to_graphs / f"{protein_id}_parsed.txt"
+
+    if not GRAPH_DATA_PATH.exists():
+        GRAPH_DATA_PATH.mkdir(parents=True)
+
+    protein_file_path = GRAPH_DATA_PATH / f"{protein_id}.txt"
+    filtered_protein_file_path = GRAPH_DATA_PATH / f"{protein_id}_parsed.txt"
+    filtered_blocks_path = GRAPH_DATA_PATH / f"{protein_id}_filtered_blocks.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
+
     r = None
-
-    path_to_graphs.mkdir(parents=True, exist_ok=True)
-
-    if protein_file_path.exists():
-        logger.info(
-            f"Protein file {protein_file_path} already exists. Skipping download."
-        )
-    else:
+    if not protein_file_path.exists():
         logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
         r.raise_for_status()
-
         protein_file_path.write_bytes(r.content)
+
+    if filtered_protein_file_path.exists() and filtered_blocks_path.exists():
+        logger.info(
+            f"Protein files already exists. Skipping parsing."
+        )
+
+        # [[block1line1, block1line2], [block2line1, block2line2]]
+        filtered_blocks = []
+        with open(filtered_blocks_path, "r") as file:
+            lines = file.readlines()
+            # if the first line is a newline, there are no blocks
+            if not lines or lines[0] == "\n":
+                return filtered_protein_file_path, [], None
+
+            i = 0
+            filtered_blocks.append([])
+            for j, line in enumerate(lines):
+                if line != "\n":
+                    filtered_blocks[i].append(line)
+                else:
+                    if j >= len(lines) - 1:
+                        break
+                    i += 1
+                    filtered_blocks.append([])
+
+        return filtered_protein_file_path, filtered_blocks, None
 
     filtered_lines, filtered_blocks = _parse_file(protein_file_path)
     with open(filtered_protein_file_path, "w") as file:
         file.writelines(filtered_lines)
+
+    with open(filtered_blocks_path, "w") as file:
+        for block in filtered_blocks:
+            file.writelines(block)
+        file.write("\n")
 
     return filtered_protein_file_path, filtered_blocks, r
 
@@ -422,6 +451,9 @@ def _parse_file(file_path):
     `_potential_peptide_matches` will not be useful.
     For this reason, we filter out all "VARIANT" features that cause the length of the
     longest path to be longer than the reference sequence.
+
+    Filtered blocks are a list of lists. The outer list contains the filtered blocks,
+    the inner lists contain the lines of each block.
     """
 
     with open(file_path, "r") as file:
