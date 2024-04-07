@@ -6,6 +6,7 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 import requests
+from os import devnull
 
 from protzilla.constants.paths import RUNS_PATH, GRAPH_DATA_PATH
 from protzilla.constants.protzilla_logging import logger
@@ -79,11 +80,10 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         )
 
     output_folder_path = run_path / "graphs"
-    output_csv = output_folder_path / f"{protein_id}.csv"
     graph_path = output_folder_path / f"{protein_id}.graphml"
     cmd_str = f"protgraph -egraphml {path_to_protein_file} \
                 --export_output_folder={output_folder_path} \
-                --output_csv={output_csv} \
+                --output_csv={devnull} \
                 -ft VARIANT \
                 -d skip"
 
