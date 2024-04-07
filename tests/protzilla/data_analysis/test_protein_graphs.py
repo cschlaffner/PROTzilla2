@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH, GRAPH_DATA_PATH
+from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH, GRAPH_DATA_PATH, UNMODIFIED_GRAPHS_PATH
 from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
@@ -788,8 +788,7 @@ def test_create_prot_variation_graph(
     )
     (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
-    output_folder = RUNS_PATH / run_name / f"graphs"
-    graph_path = output_folder / f"{protein_id}.graphml"
+    graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
     planned_msg = (
         f"Graph created for protein {protein_id} at {graph_path} using {protein_path}"
     )
@@ -798,7 +797,7 @@ def test_create_prot_variation_graph(
     out_dict = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
 
     planned_out_dict = {
-        "graph_path": str(output_folder / f"{protein_id}.graphml"),
+        "graph_path": str(UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"),
         "filtered_blocks": [],
         "messages": [dict(level=logging.INFO, msg=planned_msg)],
     }
@@ -807,6 +806,8 @@ def test_create_prot_variation_graph(
     created_graph = nx.read_graphml(graph_path)
     assert nx.is_isomorphic(created_graph, test_protein_variation_graph)
     assert nx.utils.graphs_equal(created_graph, test_protein_variation_graph)
+
+    remove_test_graphml_files(protein_id)
 
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
@@ -1370,8 +1371,8 @@ def test_peptides_to_isoform_integration_test(
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)
 
-    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
-        file.unlink()
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
 
 
 def test_peptides_to_isoform_integration_test_shortcut(
@@ -1445,8 +1446,8 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert planned_graph.nodes == created_graph.nodes
     assert nx.utils.graphs_equal(planned_graph, created_graph)
 
-    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
-        file.unlink()
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
 
 
 def test_graph_index_longer_variations():
@@ -1569,7 +1570,17 @@ def test_peptides_to_isoform_integration_test_longer_variations(
     assert created_graph.nodes == planned_graph.nodes
     nx.utils.graphs_equal(planned_graph, created_graph)
 
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
+
+
+def remove_test_protein_files(protein_id: str):
     for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
+        file.unlink()
+
+
+def remove_test_graphml_files(protein_id: str):
+    for file in UNMODIFIED_GRAPHS_PATH.glob(f"{protein_id}*.graphml"):
         file.unlink()
 
 

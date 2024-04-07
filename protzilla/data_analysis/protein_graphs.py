@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 from os import devnull
 
-from protzilla.constants.paths import RUNS_PATH, GRAPH_DATA_PATH
+from protzilla.constants.paths import RUNS_PATH, GRAPH_DATA_PATH, UNMODIFIED_GRAPHS_PATH
 from protzilla.constants.protzilla_logging import logger
 from logging import INFO, ERROR
 
@@ -61,7 +61,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     :return: dict(graph_path, messages)
     """
 
-    logger.info(f"Creating graph for protein {protein_id}")
+    # logger.info(f"Creating graph for protein {protein_id}")
     run_path = RUNS_PATH / run_name
     path_to_protein_file, filtered_blocks, request = _get_protein_file(
         protein_id, run_path
@@ -77,18 +77,26 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
             messages=[dict(level=ERROR, msg=msg, trace=request.__dict__)],
         )
 
-    output_folder_path = run_path / "graphs"
-    graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder_path} \
-                --output_csv={devnull} \
-                -ft VARIANT \
-                -d skip"
+    if not UNMODIFIED_GRAPHS_PATH.exists():
+        UNMODIFIED_GRAPHS_PATH.mkdir(parents=True)
 
-    subprocess.run(cmd_str, shell=True)
+    graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
+    if not graph_path.exists():
+        cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                    --export_output_folder={UNMODIFIED_GRAPHS_PATH} \
+                    --output_csv={devnull} \
+                    -ft VARIANT \
+                    -d skip"
 
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"  # noqa E501
-    logger.info(msg)
+        subprocess.run(cmd_str, shell=True)
+
+        msg = f"Graph created for protein {protein_id} at {graph_path} " \
+              f"using {path_to_protein_file}"
+        logger.info(msg)
+    else:
+        msg = f"Graph already exists for protein {protein_id} at {graph_path}. " \
+              f"Skipping creation."  # noqa E501
+
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
@@ -97,14 +105,14 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
 
 
 def peptides_to_isoform(
-    peptide_df: pd.DataFrame,
-    protein_id: str,
-    run_name: str,
-    k: int = 5,
-    allowed_mismatches: int = 2,
-    metadata_df: pd.DataFrame = None,
-    grouping: str = None,
-    selected_groups: list = None,
+        peptide_df: pd.DataFrame,
+        protein_id: str,
+        run_name: str,
+        k: int = 5,
+        allowed_mismatches: int = 2,
+        metadata_df: pd.DataFrame = None,
+        grouping: str = None,
+        selected_groups: list = None,
 ):
     """
     Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph and
@@ -147,7 +155,7 @@ def peptides_to_isoform(
         allowed_mismatches, int
     ), f"allowed_mismatches must be int, is {type(allowed_mismatches)}"
     assert (
-        allowed_mismatches >= 0
+            allowed_mismatches >= 0
     ), f"allowed mismatches must be >= 0, is {allowed_mismatches}"
 
     assert isinstance(k, int), f"k must be an integer, is {type(k)}"
@@ -161,7 +169,7 @@ def peptides_to_isoform(
 
     if grouping:
         assert (
-            metadata_df is not None
+                metadata_df is not None
         ), f"When selecting Peptides by grouping, Metadata has to have been imported"
         assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
     if selected_groups:
@@ -170,7 +178,7 @@ def peptides_to_isoform(
             selected_groups = [selected_groups]
         for group in selected_groups:
             assert (
-                group in metadata_df[grouping].unique()
+                    group in metadata_df[grouping].unique()
             ), f"Group '{group}' not found in metadata_df column '{grouping}'"
 
     if grouping is not None and grouping != "Sample":
@@ -196,7 +204,7 @@ def peptides_to_isoform(
             messages=[dict(level=ERROR, msg=msg)],
         )
 
-    potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
+    potential_graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
     filtered_blocks = []
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
@@ -206,14 +214,20 @@ def peptides_to_isoform(
         if graph_path is None:
             return dict(graph_path=None, messages=message)
     else:
-        logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
+        logger.info(
+            f"Graph already exists for protein {protein_id} at {potential_graph_path}. "
+            f"Skipping creation."
+        )
         graph_path = potential_graph_path
 
     protein_graph = nx.read_graphml(graph_path)
     protein_path = GRAPH_DATA_PATH / f"{protein_id}.txt"
-    matched_graph_path = (
-        RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
-    )
+
+    run_graphs_path = RUNS_PATH / run_name / "graphs"
+    if not run_graphs_path.exists():
+        run_graphs_path.mkdir(parents=True)
+
+    matched_graph_path = run_graphs_path / f"{protein_id}_modified.graphml"
 
     ref_index, reference_sequence, seq_len = _create_reference_sequence_index(
         protein_path, k=k
@@ -261,7 +275,7 @@ def peptides_to_isoform(
 
 
 def _create_graph_index(
-    protein_graph: nx.DiGraph, seq_len: int
+        protein_graph: nx.DiGraph, seq_len: int
 ) -> tuple[list | None, str, dict | None]:
     """
     Create a mapping from the position in the protein (using the longest path) to
@@ -312,14 +326,14 @@ def _create_graph_index(
     index = [[] for _ in range(seq_len)]
     for node in longest_paths:
         if (
-            protein_graph.nodes[node]["aminoacid"] == "__start__"
-            or protein_graph.nodes[node]["aminoacid"] == "__end__"
+                protein_graph.nodes[node]["aminoacid"] == "__start__"
+                or protein_graph.nodes[node]["aminoacid"] == "__end__"
         ):
             continue
 
         for i in range(
-            longest_paths[node],
-            longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]),
+                longest_paths[node],
+                longest_paths[node] + len(protein_graph.nodes[node]["aminoacid"]),
         ):
             # needed because variations can make the longest path longer than
             # the reference sequence.
@@ -376,7 +390,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"  # noqa E501
+                f"The node {node} was not visited in the topological order (distance should be set already)"
+                # noqa E501
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -385,9 +400,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
 
 
 def _get_protein_file(
-    protein_id: str, run_path: Path
+        protein_id: str, run_path: Path
 ) -> (Path, list, requests.models.Response | None):
-
     if not GRAPH_DATA_PATH.exists():
         GRAPH_DATA_PATH.mkdir(parents=True)
 
@@ -506,7 +520,7 @@ def _parse_file(file_path):
 
 
 def _create_reference_sequence_index(
-    protein_path: str, k: int = 5
+        protein_path: str, k: int = 5
 ) -> tuple[dict, str, int]:
     """
     Create mapping from kmer of reference_sequence of protein to starting position(s)
@@ -608,7 +622,7 @@ def _get_reference_sequence(protein_path: str) -> (str, int):
 
 
 def _potential_peptide_matches(
-    allowed_mismatches: int, k: int, peptides: list, ref_index: dict, seq_len: int
+        allowed_mismatches: int, k: int, peptides: list, ref_index: dict, seq_len: int
 ):
     """
     Get potential start positions for peptides on reference sequence. This is done by
@@ -632,7 +646,8 @@ def _potential_peptide_matches(
         raise ValueError(f"k must be positive integer, but is {k}")
     if not isinstance(allowed_mismatches, int) or allowed_mismatches < 0:
         raise ValueError(
-            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"  # noqa E501
+            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"
+            # noqa E501
         )
 
     logger.debug("Matching peptides to reference sequence")
@@ -649,7 +664,8 @@ def _potential_peptide_matches(
                 # for now potential matches like this will be dismissed even if
                 # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
                 logger.debug(
-                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"  # noqa E501
+                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"
+                    # noqa E501
                 )
                 continue
             matched_starts.append(match_start_pos)
@@ -660,7 +676,8 @@ def _potential_peptide_matches(
             peptide_mismatches.add(peptide)
 
     logger.debug(
-        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"  # noqa E501
+        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"
+        # noqa E501
     )
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
@@ -713,12 +730,12 @@ def _create_contigs_dict(node_start_end: dict):
 
 
 def _match_potential_matches(
-    potential_peptide_matches,
-    graph_index,
-    peptide_mismatches,
-    allowed_mismatches,
-    graph,
-    longest_paths,
+        potential_peptide_matches,
+        graph_index,
+        peptide_mismatches,
+        allowed_mismatches,
+        graph,
+        longest_paths,
 ):
     """
     Matches the potential peptide matches to the graph. This function utilizes a
@@ -757,13 +774,13 @@ def _match_potential_matches(
     peptide_mismatches = set(peptide_mismatches)
 
     def _match_on_graph(
-        mismatches,
-        allowed_mismatches,
-        graph,
-        current_node,
-        left_over_peptide,
-        node_match_data,
-        current_index,
+            mismatches,
+            allowed_mismatches,
+            graph,
+            current_node,
+            left_over_peptide,
+            node_match_data,
+            current_index,
     ):
         """
         Recursive function that matches a peptide to the graph. The function branches
@@ -812,7 +829,7 @@ def _match_potential_matches(
         added_nodes = []
         # enumerating because of index, would use zip_longest otherwise
         for i, label_aa in enumerate(
-            graph.nodes[current_node]["aminoacid"][current_index:]
+                graph.nodes[current_node]["aminoacid"][current_index:]
         ):
             if i > len(left_over_peptide) - 1:
                 return True, node_match_data, mismatches
@@ -840,7 +857,7 @@ def _match_potential_matches(
                 allowed_mismatches=allowed_mismatches,
                 graph=graph,
                 current_node=succ,
-                left_over_peptide=left_over_peptide[last_index + 1 :],
+                left_over_peptide=left_over_peptide[last_index + 1:],
                 node_match_data=recursion_start_data,
                 current_index=0,
             )
@@ -864,7 +881,8 @@ def _match_potential_matches(
                     break
             else:
                 logger.error(
-                    f"No fitting node for match start position {match_start_index} of {peptide} found"  # noqa E501
+                    f"No fitting node for match start position {match_start_index} of {peptide} found"
+                    # noqa E501
                 )
                 continue
             matched, node_match_data, mismatches = _match_on_graph(
@@ -956,8 +974,8 @@ def _modify_graph(graph, contig_positions):
                 second_node = f"n{node_num}"
                 node_num += 1
                 second_node_label = graph.nodes[current_node]["aminoacid"][
-                    start : end + 1
-                ]
+                                    start: end + 1
+                                    ]
                 second_node_dict = dict(
                     node_for_adding=second_node,
                     aminoacid=second_node_label,
@@ -966,7 +984,7 @@ def _modify_graph(graph, contig_positions):
                 )
 
                 # adopt current_node to be third_node
-                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1:]
                 third_node = current_node
                 third_node_dict = {
                     third_node: {
@@ -988,7 +1006,7 @@ def _modify_graph(graph, contig_positions):
                 )
 
                 # adopt current_node to be third_node
-                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1 :]
+                third_node_label = graph.nodes[current_node]["aminoacid"][end + 1:]
                 third_node = current_node
                 third_node_dict = {
                     third_node: {
@@ -1034,10 +1052,10 @@ def _modify_graph(graph, contig_positions):
 
 
 def _get_peptides(
-    peptide_df: pd.DataFrame,
-    protein_id: str,
-    grouping: str | None,
-    selected_groups: list | None,
+        peptide_df: pd.DataFrame,
+        protein_id: str,
+        grouping: str | None,
+        selected_groups: list | None,
 ) -> list[str] | None:
     """
     Get peptides for a protein ID from a peptide dataframe.
@@ -1061,7 +1079,7 @@ def _get_peptides(
 
     if grouping is not None:
         assert (
-            grouping in peptide_df.columns
+                grouping in peptide_df.columns
         ), f"Grouping '{grouping}' not found in peptide_df"
 
     if selected_groups is not None:
@@ -1069,7 +1087,7 @@ def _get_peptides(
             raise ValueError("Grouping must be set if selected_groups is set")
         for group in selected_groups:
             assert (
-                group in peptide_df[grouping].unique()
+                    group in peptide_df[grouping].unique()
             ), f"Group '{group}' not found in peptide_df column '{grouping}'"
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
