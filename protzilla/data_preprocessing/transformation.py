@@ -5,7 +5,9 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(intensity_df: pd.DataFrame, log_base="log10"):
+def by_log(
+        intensity_df: pd.DataFrame, peptide_df: pd.DataFrame = None, log_base="log10"
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     This function log-transforms intensity
     DataFrames. Supports log-transformation to the base
@@ -23,15 +25,24 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10"):
     """
     intensity_name = default_intensity_column(intensity_df)
     transformed_df = intensity_df.copy()
+    transformed_peptide_df = peptide_df.copy() if peptide_df is not None else None
 
     # TODO 41 drop data when intensity is 0 and return them in dict
     if log_base == "log2":
         transformed_df[intensity_name] = np.log2(transformed_df[intensity_name])
+        if transformed_peptide_df is not None:
+            transformed_peptide_df["Intensity"] = np.log2(
+                transformed_peptide_df["Intensity"]
+            )
     elif log_base == "log10":
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
+        if transformed_peptide_df is not None:
+            transformed_peptide_df["Intensity"] = np.log10(
+                transformed_peptide_df["Intensity"]
+            )
     else:
         raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
-    return transformed_df, dict()
+    return transformed_df, transformed_peptide_df, dict()
 
 
 def by_log_plot(df, result_df, out, graph_type, group_by):
