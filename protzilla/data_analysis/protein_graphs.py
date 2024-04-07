@@ -67,8 +67,6 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         protein_id, run_path
     )
 
-    # TODO: handle new situation when file alreday exists -> file, [], None
-
     path_to_protein_file = Path(path_to_protein_file)
     if not path_to_protein_file.exists() and request.status_code != 200:
         msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"  # noqa E501
@@ -407,7 +405,7 @@ def _get_protein_file(
 
     if filtered_protein_file_path.exists() and filtered_blocks_path.exists():
         logger.info(
-            f"Protein files already exists. Skipping parsing."
+            f"Protein files already exists. Skipping download and parsing."
         )
 
         # [[block1line1, block1line2], [block2line1, block2line2]]
