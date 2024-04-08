@@ -61,8 +61,6 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     :return: dict(graph_path, messages)
     """
 
-    # logger.info(f"Creating graph for protein {protein_id}")
-    run_path = RUNS_PATH / run_name
     path_to_protein_file, filtered_blocks, request = _get_protein_file(protein_id)
 
     path_to_protein_file = Path(path_to_protein_file)
