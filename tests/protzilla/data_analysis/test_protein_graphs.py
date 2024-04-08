@@ -10,7 +10,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH, GRAPH_DATA_PATH, UNMODIFIED_GRAPHS_PATH
+from protzilla.constants.paths import (
+    RUNS_PATH,
+    TEST_DATA_PATH,
+    GRAPH_DATA_PATH,
+    UNMODIFIED_GRAPHS_PATH,
+)
 from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
