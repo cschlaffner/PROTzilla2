@@ -1331,6 +1331,9 @@ def test_peptides_to_isoform_integration_test(
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
     test_protein_path = TEST_DATA_PATH / "proteins" / "test_protein_variation.txt"
     test_protein_destination = GRAPH_DATA_PATH / "test_protein_variation.txt"
     shutil.copy(test_protein_path, test_protein_destination)
@@ -1389,7 +1392,9 @@ def test_peptides_to_isoform_integration_test_shortcut(
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_shortcut"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
     protein_id = "test_protein-shortcut"
     test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
     test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
@@ -1506,7 +1511,9 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         / "test_peptides_to_isoform_integration_test_longer_variations"
     )
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
     protein_id = "test_protein_variation_long"
     test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
     test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
