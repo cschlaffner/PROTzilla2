@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -129,6 +131,11 @@ def test_peptide_import(intensity_name):
         intensity_name=intensity_name,
     )
 
+    if "messages" in out and out["messages"]:
+        for message in out["messages"]:
+            if message["level"] == logging.ERROR:
+                assert False, message["msg"]
+
     pd.testing.assert_frame_equal(
         out["peptide_df"], peptide_df(intensity_name), check_dtype=False
     )
@@ -153,6 +160,11 @@ def test_evidence_import(intensity_name):
         file_path=f"{TEST_DATA_PATH}\\peptides\\evidence-vsmall.txt",
         intensity_name=intensity_name,
     )
+
+    if "messages" in out and out["messages"]:
+        for message in out["messages"]:
+            if message["level"] == logging.ERROR:
+                assert False, message["msg"]
 
     assert np.allclose(
         out["peptide_df"]["PEP"],
