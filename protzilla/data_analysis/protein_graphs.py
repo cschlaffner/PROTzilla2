@@ -405,7 +405,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"  # noqa E501
+                f"The node {node} was not visited in the topological order "
+                f"(distance should be set already)"
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -630,7 +631,8 @@ def _potential_peptide_matches(
         raise ValueError(f"k must be positive integer, but is {k}")
     if not isinstance(allowed_mismatches, int) or allowed_mismatches < 0:
         raise ValueError(
-            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"  # noqa E501
+            f"allowed_mismatches must be non-negative integer, "
+            f"but is {allowed_mismatches}"
         )
 
     logger.debug("Matching peptides to reference sequence")
@@ -647,7 +649,8 @@ def _potential_peptide_matches(
                 # for now potential matches like this will be dismissed even if
                 # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
                 logger.debug(
-                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"  # noqa E501
+                    f"match would be out of bounds for peptide {peptide}, "
+                    f"match_start_pos {match_start_pos}"
                 )
                 continue
             matched_starts.append(match_start_pos)
@@ -658,7 +661,8 @@ def _potential_peptide_matches(
             peptide_mismatches.add(peptide)
 
     logger.debug(
-        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"  # noqa E501
+        f"potential peptide matches - peptide:[starting_pos] "
+        f":: {potential_peptide_matches}"
     )
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
@@ -862,7 +866,8 @@ def _match_potential_matches(
                     break
             else:
                 logger.error(
-                    f"No fitting node for match start position {match_start_index} of {peptide} found"  # noqa E501
+                    f"No fitting node for match start position {match_start_index} "
+                    f"of {peptide} found"
                 )
                 continue
             matched, node_match_data, mismatches = _match_on_graph(
