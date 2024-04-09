@@ -25,7 +25,7 @@ colors = {
 def scatter_plot(
     input_df: pd.DataFrame,
     color_df: pd.DataFrame | None = None,
-):
+) -> list:
     """
     Function to create a scatter plot from data.
 
@@ -98,7 +98,7 @@ def create_volcano_plot(
     group1: str,
     group2: str,
     proteins_of_interest=None,
-):
+) -> list:
     """
     Function to create a volcano plot from p values and log2 fold change with the
     possibility to annotate proteins of interest.
@@ -190,7 +190,7 @@ def create_volcano_plot(
 
 def clustergram_plot(
     input_df: pd.DataFrame, sample_group_df: pd.DataFrame | None, flip_axes: str
-):
+) -> list:
     """
     Creates a clustergram plot from a dataframe in protzilla wide format. The rows or
     columns of the clustergram are ordered according to the clustering resulting from
@@ -300,7 +300,7 @@ def prot_quant_plot(
     protein_group: str,
     similarity: float = 1.0,
     similarity_measure: str = "euclidean distance",
-):
+) -> list:
     """
     A function to create a graph visualising protein quantifications across all samples
     as a line diagram. It's possible to select one proteingroup that will be displayed in orange

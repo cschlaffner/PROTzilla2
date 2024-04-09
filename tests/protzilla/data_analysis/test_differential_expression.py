@@ -87,7 +87,7 @@ def test_differential_expression_linear_model(
         group1=current_out["group1"],
         group2=current_out["group2"],
         fc_threshold=test_fc_threshold,
-    )
+    )[0]
 
     if show_figures:
         fig.show()
@@ -136,7 +136,7 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
         current_out["corrected_alpha"],
         current_out["group1"],
         current_out["group2"],
-    )
+    )[0]
     if show_figures:
         fig.show()
 
@@ -192,7 +192,7 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
         current_out["corrected_alpha"],
         current_out["group1"],
         current_out["group2"],
-    )
+    )[0]
     if show_figures:
         fig.show()
 
@@ -390,7 +390,7 @@ def test_differential_expression_t_test_with_zero_mean(
         group1=current_out["group1"],
         group2=current_out["group2"],
         fc_threshold=test_fc_threshold,
-    )
+    )[0]
     if show_figures:
         fig.show()
 
