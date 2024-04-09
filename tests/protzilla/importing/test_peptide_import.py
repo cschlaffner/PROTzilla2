@@ -127,7 +127,7 @@ def evidence_df(intensity_name):
 def test_peptide_import(intensity_name):
     _, out = peptide_import.peptide_import(
         ms_df=None,
-        file_path=f"{TEST_DATA_PATH}\\peptides\\peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name=intensity_name,
     )
 
@@ -144,7 +144,7 @@ def test_peptide_import(intensity_name):
 def test_peptide_import_ibaq():
     _, out = peptide_import.peptide_import(
         ms_df=None,
-        file_path=f"{TEST_DATA_PATH}\\peptides\\peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="iBAQ",
     )
 
@@ -157,7 +157,7 @@ def test_peptide_import_ibaq():
 def test_evidence_import(intensity_name):
     _, out = peptide_import.evidence_import(
         ms_df=None,
-        file_path=f"{TEST_DATA_PATH}\\peptides\\evidence-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/evidence-vsmall.txt",
         intensity_name=intensity_name,
     )
 
