@@ -79,13 +79,20 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     output_folder_path = run_path / "graphs"
     output_csv = output_folder_path / f"{protein_id}.csv"
     graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder_path} \
-                --output_csv={output_csv} \
-                -ft VARIANT \
-                -d skip"
 
-    subprocess.run(cmd_str, shell=True)
+    cmd = [
+        f"protgraph",
+        "-egraphml",
+        f"--export_output_folder={output_folder_path}",
+        f"--output_csv={output_csv}",
+        "-ft",
+        "VARIANT",
+        "-d",
+        "skip",
+        f"{path_to_protein_file}",
+    ]
+
+    subprocess.run(cmd, shell=True)
 
     msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"  # noqa E501
     logger.info(msg)
