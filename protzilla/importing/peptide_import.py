@@ -20,7 +20,7 @@ def peptide_import(ms_df, file_path, intensity_name):
         "LFQ intensity" if intensity_name == "iBAQ" else intensity_name
     )
 
-    id_columns = ["Proteins", "Sequence", "PEP"]
+    id_columns = ["Proteins", "Sequence", "Missed cleavages", "PEP"]
     read = pd.read_csv(
         file_path,
         sep="\t",
