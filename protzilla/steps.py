@@ -58,6 +58,7 @@ class Messages:
 
 
 class MaxQuantImport(Step):
+    name = "MaxQuant"
     section = "importing"
     step = "msdataimport"
     method = "max_quant_import"
@@ -81,6 +82,7 @@ class MaxQuantImport(Step):
 
 
 class ImputationMinPerProtein(Step):
+    name = "Min per dataset"
     section = "data_preprocessing"
     step = "imputation"
     method = "by_min_per_protein"
