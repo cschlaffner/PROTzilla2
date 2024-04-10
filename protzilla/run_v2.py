@@ -74,6 +74,18 @@ class Run:
         assert self.run_name is not None
         return paths.RUNS_PATH / self.run_name
 
+    @property
+    def current_messages(self):
+        return self.steps.current_step.messages
+
+    @property
+    def current_plots(self):
+        return self.steps.current_step.plots
+
+    @property
+    def current_outputs(self):
+        return self.steps.current_step.output
+
 
 if __name__ == "__main__":
     run = Run("new_stepwrapper")
