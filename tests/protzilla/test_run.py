@@ -11,7 +11,7 @@ from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.importing import metadata_import, ms_data_import
 from protzilla.run import Run
 from protzilla.utilities import random_string
-from protzilla.workflow_helper import get_workflow_default_param_value
+from protzilla.workflow import get_workflow_default_param_value
 
 
 @pytest.fixture

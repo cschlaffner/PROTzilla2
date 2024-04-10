@@ -13,10 +13,7 @@ sys.path.append(f"{BASE_DIR}/..")
 from protzilla.run import Run
 from protzilla.run_helper import get_parameters
 from protzilla.utilities import name_to_title
-from protzilla.workflow_helper import (
-    get_workflow_default_param_value,
-    is_last_step_in_section,
-)
+from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
 from ui.runs.views_helper import get_displayed_steps
 
 

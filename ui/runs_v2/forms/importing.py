@@ -1,6 +1,6 @@
 from enum import Enum
 
-from protzilla.RunNew import RunNew
+from protzilla.run_v2 import Run
 
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
@@ -23,7 +23,7 @@ class MaxQuantImportForm(MethodForm):
 
     description = "MaxQuant data import"
 
-    def submit(self, run: RunNew):
+    def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
 
 
@@ -40,5 +40,5 @@ class MetadataImportForm(MethodForm):
 
     description = "Import metadata"
 
-    def submit(self, run: RunNew):
+    def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)

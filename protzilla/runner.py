@@ -6,7 +6,7 @@ from .constants.paths import RUNS_PATH
 from .run import Run
 from .run_helper import get_parameters, log_messages
 from .utilities import random_string
-from .workflow_helper import get_defaults
+from .workflow import get_defaults
 
 
 class Runner:

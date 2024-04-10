@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from protzilla.constants import paths
 from protzilla.steps import Messages, Output, Step, StepFactory, StepManager
 
 
@@ -70,6 +72,25 @@ class DiskOperator:
                 step = self.read_step(step_type, step_data, base_dir)
                 steps[step_index] = step
             return StepManager(steps)
+
+    def read_workflow(self, workflow_name: str) -> StepManager:
+        workflow_file = paths.WORKFLOWS_PATH / f"{workflow_name}.json"
+        with open(workflow_file, "r") as file:
+            data = json.load(file)
+            importing_steps = data["sections"]["importing"]["steps"]
+            data_preprocessing_steps = data["sections"]["data_preprocessing"]["steps"]
+            analysis_steps = data["sections"]["data_analysis"]["steps"]
+            integration_steps = data["sections"]["data_integration"]["steps"]
+            all_steps = (
+                importing_steps
+                + data_preprocessing_steps
+                + analysis_steps
+                + integration_steps
+            )
+
+            return StepManager(
+                [StepFactory.create_step(step["method"]) for step in all_steps]
+            )
 
     def write_run(self, run):
         run_data = {

@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from protzilla import workflow_helper
+from protzilla import workflow
 from protzilla.constants.paths import PROJECT_PATH
-from protzilla.workflow_helper import (
+from protzilla.workflow import (
     get_workflow_default_param_value,
     validate_workflow_graphs,
     validate_workflow_parameters,
@@ -58,19 +58,18 @@ def example_workflow_all_steps() -> list[dict[str, str | list[dict[str, str]]]]:
 
 def test_get_steps_of_workflow(example_workflow, example_workflow_all_steps):
     assert (
-        workflow_helper.get_steps_of_workflow(example_workflow)
-        == example_workflow_all_steps
+        workflow.get_steps_of_workflow(example_workflow) == example_workflow_all_steps
     )
 
 
 def test_get_steps_of_workflow_no_side_effects(example_workflow):
     example_workflow_copy = copy.deepcopy(example_workflow)
-    workflow_helper.get_steps_of_workflow(example_workflow)
+    workflow.get_steps_of_workflow(example_workflow)
     assert example_workflow == example_workflow_copy
 
 
 def test_get_steps_amount_of_workflow(example_workflow):
-    assert workflow_helper.get_steps_amount_of_workflow(example_workflow) == 10
+    assert workflow.get_steps_amount_of_workflow(example_workflow) == 10
 
 
 def test_get_defaults():
@@ -79,12 +78,12 @@ def test_get_defaults():
         "test2": {"something": 2},
     }
     expected = {"test1": 1, "test2": {"something": 2}}
-    result = workflow_helper.get_defaults(method_params)
+    result = workflow.get_defaults(method_params)
     assert result == expected
 
 
 def test_get_all_default_params_for_methods(workflow_meta):
-    result = workflow_helper.get_all_default_params_for_methods(
+    result = workflow.get_all_default_params_for_methods(
         workflow_meta, "data_preprocessing", "imputation", "knn"
     )
     expected = {"number_of_neighbours": 5}
@@ -93,7 +92,7 @@ def test_get_all_default_params_for_methods(workflow_meta):
 
 def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
     workflow_meta_copy = copy.deepcopy(workflow_meta)
-    workflow_helper.get_all_default_params_for_methods(
+    workflow.get_all_default_params_for_methods(
         workflow_meta, "data_preprocessing", "imputation", "knn"
     )
     assert workflow_meta_copy == workflow_meta
@@ -101,7 +100,7 @@ def test_get_all_default_params_for_methods_no_side_effects(workflow_meta):
 
 def test_get_parameter_type(workflow_meta):
     assert (
-        workflow_helper.get_parameter_type(
+        workflow.get_parameter_type(
             workflow_meta,
             "data_preprocessing",
             "imputation",
@@ -111,7 +110,7 @@ def test_get_parameter_type(workflow_meta):
         == "numeric"
     )
     assert (
-        workflow_helper.get_parameter_type(
+        workflow.get_parameter_type(
             workflow_meta,
             "importing",
             "ms_data_import",
@@ -180,52 +179,36 @@ def test_test_get_workflow_default_param_value_no_side_effects(example_workflow)
 
 
 def test_get_global_index_of_step(example_workflow):
+    assert workflow.get_global_index_of_step(example_workflow, "importing", 0) == 0
     assert (
-        workflow_helper.get_global_index_of_step(example_workflow, "importing", 0) == 0
-    )
-    assert (
-        workflow_helper.get_global_index_of_step(
-            example_workflow, "data_preprocessing", 0
-        )
+        workflow.get_global_index_of_step(example_workflow, "data_preprocessing", 0)
         == 2
     )
     assert (
-        workflow_helper.get_global_index_of_step(
-            example_workflow, "data_preprocessing", 5
-        )
+        workflow.get_global_index_of_step(example_workflow, "data_preprocessing", 5)
         == 7
     )
-    assert (
-        workflow_helper.get_global_index_of_step(example_workflow, "data_analysis", 0)
-        == 8
-    )
+    assert workflow.get_global_index_of_step(example_workflow, "data_analysis", 0) == 8
 
     assert (
-        workflow_helper.get_global_index_of_step(
-            example_workflow, "data_integration", 4
-        )
-        == -1
+        workflow.get_global_index_of_step(example_workflow, "data_integration", 4) == -1
     )
     assert (
-        workflow_helper.get_global_index_of_step(
-            example_workflow, "nonexisting_section", 4
-        )
+        workflow.get_global_index_of_step(example_workflow, "nonexisting_section", 4)
         == -1
     )
 
 
 def test_is_last_step_in_section(example_workflow):
-    assert workflow_helper.is_last_step_in_section(
-        example_workflow, "data_preprocessing", 5
-    )
-    assert not workflow_helper.is_last_step_in_section(
+    assert workflow.is_last_step_in_section(example_workflow, "data_preprocessing", 5)
+    assert not workflow.is_last_step_in_section(
         example_workflow, "data_preprocessing", 4
     )
 
 
 def test_is_last_step(example_workflow):
-    assert workflow_helper.is_last_step(example_workflow, 9)
-    assert not workflow_helper.is_last_step(example_workflow, 8)
+    assert workflow.is_last_step(example_workflow, 9)
+    assert not workflow.is_last_step(example_workflow, 8)
 
 
 def test_validate_workflow(example_workflow, workflow_meta):

@@ -14,7 +14,7 @@ from .constants.location_mapping import location_map, method_map, plot_map
 from .constants.paths import RUNS_PATH, WORKFLOW_META_PATH, WORKFLOWS_PATH
 from .history import History
 from .utilities import format_trace
-from .workflow_helper import (
+from .workflow import (
     get_global_index_of_step,
     get_parameter_type,
     get_workflow_default_param_value,

@@ -7,37 +7,53 @@ from protzilla.disk_operator import DiskOperator
 from protzilla.steps import ImputationMinPerProtein, MaxQuantImport, Step, StepManager
 
 
-class RunNew:
-    def __init__(self, run_name: str = None):
-        self.run_name: str = run_name
-        self.steps: StepManager = StepManager()
-        self.disk_operator: DiskOperator = DiskOperator()
+def get_available_run_names() -> list[str]:
+    return [
+        directory.name
+        for directory in paths.RUNS_PATH.iterdir()
+        if not directory.name.startswith(".")
+    ]
 
-    def run_write(self):
+
+class Run:
+    def __init__(
+        self, run_name: str, workflow_name: str | None = None, df_mode: str = "disk"
+    ):
+        self.run_name = run_name
+        self.workflow_name = workflow_name
+
+        self.steps = StepManager()
+        self.disk_operator = DiskOperator()
+
+        if run_name in get_available_run_names():
+            self._run_read_existing()
+        elif workflow_name:
+            self._run_read_new()
+        else:
+            raise ValueError(
+                f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
+            )
+
+    def _run_write(self):
         self.disk_operator.write_run(self)
 
-    def run_read(self, run_name: str = None):
-        if run_name is None:
-            run_name = self.run_name
-        else:
-            self.run_name = run_name
-
+    def _run_read_existing(self):
         self.steps = self.disk_operator.read_steps(self.run_disk_path)
         self.steps.current_step_index = self.disk_operator.read_step_index(
             self.run_disk_path
         )
 
-    def step_add(self, step: Step, step_index: int = None):
-        if step_index is None:
-            self.steps.add_step(step)
-        else:
-            raise NotImplementedError
-            self.steps.add_step(step, step_index)
+    def _run_read_new(self):
+        self.steps = self.disk_operator.read_workflow(self.workflow_name)
+        self.steps.current_step_index = 0
 
-    def step_remove(self, step: Step = None, step_index: int = None):
+    def step_add(self, step: Step, step_index: int | None = None):
+        self.steps.add_step(step, step_index)
+
+    def step_remove(self, step: Step | None = None, step_index: int | None = None):
         self.steps.remove_step(step=step, step_index=step_index)
 
-    def step_calculate(self, inputs: dict = None):
+    def step_calculate(self, inputs: dict | None = None):
         self.steps.current_step.calculate(self.steps, inputs)
         self.step_next()
 
@@ -54,26 +70,13 @@ class RunNew:
             logging.warning("Cannot go back from the first step")
 
     @property
-    def available_runs(self):
-        return self.disk_operator.available_runs
-
-    @property
     def run_disk_path(self):
         assert self.run_name is not None
         return paths.RUNS_PATH / self.run_name
 
 
-class WorkflowManager:
-    def __init__(self):
-        self.workflows = {}
-
-    @property
-    def available_workflows(self):
-        return self.workflows.keys()
-
-
 if __name__ == "__main__":
-    run = RunNew("new_stepwrapper")
+    run = Run("new_stepwrapper")
     run.step_add(MaxQuantImport())
     run.step_add(ImputationMinPerProtein())
 
@@ -86,7 +89,7 @@ if __name__ == "__main__":
     )
     run.step_calculate({"shrinking_value": 0.5})
     run.run_write()
-    run2 = RunNew()
+    run2 = Run()
     run2.run_read("new_stepwrapper")
     run2.step_previous()
     run2.step_previous()

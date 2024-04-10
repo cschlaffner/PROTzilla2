@@ -107,7 +107,7 @@ class ImputationMinPerProtein(Step):
 class StepFactory:
     @staticmethod
     def create_step(step_type: str) -> Step:
-        if step_type == "MaxQuantImport":
+        if step_type == "MaxQuantImport" or step_type == "max_quant_import":
             return MaxQuantImport()
         elif step_type == "ImputationMinPerProtein":
             return ImputationMinPerProtein()
@@ -144,7 +144,7 @@ class StepManager:
         return self.all_steps[: self.current_step_index]
 
     @property
-    def current_step(self):
+    def current_step(self) -> Step:
         return self.all_steps[self.current_step_index]
 
     @property
@@ -163,7 +163,7 @@ class StepManager:
                 return step.output.metadata_df
         logging.warning("No metadata_df found in steps")
 
-    def add_step(self, step, index=None):
+    def add_step(self, step, index: int | None = None):
         # TODO add support for index
         if step.section == "importing":
             self.importing.append(step)

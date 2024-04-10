@@ -3,7 +3,7 @@ import re
 from django.contrib import messages
 
 from protzilla.utilities import name_to_title
-from protzilla.workflow_helper import (
+from protzilla.workflow import (
     get_steps_of_workflow,
     get_steps_of_workflow_meta,
     method_name,

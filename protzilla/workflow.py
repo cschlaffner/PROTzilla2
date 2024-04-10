@@ -1,5 +1,15 @@
 from itertools import zip_longest
 
+from protzilla.constants import paths
+
+
+def get_available_workflow_names() -> list[str]:
+    return [
+        directory.stem
+        for directory in paths.WORKFLOWS_PATH.iterdir()
+        if not directory.name.startswith(".")
+    ]
+
 
 def get_steps_of_workflow(
     workflow_config_dict,

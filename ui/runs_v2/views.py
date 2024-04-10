@@ -5,9 +5,10 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from protzilla.Run import Run
 from protzilla.run_helper import log_messages
+from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
+from protzilla.workflow import get_available_workflow_names
 from ui.runs.fields import (
     make_displayed_history,
     make_method_dropdown,
@@ -18,7 +19,7 @@ from ui.runs.views_helper import display_messages
 
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
-active_runs = {}
+active_runs: dict[str, Run] = {}
 
 
 def detail(request: HttpRequest, run_name: str):
@@ -37,17 +38,18 @@ def detail(request: HttpRequest, run_name: str):
     :rtype: HttpResponse
     """
     if run_name not in active_runs:
-        active_runs[run_name] = Run.run_read(run_name)
-    run = active_runs[run_name]
-    section, step, method = run.current_run_location()
-    end_of_run = not step
+        active_runs[run_name] = Run(run_name)
+    run: Run = active_runs[run_name]
+
+    # section, step, method = run.current_run_location()
+    # end_of_run = not step
 
     if request.POST:
         method_form = get_filled_form_by_request(request, run)
         if method_form.is_valid():
             method_form.submit(run)
     else:
-        method_form = get_empty_form_by_method(method, run)
+        method_form = get_empty_form_by_method(run.steps.current_step.__repr__, run)
 
     description = method_form.description
 
@@ -137,8 +139,8 @@ def index(request: HttpRequest):
         request,
         "runs_v2/index.html",
         context={
-            "available_workflows": Run.available_workflows(),
-            "available_runs": Run.available_runs(),
+            "available_workflows": get_available_workflow_names(),
+            "available_runs": get_available_run_names(),
         },
     )
 
@@ -155,7 +157,7 @@ def create(request: HttpRequest):
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
-    run = Run.create(
+    run = Run(
         run_name,
         request.POST["workflow_config_name"],
         df_mode=request.POST["df_mode"],

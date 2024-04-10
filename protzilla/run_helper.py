@@ -10,7 +10,7 @@ from protzilla.data_integration.database_query import (
     uniprot_columns,
     uniprot_databases,
 )
-from protzilla.workflow_helper import get_workflow_default_param_value
+from protzilla.workflow import get_workflow_default_param_value
 
 
 def insert_special_params(param_dict, run):

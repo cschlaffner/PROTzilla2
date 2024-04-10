@@ -24,8 +24,8 @@ sys.path.append(f"{BASE_DIR}/..")
 
 from protzilla.constants.protzilla_logging import logger
 from protzilla.data_integration.database_query import uniprot_columns
-from protzilla.Run import Run, WorkflowManager
 from protzilla.run_helper import get_parameters, log_messages
+from protzilla.run_v2 import Run
 from protzilla.utilities import (
     clean_uniprot_id,
     get_memory_usage,

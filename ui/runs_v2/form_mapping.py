@@ -6,8 +6,8 @@ from .forms.base import MethodForm
 from .forms.importing import MaxQuantImportForm, MetadataImportForm
 
 form_map = {
-    "max_quant_import": MaxQuantImportForm,
-    "metadata_import_method": MetadataImportForm,
+    "MaxQuantImport": MaxQuantImportForm,
+    "MetadataImportMethod": MetadataImportForm,
 }
 
 
