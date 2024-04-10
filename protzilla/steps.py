@@ -11,6 +11,7 @@ class Step:
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
+        self.plots = []
 
     def __repr__(self):
         return self.__class__.__name__
@@ -30,6 +31,9 @@ class Step:
 
 
 class Output:
+    def __iter__(self):
+        return iter(self.output.items())
+
     def __init__(self, output: dict = None):
         if output is None:
             output = {}
@@ -51,6 +55,9 @@ class Output:
 
 
 class Messages:
+    def __iter__(self):
+        return iter(self.messages)
+
     def __init__(self, messages: list[dict] = None):
         if messages is None:
             messages = []
@@ -62,6 +69,29 @@ class MaxQuantImport(Step):
     section = "importing"
     step = "msdataimport"
     method = "max_quant_import"
+
+    def calculate(self, steps: StepManager, inputs: dict = None):
+        if inputs is not None:
+            self.inputs = inputs
+
+        # validate the inputs for the step
+        self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
+
+        # calculate the step
+        output, messages = max_quant_import(None, **self.inputs)
+
+        # store the output and messages
+        self.output = Output({"intensity_df": output})
+        self.messages = Messages(messages)
+
+        # validate the output
+        self.validate_outputs(["intensity_df"])
+
+
+class MetadataImport(Step):
+    section = "importing"
+    step = "metadataimport"
+    method = "metadata_import_method"
 
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
@@ -107,12 +137,15 @@ class ImputationMinPerProtein(Step):
 
 
 class StepFactory:
+    # TODO this could be done with the new mapping class, iterating and checking whether there exists a step with that specific name
     @staticmethod
     def create_step(step_type: str) -> Step:
         if step_type == "MaxQuantImport" or step_type == "max_quant_import":
             return MaxQuantImport()
         elif step_type == "ImputationMinPerProtein":
             return ImputationMinPerProtein()
+        elif step_type == "MetadataImport" or step_type == "metadata_import_method":
+            return MetadataImport()
         else:
             raise ValueError(f"Unknown step type {step_type}")
 

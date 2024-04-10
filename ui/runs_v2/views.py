@@ -9,13 +9,13 @@ from protzilla.run_helper import log_messages
 from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
-from ui.runs.fields import (
+from ui.runs.views_helper import display_messages
+from ui.runs_v2.fields import (
     make_displayed_history,
     make_method_dropdown,
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_messages
 
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
@@ -49,13 +49,12 @@ def detail(request: HttpRequest, run_name: str):
         if method_form.is_valid():
             method_form.submit(run)
     else:
-        method_form = get_empty_form_by_method(run.steps.current_step.__repr__, run)
+        method_form = get_empty_form_by_method(run.steps.current_step, run)
 
     description = method_form.description
 
     log_messages(run.current_messages)
     display_messages(run.current_messages, request)
-    run.current_messages = []
 
     current_plots = []
     for plot in run.current_plots:
@@ -79,7 +78,7 @@ def detail(request: HttpRequest, run_name: str):
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
     show_table = not run.current_outputs.is_empty and any(
-        isinstance(v, pd.DataFrame) for _, v in run.current_outputs.values()
+        isinstance(v, pd.DataFrame) for _, v in run.current_outputs
     )
 
     show_protein_graph = (
@@ -94,14 +93,17 @@ def detail(request: HttpRequest, run_name: str):
         "runs_v2/details.html",
         context=dict(
             run_name=run_name,
-            section=section,
-            step=run.current_step.step,
-            display_name=f"{name_to_title(run.step)}",
+            section=run.steps.current_step.section,
+            step=run.steps.current_step,
+            display_name=f"{name_to_title(run.steps.current_step.section)} - {name_to_title(run.steps.current_step.step)}",
             displayed_history=make_displayed_history(
                 run
             ),  # TODO: make NewRun compatible
             method_dropdown=make_method_dropdown(
-                run, section, step, method
+                run,
+                run.steps.current_step.section,
+                run.steps.current_step.step,
+                run.steps.current_step.method,
             ),  # TODO: make NewRun compatible
             name_field=make_name_field(
                 results_exist(run), run, end_of_run
@@ -178,7 +180,7 @@ def continue_(request: HttpRequest):
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
-    active_runs[run_name] = Run.continue_existing(run_name)
+    active_runs[run_name] = Run(run_name)
 
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
