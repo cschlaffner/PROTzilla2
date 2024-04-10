@@ -89,6 +89,7 @@ class MaxQuantImport(Step):
 
 
 class MetadataImport(Step):
+    name = "Metadata import"
     section = "importing"
     step = "metadataimport"
     method = "metadata_import_method"
@@ -174,6 +175,18 @@ class StepManager:
             + self.data_integration
         )
 
+    def all_steps_in_section(self, section: str):
+        if section == "importing":
+            return self.importing
+        elif section == "data_preprocessing":
+            return self.data_preprocessing
+        elif section == "data_analysis":
+            return self.data_analysis
+        elif section == "data_integration":
+            return self.data_integration
+        else:
+            raise ValueError(f"Unknown section {section}")
+
     @property
     def previous_steps(self):
         return self.all_steps[: self.current_step_index]
@@ -181,6 +194,9 @@ class StepManager:
     @property
     def current_step(self) -> Step:
         return self.all_steps[self.current_step_index]
+
+    def current_section(self) -> str:
+        return self.current_step.section
 
     @property
     def intensity_df(self):

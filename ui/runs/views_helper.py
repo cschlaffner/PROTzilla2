@@ -2,15 +2,10 @@ import re
 
 from django.contrib import messages
 
-from protzilla.utilities import name_to_title
 from protzilla.steps import StepManager
-from ui.runs_v2 import form_mapping
-from protzilla.workflow import (
-    get_steps_of_workflow,
-    get_steps_of_workflow_meta,
-    method_name,
-)
+from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
+from ui.runs_v2.form_mapping import Mappings
 
 
 def parameters_from_post(post):
@@ -48,40 +43,33 @@ def convert_str_if_possible(s):
 
 
 def get_displayed_steps(steps: StepManager):
-    workflow_steps = steps
-    possible_steps = form_mapping.generate_hierarchical_dict()
+    possible_steps = Mappings.generate_hierarchical_dict()
     displayed_steps = []
-    global_index = 0
-    for workflow_section, possible_section in zip(workflow_steps, possible_steps):
-        assert workflow_section["section"] == possible_section["section"]
-        section = possible_section["section"]
-        section_selected = False
+    for section in possible_steps:
         workflow_steps = []
-        global_finished = global_index < steps.current_step_index
-        for i, step in enumerate(workflow_section["steps"]):
-            if global_index == steps.current_step_index:
-                section_selected = True
-            global_finished = global_index < steps.current_step_index
+        global_index = 0
+
+        for step in steps.all_steps_in_section(section):
             workflow_steps.append(
                 {
-                    "id": step["name"],
-                    "name": name_to_title(step["name"]),
-                    "index": i,
-                    "method_name": steps.current_step.name,
-                    "selected": global_index == steps.current_step_index,
-                    "finished": global_index < steps.current_step_index,
+                    "id": step.step,
+                    "name": name_to_title(step.step),
+                    "index": step.index,
+                    "method_name": name_to_title(step.method),
+                    "selected": step == steps.current_step,
+                    "finished": step.index < steps.current_step_index,
                 }
             )
-            global_index += 1
-        section_finished = global_finished
+            global_index = step.index
+
         displayed_steps.append(
             {
                 "id": section,
                 "name": name_to_title(section),
                 "possible_steps": possible_steps[section],
                 "steps": workflow_steps,
-                "selected": section_selected,
-                "finished": section_finished,
+                "selected": steps.current_section() == section,
+                "finished": global_index <= steps.current_step_index,
             }
         )
     return displayed_steps
