@@ -1,7 +1,8 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -228,15 +229,14 @@ def back(request, run_name):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-# TODO port
 def tables(request, run_name, index, key=None):
-    return ""
     if run_name not in active_runs:
-        active_runs[run_name] = Run.continue_existing(run_name)
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
+    # TODO this will change with the update to df_mode
     # use current output when applicable (not yet in history)
-    if index < len(run.history.steps):
+    if False:  # or index < len(run.history.steps):
         history_step = run.history.steps[index]
         outputs = history_step.outputs
         section = history_step.section
@@ -244,26 +244,26 @@ def tables(request, run_name, index, key=None):
         method = history_step.method
         name = run.history.step_names[index]
     else:
-        outputs = run.current_out
-        section = run.section
-        step = run.step
-        method = run.method
-        name = None
+        outputs = run.current_outputs
+        section = run.current_step.section
+        step = run.current_step.step
+        method = run.current_step.method
+        name = run.current_step.name
 
     options = []
-    for k, value in outputs.items():
+    for k, value in outputs:
         if isinstance(value, pd.DataFrame) and k != key:
             options.append(k)
 
     if key is None and options:
         # choose an option if url without key is used
         return HttpResponseRedirect(
-            reverse("runs:tables", args=(run_name, index, options[0]))
+            reverse("runs_v2:tables", args=(run_name, index, options[0]))
         )
 
     return render(
         request,
-        "runs/tables.html",
+        "runs_v2/tables.html",
         context=dict(
             run_name=run_name,
             index=index,
@@ -276,4 +276,26 @@ def tables(request, run_name, index, key=None):
             name=name,
             clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
+    )
+
+
+def tables_content(request, run_name, index, key):
+    run = active_runs[run_name]
+    # TODO this will change with df_mode implementation
+    if False:  # index < len(run.history.steps):
+        outputs = run.history.steps[index].outputs[key]
+    else:
+        outputs = run.current_outputs[key]
+    out = outputs.replace(np.nan, None)
+
+    if "clean-ids" in request.GET:
+        for column in out.columns:
+            if "protein" in column.lower():
+                out[column] = out[column].map(
+                    lambda group: ";".join(
+                        unique_justseen(map(clean_uniprot_id, group.split(";")))
+                    )
+                )
+    return JsonResponse(
+        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
