@@ -194,7 +194,6 @@ def results_exist(run: Run) -> bool:
     return True
 
 
-# TODO: make NewRun compatible
 def next_(request, run_name):
     """
     Skips to and renders the next step/method of the run.
@@ -208,13 +207,10 @@ def next_(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
-
     run.step_next()
-
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-# TODO: make NewRun compatible
 def back(request, run_name):
     """
     Goes back to and renders the previous step/method of the run.
