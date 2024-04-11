@@ -15,7 +15,7 @@ from protzilla.utilities import default_intensity_column
 from protzilla.utilities.transform_dfs import long_to_wide, wide_to_long
 
 
-def flag_invalid_values(df: pd.DataFrame, messages: list) -> (pd.DataFrame, list):
+def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
     """
     A function to check if there are any NaN values in the dataframe.
     Also checks if some Protein groups have completely identical values for each sample.
@@ -52,14 +52,14 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> (pd.DataFrame, list
             )
             identical_values_warning_given = True
 
-    return df, {"messages": messages}
+    return dict(protein_df=df, messages=messages)
 
 
 def by_knn(
     intensity_df: pd.DataFrame,
     number_of_neighbours: int = 5,
     **kwargs,  # quantile, default is median
-) -> (pd.DataFrame, list):
+) -> dict:
     """
     A function to perform value imputation based on KNN
     (k-nearest neighbors). Imputes missing values for each
@@ -105,7 +105,7 @@ def by_knn(
 def by_simple_imputer(
     intensity_df: pd.DataFrame,
     strategy: str = "mean",
-) -> (pd.DataFrame, list):
+) -> dict:
     """
     A function to perform protein-wise imputations
     on your dataframe. Imputes missing values for each protein
@@ -145,7 +145,7 @@ def by_simple_imputer(
 def by_min_per_sample(
     intensity_df: pd.DataFrame,
     shrinking_value: float = 1,
-) -> (pd.DataFrame, list):
+) -> dict:
     """
     A function to perform  minimal value imputation on the level
     of samples of your dataframe. Imputes missing values for each
@@ -187,7 +187,7 @@ def by_min_per_sample(
 def by_min_per_protein(
     intensity_df: pd.DataFrame,
     shrinking_value: float = 1,
-) -> tuple[pd.DataFrame, list]:
+) -> dict:
     """
     A function to impute missing values for each protein
     by taking into account data from each protein.
@@ -230,7 +230,7 @@ def by_min_per_protein(
 def by_min_per_dataset(
     intensity_df: pd.DataFrame,
     shrinking_value: float = 1,
-) -> (pd.DataFrame, list):
+) -> dict:
     """
     A function to impute missing values for each protein
     by taking into account data from the entire dataframe.
@@ -262,7 +262,7 @@ def by_normal_distribution_sampling(
     strategy: str = "perProtein",
     down_shift: float = 0,
     scaling_factor: float = 1,
-) -> (pd.DataFrame, list):
+) -> dict:
     """
     A function to perform imputation via sampling of a normal distribution
     defined by the existing datapoints and user-defined parameters for down-
