@@ -2,10 +2,10 @@ import re
 
 from django.contrib import messages
 
+import ui.runs_v2.form_mapping as form_map
 from protzilla.steps import StepManager
 from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs_v2.form_mapping import Mappings
 
 
 def parameters_from_post(post):
@@ -43,8 +43,7 @@ def convert_str_if_possible(s):
 
 
 def get_displayed_steps(steps: StepManager):
-    map = Mappings()
-    possible_steps = map.generate_hierarchical_dict()
+    possible_steps = form_map.generate_hierarchical_dict()
     displayed_steps = []
     for section in possible_steps:
         workflow_steps = []
@@ -61,31 +60,13 @@ def get_displayed_steps(steps: StepManager):
                     "finished": index_global < steps.current_step_index,
                 }
             )
-
             index_global += 1
-
-        possible_steps_in_section = []
-        for step in possible_steps[section]:
-            methods = []
-            for method in possible_steps[section][step]:
-                methods.append(
-                    {
-                        "id": method,
-                        "name": name_to_title(method),
-                        "description": possible_steps[section][step][
-                            method
-                        ].method_description,
-                    }
-                )
-            possible_steps_in_section.append(
-                {"id": step, "methods": methods, "name": name_to_title(step)}
-            )
 
         displayed_steps.append(
             {
                 "id": section,
                 "name": name_to_title(section),
-                "possible_steps": possible_steps_in_section,
+                "possible_steps": possible_steps[section],
                 "steps": workflow_steps,
                 "selected": steps.current_section() == section,
                 "finished": index_global <= steps.current_step_index,
