@@ -14,7 +14,7 @@ import ui.runs_v2.form_mapping as form_map
 from protzilla.run_v2 import Run
 from protzilla.utilities import name_to_title
 from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
-from ui.runs.views_helper import get_displayed_steps
+from ui.runs_v2.views_helper import get_displayed_steps
 
 
 def make_current_fields(run: Run, section: str, step: str, method: str) -> list:

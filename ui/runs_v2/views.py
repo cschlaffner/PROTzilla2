@@ -100,7 +100,7 @@ def detail(request: HttpRequest, run_name: str):
                 run,
                 run.steps.current_step.section,
                 run.steps.current_step.step,
-                run.steps.current_step.method,
+                run.steps.current_step.method_id,
             ),
             name_field="",
             current_plots=current_plots,
@@ -248,7 +248,7 @@ def tables(request, run_name, index, key=None):
         outputs = run.current_outputs
         section = run.current_step.section
         step = run.current_step.step
-        method = run.current_step.method
+        method = run.current_step.method_id
         name = run.current_step.name
 
     options = []

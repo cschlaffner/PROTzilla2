@@ -47,25 +47,31 @@ class Run:
     def _run_read_new(self):
         self.steps = self.disk_operator.read_workflow(self.workflow_name)
         self.steps.current_step_index = 0
+        self._run_write()
 
     def step_add(self, step: Step, step_index: int | None = None):
         self.steps.add_step(step, step_index)
+        self._run_write()
 
     def step_remove(self, step: Step | None = None, step_index: int | None = None):
         self.steps.remove_step(step=step, step_index=step_index)
+        self._run_write()
 
     def step_calculate(self, inputs: dict | None = None):
         self.steps.current_step.calculate(self.steps, inputs)
+        self._run_write()
 
     def step_next(self):
         if self.steps.current_step_index < len(self.steps.all_steps) - 1:
             self.steps.current_step_index += 1
+            self._run_write()
         else:
             logging.warning("Cannot go forward from the last step")
 
     def step_previous(self):
         if self.steps.current_step_index > 0:
             self.steps.current_step_index -= 1
+            self._run_write()
         else:
             logging.warning("Cannot go back from the first step")
 

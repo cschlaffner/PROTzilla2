@@ -103,6 +103,7 @@ class DiskOperator:
                 for index, step in enumerate(run.steps.all_steps)
             },
         }
+        run.run_disk_path.mkdir(parents=True, exist_ok=True)
         run_file = run.run_disk_path / "run.yaml"
         with open(run_file, "w") as file:
             yaml.dump(run_data, file)
