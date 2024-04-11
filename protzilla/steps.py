@@ -59,11 +59,29 @@ class Step:
                 raise ValueError(f"Missing output {key} in output")
 
 
+class ImportingStep(Step):
+    section = "importing"
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        raise NotImplementedError("This method must be implemented in a subclass.")
+
+    def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
+        return None
+
+
 class DataPreprocessingStep(Step):
     section = "data_preprocessing"
 
     def get_input_dataframe(self, steps: StepManager):
-        return steps.peptide_df
+        return steps.protein_df
+
+
+class DataAnalysisStep(Step):
+    section = "data_analysis"
+
+    def get_input_dataframe(self, steps: StepManager):
+        protein_df
+        return NotImplementedError("This method must be implemented in a subclass.")
 
 
 class Output:
@@ -103,7 +121,7 @@ class Messages:
         self.messages = messages
 
 
-class MaxQuantImport(Step):
+class MaxQuantImport(ImportingStep):
     name = "MaxQuant"
     section = "importing"
     step = "msdataimport"
@@ -120,7 +138,7 @@ class MaxQuantImport(Step):
         return None
 
 
-class DiannImport(Step):
+class DiannImport(ImportingStep):
     name = "DIA-NN"
     section = "importing"
     step = "msdataimport"
@@ -140,7 +158,7 @@ class DiannImport(Step):
         self.output = Output({"protein_df": dataframe} | output_dict)
 
 
-class MsFraggerImport(Step):
+class MsFraggerImport(ImportingStep):
     name = "MS Fragger"
     section = "importing"
     step = "msdataimport"
@@ -160,7 +178,7 @@ class MsFraggerImport(Step):
         self.output = Output({"protein_df": dataframe} | output_dict)
 
 
-class MetadataImport(Step):
+class MetadataImport(ImportingStep):
     name = "Metadata import"
     section = "importing"
     step = "metadataimport"
@@ -180,7 +198,7 @@ class MetadataImport(Step):
         self.output = Output({"metadata_df": output_dict["metadata"]})
 
 
-class MetadataImportMethodDiann(Step):
+class MetadataImportMethodDiann(ImportingStep):
     name = "Metadata import DIA-NN"
     section = "importing"
     step = "metadataimport"
@@ -200,7 +218,7 @@ class MetadataImportMethodDiann(Step):
         self.output = Output({"metadata_df": output_dict["metadata"]})
 
 
-class MetadataColumnAssignment(Step):
+class MetadataColumnAssignment(ImportingStep):
     name = "Metadata column assignment"
     section = "importing"
     step = "metadataimport"
@@ -217,7 +235,7 @@ class MetadataColumnAssignment(Step):
     output_names = [" "]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
+        return meta(dataframe, **kwargs)
 
     def get_input_dataframe(self, steps: StepManager):
         return steps.intensity_df
@@ -260,7 +278,7 @@ class MetadataImport(Step):
         return metadata_import_method(dataframe, **kwargs)
 
     def get_input_dataframe(self, steps: StepManager):
-        return steps.peptide_df
+        return steps.protein_df
 
 
 class ImputationMinPerProtein(Step):
@@ -277,7 +295,7 @@ class ImputationMinPerProtein(Step):
         return by_min_per_protein(dataframe, **kwargs)
 
     def get_input_dataframe(self, steps: StepManager):
-        return steps.peptide_df
+        return steps.protein_df
 
 
 class StepFactory:
@@ -344,11 +362,11 @@ class StepManager:
         return self.current_step.section
 
     @property
-    def peptide_df(self):
+    def protein_df(self):
         # find the last step that has an intensity_df
         for step in reversed(self.all_steps):
-            if step.output.peptide_df is not None:
-                return step.output.peptide_df
+            if step.output.protein_df is not None:
+                return step.output.protein_df
         logging.warning("No intensity_df found in steps")
 
     @property
