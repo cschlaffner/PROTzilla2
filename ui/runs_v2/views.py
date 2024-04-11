@@ -46,7 +46,7 @@ def detail(request: HttpRequest, run_name: str):
     else:
         method_form = get_empty_form_by_method(run.steps.current_step, run)
 
-    description = method_form.description
+    description = run.steps.current_step.method_description
 
     log_messages(run.steps.current_step.messages)
     display_messages(run.current_messages, request)
