@@ -102,7 +102,7 @@ class MaxQuantImport(Step):
     name = "MaxQuant"
     section = "importing"
     step = "msdataimport"
-    method = "max_quant_import"
+    method_id = "max_quant_import"
     method_description = "Import MaxQuant data"
 
     parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
@@ -122,7 +122,7 @@ class MetadataImport(Step):
     name = "Metadata import"
     section = "importing"
     step = "metadataimport"
-    method = "metadata_import_method"
+    method_id = "metadata_import_method"
     method_description = "Import metadata"
 
     parameter_names = ["file_path", "feature_orientation"]
@@ -142,7 +142,7 @@ class ImputationMinPerProtein(Step):
     name = "Min per dataset"
     section = "data_preprocessing"
     step = "imputation"
-    method = "by_min_per_protein"
+    method_id = "by_min_per_protein"
     method_description = "Impute missing values by the minimum per protein"
 
     parameter_names = ["shrinking_value"]

@@ -41,7 +41,7 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
                     "id": step.step,
                     "name": name_to_title(step.step),
                     "index": index_in_section,
-                    "method_name": name_to_title(step.method),
+                    "method_name": name_to_title(step.method_id),
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
                 }
