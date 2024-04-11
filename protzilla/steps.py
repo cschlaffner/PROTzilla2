@@ -29,14 +29,12 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        dataframe, output_dict = self.method(
-            self.get_input_dataframe(steps), **self.inputs
-        )
+        output_dict = self.method(self.get_input_dataframe(steps), **self.inputs)
         messages = output_dict.pop("messages")
         self.messages = Messages(messages)
 
         # store the output and messages
-        self.handle_outputs(dataframe, output_dict)
+        self.handle_outputs(output_dict)
 
         # validate the output
         self.validate_outputs(self.output_names)
@@ -47,8 +45,8 @@ class Step:
     def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
         return None
 
-    def handle_outputs(self, dataframe: pd.DataFrame, outputs: dict):
-        pass
+    def handle_outputs(self, output_dict: dict):
+        self.output = Output(output_dict)
 
     def validate_inputs(self, required_keys: list[str]):
         for key in required_keys:
@@ -59,6 +57,13 @@ class Step:
         for key in required_keys:
             if key not in self.output.output:
                 raise ValueError(f"Missing output {key} in output")
+
+
+class DataPreprocessingStep(Step):
+    section = "data_preprocessing"
+
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.peptide_df
 
 
 class Output:
@@ -114,8 +119,45 @@ class MaxQuantImport(Step):
     def get_input_dataframe(self, steps: StepManager):
         return None
 
+
+class DiannImport(Step):
+    name = "DIA-NN"
+    section = "importing"
+    step = "msdataimport"
+    method = "diann_import"
+    method_description = "DIA-NN data import"
+
+    parameter_names = ["file_path", "map_to_uniprot"]
+    output_names = ["protein_df"]
+
+    def method(self, dataframe: pd.Dataframe, **kwargs):
+        return diann_import(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return None
+
+    def handle_outputs(self, dataframe: pd.DataFrame, outputs: dict):
+        self.output = Output({"protein_df": dataframe} | output_dict)
+
+
+class MsFraggerImport(Step):
+    name = "MS Fragger"
+    section = "importing"
+    step = "msdataimport"
+    method = "ms_fragger_import"
+    method_description = "MS Fragger data import"
+
+    parameter_names = ["file_path", "intensity_name", "map_to_uniprot"]
+    output_names = ["protein_df"]
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return ms_fragger_import(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return None
+
     def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"intensity_df": dataframe} | output_dict)
+        self.output = Output({"protein_df": dataframe} | output_dict)
 
 
 class MetadataImport(Step):
@@ -138,6 +180,89 @@ class MetadataImport(Step):
         self.output = Output({"metadata_df": output_dict["metadata"]})
 
 
+class MetadataImportMethodDiann(Step):
+    name = "Metadata import DIA-NN"
+    section = "importing"
+    step = "metadataimport"
+    method = "metadata_import_method_diann"
+    method_description = "Import metadata for run relationships of DIA-NN"
+
+    parameter_names = ["file_path", "groupby_sample"]
+    output_names = ["metadata_df"]
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return metadata_import_method(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.intensity_df
+
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
+        self.output = Output({"metadata_df": output_dict["metadata"]})
+
+
+class MetadataColumnAssignment(Step):
+    name = "Metadata column assignment"
+    section = "importing"
+    step = "metadataimport"
+    method = "metadata_column_assignment"
+    method_description = (
+        "Assign columns to metadata categories, repeatable for each category"
+    )
+
+    parameter_names = [
+        "metadata_df",
+        "metadata_required_column",
+        "metadata_unknown_column",
+    ]
+    output_names = [" "]
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return metadata_import_method(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.intensity_df
+
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
+        self.output = Output({"metadata_df": output_dict["metadata"]})
+
+
+class PeptideImport(Steps):
+    name = "Peptide import"
+    section = "importing"
+    step = "peptide_import"
+    method = "peptide_import"
+    method_description = "Import peptide data"
+
+    parameter_names = ["file_path", "intensity_name"]
+    output_names = ["peptide_df"]
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return metadata_import_method(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.intensity_df
+
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
+        self.output = Output({"peptide_df": output_dict["peptide"]})
+
+
+class MetadataImport(Step):
+    name = "Metadata import"
+    section = "importing"
+    step = "metadataimport"
+    method = "metadata_import_method"
+    method_description = "Import metadata"
+
+    parameter_names = ["file_path", "feature_orientation"]
+    output_names = ["metadata_df"]
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return metadata_import_method(dataframe, **kwargs)
+
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.peptide_df
+
+
 class ImputationMinPerProtein(Step):
     name = "Min per dataset"
     section = "data_preprocessing"
@@ -152,10 +277,7 @@ class ImputationMinPerProtein(Step):
         return by_min_per_protein(dataframe, **kwargs)
 
     def get_input_dataframe(self, steps: StepManager):
-        return steps.intensity_df
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"intensity_df": output_dict})
+        return steps.peptide_df
 
 
 class StepFactory:
@@ -222,11 +344,11 @@ class StepManager:
         return self.current_step.section
 
     @property
-    def intensity_df(self):
+    def peptide_df(self):
         # find the last step that has an intensity_df
         for step in reversed(self.all_steps):
-            if step.output.intensity_df is not None:
-                return step.output.intensity_df
+            if step.output.peptide_df is not None:
+                return step.output.peptide_df
         logging.warning("No intensity_df found in steps")
 
     @property
