@@ -49,22 +49,21 @@ def file_importer(file_path: str) -> tuple[pd.DataFrame, str]:
 
 def metadata_import_method(
     df: pd.DataFrame, file_path: str, feature_orientation: str
-) -> tuple[pd.DataFrame, dict]:
+) -> dict:
     """
         Imports a metadata file and returns the intensity dataframe and a dict with a message if the file import failed,
         and the metadata dataframe if the import was successful.
 
-    returns: (DataFrame, dict)
+    returns: dict of DataFrame and other dict of metadata and messages
     """
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
-        return (
-            None,
-            dict(
-                metadata=None,
-                messages=[dict(level=logging.ERROR, msg=msg)],
-            ),
+        return dict(
+            protein_df=None,
+            metadata=None,
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
+
     # always return metadata in the same orientation (features as columns)
     # as the dtype get lost when transposing, we save the df to disk after
     # changing the format and read it again as "Columns"-oriented
@@ -97,12 +96,14 @@ def metadata_import_method(
         )
         res.groupby(["Protein ID", "sample name"], as_index=False).median()
 
-    return df, {"metadata": meta_df, "messages": [dict(level=logging.INFO, msg=msg)]}
+    return dict(
+        protein_df=df, metadata=meta_df, messages=[dict(level=logging.INFO, msg=msg)]
+    )
 
 
 def metadata_import_method_diann(
     df: DataFrame, file_path: str, groupby_sample: bool = False
-) -> (DataFrame, dict):
+) -> dict:
     """
     This method imports a metadata file with run relationship information and returns the intensity dataframe and the
     metadata dataframe. If the import fails, it returns the unchanged dataframe and a dict with a message about the
@@ -110,12 +111,10 @@ def metadata_import_method_diann(
     """
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
-        return (
-            None,
-            dict(
-                metadata=None,
-                messages=[dict(level=logging.ERROR, msg=msg)],
-            ),
+        return dict(
+            protein_df=None,
+            metadata=None,
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
     if file_path.startswith(
@@ -135,9 +134,9 @@ def metadata_import_method_diann(
         )
         res = res.groupby(["Protein ID", "sample name"], as_index=False).median()
         res.rename(columns={"sample name": "Sample"}, inplace=True)
-        return res, {"metadata": meta_df}
+        return dict(res=res, metadata=meta_df)
 
-    return df, {"metadata": meta_df}
+    return dict(protein_df=df, metatdata=meta_df)
 
 
 def metadata_column_assignment(
@@ -159,21 +158,21 @@ def metadata_column_assignment(
      required column name
     :type metadata_unknown_column: str
     :return: returns the unchanged dataframe and a dict with messages, potentially empty if no messages
-    :rtype: pd.DataFrame, dict
+    :rtype: dict of pd.Dataframe and dict of messages
     """
 
     # TODO add info box in UI explaining that no option for unknown columns means all columns are named correctly
     # check if required column already in metadata, if so give error message
     if metadata_required_column is None or metadata_unknown_column is None:
         msg = f"You can proceed, as there is nothing that needs to be changed."
-        return df, dict(messages=[dict(level=logging.INFO, msg=msg)])
+        return dict(protein_df=df, messages=[dict(level=logging.INFO, msg=msg)])
 
     if metadata_required_column in metadata_df.columns:
         msg = f"Metadata already contains column '{metadata_required_column}'. \
         Please rename the column or select another column."
-        return df, dict(messages=[dict(level=logging.ERROR, msg=msg)])
+        return dict(protein_df=df, messages=[dict(level=logging.INFO, msg=msg)])
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
         columns={metadata_unknown_column: metadata_required_column}, inplace=True
     )
-    return df, dict()
+    return dict(protein_df=df, messages=dict())

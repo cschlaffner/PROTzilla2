@@ -134,7 +134,7 @@ def transform_and_clean(
     :type intensity_name: str
     :param map_to_uniprot: decides if protein ids will be mapped to uniprot ids
     :type map_to_uniprot: bool
-    :return: a protzilla dataframe in long format with sample, protein, gene and
+    :return: a dict of a protzilla dataframe in long format with sample, protein, gene and
         intensity columns; contaminants and rejected proteins
     :rtype: tuple[pd.DataFrame, list[str], list[str]]
     """
@@ -166,7 +166,8 @@ def transform_and_clean(
     molten.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     msg = f"Successfully imported {len(df)} protein groups for {int(len(molten)/len(df))} samples. {len(contaminants)} contaminant groups were dropped. {len(filtered_proteins)} invalid proteins were filtered."
-    return molten, dict(
+    return dict(
+        protein_df=molten,
         contaminants=contaminants,
         filtered_proteins=filtered_proteins,
         messages=[dict(level=logging.INFO, msg=msg)],
