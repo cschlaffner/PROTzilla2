@@ -129,7 +129,7 @@ class MaxQuantImport(ImportingStep):
     method_description = "Import MaxQuant data"
 
     parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
-    output_names = ["intensity_df"]
+    output_names = ["protein_df"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return max_quant_import(dataframe, **kwargs)
@@ -232,7 +232,7 @@ class MetadataColumnAssignment(ImportingStep):
         "metadata_required_column",
         "metadata_unknown_column",
     ]
-    output_names = [" "]
+    output_names = ["metadata_df"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return meta(dataframe, **kwargs)
@@ -244,7 +244,7 @@ class MetadataColumnAssignment(ImportingStep):
         self.output = Output({"metadata_df": output_dict["metadata"]})
 
 
-class PeptideImport(Steps):
+class PeptideImport(ImportingStep):
     name = "Peptide import"
     section = "importing"
     step = "peptide_import"
