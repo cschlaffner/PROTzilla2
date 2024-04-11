@@ -14,6 +14,7 @@ from protzilla.run_v2 import Run
 from protzilla.utilities import name_to_title
 from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
 from ui.runs.views_helper import get_displayed_steps
+from ui.runs_v2.form_mapping import Mappings
 
 
 def make_current_fields(run: Run, section: str, step: str, method: str) -> list:
@@ -188,10 +189,12 @@ def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
 
     :return: The html for the method dropdown
     """
+    mappings = Mappings()
+    hierarchical_dict = mappings.generate_hierarchical_dict()
     if not step:
         return ""
-    methods = run.workflow_meta[section][step].keys()
-    method_names = [run.workflow_meta[section][step][key]["name"] for key in methods]
+    methods = hierarchical_dict[section][step].values()
+    method_names = [method.method for method in methods]
 
     return render_to_string(
         "runs/field_select_with_label.html",
@@ -270,14 +273,14 @@ def make_displayed_history(run: Run) -> str:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
         has_df = any(isinstance(v, pandas.DataFrame) for v in step.outputs.values())
-        table_url = reverse("runs:tables_nokey", args=(run.run_name, i))
+        table_url = reverse("runs_v2tables_nokey", args=(run.run_name, i))
 
         has_protein_graph = (
             "graph_path" in step.outputs
             and step.outputs["graph_path"] is not None
             and Path(step.outputs["graph_path"]).exists()
         )
-        protein_graph_url = reverse("runs:protein_graph", args=(run.run_name, i))
+        protein_graph_url = reverse("runs_v2protein_graph", args=(run.run_name, i))
 
         displayed_history.append(
             dict(
