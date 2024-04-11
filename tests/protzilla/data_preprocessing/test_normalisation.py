@@ -310,7 +310,7 @@ def test_normalisation_by_z_score(
         dropouts,
         "Boxplot",
         "Sample",
-        ["Protein1", "Protein2"],
+        [],
     )[0]
     if show_figures:
         fig.show()
@@ -333,7 +333,7 @@ def test_normalisation_by_median(
         dropouts,
         "Boxplot",
         "Sample",
-        ["Protein1", "Protein2"],
+        [],
     )[0]
     if show_figures:
         fig.show()
@@ -364,7 +364,7 @@ def test_totalsum_normalisation(
         dropouts,
         "Boxplot",
         "Sample",
-        ["Protein1", "Protein2"],
+        [],
     )[0]
     if show_figures:
         fig.show()
@@ -395,7 +395,7 @@ def test_ref_protein_normalisation(
         dropouts,
         "Boxplot",
         "Sample",
-        ["Protein1", "Protein2"],
+        [],
     )[0]
     if show_figures:
         fig.show()

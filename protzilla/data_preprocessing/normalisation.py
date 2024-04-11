@@ -233,40 +233,55 @@ def by_reference_protein(
 def by_z_score_plot(
     df, result_df, current_out, graph_type, group_by, proteins_of_interest=None
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
-        df, result_df, current_out, graph_type, group_by, proteins_of_interest
+        df,
+        result_df,
+        current_out,
+        graph_type,
+        group_by,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
+
 
 
 def by_median_plot(
     df, result_df, current_out, graph_type, group_by, proteins_of_interest=None
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
-        df, result_df, current_out, graph_type, group_by, proteins_of_interest
+        df,
+        result_df,
+        current_out,
+        graph_type,
+        group_by,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
+
 
 
 def by_totalsum_plot(
     df, result_df, current_out, graph_type, group_by, proteins_of_interest=None
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
-        df, result_df, current_out, graph_type, group_by, proteins_of_interest
+        df,
+        result_df,
+        current_out,
+        graph_type,
+        group_by,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
+
 
 
 def by_reference_protein_plot(
     df, result_df, current_out, graph_type, group_by, proteins_of_interest=None
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
-        df, result_df, current_out, graph_type, group_by, proteins_of_interest
+        df,
+        result_df,
+        current_out,
+        graph_type,
+        group_by,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
 
 

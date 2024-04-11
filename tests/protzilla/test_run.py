@@ -321,7 +321,7 @@ def test_export_plot(tests_folder_name):
             graph_type="Boxplot",
             graph_type_quantities="Bar chart",
             group_by="Sample",
-            proteins_of_interest=["Protein1", "Protein2"],
+            proteins_of_interest=None,
             visual_transformation="linear",
         ),
     )

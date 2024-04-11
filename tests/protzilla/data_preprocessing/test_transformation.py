@@ -120,7 +120,7 @@ def test_log2_transformation(
         {},
         "Boxplot",
         "Protein ID",
-        ["Protein1", "Protein2"],
+        None,
     )[0]
     if show_figures:
         fig.show()
@@ -142,7 +142,7 @@ def test_log10_transformation(
         {},
         "Boxplot",
         "Protein ID",
-        proteins_of_interest=["Protein1", "Protein2"],
+        None,
     )[0]
     if show_figures:
         fig.show()

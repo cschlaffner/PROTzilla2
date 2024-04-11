@@ -362,15 +362,13 @@ def by_knn_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 
@@ -385,15 +383,13 @@ def by_normal_distribution_sampling_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 
@@ -408,15 +404,13 @@ def by_simple_imputer_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 
@@ -431,15 +425,13 @@ def by_min_per_sample_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 
@@ -454,15 +446,13 @@ def by_min_per_protein_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 
@@ -477,15 +467,13 @@ def by_min_per_dataset_plot(
     visual_transformation,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         graph_type_quantities,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
         visual_transformation,
     )
 

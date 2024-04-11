@@ -51,7 +51,7 @@ def test_create_box_plots(
         name_b="After Transformation",
         heading="Distribution of Protein Intensities",
         group_by="None",
-        proteins_of_interest=["Protein1", "Protein2"],
+        proteins_of_interest=[],
     )
     if show_figures:
         fig.show()
@@ -64,7 +64,6 @@ def test_create_box_plots(
             group_by="wrong_group_by",
         )
     return
-
 
 @pytest.mark.order(1)
 @pytest.mark.dependency()
@@ -120,7 +119,7 @@ def test_build_box_hist_plot(
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
+        [],
         "linear",
     )
     fig3, fig4 = imputation._build_box_hist_plot(
@@ -129,6 +128,7 @@ def test_build_box_hist_plot(
         "Histogram",
         "Pie chart",
         "Protein ID",
+        [],
         "linear",
     )
 

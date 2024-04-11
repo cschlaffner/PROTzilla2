@@ -42,14 +42,12 @@ def by_log_plot(
     group_by,
     proteins_of_interest=None,
 ):
-    if proteins_of_interest is None:
-        proteins_of_interest = []
     return _build_box_hist_plot(
         df,
         result_df,
         graph_type,
         group_by,
-        proteins_of_interest,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
 
 
@@ -58,7 +56,7 @@ def _build_box_hist_plot(
     result_df,
     graph_type,
     group_by,
-    proteins_of_interest,
+    proteins_of_interest=None,
 ):
     if graph_type == "Boxplot":
         fig = create_box_plots(

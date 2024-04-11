@@ -161,8 +161,8 @@ def test_imputation_min_value_per_df(
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -193,8 +193,8 @@ def test_imputation_min_value_per_sample(
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -225,8 +225,8 @@ def test_imputation_min_value_per_protein(
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -260,8 +260,8 @@ def test_imputation_mean_per_protein(
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -293,8 +293,8 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -326,8 +326,8 @@ def test_imputation_normal_distribution_sampling(show_figures, input_imputation_
         "Boxplot",
         "Bar chart",
         "Sample",
-        ["Protein1", "Protein2"],
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()

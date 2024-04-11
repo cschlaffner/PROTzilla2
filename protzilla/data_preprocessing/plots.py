@@ -144,8 +144,8 @@ def create_box_plots(
                 "Sample" or "Protein ID" but is {group_by}"""
         )
     if len(proteins_of_interest) == 0:
-        proteins_of_interest = dataframe_a["Protein ID"].iloc[:1]
-    elif not isinstance(proteins_of_interest, list):
+        proteins_of_interest = dataframe_a["Protein ID"].iloc[:5]
+    elif isinstance(proteins_of_interest, str):
         proteins_of_interest = [proteins_of_interest]
 
     filtered_df = dataframe_a[dataframe_a["Protein ID"].isin(proteins_of_interest)]
