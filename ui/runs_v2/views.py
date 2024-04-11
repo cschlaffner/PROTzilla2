@@ -304,8 +304,25 @@ def export_workflow(request, run_name):
     raise NotImplementedError("Exporting workflows is not yet implemented.")
 
 
-def delete_step(request, run_name):
-    raise NotImplementedError("Deleting steps is not yet implemented.")
+def delete_step(request: HttpRequest, run_name: str):
+    """
+    Deletes a step/method from the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, deleted method no longer visible in sidebar
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    index = int(post["index"][0])
+
+    run.step_remove(step_index=index)
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
 def navigate(request, run_name):

@@ -245,9 +245,18 @@ class StepManager:
         if step_index is not None:
             if step_index < self.current_step_index:
                 self.current_step_index -= 1
-            self.all_steps.pop(step_index)
-        else:
-            if step in self.all_steps:
-                self.all_steps.remove(step)
-            else:
-                raise ValueError(f"Step {step} not found in steps")
+            step = self.all_steps[step_index]
+
+        for section in [
+            self.importing,
+            self.data_preprocessing,
+            self.data_analysis,
+            self.data_integration,
+        ]:
+            try:
+                section.remove(step)
+                return
+            except ValueError:
+                pass
+
+        raise ValueError(f"Step {step} not found in steps")

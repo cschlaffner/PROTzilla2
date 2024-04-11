@@ -30,7 +30,6 @@
                 {# button to remove step from workflow #}
                 <form action="{% url 'runs_v2:delete_step' run_name %}" method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="section_name" value="{{ section.id }}">
                     <input type="hidden" name="index" value="{{ step.index }}">
                     <button class="removeBtn btn d-flex justify-content-center align-items-end mt-1">                    
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
