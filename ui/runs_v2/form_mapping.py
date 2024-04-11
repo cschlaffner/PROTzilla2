@@ -24,7 +24,7 @@ def get_empty_form_by_method(step, run: Run) -> MethodForm:
 
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
     map = Mappings()
-    method = request.POST["chosen_method"]
+    method = run.steps.current_step
     form_class = map.get_form_class_by_step(method)
     if form_class:
         return form_class(run=run, data=request.POST, files=request.FILES)
