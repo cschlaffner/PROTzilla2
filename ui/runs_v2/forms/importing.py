@@ -7,23 +7,26 @@ from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileFiel
 
 
 class IntensityType(Enum):
-    IBAQ = "iBaq"
+    IBAQ = "iBAQ"
     INTENSITY = "Intensity"
-    LFQ_INTENSITY = "LFQ Intensity"
+    LFQ_INTENSITY = "LFQ intensity"
 
 
 class MaxQuantImportForm(MethodForm):
-    file = CustomFileField(label="MaxQuant intensities file")
-    intensity_parameter = CustomChoiceField(
+    file_path = CustomFileField(label="MaxQuant intensities file")
+    intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter"
     )
-    mapping_flag = CustomBooleanField(
+    map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
 
     description = "MaxQuant data import"
 
     def submit(self, run: Run):
+        # TODO fix the file pathing
+        file_path = self.cleaned_data["file_path"].file.file.name
+        self.cleaned_data["file_path"] = file_path
         run.step_calculate(self.cleaned_data)
 
 
