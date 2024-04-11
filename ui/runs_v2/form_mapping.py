@@ -40,7 +40,7 @@ class Mappings:
         }
         self.reverse_mapping = {v: k for k, v in self.forward_mapping.items()}
 
-    def generate_hierarchical_dict():
+    def generate_hierarchical_dict(self):
         # Initialize an empty dictionary
         hierarchical_dict = {}
 

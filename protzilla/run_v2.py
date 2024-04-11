@@ -70,6 +70,10 @@ class Run:
             logging.warning("Cannot go back from the first step")
 
     @property
+    def is_at_last_step(self):
+        return self.steps.is_at_last_step
+
+    @property
     def run_disk_path(self):
         assert self.run_name is not None
         return paths.RUNS_PATH / self.run_name

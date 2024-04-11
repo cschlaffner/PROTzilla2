@@ -65,6 +65,7 @@ class Messages:
 
 
 class MaxQuantImport(Step):
+    name = "MaxQuant"
     section = "importing"
     step = "msdataimport"
     method = "max_quant_import"
@@ -88,6 +89,7 @@ class MaxQuantImport(Step):
 
 
 class MetadataImport(Step):
+    name = "Metadata import"
     section = "importing"
     step = "metadataimport"
     method = "metadata_import_method"
@@ -111,6 +113,7 @@ class MetadataImport(Step):
 
 
 class ImputationMinPerProtein(Step):
+    name = "Min per dataset"
     section = "data_preprocessing"
     step = "imputation"
     method = "by_min_per_protein"
@@ -172,6 +175,18 @@ class StepManager:
             + self.data_integration
         )
 
+    def all_steps_in_section(self, section: str):
+        if section == "importing":
+            return self.importing
+        elif section == "data_preprocessing":
+            return self.data_preprocessing
+        elif section == "data_analysis":
+            return self.data_analysis
+        elif section == "data_integration":
+            return self.data_integration
+        else:
+            raise ValueError(f"Unknown section {section}")
+
     @property
     def previous_steps(self):
         return self.all_steps[: self.current_step_index]
@@ -179,6 +194,9 @@ class StepManager:
     @property
     def current_step(self) -> Step:
         return self.all_steps[self.current_step_index]
+
+    def current_section(self) -> str:
+        return self.current_step.section
 
     @property
     def intensity_df(self):
@@ -195,6 +213,10 @@ class StepManager:
             if hasattr(step.output, "metadata_df"):
                 return step.output.metadata_df
         logging.warning("No metadata_df found in steps")
+
+    @property
+    def is_at_last_step(self):
+        return self.current_step_index == len(self.all_steps) - 1
 
     def add_step(self, step, index: int | None = None):
         # TODO add support for index
