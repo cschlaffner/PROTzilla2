@@ -214,6 +214,10 @@ class StepManager:
                 return step.output.metadata_df
         logging.warning("No metadata_df found in steps")
 
+    @property
+    def is_at_last_step(self):
+        return self.current_step_index == len(self.all_steps) - 1
+
     def add_step(self, step, index: int | None = None):
         # TODO add support for index
         if step.section == "importing":
