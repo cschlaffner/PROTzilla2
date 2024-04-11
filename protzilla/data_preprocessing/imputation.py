@@ -56,7 +56,7 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
 
 
 def by_knn(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     number_of_neighbours: int = 5,
     **kwargs,  # quantile, default is median
 ) -> dict:
@@ -73,9 +73,9 @@ def by_knn(
     class.
     https://scikit-learn.org/stable/modules/generated/sklearn.impute.KNNImputer.html
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
+    :type protein_df: pandas DataFrame
     :param number_of_neighbours: number of neighbouring samples used for
         imputation. Default: 5
     :type number_of_neighbours: int
@@ -87,7 +87,7 @@ def by_knn(
     :rtype: pd.DataFrame
     """
 
-    transformed_df = long_to_wide(intensity_df)
+    transformed_df = long_to_wide(protein_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
     index = transformed_df.index
     columns = transformed_df.columns
@@ -97,13 +97,13 @@ def by_knn(
     transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(transformed_df, intensity_df)
+    imputed_df = wide_to_long(transformed_df, protein_df)
 
     return flag_invalid_values(imputed_df, [])
 
 
 def by_simple_imputer(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     strategy: str = "mean",
 ) -> dict:
     """
@@ -118,7 +118,7 @@ def by_simple_imputer(
     no data will be imputed. This function automatically filters
     out such proteins from the DataFrame beforehand.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
     :param strategy: Defines the imputation strategy. Can be "mean",
         "median" or "most_frequent" (for mode).
@@ -127,7 +127,7 @@ def by_simple_imputer(
         a list of messages
     """
     assert strategy in ["mean", "median", "most_frequent"]
-    transformed_df = long_to_wide(intensity_df)
+    transformed_df = long_to_wide(protein_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
 
     index = transformed_df.index
@@ -138,12 +138,12 @@ def by_simple_imputer(
     transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(transformed_df, intensity_df)
+    imputed_df = wide_to_long(transformed_df, protein_df)
     return flag_invalid_values(imputed_df, [])
 
 
 def by_min_per_sample(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -159,7 +159,7 @@ def by_min_per_sample(
     If not wanted, make sure to filter 0 intensity samples in the
     filtering step.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
@@ -169,7 +169,7 @@ def by_min_per_sample(
     :return: returns an imputed dataframe in typical protzilla long format
         a list of messages
     """
-    intensity_df_copy = intensity_df.copy(deep=True)
+    intensity_df_copy = protein_df.copy(deep=True)
     intensity_name = default_intensity_column(intensity_df_copy)
     samples = intensity_df_copy["Sample"].unique().tolist()
     for sample in samples:
@@ -185,7 +185,7 @@ def by_min_per_sample(
 
 
 def by_min_per_protein(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -196,7 +196,7 @@ def by_min_per_protein(
     take a fraction of that minimum value for imputation.
     CAVE: All proteins without any values will be filtered out.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
@@ -206,7 +206,7 @@ def by_min_per_protein(
     :return: returns an imputed dataframe in typical protzilla long format
         a list of messages
     """
-    transformed_df = long_to_wide(intensity_df)
+    transformed_df = long_to_wide(protein_df)
     transformed_df.dropna(axis=1, how="all", inplace=True)
     columns = transformed_df.columns
 
@@ -222,13 +222,13 @@ def by_min_per_protein(
     # - we thus decided to filter them out beforehand.
 
     # Turn the wide format into the long format
-    imputed_df = wide_to_long(transformed_df, intensity_df)
+    imputed_df = wide_to_long(transformed_df, protein_df)
 
     return flag_invalid_values(imputed_df, [])
 
 
 def by_min_per_dataset(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -238,7 +238,7 @@ def by_min_per_dataset(
     the dataframe. The user can also assign a shrinking factor to
     take a fraction of that minimum value for imputation.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
     :param shrinking_value: a factor to alter the minimum value
         used for imputation. With a shrinking factor of 0.1 for
@@ -248,7 +248,7 @@ def by_min_per_dataset(
     :return: returns an imputed dataframe in typical protzilla long format
         a list of messages
     """
-    intensity_df_copy = intensity_df.copy(deep=True)
+    intensity_df_copy = protein_df.copy(deep=True)
     intensity_name = default_intensity_column(intensity_df_copy)
     intensity_df_copy[intensity_name].fillna(
         intensity_df_copy[intensity_name].min() * shrinking_value,

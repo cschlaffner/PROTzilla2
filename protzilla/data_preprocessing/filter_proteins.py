@@ -4,7 +4,7 @@ from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 from ..utilities.transform_dfs import long_to_wide
 
 
-def by_samples_missing(intensity_df: pd.DataFrame, percentage: float) -> dict:
+def by_samples_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     """
     This function filters proteins based on the amount of samples with nan values, if the percentage of nan values
     is below a threshold (percentage).
@@ -16,8 +16,8 @@ def by_samples_missing(intensity_df: pd.DataFrame, percentage: float) -> dict:
         and a list of Protein IDs that were kept
     """
 
-    filter_threshold: int = percentage * len(intensity_df.Sample.unique())
-    transformed_df = long_to_wide(intensity_df)
+    filter_threshold: int = percentage * len(protein_df.Sample.unique())
+    transformed_df = long_to_wide(protein_df)
 
     remaining_proteins_list = transformed_df.dropna(
         axis=1, thresh=filter_threshold
@@ -25,9 +25,7 @@ def by_samples_missing(intensity_df: pd.DataFrame, percentage: float) -> dict:
     filtered_proteins_list = (
         transformed_df.drop(remaining_proteins_list, axis=1).columns.unique().tolist()
     )
-    filtered_df = intensity_df[
-        (intensity_df["Protein ID"].isin(remaining_proteins_list))
-    ]
+    filtered_df = protein_df[(protein_df["Protein ID"].isin(remaining_proteins_list))]
     return dict(
         protein_df=filtered_df,
         filtered_proteins=filtered_proteins_list,

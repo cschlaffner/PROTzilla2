@@ -5,18 +5,18 @@ from protzilla.utilities import default_intensity_column
 
 
 def by_protein_intensity_sum(
-    intensity_df: pd.DataFrame, deviation_threshold: float
+    protein_df: pd.DataFrame, deviation_threshold: float
 ) -> dict:
     """
     This function filters samples based on the sum of the protein intensities.
 
-    :param intensity_df: the intensity dataframe that should be filtered
+    :param protein_df: the intensity dataframe that should be filtered
     :param deviation_threshold: defining the maximally allowed deviation from the median (in standard deviations)
         to keep a sample
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
     """
-    intensity_name = default_intensity_column(intensity_df)
-    sample_protein_sum = intensity_df.groupby("Sample")[intensity_name].sum()
+    intensity_name = default_intensity_column(protein_df)
+    sample_protein_sum = protein_df.groupby("Sample")[intensity_name].sum()
 
     median = sample_protein_sum.median()
     sd = sample_protein_sum.std()
@@ -28,24 +28,24 @@ def by_protein_intensity_sum(
         )
     ].index.tolist()
     return dict(
-        protein_df=intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
+        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
         filtered_samples=filtered_samples_list,
     )
 
 
-def by_protein_count(intensity_df: pd.DataFrame, deviation_threshold: float) -> dict:
+def by_protein_count(protein_df: pd.DataFrame, deviation_threshold: float) -> dict:
     """
     This function filters samples based on their deviation of amount of proteins with a non-nan value from
     the median across all samples.
 
-    :param intensity_df: the intensity dataframe that should be filtered
+    :param protein_df: the intensity dataframe that should be filtered
     :param deviation_threshold: float, defining the allowed deviation (in standard deviations) from the median number
         of non-nan values to keep a sample
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
     """
-    intensity_name = default_intensity_column(intensity_df)
+    intensity_name = default_intensity_column(protein_df)
     sample_protein_count = (
-        intensity_df[~intensity_df[intensity_name].isnull()]
+        protein_df[~protein_df[intensity_name].isnull()]
         .groupby("Sample")["Protein ID"]
         .nunique()
     )
@@ -60,26 +60,26 @@ def by_protein_count(intensity_df: pd.DataFrame, deviation_threshold: float) -> 
         )
     ].index.tolist()
     return dict(
-        protein_df=intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
+        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
         filtered_samples=filtered_samples_list,
     )
 
 
-def by_proteins_missing(intensity_df: pd.DataFrame, percentage: float) -> dict:
+def by_proteins_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     """
     This function filters samples based on the amount of proteins with nan values, if the percentage of nan values
     is below a threshold (percentage).
 
-    :param intensity_df: the intensity dataframe that should be filtered
+    :param protein_df: the intensity dataframe that should be filtered
     :param percentage: ranging from 0 to 1. Defining the relative share of proteins that were detected in the
         sample in inorder to be kept.
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
     """
 
-    intensity_name = default_intensity_column(intensity_df)
-    total_protein_count = intensity_df["Protein ID"].nunique()
+    intensity_name = default_intensity_column(protein_df)
+    total_protein_count = protein_df["Protein ID"].nunique()
     sample_protein_count = (
-        intensity_df[~intensity_df[intensity_name].isnull()]
+        protein_df[~protein_df[intensity_name].isnull()]
         .groupby("Sample")["Protein ID"]
         .nunique()
     )
@@ -87,7 +87,7 @@ def by_proteins_missing(intensity_df: pd.DataFrame, percentage: float) -> dict:
         ~sample_protein_count.ge(total_protein_count * percentage)
     ].index.tolist()
     return dict(
-        protein_df=intensity_df[~(intensity_df["Sample"].isin(filtered_samples_list))],
+        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
         filtered_samples=filtered_samples_list,
     )
 

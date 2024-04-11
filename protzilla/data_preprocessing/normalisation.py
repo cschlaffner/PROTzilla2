@@ -8,16 +8,16 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_z_score(intensity_df: pd.DataFrame) -> dict:
+def by_z_score(protein_df: pd.DataFrame) -> dict:
     """
     A function to run the sklearn StandardScaler class on your dataframe.
     Normalises the data on the level of each sample.
     Scales the data to zero mean and unit variance. This is often also
     called z-score normalisation/transformation.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pd.DataFrame
+    :type protein_df: pd.DataFrame
 
     :return: returns a scaled dataframe in typical protzilla long format and an empty
         dictionary
@@ -30,12 +30,12 @@ def by_z_score(intensity_df: pd.DataFrame) -> dict:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = default_intensity_column(intensity_df)
+    intensity_name = default_intensity_column(protein_df)
     scaled_df = pd.DataFrame()
-    samples = intensity_df["Sample"].unique().tolist()
+    samples = protein_df["Sample"].unique().tolist()
 
     for sample in samples:
-        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
+        df_sample = protein_df.loc[protein_df["Sample"] == sample,]
         scaler = StandardScaler().fit(df_sample[[intensity_name]])
         df_sample[f"Normalised {intensity_name}"] = scaler.transform(
             df_sample[[intensity_name]]
@@ -48,7 +48,7 @@ def by_z_score(intensity_df: pd.DataFrame) -> dict:
 
 
 def by_median(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     percentile=0.5,  # quartile, default is median
 ) -> dict:
     """
@@ -57,9 +57,9 @@ def by_median(
     Divides each intensity by the chosen intensity quartile of the
     respective sample. By default, the median (50%-quartile) is used.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
+    :type protein_df: pandas DataFrame
     :param percentile: the chosen quartile of the sample intensities for
         normalisation
     :type percentile: float
@@ -77,13 +77,13 @@ def by_median(
 
     assert 0 <= percentile <= 1
 
-    intensity_name = default_intensity_column(intensity_df)
+    intensity_name = default_intensity_column(protein_df)
     scaled_df = pd.DataFrame()
-    samples = intensity_df["Sample"].unique().tolist()
+    samples = protein_df["Sample"].unique().tolist()
     zeroed_samples = []
 
     for sample in samples:
-        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
+        df_sample = protein_df.loc[protein_df["Sample"] == sample,]
         quantile = df_sample[intensity_name].quantile(q=percentile)
 
         if quantile != 0:
@@ -113,16 +113,16 @@ def by_median(
     )
 
 
-def by_totalsum(intensity_df: pd.DataFrame) -> dict:
+def by_totalsum(protein_df: pd.DataFrame) -> dict:
     """
     A function to perform normalisation using the total sum
     of sample intensities on your dataframe.
     Normalises the data on the level of each sample.
     Divides each intensity by the total sum of sample intensities.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
+    :type protein_df: pandas DataFrame
 
     :return: returns a scaled dataframe in typical protzilla long format
         and a dict, containing all zeroed samples due to sum being 0
@@ -135,13 +135,13 @@ def by_totalsum(intensity_df: pd.DataFrame) -> dict:
     # https://realpython.com/pandas-settingwithcopywarning/
     pd.set_option("mode.chained_assignment", None)
 
-    intensity_name = default_intensity_column(intensity_df)
+    intensity_name = default_intensity_column(protein_df)
     scaled_df = pd.DataFrame()
-    samples = intensity_df["Sample"].unique().tolist()
+    samples = protein_df["Sample"].unique().tolist()
     zeroed_samples_list = []
 
     for sample in samples:
-        df_sample = intensity_df.loc[intensity_df["Sample"] == sample,]
+        df_sample = protein_df.loc[protein_df["Sample"] == sample,]
         totalsum = df_sample[intensity_name].sum()
 
         if totalsum != 0:
@@ -170,7 +170,7 @@ def by_totalsum(intensity_df: pd.DataFrame) -> dict:
 
 
 def by_reference_protein(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     reference_protein: str,
 ) -> dict:
     """
@@ -181,9 +181,9 @@ def by_reference_protein(
     protein in each sample. Samples where this value is zero will be
     removed and returned separately.
 
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
         long format
-    :type intensity_df: pandas DataFrame
+    :type protein_df: pandas DataFrame
     :param reference_protein: Protein ID of the protein to normalise by
         type reference_protein_id: str
     :return: returns a scaled dataframe in typical protzilla long format
@@ -192,8 +192,8 @@ def by_reference_protein(
     """
     scaled_df = pd.DataFrame()
     dropped_samples = []
-    intensity_name = default_intensity_column(intensity_df)
-    protein_groups = intensity_df["Protein ID"].unique().tolist()
+    intensity_name = default_intensity_column(protein_df)
+    protein_groups = protein_df["Protein ID"].unique().tolist()
     for group in protein_groups:
         if reference_protein in group.split(";"):
             reference_protein_group = group
@@ -206,9 +206,9 @@ def by_reference_protein(
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
-    samples = intensity_df["Sample"].unique().tolist()
+    samples = protein_df["Sample"].unique().tolist()
     for sample in samples:
-        df_sample = intensity_df.loc[intensity_df["Sample"] == sample]
+        df_sample = protein_df.loc[protein_df["Sample"] == sample]
 
         reference_intensity = df_sample.loc[
             df_sample["Protein ID"].values == reference_protein_group,

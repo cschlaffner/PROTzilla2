@@ -4,14 +4,14 @@ from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 
 
 def by_pep_value(
-    intensity_df: pd.DataFrame, peptide_df: pd.DataFrame, threshold: float
+    protein_df: pd.DataFrame, peptide_df: pd.DataFrame, threshold: float
 ) -> dict:
     """
     This function filters out all peptides with a PEP value (assigned to all samples
     together for each peptide) below a certain threshold.
 
-    :param intensity_df: ms-dataframe, piped through so next methods get proper input
-    :type intensity_df: pd.Dataframe
+    :param protein_df: ms-dataframe, piped through so next methods get proper input
+    :type protein_df: pd.Dataframe
     :param peptide_df: the pandas dataframe containing the peptide information
     :type peptide_df: pd.Dataframe
     :param threshold: peptides with a PEP-value below this threshold will be filtered
@@ -30,7 +30,7 @@ def by_pep_value(
     filtered_peptides_list = filtered_peptides["Sequence"].unique().tolist()
 
     return dict(
-        protein_df=intensity_df,
+        protein_df=protein_df,
         peptide_df=peptide_df,
         filtered_peptides=filtered_peptides_list,
     )

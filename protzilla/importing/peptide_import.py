@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def peptide_import(ms_df, file_path, intensity_name):
+def peptide_import(ms_df, file_path, intensity_name) -> dict:
     try:
         assert intensity_name in [
             "Intensity",
@@ -13,7 +13,11 @@ def peptide_import(ms_df, file_path, intensity_name):
         ], f"Unknown intensity name: {intensity_name}"
         assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
     except AssertionError as e:
-        return ms_df, dict(peptide_df=None, messages=[dict(level=logging.ERROR, msg=e)])
+        return dict(
+            protein_df=ms_df,
+            peptide_df=None,
+            messages=[dict(level=logging.ERROR, msg=e)],
+        )
 
     # Intensity -> Intensity, iBAQ -> LFQ, LFQ -> LFQ
     peptide_intensity_name = (
@@ -49,4 +53,4 @@ def peptide_import(ms_df, file_path, intensity_name):
     ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    return ms_df, dict(peptide_df=ordered)
+    return dict(protein_df=ms_df, peptide_df=ordered)

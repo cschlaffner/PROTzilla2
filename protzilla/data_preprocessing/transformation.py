@@ -5,14 +5,14 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(intensity_df: pd.DataFrame, log_base="log10") -> dict:
+def by_log(protein_df: pd.DataFrame, log_base="log10") -> dict:
     """
     This function log-transforms intensity
     DataFrames. Supports log-transformation to the base
     of 2 or 10.
 
-    :param intensity_df: a protein data frame in long format
-    :type intensity_df: pd.DataFrame
+    :param protein_df: a protein data frame in long format
+    :type protein_df: pd.DataFrame
     :param log_base: String of the used log method "log10" (base 10)
         or "log2" (base 2). Default: "log10"
     :type log_base: str
@@ -21,8 +21,8 @@ def by_log(intensity_df: pd.DataFrame, log_base="log10") -> dict:
         long format with the transformed data and an empty dict.
     :rtype: Tuple[pandas DataFrame, dict]
     """
-    intensity_name = default_intensity_column(intensity_df)
-    transformed_df = intensity_df.copy()
+    intensity_name = default_intensity_column(protein_df)
+    transformed_df = protein_df.copy()
 
     # TODO 41 drop data when intensity is 0 and return them in dict
     if log_base == "log2":

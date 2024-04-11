@@ -39,7 +39,7 @@ def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
     )
     threshold = 0.0014
     _, out = by_pep_value(
-        intensity_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
+        protein_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
     )
 
     fig = by_pep_value_plot(_, _, out, "Pie chart")[0]
