@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+import pandas as pd
+
 from protzilla.data_preprocessing.imputation import by_min_per_protein
 from protzilla.importing.metadata_import import metadata_import_method
 from protzilla.importing.ms_data_import import max_quant_import
@@ -13,12 +15,40 @@ class Step:
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
+        self.parameter_names = []
+        self.output_names = []
 
     def __repr__(self):
         return self.__class__.__name__
 
-    def calculate(self):
-        raise NotImplementedError
+    def calculate(self, steps: StepManager, inputs: dict = None):
+        if inputs is not None:
+            self.inputs = inputs
+
+        # validate the inputs for the step
+        self.validate_inputs(self.parameter_names)
+
+        # calculate the step
+        dataframe, output_dict = self.method(
+            self.get_input_dataframe(steps), **self.inputs
+        )
+        messages = output_dict.pop("messages")
+        self.messages = Messages(messages)
+
+        # store the output and messages
+        self.handle_outputs(dataframe, output_dict)
+
+        # validate the output
+        self.validate_outputs(self.output_names)
+
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        raise NotImplementedError("This method must be implemented in a subclass.")
+
+    def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
+        return None
+
+    def handle_outputs(self, dataframe: pd.DataFrame, outputs: dict):
+        pass
 
     def validate_inputs(self, required_keys: list[str]):
         for key in required_keys:
@@ -75,23 +105,17 @@ class MaxQuantImport(Step):
     method = "max_quant_import"
     method_description = "Import MaxQuant data"
 
-    def calculate(self, steps: StepManager, inputs: dict = None):
-        if inputs is not None:
-            self.inputs = inputs
+    parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
+    output_names = ["intensity_df"]
 
-        # validate the inputs for the step
-        self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return max_quant_import(dataframe, **kwargs)
 
-        # calculate the step
-        dataframe, output_dict = max_quant_import(None, **self.inputs)
-        messages = output_dict.pop("messages")
+    def get_input_dataframe(self, steps: StepManager):
+        return None
 
-        # store the output and messages
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
         self.output = Output({"intensity_df": dataframe} | output_dict)
-        self.messages = Messages(messages)
-
-        # validate the output
-        self.validate_outputs(["intensity_df"])
 
 
 class MetadataImport(Step):
@@ -101,22 +125,17 @@ class MetadataImport(Step):
     method = "metadata_import_method"
     method_description = "Import metadata"
 
-    def calculate(self, steps: StepManager, inputs: dict = None):
-        if inputs is not None:
-            self.inputs = inputs
+    parameter_names = ["file_path", "feature_orientation"]
+    output_names = ["metadata_df"]
 
-        # validate the inputs for the step
-        self.validate_inputs(["file_path", "feature_orientation"])
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return metadata_import_method(dataframe, **kwargs)
 
-        # calculate the step
-        _, output_dict = metadata_import_method(steps.intensity_df, **self.inputs)
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.intensity_df
 
-        # store the output and messages
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
         self.output = Output({"metadata_df": output_dict["metadata"]})
-        self.messages = Messages(output_dict["messages"])
-
-        # validate the output
-        self.validate_outputs(["metadata_df"])
 
 
 class ImputationMinPerProtein(Step):
@@ -126,23 +145,17 @@ class ImputationMinPerProtein(Step):
     method = "by_min_per_protein"
     method_description = "Impute missing values by the minimum per protein"
 
-    def calculate(self, steps: StepManager, inputs: dict = None):
-        if inputs is not None:
-            self.inputs = inputs
+    parameter_names = ["shrinking_value"]
+    output_names = ["intensity_df"]
 
-        # validate the inputs for the step
-        self.validate_inputs(["shrinking_value"])
-        if steps.intensity_df is None:
-            raise ValueError("No data to impute")
-        # calculate the step
-        output, messages = by_min_per_protein(steps.intensity_df, **self.inputs)
+    def method(self, dataframe: pd.DataFrame, **kwargs):
+        return by_min_per_protein(dataframe, **kwargs)
 
-        # store the output and messages
-        self.output = Output({"intensity_df": output})
-        self.messages = Messages(messages)
+    def get_input_dataframe(self, steps: StepManager):
+        return steps.intensity_df
 
-        # validate the output
-        self.validate_outputs(["intensity_df"])
+    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
+        self.output = Output({"intensity_df": output_dict})
 
 
 class StepFactory:
