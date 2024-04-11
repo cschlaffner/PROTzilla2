@@ -18,8 +18,8 @@ def by_pep_value(
         out
     :type threshold: float
 
-    :return: intensity-df, piped through, dict with peptide_df without the peptides
-        below the threshold and a list with filtered-out peptides (Sequences)
+    :return: dict of intensity-df, piped through, and of peptide_df without the peptides
+        below the threshold and of a list with filtered-out peptides (Sequences)
     :rtype: Tuple[pd.Dataframe, dict(pd.Dataframe, list)]
     """
 
@@ -29,10 +29,11 @@ def by_pep_value(
     filtered_peptides.reset_index(drop=True, inplace=True)
     filtered_peptides_list = filtered_peptides["Sequence"].unique().tolist()
 
-    return intensity_df, {
-        "peptide_df": peptide_df,
-        "filtered_peptides": filtered_peptides_list,
-    }
+    return dict(
+        protein_df=intensity_df,
+        peptide_df=peptide_df,
+        filtered_peptides=filtered_peptides_list,
+    )
 
 
 def by_pep_value_plot(df, results_df, current_out, graph_type):
