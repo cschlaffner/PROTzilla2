@@ -10,11 +10,11 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
+import ui.runs_v2.form_mapping as form_map
 from protzilla.run_v2 import Run
 from protzilla.utilities import name_to_title
 from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
 from ui.runs.views_helper import get_displayed_steps
-from ui.runs_v2.form_mapping import Mappings
 
 
 def make_current_fields(run: Run, section: str, step: str, method: str) -> list:
@@ -189,8 +189,7 @@ def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
 
     :return: The html for the method dropdown
     """
-    mappings = Mappings()
-    hierarchical_dict = mappings.generate_hierarchical_dict()
+    hierarchical_dict = form_map.generate_hierarchical_dict()
     if not step:
         return ""
     methods = hierarchical_dict[section][step].values()

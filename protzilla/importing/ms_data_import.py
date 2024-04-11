@@ -10,7 +10,7 @@ from protzilla.data_integration.database_query import biomart_query
 
 def max_quant_import(
     _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
-) -> (pd.DataFrame, dict):
+) -> tuple[pd.DataFrame, dict]:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
         df = pd.read_csv(

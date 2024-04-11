@@ -2,10 +2,10 @@ import re
 
 from django.contrib import messages
 
+import ui.runs_v2.form_mapping as form_map
 from protzilla.steps import StepManager
 from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
-from ui.runs_v2.form_mapping import Mappings
 
 
 def parameters_from_post(post):
@@ -43,8 +43,7 @@ def convert_str_if_possible(s):
 
 
 def get_displayed_steps(steps: StepManager):
-    map = Mappings()
-    possible_steps = map.generate_hierarchical_dict()
+    possible_steps = form_map.generate_hierarchical_dict()
     displayed_steps = []
     for section in possible_steps:
         workflow_steps = []

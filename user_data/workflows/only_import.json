@@ -9,20 +9,6 @@
           "parameters": {
             "intensity_name": "iBAQ"
           }
-        },
-        {
-          "name": "metadata_import",
-          "method": "metadata_import_method",
-          "parameters": {
-            "feature_orientation": "Columns (samples in rows, features in columns)"
-          }
-        },
-        {
-          "name": "peptide_import",
-          "method": "peptide_import",
-          "parameters": {
-            "intensity_name": "iBAQ"
-          }
         }
       ]
     },

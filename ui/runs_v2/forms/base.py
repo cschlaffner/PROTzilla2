@@ -8,10 +8,6 @@ class MethodForm(Form):
         super().__init__(*args, **kwargs)
         self.fill_form(run)
 
-    @property
-    def description(self) -> str:
-        raise NotImplementedError
-
     def fill_form(self, run: Run):
         pass
 

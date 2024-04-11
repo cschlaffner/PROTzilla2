@@ -187,7 +187,7 @@ def by_min_per_sample(
 def by_min_per_protein(
     intensity_df: pd.DataFrame,
     shrinking_value: float = 1,
-) -> (pd.DataFrame, list):
+) -> tuple[pd.DataFrame, list]:
     """
     A function to impute missing values for each protein
     by taking into account data from each protein.
