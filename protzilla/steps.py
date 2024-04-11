@@ -5,8 +5,17 @@ import logging
 import pandas as pd
 
 from protzilla.data_preprocessing.imputation import by_min_per_protein
-from protzilla.importing.metadata_import import metadata_import_method
-from protzilla.importing.ms_data_import import max_quant_import
+from protzilla.importing.metadata_import import (
+    metadata_import_method,
+    metadata_import_method_diann,
+    metadata_column_assignment,
+)
+from protzilla.importing.ms_data_import import (
+    max_quant_import,
+    diann_import,
+    ms_fragger_import,
+)
+from protzilla.importing.peptide_import import peptide_import
 
 
 class Step:
@@ -151,12 +160,6 @@ class DiannImport(ImportingStep):
     def method(self, dataframe: pd.Dataframe, **kwargs):
         return diann_import(dataframe, **kwargs)
 
-    def get_input_dataframe(self, steps: StepManager):
-        return None
-
-    def handle_outputs(self, dataframe: pd.DataFrame, outputs: dict):
-        self.output = Output({"protein_df": dataframe} | output_dict)
-
 
 class MsFraggerImport(ImportingStep):
     name = "MS Fragger"
@@ -170,12 +173,6 @@ class MsFraggerImport(ImportingStep):
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return ms_fragger_import(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return None
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"protein_df": dataframe} | output_dict)
 
 
 class MetadataImport(ImportingStep):
@@ -191,12 +188,6 @@ class MetadataImport(ImportingStep):
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return metadata_import_method(dataframe, **kwargs)
 
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.intensity_df
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"metadata_df": output_dict["metadata"]})
-
 
 class MetadataImportMethodDiann(ImportingStep):
     name = "Metadata import DIA-NN"
@@ -209,13 +200,7 @@ class MetadataImportMethodDiann(ImportingStep):
     output_names = ["metadata_df"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.intensity_df
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"metadata_df": output_dict["metadata"]})
+        return metadata_import_method_diann(dataframe, **kwargs)
 
 
 class MetadataColumnAssignment(ImportingStep):
@@ -235,13 +220,7 @@ class MetadataColumnAssignment(ImportingStep):
     output_names = ["metadata_df"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
-        return meta(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.intensity_df
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"metadata_df": output_dict["metadata"]})
+        return metadata_column_assignment(dataframe, **kwargs)
 
 
 class PeptideImport(ImportingStep):
@@ -255,33 +234,10 @@ class PeptideImport(ImportingStep):
     output_names = ["peptide_df"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.intensity_df
-
-    def handle_outputs(self, dataframe: pd.DataFrame, output_dict: dict):
-        self.output = Output({"peptide_df": output_dict["peptide"]})
+        return peptide_import(dataframe, **kwargs)
 
 
-class MetadataImport(Step):
-    name = "Metadata import"
-    section = "importing"
-    step = "metadataimport"
-    method = "metadata_import_method"
-    method_description = "Import metadata"
-
-    parameter_names = ["file_path", "feature_orientation"]
-    output_names = ["metadata_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.protein_df
-
-
-class ImputationMinPerProtein(Step):
+class ImputationMinPerProtein(DataPreprocessingStep):
     name = "Min per dataset"
     section = "data_preprocessing"
     step = "imputation"
