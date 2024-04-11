@@ -43,13 +43,14 @@ def convert_str_if_possible(s):
 
 
 def get_displayed_steps(steps: StepManager):
-    possible_steps = Mappings.generate_hierarchical_dict()
+    map = Mappings()
+    possible_steps = map.generate_hierarchical_dict()
     displayed_steps = []
     for section in possible_steps:
         workflow_steps = []
         index_global = 0
 
-        for index_in_section, step in steps.all_steps_in_section(section):
+        for index_in_section, step in enumerate(steps.all_steps_in_section(section)):
             workflow_steps.append(
                 {
                     "id": step.step,

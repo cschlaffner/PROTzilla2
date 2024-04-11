@@ -10,12 +10,7 @@ from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs.views_helper import display_messages
-from ui.runs_v2.fields import (
-    make_displayed_history,
-    make_method_dropdown,
-    make_name_field,
-    make_sidebar,
-)
+from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
@@ -104,19 +99,15 @@ def detail(request: HttpRequest, run_name: str):
                 run.steps.current_step.section,
                 run.steps.current_step.step,
                 run.steps.current_step.method,
-            ),  # TODO: make NewRun compatible
-            name_field=make_name_field(
-                results_exist(run), run, end_of_run
-            ),  # TODO: make NewRun compatible
+            ),
+            name_field="",
             current_plots=current_plots,
-            results_exist=results_exist(run),
-            show_back=bool(run.history.steps),
-            show_plot_button=run.result_df is not None,
-            sidebar=make_sidebar(
-                request, run, run_name
-            ),  # TODO: make NewRun compatible
-            last_step=run.is_at_last_step,
-            end_of_run=end_of_run,
+            results_exist=not run.steps.current_step.output.is_empty,
+            show_back=run.steps.current_step_index > 0,
+            show_plot_button=not run.steps.current_step.output.is_empty,
+            sidebar=make_sidebar(request, run),
+            last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
+            end_of_run=False,  # TODO?
             show_table=show_table,
             used_memory=get_memory_usage(),
             show_protein_graph=show_protein_graph,
@@ -220,7 +211,7 @@ def next_(request, run_name):
 
     run.next_step(request.POST["name"])
 
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
 # TODO: make NewRun compatible
@@ -237,5 +228,56 @@ def back(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
-    run.back_step()
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+    run.step_previous()
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
+
+
+# TODO port
+def tables(request, run_name, index, key=None):
+    return ""
+    if run_name not in active_runs:
+        active_runs[run_name] = Run.continue_existing(run_name)
+    run = active_runs[run_name]
+
+    # use current output when applicable (not yet in history)
+    if index < len(run.history.steps):
+        history_step = run.history.steps[index]
+        outputs = history_step.outputs
+        section = history_step.section
+        step = history_step.step
+        method = history_step.method
+        name = run.history.step_names[index]
+    else:
+        outputs = run.current_out
+        section = run.section
+        step = run.step
+        method = run.method
+        name = None
+
+    options = []
+    for k, value in outputs.items():
+        if isinstance(value, pd.DataFrame) and k != key:
+            options.append(k)
+
+    if key is None and options:
+        # choose an option if url without key is used
+        return HttpResponseRedirect(
+            reverse("runs:tables", args=(run_name, index, options[0]))
+        )
+
+    return render(
+        request,
+        "runs/tables.html",
+        context=dict(
+            run_name=run_name,
+            index=index,
+            # put key as first option to make selected
+            options=[(opt, opt) for opt in [key] + options],
+            key=key,
+            section=section,
+            step=step,
+            method=method,
+            name=name,
+            clean_ids="clean-ids" if "clean-ids" in request.GET else "",
+        ),
+    )
