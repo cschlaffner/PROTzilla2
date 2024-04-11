@@ -69,6 +69,7 @@ class MaxQuantImport(Step):
     section = "importing"
     step = "msdataimport"
     method = "max_quant_import"
+    method_description = "Import MaxQuant data"
 
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
@@ -93,6 +94,7 @@ class MetadataImport(Step):
     section = "importing"
     step = "metadataimport"
     method = "metadata_import_method"
+    method_description = "Import metadata"
 
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
@@ -117,6 +119,7 @@ class ImputationMinPerProtein(Step):
     section = "data_preprocessing"
     step = "imputation"
     method = "by_min_per_protein"
+    method_description = "Impute missing values by the minimum per protein"
 
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:

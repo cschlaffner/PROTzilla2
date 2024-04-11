@@ -61,13 +61,31 @@ def get_displayed_steps(steps: StepManager):
                     "finished": index_global < steps.current_step_index,
                 }
             )
+
             index_global += 1
+
+        possible_steps_in_section = []
+        for step in possible_steps[section]:
+            methods = []
+            for method in possible_steps[section][step]:
+                methods.append(
+                    {
+                        "id": method,
+                        "name": name_to_title(method),
+                        "description": possible_steps[section][step][
+                            method
+                        ].method_description,
+                    }
+                )
+            possible_steps_in_section.append(
+                {"id": step, "methods": methods, "name": name_to_title(step)}
+            )
 
         displayed_steps.append(
             {
                 "id": section,
                 "name": name_to_title(section),
-                "possible_steps": possible_steps[section],
+                "possible_steps": possible_steps_in_section,
                 "steps": workflow_steps,
                 "selected": steps.current_section() == section,
                 "finished": index_global <= steps.current_step_index,
