@@ -55,7 +55,6 @@ class Run:
 
     def step_calculate(self, inputs: dict | None = None):
         self.steps.current_step.calculate(self.steps, inputs)
-        self.step_next()
 
     def step_next(self):
         if self.steps.current_step_index < len(self.steps.all_steps) - 1:

@@ -24,9 +24,6 @@ class MaxQuantImportForm(MethodForm):
     description = "MaxQuant data import"
 
     def submit(self, run: Run):
-        # TODO fix the file pathing
-        file_path = self.cleaned_data["file_path"].file.file.name
-        self.cleaned_data["file_path"] = file_path
         run.step_calculate(self.cleaned_data)
 
 
@@ -36,7 +33,7 @@ class FeatureOrientationType(Enum):
 
 
 class MetadataImportForm(MethodForm):
-    file = CustomFileField(label="Metadata file")
+    file_path = CustomFileField(label="Metadata file")
     feature_orientation = CustomChoiceField(
         choices=FeatureOrientationType, label="Feature orientation"
     )

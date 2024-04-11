@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 
 from protzilla.data_preprocessing.imputation import by_min_per_protein
+from protzilla.importing.metadata_import import metadata_import_method
 from protzilla.importing.ms_data_import import max_quant_import
 
 
@@ -79,10 +80,11 @@ class MaxQuantImport(Step):
         self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
 
         # calculate the step
-        output, messages = max_quant_import(None, **self.inputs)
+        dataframe, output_dict = max_quant_import(None, **self.inputs)
+        messages = output_dict.pop("messages")
 
         # store the output and messages
-        self.output = Output({"intensity_df": output})
+        self.output = Output({"intensity_df": dataframe} | output_dict)
         self.messages = Messages(messages)
 
         # validate the output
@@ -101,17 +103,17 @@ class MetadataImport(Step):
             self.inputs = inputs
 
         # validate the inputs for the step
-        self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
+        self.validate_inputs(["file_path", "feature_orientation"])
 
         # calculate the step
-        output, messages = max_quant_import(None, **self.inputs)
+        _, output_dict = metadata_import_method(steps.intensity_df, **self.inputs)
 
         # store the output and messages
-        self.output = Output({"intensity_df": output})
-        self.messages = Messages(messages)
+        self.output = Output({"metadata_df": output_dict["metadata"]})
+        self.messages = Messages(output_dict["messages"])
 
         # validate the output
-        self.validate_outputs(["intensity_df"])
+        self.validate_outputs(["metadata_df"])
 
 
 class ImputationMinPerProtein(Step):

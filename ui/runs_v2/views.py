@@ -48,7 +48,7 @@ def detail(request: HttpRequest, run_name: str):
 
     description = method_form.description
 
-    log_messages(run.current_messages)
+    log_messages(run.steps.current_step.messages)
     display_messages(run.current_messages, request)
 
     current_plots = []
@@ -176,7 +176,7 @@ def continue_(request: HttpRequest):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-# TODO: make NewRun compatible
+# this function is no longer used, as the Output instance of a step has a utility method not_empty
 def results_exist(run: Run) -> bool:
     """
     Checks if the last step has produced valid results.
@@ -209,7 +209,7 @@ def next_(request, run_name):
     """
     run = active_runs[run_name]
 
-    run.next_step(request.POST["name"])
+    run.step_next()
 
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 

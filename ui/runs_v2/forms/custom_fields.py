@@ -37,6 +37,10 @@ class CustomFileField(FileField):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
 
+    def clean(self, data, initial=None):
+        cleaned = super().clean(data, initial)
+        return cleaned.file.file.name
+
 
 class CustomBooleanField(BooleanField):
     def __init__(self, label: str, *args, **kwargs):
