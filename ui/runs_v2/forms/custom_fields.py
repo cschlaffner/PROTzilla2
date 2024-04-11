@@ -27,7 +27,7 @@ class CustomCheckBoxInput(CheckboxInput):
 class CustomChoiceField(ChoiceField):
     def __init__(self, choices: Enum, *args, **kwargs):
         super().__init__(
-            choices=[(el.name, el.value) for el in choices], *args, **kwargs
+            choices=[(el.value, el.name) for el in choices], *args, **kwargs
         )
         self.widget.attrs.update({"class": "form-select mb-2"})
 
