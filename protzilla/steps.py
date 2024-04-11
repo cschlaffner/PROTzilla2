@@ -146,11 +146,13 @@ class StepFactory:
     # TODO this could be done with the new mapping class, iterating and checking whether there exists a step with that specific name
     @staticmethod
     def create_step(step_type: str) -> Step:
-        if step_type == "MaxQuantImport" or step_type == "max_quant_import":
+        if step_type == "MaxQuantImport":
+        if step_type == "MaxQuantImport":
             return MaxQuantImport()
         elif step_type == "ImputationMinPerProtein":
             return ImputationMinPerProtein()
-        elif step_type == "MetadataImport" or step_type == "metadata_import_method":
+        elif step_type == "MetadataImport":
+        elif step_type == "MetadataImport":
             return MetadataImport()
         else:
             raise ValueError(f"Unknown step type {step_type}")

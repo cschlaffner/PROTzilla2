@@ -21,8 +21,6 @@ class MaxQuantImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
 
-    description = "MaxQuant data import"
-
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
 
@@ -37,8 +35,6 @@ class MetadataImportForm(MethodForm):
     feature_orientation = CustomChoiceField(
         choices=FeatureOrientationType, label="Feature orientation"
     )
-
-    description = "Import metadata"
 
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
