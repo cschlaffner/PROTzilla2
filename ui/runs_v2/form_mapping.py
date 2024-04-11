@@ -1,6 +1,6 @@
 from django.http import HttpRequest
 
-from protzilla.run import Run
+from protzilla.run_v2 import Run
 from protzilla.steps import MaxQuantImport, MetadataImport, Step
 
 from .forms.base import MethodForm
@@ -58,6 +58,5 @@ def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
 
 
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
-    method = run.steps.current_step
-    form_class = _get_form_class_by_step(method)
+    form_class = _get_form_class_by_step(run.steps.current_step)
     return form_class(run=run, data=request.POST, files=request.FILES)
