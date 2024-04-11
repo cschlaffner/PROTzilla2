@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from protzilla.run_helper import log_messages
 from protzilla.run_v2 import Run, get_available_run_names
+from protzilla.steps import StepFactory
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
@@ -277,3 +278,35 @@ def tables(request, run_name, index, key=None):
             clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
     )
+
+
+def add(request: HttpRequest, run_name: str):
+    """
+    Adds a new method to the run. The method is added as the next step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, new method visible in sidebar
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    method = dict(request.POST)["method"][0]
+
+    step = StepFactory.create_step(method)
+    run.step_add(step)
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
+
+
+def export_workflow(request, run_name):
+    raise NotImplementedError("Exporting workflows is not yet implemented.")
+
+
+def delete_step(request, run_name):
+    raise NotImplementedError("Deleting steps is not yet implemented.")
+
+
+def navigate(request, run_name):
+    raise NotImplementedError("Navigating to specific steps is not yet implemented.")

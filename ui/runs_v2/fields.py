@@ -140,7 +140,7 @@ def make_sidebar(request, run: Run) -> str:
     :return: The html for the sidebar
     """
     csrf_token = request.META["CSRF_COOKIE"]
-    template = "runs/sidebar.html"
+    template = "runs_v2/sidebar.html"
     return render_to_string(
         template,
         context=dict(
