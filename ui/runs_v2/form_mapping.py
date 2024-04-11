@@ -45,7 +45,7 @@ def _get_form_class_by_step(step: Step) -> type[MethodForm]:
         raise ValueError(f"No form has been provided for {type(step).__name__} step.")
 
 
-def _get_step_class_by_form(form) -> type[Step]:
+def _get_step_class_by_form(form: MethodForm) -> type[Step]:
     step_class = _reverse_mapping.get(type(form))
     if step_class:
         return step_class
@@ -53,18 +53,11 @@ def _get_step_class_by_form(form) -> type[Step]:
         raise ValueError(f"No step has been provided for {type(form).__name__} form.")
 
 
-def get_empty_form_by_method(step, run: Run) -> MethodForm:
-    form_class = _get_form_class_by_step(step)
-    if form_class:
-        return form_class(run=run)
-    else:
-        raise ValueError(f"No form has been provided for {method} method.")
+def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
+    return _get_form_class_by_step(step)(run=run)
 
 
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
     method = run.steps.current_step
     form_class = _get_form_class_by_step(method)
-    if form_class:
-        return form_class(run=run, data=request.POST, files=request.FILES)
-    else:
-        raise ValueError(f"No form has been provided for {method} method.")
+    return form_class(run=run, data=request.POST, files=request.FILES)
