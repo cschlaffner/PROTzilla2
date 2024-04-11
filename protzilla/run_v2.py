@@ -24,6 +24,7 @@ class Run:
 
         self.steps = StepManager()
         self.disk_operator = DiskOperator()
+        self.df_mode = df_mode
 
         if run_name in get_available_run_names():
             self._run_read_existing()
@@ -88,6 +89,10 @@ class Run:
     @property
     def current_outputs(self):
         return self.steps.current_step.output
+
+    @property
+    def current_step(self):
+        return self.steps.current_step
 
 
 if __name__ == "__main__":

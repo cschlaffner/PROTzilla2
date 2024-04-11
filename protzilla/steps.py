@@ -41,6 +41,9 @@ class Output:
 
         self.output = output
 
+    def __getitem__(self, key):
+        return self.output[key]
+
     @property
     def intensity_df(self):
         if "intensity_df" in self.output:
