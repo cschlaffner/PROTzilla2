@@ -78,10 +78,11 @@ class MaxQuantImport(Step):
         self.validate_inputs(["file_path", "map_to_uniprot", "intensity_name"])
 
         # calculate the step
-        output, messages = max_quant_import(None, **self.inputs)
+        dataframe, output_dict = max_quant_import(None, **self.inputs)
+        messages = output_dict.pop("messages")
 
         # store the output and messages
-        self.output = Output({"intensity_df": output})
+        self.output = Output({"intensity_df": dataframe} | output_dict)
         self.messages = Messages(messages)
 
         # validate the output
