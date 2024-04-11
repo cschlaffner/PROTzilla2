@@ -128,7 +128,7 @@ def make_dynamic_fields(
     return dynamic_fields
 
 
-def make_sidebar(request, run: Run, run_name: str) -> str:
+def make_sidebar(request, run: Run) -> str:
     """
     Renders the sidebar of the run detail page.
 
@@ -144,10 +144,8 @@ def make_sidebar(request, run: Run, run_name: str) -> str:
         template,
         context=dict(
             csrf_token=csrf_token,
-            workflow_steps=get_displayed_steps(
-                run.workflow_config, run.workflow_meta, run.step_index
-            ),
-            run_name=run_name,
+            workflow_steps=get_displayed_steps(run.steps),
+            run_name=run.run_name,
         ),
     )
 

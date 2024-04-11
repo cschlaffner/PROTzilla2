@@ -10,7 +10,7 @@ from django.urls import reverse
 from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.run_helper import get_parameters
 from protzilla.utilities import name_to_title
 from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
@@ -129,7 +129,7 @@ def make_dynamic_fields(
     return dynamic_fields
 
 
-def make_sidebar(request, run: Run) -> str:
+def make_sidebar(request, run: Run, run_name: str) -> str:
     """
     Renders the sidebar of the run detail page.
 
@@ -145,7 +145,9 @@ def make_sidebar(request, run: Run) -> str:
         template,
         context=dict(
             csrf_token=csrf_token,
-            workflow_steps=get_displayed_steps(run.steps),
+            workflow_steps=get_displayed_steps(
+                run.workflow_config, run.workflow_meta, run.step_index
+            ),
             run_name=run.run_name,
         ),
     )
