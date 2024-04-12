@@ -6,13 +6,13 @@ import pandas as pd
 
 from protzilla.data_preprocessing.imputation import by_min_per_protein
 from protzilla.importing.metadata_import import (
+    metadata_column_assignment,
     metadata_import_method,
     metadata_import_method_diann,
-    metadata_column_assignment,
 )
 from protzilla.importing.ms_data_import import (
-    max_quant_import,
     diann_import,
+    max_quant_import,
     ms_fragger_import,
 )
 from protzilla.importing.peptide_import import peptide_import
@@ -133,7 +133,6 @@ class Messages:
 
 class MaxQuantImport(ImportingStep):
     name = "MaxQuant"
-    section = "importing"
     step = "msdataimport"
     method_id = "max_quant_import"
     method_description = "Import MaxQuant data"
@@ -150,7 +149,6 @@ class MaxQuantImport(ImportingStep):
 
 class DiannImport(ImportingStep):
     name = "DIA-NN"
-    section = "importing"
     step = "msdataimport"
     method = "diann_import"
     method_description = "DIA-NN data import"
@@ -164,7 +162,6 @@ class DiannImport(ImportingStep):
 
 class MsFraggerImport(ImportingStep):
     name = "MS Fragger"
-    section = "importing"
     step = "msdataimport"
     method = "ms_fragger_import"
     method_description = "MS Fragger data import"
@@ -178,7 +175,6 @@ class MsFraggerImport(ImportingStep):
 
 class MetadataImport(ImportingStep):
     name = "Metadata import"
-    section = "importing"
     step = "metadataimport"
     method_id = "metadata_import_method"
     method_description = "Import metadata"
@@ -192,7 +188,6 @@ class MetadataImport(ImportingStep):
 
 class MetadataImportMethodDiann(ImportingStep):
     name = "Metadata import DIA-NN"
-    section = "importing"
     step = "metadataimport"
     method = "metadata_import_method_diann"
     method_description = "Import metadata for run relationships of DIA-NN"
@@ -206,7 +201,6 @@ class MetadataImportMethodDiann(ImportingStep):
 
 class MetadataColumnAssignment(ImportingStep):
     name = "Metadata column assignment"
-    section = "importing"
     step = "metadataimport"
     method = "metadata_column_assignment"
     method_description = (
@@ -226,7 +220,6 @@ class MetadataColumnAssignment(ImportingStep):
 
 class PeptideImport(ImportingStep):
     name = "Peptide import"
-    section = "importing"
     step = "peptide_import"
     method = "peptide_import"
     method_description = "Import peptide data"
@@ -240,7 +233,6 @@ class PeptideImport(ImportingStep):
 
 class ImputationMinPerProtein(DataPreprocessingStep):
     name = "Min per dataset"
-    section = "data_preprocessing"
     step = "imputation"
     method_id = "by_min_per_protein"
     method_description = "Impute missing values by the minimum per protein"
