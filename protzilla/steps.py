@@ -200,7 +200,7 @@ class StepManager:
 
     @property
     def protein_df(self):
-        # find the last step that has an intensity_df
+        # find the last step that has a protein_df in its output
         for step in reversed(self.all_steps):
             if step.output.protein_df is not None:
                 return step.output.protein_df
@@ -208,11 +208,23 @@ class StepManager:
 
     @property
     def metadata_df(self):
-        # find the last step that has a metadata_df
+        # find the last step that has a metadata_df in its output
         for step in reversed(self.all_steps):
             if hasattr(step.output, "metadata_df"):
                 return step.output.metadata_df
         logging.warning("No metadata_df found in steps")
+
+    @property
+    def preprocessed_output(self) -> Output:
+        if self.current_section() == "importing":
+            return None
+        if self.current_section() == "data_preprocessing":
+            return (
+                self.current_step.output
+                if self.current_step.finished
+                else self.previous_steps[-1].output
+            )
+        return self.data_preprocessing[-1].output
 
     @property
     def is_at_last_step(self):

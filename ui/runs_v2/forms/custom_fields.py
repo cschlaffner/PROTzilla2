@@ -1,9 +1,10 @@
 from enum import Enum
 
-from django.forms import BooleanField, ChoiceField, FileField
+from django.forms import BooleanField, ChoiceField, FileField, DecimalField
 from django.forms.widgets import CheckboxInput
 from django.utils.html import format_html
 from django.utils.safestring import SafeText
+
 
 # Custom widgets
 
@@ -46,3 +47,9 @@ class CustomBooleanField(BooleanField):
     def __init__(self, label: str, *args, **kwargs):
         super().__init__(label="", *args, **kwargs)
         self.widget = CustomCheckBoxInput(label=label)
+
+
+class CustomNumberInput(DecimalField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.widget.attrs.update({"class": "form-control mb-2"})

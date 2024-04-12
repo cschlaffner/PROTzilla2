@@ -1,15 +1,17 @@
 from django.http import HttpRequest
 
-from protzilla.methods.importing import MaxQuantImport, MetadataImport
+import protzilla.methods.data_preprocessing as data_preprocessing
+import protzilla.methods.importing as importing
+import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
+import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
-
 from .forms.base import MethodForm
-from .forms.importing import MaxQuantImportForm, MetadataImportForm
 
 _forward_mapping = {
-    MaxQuantImport: MaxQuantImportForm,
-    MetadataImport: MetadataImportForm,
+    importing.MaxQuantImport: importing_forms.MaxQuantImportForm,
+    importing.MetadataImport: importing_forms.MetadataImportForm,
+    data_preprocessing.ImputationMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
 }
 
 
