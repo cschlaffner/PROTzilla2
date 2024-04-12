@@ -73,7 +73,7 @@ def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
         alpha=ttest_output["corrected_alpha"],
         group1=ttest_output["group1"],
         group2=ttest_output["group2"],
-    )
+    )[0]
     if show_figures:
         fig.show()
 
@@ -87,6 +87,6 @@ def test_plots_volcano_plot_multiple_annotations(ttest_output, show_figures):
         proteins_of_interest=["Protein1", "Protein2"],
         group1=ttest_output["group1"],
         group2=ttest_output["group2"],
-    )
+    )[0]
     if show_figures:
         fig.show()
