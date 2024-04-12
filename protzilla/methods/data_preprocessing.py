@@ -24,6 +24,3 @@ class ImputationMinPerProtein(DataPreprocessingStep):
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return by_min_per_protein(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.protein_df

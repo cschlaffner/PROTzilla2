@@ -9,7 +9,6 @@ import pandas as pd
 import yaml
 
 from protzilla.constants import paths
-from protzilla.stepfactory import StepFactory
 from protzilla.steps import Messages, Output, Step, StepManager
 
 
@@ -35,6 +34,8 @@ class DiskOperator:
             return data[self.KEYS.CURRENT_STEP_INDEX]
 
     def read_step(self, step_type: str, step_data: dict, base_dir: Path) -> Step:
+        from protzilla.stepfactory import StepFactory  # to avoid a circular import
+
         try:
             step = StepFactory.create_step(step_type)
             step.inputs = step_data[self.KEYS.STEP_INPUTS]

@@ -61,3 +61,7 @@ def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
     form_class = _get_form_class_by_step(run.steps.current_step)
     return form_class(run=run, data=request.POST, files=request.FILES)
+
+
+def get_all_methods() -> list[type[Step]]:
+    return list(_forward_mapping.keys())

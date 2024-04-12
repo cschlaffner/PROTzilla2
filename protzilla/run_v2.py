@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 
 import protzilla.constants.paths as paths
-from protzilla.disk_operator import DiskOperator
 from protzilla.methods.data_preprocessing import ImputationMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
 from protzilla.steps import Step, StepManager
@@ -21,6 +20,8 @@ class Run:
     def __init__(
         self, run_name: str, workflow_name: str | None = None, df_mode: str = "disk"
     ):
+        from protzilla.disk_operator import DiskOperator  # to avoid a circular import
+
         self.run_name = run_name
         self.workflow_name = workflow_name
 
