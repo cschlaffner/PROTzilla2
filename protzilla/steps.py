@@ -79,6 +79,9 @@ class Output:
     def __repr__(self):
         return f"Output: {self.output}"
 
+    def __contains__(self, key):
+        return key in self.output
+
     @property
     def intensity_df(self):
         if "intensity_df" in self.output:
@@ -202,9 +205,9 @@ class StepManager:
     @property
     def protein_df(self):
         # find the last step that has a protein_df in its output
-        for step in reversed(self.all_steps):
-            if step.output.protein_df is not None:
-                return step.output.protein_df
+        for step in reversed(self.previous_steps):
+            if "protein_df" in step.output and step.output["protein_df"] is not None:
+                return step.output["protein_df"]
         logging.warning("No intensity_df found in steps")
 
     @property

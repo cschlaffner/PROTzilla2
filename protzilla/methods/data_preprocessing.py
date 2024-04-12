@@ -26,4 +26,4 @@ class ImputationMinPerProtein(DataPreprocessingStep):
         return by_min_per_protein(dataframe, **kwargs)
 
     def plot(self, **kwargs):
-        i = 1
+        raise NotImplementedError("Plotting is not implemented yet for this step.")
