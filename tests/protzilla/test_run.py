@@ -311,7 +311,7 @@ def test_export_plot(tests_folder_name):
         data_preprocessing.filter_proteins.by_samples_missing_plot,
         dict(graph_type="Pie chart"),
     )
-    for plot in run.export_plots("png"):
+    for plot in run.current_plots.export("png"):
         Image.open(plot).verify()
     run.next_step()
     run.perform_calculation(data_preprocessing.imputation.by_min_per_sample, {})
@@ -325,9 +325,9 @@ def test_export_plot(tests_folder_name):
         ),
     )
     assert len(run.plots) > 1
-    for plot in run.export_plots("tiff"):
+    for plot in run.current_plots.export("tiff"):
         Image.open(plot).verify()
-    for plot in run.export_plots("eps"):
+    for plot in run.current_plots.export("eps"):
         Image.open(plot).verify()
 
 
@@ -350,11 +350,11 @@ def test_export_plot_base64(tests_folder_name):
             value="p_value",
         ),
     )
-    for plot in run.export_plots("png"):
+    for plot in run.current_plots.export("png"):
         Image.open(plot).verify()
-    for plot in run.export_plots("tiff"):
+    for plot in run.current_plots.export("tiff"):
         Image.open(plot).verify()
-    for plot in run.export_plots("eps"):
+    for plot in run.current_plots.export("eps"):
         Image.open(plot).verify()
 
 
