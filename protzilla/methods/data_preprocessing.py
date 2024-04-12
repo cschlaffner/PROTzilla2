@@ -24,3 +24,6 @@ class ImputationMinPerProtein(DataPreprocessingStep):
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         return by_min_per_protein(dataframe, **kwargs)
+
+    def plot(self, **kwargs):
+        i = 1

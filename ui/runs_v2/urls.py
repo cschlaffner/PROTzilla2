@@ -8,6 +8,7 @@ urlpatterns = [
     path("create", views.create, name="create"),
     path("continue", views.continue_, name="continue"),
     path("detail/<str:run_name>", views.detail, name="detail"),
+    path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),
     path("<str:run_name>/tables/<int:index>/<str:key>", views.tables, name="tables"),
     path(
