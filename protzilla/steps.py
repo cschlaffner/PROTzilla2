@@ -63,14 +63,6 @@ class Step:
         return True
 
 
-class DataAnalysisStep(Step):
-    section = "data_analysis"
-
-    def get_input_dataframe(self, steps: StepManager):
-        protein_df
-        return NotImplementedError("This method must be implemented in a subclass.")
-
-
 class Output:
     def __init__(self, output: dict = None):
         if output is None:
@@ -83,6 +75,9 @@ class Output:
 
     def __getitem__(self, key):
         return self.output[key]
+
+    def __repr__(self):
+        return f"Output: {self.output}"
 
     @property
     def intensity_df(self):
@@ -107,6 +102,9 @@ class Messages:
     def __iter__(self):
         return iter(self.messages)
 
+    def __repr__(self):
+        return f"Messages: {[message['message'] for message in self.messages]}"
+
 
 class Plots:
     def __init__(self, plots: list = None):
@@ -116,6 +114,9 @@ class Plots:
 
     def __iter__(self):
         return iter(self.plots)
+
+    def __repr__(self):
+        return f"Plots: {len(self.plots)}"
 
     def export(self, format_):
         exports = []

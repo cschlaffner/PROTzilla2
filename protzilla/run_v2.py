@@ -5,7 +5,7 @@ import logging
 import protzilla.constants.paths as paths
 from protzilla.methods.data_preprocessing import ImputationMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
-from protzilla.steps import Step, StepManager, Plots
+from protzilla.steps import Plots, Step, StepManager
 
 
 def get_available_run_names() -> list[str]:
@@ -37,6 +37,9 @@ class Run:
             raise ValueError(
                 f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
             )
+
+    def __repr__(self):
+        return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 
     def _run_write(self):
         self.disk_operator.write_run(self)
