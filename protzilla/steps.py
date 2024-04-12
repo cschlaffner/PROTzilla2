@@ -4,19 +4,6 @@ import logging
 
 import pandas as pd
 
-from protzilla.data_preprocessing.imputation import by_min_per_protein
-from protzilla.importing.metadata_import import (
-    metadata_column_assignment,
-    metadata_import_method,
-    metadata_import_method_diann,
-)
-from protzilla.importing.ms_data_import import (
-    diann_import,
-    max_quant_import,
-    ms_fragger_import,
-)
-from protzilla.importing.peptide_import import peptide_import
-
 
 class Step:
     def __init__(self):
@@ -69,23 +56,6 @@ class Step:
                 raise ValueError(f"Missing output {key} in output")
 
 
-class ImportingStep(Step):
-    section = "importing"
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        raise NotImplementedError("This method must be implemented in a subclass.")
-
-    def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
-        return None
-
-
-class DataPreprocessingStep(Step):
-    section = "data_preprocessing"
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.protein_df
-
-
 class DataAnalysisStep(Step):
     section = "data_analysis"
 
@@ -129,138 +99,6 @@ class Messages:
         if messages is None:
             messages = []
         self.messages = messages
-
-
-class MaxQuantImport(ImportingStep):
-    name = "MaxQuant"
-    step = "msdataimport"
-    method_id = "max_quant_import"
-    method_description = "Import MaxQuant data"
-
-    parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
-    output_names = ["protein_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return max_quant_import(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return None
-
-
-class DiannImport(ImportingStep):
-    name = "DIA-NN"
-    step = "msdataimport"
-    method = "diann_import"
-    method_description = "DIA-NN data import"
-
-    parameter_names = ["file_path", "map_to_uniprot"]
-    output_names = ["protein_df"]
-
-    def method(self, dataframe: pd.Dataframe, **kwargs):
-        return diann_import(dataframe, **kwargs)
-
-
-class MsFraggerImport(ImportingStep):
-    name = "MS Fragger"
-    step = "msdataimport"
-    method = "ms_fragger_import"
-    method_description = "MS Fragger data import"
-
-    parameter_names = ["file_path", "intensity_name", "map_to_uniprot"]
-    output_names = ["protein_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return ms_fragger_import(dataframe, **kwargs)
-
-
-class MetadataImport(ImportingStep):
-    name = "Metadata import"
-    step = "metadataimport"
-    method_id = "metadata_import_method"
-    method_description = "Import metadata"
-
-    parameter_names = ["file_path", "feature_orientation"]
-    output_names = ["metadata_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
-
-
-class MetadataImportMethodDiann(ImportingStep):
-    name = "Metadata import DIA-NN"
-    step = "metadataimport"
-    method = "metadata_import_method_diann"
-    method_description = "Import metadata for run relationships of DIA-NN"
-
-    parameter_names = ["file_path", "groupby_sample"]
-    output_names = ["metadata_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method_diann(dataframe, **kwargs)
-
-
-class MetadataColumnAssignment(ImportingStep):
-    name = "Metadata column assignment"
-    step = "metadataimport"
-    method = "metadata_column_assignment"
-    method_description = (
-        "Assign columns to metadata categories, repeatable for each category"
-    )
-
-    parameter_names = [
-        "metadata_df",
-        "metadata_required_column",
-        "metadata_unknown_column",
-    ]
-    output_names = ["metadata_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_column_assignment(dataframe, **kwargs)
-
-
-class PeptideImport(ImportingStep):
-    name = "Peptide import"
-    step = "peptide_import"
-    method = "peptide_import"
-    method_description = "Import peptide data"
-
-    parameter_names = ["file_path", "intensity_name"]
-    output_names = ["peptide_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return peptide_import(dataframe, **kwargs)
-
-
-class ImputationMinPerProtein(DataPreprocessingStep):
-    name = "Min per dataset"
-    step = "imputation"
-    method_id = "by_min_per_protein"
-    method_description = "Impute missing values by the minimum per protein"
-
-    parameter_names = ["shrinking_value"]
-    output_names = ["intensity_df"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return by_min_per_protein(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.protein_df
-
-
-class StepFactory:
-    # TODO this could be done with the new mapping class, iterating and checking whether there exists a step with that specific name
-    @staticmethod
-    def create_step(step_type: str) -> Step:
-        if step_type == "MaxQuantImport" or step_type == "max_quant_import":
-            return MaxQuantImport()
-        elif (
-            step_type == "ImputationMinPerProtein" or step_type == "by_min_per_protein"
-        ):
-            return ImputationMinPerProtein()
-        elif step_type == "MetadataImport" or step_type == "metadata_import_method":
-            return MetadataImport()
-        else:
-            raise ValueError(f"Unknown step type {step_type}")
 
 
 class StepManager:

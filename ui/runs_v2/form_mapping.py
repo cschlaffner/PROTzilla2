@@ -1,7 +1,8 @@
 from django.http import HttpRequest
 
+from protzilla.methods.importing import MaxQuantImport, MetadataImport
 from protzilla.run_v2 import Run
-from protzilla.steps import MaxQuantImport, MetadataImport, Step
+from protzilla.steps import Step
 
 from .forms.base import MethodForm
 from .forms.importing import MaxQuantImportForm, MetadataImportForm

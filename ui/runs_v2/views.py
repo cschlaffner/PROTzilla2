@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from protzilla.run_helper import log_messages
 from protzilla.run_v2 import Run, get_available_run_names
-from protzilla.steps import StepFactory
+from protzilla.stepfactory import StepFactory
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar

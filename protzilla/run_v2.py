@@ -4,7 +4,9 @@ import logging
 
 import protzilla.constants.paths as paths
 from protzilla.disk_operator import DiskOperator
-from protzilla.steps import ImputationMinPerProtein, MaxQuantImport, Step, StepManager
+from protzilla.methods.data_preprocessing import ImputationMinPerProtein
+from protzilla.methods.importing import MaxQuantImport
+from protzilla.steps import Step, StepManager
 
 
 def get_available_run_names() -> list[str]:
