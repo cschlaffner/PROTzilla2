@@ -25,19 +25,16 @@ colors = {
 def scatter_plot(
     input_df: pd.DataFrame,
     color_df: pd.DataFrame | None = None,
-):
+) -> dict:
     """
     Function to create a scatter plot from data.
 
     :param input_df: the dataframe that should be plotted. It should have either 2
         or 3 dimensions
-    :type input_df: pd.Dataframe
     :param color_df: the Dataframe with one column according to which the marks should
         be colored. This is an optional parameter
-    :type color_df: pd.Dataframe
 
-    :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
-    :rtype: list[plotly figure]/dict
+    :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
 
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
@@ -72,7 +69,7 @@ def scatter_plot(
         fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
         fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
         fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
-        return [fig]
+        return dict(plots=[fig])
     except ValueError as e:
         msg = ""
         if intensity_df_wide.shape[1] < 2:
@@ -87,35 +84,31 @@ def scatter_plot(
             )
         elif color_df.shape[1] != 1:
             msg = "The color dataframe should have 1 dimension only"
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
 
 
 def create_volcano_plot(
-    p_values,
-    log2_fc,
-    fc_threshold,
-    alpha,
+    p_values: pd.DataFrame,
+    log2_fc: pd.DataFrame,
+    fc_threshold: float,
+    alpha: float,
     group1: str,
     group2: str,
-    proteins_of_interest=None,
-):
+    proteins_of_interest: list | None = None,
+) -> dict:
     """
     Function to create a volcano plot from p values and log2 fold change with the
     possibility to annotate proteins of interest.
 
     :param p_values:dataframe with p values
-    :type p_values: pd.Dataframe
     :param log2_fc: dataframe with log2 fold change
-    :type log2_fc: pd.Dataframe
     :param fc_threshold: the threshold for the fold change to show
-    :type fc_threshold: float
     :param alpha: the alpha value for the significance line
-    :type alpha: float
+    :param group1: the name of the first group
+    :param group2: the name of the second group
     :param proteins_of_interest: the proteins that should be annotated in the plot
-    :type proteins_of_interest: list or None
 
-    :return: returns a list with a plotly figure
-    :rtype: [plotly figure]
+    :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
 
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
@@ -185,12 +178,12 @@ def create_volcano_plot(
         selector=dict(name="Not Significant Proteins"),
     )
 
-    return [fig]
+    return dict(plots=[fig])
 
 
 def clustergram_plot(
     input_df: pd.DataFrame, sample_group_df: pd.DataFrame | None, flip_axes: str
-):
+) -> dict:
     """
     Creates a clustergram plot from a dataframe in protzilla wide format. The rows or
     columns of the clustergram are ordered according to the clustering resulting from
@@ -199,18 +192,15 @@ def clustergram_plot(
 
     :param input_df: A dataframe in protzilla wide format, where each row
         represents a sample and each column represents a feature.
-    :type input_df: pd.DataFrame
     :param sample_group_df: A dataframe with a column that specifies the group of each
         sample in `input_df`. Each group will be assigned a color, which will be shown
         in the final plot as a colorbar next to the heatmap. This is an optional
         parameter
-    :type sample_group_df: pd.DataFrame
     :param flip_axes: If "yes", the rows and columns of the clustergram will be
         swapped. If "no", the default orientation is used.
-    :type flip_axes: str
 
-    :return: returns a list with a plotly figure or a list with a dictionary if an error occurs
-    :rtype: list[plotly figure]/dict
+
+    return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
     try:
         assert isinstance(input_df, pd.DataFrame) and not input_df.empty
@@ -267,7 +257,7 @@ def clustergram_plot(
         clustergram.update_layout(
             autosize=True,
         )
-        return [clustergram]
+        return dict(plots=[clustergram])
     except AssertionError as e:
         if not isinstance(input_df, pd.DataFrame):
             msg = (
@@ -292,7 +282,7 @@ def clustergram_plot(
             msg = "The input dataframe and the grouping contain different samples"
         else:
             msg = f"An unknown error occurred: {e}"
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
 
 def prot_quant_plot(
@@ -300,7 +290,7 @@ def prot_quant_plot(
     protein_group: str,
     similarity: float = 1.0,
     similarity_measure: str = "euclidean distance",
-):
+) -> dict:
     """
     A function to create a graph visualising protein quantifications across all samples
     as a line diagram. It's possible to select one proteingroup that will be displayed in orange
@@ -314,6 +304,9 @@ def prot_quant_plot(
     :param similarity_measure: method to compare the chosen proteingroup with all others. The two
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
+
+
+    :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
 
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
@@ -332,7 +325,7 @@ def prot_quant_plot(
                 "Similarity for cosine similarity should be between -1 and 1."
             )
     except ValueError as error:
-        return [dict(messages=[dict(level=messages.ERROR, msg=str(error))])]
+        return dict(messages=[dict(level=messages.ERROR, msg=str(error))])
 
     fig = go.Figure()
 
@@ -470,4 +463,4 @@ def prot_quant_plot(
         ),
     )
 
-    return [fig]
+    return dict(plots=[fig])

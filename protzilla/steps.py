@@ -39,10 +39,11 @@ class Step:
 
         # calculate the step
         output_dict = self.method(self.get_input_dataframe(steps), **self.inputs)
-        messages = output_dict.pop("messages")
-        self.messages = Messages(messages)
 
         # store the output and messages
+        messages = output_dict.pop("messages", [])
+        self.messages = Messages(messages)
+        self.plots = output_dict.pop("plots", [])
         self.handle_outputs(output_dict)
 
         # validate the output
