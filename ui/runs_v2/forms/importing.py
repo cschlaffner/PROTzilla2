@@ -11,6 +11,10 @@ class IntensityType(Enum):
     INTENSITY = "Intensity"
     LFQ_INTENSITY = "LFQ intensity"
 
+class FeatureOrientationType(Enum):
+    COLUMNS = "Columns (samples in rows, features in columns)"
+    ROWS = "Rows (features in rows, samples in columns)"
+
 
 class MaxQuantImportForm(MethodForm):
     file_path = CustomFileField(label="MaxQuant intensities file")
@@ -25,9 +29,24 @@ class MaxQuantImportForm(MethodForm):
         run.step_calculate(self.cleaned_data)
 
 
-class FeatureOrientationType(Enum):
-    COLUMNS = "Columns (samples in rows, features in columns)"
-    ROWS = "Rows (features in rows, samples in columns)"
+class DiannImportForm(MethodForm):
+    file_path = CustomFileField(label="DIA-NN intensities file:")
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
+
+
+class MSFraggerImportForm(MethodForm)
+    file_path = CustomFileField(label="MSFragger intensities file")
+    intensity_name = CustomChoiceField(choices=IntensityNameType, label="intensity name")
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class MetadataImportForm(MethodForm):
@@ -35,6 +54,23 @@ class MetadataImportForm(MethodForm):
     feature_orientation = CustomChoiceField(
         choices=FeatureOrientationType, label="Feature orientation"
     )
+
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
+
+class MetadataImportMethodDiannForm(MethodForm):
+    filepath = CustomFileField(label="Run-Relationship metadata file:")
+    groupby_sample = CustomBooleanField(
+        label="Group replicate runs by sample using median", required=False
+    )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
+
+class MetadataColumnAssignmentForm(MethodForm):
+
+    metadata_required_column = CustomChoiceField(label="Missing, but required metadata columns")
+    metadata_unknown_column = CustomChoiceField(label="Existing, but unknown metadata columns")
+    #TODO: "categories": []  (workflow_meta.json line 129, 136)
 
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
