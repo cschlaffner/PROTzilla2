@@ -132,14 +132,16 @@ def detail(request, run_name):
             run_name=run_name,
             section=run.steps.current_step.section,
             step=run.steps.current_step.step,
-            display_name=f"{name_to_title(run.step)}",
+            display_name=f"{name_to_title(run.current_step.name)}",
             displayed_history=make_displayed_history(run),  # TODO
             method_dropdown=make_method_dropdown(run, section, step, method),  # TODO
             fields=make_current_fields(run, section, step, method),
             plot_fields=make_plot_fields(run, section, step, method),  # TODO
-            name_field=make_name_field(results_exist(run), run, end_of_run),  # TODo
+            name_field=make_name_field(
+                run.current_step.finished, run, end_of_run
+            ),  # TODo
             current_plots=current_plots,
-            results_exist=results_exist(run),  # TODO
+            results_exist=run.current_step.finished,
             show_back=run.steps.current_step_index > 0,
             show_plot_button=not run.current_outputs.is_empty,
             sidebar=make_sidebar(request, run, run_name),  # TODO
@@ -631,23 +633,6 @@ def add_name(request, run_name):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
-def results_exist(run: Run) -> bool:
-    """
-    Checks if the last step has produced valid results.
-
-    :param run: the run to check
-
-    :return: True if the results are valid, False otherwise
-    """
-    if run.section == "importing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_preprocessing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_analysis" or run.section == "data_integration":
-        return run.calculated_method is not None or (run.step == "plot" and run.plots)
-    return True
-
-
 def results_exist_json(request, run_name):
     """
     Checks if the results of the run exist. This is used to determine if the Next button
@@ -662,7 +647,7 @@ def results_exist_json(request, run_name):
     :rtype: JsonResponse
     """
     run = active_runs[run_name]
-    return JsonResponse(dict(results_exist=results_exist(run)))
+    return JsonResponse(dict(results_exist=run.current_step.finished))
 
 
 def all_button_parameters(request, run_name):
@@ -686,7 +671,7 @@ def all_button_parameters(request, run_name):
         run.plotted_for_parameters if run.plotted_for_parameters is not None else dict()
     )
 
-    if run.current_parameters is None or run.result_df is None:
+    if run.current_parameters is None or not run.current_step.finished:
         d["current_parameters"] = dict()
         d["chosen_method"] = dict()
     else:

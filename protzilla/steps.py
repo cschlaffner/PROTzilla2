@@ -26,6 +26,7 @@ class Step:
         self.plots = []
         self.parameter_names = []
         self.output_names = []
+        self.finished = False
 
     def __repr__(self):
         return self.__class__.__name__
@@ -47,7 +48,7 @@ class Step:
         self.handle_outputs(output_dict)
 
         # validate the output
-        self.validate_outputs(self.output_names)
+        self.finished = self.valid_outputs(self.output_names)
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
@@ -63,10 +64,11 @@ class Step:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
 
-    def validate_outputs(self, required_keys: list[str]):
+    def valid_outputs(self, required_keys: list[str]) -> bool:
         for key in required_keys:
             if key not in self.output.output:
-                raise ValueError(f"Missing output {key} in output")
+                return False
+        return True
 
 
 class ImportingStep(Step):
