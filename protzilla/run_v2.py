@@ -6,7 +6,7 @@ import protzilla.constants.paths as paths
 from protzilla.disk_operator import DiskOperator
 from protzilla.methods.data_preprocessing import ImputationMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
-from protzilla.steps import Step, StepManager
+from protzilla.steps import Step, StepManager, Plots
 
 
 def get_available_run_names() -> list[str]:
@@ -91,7 +91,7 @@ class Run:
         return self.steps.current_step.messages
 
     @property
-    def current_plots(self):
+    def current_plots(self) -> Plots | None:
         return self.steps.current_step.plots
 
     @property

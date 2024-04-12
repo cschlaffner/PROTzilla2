@@ -714,7 +714,7 @@ def download_plots(request, run_name):
     """
     run = active_runs[run_name]
     format_ = request.GET["format"]
-    exported = run.export_plots(format_=format_)
+    exported = run.current_plots.export(format_=format_)
     if len(exported) == 1:
         filename = f"{run.step_index}-{run.section}-{run.step}-{run.method}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
