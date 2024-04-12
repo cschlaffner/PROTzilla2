@@ -104,8 +104,8 @@ class Messages:
             messages = []
         self.messages = messages
 
-        def __iter__(self):
-            return iter(self.messages)
+    def __iter__(self):
+        return iter(self.messages)
 
 
 class Plots:
