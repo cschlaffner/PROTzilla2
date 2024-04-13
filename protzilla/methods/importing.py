@@ -19,11 +19,11 @@ from protzilla.steps import Step, StepManager
 class ImportingStep(Step):
     section = "importing"
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
+    def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
-        return None
+    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+        return kwargs
 
 
 class MaxQuantImport(ImportingStep):
@@ -35,11 +35,8 @@ class MaxQuantImport(ImportingStep):
     parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
     output_names = ["protein_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return max_quant_import(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return None
+    def method(self, **kwargs):
+        return max_quant_import(**kwargs)
 
 
 class DiannImport(ImportingStep):
@@ -51,8 +48,8 @@ class DiannImport(ImportingStep):
     parameter_names = ["file_path", "map_to_uniprot"]
     output_names = ["protein_df"]
 
-    def method(self, dataframe: pd.Dataframe, **kwargs):
-        return diann_import(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return diann_import(**kwargs)
 
 
 class MsFraggerImport(ImportingStep):
@@ -64,8 +61,8 @@ class MsFraggerImport(ImportingStep):
     parameter_names = ["file_path", "intensity_name", "map_to_uniprot"]
     output_names = ["protein_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return ms_fragger_import(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return ms_fragger_import(**kwargs)
 
 
 class MetadataImport(ImportingStep):
@@ -77,8 +74,12 @@ class MetadataImport(ImportingStep):
     parameter_names = ["file_path", "feature_orientation"]
     output_names = ["metadata_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return metadata_import_method(**kwargs)
+
+    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+        kwargs["protein_df"] = None
+        return kwargs
 
 
 class MetadataImportMethodDiann(ImportingStep):
@@ -90,8 +91,12 @@ class MetadataImportMethodDiann(ImportingStep):
     parameter_names = ["file_path", "groupby_sample"]
     output_names = ["metadata_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_import_method_diann(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return metadata_import_method_diann(**kwargs)
+
+    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+        kwargs["protein_df"] = None
+        return kwargs
 
 
 class MetadataColumnAssignment(ImportingStep):
@@ -109,8 +114,8 @@ class MetadataColumnAssignment(ImportingStep):
     ]
     output_names = ["metadata_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return metadata_column_assignment(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return metadata_column_assignment(**kwargs)
 
 
 class PeptideImport(ImportingStep):
@@ -122,5 +127,5 @@ class PeptideImport(ImportingStep):
     parameter_names = ["file_path", "intensity_name"]
     output_names = ["peptide_df"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return peptide_import(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return peptide_import(**kwargs)

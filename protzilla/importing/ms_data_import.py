@@ -8,9 +8,7 @@ import pandas as pd
 from protzilla.data_integration.database_query import biomart_query
 
 
-def max_quant_import(
-    _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
-) -> dict:
+def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) -> dict:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
         df = pd.read_csv(
@@ -40,7 +38,7 @@ def max_quant_import(
 
 
 def ms_fragger_import(
-    _: pd.DataFrame, file_path: str, intensity_name: str, map_to_uniprot=False
+    file_path: str, intensity_name: str, map_to_uniprot=False
 ) -> dict:
     assert intensity_name in [
         "Intensity",
@@ -91,7 +89,7 @@ def ms_fragger_import(
         return dict(None, messages=[dict(level=logging.ERROR, msg=msg)])
 
 
-def diann_import(_, file_path, map_to_uniprot=False) -> dict:
+def diann_import(file_path, map_to_uniprot=False) -> dict:
     try:
         df = pd.read_csv(
             file_path,

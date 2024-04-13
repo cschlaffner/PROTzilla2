@@ -72,21 +72,21 @@ def test_metadata_column_assignment():
     # this is a workaround because the metadata is not passed properly using calculate_and_next,
     # TODO but it works in the UI, it would be better to fix this
     metadata_import.metadata_column_assignment(
-        df=run.df,
+        protein_df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="Sample_renamed",
         metadata_unknown_column="Sample",
     )
     assert run.metadata.columns[0] == "Sample_renamed"
     metadata_import.metadata_column_assignment(
-        df=run.df,
+        protein_df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="Sample",
         metadata_unknown_column="Sample_renamed",
     )
     assert run.metadata.columns[0] == "Sample"
     df, out = metadata_import.metadata_column_assignment(
-        df=run.df,
+        protein_df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="Group",
         metadata_unknown_column="Sample",
@@ -94,7 +94,7 @@ def test_metadata_column_assignment():
     assert out["messages"][0]["level"] == logging.ERROR
     assert out["messages"][0]["msg"]
     df_new, out_new = metadata_import.metadata_column_assignment(
-        df=run.df,
+        protein_df=run.df,
         metadata_df=run.metadata,
         metadata_required_column="",
         metadata_unknown_column="",
