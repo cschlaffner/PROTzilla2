@@ -27,6 +27,8 @@ class FeatureOrientationType(Enum):
     COLUMNS = "Columns (samples in rows, features in columns)"
     ROWS = "Rows (features in rows, samples in columns)"
 
+class EmptyEnum(Enum):
+    pass
 
 class MaxQuantImportForm(MethodForm):
     file_path = CustomFileField(label="MaxQuant intensities file")
@@ -84,10 +86,6 @@ class MetadataImportMethodDiannForm(MethodForm):
         run.step_calculate(self.cleaned_data)
 
 
-class EmptyEnum(Enum):
-    pass
-
-
 class MetadataColumnAssignmentForm(MethodForm):
     metadata_required_column = CustomChoiceField(
         choices=EmptyEnum, label="Missing, but required metadata columns"
@@ -98,5 +96,13 @@ class MetadataColumnAssignmentForm(MethodForm):
 
     # TODO: "categories": []  (workflow_meta.json line 129, 136)
 
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
+
+class PeptideImportForm(MethodForm):
+    file_path = CustomFileField(label="Peptide file")
+    intensity_name = CustomChoiceField(
+        choices=IntensityType, label="Intensity parameter (same as MS-Data)"
+    )
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
