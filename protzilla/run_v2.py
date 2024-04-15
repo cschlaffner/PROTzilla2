@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 
 import protzilla.constants.paths as paths
-from protzilla.methods.data_preprocessing import ImputationMinPerProtein
-from protzilla.methods.importing import MaxQuantImport
 from protzilla.steps import Plots, Step, StepManager
 
 
@@ -17,6 +15,14 @@ def get_available_run_names() -> list[str]:
 
 
 class Run:
+    def auto_save(func):
+        def wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            self._run_write()
+            return result
+
+        return wrapper
+
     def __init__(
         self, run_name: str, workflow_name: str | None = None, df_mode: str = "disk"
     ):
@@ -25,14 +31,14 @@ class Run:
         self.run_name = run_name
         self.workflow_name = workflow_name
 
+        self.disk_operator = DiskOperator(run_name, workflow_name)
         self.steps = StepManager()
-        self.disk_operator = DiskOperator()
         self.df_mode = df_mode
 
         if run_name in get_available_run_names():
-            self._run_read_existing()
+            self._run_read()
         elif workflow_name:
-            self._run_read_new()
+            self._workflow_read()
         else:
             raise ValueError(
                 f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
@@ -41,19 +47,17 @@ class Run:
     def __repr__(self):
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 
+    def _run_read(self):
+        self.steps = self.disk_operator.read_run()
+
     def _run_write(self):
-        self.disk_operator.write_run(self)
+        self.disk_operator.write_run(self.steps)
 
-    def _run_read_existing(self):
-        self.steps = self.disk_operator.read_steps(self.run_disk_path)
-        self.steps.current_step_index = self.disk_operator.read_step_index(
-            self.run_disk_path
-        )
+    def _workflow_read(self):
+        self.steps = self.disk_operator.read_workflow()
 
-    def _run_read_new(self):
-        self.steps = self.disk_operator.read_workflow(self.workflow_name)
-        self.steps.current_step_index = 0
-        self._run_write()
+    def _workflow_write(self):
+        self.disk_operator.export_workflow(self.steps)
 
     @auto_save
     def step_add(self, step: Step, step_index: int | None = None):
@@ -105,33 +109,3 @@ class Run:
     @property
     def current_step(self):
         return self.steps.current_step
-
-    def auto_save(func):
-        def wrapper(self, *args, **kwargs):
-            result = func(self, *args, **kwargs)
-            self._run_write()
-            return result
-
-
-if __name__ == "__main__":
-    run = Run("new_stepwrapper")
-    run.step_add(MaxQuantImport())
-    run.step_add(ImputationMinPerProtein())
-
-    run.step_calculate(
-        {
-            "file_path": "/home/henning/BP2023BR1/PROTzilla2/example/MaxQuant_data/proteinGroups_small.txt",
-            "map_to_uniprot": True,
-            "intensity_name": "Intensity",
-        }
-    )
-    run.step_calculate({"shrinking_value": 0.5})
-    run.run_write()
-    run2 = Run()
-    run2.run_read("new_stepwrapper")
-    run2.step_previous()
-    run2.step_previous()
-    run2.step_calculate()
-    run2.step_calculate()
-
-    print("done")

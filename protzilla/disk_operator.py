@@ -9,44 +9,125 @@ import pandas as pd
 import yaml
 
 from protzilla.constants import paths
+from protzilla.run_v2 import Run
 from protzilla.steps import Messages, Output, Step, StepManager
 
 
+class YamlOperator:
+    @staticmethod
+    def read(file_path: Path):
+        with open(file_path, "r") as file:
+            return yaml.safe_load(file)
+
+    @staticmethod
+    def write(file_path: Path, data: dict):
+        with open(file_path, "w") as file:
+            yaml.dump(data, file)
+
+
+class JsonOperator:
+    @staticmethod
+    def read(file_path: Path):
+        with open(file_path, "r") as file:
+            return json.load(file)
+
+
+class DataFrameOperator:
+    @staticmethod
+    def read(file_path: Path):
+        return pd.read_csv(file_path)
+
+    @staticmethod
+    def write(file_path: Path, dataframe: pd.DataFrame):
+        dataframe.to_csv(file_path, index=False)
+
+
+RUN_FILE = "run.yaml"
+
+
+@dataclass
+class KEYS:
+    # We add this here to avoid typos and signal to the developer that accessing the keys should be done through this class only
+    CURRENT_STEP_INDEX = "current_step_index"
+    STEPS = "steps"
+    STEP_OUTPUTS = "output"
+    STEP_INPUTS = "inputs"
+    STEP_MESSAGES = "messages"
+    STEP_PLOTS = "plots"
+
+
 class DiskOperator:
-    @dataclass
-    class KEYS:
-        # We add this here to avoid typos and signal to the developer that accessing the keys should be done through this class only
-        RUN_NAME = "run_name"
-        CURRENT_STEP_INDEX = "current_step_index"
-        STEPS = "steps"
-        STEP_OUTPUTS = "output"
-        STEP_INPUTS = "inputs"
-        STEP_MESSAGES = "messages"
-        STEP_INDEX = "step_index"
+    def __init__(self, run_name: str, workflow_name: str):
+        self.run_name = run_name
+        self.workflow_name = workflow_name
+        self.yaml_operator = YamlOperator()
+        self.json_operator = JsonOperator()
+        self.dataframe_operator = DataFrameOperator()
 
-    def __init__(self):
-        self.step_dictionary = None
+    def read_run(self, file: Path = None) -> StepManager:
+        file if file else self.run_file
+        run = self.yaml_operator.read(self.run_file)
+        step_manager = StepManager()
+        for step_name, step_data in run[KEYS.STEPS].items():
+            step = self._read_step(step_name, step_data)
+            step_manager.add_step(step)
+        step_manager.current_step_index = run[KEYS.CURRENT_STEP_INDEX]
+        return step_manager
 
-    def read_step_index(self, base_dir: Path) -> int:
-        run_file = base_dir / "run.yaml"
-        with open(run_file, "r") as file:
-            data = yaml.safe_load(file)
-            return data[self.KEYS.CURRENT_STEP_INDEX]
+    def write_run(self, step_manager: StepManager) -> None:
+        run = {}
+        run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
+        run[KEYS.STEPS] = {}
+        for step in step_manager.all_steps:
+            # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id over a method_id
+            run[KEYS.STEPS][step.__class__.__name__] = self._write_step(step)
+        self.yaml_operator.write(self.run_file, run)
 
-    def read_step(self, step_type: str, step_data: dict, base_dir: Path) -> Step:
-        from protzilla.stepfactory import StepFactory  # to avoid a circular import
+    def read_workflow(self) -> StepManager:
+        # we can completely reuse the read_run, as the structure is the same
+        return self.read_run(self.workflow_file)
 
-        try:
-            step = StepFactory.create_step(step_type)
-            step.inputs = step_data[self.KEYS.STEP_INPUTS]
-            step.messages = Messages(step_data[self.KEYS.STEP_MESSAGES])
+    def export_workflow(self, step_manager: StepManager) -> None:
+        # it is basically like writing a run, but we only write the inputs and blacklist a few datatypes from inputs
+        # we can reuse the write_run method, but we need to modify the write_step method
+        workflow = {}
+        workflow[KEYS.CURRENT_STEP_INDEX] = 0
+        workflow[KEYS.STEPS] = {}
+        for step in step_manager.all_steps:
+            step_data = self._write_step(step, workflow_mode=True)
+            for key in step_data.get(KEYS.STEP_INPUTS, {}):
+                if isinstance(
+                    step_data[KEYS.STEP_INPUTS][key], pd.DataFrame
+                ) or isinstance(step_data[KEYS.STEP_INPUTS][key], Path):
+                    del step_data[KEYS.STEP_INPUTS][key]
+                # if it is a string, we still have to check if it is a path
+                elif isinstance(step_data[KEYS.STEP_INPUTS][key], str):
+                    if Path(step_data[KEYS.STEP_INPUTS][key]).exists():
+                        del step_data[KEYS.STEP_INPUTS][key]
+            workflow[KEYS.STEPS][step.__class__.__name__] = step_data
+        self.yaml_operator.write(self.workflow_file, workflow)
 
-            if step_data[self.KEYS.STEP_OUTPUTS]:
-                step.output = self._read_outputs(step_data[self.KEYS.STEP_OUTPUTS])
-            return step
-        except Exception as e:
-            logging.error(f"Error while reading step {step_type}: {e}")
-            raise
+    def _read_step(self, step_name, step_data: dict) -> Step:
+        from protzilla.stepfactory import StepFactory
+
+        step = StepFactory.create_step(step_name)
+        step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
+        step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
+        step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
+        step.plots = self._read_plots(
+            step_data.get(KEYS.STEP_PLOTS, [])
+        )  # TODO is [] the correct default?
+        return step
+
+    def _write_step(self, step: Step, workflow_mode: boolean = False) -> dict:
+        step_data = {}
+        step_data[KEYS.STEP_INPUTS] = step.inputs
+        if not workflow_mode:
+            step_data[KEYS.STEP_OUTPUTS] = self._write_output(
+                step_name=step.__class__.__name__, output=step.output
+            )
+            step_data[KEYS.STEP_MESSAGES] = step.messages.messages
+        return step_data
 
     def _read_outputs(self, output: dict) -> Output:
         step_output = {}
@@ -54,7 +135,7 @@ class DiskOperator:
             if isinstance(value, str):
                 if Path(value).exists():
                     try:
-                        step_output[key] = pd.read_csv(Path(value))
+                        step_output[key] = self.dataframe_operator.read(value)
                     except Exception as e:
                         logging.error(f"Error while reading output {key}: {e}")
                         step_output[key] = value
@@ -64,87 +145,48 @@ class DiskOperator:
                 output[key] = value
         return Output(step_output)
 
-    def read_steps(self, base_dir: Path) -> StepManager:
-        run_file = base_dir / "run.yaml"
-        with open(run_file, "r") as file:
-            data = yaml.safe_load(file)
-            steps = [None] * len(data[self.KEYS.STEPS])
-            for step_type, step_data in data[self.KEYS.STEPS].items():
-                step_index = step_data[self.KEYS.STEP_INDEX]
-                step = self.read_step(step_type, step_data, base_dir)
-                steps[step_index] = step
-            return StepManager(steps)
-
-    def read_workflow(self, workflow_name: str) -> StepManager:
-        workflow_file = paths.WORKFLOWS_PATH / f"{workflow_name}.json"
-        with open(workflow_file, "r") as file:
-            data = json.load(file)
-            importing_steps = data["sections"]["importing"]["steps"]
-            data_preprocessing_steps = data["sections"]["data_preprocessing"]["steps"]
-            analysis_steps = data["sections"]["data_analysis"]["steps"]
-            integration_steps = data["sections"]["data_integration"]["steps"]
-            all_steps = (
-                importing_steps
-                + data_preprocessing_steps
-                + analysis_steps
-                + integration_steps
-            )
-
-            return StepManager(
-                [StepFactory.create_step(step["method"]) for step in all_steps]
-            )
-
-    def write_run(self, run):
-        run_data = {
-            self.KEYS.RUN_NAME: run.run_name,
-            self.KEYS.CURRENT_STEP_INDEX: run.steps.current_step_index,
-            self.KEYS.STEPS: {
-                step.__class__.__name__: self.prepare_step_data(
-                    step, index, run.run_disk_path
-                )
-                for index, step in enumerate(run.steps.all_steps)
-            },
-        }
-        run.run_disk_path.mkdir(parents=True, exist_ok=True)
-        run_file = run.run_disk_path / "run.yaml"
-        with open(run_file, "w") as file:
-            yaml.dump(run_data, file)
-        logging.info(f"Run {run.run_name} saved to {run_file}")
-
-    def prepare_step_data(self, step: Step, step_index: int, base_dir: Path) -> dict:
-        self.step_dictionary = {
-            self.KEYS.STEP_INDEX: step_index,
-            self.KEYS.STEP_INPUTS: {},
-            self.KEYS.STEP_OUTPUTS: {},
-            self.KEYS.STEP_MESSAGES: {},
-        }
-        if not step.output.is_empty:
-            self.write_outputs(step, base_dir)
-
-        if step.inputs:
-            self.write_inputs(step)
-        return self.step_dictionary
-
-    def write_outputs(self, step: Step, base_dir: Path):
-        dataframe_dir = base_dir / "dataframes"
-        for key, value in step.output.output.items():
+    def _write_output(self, step_name: str, output: Output) -> dict:
+        output_data = {}
+        for key, value in output:
             if isinstance(value, pd.DataFrame):
-                try:
-                    dataframe_dir.mkdir(parents=True, exist_ok=True)
-                    file_path = dataframe_dir / f"{step.__class__.__name__}.{key}.csv"
-                    value.to_csv(file_path, index=False)
-                    self.step_dictionary[self.KEYS.STEP_OUTPUTS][key] = str(file_path)
-                except Exception as e:
-                    self.step_dictionary[self.KEYS.STEP_OUTPUTS][key] = None
-                    logging.error(f"Error while writing output {key}: {e}")
-
+                file_path = self.dataframe_dir / f"{step_name}_{key}.csv"
+                self.dataframe_operator.write(file_path, value)
+                output_data[key] = str(file_path)
             else:
-                self.step_dictionary[self.KEYS.STEP_OUTPUTS][key] = value
+                output_data[key] = value
+        return output_data
 
-    def write_inputs(self, step: Step):
-        for key, value in step.inputs.items():
-            self.step_dictionary[self.KEYS.STEP_INPUTS][key] = value
+    def _read_plots(self, plots: list) -> list:
+        if plots:
+            raise NotImplementedError  # TODo
+        return []
 
-    def write_messages(self, step: Step):
-        for message in step.messages:
-            self.step_dictionary[self.KEYS.STEP_MESSAGES].append(message)
+    def _write_plots(self, plots: list) -> dict:
+        raise NotImplementedError  # TODO
+
+    @property
+    def run_dir(self):
+        return paths.RUNS_PATH / self.run_name
+
+    @property
+    def run_file(self) -> Path:
+        return self.run_dir / RUN_FILE
+
+    @property
+    def workflow_file(self) -> Path:
+        return paths.WORKFLOWS_PATH / f"{self.workflow_name}.yaml"
+
+    @property
+    def dataframe_dir(self) -> Path:
+        return self.run_dir / "dataframes"
+
+    @property
+    def plot_dir(self) -> Path:
+        return self.run_dir / "plots"
+
+
+if __name__ == "__main__":
+    run = Run(run_name="OVERHAUL", workflow_name="OVERHAUL_WORKFLOW")
+    run._run_write()
+    run._workflow_write()
+    print("done")
