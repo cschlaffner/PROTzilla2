@@ -264,13 +264,12 @@ def tables(request, run_name, index, key=None):
 
     # TODO this will change with the update to df_mode
     # use current output when applicable (not yet in history)
-    if False:  # or index < len(run.history.steps):
-        history_step = run.history.steps[index]
-        outputs = history_step.outputs
-        section = history_step.section
-        step = history_step.step
-        method = history_step.method
-        name = run.history.step_names[index]
+    if index < len(run.steps.previous_steps):
+        outputs = run.steps.previous_steps[index].output
+        section = run.steps.previous_steps[index].section
+        step = run.steps.previous_steps[index].step
+        method = run.steps.previous_steps[index].method_id
+        name = run.steps.previous_steps[index].name
     else:
         outputs = run.current_outputs
         section = run.current_step.section
@@ -370,8 +369,8 @@ def navigate(request, run_name):
 def tables_content(request, run_name, index, key):
     run = active_runs[run_name]
     # TODO this will change with df_mode implementation
-    if False:  # index < len(run.history.steps):
-        outputs = run.history.steps[index].outputs[key]
+    if index < len(run.steps.previous_steps):
+        outputs = run.steps.previous_steps[index].output[key]
     else:
         outputs = run.current_outputs[key]
     out = outputs.replace(np.nan, None)
