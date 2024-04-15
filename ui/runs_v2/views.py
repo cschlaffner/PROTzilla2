@@ -387,3 +387,7 @@ def tables_content(request, run_name, index, key):
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
+
+
+def protein_graph(request, run_name):
+    raise NotImplementedError("Protein graphs are not yet implemented.")

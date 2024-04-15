@@ -193,7 +193,7 @@ class StepManager:
             raise ValueError(f"Unknown section {section}")
 
     @property
-    def previous_steps(self):
+    def previous_steps(self) -> list[Step]:
         return self.all_steps[: self.current_step_index]
 
     @property

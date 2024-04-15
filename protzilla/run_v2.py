@@ -44,6 +44,14 @@ class Run:
                 f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
             )
 
+    def auto_save(func):
+        def wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            self._run_write()
+            return result
+
+        return wrapper
+
     def __repr__(self):
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 

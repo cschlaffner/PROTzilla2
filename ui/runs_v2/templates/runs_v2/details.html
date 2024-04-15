@@ -67,16 +67,14 @@
                                     {% endif %}
 
                                     <b>{{ step.display_name }}</b><br>
-                                    {% if step.name %}
-                                        Name: {{ step.name }}<br>
-                                    {% endif %}
 
                                     <div class="mb-3">
-                                        {% if "Classification" in step.display_name %}
-                                            {% include "runs/fields_classification_methods.html" with fields=step.fields history=True %}
-                                        {% else %}
-                                            {% include "runs/fields.html" with fields=step.fields %}
-                                        {% endif %}
+                                        {% for field in step.form %}
+                                            <div class="fieldWrapper">
+                                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                                {{ field }}
+                                            </div>
+                                        {% endfor %}
                                         <div class="d-flex flex-nowrap">
                                             {% if step.table_link %}
                                                 <a href="{{ step.table_link }}" target="_blank"

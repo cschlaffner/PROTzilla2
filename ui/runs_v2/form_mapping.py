@@ -64,6 +64,13 @@ def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
     return _get_form_class_by_step(step)(run=run)
 
 
+def get_filled_form_by_method(
+    step: Step, run: Run, in_history: bool = False
+) -> MethodForm:
+    form_class = _get_form_class_by_step(step)
+    return form_class(run=run, readonly=in_history, data=step.inputs)
+
+
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
     form_class = _get_form_class_by_step(run.steps.current_step)
     return form_class(run=run, data=request.POST, files=request.FILES)

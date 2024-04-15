@@ -24,4 +24,9 @@ urlpatterns = [
     ),
     path("<str:run_name>/delete_step", views.delete_step, name="delete_step"),
     path("<str:run_name>/navigate", views.navigate, name="navigate"),
+    path(
+        "<str:run_name>/protein_graph/<int:index>",
+        views.protein_graph,
+        name="protein_graph",
+    ),
 ]

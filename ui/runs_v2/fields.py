@@ -216,39 +216,17 @@ def make_displayed_history(run: Run) -> str:
 
     :return: The html for the displayed history
     """
-    # TODO fix all of this later
     displayed_history = []
-    return displayed_history
+
     for i, step in enumerate(run.steps.previous_steps):
-        fields = []
-        # should parameters be copied, so workflow_meta won't change?
-        # parameters = run.workflow_meta[step.section][step.step][
-        #    step.method
-        # ]["parameters"]
-        parameters = step.inputs
-        name = f"{name_to_title(step.step)}: {name_to_title(step.method)}"
+        name = f"{name_to_title(step.step)}: {name_to_title(step.method_id)}"
         section_heading = (
             name_to_title(step.section)
             if run.steps.all_steps[i - 1].section != step.section
             else None
         )
-        if step.section == "importing":
-            fields = [""]
-        else:
-            for key, param_dict in parameters.items():
-                if "dynamic" in param_dict:
-                    continue
-                if key == "proteins_of_interest" and key not in step.parameters:
-                    step.parameters[key] = ["", ""]
-                param_dict["default"] = (
-                    step.parameters[key] if key in step.parameters else None
-                )
-                if param_dict["type"] == "named_output":
-                    param_dict["steps"] = [param_dict["default"][0]]
-                    param_dict["outputs"] = [param_dict["default"][1]]
-                fields.append(
-                    make_parameter_input(key, param_dict, parameters, disabled=True)
-                )
+
+        form = form_map.get_filled_form_by_method(step, run, in_history=True)
 
         plots = []
         for plot in step.plots:
@@ -271,23 +249,23 @@ def make_displayed_history(run: Run) -> str:
             else:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-        has_df = any(isinstance(v, pandas.DataFrame) for v in step.outputs.values())
-        table_url = reverse("runs_v2tables_nokey", args=(run.run_name, i))
+        has_df = any(isinstance(v, pandas.DataFrame) for _, v in step.output)
+        table_url = reverse("runs_v2:tables_nokey", args=(run.run_name, i))
 
         has_protein_graph = (
-            "graph_path" in step.outputs
-            and step.outputs["graph_path"] is not None
-            and Path(step.outputs["graph_path"]).exists()
+            "graph_path" in step.output
+            and step.output["graph_path"] is not None
+            and Path(step.output["graph_path"]).exists()
         )
-        protein_graph_url = reverse("runs_v2protein_graph", args=(run.run_name, i))
+        protein_graph_url = reverse("runs_v2:protein_graph", args=(run.run_name, i))
 
         displayed_history.append(
             dict(
                 display_name=name,
-                fields=fields,
+                form=form,
                 plots=plots,
                 section_heading=section_heading,
-                name=run.history.step_names[i],
+                name=step.name,
                 index=i,
                 table_link=table_url if has_df else "",
                 protein_graph_link=protein_graph_url if has_protein_graph else "",
