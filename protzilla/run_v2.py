@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 import protzilla.constants.paths as paths
-from protzilla.methods.data_preprocessing import ImputationMinPerProtein
+from protzilla.methods.data_preprocessing import ImputationByMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
 from protzilla.steps import Plots, Step, StepManager
 
@@ -37,6 +37,12 @@ class Run:
             raise ValueError(
                 f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
             )
+
+    def auto_save(func):
+        def wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            self._run_write()
+            return result
 
     def __repr__(self):
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
@@ -106,17 +112,11 @@ class Run:
     def current_step(self):
         return self.steps.current_step
 
-    def auto_save(func):
-        def wrapper(self, *args, **kwargs):
-            result = func(self, *args, **kwargs)
-            self._run_write()
-            return result
-
 
 if __name__ == "__main__":
     run = Run("new_stepwrapper")
     run.step_add(MaxQuantImport())
-    run.step_add(ImputationMinPerProtein())
+    run.step_add(ImputationByMinPerProtein())
 
     run.step_calculate(
         {
