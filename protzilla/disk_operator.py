@@ -9,6 +9,7 @@ import pandas as pd
 import yaml
 
 from protzilla.constants import paths
+from protzilla.stepfactory import StepFactory
 from protzilla.steps import Messages, Output, Step, StepManager
 
 

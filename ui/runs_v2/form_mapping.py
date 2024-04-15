@@ -8,6 +8,7 @@ import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
+
 from .forms.base import MethodForm
 
 _forward_mapping = {
@@ -37,7 +38,7 @@ def generate_hierarchical_dict() -> dict[str, dict[str, dict[str, type[Step]]]]:
         if step_class.step not in hierarchical_dict[step_class.section]:
             hierarchical_dict[step_class.section][step_class.step] = {}
         hierarchical_dict[step_class.section][step_class.step][
-            step_class.method_id
+            step_class.__name__
         ] = step_class
 
     return hierarchical_dict
