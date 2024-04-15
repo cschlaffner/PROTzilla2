@@ -12,8 +12,7 @@ from protzilla.stepfactory import StepFactory
 from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
-from ui.runs_v2.views_helper import display_messages
-
+from ui.runs_v2.views_helper import display_messages, parameters_from_post
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
 active_runs: dict[str, Run] = {}
@@ -228,6 +227,33 @@ def back(request, run_name):
     run = active_runs[run_name]
     run.step_previous()
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
+
+
+def plot(request, run_name):
+    """
+    Creates a plot from the current step/method of the run.
+    This is only called by the plot button in the data preprocessing section aka when a plot is
+    simultaneously a step on its own.
+    Django messages are used to display additional information, warnings and errors to the user.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run, now with the plot
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    parameters = parameters_from_post(request.POST)
+
+    if run.current_step.name == "plot":
+        del parameters["chosen_method"]
+        run.step_calculate(parameters)
+    else:
+        run.current_step.plot(parameters)
+
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
 def tables(request, run_name, index, key=None):

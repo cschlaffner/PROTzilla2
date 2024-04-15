@@ -2,13 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-import protzilla.data_preprocessing.filter_proteins as filter_proteins
-import protzilla.data_preprocessing.filter_samples as filter_samples
-import protzilla.data_preprocessing.imputation as imputation
-import protzilla.data_preprocessing.normalisation as normalisation
-import protzilla.data_preprocessing.outlier_detection as outlier_detection
-import protzilla.data_preprocessing.peptide_filter as peptide_filter
-import protzilla.data_preprocessing.transformation as transformation
+from protzilla.data_preprocessing.imputation import by_min_per_protein
 from protzilla.steps import Step, StepManager
 
 
@@ -177,79 +171,4 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     parameter_names = ["shrinking_value"]
 
     def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_min_per_sample(dataframe, **kwargs)
-
-
-class ImputationMinPerDataset(DataPreprocessingStep):
-    name = "Min per dataset"
-    step = "imputation"
-    method_id = "by_min_per_dataset"
-    method_description = "Impute missing values by the minimum per dataset"
-
-    parameter_names = ["shrinking_value"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_min_per_dataset(dataframe, **kwargs)
-
-
-class ImputationMinPerSample(DataPreprocessingStep):
-    name = "Min per sample"
-    step = "imputation"
-    method_id = "by_min_per_sample"
-    method_description = "Impute missing values by the minimum per sample"
-
-    parameter_names = ["shrinking_value"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_min_per_sample(dataframe, **kwargs)
-
-
-class ImputationSimpleImputer(DataPreprocessingStep):
-    name = "Simple imputer"
-    step = "imputation"
-    method_id = "by_simple_imputer"
-    method_description = "Impute missing values by the mean per protein"
-
-    parameter_names = ["strategy"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_simple_imputer(dataframe, **kwargs)
-
-
-class ImputationByKNN(DataPreprocessingStep):
-    name = "KNN"
-    step = "imputation"
-    method_id = "by_knn"
-    method_description = "Impute missing values by KNN"
-
-    parameter_names = ["number_of_neighbours"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_knn(dataframe, **kwargs)
-
-
-class ImputationByNormalDistribution(DataPreprocessingStep):
-    name = "Normal distribution"
-    step = "imputation"
-    method_id = "by_normal_distribution"
-    method_description = "Impute missing values by normal distribution"
-
-    parameter_names = ["down_shift", "scaling_factor", "strategy"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_normal_distribution_sampling(dataframe, **kwargs)
-
-
-class FilterPeptidesByPEP(DataPreprocessingStep):
-    name = "PEP"
-    step = "peptide_filter"
-    method_id = "by_pep"
-    method_description = "Filter peptides by PEP"
-
-    parameter_names = ["threshold"]
-
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return peptide_filter.by_pep_value(dataframe, **kwargs)
-
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.peptide_df
+        return by_min_per_protein(dataframe, **kwargs)

@@ -1,7 +1,9 @@
 from django.http import HttpRequest
 
+import protzilla.methods.data_analysis as data_analysis
 import protzilla.methods.data_preprocessing as data_preprocessing
 import protzilla.methods.importing as importing
+import ui.runs_v2.forms.data_analysis as data_analysis_forms
 import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
@@ -12,6 +14,7 @@ _forward_mapping = {
     importing.MaxQuantImport: importing_forms.MaxQuantImportForm,
     importing.MetadataImport: importing_forms.MetadataImportForm,
     data_preprocessing.ImputationMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
+    data_analysis.DifferentialExpression_TTest: data_analysis_forms.DifferentialExpression_TTestForm,
 }
 
 

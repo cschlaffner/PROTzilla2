@@ -25,10 +25,7 @@ class LogBase(Enum):
     log10 = "log10"
 
 
-class Groups(Enum):
-
-
-class DifferentialExpression_TTest(MethodForm):
+class DifferentialExpression_TTestForm(MethodForm):
     ttest_type = CustomChoiceField(choices=TTestType, label="T-test type")
 
     # intensity_df = CustomChoiceField(
@@ -48,11 +45,6 @@ class DifferentialExpression_TTest(MethodForm):
     group1 = "Put a usefull default here"
 
     group2 = "Put a usefull default here"
-
-    file_path = CustomFileField(label="Metadata file")
-    feature_orientation = CustomChoiceField(
-        choices=FeatureOrientationType, label="Feature orientation"
-    )
 
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)

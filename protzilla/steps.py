@@ -28,9 +28,10 @@ class Step:
 
         # validate the inputs for the step
         self.validate_inputs(self.parameter_names)
+        inputs = self.get_input_dataframe(steps, self.inputs)
 
         # calculate the step
-        output_dict = self.method(self.get_input_dataframe(steps), **self.inputs)
+        output_dict = self.method(**inputs)
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
@@ -42,11 +43,11 @@ class Step:
         # validate the output
         self.finished = self.valid_outputs(self.output_names)
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
+    def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def get_input_dataframe(self, steps: StepManager) -> pd.DataFrame | None:
-        return None
+    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+        return kwargs
 
     def handle_outputs(self, output_dict: dict):
         self.output = Output(output_dict)
@@ -78,6 +79,9 @@ class Output:
 
     def __repr__(self):
         return f"Output: {self.output}"
+
+    def __contains__(self, key):
+        return key in self.output
 
     @property
     def intensity_df(self):
@@ -202,9 +206,9 @@ class StepManager:
     @property
     def protein_df(self):
         # find the last step that has a protein_df in its output
-        for step in reversed(self.all_steps):
-            if step.output.protein_df is not None:
-                return step.output.protein_df
+        for step in reversed(self.previous_steps):
+            if "protein_df" in step.output and step.output["protein_df"] is not None:
+                return step.output["protein_df"]
         logging.warning("No intensity_df found in steps")
 
     @property
