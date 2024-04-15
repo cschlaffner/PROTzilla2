@@ -21,6 +21,11 @@ class YamlOperator:
 
     @staticmethod
     def write(file_path: Path, data: dict):
+        if not file_path.exists():
+            if not file_path.parent.exists():
+                file_path.parent.mkdir(parents=True)
+            file_path.touch()
+            logging.warning(f"File {file_path} did not exist and was created")
         with open(file_path, "w") as file:
             yaml.dump(data, file)
 
@@ -65,8 +70,7 @@ class DiskOperator:
         self.dataframe_operator = DataFrameOperator()
 
     def read_run(self, file: Path = None) -> StepManager:
-        file if file else self.run_file
-        run = self.yaml_operator.read(self.run_file)
+        run = self.yaml_operator.read(file or self.run_file)
         step_manager = StepManager()
         for step_name, step_data in run[KEYS.STEPS].items():
             step = self._read_step(step_name, step_data)
@@ -75,6 +79,10 @@ class DiskOperator:
         return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
+        if not self.run_dir.exists():
+            self.run_dir.mkdir(parents=True)
+        if not self.dataframe_dir.exists():
+            self.dataframe_dir.mkdir(parents=True)
         run = {}
         run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
         run[KEYS.STEPS] = {}
