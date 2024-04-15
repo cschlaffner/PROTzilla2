@@ -13,6 +13,7 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
+
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
 active_runs: dict[str, Run] = {}
@@ -326,7 +327,18 @@ def add(request: HttpRequest, run_name: str):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-def export_workflow(request, run_name):
+def export_workflow(request: HttpRequest, run_name: str):
+    """
+    Exports the workflow of the run as a JSON file.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
     raise NotImplementedError("Exporting workflows is not yet implemented.")
 
 
