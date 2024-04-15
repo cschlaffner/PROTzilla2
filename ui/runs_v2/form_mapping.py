@@ -14,6 +14,7 @@ from .forms.base import MethodForm
 _forward_mapping = {
     importing.MaxQuantImport: importing_forms.MaxQuantImportForm,
     importing.MetadataImport: importing_forms.MetadataImportForm,
+    importing.PeptideImport: importing_forms.PeptideImportForm,
     data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
     data_analysis.DifferentialExpression_TTest: data_analysis_forms.DifferentialExpression_TTestForm,
 }

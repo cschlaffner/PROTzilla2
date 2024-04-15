@@ -1,8 +1,9 @@
 from pathlib import Path
 
+import networkx as nx
 import numpy as np
 import pandas as pd
-from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -388,5 +389,70 @@ def tables_content(request, run_name, index, key):
     )
 
 
-def protein_graph(request, run_name):
-    raise NotImplementedError("Protein graphs are not yet implemented.")
+def protein_graph(request, run_name, index: int):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
+    run = active_runs[run_name]
+
+    outputs = run.current_outputs
+
+    if "graph_path" not in outputs:
+        return HttpResponseBadRequest(
+            f"No Graph Path found in output of step with index {index}"
+        )
+
+    graph_path = outputs["graph_path"]
+    peptide_matches = outputs.get("peptide_matches", [])
+    peptide_mismatches = outputs.get("peptide_mismatches", [])
+    protein_id = outputs.get("protein_id", "")
+
+    if not Path(graph_path).exists():
+        return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
+
+    graph = nx.read_graphml(graph_path)
+
+    max_peptides = 0
+    min_peptides = 0
+    nodes = []
+
+    # count number of peptides for each node, set max_peptides and min_peptides
+    for node in graph.nodes():
+        peptides = graph.nodes[node].get("peptides", "")
+        if peptides != "":
+            peptides = peptides.split(";")
+            if len(peptides) > max_peptides:
+                max_peptides = len(peptides)
+            elif len(peptides) < min_peptides:
+                min_peptides = len(peptides)
+        nodes.append(
+            {
+                "data": {
+                    "id": node,
+                    "label": graph.nodes[node].get(
+                        "aminoacid", "####### ERROR #######"
+                    ),
+                    "match": graph.nodes[node].get("match", "false"),
+                    "peptides": graph.nodes[node].get("peptides", ""),
+                    "peptides_count": len(peptides),
+                }
+            }
+        )
+
+    edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
+    elements = nodes + edges
+
+    return render(
+        request,
+        "runs_v2/protein_graph.html",
+        context={
+            "elements": elements,
+            "peptide_matches": peptide_matches,
+            "peptide_mismatches": peptide_mismatches,
+            "protein_id": protein_id,
+            "filtered_blocks": outputs.get("filtered_blocks", []),
+            "max_peptides": max_peptides,
+            "min_peptides": min_peptides,
+            "run_name": run_name,
+            "used_memory": get_memory_usage(),
+        },
+    )
