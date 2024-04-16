@@ -126,6 +126,6 @@ def check_is_path(path: str | Path):
         return True
     elif isinstance(path, str):
         return (
-            Path(path).exists() or len(path.split("/")) > 1
+            Path(path).exists() or len(path.split("/")) > 1 or len(path.split("\\")) > 1
         )  # couldn't think of a good check with pathlib
     return False
