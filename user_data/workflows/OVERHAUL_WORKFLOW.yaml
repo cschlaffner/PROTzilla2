@@ -1,0 +1,6 @@
+current_step_index: 0
+steps:
+  MaxQuantImport:
+    inputs:
+      file_path: akjsdhkajsdhjkashdkj
+      test: test
