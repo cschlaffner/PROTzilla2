@@ -10,8 +10,9 @@ class DataPreprocessingStep(Step):
     section = "data_preprocessing"
     output_names = ["protein_df"]
 
-    def get_input_dataframe(self, steps: StepManager):
-        return steps.protein_df
+    def get_input_dataframe(self, steps: StepManager, kwargs: dict) -> dict:
+        kwargs["protein_df"] = steps.protein_df
+        return kwargs
 
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
@@ -24,8 +25,8 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
     parameter_names = ["percentage"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return filter_proteins.by_samples_missing(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return filter_proteins.by_samples_missing(**kwargs)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
@@ -38,8 +39,8 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
 
     parameter_names = ["percentage"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return filter_samples.by_proteins_missing(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return filter_samples.by_proteins_missing(**kwargs)
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
@@ -50,8 +51,8 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 
     parameter_names = ["number_of_components", "threshold"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return outlier_detection.by_pca(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return outlier_detection.by_pca(**kwargs)
 
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
@@ -62,8 +63,8 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
 
     parameter_names = ["number_of_neighbors", "n_jobs"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return outlier_detection.by_lof(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return outlier_detection.by_lof(**kwargs)
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
@@ -74,8 +75,8 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
 
     parameter_names = ["n_estimators", "n_jobs"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return outlier_detection.by_isolation_forest(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return outlier_detection.by_isolation_forest(**kwargs)
 
 
 class TransformationLog(DataPreprocessingStep):
@@ -86,8 +87,8 @@ class TransformationLog(DataPreprocessingStep):
 
     parameter_names = ["log_base"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return transformation.by_log(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return transformation.by_log(**kwargs)
 
 
 class NormalisationByZScore(DataPreprocessingStep):
@@ -98,8 +99,8 @@ class NormalisationByZScore(DataPreprocessingStep):
 
     parameter_names = []
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return normalisation.by_z_score(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return normalisation.by_z_score(**kwargs)
 
 
 class NormalisationByTotalSum(DataPreprocessingStep):
@@ -110,8 +111,8 @@ class NormalisationByTotalSum(DataPreprocessingStep):
 
     parameter_names = []
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return normalisation.by_totalsum(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return normalisation.by_totalsum(**kwargs)
 
 
 class NormalisationByMedian(DataPreprocessingStep):
@@ -122,8 +123,8 @@ class NormalisationByMedian(DataPreprocessingStep):
 
     parameter_names = ["percentile"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return normalisation.by_median(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return normalisation.by_median(**kwargs)
 
 
 class NormalisationByReferenceProtein(DataPreprocessingStep):
@@ -134,8 +135,8 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
 
     parameter_names = ["reference_protein"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return normalisation.by_reference_protein(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return normalisation.by_reference_protein(**kwargs)
 
 
 class ImputationByMinPerDataset(DataPreprocessingStep):
@@ -146,8 +147,8 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_min_per_dataset(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return imputation.by_min_per_dataset(**kwargs)
 
 
 class ImputationByMinPerProtein(DataPreprocessingStep):
@@ -158,8 +159,8 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return imputation.by_min_per_protein(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return imputation.by_min_per_protein(**kwargs)
 
 
 class ImputationByMinPerSample(DataPreprocessingStep):
@@ -170,5 +171,5 @@ class ImputationByMinPerSample(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, dataframe: pd.DataFrame, **kwargs):
-        return by_min_per_protein(dataframe, **kwargs)
+    def method(self, **kwargs):
+        return by_min_per_protein(**kwargs)
