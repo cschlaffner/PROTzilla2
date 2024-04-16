@@ -4,6 +4,7 @@ import operator
 import os
 import re
 from itertools import groupby
+from pathlib import Path
 from random import choices
 from string import ascii_letters
 
@@ -118,3 +119,13 @@ def name_to_title(step: str) -> str:
     name = re.sub(r"(ms)", "MS", name, flags=re.IGNORECASE)
 
     return name
+
+
+def check_is_path(path: str | Path):
+    if isinstance(path, Path):
+        return True
+    elif isinstance(path, str):
+        return (
+            Path(path).exists() or len(path.split("/")) > 1
+        )  # couldn't think of a good check with pathlib
+    return False

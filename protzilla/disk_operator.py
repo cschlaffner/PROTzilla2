@@ -10,6 +10,7 @@ import yaml
 
 from protzilla.constants import paths
 from protzilla.steps import Messages, Output, Step, StepManager
+from protzilla.utilities import check_is_path
 
 
 class YamlOperator:
@@ -94,24 +95,23 @@ class DiskOperator:
         # we can completely reuse the read_run, as the structure is the same
         return self.read_run(self.workflow_file)
 
-    def export_workflow(self, step_manager: StepManager) -> None:
-        # it is basically like writing a run, but we only write the inputs and blacklist a few datatypes from inputs
-        # we can reuse the write_run method, but we need to modify the write_step method
+    def export_workflow(self, step_manager: StepManager, workflow_name: str) -> None:
+        self.workflow_name = workflow_name
         workflow = {}
         workflow[KEYS.CURRENT_STEP_INDEX] = 0
         workflow[KEYS.STEPS] = {}
         for step in step_manager.all_steps:
-            step_data = self._write_step(step, workflow_mode=True)
-            for key in step_data.get(KEYS.STEP_INPUTS, {}):
-                if isinstance(
-                    step_data[KEYS.STEP_INPUTS][key], pd.DataFrame
-                ) or isinstance(step_data[KEYS.STEP_INPUTS][key], Path):
-                    del step_data[KEYS.STEP_INPUTS][key]
-                # if it is a string, we still have to check if it is a path
-                elif isinstance(step_data[KEYS.STEP_INPUTS][key], str):
-                    if Path(step_data[KEYS.STEP_INPUTS][key]).exists():
-                        del step_data[KEYS.STEP_INPUTS][key]
+            step_data = self._write_step(step, workflow_mode=True).copy()
+            inputs = step_data.get(KEYS.STEP_INPUTS, {}).items()
+            inputs_to_write = {}
+            for input_key, input_value in inputs:
+                if not isinstance(input_value, pd.DataFrame) and not check_is_path(
+                    input_value
+                ):
+                    inputs_to_write[input_key] = input_value
+
             workflow[KEYS.STEPS][step.__class__.__name__] = step_data
+            step_data[KEYS.STEP_INPUTS] = inputs_to_write
         self.yaml_operator.write(self.workflow_file, workflow)
 
     def _read_step(self, step_name, step_data: dict) -> Step:
