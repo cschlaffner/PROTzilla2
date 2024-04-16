@@ -1,7 +1,5 @@
 from enum import Enum
 
-from protzilla.run_v2 import Run
-
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
 
@@ -24,7 +22,6 @@ class IntensityNameType(Enum):
     TOTAL_SPECTRAL_COUNT = "Total Spectral Count"
 
 
-# TODO refactor the submit() method to avoid redundancy
 class FeatureOrientationType(Enum):
     COLUMNS = "Columns (samples in rows, features in columns)"
     ROWS = "Rows (features in rows, samples in columns)"
@@ -43,18 +40,12 @@ class MaxQuantImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
 
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
-
 
 class DiannImportForm(MethodForm):
     file_path = CustomFileField(label="DIA-NN intensities file:")
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
-
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class MSFraggerImportForm(MethodForm):
@@ -66,9 +57,6 @@ class MSFraggerImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
 
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
-
 
 class MetadataImportForm(MethodForm):
     file_path = CustomFileField(label="Metadata file")
@@ -76,18 +64,12 @@ class MetadataImportForm(MethodForm):
         choices=FeatureOrientationType, label="Feature orientation"
     )
 
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
-
 
 class MetadataImportMethodDiannForm(MethodForm):
     filepath = CustomFileField(label="Run-Relationship metadata file:")
     groupby_sample = CustomBooleanField(
         label="Group replicate runs by sample using median", required=False
     )
-
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class MetadataColumnAssignmentForm(MethodForm):
@@ -100,15 +82,9 @@ class MetadataColumnAssignmentForm(MethodForm):
 
     # TODO: "categories": []  (workflow_meta.json line 129, 136)
 
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
-
 
 class PeptideImportForm(MethodForm):
     file_path = CustomFileField(label="Peptide file")
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter (same as MS-Data)"
     )
-
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
