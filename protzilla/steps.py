@@ -31,7 +31,7 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        output_dict = self.method(**self.get_input_dataframe(steps, self.inputs))
+        output_dict = self.method(**self.get_input_dataframe(steps, inputs))
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
