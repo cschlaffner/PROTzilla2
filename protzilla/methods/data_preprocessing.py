@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from protzilla.data_preprocessing import filter_samples, outlier_detection, transformation, normalisation, imputation, \
+    filter_proteins
 from protzilla.data_preprocessing.imputation import by_min_per_protein
 from protzilla.steps import Step, StepManager
 
@@ -27,6 +29,16 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
     def method(self, **kwargs):
         return filter_proteins.by_samples_missing(**kwargs)
+
+class FilterByProteinsCount(DataPreprocessingStep):
+    name = "Protein Count"
+    step = "filter_samples"
+    method_description = ("Filter by protein count per sample")
+
+    parameter_names = ["deviation_threshold"]
+
+    def method(self, **kwargs):
+        return filter_samples.protein_count_filter(**kwargs)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
