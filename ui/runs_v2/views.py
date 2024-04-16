@@ -275,13 +275,11 @@ def tables(request, run_name, index, key=None):
         section = run.steps.previous_steps[index].section
         step = run.steps.previous_steps[index].step
         method = run.steps.previous_steps[index].method_id
-        name = run.steps.previous_steps[index].name
     else:
         outputs = run.current_outputs
         section = run.current_step.section
         step = run.current_step.step
         method = run.current_step.method_id
-        name = run.current_step.name
 
     options = []
     for k, value in outputs:
@@ -306,7 +304,6 @@ def tables(request, run_name, index, key=None):
             section=section,
             step=step,
             method=method,
-            name=name,
             clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
     )
