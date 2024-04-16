@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from protzilla.data_preprocessing import filter_samples, outlier_detection, transformation, normalisation, imputation, \
-    filter_proteins
+    filter_proteins, peptide_filter
 from protzilla.data_preprocessing.imputation import by_min_per_protein
 from protzilla.steps import Step, StepManager
 
@@ -29,6 +29,7 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
     def method(self, **kwargs):
         return filter_proteins.by_samples_missing(**kwargs)
+
 
 class FilterByProteinsCount(DataPreprocessingStep):
     name = "Protein Count"
@@ -185,3 +186,38 @@ class ImputationByMinPerSample(DataPreprocessingStep):
 
     def method(self, **kwargs):
         return by_min_per_protein(**kwargs)
+
+
+class ImputationByKNN(DataPreprocessingStep):
+    name = "kNN"
+    step = "imputation"
+    method_description = "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing " \
+                         "values for each sample based on intensity-wise similar samples. Two samples are close if " \
+                         "the features that neither is missing are close."
+
+    parameter_names = ["number_of_neighbours"]
+
+    def method(self, **kwargs):
+        return imputation.by_knn(**kwargs)
+
+
+class ImputationByNormalDistributionSampling(DataPreprocessingStep):
+    name = "Normal distribution sampling"
+    step = "imputation"
+    method_description = "Imputation methods include normal distribution sampling per protein or per dataset"
+
+    parameter_names = ["strategy", "down_shift", "scaling_factor"]
+
+    def method(self, **kwargs):
+        return imputation.by_normal_distribution_sampling(**kwargs)
+
+
+class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
+    name = "PEP threshold"
+    step = "filter_peptides"
+    method_description = "Filter by PEP-threshold"
+
+    parameter_names = ["threshold", "peptide_df"]
+
+    def method(self, **kwargs):
+        return peptide_filter.by_pep_value(**kwargs)

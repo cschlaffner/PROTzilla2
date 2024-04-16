@@ -22,6 +22,9 @@ _forward_mapping = {
     data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingForm,
     data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountForm,
     data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
+    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNForms,
+    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingForm,
+    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdForm,
     data_analysis.DifferentialExpression_TTest: data_analysis_forms.DifferentialExpression_TTestForm,
 }
 
