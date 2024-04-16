@@ -65,11 +65,6 @@ class Step:
                 return False
         return True
 
-    # TODO this is only temporary until we remove method_id entirely
-    @property
-    def method_id(self):
-        return self.__class__.__name__
-
 
 class Output:
     def __init__(self, output: dict = None):
