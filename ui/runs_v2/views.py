@@ -19,7 +19,6 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
-
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
 active_runs: dict[str, Run] = {}
@@ -106,7 +105,7 @@ def detail(request: HttpRequest, run_name: str):
                 run,
                 run.steps.current_step.section,
                 run.steps.current_step.step,
-                run.steps.current_step.method_id,
+                run.steps.current_step.name,
             ),
             name_field="",
             current_plots=current_plots,
@@ -274,12 +273,12 @@ def tables(request, run_name, index, key=None):
         outputs = run.steps.previous_steps[index].output
         section = run.steps.previous_steps[index].section
         step = run.steps.previous_steps[index].step
-        method = run.steps.previous_steps[index].method_id
+        method = run.steps.previous_steps[index].name
     else:
         outputs = run.current_outputs
         section = run.current_step.section
         step = run.current_step.step
-        method = run.current_step.method_id
+        method = run.current_step.name
 
     options = []
     for k, value in outputs:
