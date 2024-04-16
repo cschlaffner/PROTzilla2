@@ -29,7 +29,6 @@ class ImportingStep(Step):
 class MaxQuantImport(ImportingStep):
     name = "MaxQuant"
     step = "msdataimport"
-    method_id = "max_quant_import"
     method_description = "Import MaxQuant data"
 
     parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
@@ -68,7 +67,6 @@ class MsFraggerImport(ImportingStep):
 class MetadataImport(ImportingStep):
     name = "Metadata import"
     step = "metadataimport"
-    method_id = "metadata_import_method"
     method_description = "Import metadata"
 
     parameter_names = ["file_path", "feature_orientation"]

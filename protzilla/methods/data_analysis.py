@@ -12,7 +12,6 @@ class DataAnalysisStep(Step):
 class DifferentialExpression_TTest(DataAnalysisStep):
     name = "t-test"
     step = "differential_expression"
-    method_id = "t-test"
     method_description = (
         "A function to conduct a two sample t-test between groups defined in the clinical data. The "
         "t-test is conducted on the level of each protein. The p-values are corrected for multiple "

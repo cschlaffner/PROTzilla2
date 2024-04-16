@@ -87,7 +87,7 @@ class DiskOperator:
         run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
         run[KEYS.STEPS] = {}
         for step in step_manager.all_steps:
-            # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id over a method_id
+            # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id
             run[KEYS.STEPS][step.__class__.__name__] = self._write_step(step)
         self.yaml_operator.write(self.run_file, run)
 

@@ -16,7 +16,6 @@ class DataPreprocessingStep(Step):
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
     name = "By samples missing"
     step = "filter_proteins"
-    method_id = "by_samples_missing"
     method_description = (
         "Filter proteins based on the amount of samples with nan values"
     )
@@ -30,7 +29,6 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
     name = "By proteins missing"
     step = "filter_samples"
-    method_id = "by_proteins_missing"
     method_description = (
         "Filter samples based on the amount of proteins with nan values"
     )
@@ -44,7 +42,6 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
 class OutlierDetectionByPCA(DataPreprocessingStep):
     name = "PCA"
     step = "outlier_detection"
-    method_id = "by_pca"
     method_description = "Detect outliers using PCA"
 
     parameter_names = ["number_of_components", "threshold"]
@@ -56,7 +53,6 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     name = "LOF"
     step = "outlier_detection"
-    method_id = "by_lof"
     method_description = "Detect outliers using LOF"
 
     parameter_names = ["number_of_neighbors", "n_jobs"]
@@ -68,7 +64,6 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     name = "Isolation Forest"
     step = "outlier_detection"
-    method_id = "by_isolation_forest"
     method_description = "Detect outliers using Isolation Forest"
 
     parameter_names = ["n_estimators", "n_jobs"]
@@ -80,7 +75,6 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
 class TransformationLog(DataPreprocessingStep):
     name = "Log"
     step = "transformation"
-    method_id = "by_log"
     method_description = "Transform data by log"
 
     parameter_names = ["log_base"]
@@ -92,7 +86,6 @@ class TransformationLog(DataPreprocessingStep):
 class NormalisationByZScore(DataPreprocessingStep):
     name = "Z-Score"
     step = "normalisation"
-    method_id = "by_z_score"
     method_description = "Normalise data by Z-Score"
 
     parameter_names = []
@@ -104,7 +97,6 @@ class NormalisationByZScore(DataPreprocessingStep):
 class NormalisationByTotalSum(DataPreprocessingStep):
     name = "Total sum"
     step = "normalisation"
-    method_id = "by_total_sum"
     method_description = "Normalise data by total sum"
 
     parameter_names = []
@@ -116,7 +108,6 @@ class NormalisationByTotalSum(DataPreprocessingStep):
 class NormalisationByMedian(DataPreprocessingStep):
     name = "Median"
     step = "normalisation"
-    method_id = "by_median"
     method_description = "Normalise data by median"
 
     parameter_names = ["percentile"]
@@ -128,7 +119,6 @@ class NormalisationByMedian(DataPreprocessingStep):
 class NormalisationByReferenceProtein(DataPreprocessingStep):
     name = "Reference protein"
     step = "normalisation"
-    method_id = "by_reference_protein"
     method_description = "Normalise data by reference protein"
 
     parameter_names = ["reference_protein"]
@@ -140,7 +130,6 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
 class ImputationByMinPerDataset(DataPreprocessingStep):
     name = "Min per dataset"
     step = "imputation"
-    method_id = "by_min_per_dataset"
     method_description = "Impute missing values by the minimum per dataset"
 
     parameter_names = ["shrinking_value"]
@@ -152,7 +141,6 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
 class ImputationByMinPerProtein(DataPreprocessingStep):
     name = "Min per protein"
     step = "imputation"
-    method_id = "by_min_per_protein"
     method_description = "Impute missing values by the minimum per protein"
 
     parameter_names = ["shrinking_value"]
@@ -164,7 +152,6 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
 class ImputationByMinPerSample(DataPreprocessingStep):
     name = "Min per sample"
     step = "imputation"
-    method_id = "by_min_per_sample"
     method_description = "Impute missing values by the minimum per sample"
 
     parameter_names = ["shrinking_value"]
