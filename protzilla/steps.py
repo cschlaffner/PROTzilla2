@@ -46,7 +46,9 @@ class Step:
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+    def get_input_dataframe(
+        self, steps: StepManager, kwargs: dict
+    ) -> pd.DataFrame | None:
         return kwargs
 
     def handle_outputs(self, output_dict: dict):

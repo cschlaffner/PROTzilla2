@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import pandas as pd
-
-from protzilla.data_preprocessing.imputation import by_min_per_protein
+from protzilla.data_preprocessing import imputation
 from protzilla.steps import Step, StepManager
 
 

@@ -219,7 +219,7 @@ def make_displayed_history(run: Run) -> str:
     displayed_history = []
 
     for i, step in enumerate(run.steps.previous_steps):
-        name = f"{name_to_title(step.step)}: {name_to_title(step.method_id)}"
+        name = f"{name_to_title(step.step)}: {step.name}"
         section_heading = (
             name_to_title(step.section)
             if run.steps.all_steps[i - 1].section != step.section
