@@ -24,6 +24,7 @@ def random_string():
 
 
 def get_memory_usage():
+    # TODO this function seems to be quite inaccurate, even when used with gc.collect()
     memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024**2
     return f"{round(memory_mb, 1)} MB"
 

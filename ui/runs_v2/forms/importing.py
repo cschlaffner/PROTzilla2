@@ -1,6 +1,7 @@
 from enum import Enum
 
 from protzilla.run_v2 import Run
+
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
 
@@ -23,12 +24,15 @@ class IntensityNameType(Enum):
     TOTAL_SPECTRAL_COUNT = "Total Spectral Count"
 
 
+# TODO refactor the submit() method to avoid redundancy
 class FeatureOrientationType(Enum):
     COLUMNS = "Columns (samples in rows, features in columns)"
     ROWS = "Rows (features in rows, samples in columns)"
 
+
 class EmptyEnum(Enum):
     pass
+
 
 class MaxQuantImportForm(MethodForm):
     file_path = CustomFileField(label="MaxQuant intensities file")
@@ -99,10 +103,12 @@ class MetadataColumnAssignmentForm(MethodForm):
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
 
+
 class PeptideImportForm(MethodForm):
     file_path = CustomFileField(label="Peptide file")
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter (same as MS-Data)"
     )
+
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)

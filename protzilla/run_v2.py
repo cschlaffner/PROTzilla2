@@ -19,6 +19,8 @@ class Run:
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
             self._run_write()
+            self.steps.df_mode = self.df_mode
+            self.steps.disk_operator = self.disk_operator
             return result
 
         return wrapper
@@ -30,10 +32,12 @@ class Run:
 
         self.run_name = run_name
         self.workflow_name = workflow_name
-
-        self.disk_operator = DiskOperator(run_name, workflow_name)
-        self.steps = StepManager()
         self.df_mode = df_mode
+
+        self.disk_operator: DiskOperator = DiskOperator(run_name, workflow_name)
+        self.steps: StepManager = StepManager(
+            df_mode=self.df_mode, disk_operator=self.disk_operator
+        )
 
         if run_name in get_available_run_names():
             self._run_read()
@@ -44,14 +48,6 @@ class Run:
                 f"No run named {run_name} has been found and no workflow has been provided. Please reference an existing run or provide a workflow to create a new one."
             )
 
-    def auto_save(func):
-        def wrapper(self, *args, **kwargs):
-            result = func(self, *args, **kwargs)
-            self._run_write()
-            return result
-
-        return wrapper
-
     def __repr__(self):
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 
@@ -61,10 +57,11 @@ class Run:
     def _run_write(self):
         self.disk_operator.write_run(self.steps)
 
+    @auto_save
     def _workflow_read(self):
         self.steps = self.disk_operator.read_workflow()
 
-    def _workflow_write(self):
+    def _workflow_export(self):
         self.disk_operator.export_workflow(self.steps)
 
     @auto_save
@@ -81,10 +78,7 @@ class Run:
 
     @auto_save
     def step_next(self):
-        if self.steps.current_step_index < len(self.steps.all_steps) - 1:
-            self.steps.current_step_index += 1
-        else:
-            logging.warning("Cannot go forward from the last step")
+        self.steps.next_step()
 
     @auto_save
     def step_previous(self):
@@ -96,11 +90,6 @@ class Run:
     @property
     def is_at_last_step(self):
         return self.steps.is_at_last_step
-
-    @property
-    def run_disk_path(self):
-        assert self.run_name is not None
-        return paths.RUNS_PATH / self.run_name
 
     @property
     def current_messages(self):

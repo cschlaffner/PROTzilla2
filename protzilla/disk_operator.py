@@ -9,7 +9,6 @@ import pandas as pd
 import yaml
 
 from protzilla.constants import paths
-from protzilla.run_v2 import Run
 from protzilla.steps import Messages, Output, Step, StepManager
 
 
@@ -191,10 +190,3 @@ class DiskOperator:
     @property
     def plot_dir(self) -> Path:
         return self.run_dir / "plots"
-
-
-if __name__ == "__main__":
-    run = Run(run_name="OVERHAUL", workflow_name="OVERHAUL_WORKFLOW")
-    run._run_write()
-    run._workflow_write()
-    print("done")

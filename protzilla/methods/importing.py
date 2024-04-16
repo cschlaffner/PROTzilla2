@@ -78,7 +78,7 @@ class MetadataImport(ImportingStep):
         return metadata_import_method(**kwargs)
 
     def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
-        kwargs["protein_df"] = None
+        kwargs["protein_df"] = steps.get_step_output(ImportingStep, "protein_df")
         return kwargs
 
 

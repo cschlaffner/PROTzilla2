@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import logging
 from io import BytesIO
+from pathlib import Path
 
 import pandas as pd
 import plotly
@@ -24,7 +25,7 @@ class Step:
 
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
-            self.inputs = inputs
+            self.inputs = inputs.copy()
 
         # validate the inputs for the step
         self.validate_inputs(self.parameter_names)
@@ -160,11 +161,18 @@ class StepManager:
     def __repr__(self):
         return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
 
-    def __init__(self, steps: list[Step] = None):
+    def __init__(
+        self,
+        steps: list[Step] = None,
+        df_mode: str = "disk",
+        disk_operator: DiskOperator = None,
+    ):
         self.importing = []
         self.data_preprocessing = []
         self.data_analysis = []
         self.data_integration = []
+        self.df_mode = df_mode
+        self.disk_operator = None
         self.current_step_index = 0
 
         if steps is not None:
@@ -179,6 +187,21 @@ class StepManager:
             + self.data_analysis
             + self.data_integration
         )
+
+    def get_step_output(self, step_name: type[Step], output_key: str):
+        for step in self.previous_steps:
+            if isinstance(step, step_name) and output_key in step.output:
+                val = step.output[output_key]
+                if isinstance(val, str) and Path(val).exists():
+                    if Path(val).suffix == ".csv":
+                        from protzilla.disk_operator import DataFrameOperator
+
+                        df_operator = DataFrameOperator()
+                        return df_operator.read(val)
+                    else:
+                        raise ValueError(f"Unsupported file format {Path(str).suffix}")
+                return val
+        return None
 
     def all_steps_in_section(self, section: str):
         if section == "importing":
@@ -267,3 +290,16 @@ class StepManager:
                 pass
 
         raise ValueError(f"Step {step} not found in steps")
+
+    def next_step(self):
+        if not self.is_at_last_step:
+            if self.df_mode == "disk":
+                self.current_step.output = Output(
+                    self.disk_operator._write_output(
+                        step_name=self.current_step.__class__.__name__,
+                        output=self.current_step.output,
+                    )
+                )
+            self.current_step_index += 1
+        else:
+            logging.warning("Cannot go forward from the last step")

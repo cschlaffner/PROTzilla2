@@ -249,7 +249,9 @@ def make_displayed_history(run: Run) -> str:
             else:
                 plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-        has_df = any(isinstance(v, pandas.DataFrame) for _, v in step.output)
+        has_df = any(
+            isinstance(v, pandas.DataFrame) for _, v in step.output
+        )  # TODO check if it is a str that has a path, if so it probably is a df and can be shown via table
         table_url = reverse("runs_v2:tables_nokey", args=(run.run_name, i))
 
         has_protein_graph = (
