@@ -8,9 +8,9 @@ class DataPreprocessingStep(Step):
     section = "data_preprocessing"
     output_names = ["protein_df"]
 
-    def get_input_dataframe(self, steps: StepManager, kwargs: dict) -> dict:
-        kwargs["protein_df"] = steps.protein_df
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
+        inputs["protein_df"] = steps.protein_df
+        return inputs
 
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
@@ -22,8 +22,8 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
     parameter_names = ["percentage"]
 
-    def method(self, **kwargs):
-        return filter_proteins.by_samples_missing(**kwargs)
+    def method(self, inputs):
+        return filter_proteins.by_samples_missing(**inputs)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
@@ -35,8 +35,8 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
 
     parameter_names = ["percentage"]
 
-    def method(self, **kwargs):
-        return filter_samples.by_proteins_missing(**kwargs)
+    def method(self, inputs):
+        return filter_samples.by_proteins_missing(**inputs)
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
@@ -46,7 +46,7 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 
     parameter_names = ["number_of_components", "threshold"]
 
-    def method(self, **kwargs):
+    def method(self, kwargs):
         return outlier_detection.by_pca(**kwargs)
 
 
@@ -57,8 +57,8 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
 
     parameter_names = ["number_of_neighbors", "n_jobs"]
 
-    def method(self, **kwargs):
-        return outlier_detection.by_lof(**kwargs)
+    def method(self, inputs):
+        return outlier_detection.by_lof(**inputs)
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
@@ -68,8 +68,8 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
 
     parameter_names = ["n_estimators", "n_jobs"]
 
-    def method(self, **kwargs):
-        return outlier_detection.by_isolation_forest(**kwargs)
+    def method(self, inputs):
+        return outlier_detection.by_isolation_forest(**inputs)
 
 
 class TransformationLog(DataPreprocessingStep):
@@ -79,8 +79,8 @@ class TransformationLog(DataPreprocessingStep):
 
     parameter_names = ["log_base"]
 
-    def method(self, **kwargs):
-        return transformation.by_log(**kwargs)
+    def method(self, inputs):
+        return transformation.by_log(**inputs)
 
 
 class NormalisationByZScore(DataPreprocessingStep):
@@ -90,8 +90,8 @@ class NormalisationByZScore(DataPreprocessingStep):
 
     parameter_names = []
 
-    def method(self, **kwargs):
-        return normalisation.by_z_score(**kwargs)
+    def method(self, inputs):
+        return normalisation.by_z_score(**inputs)
 
 
 class NormalisationByTotalSum(DataPreprocessingStep):
@@ -101,8 +101,8 @@ class NormalisationByTotalSum(DataPreprocessingStep):
 
     parameter_names = []
 
-    def method(self, **kwargs):
-        return normalisation.by_totalsum(**kwargs)
+    def method(self, inputs):
+        return normalisation.by_totalsum(**inputs)
 
 
 class NormalisationByMedian(DataPreprocessingStep):
@@ -112,8 +112,8 @@ class NormalisationByMedian(DataPreprocessingStep):
 
     parameter_names = ["percentile"]
 
-    def method(self, **kwargs):
-        return normalisation.by_median(**kwargs)
+    def method(self, inputs):
+        return normalisation.by_median(**inputs)
 
 
 class NormalisationByReferenceProtein(DataPreprocessingStep):
@@ -123,8 +123,8 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
 
     parameter_names = ["reference_protein"]
 
-    def method(self, **kwargs):
-        return normalisation.by_reference_protein(**kwargs)
+    def method(self, inputs):
+        return normalisation.by_reference_protein(**inputs)
 
 
 class ImputationByMinPerDataset(DataPreprocessingStep):
@@ -134,8 +134,8 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, **kwargs):
-        return imputation.by_min_per_dataset(**kwargs)
+    def method(self, inputs):
+        return imputation.by_min_per_dataset(**inputs)
 
 
 class ImputationByMinPerProtein(DataPreprocessingStep):
@@ -145,8 +145,8 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, **kwargs):
-        return imputation.by_min_per_protein(**kwargs)
+    def method(self, inputs):
+        return imputation.by_min_per_protein(**inputs)
 
 
 class ImputationByMinPerSample(DataPreprocessingStep):
@@ -156,5 +156,5 @@ class ImputationByMinPerSample(DataPreprocessingStep):
 
     parameter_names = ["shrinking_value"]
 
-    def method(self, **kwargs):
-        return by_min_per_protein(**kwargs)
+    def method(self, inputs):
+        return by_min_per_protein(**inputs)

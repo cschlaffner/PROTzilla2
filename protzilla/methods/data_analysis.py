@@ -5,8 +5,8 @@ from protzilla.steps import Step, StepManager
 class DataAnalysisStep(Step):
     section = "data_analysis"
 
-    def get_input_dataframe(self, steps: StepManager, **kwargs) -> dict | None:
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        return inputs
 
 
 class DifferentialExpression_TTest(DataAnalysisStep):
@@ -31,13 +31,13 @@ class DifferentialExpression_TTest(DataAnalysisStep):
     ]
     output_names = ["intensity_df"]
 
-    def method(self, **kwargs):
-        return t_test(**kwargs)
+    def method(self, inputs: dict) -> dict:
+        return t_test(**inputs)
 
-    def get_input_dataframe(self, steps: StepManager, kwargs) -> dict | None:
-        kwargs["intensity_df"] = steps.protein_df
-        kwargs["metadata_df"] = steps.metadata_df
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
 
-    def plot(self, **kwargs):
+    def plot(self, inputs):
         raise NotImplementedError("Plotting is not implemented yet for this step.")

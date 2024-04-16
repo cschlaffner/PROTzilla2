@@ -31,7 +31,7 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        output_dict = self.method(**self.get_input_dataframe(steps, inputs))
+        output_dict = self.method(**self.insert_dataframes(steps, inputs))
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
@@ -46,7 +46,7 @@ class Step:
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def get_input_dataframe(
+    def insert_dataframes(
         self, steps: StepManager, kwargs: dict
     ) -> pd.DataFrame | None:
         return kwargs
