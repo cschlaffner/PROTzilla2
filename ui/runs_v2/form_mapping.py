@@ -13,7 +13,11 @@ from .forms.base import MethodForm
 
 _forward_mapping = {
     importing.MaxQuantImport: importing_forms.MaxQuantImportForm,
+    importing.DiannImport: importing_forms.DiannImportForm,
+    importing.MsFraggerImport: importing_forms.MSFraggerImportForm,
     importing.MetadataImport: importing_forms.MetadataImportForm,
+    importing.MetadataImportMethodDiann: importing_forms.MetadataImportMethodDiannForm,
+    importing.MetadataColumnAssignment: importing_forms.MetadataColumnAssignmentForm,
     importing.PeptideImport: importing_forms.PeptideImportForm,
     data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
     data_analysis.DifferentialExpression_TTest: data_analysis_forms.DifferentialExpression_TTestForm,
