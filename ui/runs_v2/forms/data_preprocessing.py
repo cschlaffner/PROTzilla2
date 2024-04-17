@@ -3,7 +3,8 @@ from enum import Enum
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
-from .custom_fields import CustomNumberInput, CustomChoiceField
+from .custom_fields import CustomNumberInput, CustomChoiceField, CustomFloatField
+from django.forms import FloatField
 
 
 # we left out the graphs things, didnt know how :(
@@ -27,13 +28,7 @@ class ImputationMinPerProteinForm(MethodForm):
 
 
 class FilterProteinsBySamplesMissingForm(MethodForm):
-    percentage = CustomNumberInput(label="Percentage of minimum non-missing samples per protein")
-
-    def submit(self, run: Run):
-        self.cleaned_data["percentage"] = float(
-            self.cleaned_data["percentage"]
-        )
-        run.step_calculate(self.cleaned_data)
+    percentage = CustomFloatField(label="Percentage of minimum non-missing samples per protein")
 
 
 class FilterByProteinsCountForm(MethodForm):
