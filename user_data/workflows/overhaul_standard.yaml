@@ -1,9 +1,12 @@
-current_step_index: 0
 steps:
-  MaxQuantImport:
-    inputs:
+  - inputs:
       intensity_name: iBAQ
       map_to_uniprot: false
-  MetadataImport:
-    inputs:
+    instance_identifier: MaxQuantImportHELLOWORLD
+    type: MaxQuantImport
+  - inputs:
       feature_orientation: Columns (samples in rows, features in columns)
+    instance_identifier: MetadataImport
+    type: MetadataImport
+  - inputs: {}
+    type: MetadataColumnAssignment
