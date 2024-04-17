@@ -178,7 +178,9 @@ def make_plot_fields(run: Run, section: str, step: str, method: str) -> str:
     return plot_fields
 
 
-def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
+def make_method_dropdown(
+    run_name: str, section: str, step_name: str, step_id: str
+) -> str:
     """
     Generates the html for the method dropdown of the current step.
 
@@ -190,19 +192,18 @@ def make_method_dropdown(run: Run, section: str, step: str, method: str) -> str:
     :return: The html for the method dropdown
     """
     hierarchical_dict = form_map.generate_hierarchical_dict()
-    if not step:
-        return ""
-    methods = hierarchical_dict[section][step].values()
-    method_names = [method.method for method in methods]
+    methods = hierarchical_dict[section][step_name].values()
+    method_names = [method.name for method in methods]
 
+    methods = [method.__name__ for method in methods]
     return render_to_string(
-        "runs/field_select_with_label.html",
+        "runs_v2/method_dropdown.html",
         context=dict(
-            disabled=False,
             key="chosen_method",
-            name=f"{name_to_title(step)} Method:",
-            default=method,
+            name=f"{name_to_title(step_name)} Method:",
+            default=step_id,
             categories=list(zip(methods, method_names)),
+            run_name=run_name,
         ),
     )
 

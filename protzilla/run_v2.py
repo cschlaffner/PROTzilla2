@@ -89,6 +89,10 @@ class Run:
         else:
             logging.warning("Cannot go back from the first step")
 
+    @auto_save
+    def step_change_method(self, new_method: str):
+        self.steps.change_method(new_method)
+
     @property
     def is_at_last_step(self):
         return self.steps.is_at_last_step

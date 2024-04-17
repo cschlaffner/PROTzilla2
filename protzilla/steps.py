@@ -304,3 +304,31 @@ class StepManager:
             self.current_step_index += 1
         else:
             logging.warning("Cannot go forward from the last step")
+
+    def change_method(self, new_method: str):
+        from protzilla.stepfactory import StepFactory
+
+        new_step = StepFactory.create_step(new_method)
+
+        if self.current_section() == "importing":
+            self.importing = [
+                new_step if step == self.current_step else step
+                for step in self.importing
+            ]
+        elif self.current_section() == "data_preprocessing":
+            self.data_preprocessing = [
+                new_step if step == self.current_step else step
+                for step in self.data_preprocessing
+            ]
+        elif self.current_section() == "data_analysis":
+            self.data_analysis = [
+                new_step if step == self.current_step else step
+                for step in self.data_analysis
+            ]
+        elif self.current_section() == "data_integration":
+            self.data_integration = [
+                new_step if step == self.current_step else step
+                for step in self.data_integration
+            ]
+        else:
+            raise ValueError(f"Unknown section {self.current_section()}")

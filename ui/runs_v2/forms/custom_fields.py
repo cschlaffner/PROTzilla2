@@ -5,7 +5,6 @@ from django.forms.widgets import CheckboxInput
 from django.utils.html import format_html
 from django.utils.safestring import SafeText
 
-
 # Custom widgets
 
 
@@ -26,10 +25,14 @@ class CustomCheckBoxInput(CheckboxInput):
 
 
 class CustomChoiceField(ChoiceField):
-    def __init__(self, choices: Enum, *args, **kwargs):
-        super().__init__(
-            choices=[(el.value, el.value) for el in choices], *args, **kwargs
-        )
+    def __init__(self, choices: Enum | list, *args, **kwargs):
+        if isinstance(choices, list):
+            super().__init__(choices=choices, *args, **kwargs)
+        else:
+            super().__init__(
+                choices=[(el.value, el.value) for el in choices], *args, **kwargs
+            )
+
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
