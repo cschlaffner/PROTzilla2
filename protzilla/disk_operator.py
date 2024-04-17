@@ -8,9 +8,9 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+import protzilla.utilities as utilities
 from protzilla.constants import paths
 from protzilla.steps import Messages, Output, Step, StepManager
-from protzilla.utilities import check_is_path
 
 
 class YamlOperator:
@@ -87,7 +87,7 @@ class DiskOperator:
         run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
         run[KEYS.STEPS] = {}
         for step in step_manager.all_steps:
-            # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id over a method_id
+            # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id
             run[KEYS.STEPS][step.__class__.__name__] = self._write_step(step)
         self.yaml_operator.write(self.run_file, run)
 
@@ -105,9 +105,9 @@ class DiskOperator:
             inputs = step_data.get(KEYS.STEP_INPUTS, {}).items()
             inputs_to_write = {}
             for input_key, input_value in inputs:
-                if not isinstance(input_value, pd.DataFrame) and not check_is_path(
-                    input_value
-                ):
+                if not isinstance(
+                    input_value, pd.DataFrame
+                ) and not utilities.check_is_path(input_value):
                     inputs_to_write[input_key] = input_value
 
             workflow[KEYS.STEPS][step.__class__.__name__] = step_data
@@ -126,7 +126,7 @@ class DiskOperator:
         )  # TODO is [] the correct default?
         return step
 
-    def _write_step(self, step: Step, workflow_mode: boolean = False) -> dict:
+    def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         step_data = {}
         step_data[KEYS.STEP_INPUTS] = step.inputs
         if not workflow_mode:

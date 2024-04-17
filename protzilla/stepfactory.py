@@ -11,8 +11,6 @@ class StepFactory:
         )  # to avoid a circular import
 
         for method in get_all_methods():
-            if (
-                    method.__name__ == step_type or method().method_id == step_type
-            ):  # TODO make names consistent
+            if method.__name__ == step_type:  # TODO make names consistent
                 return method()
         raise ValueError(f"Unknown step type {step_type}")

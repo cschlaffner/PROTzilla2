@@ -2,7 +2,7 @@ from enum import Enum
 
 from protzilla.run_v2 import Run
 from .base import MethodForm
-from .custom_fields import CustomChoiceField, CustomNumberInput
+from .custom_fields import CustomChoiceField, CustomFloatField
 
 
 class TTestType(Enum):
@@ -36,7 +36,7 @@ class DifferentialExpression_TTestForm(MethodForm):
         choices=MultipelTestingCorrectionMethod, label="Multiple testing correction"
     )
 
-    alpha = CustomNumberInput(label="Alpha")
+    alpha = CustomFloatField(label="Alpha")
 
     log_base = CustomChoiceField(choices=LogBase, label="Log base")
 

@@ -7,7 +7,6 @@ from .custom_fields import CustomNumberInput, CustomChoiceField, CustomFloatFiel
 from django.forms import FloatField
 
 
-# we left out the graphs things, didnt know how :(
 class EmptyEnum(Enum):
     pass
 
@@ -15,9 +14,11 @@ class EmptyEnum(Enum):
 class StrategyType(Enum):
     PERPROTEIN = "perProtein"
     PERDATASET = "perDataset"
+from .custom_fields import CustomFloatField
 
 
 class ImputationMinPerProteinForm(MethodForm):
+    shrinking_value = CustomFloatField(label="Shrinking value")
     shrinking_value = CustomFloatField(label="Shrinking value")
 
 
@@ -33,11 +34,8 @@ class ImputationByKNNForms(MethodForm):
     number_of_neighbours = CustomFloatField(label="Number of neighbours")
 
 
-class ImputationByNormalDistributionSamplingForm(MethodForm):
-    strategy = CustomChoiceField(choices=StrategyType, label="Strategy")
-    down_shift = CustomFloatField(label="Downshift")
-    scaling_factor = CustomFloatField(label="Scaling factor")
-
-class FilterPeptidesByPEPThresholdForm(MethodForm):
-    threshold = CustomFloatField(label="Threshold value for PEP")
-    peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
+    def submit(self, run: Run):
+        self.cleaned_data["shrinking_value"] = float(
+            self.cleaned_data["shrinking_value"]
+        )
+        run.step_calculate(self.cleaned_data)
