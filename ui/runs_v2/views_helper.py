@@ -66,14 +66,12 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
         possible_steps_in_section = []
         for step in possible_steps[section]:
             methods = []
-            for method in possible_steps[section][step]:
+            for method, step_instance in possible_steps[section][step].items():
                 methods.append(
                     {
                         "id": method,
-                        "name": name_to_title(method),
-                        "description": possible_steps[section][step][
-                            method
-                        ].method_description,
+                        "name": step_instance.name,
+                        "description": step_instance.method_description,
                     }
                 )
             possible_steps_in_section.append(
