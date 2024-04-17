@@ -31,7 +31,7 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        output_dict = self.method(**self.get_input_dataframe(steps, inputs))
+        output_dict = self.method(self.insert_dataframes(steps, inputs))
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
@@ -46,7 +46,9 @@ class Step:
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def get_input_dataframe(self, steps: StepManager, kwargs) -> pd.DataFrame | None:
+    def insert_dataframes(
+        self, steps: StepManager, kwargs: dict
+    ) -> pd.DataFrame | None:
         return kwargs
 
     def handle_outputs(self, output_dict: dict):
@@ -62,11 +64,6 @@ class Step:
             if key not in self.output.output:
                 return False
         return True
-
-    # TODO this is only temporary until we remove method_id entirely
-    @property
-    def method_id(self):
-        return self.__class__.__name__
 
 
 class Output:

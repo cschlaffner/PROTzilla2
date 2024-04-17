@@ -61,8 +61,10 @@ class Run:
     def _workflow_read(self):
         self.steps = self.disk_operator.read_workflow()
 
-    def _workflow_export(self):
-        self.disk_operator.export_workflow(self.steps)
+    def _workflow_export(self, workflow_name: str | None = None):
+        if workflow_name:
+            self.workflow_name = workflow_name
+        self.disk_operator.export_workflow(self.steps, self.workflow_name)
 
     @auto_save
     def step_add(self, step: Step, step_index: int | None = None):

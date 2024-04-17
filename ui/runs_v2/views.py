@@ -3,7 +3,12 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
-from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import (
+    HttpRequest,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -14,7 +19,6 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
-
 from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
 
 active_runs: dict[str, Run] = {}
@@ -101,7 +105,7 @@ def detail(request: HttpRequest, run_name: str):
                 run,
                 run.steps.current_step.section,
                 run.steps.current_step.step,
-                run.steps.current_step.method_id,
+                run.steps.current_step.name,
             ),
             name_field="",
             current_plots=current_plots,
@@ -269,14 +273,12 @@ def tables(request, run_name, index, key=None):
         outputs = run.steps.previous_steps[index].output
         section = run.steps.previous_steps[index].section
         step = run.steps.previous_steps[index].step
-        method = run.steps.previous_steps[index].method_id
-        name = run.steps.previous_steps[index].name
+        method = run.steps.previous_steps[index].name
     else:
         outputs = run.current_outputs
         section = run.current_step.section
         step = run.current_step.step
-        method = run.current_step.method_id
-        name = run.current_step.name
+        method = run.current_step.name
 
     options = []
     for k, value in outputs:
@@ -301,7 +303,6 @@ def tables(request, run_name, index, key=None):
             section=section,
             step=step,
             method=method,
-            name=name,
             clean_ids="clean-ids" if "clean-ids" in request.GET else "",
         ),
     )
@@ -339,7 +340,10 @@ def export_workflow(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run
     :rtype: HttpResponse
     """
-    raise NotImplementedError("Exporting workflows is not yet implemented.")
+    run = active_runs[run_name]
+    requested_workflow_name = request.POST["name"]
+    run._workflow_export(requested_workflow_name)
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
 def delete_step(request: HttpRequest, run_name: str):
@@ -387,6 +391,34 @@ def tables_content(request, run_name, index, key):
     return JsonResponse(
         dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
     )
+
+
+def change_method(request, run_name):
+    """
+    Changes the method during a step of a run.
+    This is called when the user selects a new method in the first dropdown of a step.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: a JSON response object containing the new fields for the selected method
+    :rtype: JsonResponse
+    """
+    # TODO 92 extract into a separate method like try_reactivate_run
+    try:
+        if run_name not in active_runs:
+            active_runs[run_name] = Run(run_name)
+        active_runs[run_name]
+    except FileNotFoundError:
+        traceback.print_exc()
+        response = JsonResponse({"error": f"Run '{run_name}' was not found"})
+        response.status_code = 404  # not found
+        return response
+
+    # TODO @Luca fix this
+    raise NotImplementedError
 
 
 def protein_graph(request, run_name, index: int):

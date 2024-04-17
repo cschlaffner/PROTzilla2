@@ -94,10 +94,11 @@ def metadata_import_method(
             right_on="MS run",
             how="left",
         )
-        res.groupby(["Protein ID", "sample name"], as_index=False).median()
+        res.groupby(
+            ["Protein ID", "sample name"], as_index=False
+        ).median()  # TODO why do we do this?
 
     return dict(
-        protein_df=protein_df,
         metadata=meta_df,
         messages=[dict(level=logging.INFO, msg=msg)],
     )
