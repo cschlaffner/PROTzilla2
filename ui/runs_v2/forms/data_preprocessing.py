@@ -38,7 +38,7 @@ class FilterByProteinsCountForm(MethodForm):
 
 
 class NormalisationByReferenceProteinForms(MethodForm):
-    reference_protein = CustomCharField(lable="A function to perform protein-intensity normalisation in reference to "
+    reference_protein = CustomCharField(label="A function to perform protein-intensity normalisation in reference to "
                                               "a selected protein on your dataframe. Normalises the data on the level "
                                               "of each sample. Divides each intensity by the intensity of the chosen "
                                               "reference protein in each sample. Samples where this value is zero "
@@ -51,7 +51,7 @@ class NormalisationByReferenceProteinForms(MethodForm):
 
 
 class ImputationByMinPerDatasetForm(MethodForm):
-    shrinking_value = CustomFloatField("A function to impute missing values for each protein by taking into account "
+    shrinking_value = CustomFloatField(label="A function to impute missing values for each protein by taking into account "
                                        "data from the entire dataframe. Sets missing value to the smallest measured "
                                        "value in the dataframe. The user can also assign a shrinking factor to take a "
                                        "fraction of that minimum value for imputation.")
