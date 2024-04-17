@@ -11,14 +11,20 @@ from PIL import Image
 
 
 class Step:
+    section: str = None
+    display_name: str = None
+    operation: str = None
+    method_description: str = None
+
     def __init__(self):
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.parameter_names = []
-        self.output_names = []
-        self.finished = False
+        self.parameter_names: list[str] = []
+        self.output_names: list[str] = []
+        self.finished: bool = False
+        self.instance_identifier: str = None
 
     def __repr__(self):
         return self.__class__.__name__
@@ -239,11 +245,11 @@ class StepManager:
         logging.warning("No intensity_df found in steps")
 
     @property
-    def metadata_df(self):
+    def metadata_df(self) -> pd.DataFrame | None:
         # find the last step that has a metadata_df in its output
         for step in reversed(self.all_steps):
-            if hasattr(step.output, "metadata_df"):
-                return step.output.metadata_df
+            if "metadata" in step.output:
+                return step.output["metadata"]
         logging.warning("No metadata_df found in steps")
 
     @property

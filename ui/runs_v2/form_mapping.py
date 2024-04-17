@@ -43,9 +43,9 @@ def generate_hierarchical_dict() -> dict[str, dict[str, dict[str, type[Step]]]]:
         # and the value being the class itself
         if step_class.section not in hierarchical_dict:
             hierarchical_dict[step_class.section] = {}
-        if step_class.step not in hierarchical_dict[step_class.section]:
-            hierarchical_dict[step_class.section][step_class.step] = {}
-        hierarchical_dict[step_class.section][step_class.step][
+        if step_class.operation not in hierarchical_dict[step_class.section]:
+            hierarchical_dict[step_class.section][step_class.operation] = {}
+        hierarchical_dict[step_class.section][step_class.operation][
             step_class.__name__
         ] = step_class
 

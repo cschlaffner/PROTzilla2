@@ -19,6 +19,7 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
+
 from .form_mapping import (
     get_empty_form_by_method,
     get_filled_form_by_request,
@@ -103,15 +104,15 @@ def detail(request: HttpRequest, run_name: str):
             run_name=run_name,
             section=run.steps.current_step.section,
             step=run.steps.current_step,
-            display_name=f"{name_to_title(run.steps.current_step.section)} - {name_to_title(run.steps.current_step.step)}",
+            display_name=f"{name_to_title(run.steps.current_step.section)} - {name_to_title(run.steps.current_step.display_name)}",
             displayed_history=make_displayed_history(
                 run
             ),  # TODO: make NewRun compatible
             method_dropdown=make_method_dropdown(
                 run,
                 run.steps.current_step.section,
-                run.steps.current_step.step,
-                run.steps.current_step.name,
+                run.steps.current_step.operation,
+                run.steps.current_step.display_name,
             ),
             name_field="",
             current_plots=current_plots,
@@ -259,7 +260,7 @@ def plot(request, run_name):
     run = active_runs[run_name]
     parameters = parameters_from_post(request.POST)
 
-    if run.current_step.name == "plot":
+    if run.current_step.display_name == "plot":
         del parameters["chosen_method"]
         run.step_calculate(parameters)
     else:
@@ -278,13 +279,13 @@ def tables(request, run_name, index, key=None):
     if index < len(run.steps.previous_steps):
         outputs = run.steps.previous_steps[index].output
         section = run.steps.previous_steps[index].section
-        step = run.steps.previous_steps[index].step
-        method = run.steps.previous_steps[index].name
+        step = run.steps.previous_steps[index].operation
+        method = run.steps.previous_steps[index].display_name
     else:
         outputs = run.current_outputs
         section = run.current_step.section
-        step = run.current_step.step
-        method = run.current_step.name
+        step = run.current_step.operation
+        method = run.current_step.display_name
 
     options = []
     for k, value in outputs:
