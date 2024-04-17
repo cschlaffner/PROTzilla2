@@ -157,8 +157,6 @@ class DifferentialExpression_ANOVA(MethodForm):
     #TODO: Add dynamic fill for grouping & selected_groups
     grouping = "Put a usefull default here"
     selected_groups = "Put a usefull default here"
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class DifferentialExpression_TTestForm(MethodForm):
@@ -189,8 +187,6 @@ class DifferentialExpression_TTestForm(MethodForm):
     grouping = "Put a usefull default here"
     group1 = "Put a usefull default here"
     group2 = "Put a usefull default here"
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class DifferentialExpression_LinearModel(MethodForm):
@@ -213,8 +209,6 @@ class DifferentialExpression_LinearModel(MethodForm):
     grouping = "Put a usefull default here"
     group1 = "Put a usefull default here"
     group2 = "Put a usefull default here"
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class PlotVolcano(MethodForm):
@@ -231,8 +225,6 @@ class PlotVolcano(MethodForm):
         label="Proteins of interest",
         default=None
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class PlotScatterPlot(MethodForm):
@@ -247,8 +239,6 @@ class PlotScatterPlot(MethodForm):
         default=[None, None],
         required=False,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class PlotClustergram(MethodForm):
@@ -268,8 +258,6 @@ class PlotClustergram(MethodForm):
         label="Flip axis",
         default="No"
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class PlotProtQuant(MethodForm):
@@ -295,8 +283,6 @@ class PlotProtQuant(MethodForm):
         step_size=1,
         default=1
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class Plotprecision_recall_curve(MethodForm):
@@ -309,8 +295,6 @@ class Plotprecision_recall_curve(MethodForm):
         label="Title of the plot (optional)",
         default="Precision-Recall Curve"
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringKMeans(MethodForm):
@@ -380,8 +364,6 @@ class ClusteringKMeans(MethodForm):
         min_value=0,
         default=1e-4,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringExpectationMaximization(MethodForm):
@@ -447,8 +429,6 @@ class ClusteringExpectationMaximization(MethodForm):
         step_size=1,
         default=0,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
@@ -495,8 +475,6 @@ class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
         label="The linkage criterion to use in order to to determine the distance to use between sets of observation",
         default="ward",
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ClassificationRandomForest(MethodForm):
@@ -594,8 +572,6 @@ class ClassificationRandomForest(MethodForm):
         step_size=1,
         default=6,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ClassificationSVM(MethodForm):
@@ -685,8 +661,6 @@ class ClassificationSVM(MethodForm):
         step_size=1,
         default=6,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ModelEvaluationClassificationModel(MethodForm):
@@ -696,8 +670,6 @@ class ModelEvaluationClassificationModel(MethodForm):
         label="Scoring for the model",
         default="accuracy"
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class DimensionReductionTSNE(MethodForm):
@@ -741,8 +713,6 @@ class DimensionReductionTSNE(MethodForm):
         step_size=1,
         default=300,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class DimensionReductionUMAP(MethodForm):
@@ -782,8 +752,6 @@ class DimensionReductionUMAP(MethodForm):
         step_size=1,
         default=42,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class ProteinGraph(MethodForm):
@@ -803,8 +771,6 @@ class ProteinGraph(MethodForm):
         step_size=1,
         default=2,
     )
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
 
 
 class variationGraph(MethodForm):
@@ -813,6 +779,6 @@ class variationGraph(MethodForm):
         placeholder="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
+
+
 
