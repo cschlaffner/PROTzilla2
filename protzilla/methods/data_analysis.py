@@ -1,4 +1,14 @@
 from protzilla.data_analysis.differential_expression_t_test import t_test
+from protzilla.data_analysis.differential_expression_anova import anova
+from protzilla.data_analysis.differential_expression_linear_model import linear_model
+from protzilla.data_analysis.dimension_reduction import t_sne, umap
+from protzilla.data_analysis.model_evaluation import evaluate_classification_model
+from protzilla.data_analysis.classification import random_forest, svm
+from protzilla.data_analysis.clustering import k_means, expectation_maximisation, hierarchical_agglomerative_clustering
+from protzilla.data_analysis.plots import create_volcano_plot, clustergram_plot, prot_quant_plot
+from protzilla.data_analysis.protein_graphs import variation_graph, peptides_to_isoform
+
+
 from protzilla.steps import Step, StepManager
 
 
