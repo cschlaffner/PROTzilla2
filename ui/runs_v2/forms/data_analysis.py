@@ -135,50 +135,62 @@ class DimensionReductionMetric(Enum):
 
 
 class DifferentialExpression_ANOVA(MethodForm):
-    multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
-        label="Multiple esting correction",
-        default="Benjamini-Hochberg",
-    )
-
-    alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, default=0.05
-    )
-
-    log_base = CustomChoiceField(
-        choices=LogBase, label="Base of the log transformation", default="log2"
-    )
-
-    grouping = "Put a usefull default here"
-
-    selected_groups = "Put a usefull default here"
-
-    def submit(self, run: Run):
-        run.step_calculate(self.cleaned_data)
-
-
-class DifferentialExpression_TTestForm(MethodForm):
-    ttest_type = CustomChoiceField(choices=TTestType, label="T-test type")
-
     # intensity_df = CustomChoiceField(
     #    choices=AnalysisLevel, label="Intensitys"
     # )
-
     multiple_testing_correction = CustomChoiceField(
         choices=MultipelTestingCorrectionMethod,
         label="Multiple testing correction",
         default="Benjamini-Hochberg",
     )
-
-    alpha = CustomFloatField(label="Alpha")
-
-    log_base = CustomChoiceField(choices=LogBase, label="Log base")
-
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        default=0.05
+    )
+    log_base = CustomChoiceField(
+        choices=LogBase,
+        label="Base of the log transformation",
+        default="log2"
+    )
+    #TODO: Add dynamic fill for grouping & selected_groups
     grouping = "Put a usefull default here"
+    selected_groups = "Put a usefull default here"
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
+
+class DifferentialExpression_TTestForm(MethodForm):
+    ttest_type = CustomChoiceField(
+        choices=TTestType,
+        label="T-test type"
+    )
+    # intensity_df = CustomChoiceField(
+    #    choices=AnalysisLevel, label="Intensitys"
+    # )
+    multiple_testing_correction = CustomChoiceField(
+        choices=MultipelTestingCorrectionMethod,
+        label="Multiple testing correction",
+        default="Benjamini-Hochberg",
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.05,
+        default=0.05
+    )
+    log_base = CustomChoiceField(
+        choices=LogBase,
+        label="Base of the log transformation",
+        default="log2"
+    )
+    grouping = "Put a usefull default here"
     group1 = "Put a usefull default here"
-
     group2 = "Put a usefull default here"
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class DifferentialExpression_LinearModel(MethodForm):
@@ -188,24 +200,39 @@ class DifferentialExpression_LinearModel(MethodForm):
         default="Benjamini-Hochberg",
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, default=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        default=0.05
     )
     log_base = CustomChoiceField(
-        choices=LogBase, label="Base of the log transformation", default="log2"
+        choices=LogBase,
+        label="Base of the log transformation",
+        default="log2"
     )
     grouping = "Put a usefull default here"
     group1 = "Put a usefull default here"
     group2 = "Put a usefull default here"
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class PlotVolcano(MethodForm):
+    #TODO: Add inbput_dict
     input_dict = "Put a usefull default here"
     fc_threshold = CustomFloatField(
-        label="log 2 fold change threshold", min_value=0, default=0
+        label="log 2 fold change threshold",
+        min_value=0,
+        default=0
     )
+    #TODO: Add dynamic fill for proteins_of_interest
     proteins_of_interest = CustomMultipleChoiceField(
-        choices=ProteinsOfInterest, label="Proteins of interest", default=None
+        choices=ProteinsOfInterest,
+        label="Proteins of interest",
+        default=None
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class PlotScatterPlot(MethodForm):
@@ -220,6 +247,8 @@ class PlotScatterPlot(MethodForm):
         default=[None, None],
         required=False,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class PlotClustergram(MethodForm):
@@ -234,7 +263,13 @@ class PlotClustergram(MethodForm):
         default=[None, None],
         required=False,
     )
-    flip_axis = CustomChoiceField(choices=YesNo, label="Flip axis", default="No")
+    flip_axis = CustomChoiceField(
+        choices=YesNo,
+        label="Flip axis",
+        default="No"
+    )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class PlotProtQuant(MethodForm):
@@ -254,8 +289,14 @@ class PlotProtQuant(MethodForm):
         default="Euclidean distance",
     )
     similarity = CustomFloatField(
-        label="Similarity", min_value=-1, max_value=999, step_size=1, default=1
+        label="Similarity",
+        min_value=-1,
+        max_value=999,
+        step_size=1,
+        default=1
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class Plotprecision_recall_curve(MethodForm):
@@ -265,8 +306,11 @@ class Plotprecision_recall_curve(MethodForm):
         default=[None, None],
     )
     plot_title = CustomCharField(
-        label="Title of the plot (optional)", default="Precision-Recall Curve"
+        label="Title of the plot (optional)",
+        default="Precision-Recall Curve"
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringKMeans(MethodForm):
@@ -298,7 +342,10 @@ class ClusteringKMeans(MethodForm):
     )
     # TODO: workflow_meta line 1375
     n_clusters = CustomFloatField(
-        label="Number of clusters to find", min_value=1, step_size=1, default=8
+        label="Number of clusters to find",
+        min_value=1,
+        step_size=1,
+        default=8
     )
     # TODO: workflow_meta line 1384
     random_state = CustomFloatField(
@@ -333,6 +380,8 @@ class ClusteringKMeans(MethodForm):
         min_value=0,
         default=1e-4,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringExpectationMaximization(MethodForm):
@@ -368,7 +417,9 @@ class ClusteringExpectationMaximization(MethodForm):
         default="Adjusted Rand Score",
     )
     # TODO: workflow_meta line 1509
-    n_components = CustomFloatField(label="The number of mixture components", default=1)
+    n_components = CustomFloatField(
+        label="The number of mixture components",
+        default=1)
     # TODO: workflow_meta line 1515
     reg_covar = CustomFloatField(
         label="Non-negative regularization added to the diagonal of covariance",
@@ -376,7 +427,9 @@ class ClusteringExpectationMaximization(MethodForm):
         default=1e-6,
     )
     covariance_type = CustomMultipleChoiceField(
-        choices=ClusteringCovarianceType, label="Type of covariance", default="full"
+        choices=ClusteringCovarianceType,
+        label="Type of covariance",
+        default="full"
     )
     init_params = CustomMultipleChoiceField(
         choices=ClusteringInitParams,
@@ -384,7 +437,8 @@ class ClusteringExpectationMaximization(MethodForm):
         default="kmeans",
     )
     max_iter = CustomFloatField(
-        label="The number of EM iterations to perform", default=100
+        label="The number of EM iterations to perform",
+        default=100
     )
     random_state = CustomFloatField(
         label="Seed for random number generation",
@@ -393,6 +447,8 @@ class ClusteringExpectationMaximization(MethodForm):
         step_size=1,
         default=0,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
@@ -424,16 +480,23 @@ class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
     )
     # TODO: workflow_meta line 1647
     n_clusters = CustomFloatField(
-        label="The number of clusters to find", min_value=1, step_size=1, default=2
+        label="The number of clusters to find",
+        min_value=1,
+        step_size=1,
+        default=2
     )
     metric = CustomMultipleChoiceField(
-        choices=ClusteringMetric, label="Distance metric", default="euclidean"
+        choices=ClusteringMetric,
+        label="Distance metric",
+        default="euclidean"
     )
     linkage = CustomMultipleChoiceField(
         choices=ClusteringLinkage,
         label="The linkage criterion to use in order to to determine the distance to use between sets of observation",
         default="ward",
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ClassificationRandomForest(MethodForm):
@@ -445,9 +508,14 @@ class ClassificationRandomForest(MethodForm):
     # TODO: Add dynamic fill for labels_column & positive_label
     labels_column = CustomChoiceField(label="Choose labels column from metadata")
     positive_label = CustomChoiceField(label="Choose positive class")
-    test_size = CustomFloatField(label="Test size", min_value=0, default=0.20)
+    test_size = CustomFloatField(
+        label="Test size",
+        min_value=0,
+        default=0.20)
     split_stratify = CustomChoiceField(
-        choices=YesNo, label="Stratify the split", default="Yes"
+        choices=YesNo,
+        label="Stratify the split",
+        default="Yes"
     )
     # TODO: Validation strategy
     validatation_strategy = CustomChoiceField(choices=ClassificationValidationStrategy)
@@ -457,7 +525,10 @@ class ClassificationRandomForest(MethodForm):
         default=0.20,
     )
     # TODO: Workflow_meta line 1770
-    n_splits = CustomFloatField(label="Number of folds", min_value=2, default=5)
+    n_splits = CustomFloatField(
+        label="Number of folds",
+        min_value=2,
+        default=5)
     # TODO: workflow_meta line 1781-1784
     shuffle = CustomChoiceField(
         choices=YesNo,
@@ -479,9 +550,14 @@ class ClassificationRandomForest(MethodForm):
         default=42,
     )
     # TODO: workflow_meta line 1806
-    p_samples = CustomFloatField(label="Size of the test sets", default=1)
+    p_samples = CustomFloatField(
+        label="Size of the test sets",
+        default=1
+    )
     scoring = CustomMultipleChoiceField(
-        choices=ClassificationScoring, label="Scoring for the model", default="accuracy"
+        choices=ClassificationScoring,
+        label="Scoring for the model",
+        default="accuracy"
     )
     # TODO: workflow_meta line 1830-1837
     model_selection = CustomChoiceField(
@@ -496,7 +572,10 @@ class ClassificationRandomForest(MethodForm):
         default="accuracy",
     )
     n_estimators = CustomFloatField(
-        label="The number of trees in the forest", min_value=1, step_size=1, default=100
+        label="The number of trees in the forest",
+        min_value=1,
+        step_size=1,
+        default=100
     )
     criterion = CustomMultipleChoiceField(
         choices=ClusteringCriterion,
@@ -504,7 +583,9 @@ class ClassificationRandomForest(MethodForm):
         default="gini",
     )
     max_depth = CustomFloatField(
-        label="The maximum depth of the tree", min_value=1, default=1
+        label="The maximum depth of the tree",
+        min_value=1,
+        default=1
     )
     random_state = CustomFloatField(
         label="Seed for random number generation",
@@ -513,6 +594,8 @@ class ClassificationRandomForest(MethodForm):
         step_size=1,
         default=6,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ClassificationSVM(MethodForm):
@@ -524,9 +607,14 @@ class ClassificationSVM(MethodForm):
     # TODO: Add dynamic fill for labels_column & positive_label
     labels_column = CustomChoiceField(label="Choose labels column from metadata")
     positive_label = CustomChoiceField(label="Choose positive class")
-    test_size = CustomFloatField(label="Test size", min_value=0, default=0.20)
+    test_size = CustomFloatField(
+        label="Test size",
+        min_value=0,
+        default=0.20)
     split_stratify = CustomChoiceField(
-        choices=YesNo, label="Stratify the split", default="Yes"
+        choices=YesNo,
+        label="Stratify the split",
+        default="Yes"
     )
     # TODO: Validation strategy
     validatation_strategy = CustomChoiceField(choices=ClassificationValidationStrategy)
@@ -535,7 +623,10 @@ class ClassificationSVM(MethodForm):
         default=0.20,
     )
     # TODO: Workflow_meta line 1973
-    n_splits = CustomFloatField(label="Number of folds", min_value=2, default=5)
+    n_splits = CustomFloatField(
+        label="Number of folds",
+        min_value=2,
+        default=5)
     # TODO: workflow_meta line 1984-1989
     shuffle = CustomChoiceField(
         choices=YesNo,
@@ -556,9 +647,14 @@ class ClassificationSVM(MethodForm):
         step_size=1,
         default=42,
     )
-    p_samples = CustomFloatField(label="Size of the test sets", default=1)
+    p_samples = CustomFloatField(
+        label="Size of the test sets",
+        default=1
+    )
     scoring = CustomMultipleChoiceField(
-        choices=ClassificationScoring, label="Scoring for the model", default="accuracy"
+        choices=ClassificationScoring,
+        label="Scoring for the model",
+        default="accuracy"
     )
     # TODO: workflow_meta line 2033-2040
     model_selection = CustomChoiceField(
@@ -578,7 +674,9 @@ class ClassificationSVM(MethodForm):
         default="linear",
     )
     tolerance = CustomFloatField(
-        label="Tolerance for stopping criterion", min_value=0.0, default=1e-4
+        label="Tolerance for stopping criterion",
+        min_value=0.0,
+        default=1e-4
     )
     random_state = CustomFloatField(
         label="Seed for random number generation",
@@ -587,13 +685,19 @@ class ClassificationSVM(MethodForm):
         step_size=1,
         default=6,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ModelEvaluationClassificationModel(MethodForm):
     # TODO: Input_dict
     scoring = CustomMultipleChoiceField(
-        choices=ClassificationScoring, label="Scoring for the model", default="accuracy"
+        choices=ClassificationScoring,
+        label="Scoring for the model",
+        default="accuracy"
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class DimensionReductionTSNE(MethodForm):
@@ -603,13 +707,21 @@ class DimensionReductionTSNE(MethodForm):
         default=[None, None],
     )
     n_components = CustomFloatField(
-        label="Dimension of the embedded space", min_value=1, step_size=1, default=2
+        label="Dimension of the embedded space",
+        min_value=1,
+        step_size=1,
+        default=2
     )
     perplexity = CustomFloatField(
-        label="Perplexity", min_value=5.0, max_value=50.0, default=30.0
+        label="Perplexity",
+        min_value=5.0,
+        max_value=50.0,
+        default=30.0
     )
     metric = CustomMultipleChoiceField(
-        choices=DimensionReductionMetric, label="Metric", default="euclidean"
+        choices=DimensionReductionMetric,
+        label="Metric",
+        default="euclidean"
     )
     random_state = CustomFloatField(
         label="Seed for random number generation",
@@ -629,6 +741,8 @@ class DimensionReductionTSNE(MethodForm):
         step_size=1,
         default=300,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class DimensionReductionUMAP(MethodForm):
@@ -645,7 +759,10 @@ class DimensionReductionUMAP(MethodForm):
         default=15,
     )
     n_components = CustomFloatField(
-        label="Number of components", min_value=1, step_size=1, default=2
+        label="Number of components",
+        min_value=1,
+        step_size=1,
+        default=2
     )
     min_dist = CustomFloatField(
         label="The minimum distance between embedded points",
@@ -654,7 +771,9 @@ class DimensionReductionUMAP(MethodForm):
         default=0.1,
     )
     metric = CustomMultipleChoiceField(
-        choices=DimensionReductionMetric, label="Metric", default="euclidean"
+        choices=DimensionReductionMetric,
+        label="Metric",
+        default="euclidean"
     )
     random_state = CustomFloatField(
         label="Seed for random number generation",
@@ -663,27 +782,37 @@ class DimensionReductionUMAP(MethodForm):
         step_size=1,
         default=42,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class ProteinGraph(MethodForm):
     protein_ID = CustomCharField(
-        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
+        label="Protein ID",
+        placeholder="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2255 - 2263
-    k = CustomFloatField(label="k-mer length", min_value=1, step_size=1, default=5)
+    k = CustomFloatField(
+        label="k-mer length",
+        min_value=1,
+        step_size=1,
+        default=5)
     allowed_mismatches = CustomFloatField(
         label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
         min_value=0,
         step_size=1,
         default=2,
     )
+    def submit(self, run: Run):
+        run.step_calculate(self.cleaned_data)
 
 
 class variationGraph(MethodForm):
     protein_ID = CustomCharField(
-        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
+        label="Protein ID",
+        placeholder="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
-
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
+
