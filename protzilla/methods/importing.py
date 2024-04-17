@@ -25,8 +25,8 @@ class ImportingStep(Step):
 
 
 class MaxQuantImport(ImportingStep):
-    name = "MaxQuant"
-    step = "msdataimport"
+    display_name = "MaxQuant"
+    operation = "msdataimport"
     method_description = "Import MaxQuant data"
 
     parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
@@ -37,8 +37,8 @@ class MaxQuantImport(ImportingStep):
 
 
 class DiannImport(ImportingStep):
-    name = "DIA-NN"
-    step = "msdataimport"
+    display_name = "DIA-NN"
+    operation = "msdataimport"
     method = "diann_import"
     method_description = "DIA-NN data import"
 
@@ -50,8 +50,8 @@ class DiannImport(ImportingStep):
 
 
 class MsFraggerImport(ImportingStep):
-    name = "MS Fragger"
-    step = "msdataimport"
+    display_name = "MS Fragger"
+    operation = "msdataimport"
     method = "ms_fragger_import"
     method_description = "MS Fragger data import"
 
@@ -63,8 +63,8 @@ class MsFraggerImport(ImportingStep):
 
 
 class MetadataImport(ImportingStep):
-    name = "Metadata import"
-    step = "metadataimport"
+    display_name = "Metadata import"
+    operation = "metadataimport"
     method_description = "Import metadata"
 
     parameter_names = ["file_path", "feature_orientation"]
@@ -79,8 +79,8 @@ class MetadataImport(ImportingStep):
 
 
 class MetadataImportMethodDiann(ImportingStep):
-    name = "Metadata import DIA-NN"
-    step = "metadataimport"
+    display_name = "Metadata import DIA-NN"
+    operation = "metadataimport"
     method = "metadata_import_method_diann"
     method_description = "Import metadata for run relationships of DIA-NN"
 
@@ -96,8 +96,8 @@ class MetadataImportMethodDiann(ImportingStep):
 
 
 class MetadataColumnAssignment(ImportingStep):
-    name = "Metadata column assignment"
-    step = "metadataimport"
+    display_name = "Metadata column assignment"
+    operation = "metadataimport"
     method = "metadata_column_assignment"
     method_description = (
         "Assign columns to metadata categories, repeatable for each category"
@@ -120,8 +120,8 @@ class MetadataColumnAssignment(ImportingStep):
 
 
 class PeptideImport(ImportingStep):
-    name = "Peptide import"
-    step = "peptide_import"
+    display_name = "Peptide import"
+    operation = "peptide_import"
     method = "peptide_import"
     method_description = "Import peptide data"
 

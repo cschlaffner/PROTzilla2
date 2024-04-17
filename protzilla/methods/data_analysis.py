@@ -1,5 +1,5 @@
 from protzilla.data_analysis.differential_expression_t_test import t_test
-from protzilla.steps import Step, StepManager
+from protzilla.steps import Step, StepManager, Plots
 
 
 class DataAnalysisStep(Step):
@@ -9,9 +9,17 @@ class DataAnalysisStep(Step):
         return inputs
 
 
+class PlotStep(DataAnalysisStep):
+    step = "plot"
+
+    def handle_outputs(self, output_dict: dict):
+        plots = output_dict.pop("plots", [])
+        self.plots = Plots(plots)
+
+
 class DifferentialExpression_TTest(DataAnalysisStep):
-    name = "t-test"
-    step = "differential_expression"
+    display_name = "t-test"
+    operation = "differential_expression"
     method_description = (
         "A function to conduct a two sample t-test between groups defined in the clinical data. The "
         "t-test is conducted on the level of each protein. The p-values are corrected for multiple "

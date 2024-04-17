@@ -179,20 +179,21 @@ def make_plot_fields(run: Run, section: str, step: str, method: str) -> str:
 
 
 def make_method_dropdown(
-    run_name: str, section: str, step_name: str, step_id: str
+    run_name: str, section: str, operation: str, display_name: str
 ) -> str:
     """
     Generates the html for the method dropdown of the current step.
 
     :param run: The current run object
     :param section: The current section
-    :param step: The current step
-    :param method: The current method
+    :param operation: The current step
+    :param display_name: The current method
 
     :return: The html for the method dropdown
     """
     hierarchical_dict = form_map.generate_hierarchical_dict()
-    methods = hierarchical_dict[section][step_name].values()
+
+    methods = hierarchical_dict[section][operation].values()
     method_names = [method.name for method in methods]
 
     methods = [method.__name__ for method in methods]
@@ -200,8 +201,8 @@ def make_method_dropdown(
         "runs_v2/method_dropdown.html",
         context=dict(
             key="chosen_method",
-            name=f"{name_to_title(step_name)} Method:",
-            default=step_id,
+            name=f"{name_to_title(operation)} Method:",
+            default=display_name,
             categories=list(zip(methods, method_names)),
             run_name=run_name,
         ),
@@ -220,7 +221,7 @@ def make_displayed_history(run: Run) -> str:
     displayed_history = []
 
     for i, step in enumerate(run.steps.previous_steps):
-        name = f"{name_to_title(step.step)}: {step.name}"
+        name = f"{name_to_title(step.display_name)}: {step.instance_identifier}"
         section_heading = (
             name_to_title(step.section)
             if run.steps.all_steps[i - 1].section != step.section
@@ -268,7 +269,7 @@ def make_displayed_history(run: Run) -> str:
                 form=form,
                 plots=plots,
                 section_heading=section_heading,
-                name=step.name,
+                name=step.display_name,
                 index=i,
                 table_link=table_url if has_df else "",
                 protein_graph_link=protein_graph_url if has_protein_graph else "",

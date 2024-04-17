@@ -14,9 +14,9 @@
 
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
-    {% if section == "data_preprocessing" %}
-        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
-    {% endif %}
+    {#% if section == "data_preprocessing" %#}
+    {#% include 'runs/form_buttons.html' with results_exist=results_exist %#}
+    {#% endif %#}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
 
 {% endblock %}

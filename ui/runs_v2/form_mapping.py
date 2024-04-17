@@ -8,7 +8,6 @@ import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
-
 from .forms.base import MethodForm
 
 _forward_mapping = {
@@ -21,6 +20,10 @@ _forward_mapping = {
     importing.PeptideImport: importing_forms.PeptideImportForm,
     data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
     data_analysis.DifferentialExpression_TTest: data_analysis_forms.DifferentialExpression_TTestForm,
+}
+
+_forward_mapping_plots = {
+    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinPlotForm,
 }
 
 
@@ -40,9 +43,9 @@ def generate_hierarchical_dict() -> dict[str, dict[str, dict[str, type[Step]]]]:
         # and the value being the class itself
         if step_class.section not in hierarchical_dict:
             hierarchical_dict[step_class.section] = {}
-        if step_class.step not in hierarchical_dict[step_class.section]:
-            hierarchical_dict[step_class.section][step_class.step] = {}
-        hierarchical_dict[step_class.section][step_class.step][
+        if step_class.operation not in hierarchical_dict[step_class.section]:
+            hierarchical_dict[step_class.section][step_class.operation] = {}
+        hierarchical_dict[step_class.section][step_class.operation][
             step_class.__name__
         ] = step_class
 
@@ -57,6 +60,10 @@ def _get_form_class_by_step(step: Step) -> type[MethodForm]:
         raise ValueError(f"No form has been provided for {type(step).__name__} step.")
 
 
+def _get_plot_form_class_by_step(step: Step) -> type[MethodForm]:
+    return _forward_mapping_plots.get(type(step))
+
+
 def _get_step_class_by_form(form: MethodForm) -> type[Step]:
     step_class = _reverse_mapping.get(type(form))
     if step_class:
@@ -67,6 +74,11 @@ def _get_step_class_by_form(form: MethodForm) -> type[Step]:
 
 def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
     return _get_form_class_by_step(step)(run=run)
+
+
+def get_empty_plot_form_by_method(step: Step, run: Run) -> MethodForm:
+    plot_form_class = _get_plot_form_class_by_step(step)
+    return plot_form_class(run=run) if plot_form_class else None
 
 
 def get_filled_form_by_method(
