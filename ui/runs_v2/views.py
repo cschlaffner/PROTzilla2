@@ -19,7 +19,6 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
-
 from .form_mapping import (
     get_empty_form_by_method,
     get_empty_plot_form_by_method,
@@ -116,9 +115,10 @@ def detail(request: HttpRequest, run_name: str):
             ),
             name_field="",
             current_plots=current_plots,
-            results_exist=True,  # TODO (not run.steps.current_step.output.is_empty)
+            results_exist=not run.steps.current_step.output.is_empty,
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=True,  # TODO (not run.steps.current_step.output.is_empty)
+            show_plot_button=not run.steps.current_step.output.is_empty,
+            # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
             end_of_run=False,  # TODO?

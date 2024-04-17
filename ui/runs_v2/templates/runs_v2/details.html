@@ -154,7 +154,8 @@
                                             {{ plot_form }}
                                         </div>
                                     </fieldset>
-                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
+                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey"
+                                            {% if not show_plot_button %} disabled {% endif %}>
                                 </form>
                             </div>
                         {% else %}
@@ -173,7 +174,9 @@
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                                    class="btn btn-red mr-auto">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs_v2:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey">Plot</a>
+                                                <a href="{% url 'runs_v2:plot' run_name %}" id="plot_parameters_submit"
+                                                   class="btn btn-grey" {% if not show_plot_button %}
+                                                   disabled {% endif %}>Plot</a>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs_v2:tables_nokey' run_name displayed_history|length %}"
