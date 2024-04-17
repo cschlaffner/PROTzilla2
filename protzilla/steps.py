@@ -31,13 +31,11 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        output_dict = self.method(self.insert_dataframes(steps, inputs))
+        output_dict = self.method(self.insert_dataframes(steps, self.inputs))
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
         self.messages = Messages(messages)
-        plots = output_dict.pop("plots", [])
-        self.plots = Plots(plots)
         self.handle_outputs(output_dict)
 
         # validate the output
@@ -53,6 +51,11 @@ class Step:
 
     def handle_outputs(self, output_dict: dict):
         self.output = Output(output_dict)
+
+    def plot(self):
+        raise NotImplementedError(
+            "Plotting is not implemented for this step. Only preprocessing methods can have addidional plots."
+        )
 
     def validate_inputs(self, required_keys: list[str]):
         for key in required_keys:

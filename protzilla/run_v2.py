@@ -18,7 +18,7 @@ class Run:
     def auto_save(func):
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
-            self._run_write()
+            self._run_write()  # TODO this takes a very long time, possibly make it asynchronous
             self.steps.df_mode = self.df_mode
             self.steps.disk_operator = self.disk_operator
             return result
@@ -77,6 +77,10 @@ class Run:
     @auto_save
     def step_calculate(self, inputs: dict | None = None):
         self.steps.current_step.calculate(self.steps, inputs)
+
+    @auto_save
+    def step_plot(self):
+        self.steps.current_step.plot()
 
     @auto_save
     def step_next(self):

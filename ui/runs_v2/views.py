@@ -19,7 +19,11 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
-from .form_mapping import get_empty_form_by_method, get_filled_form_by_request
+from .form_mapping import (
+    get_empty_form_by_method,
+    get_filled_form_by_request,
+    get_empty_plot_form_by_method,
+)
 
 active_runs: dict[str, Run] = {}
 
@@ -50,8 +54,10 @@ def detail(request: HttpRequest, run_name: str):
         method_form = get_filled_form_by_request(request, run)
         if method_form.is_valid():
             method_form.submit(run)
+        plot_form = get_empty_plot_form_by_method(run.steps.current_step, run)
     else:
         method_form = get_empty_form_by_method(run.steps.current_step, run)
+        plot_form = get_empty_plot_form_by_method(run.steps.current_step, run)
 
     description = run.steps.current_step.method_description
 
@@ -109,9 +115,9 @@ def detail(request: HttpRequest, run_name: str):
             ),
             name_field="",
             current_plots=current_plots,
-            results_exist=not run.steps.current_step.output.is_empty,
+            results_exist=True,  # TODO (not run.steps.current_step.output.is_empty)
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=not run.steps.current_step.output.is_empty,
+            show_plot_button=True,  # TODO (not run.steps.current_step.output.is_empty)
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
             end_of_run=False,  # TODO?
@@ -120,7 +126,7 @@ def detail(request: HttpRequest, run_name: str):
             show_protein_graph=show_protein_graph,
             description=description,
             method_form=method_form,
-            plot_form=None,
+            plot_form=plot_form,
         ),
     )
 
@@ -259,7 +265,7 @@ def plot(request, run_name):
     else:
         run.current_step.plot(parameters)
 
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
 def tables(request, run_name, index, key=None):
@@ -344,6 +350,11 @@ def export_workflow(request: HttpRequest, run_name: str):
     requested_workflow_name = request.POST["name"]
     run._workflow_export(requested_workflow_name)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
+
+
+def download_plots(request: HttpRequest, run_name: str):
+    # TODO: implement
+    raise NotImplementedError("Downloading workflows is not yet implemented.")
 
 
 def delete_step(request: HttpRequest, run_name: str):

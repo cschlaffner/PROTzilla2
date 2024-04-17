@@ -431,7 +431,6 @@ def by_min_per_sample_plot(
 def by_min_per_protein_plot(
     df,
     result_df,
-    current_out,
     graph_type,
     graph_type_quantities,
     group_by,

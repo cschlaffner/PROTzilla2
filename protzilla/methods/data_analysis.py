@@ -1,5 +1,5 @@
 from protzilla.data_analysis.differential_expression_t_test import t_test
-from protzilla.steps import Step, StepManager
+from protzilla.steps import Step, StepManager, Plots
 
 
 class DataAnalysisStep(Step):
@@ -7,6 +7,14 @@ class DataAnalysisStep(Step):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
+
+
+class PlotStep(DataAnalysisStep):
+    step = "plot"
+
+    def handle_outputs(self, output_dict: dict):
+        plots = output_dict.pop("plots", [])
+        self.plots = Plots(plots)
 
 
 class DifferentialExpression_TTest(DataAnalysisStep):
