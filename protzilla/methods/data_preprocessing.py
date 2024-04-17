@@ -176,6 +176,18 @@ class ImputationByMinPerSample(DataPreprocessingStep):
         return by_min_per_protein(**inputs)
 
 
+class SimpleImputationPerProtein(DataPreprocessingStep):
+    name = "SimpleImputer"
+    step = "imputation"
+    method_description = "Imputation methods include imputation by mean, median and mode. Implements the " \
+                         "sklearn.SimpleImputer class"
+
+    parameter_names = ["strategy"]
+
+    def method(self, inputs):
+        return imputation.by_simple_imputer(**inputs)
+
+
 class ImputationByKNN(DataPreprocessingStep):
     name = "kNN"
     step = "imputation"

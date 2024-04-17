@@ -11,10 +11,15 @@ class EmptyEnum(Enum):
     pass
 
 
-class StrategyType(Enum):
+class SimpleImputerStrategyType(Enum):
+    MEAN = "mean"
+    MEDIAN = "median"
+    MOST_FREQUENT = "most_frequent"
+
+
+class ImputationByNormalDistributionSamplingStrategyType(Enum):
     PERPROTEIN = "perProtein"
     PERDATASET = "perDataset"
-from .custom_fields import CustomFloatField
 
 
 class ImputationMinPerProteinForm(MethodForm):
@@ -30,12 +35,20 @@ class FilterByProteinsCountForm(MethodForm):
     deviation_threshold = CustomFloatField(label="Number of standard deviations from the median:")
 
 
+class SimpleImputationPerProteinForm(MethodForm):
+    strategy = CustomChoiceField(choices=SimpleImputerStrategyType, label="Strategy")
+
+
 class ImputationByKNNForms(MethodForm):
     number_of_neighbours = CustomFloatField(label="Number of neighbours")
 
 
-    def submit(self, run: Run):
-        self.cleaned_data["shrinking_value"] = float(
-            self.cleaned_data["shrinking_value"]
-        )
-        run.step_calculate(self.cleaned_data)
+class ImputationByNormalDistributionSamplingForm(MethodForm):
+    strategy = CustomChoiceField(choices=ImputationByNormalDistributionSamplingStrategyType, label="Strategy")
+    down_shift = CustomFloatField(label="Downshift")
+    scaling_factor = CustomFloatField(label="Scaling factor")
+
+
+class FilterPeptidesByPEPThresholdForm(MethodForm):
+    threshold = CustomFloatField(label="Threshold value for PEP")
+    peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
