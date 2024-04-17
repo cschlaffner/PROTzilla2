@@ -18,13 +18,7 @@ class StrategyType(Enum):
 
 
 class ImputationMinPerProteinForm(MethodForm):
-    shrinking_value = CustomNumberInput(label="Shrinking value")
-
-    def submit(self, run: Run):
-        self.cleaned_data["shrinking_value"] = float(
-            self.cleaned_data["shrinking_value"]
-        )
-        run.step_calculate(self.cleaned_data)
+    shrinking_value = CustomFloatField(label="Shrinking value")
 
 
 class FilterProteinsBySamplesMissingForm(MethodForm):
@@ -32,46 +26,18 @@ class FilterProteinsBySamplesMissingForm(MethodForm):
 
 
 class FilterByProteinsCountForm(MethodForm):
-    deviation_threshold = CustomNumberInput(label="Number of standard deviations from the median:")
-
-    def submit(self, run: Run):
-        self.cleaned_data["deviation_threshold"] = float(
-            self.cleaned_data["deviation_threshold"]
-        )
-        run.step_calculate(self.cleaned_data)
+    deviation_threshold = CustomFloatField(label="Number of standard deviations from the median:")
 
 
 class ImputationByKNNForms(MethodForm):
-    number_of_neighbours = CustomNumberInput(label="Number of neighbours")
-
-    def submit(self, run: Run):
-        self.cleaned_data["number_of_neighbours"] = float(
-            self.cleaned_data["number_of_neighbours"]
-        )
-        run.step_calculate(self.cleaned_data)
+    number_of_neighbours = CustomFloatField(label="Number of neighbours")
 
 
 class ImputationByNormalDistributionSamplingForm(MethodForm):
     strategy = CustomChoiceField(choices=StrategyType, label="Strategy")
-    down_shift = CustomNumberInput(label="Downshift")
-    scaling_factor = CustomNumberInput(label="Scaling factor")
-
-    def submit(self, run: Run):
-        self.cleaned_data["down_shift"] = float(
-            self.cleaned_data["down_shift"]
-        )
-        self.cleaned_data["scaling_factor"] = float(
-            self.cleaned_data["scaling_factor"]
-        )
-        run.step_calculate(self.cleaned_data)
-
+    down_shift = CustomFloatField(label="Downshift")
+    scaling_factor = CustomFloatField(label="Scaling factor")
 
 class FilterPeptidesByPEPThresholdForm(MethodForm):
-    threshold = CustomNumberInput(label="Threshold value for PEP")
+    threshold = CustomFloatField(label="Threshold value for PEP")
     peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
-
-    def submit(self, run: Run):
-        self.cleaned_data["threshold"] = float(
-            self.cleaned_data["threshold"]
-        )
-        run.step_calculate(self.cleaned_data)
