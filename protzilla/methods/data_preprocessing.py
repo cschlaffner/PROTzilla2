@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 from protzilla.data_preprocessing import imputation
-from protzilla.steps import Step, StepManager
+from protzilla.steps import Step, StepManager, Plots
 
 
 class DataPreprocessingStep(Step):
     section = "data_preprocessing"
     output_names = ["protein_df"]
 
+    plot_input_names = ["protein_df"]
+    plot_output_names = ["plots"]
+
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.protein_df
         return inputs
+
+    def plot(self, inputs):
+        raise NotImplementedError("Plotting is not implemented yet for this step.")
 
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
@@ -147,6 +153,11 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
 
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
+
+    def plot(self, inputs):
+        inputs["df"] = self.inputs["protein_df"]
+        inputs["result_df"] = self.output["protein_df"]
+        self.plots = Plots(imputation.by_min_per_protein_plot(**inputs))
 
 
 class ImputationByMinPerSample(DataPreprocessingStep):
