@@ -57,6 +57,32 @@ class InitCentroidStrategy(Enum):
     kmeans_plus_plus = "k-means++"
     random = "random"
 
+class ClusteringCovarianceType(Enum):
+    full = "full"
+    tied = "tied"
+    diag = "diag"
+    spherical = "spherical"
+
+class ClusteringInitParams(Enum):
+    kmeans = "kmeans"
+    kmeans_plus_plus = "kmeans++"
+    random = "random"
+    random_from_data = "random from data"
+
+class ClusteringMetric(Enum):
+    euclidean = "euclidean"
+    manhattan = "manhattan"
+    cosine = "cosine"
+    l1 = "l1"
+    l2 = "l2"
+
+class ClusteringLinkage(Enum):
+    ward = "ward"
+    complete = "complete"
+    average = "average"
+    single = "single"
+
+
 
 class DifferentialExpression_ANOVA(MethodForm):
     multiple_testing_correction = CustomChoiceField(
@@ -152,8 +178,38 @@ class ClusteringKMeans(MethodForm):
 
 class ClusteringExpectationMaximization(MethodForm):
     input_df = CustomChoiceField(choices=AnalysisLevel, label="Choose dataframe to be plotted", default=[None, None])
+    input_df = CustomChoiceField(choices=AnalysisLevel, label="Choose dataframe to be plotted", default=[None, None])
+    # TODO: Add dynamic fill for labels_column & positive_label
+    labels_column = CustomChoiceField(label="Choose labels column from metadata")
+    positive_label = CustomChoiceField(label="Choose positive class")
+    model_selection = CustomChoiceField(choices=ClusteringModelSelection, label="Choose strategy to perform parameter fine-tuning", default="Grid search")
+    # TODO: Add dynamic parameters for grid search & randomized search
+    # TODO Add dynamic parameter for model selection scoring
+    model_selection_scoring = CustomChoiceField(choices=ClusteringScoring, label="Select a scoring for identifying the best estimator following a grid search", default="Adjusted Rand Score", dynamic=True)
+    scoring = CustomMultipleChoiceField(choices=ClusteringScoring, label="Scoring for the model", default="Adjusted Rand Score")
+    #TODO: workflow_meta line 1509
+    n_components = CustomFloatField(label="The number of mixture components", default=1)
+    #TODO: workflow_meta line 1515
+    reg_covar = CustomFloatField(label="Non-negative regularization added to the diagonal of covariance", min_value=0, default=1e-6)
+    covariance_type = CustomMultipleChoiceField(choices=ClusteringCovarianceType, label="Type of covariance", default="full")
+    init_params = CustomMultipleChoiceField(choices=ClusteringInitParams, label="The method used to initialize the weights, the means and the precisions.", default="kmeans")
+    max_iter = CustomFloatField(label="The number of EM iterations to perform", default=100)
+    random_state = CustomFloatField(label="Seed for random number generation", min_value=0, max_value=4294967295, step_size=1, default=0)
 
-
+class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
+    input_df = CustomChoiceField(choices=AnalysisLevel, label="Choose dataframe to be plotted", default=[None, None])
+    # TODO: Add dynamic fill for labels_column & positive_label
+    labels_column = CustomChoiceField(label="Choose labels column from metadata")
+    positive_label = CustomChoiceField(label="Choose positive class")
+    model_selection = CustomChoiceField(choices=ClusteringModelSelection, label="Choose strategy to perform parameter fine-tuning", default="Grid search")
+    # TODO: Add dynamic parameters for grid search & randomized search
+    # TODO Add dynamic parameter for model selection scoring
+    model_selection_scoring = CustomChoiceField(choices=ClusteringScoring, label="Select a scoring for identifying the best estimator following a grid search", default="Adjusted Rand Score", dynamic=True)
+    scoring = CustomMultipleChoiceField(choices=ClusteringScoring, label="Scoring for the model", default="Adjusted Rand Score")
+    #TODO: workflow_meta line 1647
+    n_clusters = CustomFloatField(label="The number of clusters to find", min_value=1, step_size=1, default=2)
+    metric = CustomMultipleChoiceField(choices=ClusteringMetric, label="Distance metric", default="euclidean")
+    linkage = CustomMultipleChoiceField(choices=ClusteringLinkage, label="The linkage criterion to use in order to to determine the distance to use between sets of observation", default="ward")
 
 
 
