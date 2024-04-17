@@ -133,7 +133,7 @@ class DiskOperator:
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         step_data = {}
-        step_data[KEYS.STEP_INPUTS] = step.inputs
+        step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
         step_data[KEYS.STEP_TYPE] = step.__class__.__name__
         step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
         if not workflow_mode:
@@ -197,3 +197,7 @@ class DiskOperator:
     @property
     def plot_dir(self) -> Path:
         return self.run_dir / "plots"
+
+
+def sanitize_inputs(inputs: dict) -> dict:
+    return {key: value for key, value in inputs.items() if type(value) != pd.DataFrame}
