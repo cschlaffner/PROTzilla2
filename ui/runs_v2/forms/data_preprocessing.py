@@ -10,6 +10,9 @@ from django.forms import FloatField
 class EmptyEnum(Enum):
     pass
 
+class LogTransformationBaseType(Enum):
+    LOG2 = "log2"
+    LOG10 = "log10"
 
 class SimpleImputerStrategyType(Enum):
     MEAN = "mean"
@@ -29,7 +32,6 @@ class ImputationMinPerProteinForm(MethodForm):
 
 class FilterProteinsBySamplesMissingForm(MethodForm):
     percentage = CustomFloatField(label="Percentage of minimum non-missing samples per protein")
-
 
 class FilterByProteinsCountForm(MethodForm):
     deviation_threshold = CustomFloatField(label="Number of standard deviations from the median")
@@ -67,9 +69,37 @@ class ImputationByMinPerSampleForms(MethodForm):
     shrinking_value = CustomFloatField(
         label="Sets missing intensity values to the smallest measured value for each sample")
 
+class FilterSamplesByProteinsMissingForm(MethodForm):
+    percentage = CustomFloatField(label="Percentage of minimum non-missing proteins per sample")
+
+class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
+    deviation_threshold = CustomFloatField(label="Number of standard deviations from the median:")
+
+class OutlierDetectionByPCAForm(MethodForm):
+    threshold = CustomFloatField(label="Threshold for number of standard deviations from the median:")
+    number_of_components = CustomFloatField(label="Number of components")
+
+class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
+    number_of_neighbors = CustomFloatField(label="Number of neighbours")
+
+class OutlierDetectionByIsolationForestForm(MethodForm):
+    n_estimators = CustomFloatField(label="Number of estimators")
+
+class TransformationLogForm(MethodForm):
+    log_base = CustomChoiceField(choices=LogTransformationBaseType, label="Log transformation base:")
+
+class NormalisationByZScoreForm(MethodForm):
+    pass
+
+class NormalisationByTotalSumForm(MethodForm):
+    pass
+
+class NormalisationByMedianForm(MethodForm):
+    percentile = CustomFloatField(label="Percentile for normalisation:")
 
 class SimpleImputationPerProteinForm(MethodForm):
     strategy = CustomChoiceField(choices=SimpleImputerStrategyType, label="Strategy")
+
 
 
 class ImputationByKNNForms(MethodForm):

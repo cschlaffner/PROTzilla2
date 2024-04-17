@@ -54,6 +54,17 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
     def method(self, inputs):
         return filter_samples.by_proteins_missing(**inputs)
 
+class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
+    name = "Sum of intensities"
+    step = "filter_samples"
+    method_description = (
+        "Filter by sum of protein intensities per sample"
+    )
+
+    parameter_names = ["deviation_threshold"]
+
+    def method(self, inputs):
+        return filter_samples.by_protein_intensity_sum(inputs)
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
     name = "PCA"
@@ -71,7 +82,7 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     step = "outlier_detection"
     method_description = "Detect outliers using LOF"
 
-    parameter_names = ["number_of_neighbors", "n_jobs"]
+    parameter_names = ["number_of_neighbors"]
 
     def method(self, inputs):
         return outlier_detection.by_lof(**inputs)
@@ -82,7 +93,7 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     step = "outlier_detection"
     method_description = "Detect outliers using Isolation Forest"
 
-    parameter_names = ["n_estimators", "n_jobs"]
+    parameter_names = ["n_estimators"]
 
     def method(self, inputs):
         return outlier_detection.by_isolation_forest(**inputs)
