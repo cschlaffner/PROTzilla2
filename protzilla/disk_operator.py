@@ -77,7 +77,7 @@ class DiskOperator:
         for step_data in run[KEYS.STEPS]:
             step = self._read_step(step_data)
             step_manager.add_step(step)
-        step_manager.current_step_index = run[KEYS.CURRENT_STEP_INDEX]
+        step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
         return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
@@ -100,7 +100,6 @@ class DiskOperator:
     def export_workflow(self, step_manager: StepManager, workflow_name: str) -> None:
         self.workflow_name = workflow_name
         workflow = {}
-        workflow[KEYS.CURRENT_STEP_INDEX] = 0
         workflow[KEYS.STEPS] = {}
         for step in step_manager.all_steps:
             step_data = self._write_step(step, workflow_mode=True).copy()
