@@ -11,14 +11,20 @@ from PIL import Image
 
 
 class Step:
+    section: str = None
+    display_name: str = None
+    operation: str = None
+    method_description: str = None
+
     def __init__(self):
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.parameter_names = []
-        self.output_names = []
-        self.finished = False
+        self.parameter_names: list[str] = []
+        self.output_names: list[str] = []
+        self.finished: bool = False
+        self.instance_identifier: str = None
 
     def __repr__(self):
         return self.__class__.__name__

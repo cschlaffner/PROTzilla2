@@ -52,10 +52,10 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
         for index_in_section, step in enumerate(steps.all_steps_in_section(section)):
             workflow_steps.append(
                 {
-                    "id": step.step,
-                    "name": name_to_title(step.step),
+                    "id": step.operation,
+                    "name": name_to_title(step.operation),
                     "index": index_in_section,
-                    "method_name": step.name,
+                    "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
                 }
