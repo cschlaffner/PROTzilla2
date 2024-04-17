@@ -194,7 +194,7 @@ def make_method_dropdown(
     hierarchical_dict = form_map.generate_hierarchical_dict()
 
     methods = hierarchical_dict[section][operation].values()
-    method_names = [method.name for method in methods]
+    method_names = [method.display_name for method in methods]
 
     methods = [method.__name__ for method in methods]
     return render_to_string(
