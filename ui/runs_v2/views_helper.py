@@ -45,9 +45,9 @@ def convert_str_if_possible(s):
 def get_displayed_steps(steps: StepManager) -> list[dict]:
     possible_steps = form_map.generate_hierarchical_dict()
     displayed_steps = []
+    index_global = 0
     for section in possible_steps:
         workflow_steps = []
-        index_global = 0
 
         for index_in_section, step in enumerate(steps.all_steps_in_section(section)):
             workflow_steps.append(
@@ -85,7 +85,7 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
                 "possible_steps": possible_steps_in_section,
                 "steps": workflow_steps,
                 "selected": steps.current_section() == section,
-                "finished": index_global - 1 > steps.current_step_index,
+                "finished": index_global - 1 < steps.current_step_index,
             }
         )
     return displayed_steps
