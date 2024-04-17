@@ -3,7 +3,7 @@ from enum import Enum
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
-from .custom_fields import CustomNumberInput, CustomChoiceField, CustomFloatField
+from .custom_fields import CustomNumberInput, CustomChoiceField, CustomFloatField, CustomCharField
 from django.forms import FloatField
 
 
@@ -32,7 +32,40 @@ class FilterProteinsBySamplesMissingForm(MethodForm):
 
 
 class FilterByProteinsCountForm(MethodForm):
-    deviation_threshold = CustomFloatField(label="Number of standard deviations from the median:")
+    deviation_threshold = CustomFloatField(label="Number of standard deviations from the median")
+
+
+class NormalisationByReferenceProteinForms(MethodForm):
+    reference_protein = CustomCharField(lable="A function to perform protein-intensity normalisation in reference to "
+                                              "a selected protein on your dataframe. Normalises the data on the level "
+                                              "of each sample. Divides each intensity by the intensity of the chosen "
+                                              "reference protein in each sample. Samples where this value is zero "
+                                              "will be removed and returned separately.A function to perform "
+                                              "protein-intensity normalisation in reference to a selected protein on "
+                                              "your dataframe. Normalises the data on the level of each sample. "
+                                              "Divides each intensity by the intensity of the chosen reference "
+                                              "protein in each sample. Samples where this value is zero will be "
+                                              "removed and returned separately.")
+
+
+class ImputationByMinPerDatasetForm(MethodForm):
+    shrinking_value = CustomFloatField("A function to impute missing values for each protein by taking into account "
+                                       "data from the entire dataframe. Sets missing value to the smallest measured "
+                                       "value in the dataframe. The user can also assign a shrinking factor to take a "
+                                       "fraction of that minimum value for imputation.")
+
+
+class ImputationByMinPerProteinForm(MethodForm):
+    shrinking_value = CustomFloatField(
+        label="A function to impute missing values for each protein by taking into account data from each protein. "
+              "Sets missing value to the smallest measured value for each protein column. The user can also assign a "
+              "shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without "
+              "any values will be filtered out.")
+
+
+class ImputationByMinPerSampleForms(MethodForm):
+    shrinking_value = CustomFloatField(
+        label="Sets missing intensity values to the smallest measured value for each sample")
 
 
 class SimpleImputationPerProteinForm(MethodForm):
