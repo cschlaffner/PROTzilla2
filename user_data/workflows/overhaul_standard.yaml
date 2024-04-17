@@ -1,0 +1,9 @@
+current_step_index: 0
+steps:
+  MaxQuantImport:
+    inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+  MetadataImport:
+    inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
