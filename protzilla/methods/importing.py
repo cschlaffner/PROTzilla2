@@ -117,6 +117,11 @@ class MetadataColumnAssignment(ImportingStep):
     def method(self, **kwargs):
         return metadata_column_assignment(**kwargs)
 
+    def get_input_dataframe(self, steps: StepManager, inputs: dict) -> dict:
+        inputs["protein_df"] = steps.get_step_output(ImportingStep, "protein_df")
+        inputs["metadata_df"] = steps.get_step_output(MetadataImport, "metadata")
+        return inputs
+
 
 class PeptideImport(ImportingStep):
     name = "Peptide import"

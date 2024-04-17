@@ -239,11 +239,11 @@ class StepManager:
         logging.warning("No intensity_df found in steps")
 
     @property
-    def metadata_df(self):
+    def metadata_df(self) -> pd.DataFrame | None:
         # find the last step that has a metadata_df in its output
         for step in reversed(self.all_steps):
-            if hasattr(step.output, "metadata_df"):
-                return step.output.metadata_df
+            if "metadata" in step.output:
+                return step.output["metadata"]
         logging.warning("No metadata_df found in steps")
 
     @property
