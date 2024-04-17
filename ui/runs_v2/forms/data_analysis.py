@@ -664,5 +664,26 @@ class DimensionReductionUMAP(MethodForm):
         default=42,
     )
 
+
+class ProteinGraph(MethodForm):
+    protein_ID = CustomCharField(
+        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
+    )
+    # TODO: workflow_meta line 2255 - 2263
+    k = CustomFloatField(label="k-mer length", min_value=1, step_size=1, default=5)
+    allowed_mismatches = CustomFloatField(
+        label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
+        min_value=0,
+        step_size=1,
+        default=2,
+    )
+
+
+class variationGraph(MethodForm):
+    protein_ID = CustomCharField(
+        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
+    )
+    # TODO: workflow_meta line 2291 - 2295
+
     def submit(self, run: Run):
         run.step_calculate(self.cleaned_data)
