@@ -10,7 +10,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
+from protzilla.constants.paths import (
+    RUNS_PATH,
+    TEST_DATA_PATH,
+    GRAPH_DATA_PATH,
+    UNMODIFIED_GRAPHS_PATH,
+)
 from protzilla.data_analysis.protein_graphs import (
     _create_contigs_dict,
     _create_graph_index,
@@ -619,14 +624,14 @@ def test_get_ref_seq_test_protein():
 
 
 def test_get_ref_seq_empty_seq():
-    protein_path = Path(TEST_DATA_PATH, "proteins", "empty_seq.txt")
+    protein_path = TEST_DATA_PATH / "proteins" / "empty_seq.txt"
     error_msg = f"Could not find sequence for protein at path {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _get_reference_sequence(str(protein_path))
 
 
 def test_get_ref_seq_no_seq_len():
-    protein_path = Path(TEST_DATA_PATH, "proteins", "no_seq_len.txt")
+    protein_path = TEST_DATA_PATH / "proteins" / "no_seq_len.txt"
     error_msg = f"Could not find lines with Sequence in {protein_path}"
     with pytest.raises(ValueError, match=re.escape(error_msg)):
         _get_reference_sequence(str(protein_path))
@@ -788,8 +793,7 @@ def test_create_prot_variation_graph(
     )
     (RUNS_PATH / run_name).mkdir(exist_ok=True)
 
-    output_folder = RUNS_PATH / run_name / f"graphs"
-    graph_path = output_folder / f"{protein_id}.graphml"
+    graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
     planned_msg = (
         f"Graph created for protein {protein_id} at {graph_path} using {protein_path}"
     )
@@ -798,7 +802,7 @@ def test_create_prot_variation_graph(
     out_dict = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
 
     planned_out_dict = {
-        "graph_path": str(output_folder / f"{protein_id}.graphml"),
+        "graph_path": str(UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"),
         "filtered_blocks": [],
         "messages": [dict(level=logging.INFO, msg=planned_msg)],
     }
@@ -807,6 +811,8 @@ def test_create_prot_variation_graph(
     created_graph = nx.read_graphml(graph_path)
     assert nx.is_isomorphic(created_graph, test_protein_variation_graph)
     assert nx.utils.graphs_equal(created_graph, test_protein_variation_graph)
+
+    remove_test_graphml_files(protein_id)
 
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_protein_file")
@@ -1325,8 +1331,11 @@ def test_peptides_to_isoform_integration_test(
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / "test_protein_variation.txt")
-    test_protein_destination = Path(run_path / "graphs" / "test_protein_variation.txt")
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
+    test_protein_path = TEST_DATA_PATH / "proteins" / "test_protein_variation.txt"
+    test_protein_destination = GRAPH_DATA_PATH / "test_protein_variation.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     protein_id = "test_protein_variation"
@@ -1370,6 +1379,9 @@ def test_peptides_to_isoform_integration_test(
     assert created_graph.nodes == planned_graph.nodes
     assert nx.utils.graphs_equal(created_graph, planned_graph)
 
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
+
 
 def test_peptides_to_isoform_integration_test_shortcut(
     integration_test_peptides,
@@ -1380,10 +1392,12 @@ def test_peptides_to_isoform_integration_test_shortcut(
     run_name = f"{tests_folder_name}/test_peptides_to_isoform_integration_test_shortcut"
     run_path = RUNS_PATH / run_name
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
     protein_id = "test_protein-shortcut"
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
-    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
+    test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
+    test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     out_dict = peptides_to_isoform(
@@ -1442,6 +1456,9 @@ def test_peptides_to_isoform_integration_test_shortcut(
     assert planned_graph.nodes == created_graph.nodes
     assert nx.utils.graphs_equal(planned_graph, created_graph)
 
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
+
 
 def test_graph_index_longer_variations():
     planned_index = [
@@ -1494,10 +1511,12 @@ def test_peptides_to_isoform_integration_test_longer_variations(
         / "test_peptides_to_isoform_integration_test_longer_variations"
     )
     (run_path / "graphs").mkdir(parents=True, exist_ok=True)
-
+    None if GRAPH_DATA_PATH.exists() else GRAPH_DATA_PATH.mkdir(
+        parents=True, exist_ok=True
+    )
     protein_id = "test_protein_variation_long"
-    test_protein_path = Path(TEST_DATA_PATH / "proteins" / f"{protein_id}.txt")
-    test_protein_destination = Path(run_path / "graphs" / f"{protein_id}.txt")
+    test_protein_path = TEST_DATA_PATH / "proteins" / f"{protein_id}.txt"
+    test_protein_destination = GRAPH_DATA_PATH / f"{protein_id}.txt"
     shutil.copy(test_protein_path, test_protein_destination)
 
     peptide_protein_list = (
@@ -1562,6 +1581,19 @@ def test_peptides_to_isoform_integration_test_longer_variations(
 
     assert created_graph.nodes == planned_graph.nodes
     nx.utils.graphs_equal(planned_graph, created_graph)
+
+    remove_test_protein_files(protein_id)
+    remove_test_graphml_files(protein_id)
+
+
+def remove_test_protein_files(protein_id: str):
+    for file in GRAPH_DATA_PATH.glob(f"{protein_id}*.txt"):
+        file.unlink()
+
+
+def remove_test_graphml_files(protein_id: str):
+    for file in UNMODIFIED_GRAPHS_PATH.glob(f"{protein_id}*.graphml"):
+        file.unlink()
 
 
 def pprint_graphs(graph, planned_graph):

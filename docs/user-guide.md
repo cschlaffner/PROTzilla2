@@ -61,6 +61,13 @@ Finally, at the bottom of the sidebar, you can name and export the workflow of t
 - The logo and "PROTzilla"-Text in the top left leads back to the start page.
 
 
+## Specific Feature Notes
+### Managing Data for Protein Graphs
+When using the Protein Graphs feature, protein data files are downloaded from UniProt. These files and versions specifically for PROTzilla as well as some miscellaneous data is stored in a central location: [_Path to PROTzilla/user_data/external_data/graph_data/..._](../user_data/external_data/graph_data). When you create a Protein Graph for the same protein across two separate Runs, these files are reused to save on disk space and allow for offline usage once these files were downloaded for any run once. As they aren't automatically deleted or updated, even if there was a newer version available version on UniProt, you might want to consider deleting them manually if you are not getting the results you are expecting.
+
+From these parsed files, a baseline graph is created. As long as the underlying protein sequence data does not change, these graphs are current. These baseline graphs are, therefore, also used across runs to save space and speed up processing. These graphs are saved at [_Path to PROTzilla/user_data/external_data/unmodified_graphs/..._](../user_data/external_data/unmodified_graphs). Again, if you are not getting the results you were expecting, try deleting these baseline graph files (as well as the protein data files mentioned above).
+
+
 # UniProt usage in PROTzilla
 To make use of the UniProt integration in PROTzilla, tables with information onproteins need to be added to PROTzilla via the Databases page. Afterward, theycan be used for Gene mapping if they contain a `Gene Names` or `Gene Names (primary)` column, or for adding UniProt data to a PROTzilla table.
 

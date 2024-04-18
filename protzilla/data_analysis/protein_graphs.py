@@ -6,8 +6,9 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 import requests
+from os import devnull
 
-from protzilla.constants.paths import RUNS_PATH
+from protzilla.constants.paths import RUNS_PATH, GRAPH_DATA_PATH, UNMODIFIED_GRAPHS_PATH
 from protzilla.constants.protzilla_logging import logger
 from logging import INFO, ERROR
 
@@ -60,15 +61,15 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     :return: dict(graph_path, messages)
     """
 
-    logger.info(f"Creating graph for protein {protein_id}")
-    run_path = RUNS_PATH / run_name
-    path_to_protein_file, filtered_blocks, request = _get_protein_file(
-        protein_id, run_path
-    )
+    path_to_protein_file, filtered_blocks, request = _get_protein_file(protein_id)
 
     path_to_protein_file = Path(path_to_protein_file)
     if not path_to_protein_file.exists() and request.status_code != 200:
-        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"  # noqa E501
+        msg = (
+            f"error while downloading protein file for {protein_id}. "
+            f"Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. "
+            f"Tip: check if the ID is correct"
+        )
         logger.error(msg)
         return dict(
             graph_path=None,
@@ -76,19 +77,30 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
             messages=[dict(level=ERROR, msg=msg, trace=request.__dict__)],
         )
 
-    output_folder_path = run_path / "graphs"
-    output_csv = output_folder_path / f"{protein_id}.csv"
-    graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder_path} \
-                --output_csv={output_csv} \
-                -ft VARIANT \
-                -d skip"
+    if not UNMODIFIED_GRAPHS_PATH.exists():
+        UNMODIFIED_GRAPHS_PATH.mkdir(parents=True)
 
-    subprocess.run(cmd_str, shell=True)
+    graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
+    if not graph_path.exists():
+        cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+                    --export_output_folder={UNMODIFIED_GRAPHS_PATH} \
+                    --output_csv={devnull} \
+                    -ft VARIANT \
+                    -d skip"
 
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"  # noqa E501
-    logger.info(msg)
+        subprocess.run(cmd_str, shell=True)
+
+        msg = (
+            f"Graph created for protein {protein_id} at {graph_path} "
+            f"using {path_to_protein_file}"
+        )
+        logger.info(msg)
+    else:
+        msg = (
+            f"Graph already exists for protein {protein_id} at {graph_path}. "
+            f"Skipping creation."
+        )
+
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
@@ -165,7 +177,8 @@ def peptides_to_isoform(
         ), f"When selecting Peptides by grouping, Metadata has to have been imported"
         assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
     if selected_groups:
-        # convert to always deal with list, will be string if only one category was selected  # noqa E501
+        # convert to always deal with list, will be string if only one category
+        # was selected
         if isinstance(selected_groups, str):
             selected_groups = [selected_groups]
         for group in selected_groups:
@@ -196,7 +209,7 @@ def peptides_to_isoform(
             messages=[dict(level=ERROR, msg=msg)],
         )
 
-    potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
+    potential_graph_path = UNMODIFIED_GRAPHS_PATH / f"{protein_id}.graphml"
     filtered_blocks = []
     if not potential_graph_path.exists():
         out_dict = _create_protein_variation_graph(protein_id, run_name)
@@ -206,14 +219,20 @@ def peptides_to_isoform(
         if graph_path is None:
             return dict(graph_path=None, messages=message)
     else:
-        logger.info(f"Graph already exists for protein {protein_id}. Skipping creation")
+        logger.info(
+            f"Graph already exists for protein {protein_id} at {potential_graph_path}. "
+            f"Skipping creation."
+        )
         graph_path = potential_graph_path
 
     protein_graph = nx.read_graphml(graph_path)
-    protein_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.txt"
-    matched_graph_path = (
-        RUNS_PATH / run_name / "graphs" / f"{protein_id}_modified.graphml"
-    )
+    protein_path = GRAPH_DATA_PATH / f"{protein_id}.txt"
+
+    run_graphs_path = RUNS_PATH / run_name / "graphs"
+    if not run_graphs_path.exists():
+        run_graphs_path.mkdir(parents=True)
+
+    matched_graph_path = run_graphs_path / f"{protein_id}_modified.graphml"
 
     ref_index, reference_sequence, seq_len = _create_reference_sequence_index(
         protein_path, k=k
@@ -288,7 +307,10 @@ def _create_graph_index(
             starting_point = node
             break
     else:
-        msg = "No starting point found in the graph. An error in the graph creation is likely."  # noqa E501
+        msg = (
+            "No starting point found in the graph. An error in the graph "
+            f"creation is likely."
+        )
         logger.error(msg)
         return None, msg, None
 
@@ -301,11 +323,22 @@ def _create_graph_index(
     for node in protein_graph.nodes:
         if protein_graph.nodes[node]["aminoacid"] == "__end__":
             if longest_paths[node] < seq_len:
-                msg = f"The longest path to the last node is shorter than the reference sequence. An error in the graph creation is likely. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"  # noqa E501
+                msg = (
+                    f"The longest path to the last node is shorter than the "
+                    f"reference sequence. An error in the graph creation is likely. "
+                    f"Node: {node}, longest path: {longest_paths[node]}, "
+                    f"seq_len: {seq_len}"
+                )
                 logger.error(msg)
                 return None, msg, longest_paths
             elif longest_paths[node] > seq_len:
-                msg = f"The longest path to the last node is longer than the reference sequence. This could occur if a VARIANT substitutes more amino acids than it replaces. This is unexpected behaviour and should have been filtered out of the protein data. Node: {node}, longest path: {longest_paths[node]}, seq_len: {seq_len}"  # noqa E501
+                msg = (
+                    f"The longest path to the last node is longer than the reference "
+                    f"sequence. This could occur if a VARIANT substitutes more amino "
+                    f"acids than it replaces. This is unexpected behaviour and should "
+                    f"have been filtered out of the protein data. Node: {node}, "
+                    f"longest path: {longest_paths[node]}, seq_len: {seq_len}"
+                )
                 logger.error(msg)
                 return None, msg, longest_paths
 
@@ -376,8 +409,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"
-                # noqa E501
+                f"The node {node} was not visited in the topological order "
+                f"(distance should be set already)"
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -385,31 +418,54 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
     return longest_paths
 
 
-def _get_protein_file(
-    protein_id: str, run_path: Path
-) -> (Path, list, requests.models.Response | None):
-    path_to_graphs = run_path / "graphs"
-    protein_file_path = path_to_graphs / f"{protein_id}.txt"
-    filtered_protein_file_path = path_to_graphs / f"{protein_id}_parsed.txt"
+def _get_protein_file(protein_id: str) -> (Path, list, requests.models.Response | None):
+    if not GRAPH_DATA_PATH.exists():
+        GRAPH_DATA_PATH.mkdir(parents=True)
+
+    protein_file_path = GRAPH_DATA_PATH / f"{protein_id}.txt"
+    filtered_protein_file_path = GRAPH_DATA_PATH / f"{protein_id}_parsed.txt"
+    filtered_blocks_path = GRAPH_DATA_PATH / f"{protein_id}_filtered_blocks.txt"
     url = f"https://rest.uniprot.org/uniprotkb/{protein_id}.txt"
+
     r = None
-
-    path_to_graphs.mkdir(parents=True, exist_ok=True)
-
-    if protein_file_path.exists():
-        logger.info(
-            f"Protein file {protein_file_path} already exists. Skipping download."
-        )
-    else:
+    if not protein_file_path.exists():
         logger.info(f"Downloading protein file from {url}")
         r = requests.get(url)
         r.raise_for_status()
-
         protein_file_path.write_bytes(r.content)
+
+    if filtered_protein_file_path.exists() and filtered_blocks_path.exists():
+        logger.info(f"Protein files already exists. Skipping download and parsing.")
+
+        # [[block1line1, block1line2], [block2line1, block2line2]]
+        filtered_blocks = []
+        with open(filtered_blocks_path, "r") as file:
+            lines = file.readlines()
+            # if the first line is a newline, there are no blocks
+            if not lines or lines[0] == "\n":
+                return filtered_protein_file_path, [], None
+
+            i = 0
+            filtered_blocks.append([])
+            for j, line in enumerate(lines):
+                if line != "\n":
+                    filtered_blocks[i].append(line)
+                else:
+                    if j >= len(lines) - 1:
+                        break
+                    i += 1
+                    filtered_blocks.append([])
+
+        return filtered_protein_file_path, filtered_blocks, None
 
     filtered_lines, filtered_blocks = _parse_file(protein_file_path)
     with open(filtered_protein_file_path, "w") as file:
         file.writelines(filtered_lines)
+
+    with open(filtered_blocks_path, "w") as file:
+        for block in filtered_blocks:
+            file.writelines(block)
+        file.write("\n")
 
     return filtered_protein_file_path, filtered_blocks, r
 
@@ -422,6 +478,9 @@ def _parse_file(file_path):
     `_potential_peptide_matches` will not be useful.
     For this reason, we filter out all "VARIANT" features that cause the length of the
     longest path to be longer than the reference sequence.
+
+    Filtered blocks are a list of lists. The outer list contains the filtered blocks,
+    the inner lists contain the lines of each block.
     """
 
     with open(file_path, "r") as file:
@@ -602,7 +661,8 @@ def _potential_peptide_matches(
         raise ValueError(f"k must be positive integer, but is {k}")
     if not isinstance(allowed_mismatches, int) or allowed_mismatches < 0:
         raise ValueError(
-            f"allowed_mismatches must be non-negative integer, but is {allowed_mismatches}"  # noqa E501
+            f"allowed_mismatches must be non-negative integer, "
+            f"but is {allowed_mismatches}"
         )
 
     logger.debug("Matching peptides to reference sequence")
@@ -619,7 +679,8 @@ def _potential_peptide_matches(
                 # for now potential matches like this will be dismissed even if
                 # match_start_pos + len(peptide) - allowed_mismatches <= seq_len
                 logger.debug(
-                    f"match would be out of bounds for peptide {peptide}, match_start_pos {match_start_pos}"  # noqa E501
+                    f"match would be out of bounds for peptide {peptide}, "
+                    f"match_start_pos {match_start_pos}"
                 )
                 continue
             matched_starts.append(match_start_pos)
@@ -630,7 +691,8 @@ def _potential_peptide_matches(
             peptide_mismatches.add(peptide)
 
     logger.debug(
-        f"potential peptide matches - peptide:[starting_pos] :: {potential_peptide_matches}"  # noqa E501
+        f"potential peptide matches - peptide:[starting_pos] :: "
+        f"{potential_peptide_matches}"
     )
     logger.debug(f"peptide mismatches: {peptide_mismatches}")
 
@@ -834,7 +896,8 @@ def _match_potential_matches(
                     break
             else:
                 logger.error(
-                    f"No fitting node for match start position {match_start_index} of {peptide} found"  # noqa E501
+                    f"No fitting node for match start position {match_start_index} "
+                    f"of {peptide} found"
                 )
                 continue
             matched, node_match_data, mismatches = _match_on_graph(
