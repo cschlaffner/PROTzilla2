@@ -18,7 +18,7 @@ class Run:
     def auto_save(func):
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
-            self._run_write()
+            self._run_write()  # TODO this takes a very long time, possibly make it asynchronous
             self.steps.df_mode = self.df_mode
             self.steps.disk_operator = self.disk_operator
             return result
@@ -79,6 +79,10 @@ class Run:
         self.steps.current_step.calculate(self.steps, inputs)
 
     @auto_save
+    def step_plot(self):
+        self.steps.current_step.plot()
+
+    @auto_save
     def step_next(self):
         self.steps.next_step()
 
@@ -88,6 +92,10 @@ class Run:
             self.steps.current_step_index -= 1
         else:
             logging.warning("Cannot go back from the first step")
+
+    @auto_save
+    def step_change_method(self, new_method: str):
+        self.steps.change_method(new_method)
 
     @property
     def is_at_last_step(self):

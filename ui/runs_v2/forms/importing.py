@@ -14,14 +14,14 @@ class IntensityType(Enum):
 
 
 class IntensityNameType(Enum):
-    INTENSITY = ("Intensity",)
-    MAXLFQ_TOTAL_iNTENSITY = ("MaxLFQ Total Intensity",)
-    MAXLFQ_INTENSITY = ("MaxLFQ Intensity",)
-    TOTAL_INTENSITY = ("Total Intensity",)
-    MAXLFQ_UNIQUE_INTENSITY = ("MaxLFQ Unique Intensity",)
-    UNIQUE_SPECTRAL_COUNT = ("Unique Spectral Count",)
-    UNIQUE_INTENSITY = ("Unique Intensity",)
-    SPECTRAL_COUNT = ("Spectral Count",)
+    INTENSITY = "Intensity"
+    MAXLFQ_TOTAL_iNTENSITY = "MaxLFQ Total Intensity"
+    MAXLFQ_INTENSITY = "MaxLFQ Intensity"
+    TOTAL_INTENSITY = "Total Intensity"
+    MAXLFQ_UNIQUE_INTENSITY = "MaxLFQ Unique Intensity"
+    UNIQUE_SPECTRAL_COUNT = "Unique Spectral Count"
+    UNIQUE_INTENSITY = "Unique Intensity"
+    SPECTRAL_COUNT = "Spectral Count"
     TOTAL_SPECTRAL_COUNT = "Total Spectral Count"
 
 
@@ -88,8 +88,7 @@ class MetadataColumnAssignmentForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        super().fill_form(run)
-        metadata = run.steps.get_step_output(MetadataImport, "metadata")
+        metadata = run.steps.get_step_output(MetadataImport, "metadata_df")
 
         if metadata is not None:
             self.fields["metadata_required_column"].choices = [
@@ -101,6 +100,7 @@ class MetadataColumnAssignmentForm(MethodForm):
                 self.fields["metadata_required_column"].choices = [
                     (None, "No required columns missing")
                 ]
+                self.fields["metadata_required_column"].disabled = True
 
             self.fields["metadata_unknown_column"].choices = metadata.columns[
                 ~metadata.columns.isin(["Sample", "Group", "Batch"])
@@ -109,6 +109,7 @@ class MetadataColumnAssignmentForm(MethodForm):
                 self.fields["metadata_unknown_column"].choices = [
                     (None, "No unknown columns")
                 ]
+                self.fields["metadata_unknown_column"].disabled = True
 
 
 class PeptideImportForm(MethodForm):

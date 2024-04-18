@@ -59,6 +59,8 @@ class KEYS:
     STEP_INPUTS = "inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
+    STEP_INSTANCE_IDENTIFIER = "instance_identifier"
+    STEP_TYPE = "type"
 
 
 class DiskOperator:
@@ -72,10 +74,10 @@ class DiskOperator:
     def read_run(self, file: Path = None) -> StepManager:
         run = self.yaml_operator.read(file or self.run_file)
         step_manager = StepManager()
-        for step_name, step_data in run[KEYS.STEPS].items():
-            step = self._read_step(step_name, step_data)
+        for step_data in run[KEYS.STEPS]:
+            step = self._read_step(step_data)
             step_manager.add_step(step)
-        step_manager.current_step_index = run[KEYS.CURRENT_STEP_INDEX]
+        step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
         return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
@@ -85,10 +87,10 @@ class DiskOperator:
             self.dataframe_dir.mkdir(parents=True)
         run = {}
         run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
-        run[KEYS.STEPS] = {}
+        run[KEYS.STEPS] = []
         for step in step_manager.all_steps:
             # we use the name of the class in python, as we decided is removes redundancy has more advantages over a method_id
-            run[KEYS.STEPS][step.__class__.__name__] = self._write_step(step)
+            run[KEYS.STEPS].append(self._write_step(step))
         self.yaml_operator.write(self.run_file, run)
 
     def read_workflow(self) -> StepManager:
@@ -98,7 +100,6 @@ class DiskOperator:
     def export_workflow(self, step_manager: StepManager, workflow_name: str) -> None:
         self.workflow_name = workflow_name
         workflow = {}
-        workflow[KEYS.CURRENT_STEP_INDEX] = 0
         workflow[KEYS.STEPS] = {}
         for step in step_manager.all_steps:
             step_data = self._write_step(step, workflow_mode=True).copy()
@@ -114,10 +115,14 @@ class DiskOperator:
             step_data[KEYS.STEP_INPUTS] = inputs_to_write
         self.yaml_operator.write(self.workflow_file, workflow)
 
-    def _read_step(self, step_name, step_data: dict) -> Step:
+    def _read_step(self, step_data: dict) -> Step:
         from protzilla.stepfactory import StepFactory
 
-        step = StepFactory.create_step(step_name)
+        step_type = step_data.get(KEYS.STEP_TYPE)
+        step = StepFactory.create_step(step_type)
+        step.instance_identifier = step_data.get(
+            KEYS.STEP_INSTANCE_IDENTIFIER, step_type
+        )  # here we default to the class name if no instance identifier is provided TODO
         step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
         step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
         step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
@@ -128,7 +133,9 @@ class DiskOperator:
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         step_data = {}
-        step_data[KEYS.STEP_INPUTS] = step.inputs
+        step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
+        step_data[KEYS.STEP_TYPE] = step.__class__.__name__
+        step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
         if not workflow_mode:
             step_data[KEYS.STEP_OUTPUTS] = self._write_output(
                 step_name=step.__class__.__name__, output=step.output
@@ -190,3 +197,7 @@ class DiskOperator:
     @property
     def plot_dir(self) -> Path:
         return self.run_dir / "plots"
+
+
+def sanitize_inputs(inputs: dict) -> dict:
+    return {key: value for key, value in inputs.items() if type(value) != pd.DataFrame}

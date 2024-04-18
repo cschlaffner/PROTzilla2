@@ -5,9 +5,9 @@ from protzilla.constants import paths
 
 def get_available_workflow_names() -> list[str]:
     return [
-        directory.stem
-        for directory in paths.WORKFLOWS_PATH.iterdir()
-        if not directory.name.startswith(".")
+        file.stem
+        for file in paths.WORKFLOWS_PATH.iterdir()
+        if not file.name.startswith(".") and not file.suffix == ".json"
     ]
 
 

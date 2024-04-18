@@ -1,0 +1,7 @@
+<label for="{{ key }}">{{ name }}</label>
+<select name="{{ key }}" class="form-select" hx-post="{% url 'runs_v2:change_method' run_name %}" hx-target="body" hx-swap="outerHTML">
+    {% for option, label in categories %}
+        <option value="{{ option }}" {% if option == default %} selected="selected" {% endif %}
+                label="{{ label }}">{{ option }}</option>
+    {% endfor %}
+</select>

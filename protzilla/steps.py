@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import logging
+import traceback
 from io import BytesIO
 from pathlib import Path
 
@@ -9,16 +10,24 @@ import pandas as pd
 import plotly
 from PIL import Image
 
+from protzilla.utilities import format_trace
+
 
 class Step:
+    section: str = None
+    display_name: str = None
+    operation: str = None
+    method_description: str = None
+    input_keys: list[str] = []
+    output_keys: list[str] = []
+
     def __init__(self):
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.parameter_names = []
-        self.output_names = []
-        self.finished = False
+        self.finished: bool = False
+        self.instance_identifier: str = None
 
     def __repr__(self):
         return self.__class__.__name__
@@ -26,43 +35,93 @@ class Step:
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
             self.inputs = inputs.copy()
+        self.finished = False
 
-        # validate the inputs for the step
-        self.validate_inputs(self.parameter_names)
+        try:
+            self.insert_dataframes(steps, self.inputs)
+            self.validate_inputs()
 
-        # calculate the step
-        output_dict = self.method(self.insert_dataframes(steps, inputs))
+            output_dict = self.method(self.inputs)
+            self.handle_outputs(output_dict)
+            self.handle_messages(output_dict)
 
-        # store the output and messages
-        messages = output_dict.pop("messages", [])
-        self.messages = Messages(messages)
-        plots = output_dict.pop("plots", [])
-        self.plots = Plots(plots)
-        self.handle_outputs(output_dict)
-
-        # validate the output
-        self.finished = self.valid_outputs(self.output_names)
+            if self.validate_outputs():
+                self.finished = True
+        except NotImplementedError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"Method not implemented: {e}. Please contact the developer.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+        except ValueError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"An error occured while validating inputs or outputs: {e}. Please check your parameters.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+        except TypeError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"Please check the implementation of this steps method: {e}.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+        except Exception as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=(
+                        f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
+                        f"Please check your parameters or report a potential programming issue."
+                    ),
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
 
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def insert_dataframes(
-        self, steps: StepManager, kwargs: dict
-    ) -> pd.DataFrame | None:
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
+        return inputs
 
-    def handle_outputs(self, output_dict: dict):
-        self.output = Output(output_dict)
+    def handle_outputs(self, outputs: dict):
+        if not isinstance(outputs, dict):
+            raise TypeError("Output of calculation is not a dictionary.")
+        if not outputs:
+            raise ValueError("Output of calculation is empty.")
+        self.output = Output(outputs)
 
-    def validate_inputs(self, required_keys: list[str]):
+    def handle_messages(self, outputs: dict):
+        self.messages.clear()
+        messages = outputs.get("messages", [])
+        self.messages.extend(messages)
+
+    def plot(self, inputs: dict):
+        raise NotImplementedError(
+            "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
+        )
+
+    def validate_inputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.input_keys
         for key in required_keys:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
+        return True
 
-    def valid_outputs(self, required_keys: list[str]) -> bool:
+    def validate_outputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.output_keys
         for key in required_keys:
-            if key not in self.output.output:
-                return False
+            if key not in self.output:
+                raise ValueError(
+                    f"Output validation failed: missing output {key} in outputs."
+                )
         return True
 
 
@@ -110,6 +169,15 @@ class Messages:
 
     def __repr__(self):
         return f"Messages: {[message['message'] for message in self.messages]}"
+
+    def append(self, param):
+        self.messages.append(param)
+
+    def extend(self, messages):
+        self.messages.extend(messages)
+
+    def clear(self):
+        self.messages = []
 
 
 class Plots:
@@ -229,18 +297,17 @@ class StepManager:
 
     @property
     def protein_df(self):
-        # find the last step that has a protein_df in its output
-        for step in reversed(self.previous_steps):
-            if "protein_df" in step.output and step.output["protein_df"] is not None:
-                return step.output["protein_df"]
+        from protzilla.methods.importing import ImportingStep
+
+        df = self.get_step_output(ImportingStep, "protein_df")
+        return df
         logging.warning("No intensity_df found in steps")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
-        # find the last step that has a metadata_df in its output
-        for step in reversed(self.all_steps):
-            if "metadata" in step.output:
-                return step.output["metadata"]
+        from protzilla.methods.importing import ImportingStep
+
+        return self.get_step_output(ImportingStep, "metadata_df")
         logging.warning("No metadata_df found in steps")
 
     @property
@@ -304,3 +371,31 @@ class StepManager:
             self.current_step_index += 1
         else:
             logging.warning("Cannot go forward from the last step")
+
+    def change_method(self, new_method: str):
+        from protzilla.stepfactory import StepFactory
+
+        new_step = StepFactory.create_step(new_method)
+
+        if self.current_section() == "importing":
+            self.importing = [
+                new_step if step == self.current_step else step
+                for step in self.importing
+            ]
+        elif self.current_section() == "data_preprocessing":
+            self.data_preprocessing = [
+                new_step if step == self.current_step else step
+                for step in self.data_preprocessing
+            ]
+        elif self.current_section() == "data_analysis":
+            self.data_analysis = [
+                new_step if step == self.current_step else step
+                for step in self.data_analysis
+            ]
+        elif self.current_section() == "data_integration":
+            self.data_integration = [
+                new_step if step == self.current_step else step
+                for step in self.data_integration
+            ]
+        else:
+            raise ValueError(f"Unknown section {self.current_section()}")

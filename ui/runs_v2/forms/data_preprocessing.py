@@ -3,8 +3,7 @@ from enum import Enum
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
-from .custom_fields import CustomNumberInput, CustomChoiceField, CustomFloatField, CustomCharField
-
+from .custom_fields import CustomFloatField, CustomChoiceField, CustomChoiceField, CustomFloatField, CustomCharField
 
 class EmptyEnum(Enum):
     pass
@@ -24,6 +23,26 @@ class SimpleImputerStrategyType(Enum):
 class ImputationByNormalDistributionSamplingStrategyType(Enum):
     PERPROTEIN = "perProtein"
     PERDATASET = "perDataset"
+
+class ImputationGraphTypes(Enum):
+    Boxplot = "Boxplot"
+    Histogram = "Histogram"
+
+
+class GroupBy(Enum):
+    NoGrouping = "None"
+    Sample = "Sample"
+    ProteinID = "Protein ID"
+
+
+class VisualTrasformations(Enum):
+    linear = "linear"
+    Log10 = "log10"
+
+
+class GraphTypesImputedValues(Enum):
+    Bar = "Bar chart"
+    Pie = "Pie chart"
 
 
 class ImputationMinPerProteinForm(MethodForm):
@@ -126,3 +145,18 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
 class FilterPeptidesByPEPThresholdForm(MethodForm):
     threshold = CustomFloatField(label="Threshold value for PEP")
     peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
+
+
+class ImputationMinPerProteinPlotForm(MethodForm):
+    graph_type = CustomChoiceField(choices=ImputationGraphTypes, label="Graph type")
+
+    group_by = CustomChoiceField(choices=GroupBy, label="Group by")
+
+    visual_transformation = CustomChoiceField(
+        VisualTrasformations, label="Visual transformation"
+    )
+
+    graph_type_quantities = CustomChoiceField(
+        GraphTypesImputedValues, label="Graph type - quantity of imputed values"
+    )
+
