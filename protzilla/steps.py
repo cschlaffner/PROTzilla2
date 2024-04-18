@@ -18,8 +18,8 @@ class Step:
     display_name: str = None
     operation: str = None
     method_description: str = None
-    parameter_names: list[str] = []
-    output_names: list[str] = []
+    input_keys: list[str] = []
+    output_keys: list[str] = []
 
     def __init__(self):
         self.inputs: dict = {}
@@ -85,21 +85,19 @@ class Step:
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def insert_dataframes(
-        self, steps: StepManager, kwargs: dict
-    ) -> pd.DataFrame | None:
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
+        return inputs
 
-    def handle_outputs(self, output_dict: dict):
-        if not isinstance(output_dict, dict):
+    def handle_outputs(self, outputs: dict):
+        if not isinstance(outputs, dict):
             raise TypeError("Output of calculation is not a dictionary.")
-        if not output_dict:
+        if not outputs:
             raise ValueError("Output of calculation is empty.")
-        self.output = Output(output_dict)
+        self.output = Output(outputs)
 
-    def handle_messages(self, output_dict: dict):
+    def handle_messages(self, outputs: dict):
         self.messages.clear()
-        messages = output_dict.get("messages", [])
+        messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
     def plot(self, inputs: dict):
@@ -107,13 +105,18 @@ class Step:
             "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
         )
 
-    def validate_inputs(self):
-        for key in self.parameter_names:
+    def validate_inputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.input_keys
+        for key in required_keys:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
+        return True
 
-    def validate_outputs(self) -> bool:
-        for key in self.output_names:
+    def validate_outputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.output_keys
+        for key in required_keys:
             if key not in self.output:
                 raise ValueError(
                     f"Output validation failed: missing output {key} in outputs."
