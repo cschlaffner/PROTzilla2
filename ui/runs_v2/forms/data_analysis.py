@@ -755,7 +755,7 @@ class DimensionReductionUMAP(MethodForm):
     )
 
 
-class ProteinGraph(MethodForm):
+class ProteinGraphsPeptidesToIsoform(MethodForm):
     protein_ID = CustomCharField(
         label="Protein ID",
         placeholder="Enter the Uniprot-ID of the protein"
