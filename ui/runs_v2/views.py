@@ -54,14 +54,14 @@ def detail(request: HttpRequest, run_name: str):
         method_form = get_filled_form_by_request(request, run)
         if method_form.is_valid():
             method_form.submit(run)
-        plot_form = get_empty_plot_form_by_method(run.steps.current_step, run)
+        plot_form = get_empty_plot_form_by_method(run.current_step, run)
     else:
-        method_form = get_empty_form_by_method(run.steps.current_step, run)
-        plot_form = get_empty_plot_form_by_method(run.steps.current_step, run)
+        method_form = get_empty_form_by_method(run.current_step, run)
+        plot_form = get_empty_plot_form_by_method(run.current_step, run)
 
-    description = run.steps.current_step.method_description
+    description = run.current_step.method_description
 
-    log_messages(run.steps.current_step.messages)
+    log_messages(run.current_step.messages)
     display_messages(run.current_messages, request)
 
     current_plots = []
@@ -101,23 +101,23 @@ def detail(request: HttpRequest, run_name: str):
         "runs_v2/details.html",
         context=dict(
             run_name=run_name,
-            section=run.steps.current_step.section,
-            step=run.steps.current_step,
-            display_name=f"{name_to_title(run.steps.current_step.section)} - {run.steps.current_step.display_name}",
+            section=run.current_step.section,
+            step=run.current_step,
+            display_name=f"{name_to_title(run.current_step.section)} - {run.current_step.display_name}",
             displayed_history=make_displayed_history(
                 run
             ),  # TODO: make NewRun compatible
             method_dropdown=make_method_dropdown(
                 run.run_name,
-                run.steps.current_step.section,
-                run.steps.current_step.operation,
-                type(run.steps.current_step).__name__,
+                run.current_step.section,
+                run.current_step.operation,
+                type(run.current_step).__name__,
             ),
             name_field="",
             current_plots=current_plots,
-            results_exist=not run.steps.current_step.output.is_empty,
+            results_exist=not run.current_step.output.is_empty,
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=not run.steps.current_step.output.is_empty,
+            show_plot_button=not run.current_step.output.is_empty,
             # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
