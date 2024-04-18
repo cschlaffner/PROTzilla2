@@ -431,3 +431,56 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
 
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
+
+
+class DimensionReductionTSNE(DataAnalysisStep):
+    name = "t-SNE"
+    step = "data_analysis"
+    method_description = "Dimension reduction of a dataframe using t-SNE"
+
+    parameter_names = [
+        'input_df',
+        'n_components',
+        'perplexity',
+        'metric',
+        'random_state',
+        'n_iter',
+        'n_iter_without_progress',
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return t_sne(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["input_df"] = steps.protein_df
+        inputs["sample_group_df"] = steps.metadata_df
+        return inputs
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
+
+
+class DimensionReductionUMAP(DataAnalysisStep):
+    name = "UMAP"
+    step = "data_analysis"
+    method_description = "Dimension reduction of a dataframe using UMAP"
+
+    parameter_names = [
+        'input_df',
+        'n_neighbors',
+        'n_components',
+        'min_dist',
+        'metric',
+        'random_state',
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return umap(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["input_df"] = steps.protein_df
+        inputs["sample_group_df"] = steps.metadata_df
+        return inputs
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
