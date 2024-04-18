@@ -18,14 +18,14 @@ class Step:
     display_name: str = None
     operation: str = None
     method_description: str = None
+    parameter_names: list[str] = []
+    output_names: list[str] = []
 
     def __init__(self):
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.parameter_names: list[str] = []
-        # self.output_names: list[str] = []
         self.finished: bool = False
         self.instance_identifier: str = None
 
@@ -35,15 +35,42 @@ class Step:
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
             self.inputs = inputs.copy()
+        self.finished = False
 
-        # validate the inputs for the step
-        self.validate_inputs(self.parameter_names)
-
-        # calculate the step
         try:
+            self.validate_inputs()
+
             output_dict = self.method(self.insert_dataframes(steps, self.inputs))
+            self.handle_outputs(output_dict)
+            self.handle_messages(output_dict)
+
+            if self.validate_outputs():
+                self.finished = True
+        except NotImplementedError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"Method not implemented: {e}. Please contact the developer.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+        except ValueError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"An error occured while validating inputs or outputs: {e}. Please check your parameters.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+        except TypeError as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=f"Please check the implementation of this steps method: {e}.",
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
         except Exception as e:
-            output_dict = {}
             self.messages.append(
                 dict(
                     level=logging.ERROR,
@@ -55,14 +82,6 @@ class Step:
                 )
             )
 
-        # store the output and messages
-        messages = output_dict.pop("messages", [])
-        self.messages.extend(messages)
-        self.handle_outputs(output_dict)
-
-        # validate the output
-        self.finished = self.valid_outputs(self.output_names)
-
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
@@ -72,22 +91,33 @@ class Step:
         return kwargs
 
     def handle_outputs(self, output_dict: dict):
+        if not isinstance(output_dict, dict):
+            raise TypeError("Output of calculation is not a dictionary.")
+        if not output_dict:
+            raise ValueError("Output of calculation is empty.")
         self.output = Output(output_dict)
+
+    def handle_messages(self, output_dict: dict):
+        self.messages.clear()
+        messages = output_dict.get("messages", [])
+        self.messages.extend(messages)
 
     def plot(self, inputs: dict):
         raise NotImplementedError(
             "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
         )
 
-    def validate_inputs(self, required_keys: list[str]):
-        for key in required_keys:
+    def validate_inputs(self):
+        for key in self.parameter_names:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
 
-    def valid_outputs(self, required_keys: list[str]) -> bool:
-        for key in required_keys:
-            if key not in self.output.output:
-                return False
+    def validate_outputs(self) -> bool:
+        for key in self.output_names:
+            if key not in self.output:
+                raise ValueError(
+                    f"Output validation failed: missing output {key} in outputs."
+                )
         return True
 
 
