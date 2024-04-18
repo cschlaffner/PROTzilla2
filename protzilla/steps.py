@@ -38,9 +38,10 @@ class Step:
         self.finished = False
 
         try:
+            self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
 
-            output_dict = self.method(self.insert_dataframes(steps, self.inputs))
+            output_dict = self.method(self.inputs)
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
 
@@ -296,18 +297,17 @@ class StepManager:
 
     @property
     def protein_df(self):
-        # find the last step that has a protein_df in its output
-        for step in reversed(self.previous_steps):
-            if "protein_df" in step.output and step.output["protein_df"] is not None:
-                return step.output["protein_df"]
+        from protzilla.methods.importing import ImportingStep
+
+        df = self.get_step_output(ImportingStep, "protein_df")
+        return df
         logging.warning("No intensity_df found in steps")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
-        # find the last step that has a metadata_df in its output
-        for step in reversed(self.all_steps):
-            if "metadata" in step.output:
-                return step.output["metadata"]
+        from protzilla.methods.importing import ImportingStep
+
+        return self.get_step_output(ImportingStep, "metadata_df")
         logging.warning("No metadata_df found in steps")
 
     @property
