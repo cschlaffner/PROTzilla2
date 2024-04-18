@@ -1,14 +1,20 @@
-from protzilla.data_analysis.differential_expression_t_test import t_test
+from protzilla.data_analysis.classification import random_forest, svm
+from protzilla.data_analysis.clustering import (
+    expectation_maximisation,
+    hierarchical_agglomerative_clustering,
+    k_means,
+)
 from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
+from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
-from protzilla.data_analysis.classification import random_forest, svm
-from protzilla.data_analysis.clustering import k_means, expectation_maximisation, hierarchical_agglomerative_clustering
-from protzilla.data_analysis.plots import create_volcano_plot, clustergram_plot, prot_quant_plot
-from protzilla.data_analysis.protein_graphs import variation_graph, peptides_to_isoform
-
-
+from protzilla.data_analysis.plots import (
+    clustergram_plot,
+    create_volcano_plot,
+    prot_quant_plot,
+)
+from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.steps import Step, StepManager
 
 
@@ -18,12 +24,11 @@ class DataAnalysisStep(Step):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
 
+
 class DifferentialExpressionANOVA(DataAnalysisStep):
     name = "ANOVA"
     step = "differential_expression"
-    method_description = (
-        "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing."
-    )
+    method_description = "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing."
 
     parameter_names = [
         "intensity_df",
@@ -34,7 +39,6 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
         "selected_groups",
         "metadata_df",
     ]
-
 
     def method(self, inputs: dict) -> dict:
         return anova(**inputs)
@@ -51,9 +55,7 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
 class DifferentialExpressionTTest(DataAnalysisStep):
     name = "t-test"
     step = "differential_expression"
-    method_description = (
-        "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1."
-    )
+    method_description = "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1."
 
     parameter_names = [
         "ttest_type",
@@ -79,12 +81,11 @@ class DifferentialExpressionTTest(DataAnalysisStep):
     def plot(self, inputs):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
 
+
 class DifferentialExpressionLinearModel(DataAnalysisStep):
     name = "Linear Model"
     step = "differential_expression"
-    method_description = (
-        "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing."
-    )
+    method_description = "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing."
 
     parameter_names = [
         "intensity_df",
@@ -108,19 +109,20 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
     def plot(self, inputs):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
 
+
 class PlotVolcano(DataAnalysisStep):
     name = "Volcano Plot"
     step = "differential_expression"
     parameter_names = [
-        #TODO: Input the results from the differential expression analysis,
-       'fc_threshold',
-        'proteins_of_interest',
+        # TODO: Input the results from the differential expression analysis,
+        "fc_threshold",
+        "proteins_of_interest",
     ]
 
     def method(self, inputs: dict) -> dict:
         return create_volcano_plot(**inputs)
 
-#TODO: input
+    # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["ttest_results"] = steps.ttest_results
         return inputs
@@ -128,19 +130,20 @@ class PlotVolcano(DataAnalysisStep):
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
 
+
 class PlotScatter(DataAnalysisStep):
     name = "Scatter Plot"
     step = "data_analysis"
 
     parameter_names = [
-        'input_df',
-        'color_df',
+        "input_df",
+        "color_df",
     ]
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
 
-    #TODO: input
+    # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
         inputs["color_df"] = steps.metadata_df
@@ -156,9 +159,9 @@ class PlotClustergram(DataAnalysisStep):
     method_description = "Creates a clustergram from data"
 
     parameter_names = [
-        'input_df',
-        'sample_group_df',
-        'flip_axes',
+        "input_df",
+        "sample_group_df",
+        "flip_axes",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -176,14 +179,11 @@ class PlotClustergram(DataAnalysisStep):
 class PlotProtQuant(DataAnalysisStep):
     name = "Protein Quantification Plot"
     step = "data_analysis"
-    method_description = "Creates a line chart for intensity across samples for proteingroups"
+    method_description = (
+        "Creates a line chart for intensity across samples for proteingroups"
+    )
 
-    parameter_names = [
-        'input_df',
-        'protein_group',
-        'similarity_measure',
-        'similarity'
-    ]
+    parameter_names = ["input_df", "protein_group", "similarity_measure", "similarity"]
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
@@ -203,15 +203,15 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
 
     parameter_names = [
-        #TODO: Input
-        'plot_title',
+        # TODO: Input
+        "plot_title",
     ]
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-    #TODO: Input
+        # TODO: Input
         return inputs
 
     def plot(self, inputs):
@@ -224,15 +224,15 @@ class PlotROC(DataAnalysisStep):
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
     parameter_names = [
-        #TODO: Input
-        'plot_title',
+        # TODO: Input
+        "plot_title",
     ]
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        #Todo: Input
+        # Todo: Input
         return inputs
 
     def plot(self, inputs):
@@ -245,19 +245,18 @@ class ClusteringKMeans(DataAnalysisStep):
     method_description = "Partitions a number of samples in k clusters using k-means"
 
     parameter_names = [
-        'input_df',
-        'labels_column',
-        'positive_label',
-        'model_selection',
-        'model_selection_scoring',
-        'scoring',
-        'n_clusters',
-        'random_state',
-        'init_centroid_strategy',
-        'n_init',
-        'max_iter',
-        'tolerance'
-        'metadata_df',
+        "input_df",
+        "labels_column",
+        "positive_label",
+        "model_selection",
+        "model_selection_scoring",
+        "scoring",
+        "n_clusters",
+        "random_state",
+        "init_centroid_strategy",
+        "n_init",
+        "max_iter",
+        "tolerance" "metadata_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -273,23 +272,25 @@ class ClusteringKMeans(DataAnalysisStep):
 
 
 class ClusteringExpectationMaximisation(DataAnalysisStep):
-    name = "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models"
+    name = (
+        "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models"
+    )
     step = "data_analysis"
 
     parameter_names = [
-        'input_df',
-        'labels_column',
-        'positive_label',
-        'model_selection',
-        'model_selection_scoring',
-        'scoring',
-        'n_components',
-        'reg_covar',
-        'covariance_type',
-        'init_params',
-        'max_iter',
-        'random_state',
-        'metadata_df',
+        "input_df",
+        "labels_column",
+        "positive_label",
+        "model_selection",
+        "model_selection_scoring",
+        "scoring",
+        "n_components",
+        "reg_covar",
+        "covariance_type",
+        "init_params",
+        "max_iter",
+        "random_state",
+        "metadata_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -307,19 +308,21 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
     name = "Hierarchical Agglomerative Clustering"
     step = "data_analysis"
-    method_description = "Performs hierarchical clustering utilizing a bottom-up approach"
+    method_description = (
+        "Performs hierarchical clustering utilizing a bottom-up approach"
+    )
 
     parameter_names = [
-        'input_df',
-        'labels_column',
-        'positive_label',
-        'model_selection',
-        'model_selection_scoring',
-        'scoring',
-        'n_clusters',
-        'metric',
-        'linkage',
-        'metadata_df',
+        "input_df",
+        "labels_column",
+        "positive_label",
+        "model_selection",
+        "model_selection_scoring",
+        "scoring",
+        "n_clusters",
+        "metric",
+        "linkage",
+        "metadata_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -340,25 +343,25 @@ class ClassificationRandomForest(DataAnalysisStep):
     method_description = "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting."
 
     parameter_names = [
-        'input_df',
-        'labels_column',
-        'positive_label',
-        'test_size',
-        'split_stratify',
-        'validation_strategy',
-        'train_val_split',
-        'n_splits',
-        'shuffle',
-        'n_repeats',
-        'random_state_cv',
-        'p_samples',
-        'scoring',
-        'model_selection',
-        'model_selection_scoring',
-        'criterion',
-        'max_depth',
-        'random_state',
-        'metadata_df',
+        "input_df",
+        "labels_column",
+        "positive_label",
+        "test_size",
+        "split_stratify",
+        "validation_strategy",
+        "train_val_split",
+        "n_splits",
+        "shuffle",
+        "n_repeats",
+        "random_state_cv",
+        "p_samples",
+        "scoring",
+        "model_selection",
+        "model_selection_scoring",
+        "criterion",
+        "max_depth",
+        "random_state",
+        "metadata_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -378,26 +381,25 @@ class ClassificationSVM(DataAnalysisStep):
     step = "data_analysis"
 
     parameter_names = [
-        'input_df',
-        'labels_column',
-        'positive_label',
-        'test_size',
-        'split_stratify',
-        'validation_strategy',
-        'train_val_split',
-        'n_splits',
-        'shuffle',
-        'n_repeats',
-        'random_state_cv',
-        'p_samples',
-        'scoring',
-        'model_selection',
-        'model_selection_scoring',
-        'C',
-        'kernel',
-        'tolerance'
-        'random_state',
-        'metadata_df',
+        "input_df",
+        "labels_column",
+        "positive_label",
+        "test_size",
+        "split_stratify",
+        "validation_strategy",
+        "train_val_split",
+        "n_splits",
+        "shuffle",
+        "n_repeats",
+        "random_state_cv",
+        "p_samples",
+        "scoring",
+        "model_selection",
+        "model_selection_scoring",
+        "C",
+        "kernel",
+        "tolerance" "random_state",
+        "metadata_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -411,14 +413,15 @@ class ClassificationSVM(DataAnalysisStep):
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
 
+
 class ModelEvaluationClassificationModel(DataAnalysisStep):
     name = "Evaluation of classification models"
     step = "data_analysis"
     method_description = "Assessing an already trained classification model on separate testing data using widely used scoring metrics"
 
     parameter_names = [
-        #Todo: input_dict
-        'scoring',
+        # Todo: input_dict
+        "scoring",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -439,13 +442,13 @@ class DimensionReductionTSNE(DataAnalysisStep):
     method_description = "Dimension reduction of a dataframe using t-SNE"
 
     parameter_names = [
-        'input_df',
-        'n_components',
-        'perplexity',
-        'metric',
-        'random_state',
-        'n_iter',
-        'n_iter_without_progress',
+        "input_df",
+        "n_components",
+        "perplexity",
+        "metric",
+        "random_state",
+        "n_iter",
+        "n_iter_without_progress",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -466,12 +469,12 @@ class DimensionReductionUMAP(DataAnalysisStep):
     method_description = "Dimension reduction of a dataframe using UMAP"
 
     parameter_names = [
-        'input_df',
-        'n_neighbors',
-        'n_components',
-        'min_dist',
-        'metric',
-        'random_state',
+        "input_df",
+        "n_neighbors",
+        "n_components",
+        "min_dist",
+        "metric",
+        "random_state",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -492,11 +495,10 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
 
     parameter_names = [
-        'protein_id',
-        'run_name',
-        'peptide_df',
-        'k'
-        'allowed_mismatches',
+        "protein_id",
+        "run_name",
+        "peptide_df",
+        "k" "allowed_mismatches",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -510,14 +512,15 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
 
+
 class ProteinGraphVariationGraph(DataAnalysisStep):
     name = "Protein Variation Graph"
     step = "data_analysis"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."
 
     parameter_names = [
-        'protein_id',
-        'run_name',
+        "protein_id",
+        "run_name",
     ]
 
     def method(self, inputs: dict) -> dict:

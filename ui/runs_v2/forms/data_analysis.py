@@ -1,7 +1,5 @@
 from enum import Enum
 
-from protzilla.run_v2 import Run
-
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
@@ -154,7 +152,7 @@ class DifferentialExpressionANOVAForm(MethodForm):
         label="Base of the log transformation",
         default="log2"
     )
-    #TODO: Add dynamic fill for grouping & selected_groups
+    # TODO: Add dynamic fill for grouping & selected_groups
     grouping = "Put a usefull default here"
     selected_groups = "Put a usefull default here"
 
@@ -212,14 +210,14 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 
 
 class PlotVolcanoForm(MethodForm):
-    #TODO: Add inbput_dict
+    # TODO: Add inbput_dict
     input_dict = "Put a usefull default here"
     fc_threshold = CustomFloatField(
         label="log 2 fold change threshold",
         min_value=0,
         default=0
     )
-    #TODO: Add dynamic fill for proteins_of_interest
+    # TODO: Add dynamic fill for proteins_of_interest
     proteins_of_interest = CustomMultipleChoiceField(
         choices=ProteinsOfInterest,
         label="Proteins of interest",
@@ -286,18 +284,21 @@ class PlotProtQuantForm(MethodForm):
 
 
 class PlotPrecisionRecallCurveForm(MethodForm):
-    #Todo: Input
+    # Todo: Input
     plot_title = CustomCharField(
         label="Title of the plot (optional)",
         default="Precision-Recall Curve"
     )
 
+
 class PlotROCCurveForm(MethodForm):
-    #Todo: Input
+    # Todo: Input
     plot_title = CustomCharField(
         label = "Title of the plot (optional)",
         default = "ROC Curve"
     )
+
+
 class ClusteringKMeansForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
@@ -780,6 +781,3 @@ class ProteinGraphVariationGraphForm(MethodForm):
         placeholder="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
-
-
-
