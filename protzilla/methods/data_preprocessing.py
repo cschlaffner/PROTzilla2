@@ -3,9 +3,8 @@ from __future__ import annotations
 import pandas as pd
 
 from protzilla.data_preprocessing import filter_samples, outlier_detection, transformation, normalisation, imputation, \
-    filter_proteins, peptide_filter
-from protzilla.data_preprocessing.imputation import by_min_per_protein
-from protzilla.data_preprocessing import imputation
+    filter_proteins, imputation, peptide_filter
+
 from protzilla.steps import Step, StepManager
 
 
@@ -34,7 +33,7 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 class FilterByProteinsCount(DataPreprocessingStep):
     name = "Protein Count"
     step = "filter_samples"
-    method_description = ("Filter by protein count per sample")
+    method_description = "Filter by protein count per sample"
 
     parameter_names = ["deviation_threshold"]
 
@@ -54,6 +53,7 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
     def method(self, inputs):
         return filter_samples.by_proteins_missing(**inputs)
 
+
 class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
     name = "Sum of intensities"
     step = "filter_samples"
@@ -65,6 +65,7 @@ class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
 
     def method(self, inputs):
         return filter_samples.by_protein_intensity_sum(inputs)
+
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
     name = "PCA"
@@ -184,7 +185,7 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     parameter_names = ["shrinking_value"]
 
     def method(self, inputs):
-        return by_min_per_protein(**inputs)
+        return imputation.by_min_per_protein(**inputs)
 
 
 class SimpleImputationPerProtein(DataPreprocessingStep):
