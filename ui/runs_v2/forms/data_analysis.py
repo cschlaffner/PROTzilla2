@@ -134,7 +134,7 @@ class DimensionReductionMetric(Enum):
     havensine = "havensine"
 
 
-class DifferentialExpression_ANOVA(MethodForm):
+class DifferentialExpressionANOVA(MethodForm):
     # intensity_df = CustomChoiceField(
     #    choices=AnalysisLevel, label="Intensitys"
     # )
@@ -159,7 +159,7 @@ class DifferentialExpression_ANOVA(MethodForm):
     selected_groups = "Put a usefull default here"
 
 
-class DifferentialExpression_TTestForm(MethodForm):
+class DifferentialExpressionTTestForm(MethodForm):
     ttest_type = CustomChoiceField(
         choices=TTestType,
         label="T-test type"
@@ -189,7 +189,7 @@ class DifferentialExpression_TTestForm(MethodForm):
     group2 = "Put a usefull default here"
 
 
-class DifferentialExpression_LinearModel(MethodForm):
+class DifferentialExpressionLinearModel(MethodForm):
     multiple_testing_correction = CustomChoiceField(
         choices=MultipelTestingCorrectionMethod,
         label="Multiple testing correction",
@@ -285,18 +285,19 @@ class PlotProtQuant(MethodForm):
     )
 
 
-class Plotprecision_recall_curve(MethodForm):
-    input_df = CustomChoiceField(
-        choices=AnalysisLevel,
-        label="Choose dataframe to be plotted",
-        default=[None, None],
-    )
+class PlotPrecisionRecallCurve(MethodForm):
+    #Todo: Input
     plot_title = CustomCharField(
         label="Title of the plot (optional)",
         default="Precision-Recall Curve"
     )
 
-
+class PlotROCCurve(MethodForm)
+    #Todo: Input
+    plot_title = CustomCharField(
+        label = "Title of the plot (optional)",
+        default = "ROC Curve"
+    )
 class ClusteringKMeans(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
