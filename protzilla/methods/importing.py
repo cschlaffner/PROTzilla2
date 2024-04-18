@@ -29,8 +29,8 @@ class MaxQuantImport(ImportingStep):
     operation = "msdataimport"
     method_description = "Import MaxQuant data"
 
-    parameter_names = ["file_path", "map_to_uniprot", "intensity_name"]
-    output_names = ["protein_df"]
+    input_keys = ["file_path", "map_to_uniprot", "intensity_name"]
+    output_keys = ["protein_df"]
 
     def method(self, inputs):
         return max_quant_import(**inputs)
@@ -42,8 +42,8 @@ class DiannImport(ImportingStep):
     method = "diann_import"
     method_description = "DIA-NN data import"
 
-    parameter_names = ["file_path", "map_to_uniprot"]
-    output_names = ["protein_df"]
+    input_keys = ["file_path", "map_to_uniprot"]
+    output_keys = ["protein_df"]
 
     def method(self, inputs):
         return diann_import(**inputs)
@@ -55,8 +55,8 @@ class MsFraggerImport(ImportingStep):
     method = "ms_fragger_import"
     method_description = "MS Fragger data import"
 
-    parameter_names = ["file_path", "intensity_name", "map_to_uniprot"]
-    output_names = ["protein_df"]
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
+    output_keys = ["protein_df"]
 
     def method(self, inputs):
         return ms_fragger_import(**inputs)
@@ -67,8 +67,8 @@ class MetadataImport(ImportingStep):
     operation = "metadataimport"
     method_description = "Import metadata"
 
-    parameter_names = ["file_path", "feature_orientation"]
-    output_names = ["metadata_df"]
+    input_keys = ["file_path", "feature_orientation"]
+    output_keys = ["metadata_df"]
 
     def method(self, inputs):
         return metadata_import_method(**inputs)
@@ -84,8 +84,8 @@ class MetadataImportMethodDiann(ImportingStep):
     method = "metadata_import_method_diann"
     method_description = "Import metadata for run relationships of DIA-NN"
 
-    parameter_names = ["file_path", "groupby_sample"]
-    output_names = ["metadata_df"]
+    input_keys = ["file_path", "groupby_sample"]
+    output_keys = ["metadata_df"]
 
     def method(self, inputs):
         return metadata_import_method_diann(**inputs)
@@ -103,11 +103,11 @@ class MetadataColumnAssignment(ImportingStep):
         "Assign columns to metadata categories, repeatable for each category"
     )
 
-    parameter_names = [
+    input_keys = [
         "metadata_required_column",
         "metadata_unknown_column",
     ]
-    output_names = ["metadata_df"]
+    output_keys = ["metadata_df"]
 
     def method(self, inputs):
         return metadata_column_assignment(**inputs)
@@ -124,8 +124,8 @@ class PeptideImport(ImportingStep):
     method = "peptide_import"
     method_description = "Import peptide data"
 
-    parameter_names = ["file_path", "intensity_name"]
-    output_names = ["peptide_df"]
+    input_keys = ["file_path", "intensity_name"]
+    output_keys = ["peptide_df"]
 
     def method(self, inputs):
         return peptide_import(**inputs)
