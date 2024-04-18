@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import base64
 import logging
+import traceback
 from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
 import plotly
 from PIL import Image
+
+from protzilla.utilities import format_trace
 
 
 class Step:
@@ -22,7 +25,7 @@ class Step:
         self.output: Output = Output()
         self.plots = []
         self.parameter_names: list[str] = []
-        self.output_names: list[str] = []
+        # self.output_names: list[str] = []
         self.finished: bool = False
         self.instance_identifier: str = None
 
@@ -37,11 +40,24 @@ class Step:
         self.validate_inputs(self.parameter_names)
 
         # calculate the step
-        output_dict = self.method(self.insert_dataframes(steps, self.inputs))
+        try:
+            output_dict = self.method(self.insert_dataframes(steps, self.inputs))
+        except Exception as e:
+            output_dict = {}
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=(
+                        f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
+                        f"Please check your parameters or report a potential programming issue."
+                    ),
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
 
         # store the output and messages
         messages = output_dict.pop("messages", [])
-        self.messages = Messages(messages)
+        self.messages.extend(messages)
         self.handle_outputs(output_dict)
 
         # validate the output
@@ -58,9 +74,9 @@ class Step:
     def handle_outputs(self, output_dict: dict):
         self.output = Output(output_dict)
 
-    def plot(self):
+    def plot(self, inputs: dict):
         raise NotImplementedError(
-            "Plotting is not implemented for this step. Only preprocessing methods can have addidional plots."
+            "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
         )
 
     def validate_inputs(self, required_keys: list[str]):
@@ -119,6 +135,15 @@ class Messages:
 
     def __repr__(self):
         return f"Messages: {[message['message'] for message in self.messages]}"
+
+    def append(self, param):
+        self.messages.append(param)
+
+    def extend(self, messages):
+        self.messages.extend(messages)
+
+    def clear(self):
+        self.messages = []
 
 
 class Plots:

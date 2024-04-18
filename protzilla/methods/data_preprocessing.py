@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import logging
+import traceback
+
 from protzilla.data_preprocessing import imputation
 from protzilla.steps import Step, StepManager, Plots
+from protzilla.utilities import format_trace
 
 
 class DataPreprocessingStep(Step):
@@ -15,8 +19,27 @@ class DataPreprocessingStep(Step):
         inputs["protein_df"] = steps.protein_df
         return inputs
 
-    def plot(self, inputs):
-        raise NotImplementedError("Plotting is not implemented yet for this step.")
+    def plot(self, inputs: dict):
+        inputs = self.insert_dataframes_for_plot(inputs)
+        try:
+            self.plots = Plots(self.plot_method(inputs))
+        except Exception as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=(
+                        f"An error occurred while plotting this step: {e.__class__.__name__} {e} "
+                        f"Please check your parameters or report a potential programming issue."
+                    ),
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+
+    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
+        return inputs
+
+    def plot_method(self, inputs):
+        raise NotImplementedError("Plot method not implemented for this step")
 
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
@@ -154,10 +177,13 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
 
-    def plot(self, inputs):
+    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
         inputs["df"] = self.inputs["protein_df"]
         inputs["result_df"] = self.output["protein_df"]
-        self.plots = Plots(imputation.by_min_per_protein_plot(**inputs))
+        return inputs
+
+    def plot_method(self, inputs):
+        return imputation.by_min_per_protein_plot(**inputs)
 
 
 class ImputationByMinPerSample(DataPreprocessingStep):

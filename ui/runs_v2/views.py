@@ -63,6 +63,7 @@ def detail(request: HttpRequest, run_name: str):
 
     log_messages(run.current_step.messages)
     display_messages(run.current_messages, request)
+    run.current_messages.clear()
 
     current_plots = []
     for plot in run.current_plots:
@@ -115,9 +116,9 @@ def detail(request: HttpRequest, run_name: str):
             ),
             name_field="",
             current_plots=current_plots,
-            results_exist=not run.current_step.output.is_empty,
+            results_exist=run.current_step.finished,
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=not run.current_step.output.is_empty,
+            show_plot_button=run.current_step.finished,
             # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
