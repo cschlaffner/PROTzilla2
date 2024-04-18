@@ -112,6 +112,12 @@ class Step:
         for key in required_keys:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
+
+        # Deleting all unnecessary keys as to avoid "too many parameters" error
+        for key in self.inputs.copy().keys():
+            if key not in required_keys:
+                self.inputs.pop(key)
+
         return True
 
     def validate_outputs(self, required_keys: list[str] = None) -> bool:
@@ -257,9 +263,29 @@ class StepManager:
             + self.data_integration
         )
 
-    def get_step_output(self, step_name: type[Step], output_key: str):
+    def get_step_instances(self, step_type: type[Step]):
+        return [
+            step.instance_identifier
+            for step in self.all_steps
+            if isinstance(step, step_type)
+        ]
+
+    def get_step_output(
+        self, step_type: type[Step], output_key: str, instance_identifier: str = None
+    ):
+        def check_instance_identifier(step):
+            return (
+                step.instance_identifier == instance_identifier
+                if instance_identifier is not None
+                else True
+            )
+
         for step in self.previous_steps:
-            if isinstance(step, step_name) and output_key in step.output:
+            if (
+                isinstance(step, step_type)
+                and check_instance_identifier(step)
+                and output_key in step.output
+            ):
                 val = step.output[output_key]
                 if isinstance(val, str) and Path(val).exists():
                     if Path(val).suffix == ".csv":
