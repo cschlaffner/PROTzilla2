@@ -99,7 +99,7 @@ def metadata_import_method(
         ).median()  # TODO why do we do this?
 
     return dict(
-        metadata=meta_df,
+        metadata_df=meta_df,
         messages=[dict(level=logging.INFO, msg=msg)],
     )
 
@@ -139,7 +139,7 @@ def metadata_import_method_diann(
         res.rename(columns={"sample name": "Sample"}, inplace=True)
         return dict(res=res, metadata=meta_df)
 
-    return dict(protein_df=protein_df, metatdata=meta_df)
+    return dict(protein_df=protein_df, metatdata_df=meta_df)
 
 
 def metadata_column_assignment(
