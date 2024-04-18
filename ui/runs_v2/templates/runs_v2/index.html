@@ -7,8 +7,7 @@
 
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" id="contain">
-  <!-- This tag ensures the header row is separate -->
-  <div class="col">
+  <div class="col" id="row">
     {% if index_error %}
     <div class="row">   
       <div class="alert alert-dismissible fade show ps-5 alert-danger"
@@ -21,7 +20,7 @@
     </div> 
     {% endif %}
 
-    <div class="row" id="row">
+    <div class="row">
       <div class="col mx-4">
         <form action="{% url 'runs_v2:create' %}" method="post">
           {% csrf_token %}
