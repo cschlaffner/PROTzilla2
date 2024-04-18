@@ -221,7 +221,7 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
 class PlotROC(DataAnalysisStep):
     name = "ROC"
     step = "data_analysis"
-    method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making""
+    method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
     parameter_names = [
         #TODO: Input
@@ -324,6 +324,84 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
 
     def method(self, inputs: dict) -> dict:
         return hierarchical_agglomerative_clustering(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["input_df"] = steps.protein_df
+        inputs["sample_group_df"] = steps.metadata_df
+        return inputs
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
+
+
+class ClassificationRandomForest(DataAnalysisStep):
+    name = "Random Forest"
+    step = "data_analysis"
+    method_description = "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting."
+
+    parameter_names = [
+        'input_df',
+        'labels_column',
+        'positive_label',
+        'test_size',
+        'split_stratify',
+        'validation_strategy',
+        'train_val_split',
+        'n_splits',
+        'shuffle',
+        'n_repeats',
+        'random_state_cv',
+        'p_samples',
+        'scoring',
+        'model_selection',
+        'model_selection_scoring',
+        'criterion',
+        'max_depth',
+        'random_state',
+        'metadata_df',
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return random_forest(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["input_df"] = steps.protein_df
+        inputs["sample_group_df"] = steps.metadata_df
+        return inputs
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
+
+
+class ClassificationSVM(DataAnalysisStep):
+    name = "Support Vector Machine"
+    step = "data_analysis"
+
+    parameter_names = [
+        'input_df',
+        'labels_column',
+        'positive_label',
+        'test_size',
+        'split_stratify',
+        'validation_strategy',
+        'train_val_split',
+        'n_splits',
+        'shuffle',
+        'n_repeats',
+        'random_state_cv',
+        'p_samples',
+        'scoring',
+        'model_selection',
+        'model_selection_scoring',
+        'C',
+        'kernel',
+        'tolerance'
+        'random_state',
+        'metadata_df',
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return svm(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
