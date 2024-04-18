@@ -410,3 +410,24 @@ class ClassificationSVM(DataAnalysisStep):
 
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
+
+class ModelEvaluationClassificationModel(DataAnalysisStep):
+    name = "Evaluation of classification models"
+    step = "data_analysis"
+    method_description = "Assessing an already trained classification model on separate testing data using widely used scoring metrics"
+
+    parameter_names = [
+        #Todo: input_dict
+        'scoring',
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return evaluate_classification_model(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["input_df"] = steps.protein_df
+        inputs["sample_group_df"] = steps.metadata_df
+        return inputs
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
