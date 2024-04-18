@@ -172,7 +172,7 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per protein"
 
-    input_keys = ["shrinking_value"]
+    input_keys = ["shrinking_value", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
