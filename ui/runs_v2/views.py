@@ -19,6 +19,7 @@ from protzilla.utilities.utilities import get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
 from ui.runs_v2.views_helper import display_messages, parameters_from_post
+
 from .form_mapping import (
     get_empty_form_by_method,
     get_empty_plot_form_by_method,
@@ -26,6 +27,9 @@ from .form_mapping import (
 )
 
 active_runs: dict[str, Run] = {}
+
+index_error_message: str = "Something went wrong creating a new run. Are you sure the workflow exists and is in the correct format?"
+index_error: bool = False
 
 
 def detail(request: HttpRequest, run_name: str):
@@ -133,7 +137,7 @@ def detail(request: HttpRequest, run_name: str):
     )
 
 
-def index(request: HttpRequest):
+def index(request: HttpRequest, index_error: bool = False):
     """
     Renders the main index page of the PROTzilla application.
 
@@ -143,17 +147,20 @@ def index(request: HttpRequest):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+    index_error = request.GET.get("error", "False")
+    index_error = index_error == "True"
+
     return render(
         request,
         "runs_v2/index.html",
         context={
             "available_workflows": get_available_workflow_names(),
             "available_runs": get_available_run_names(),
+            "index_error": index_error,
         },
     )
 
 
-# TODO: make NewRun compatible
 def create(request: HttpRequest):
     """
     Creates a new run. The user is then redirected to the detail page of the run.
@@ -165,11 +172,15 @@ def create(request: HttpRequest):
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
-    run = Run(
-        run_name,
-        request.POST["workflow_config_name"],
-        df_mode=request.POST["df_mode"],
-    )
+    try:
+        run = Run(
+            run_name,
+            request.POST["workflow_config_name"],
+            df_mode=request.POST["df_mode"],
+        )
+    except Exception:
+        return HttpResponseRedirect(reverse("runs_v2:index") + "?error=True")
+
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
