@@ -33,8 +33,8 @@ class PlotStep(DataAnalysisStep):
 
 
 class DifferentialExpressionANOVA(DataAnalysisStep):
-    name = "ANOVA"
-    step = "differential_expression"
+    display_name = "ANOVA"
+    operation = "differential_expression"
     method_description = "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing."
 
     parameter_names = [
@@ -60,8 +60,8 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
 
 
 class DifferentialExpressionTTest(DataAnalysisStep):
-    name = "t-test"
-    step = "differential_expression"
+    display_name = "t-Test"
+    operation = "differential_expression"
     method_description = "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1."
 
     parameter_names = [
@@ -90,8 +90,8 @@ class DifferentialExpressionTTest(DataAnalysisStep):
 
 
 class DifferentialExpressionLinearModel(DataAnalysisStep):
-    name = "Linear Model"
-    step = "differential_expression"
+    display_name = "Linear Model"
+    operation = "differential_expression"
     method_description = "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing."
 
     parameter_names = [
@@ -118,8 +118,8 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 
 
 class PlotVolcano(DataAnalysisStep):
-    name = "Volcano Plot"
-    step = "differential_expression"
+    display_name = "Volcano Plot"
+    operation = "plot"
     parameter_names = [
         # TODO: Input the results from the differential expression analysis,
         "fc_threshold",
@@ -139,8 +139,9 @@ class PlotVolcano(DataAnalysisStep):
 
 
 class PlotScatter(DataAnalysisStep):
-    name = "Scatter Plot"
-    step = "data_analysis"
+    display_name = "Scatter Plot"
+    operation = "plot"
+    method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
 
     parameter_names = [
         "input_df",
@@ -161,8 +162,8 @@ class PlotScatter(DataAnalysisStep):
 
 
 class PlotClustergram(DataAnalysisStep):
-    name = "Clustergram"
-    step = "data_analysis"
+    display_name = "Clustergram"
+    operation = "plot"
     method_description = "Creates a clustergram from data"
 
     parameter_names = [
@@ -184,13 +185,16 @@ class PlotClustergram(DataAnalysisStep):
 
 
 class PlotProtQuant(DataAnalysisStep):
-    name = "Protein Quantification Plot"
-    step = "data_analysis"
-    method_description = (
-        "Creates a line chart for intensity across samples for proteingroups"
-    )
+    display_name = "Protein Quantification Plot"
+    operation = "plot"
+    method_description = "Creates a line chart for intensity across samples for protein groups"
 
-    parameter_names = ["input_df", "protein_group", "similarity_measure", "similarity"]
+    parameter_names = [
+        "input_df",
+        "protein_group",
+        "similarity_measure",
+        "similarity"
+    ]
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
@@ -205,8 +209,8 @@ class PlotProtQuant(DataAnalysisStep):
 
 
 class PlotPrecisionRecallCurve(DataAnalysisStep):
-    name = "Precision Recall"
-    step = "data_analysis"
+    display_name = "Precision Recall"
+    operation = "plot"
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
 
     parameter_names = [
@@ -226,8 +230,8 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
 
 
 class PlotROC(DataAnalysisStep):
-    name = "ROC"
-    step = "data_analysis"
+    display_name = "Receiver Operating Characteristic curve"
+    step = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
     parameter_names = [
@@ -247,8 +251,8 @@ class PlotROC(DataAnalysisStep):
 
 
 class ClusteringKMeans(DataAnalysisStep):
-    name = "KMeans"
-    step = "data_analysis"
+    display_name = "KMeans"
+    operation = "clustering"
     method_description = "Partitions a number of samples in k clusters using k-means"
 
     parameter_names = [
@@ -279,10 +283,9 @@ class ClusteringKMeans(DataAnalysisStep):
 
 
 class ClusteringExpectationMaximisation(DataAnalysisStep):
-    name = (
-        "Expectation-maximization (EM) algorithm for fitting mixture-of-Gaussian models"
-    )
-    step = "data_analysis"
+    display_name = "Expectation-maximization (EM)"
+    operation = "clustering"
+    method_description = "A clustering algorithm that seeks to find the maximum likelihood estimates for a mixture of multivariate Gaussian distributions"
 
     parameter_names = [
         "input_df",
@@ -313,11 +316,9 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
 
 
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
-    name = "Hierarchical Agglomerative Clustering"
-    step = "data_analysis"
-    method_description = (
-        "Performs hierarchical clustering utilizing a bottom-up approach"
-    )
+    display_name = "Hierarchical Agglomerative Clustering"
+    operation = "clustering"
+    method_description = "Performs hierarchical clustering utilizing a bottom-up approach"
 
     parameter_names = [
         "input_df",
@@ -345,8 +346,8 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
 
 
 class ClassificationRandomForest(DataAnalysisStep):
-    name = "Random Forest"
-    step = "data_analysis"
+    display_name = "Random Forest"
+    operation = "classification"
     method_description = "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting."
 
     parameter_names = [
@@ -384,8 +385,9 @@ class ClassificationRandomForest(DataAnalysisStep):
 
 
 class ClassificationSVM(DataAnalysisStep):
-    name = "Support Vector Machine"
-    step = "data_analysis"
+    display_name = "Support Vector Machine"
+    operation = "classification"
+    method_description = "A support vector machine constructs a hyperplane or set of hyperplanes in a high- or infinite-dimensional space, which can be used for classification."
 
     parameter_names = [
         "input_df",
@@ -422,8 +424,8 @@ class ClassificationSVM(DataAnalysisStep):
 
 
 class ModelEvaluationClassificationModel(DataAnalysisStep):
-    name = "Evaluation of classification models"
-    step = "data_analysis"
+    display_name = "Evaluation of classification models"
+    operation = "model_evaluation"
     method_description = "Assessing an already trained classification model on separate testing data using widely used scoring metrics"
 
     parameter_names = [
@@ -444,8 +446,8 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
 
 
 class DimensionReductionTSNE(DataAnalysisStep):
-    name = "t-SNE"
-    step = "data_analysis"
+    display_name = "t-SNE"
+    operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using t-SNE"
 
     parameter_names = [
@@ -471,8 +473,8 @@ class DimensionReductionTSNE(DataAnalysisStep):
 
 
 class DimensionReductionUMAP(DataAnalysisStep):
-    name = "UMAP"
-    step = "data_analysis"
+    display_name = "UMAP"
+    operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using UMAP"
 
     parameter_names = [
@@ -497,8 +499,8 @@ class DimensionReductionUMAP(DataAnalysisStep):
 
 
 class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
-    name = "Peptides to Isoform"
-    step = "data_analysis"
+    display_name = "Peptides to Isoform"
+    operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
 
     parameter_names = [
@@ -521,8 +523,8 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
 
 
 class ProteinGraphVariationGraph(DataAnalysisStep):
-    name = "Protein Variation Graph"
-    step = "data_analysis"
+    display_name = "Protein Variation Graph"
+    operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."
 
     parameter_names = [
