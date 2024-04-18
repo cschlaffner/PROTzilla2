@@ -486,7 +486,7 @@ class DimensionReductionUMAP(DataAnalysisStep):
         return inputs["Plotting is not implemented yet for this step."]
 
 
-class ProteinGraphsPeptidesToIsoform(DataAnalysisStep):
+class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     name = "Peptides to Isoform"
     step = "data_analysis"
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
@@ -510,7 +510,7 @@ class ProteinGraphsPeptidesToIsoform(DataAnalysisStep):
     def plot(self, inputs):
         return inputs["Plotting is not implemented yet for this step."]
 
-class ProteinGraphsVariationGraph(DataAnalysisStep):
+class ProteinGraphVariationGraph(DataAnalysisStep):
     name = "Protein Variation Graph"
     step = "data_analysis"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."

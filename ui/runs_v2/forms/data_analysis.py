@@ -134,7 +134,7 @@ class DimensionReductionMetric(Enum):
     havensine = "havensine"
 
 
-class DifferentialExpressionANOVA(MethodForm):
+class DifferentialExpressionANOVAForm(MethodForm):
     # intensity_df = CustomChoiceField(
     #    choices=AnalysisLevel, label="Intensitys"
     # )
@@ -189,7 +189,7 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = "Put a usefull default here"
 
 
-class DifferentialExpressionLinearModel(MethodForm):
+class DifferentialExpressionLinearModelForm(MethodForm):
     multiple_testing_correction = CustomChoiceField(
         choices=MultipelTestingCorrectionMethod,
         label="Multiple testing correction",
@@ -211,7 +211,7 @@ class DifferentialExpressionLinearModel(MethodForm):
     group2 = "Put a usefull default here"
 
 
-class PlotVolcano(MethodForm):
+class PlotVolcanoForm(MethodForm):
     #TODO: Add inbput_dict
     input_dict = "Put a usefull default here"
     fc_threshold = CustomFloatField(
@@ -227,7 +227,7 @@ class PlotVolcano(MethodForm):
     )
 
 
-class PlotScatterPlot(MethodForm):
+class PlotScatterPlotForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -241,7 +241,7 @@ class PlotScatterPlot(MethodForm):
     )
 
 
-class PlotClustergram(MethodForm):
+class PlotClustergramForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -260,7 +260,7 @@ class PlotClustergram(MethodForm):
     )
 
 
-class PlotProtQuant(MethodForm):
+class PlotProtQuantForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -285,20 +285,20 @@ class PlotProtQuant(MethodForm):
     )
 
 
-class PlotPrecisionRecallCurve(MethodForm):
+class PlotPrecisionRecallCurveForm(MethodForm):
     #Todo: Input
     plot_title = CustomCharField(
         label="Title of the plot (optional)",
         default="Precision-Recall Curve"
     )
 
-class PlotROCCurve(MethodForm)
+class PlotROCCurveForm(MethodForm):
     #Todo: Input
     plot_title = CustomCharField(
         label = "Title of the plot (optional)",
         default = "ROC Curve"
     )
-class ClusteringKMeans(MethodForm):
+class ClusteringKMeansForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -367,7 +367,7 @@ class ClusteringKMeans(MethodForm):
     )
 
 
-class ClusteringExpectationMaximization(MethodForm):
+class ClusteringExpectationMaximizationForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -432,7 +432,7 @@ class ClusteringExpectationMaximization(MethodForm):
     )
 
 
-class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
+class ClusteringHierarchicalAgglomerativeClusteringForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -478,7 +478,7 @@ class ClusteringHierarchicalAgglomerativeClustering(MethodForm):
     )
 
 
-class ClassificationRandomForest(MethodForm):
+class ClassificationRandomForestForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -575,7 +575,7 @@ class ClassificationRandomForest(MethodForm):
     )
 
 
-class ClassificationSVM(MethodForm):
+class ClassificationSVMForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -664,7 +664,7 @@ class ClassificationSVM(MethodForm):
     )
 
 
-class ModelEvaluationClassificationModel(MethodForm):
+class ModelEvaluationClassificationModelForm(MethodForm):
     # TODO: Input_dict
     scoring = CustomMultipleChoiceField(
         choices=ClassificationScoring,
@@ -673,7 +673,7 @@ class ModelEvaluationClassificationModel(MethodForm):
     )
 
 
-class DimensionReductionTSNE(MethodForm):
+class DimensionReductionTSNEForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Dimension reduction of a dataframe using t-SNE",
@@ -716,7 +716,7 @@ class DimensionReductionTSNE(MethodForm):
     )
 
 
-class DimensionReductionUMAP(MethodForm):
+class DimensionReductionUMAPForm(MethodForm):
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Dimension reduction of a dataframe using UMAP",
@@ -755,7 +755,7 @@ class DimensionReductionUMAP(MethodForm):
     )
 
 
-class ProteinGraphsPeptidesToIsoform(MethodForm):
+class ProteinGraphPeptidesToIsoformForm(MethodForm):
     protein_ID = CustomCharField(
         label="Protein ID",
         placeholder="Enter the Uniprot-ID of the protein"
@@ -774,7 +774,7 @@ class ProteinGraphsPeptidesToIsoform(MethodForm):
     )
 
 
-class variationGraph(MethodForm):
+class ProteinGraphVariationGraphForm(MethodForm):
     protein_ID = CustomCharField(
         label="Protein ID",
         placeholder="Enter the Uniprot-ID of the protein"
