@@ -42,20 +42,22 @@ def convert_str_if_possible(s):
         return s
 
 
-def get_displayed_steps(steps: StepManager) -> list[dict]:
+def get_displayed_steps(
+    steps: StepManager,
+) -> list[dict]:  # TODO i think this broke with the new naming scheme, should be redone
     possible_steps = form_map.generate_hierarchical_dict()
     displayed_steps = []
+    index_global = 0
     for section in possible_steps:
         workflow_steps = []
-        index_global = 0
 
         for index_in_section, step in enumerate(steps.all_steps_in_section(section)):
             workflow_steps.append(
                 {
-                    "id": step.step,
-                    "name": name_to_title(step.step),
+                    "id": step.operation,
+                    "name": name_to_title(step.operation),
                     "index": index_in_section,
-                    "method_name": step.name,
+                    "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
                 }
@@ -64,20 +66,22 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
             index_global += 1
 
         possible_steps_in_section = []
-        for step in possible_steps[section]:
+        for operations in possible_steps[section]:
             methods = []
-            for method in possible_steps[section][step]:
+            for method, step_instance in possible_steps[section][operations].items():
                 methods.append(
                     {
                         "id": method,
-                        "name": name_to_title(method),
-                        "description": possible_steps[section][step][
-                            method
-                        ].method_description,
+                        "name": step_instance.display_name,
+                        "description": step_instance.method_description,
                     }
                 )
             possible_steps_in_section.append(
-                {"id": step, "methods": methods, "name": name_to_title(step)}
+                {
+                    "id": operations,
+                    "methods": methods,
+                    "name": name_to_title(operations),
+                }
             )
 
         displayed_steps.append(
@@ -87,7 +91,7 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
                 "possible_steps": possible_steps_in_section,
                 "steps": workflow_steps,
                 "selected": steps.current_section() == section,
-                "finished": index_global - 1 > steps.current_step_index,
+                "finished": index_global - 1 < steps.current_step_index,
             }
         )
     return displayed_steps

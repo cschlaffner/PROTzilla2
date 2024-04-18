@@ -1,6 +1,9 @@
 current_step_index: 0
 steps:
   MaxQuantImport:
-    inputs:
-      file_path: akjsdhkajsdhjkashdkj
-      test: test
+    inputs: {}
+    messages:
+      - level: 20
+        msg: Metadata file successfully imported.
+    output:
+      metadata: /home/henning/BP2023BR1/PROTzilla2/user_data/runs/TESTING1/dataframes/MetadataImport_metadata.csv

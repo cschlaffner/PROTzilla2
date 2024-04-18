@@ -1,5 +1,8 @@
 from enum import Enum
 
+from protzilla.methods.importing import MetadataImport
+from protzilla.run_v2 import Run
+
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
 
@@ -11,14 +14,14 @@ class IntensityType(Enum):
 
 
 class IntensityNameType(Enum):
-    INTENSITY = ("Intensity",)
-    MAXLFQ_TOTAL_iNTENSITY = ("MaxLFQ Total Intensity",)
-    MAXLFQ_INTENSITY = ("MaxLFQ Intensity",)
-    TOTAL_INTENSITY = ("Total Intensity",)
-    MAXLFQ_UNIQUE_INTENSITY = ("MaxLFQ Unique Intensity",)
-    UNIQUE_SPECTRAL_COUNT = ("Unique Spectral Count",)
-    UNIQUE_INTENSITY = ("Unique Intensity",)
-    SPECTRAL_COUNT = ("Spectral Count",)
+    INTENSITY = "Intensity"
+    MAXLFQ_TOTAL_iNTENSITY = "MaxLFQ Total Intensity"
+    MAXLFQ_INTENSITY = "MaxLFQ Intensity"
+    TOTAL_INTENSITY = "Total Intensity"
+    MAXLFQ_UNIQUE_INTENSITY = "MaxLFQ Unique Intensity"
+    UNIQUE_SPECTRAL_COUNT = "Unique Spectral Count"
+    UNIQUE_INTENSITY = "Unique Intensity"
+    SPECTRAL_COUNT = "Spectral Count"
     TOTAL_SPECTRAL_COUNT = "Total Spectral Count"
 
 
@@ -74,13 +77,38 @@ class MetadataImportMethodDiannForm(MethodForm):
 
 class MetadataColumnAssignmentForm(MethodForm):
     metadata_required_column = CustomChoiceField(
-        choices=EmptyEnum, label="Missing, but required metadata columns"
+        choices=EmptyEnum,
+        label="Missing, but required metadata columns",
+        required=False,
     )
     metadata_unknown_column = CustomChoiceField(
-        choices=EmptyEnum, label="Existing, but unknown metadata columns"
+        choices=EmptyEnum,
+        label="Existing, but unknown metadata columns",
+        required=False,
     )
 
-    # TODO: "categories": []  (workflow_meta.json line 129, 136)
+    def fill_form(self, run: Run) -> None:
+        super().fill_form(run)
+        metadata = run.steps.get_step_output(MetadataImport, "metadata")
+
+        if metadata is not None:
+            self.fields["metadata_required_column"].choices = [
+                (col, col)
+                for col in ["Sample", "Group", "Batch"]
+                if col not in metadata.columns
+            ]
+            if len(self.fields["metadata_required_column"].choices) == 0:
+                self.fields["metadata_required_column"].choices = [
+                    (None, "No required columns missing")
+                ]
+
+            self.fields["metadata_unknown_column"].choices = metadata.columns[
+                ~metadata.columns.isin(["Sample", "Group", "Batch"])
+            ].unique()
+            if len(self.fields["metadata_unknown_column"].choices) == 0:
+                self.fields["metadata_unknown_column"].choices = [
+                    (None, "No unknown columns")
+                ]
 
 
 class PeptideImportForm(MethodForm):

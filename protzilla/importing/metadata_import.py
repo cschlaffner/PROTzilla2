@@ -99,7 +99,7 @@ def metadata_import_method(
         ).median()  # TODO why do we do this?
 
     return dict(
-        metadata=meta_df,
+        metadata_df=meta_df,
         messages=[dict(level=logging.INFO, msg=msg)],
     )
 
@@ -139,7 +139,7 @@ def metadata_import_method_diann(
         res.rename(columns={"sample name": "Sample"}, inplace=True)
         return dict(res=res, metadata=meta_df)
 
-    return dict(protein_df=protein_df, metatdata=meta_df)
+    return dict(protein_df=protein_df, metatdata_df=meta_df)
 
 
 def metadata_column_assignment(
@@ -166,7 +166,12 @@ def metadata_column_assignment(
 
     # TODO add info box in UI explaining that no option for unknown columns means all columns are named correctly
     # check if required column already in metadata, if so give error message
-    if metadata_required_column is None or metadata_unknown_column is None:
+    if (
+        metadata_required_column is None
+        or metadata_unknown_column is None
+        or metadata_unknown_column == ""
+        or metadata_required_column == ""
+    ):
         msg = f"You can proceed, as there is nothing that needs to be changed."
         return dict(protein_df=protein_df, messages=[dict(level=logging.INFO, msg=msg)])
 

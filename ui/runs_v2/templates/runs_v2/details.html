@@ -10,11 +10,13 @@
     <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
 
+    <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
+
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
-    {% if section == "data_preprocessing" %}
-        {% include 'runs/form_buttons.html' with results_exist=results_exist %}
-    {% endif %}
+    {#% if section == "data_preprocessing" %#}
+    {#% include 'runs/form_buttons.html' with results_exist=results_exist %#}
+    {#% endif %#}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}
 
 {% endblock %}
@@ -152,7 +154,8 @@
                                             {{ plot_form }}
                                         </div>
                                     </fieldset>
-                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey">
+                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey"
+                                            {% if not show_plot_button %} disabled {% endif %}>
                                 </form>
                             </div>
                         {% else %}
@@ -171,7 +174,9 @@
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
                                                    class="btn btn-red mr-auto">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs_v2:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey">Plot</a>
+                                                <a href="{% url 'runs_v2:plot' run_name %}" id="plot_parameters_submit"
+                                                   class="btn btn-grey" {% if not show_plot_button %}
+                                                   disabled {% endif %}>Plot</a>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs_v2:tables_nokey' run_name displayed_history|length %}"

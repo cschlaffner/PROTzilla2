@@ -1,21 +1,50 @@
 from __future__ import annotations
 
+import logging
+import traceback
+
 from protzilla.data_preprocessing import imputation
-from protzilla.steps import Step, StepManager
+from protzilla.steps import Step, StepManager, Plots
+from protzilla.utilities import format_trace
 
 
 class DataPreprocessingStep(Step):
     section = "data_preprocessing"
     output_names = ["protein_df"]
 
+    plot_input_names = ["protein_df"]
+    plot_output_names = ["plots"]
+
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.protein_df
         return inputs
 
+    def plot(self, inputs: dict):
+        inputs = self.insert_dataframes_for_plot(inputs)
+        try:
+            self.plots = Plots(self.plot_method(inputs))
+        except Exception as e:
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=(
+                        f"An error occurred while plotting this step: {e.__class__.__name__} {e} "
+                        f"Please check your parameters or report a potential programming issue."
+                    ),
+                    trace=format_trace(traceback.format_exception(e)),
+                )
+            )
+
+    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
+        return inputs
+
+    def plot_method(self, inputs):
+        raise NotImplementedError("Plot method not implemented for this step")
+
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
-    name = "By samples missing"
-    step = "filter_proteins"
+    display_name = "By samples missing"
+    operation = "filter_proteins"
     method_description = (
         "Filter proteins based on the amount of samples with nan values"
     )
@@ -27,8 +56,8 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
-    name = "By proteins missing"
-    step = "filter_samples"
+    display_name = "By proteins missing"
+    operation = "filter_samples"
     method_description = (
         "Filter samples based on the amount of proteins with nan values"
     )
@@ -40,8 +69,8 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
-    name = "PCA"
-    step = "outlier_detection"
+    display_name = "PCA"
+    operation = "outlier_detection"
     method_description = "Detect outliers using PCA"
 
     parameter_names = ["number_of_components", "threshold"]
@@ -51,8 +80,8 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
-    name = "LOF"
-    step = "outlier_detection"
+    display_name = "LOF"
+    operation = "outlier_detection"
     method_description = "Detect outliers using LOF"
 
     parameter_names = ["number_of_neighbors", "n_jobs"]
@@ -62,8 +91,8 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
-    name = "Isolation Forest"
-    step = "outlier_detection"
+    display_name = "Isolation Forest"
+    operation = "outlier_detection"
     method_description = "Detect outliers using Isolation Forest"
 
     parameter_names = ["n_estimators", "n_jobs"]
@@ -73,8 +102,8 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
 
 
 class TransformationLog(DataPreprocessingStep):
-    name = "Log"
-    step = "transformation"
+    display_name = "Log"
+    operation = "transformation"
     method_description = "Transform data by log"
 
     parameter_names = ["log_base"]
@@ -84,8 +113,8 @@ class TransformationLog(DataPreprocessingStep):
 
 
 class NormalisationByZScore(DataPreprocessingStep):
-    name = "Z-Score"
-    step = "normalisation"
+    display_name = "Z-Score"
+    operation = "normalisation"
     method_description = "Normalise data by Z-Score"
 
     parameter_names = []
@@ -95,8 +124,8 @@ class NormalisationByZScore(DataPreprocessingStep):
 
 
 class NormalisationByTotalSum(DataPreprocessingStep):
-    name = "Total sum"
-    step = "normalisation"
+    display_name = "Total sum"
+    operation = "normalisation"
     method_description = "Normalise data by total sum"
 
     parameter_names = []
@@ -106,8 +135,8 @@ class NormalisationByTotalSum(DataPreprocessingStep):
 
 
 class NormalisationByMedian(DataPreprocessingStep):
-    name = "Median"
-    step = "normalisation"
+    display_name = "Median"
+    operation = "normalisation"
     method_description = "Normalise data by median"
 
     parameter_names = ["percentile"]
@@ -117,8 +146,8 @@ class NormalisationByMedian(DataPreprocessingStep):
 
 
 class NormalisationByReferenceProtein(DataPreprocessingStep):
-    name = "Reference protein"
-    step = "normalisation"
+    display_name = "Reference protein"
+    operation = "normalisation"
     method_description = "Normalise data by reference protein"
 
     parameter_names = ["reference_protein"]
@@ -128,8 +157,8 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
 
 
 class ImputationByMinPerDataset(DataPreprocessingStep):
-    name = "Min per dataset"
-    step = "imputation"
+    display_name = "Min per dataset"
+    operation = "imputation"
     method_description = "Impute missing values by the minimum per dataset"
 
     parameter_names = ["shrinking_value"]
@@ -139,8 +168,8 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
 
 
 class ImputationByMinPerProtein(DataPreprocessingStep):
-    name = "Min per protein"
-    step = "imputation"
+    display_name = "Min per protein"
+    operation = "imputation"
     method_description = "Impute missing values by the minimum per protein"
 
     parameter_names = ["shrinking_value"]
@@ -148,10 +177,18 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
 
+    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
+        inputs["df"] = self.inputs["protein_df"]
+        inputs["result_df"] = self.output["protein_df"]
+        return inputs
+
+    def plot_method(self, inputs):
+        return imputation.by_min_per_protein_plot(**inputs)
+
 
 class ImputationByMinPerSample(DataPreprocessingStep):
-    name = "Min per sample"
-    step = "imputation"
+    display_name = "Min per sample"
+    operation = "imputation"
     method_description = "Impute missing values by the minimum per sample"
 
     parameter_names = ["shrinking_value"]
