@@ -1,6 +1,3 @@
-import numpy as np
-import pytest
-
 from protzilla.data_analysis.plots import *
 from tests.protzilla.data_analysis.test_clustering import *
 
@@ -114,7 +111,7 @@ def test_clustergram(show_figures, wide_4d_df, color_df):
 
 
 def test_prot_quant_plot(show_figures, wide_4d_df):
-    fig = prot_quant_plot(wide_4d_df, "")[0]
+    fig = prot_quant_plot(wide_4d_df, "Protein1")[0]
     if show_figures:
         fig.show()
     return
