@@ -46,6 +46,14 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
         "selected_groups",
         "metadata_df",
     ]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "sample_group_df",
+        "corrected_alpha",
+        "filtered_proteins",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return anova(**inputs)
@@ -75,7 +83,16 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         "group2",
         "metadata_df",
     ]
-    output_keys = ["intensity_df"]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "t_statistic_df",
+        "log2_fold_change_df",
+        "corrected_alpha",
+        "group1",
+        "group2",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return t_test(**inputs)
@@ -104,6 +121,16 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         "group2",
         "metadata_df",
     ]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "log2_fold_change_df",
+        "corrected_alpha",
+        "filtered_proteins",
+        "group1",
+        "group2",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return linear_model(**inputs)
@@ -125,6 +152,7 @@ class PlotVolcano(DataAnalysisStep):
         "fc_threshold",
         "proteins_of_interest",
     ]
+    output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
         return create_volcano_plot(**inputs)
@@ -147,6 +175,7 @@ class PlotScatter(DataAnalysisStep):
         "input_df",
         "color_df",
     ]
+    output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
@@ -171,6 +200,7 @@ class PlotClustergram(DataAnalysisStep):
         "sample_group_df",
         "flip_axes",
     ]
+    output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
         return clustergram_plot(**inputs)
@@ -195,6 +225,7 @@ class PlotProtQuant(DataAnalysisStep):
         "similarity_measure",
         "similarity"
     ]
+    output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
@@ -217,6 +248,7 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
         # TODO: Input
         "plot_title",
     ]
+    #Todo: output_keys
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
@@ -238,6 +270,7 @@ class PlotROC(DataAnalysisStep):
         # TODO: Input
         "plot_title",
     ]
+    # Todo: output_keys
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
@@ -268,6 +301,12 @@ class ClusteringKMeans(DataAnalysisStep):
         "n_init",
         "max_iter",
         "tolerance" "metadata_df",
+    ]
+    output_keys = [
+        "model",
+        "model_evaluation_df",
+        "cluster_labels_df",
+        "cluster_centers_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -302,6 +341,12 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
         "random_state",
         "metadata_df",
     ]
+    output_keys = [
+        "model",
+        "model_evaluation_df",
+        "cluster_labels_df",
+        "cluster_labels_probabilities_df",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return expectation_maximisation(**inputs)
@@ -331,6 +376,11 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
         "metric",
         "linkage",
         "metadata_df",
+    ]
+    output_keys = [
+        "model",
+        "model_evaluation_df",
+        "cluster_labels_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -371,6 +421,14 @@ class ClassificationRandomForest(DataAnalysisStep):
         "random_state",
         "metadata_df",
     ]
+    output_keys = [
+        "model",
+        "model_evaluation_df",
+        "X_train_df",
+        "X_test_df",
+        "y_train_df",
+        "y_test_df",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return random_forest(**inputs)
@@ -410,6 +468,14 @@ class ClassificationSVM(DataAnalysisStep):
         "tolerance" "random_state",
         "metadata_df",
     ]
+    output_keys = [
+        "model",
+        "model_evaluation_df",
+        "X_train_df",
+        "X_test_df",
+        "y_train_df",
+        "y_test_df",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return svm(**inputs)
@@ -432,6 +498,7 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
         # Todo: input_dict
         "scoring",
     ]
+    output_keys = ["scores_df"]
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
@@ -459,6 +526,7 @@ class DimensionReductionTSNE(DataAnalysisStep):
         "n_iter",
         "n_iter_without_progress",
     ]
+    output_keys = ["embedded_data"]
 
     def method(self, inputs: dict) -> dict:
         return t_sne(**inputs)
@@ -485,6 +553,7 @@ class DimensionReductionUMAP(DataAnalysisStep):
         "metric",
         "random_state",
     ]
+    output_keys = ["embedded_data"]
 
     def method(self, inputs: dict) -> dict:
         return umap(**inputs)
@@ -509,6 +578,13 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         "peptide_df",
         "k" "allowed_mismatches",
     ]
+    output_keys = [
+        "graph_path"
+        "protein_id",
+        "peptide_matches",
+        "peptide_mismatches",
+        "filtered_blocks",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return peptides_to_isoform(**inputs)
@@ -530,6 +606,10 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     input_keys = [
         "protein_id",
         "run_name",
+    ]
+    output_keys = [
+        "graph_path",
+        "filtered_blocks",
     ]
 
     def method(self, inputs: dict) -> dict:
