@@ -173,14 +173,22 @@ def metadata_column_assignment(
         or metadata_required_column == ""
     ):
         msg = f"You can proceed, as there is nothing that needs to be changed."
-        return dict(protein_df=protein_df, messages=[dict(level=logging.INFO, msg=msg)])
+        return dict(
+            protein_df=protein_df,
+            metadata_df=metadata_df,
+            messages=[dict(level=logging.INFO, msg=msg)],
+        )
 
     if metadata_required_column in metadata_df.columns:
         msg = f"Metadata already contains column '{metadata_required_column}'. \
         Please rename the column or select another column."
-        return dict(protein_df=protein_df, messages=[dict(level=logging.INFO, msg=msg)])
+        return dict(
+            protein_df=protein_df,
+            metadata_df=metadata_df,
+            messages=[dict(level=logging.INFO, msg=msg)],
+        )
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
         columns={metadata_unknown_column: metadata_required_column}, inplace=True
     )
-    return dict(protein_df=protein_df, messages=dict())
+    return dict(protein_df=protein_df, metadata_df=renamed_metadata_df, messages=dict())

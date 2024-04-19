@@ -18,8 +18,8 @@ class Step:
     display_name: str = None
     operation: str = None
     method_description: str = None
-    parameter_names: list[str] = []
-    output_names: list[str] = []
+    input_keys: list[str] = []
+    output_keys: list[str] = []
 
     def __init__(self):
         self.inputs: dict = {}
@@ -38,9 +38,10 @@ class Step:
         self.finished = False
 
         try:
+            self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
 
-            output_dict = self.method(self.insert_dataframes(steps, self.inputs))
+            output_dict = self.method(self.inputs)
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
 
@@ -85,21 +86,19 @@ class Step:
     def method(self, **kwargs):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
-    def insert_dataframes(
-        self, steps: StepManager, kwargs: dict
-    ) -> pd.DataFrame | None:
-        return kwargs
+    def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
+        return inputs
 
-    def handle_outputs(self, output_dict: dict):
-        if not isinstance(output_dict, dict):
+    def handle_outputs(self, outputs: dict):
+        if not isinstance(outputs, dict):
             raise TypeError("Output of calculation is not a dictionary.")
-        if not output_dict:
+        if not outputs:
             raise ValueError("Output of calculation is empty.")
-        self.output = Output(output_dict)
+        self.output = Output(outputs)
 
-    def handle_messages(self, output_dict: dict):
+    def handle_messages(self, outputs: dict):
         self.messages.clear()
-        messages = output_dict.get("messages", [])
+        messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
     def plot(self, inputs: dict):
@@ -107,13 +106,24 @@ class Step:
             "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
         )
 
-    def validate_inputs(self):
-        for key in self.parameter_names:
+    def validate_inputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.input_keys
+        for key in required_keys:
             if key not in self.inputs:
                 raise ValueError(f"Missing input {key} in inputs")
 
-    def validate_outputs(self) -> bool:
-        for key in self.output_names:
+        # Deleting all unnecessary keys as to avoid "too many parameters" error
+        for key in self.inputs.copy().keys():
+            if key not in required_keys:
+                self.inputs.pop(key)
+
+        return True
+
+    def validate_outputs(self, required_keys: list[str] = None) -> bool:
+        if required_keys is None:
+            required_keys = self.output_keys
+        for key in required_keys:
             if key not in self.output:
                 raise ValueError(
                     f"Output validation failed: missing output {key} in outputs."
@@ -253,9 +263,29 @@ class StepManager:
             + self.data_integration
         )
 
-    def get_step_output(self, step_name: type[Step], output_key: str):
+    def get_step_instances(self, step_type: type[Step]):
+        return [
+            step.instance_identifier
+            for step in self.all_steps
+            if isinstance(step, step_type)
+        ]
+
+    def get_step_output(
+        self, step_type: type[Step], output_key: str, instance_identifier: str = None
+    ):
+        def check_instance_identifier(step):
+            return (
+                step.instance_identifier == instance_identifier
+                if instance_identifier is not None
+                else True
+            )
+
         for step in self.previous_steps:
-            if isinstance(step, step_name) and output_key in step.output:
+            if (
+                isinstance(step, step_type)
+                and check_instance_identifier(step)
+                and output_key in step.output
+            ):
                 val = step.output[output_key]
                 if isinstance(val, str) and Path(val).exists():
                     if Path(val).suffix == ".csv":
@@ -293,18 +323,17 @@ class StepManager:
 
     @property
     def protein_df(self):
-        # find the last step that has a protein_df in its output
-        for step in reversed(self.previous_steps):
-            if "protein_df" in step.output and step.output["protein_df"] is not None:
-                return step.output["protein_df"]
+        from protzilla.methods.importing import ImportingStep
+
+        df = self.get_step_output(ImportingStep, "protein_df")
+        return df
         logging.warning("No intensity_df found in steps")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
-        # find the last step that has a metadata_df in its output
-        for step in reversed(self.all_steps):
-            if "metadata" in step.output:
-                return step.output["metadata"]
+        from protzilla.methods.importing import ImportingStep
+
+        return self.get_step_output(ImportingStep, "metadata_df")
         logging.warning("No metadata_df found in steps")
 
     @property

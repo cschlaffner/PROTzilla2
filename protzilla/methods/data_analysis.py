@@ -27,8 +27,8 @@ class DataAnalysisStep(Step):
 class PlotStep(DataAnalysisStep):
     step = "plot"
 
-    def handle_outputs(self, output_dict: dict):
-        plots = output_dict.pop("plots", [])
+    def handle_outputs(self, outputs: dict):
+        plots = outputs.pop("plots", [])
         self.plots = Plots(plots)
 
 
@@ -64,7 +64,7 @@ class DifferentialExpressionTTest(DataAnalysisStep):
     operation = "differential_expression"
     method_description = "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1."
 
-    parameter_names = [
+    input_keys = [
         "ttest_type",
         "intensity_df",
         "multiple_testing_correction",
@@ -75,7 +75,7 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         "group2",
         "metadata_df",
     ]
-    output_names = ["t-test_results"]
+    output_keys = ["intensity_df"]
 
     def method(self, inputs: dict) -> dict:
         return t_test(**inputs)

@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
+
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
 
@@ -135,7 +136,6 @@ def create_box_plots(
     graph_type argument. Default is "None".
     :return: returns a boxplot of the data
     """
-    i = 1 / 0
     if group_by not in {"None", "Sample", "Protein ID"}:
         raise ValueError(
             f"""Group_by parameter  must be "None" or

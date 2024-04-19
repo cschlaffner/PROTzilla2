@@ -1,5 +1,7 @@
 from enum import Enum
 
+from protzilla.run_v2 import Run
+
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
@@ -19,13 +21,13 @@ class AnalysisLevel(Enum):
 
 
 class MultipelTestingCorrectionMethod(Enum):
-    benjamini_hochberg = "Benjamini-Hochberg",
+    benjamini_hochberg = "Benjamini-Hochberg"
     bonferroni = "Bonferroni"
 
 
 class LogBase(Enum):
-    none = "None",
-    log2 = "log2",
+    none = "None"
+    log2 = "log2"
     log10 = "log10"
 
 
