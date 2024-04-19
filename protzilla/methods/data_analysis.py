@@ -37,7 +37,7 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
     operation = "differential_expression"
     method_description = "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing."
 
-    parameter_names = [
+    input_keys = [
         "intensity_df",
         "multiple_testing_correction_method",
         "alpha",
@@ -94,7 +94,7 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
     operation = "differential_expression"
     method_description = "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing."
 
-    parameter_names = [
+    input_keys = [
         "intensity_df",
         "multiple_testing_correction_method",
         "alpha",
@@ -120,7 +120,7 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 class PlotVolcano(DataAnalysisStep):
     display_name = "Volcano Plot"
     operation = "plot"
-    parameter_names = [
+    input_keys = [
         # TODO: Input the results from the differential expression analysis,
         "fc_threshold",
         "proteins_of_interest",
@@ -143,7 +143,7 @@ class PlotScatter(DataAnalysisStep):
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "color_df",
     ]
@@ -166,7 +166,7 @@ class PlotClustergram(DataAnalysisStep):
     operation = "plot"
     method_description = "Creates a clustergram from data"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "sample_group_df",
         "flip_axes",
@@ -189,7 +189,7 @@ class PlotProtQuant(DataAnalysisStep):
     operation = "plot"
     method_description = "Creates a line chart for intensity across samples for protein groups"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "protein_group",
         "similarity_measure",
@@ -213,7 +213,7 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
     operation = "plot"
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
 
-    parameter_names = [
+    input_keys = [
         # TODO: Input
         "plot_title",
     ]
@@ -234,7 +234,7 @@ class PlotROC(DataAnalysisStep):
     step = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
-    parameter_names = [
+    input_keys = [
         # TODO: Input
         "plot_title",
     ]
@@ -255,7 +255,7 @@ class ClusteringKMeans(DataAnalysisStep):
     operation = "clustering"
     method_description = "Partitions a number of samples in k clusters using k-means"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "labels_column",
         "positive_label",
@@ -287,7 +287,7 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
     operation = "clustering"
     method_description = "A clustering algorithm that seeks to find the maximum likelihood estimates for a mixture of multivariate Gaussian distributions"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "labels_column",
         "positive_label",
@@ -320,7 +320,7 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
     operation = "clustering"
     method_description = "Performs hierarchical clustering utilizing a bottom-up approach"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "labels_column",
         "positive_label",
@@ -350,7 +350,7 @@ class ClassificationRandomForest(DataAnalysisStep):
     operation = "classification"
     method_description = "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting."
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "labels_column",
         "positive_label",
@@ -389,7 +389,7 @@ class ClassificationSVM(DataAnalysisStep):
     operation = "classification"
     method_description = "A support vector machine constructs a hyperplane or set of hyperplanes in a high- or infinite-dimensional space, which can be used for classification."
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "labels_column",
         "positive_label",
@@ -428,7 +428,7 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
     operation = "model_evaluation"
     method_description = "Assessing an already trained classification model on separate testing data using widely used scoring metrics"
 
-    parameter_names = [
+    input_keys = [
         # Todo: input_dict
         "scoring",
     ]
@@ -450,7 +450,7 @@ class DimensionReductionTSNE(DataAnalysisStep):
     operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using t-SNE"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "n_components",
         "perplexity",
@@ -477,7 +477,7 @@ class DimensionReductionUMAP(DataAnalysisStep):
     operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using UMAP"
 
-    parameter_names = [
+    input_keys = [
         "input_df",
         "n_neighbors",
         "n_components",
@@ -503,7 +503,7 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
 
-    parameter_names = [
+    input_keys = [
         "protein_id",
         "run_name",
         "peptide_df",
@@ -527,7 +527,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."
 
-    parameter_names = [
+    input_keys = [
         "protein_id",
         "run_name",
     ]
