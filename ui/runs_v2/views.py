@@ -26,8 +26,8 @@ from ui.runs_v2.views_helper import (
 )
 
 from .form_mapping import (
-    get_empty_form_by_method,
     get_empty_plot_form_by_method,
+    get_filled_form_by_method,
     get_filled_form_by_request,
 )
 
@@ -66,7 +66,7 @@ def detail(request: HttpRequest, run_name: str):
         # in case the fill_form now would change it
         method_form.fill_form(run)
     else:
-        method_form = get_empty_form_by_method(run.current_step, run)
+        method_form = get_filled_form_by_method(run.current_step, run)
         plot_form = get_empty_plot_form_by_method(run.current_step, run)
 
     description = run.current_step.method_description
