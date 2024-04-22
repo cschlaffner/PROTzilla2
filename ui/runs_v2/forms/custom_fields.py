@@ -1,6 +1,13 @@
 from enum import Enum
 
-from django.forms import BooleanField, CharField, ChoiceField, DecimalField, FileField, FloatField
+from django.forms import (
+    BooleanField,
+    CharField,
+    ChoiceField,
+    DecimalField, FileField,
+    FloatField,
+    MultipleChoiceField,
+)
 from django.forms.widgets import CheckboxInput
 from django.utils.html import format_html
 from django.utils.safestring import SafeText
@@ -33,6 +40,14 @@ class CustomChoiceField(ChoiceField):
                 choices=[(el.value, el.value) for el in choices], *args, **kwargs
             )
 
+        self.widget.attrs.update({"class": "form-select mb-2"})
+
+
+class CustomMultipleChoiceField(MultipleChoiceField):
+    def __init__(self, choices: Enum, *args, **kwargs):
+        super().__init__(
+            choices=[(el.value, el.value) for el in choices], *args, **kwargs
+        )
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
