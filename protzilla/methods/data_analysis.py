@@ -15,7 +15,7 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
-from protzilla.steps import Step, StepManager, Plots
+from protzilla.steps import Plots, Step, StepManager
 
 
 class DataAnalysisStep(Step):
@@ -23,6 +23,7 @@ class DataAnalysisStep(Step):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
+
 
 class PlotStep(DataAnalysisStep):
     step = "plot"
@@ -217,14 +218,11 @@ class PlotClustergram(DataAnalysisStep):
 class PlotProtQuant(DataAnalysisStep):
     display_name = "Protein Quantification Plot"
     operation = "plot"
-    method_description = "Creates a line chart for intensity across samples for protein groups"
+    method_description = (
+        "Creates a line chart for intensity across samples for protein groups"
+    )
 
-    input_keys = [
-        "input_df",
-        "protein_group",
-        "similarity_measure",
-        "similarity"
-    ]
+    input_keys = ["input_df", "protein_group", "similarity_measure", "similarity"]
     output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
@@ -248,7 +246,7 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
         # TODO: Input
         "plot_title",
     ]
-    #Todo: output_keys
+    # Todo: output_keys
 
     def method(self, inputs: dict) -> dict:
         return evaluate_classification_model(**inputs)
@@ -263,7 +261,7 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
 
 class PlotROC(DataAnalysisStep):
     display_name = "Receiver Operating Characteristic curve"
-    step = "plot"
+    operation = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
     input_keys = [
@@ -363,7 +361,9 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
     display_name = "Hierarchical Agglomerative Clustering"
     operation = "clustering"
-    method_description = "Performs hierarchical clustering utilizing a bottom-up approach"
+    method_description = (
+        "Performs hierarchical clustering utilizing a bottom-up approach"
+    )
 
     input_keys = [
         "input_df",
@@ -579,8 +579,7 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         "k" "allowed_mismatches",
     ]
     output_keys = [
-        "graph_path"
-        "protein_id",
+        "graph_path" "protein_id",
         "peptide_matches",
         "peptide_mismatches",
         "filtered_blocks",
