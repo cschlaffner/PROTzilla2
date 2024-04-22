@@ -1,6 +1,6 @@
 from enum import Enum
 
-from protzilla.methods.importing import MetadataImport
+from protzilla.methods.importing import ImportingStep
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
@@ -69,7 +69,7 @@ class MetadataImportForm(MethodForm):
 
 
 class MetadataImportMethodDiannForm(MethodForm):
-    filepath = CustomFileField(label="Run-Relationship metadata file:")
+    file_path = CustomFileField(label="Run-Relationship metadata file:")
     groupby_sample = CustomBooleanField(
         label="Group replicate runs by sample using median", required=False
     )
@@ -88,7 +88,10 @@ class MetadataColumnAssignmentForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        metadata = run.steps.get_step_output(MetadataImport, "metadata_df")
+        print("Calling fill_form")
+        metadata = run.steps.get_step_output(
+            ImportingStep, "metadata_df", include_current_step=True
+        )
 
         if metadata is not None:
             self.fields["metadata_required_column"].choices = [
@@ -102,9 +105,15 @@ class MetadataColumnAssignmentForm(MethodForm):
                 ]
                 self.fields["metadata_required_column"].disabled = True
 
-            self.fields["metadata_unknown_column"].choices = metadata.columns[
-                ~metadata.columns.isin(["Sample", "Group", "Batch"])
-            ].unique()
+            unknown_columns = list(
+                metadata.columns[
+                    ~metadata.columns.isin(["Sample", "Group", "Batch"])
+                ].unique()
+            )
+
+            self.fields["metadata_unknown_column"].choices = [
+                (col, col) for col in unknown_columns
+            ]
             if len(self.fields["metadata_unknown_column"].choices) == 0:
                 self.fields["metadata_unknown_column"].choices = [
                     (None, "No unknown columns")

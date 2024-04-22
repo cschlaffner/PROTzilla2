@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import inspect
 import logging
 import traceback
 from io import BytesIO
@@ -67,7 +68,7 @@ class Step:
             self.messages.append(
                 dict(
                     level=logging.ERROR,
-                    msg=f"Please check the implementation of this steps method: {e}.",
+                    msg=f"Please check the implementation of this steps method class (especially the input_keys): {e}.",
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
@@ -116,11 +117,15 @@ class Step:
         # Deleting all unnecessary keys as to avoid "too many parameters" error
         for key in self.inputs.copy().keys():
             if key not in required_keys:
+                logging.warning(
+                    f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
+                )
                 self.inputs.pop(key)
 
         return True
 
     def validate_outputs(self, required_keys: list[str] = None) -> bool:
+        inspect.signature(self.method).parameters
         if required_keys is None:
             required_keys = self.output_keys
         for key in required_keys:
@@ -271,7 +276,11 @@ class StepManager:
         ]
 
     def get_step_output(
-        self, step_type: type[Step], output_key: str, instance_identifier: str = None
+        self,
+        step_type: type[Step],
+        output_key: str,
+        instance_identifier: str = None,
+        include_current_step: bool = False,
     ):
         def check_instance_identifier(step):
             return (
@@ -280,7 +289,12 @@ class StepManager:
                 else True
             )
 
-        for step in self.previous_steps:
+        if include_current_step:
+            steps_to_serach = self.all_steps
+        else:
+            steps_to_serach = self.previous_steps
+
+        for step in reversed(steps_to_serach):
             if (
                 isinstance(step, step_type)
                 and check_instance_identifier(step)
@@ -292,7 +306,13 @@ class StepManager:
                         from protzilla.disk_operator import DataFrameOperator
 
                         df_operator = DataFrameOperator()
-                        return df_operator.read(val)
+                        df = df_operator.read(val)
+                        if df == None or df.empty:
+                            logging.warning(
+                                f"Could not read DataFrame from {val}, continuing"
+                            )
+                            continue
+                        return df
                     else:
                         raise ValueError(f"Unsupported file format {Path(str).suffix}")
                 return val
