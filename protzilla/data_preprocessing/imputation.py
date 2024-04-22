@@ -169,19 +169,19 @@ def by_min_per_sample(
     :return: returns an imputed dataframe in typical protzilla long format
         a list of messages
     """
-    intensity_df_copy = protein_df.copy(deep=True)
-    intensity_name = default_intensity_column(intensity_df_copy)
-    samples = intensity_df_copy["Sample"].unique().tolist()
+    protein_df_copy = protein_df.copy(deep=True)
+    intensity_name = default_intensity_column(protein_df_copy)
+    samples = protein_df_copy["Sample"].unique().tolist()
     for sample in samples:
-        location = intensity_df_copy[intensity_name].loc[
-            intensity_df_copy["Sample"] == sample,
+        location = protein_df_copy[intensity_name].loc[
+            protein_df_copy["Sample"] == sample,
         ]
         if location.isnull().all():
             continue
         else:
             location.fillna(location.min() * shrinking_value, inplace=True)
-            intensity_df_copy[intensity_name].update(location)
-    return flag_invalid_values(intensity_df_copy, [])
+            protein_df_copy[intensity_name].update(location)
+    return flag_invalid_values(protein_df_copy, [])
 
 
 def by_min_per_protein(
@@ -248,17 +248,17 @@ def by_min_per_dataset(
     :return: returns an imputed dataframe in typical protzilla long format
         a list of messages
     """
-    intensity_df_copy = protein_df.copy(deep=True)
-    intensity_name = default_intensity_column(intensity_df_copy)
-    intensity_df_copy[intensity_name].fillna(
-        intensity_df_copy[intensity_name].min() * shrinking_value,
+    protein_df_copy = protein_df.copy(deep=True)
+    intensity_name = default_intensity_column(protein_df_copy)
+    protein_df_copy[intensity_name].fillna(
+        protein_df_copy[intensity_name].min() * shrinking_value,
         inplace=True,
     )
-    return flag_invalid_values(intensity_df_copy, [])
+    return flag_invalid_values(protein_df_copy, [])
 
 
 def by_normal_distribution_sampling(
-    intensity_df: pd.DataFrame,
+    protein_df: pd.DataFrame,
     strategy: str = "perProtein",
     down_shift: float = 0,
     scaling_factor: float = 1,
@@ -271,7 +271,7 @@ def by_normal_distribution_sampling(
     transformed before sampling from the normal distribution and transformed
     back afterwards, meaning only values > 0 are imputed.
     Will not impute if insufficient data is available for sampling.
-    :param intensity_df: the dataframe that should be filtered in
+    :param protein_df: the dataframe that should be filtered in
     long format
     :param strategy: which strategy to use for definition of the normal
     distribution to be sampled. Can be "perProtein", "perDataset" or "most_frequent"
@@ -287,7 +287,7 @@ def by_normal_distribution_sampling(
     assert strategy in ["perProtein", "perDataset"]
 
     if strategy == "perProtein":
-        transformed_df = long_to_wide(intensity_df)
+        transformed_df = long_to_wide(protein_df)
         # iterate over all protein groups
         for protein_grp in transformed_df.columns:
             number_of_nans = transformed_df[protein_grp].isnull().sum()
@@ -316,21 +316,21 @@ def by_normal_distribution_sampling(
             impute_value_series = pd.Series(impute_values, index=indices_of_nans)
             transformed_df[protein_grp].fillna(impute_value_series, inplace=True)
 
-        imputed_df = wide_to_long(transformed_df, intensity_df)
+        imputed_df = wide_to_long(transformed_df, protein_df)
         return flag_invalid_values(imputed_df, [])
 
     else:
         # determine column for protein intensities
-        intensity_type = default_intensity_column(intensity_df)
+        intensity_type = default_intensity_column(protein_df)
 
-        number_of_nans = intensity_df[intensity_type].isnull().sum()
-        assert number_of_nans <= len(intensity_df[intensity_type]) - 2
+        number_of_nans = protein_df[intensity_type].isnull().sum()
+        assert number_of_nans <= len(protein_df[intensity_type]) - 2
 
-        location_of_nans = intensity_df[intensity_type].isnull()
+        location_of_nans = protein_df[intensity_type].isnull()
         indices_of_nans = location_of_nans[location_of_nans].index
 
-        dataset_mean = np.log10(intensity_df[intensity_type]).mean()
-        dataset_std = np.log10(intensity_df[intensity_type]).std()
+        dataset_mean = np.log10(protein_df[intensity_type]).mean()
+        dataset_std = np.log10(protein_df[intensity_type]).std()
         sampling_mean = max(0, dataset_mean + down_shift * dataset_std)
         sampling_std = dataset_std * scaling_factor
 
@@ -347,9 +347,9 @@ def by_normal_distribution_sampling(
 
         # zip indices of NaN values with values to be imputed together as a Series, such that fillna can be used
         impute_value_series = pd.Series(impute_values, index=indices_of_nans)
-        intensity_df[intensity_type].fillna(impute_value_series, inplace=True)
+        protein_df[intensity_type].fillna(impute_value_series, inplace=True)
 
-        return flag_invalid_values(intensity_df, [])
+        return flag_invalid_values(protein_df, [])
 
 
 def by_knn_plot(
