@@ -346,9 +346,9 @@ class StepManager:
 
     @property
     def protein_df(self):
-        from protzilla.methods.importing import ImportingStep
+        from protzilla.steps import Step
 
-        df = self.get_step_output(ImportingStep, "protein_df")
+        df = self.get_step_output(Step, "protein_df")
         return df
         logging.warning("No intensity_df found in steps")
 

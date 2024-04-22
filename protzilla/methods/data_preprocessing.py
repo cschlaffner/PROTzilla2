@@ -4,13 +4,13 @@ import logging
 import traceback
 
 from protzilla.data_preprocessing import (
-    filter_samples,
-    outlier_detection,
-    transformation,
-    normalisation,
     filter_proteins,
+    filter_samples,
     imputation,
+    normalisation,
+    outlier_detection,
     peptide_filter,
+    transformation,
 )
 from protzilla.steps import Plots, Step, StepManager
 from protzilla.utilities import format_trace
@@ -59,7 +59,7 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
         "Filter proteins based on the amount of samples with nan values"
     )
 
-    input_keys = ["percentage"]
+    input_keys = ["percentage", "protein_df"]
 
     def method(self, inputs):
         return filter_proteins.by_samples_missing(**inputs)
@@ -70,7 +70,7 @@ class FilterByProteinsCount(DataPreprocessingStep):
     operation = "filter_samples"
     method_description = "Filter by protein count per sample"
 
-    input_keys = ["deviation_threshold"]
+    input_keys = ["deviation_threshold", "protein_df"]
 
     def method(self, inputs):
         return filter_samples.protein_count_filter(**inputs)
@@ -83,7 +83,7 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
         "Filter samples based on the amount of proteins with nan values"
     )
 
-    input_keys = ["percentage"]
+    input_keys = ["percentage", "protein_df"]
 
     def method(self, inputs):
         return filter_samples.by_proteins_missing(**inputs)
@@ -94,10 +94,10 @@ class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
     operation = "filter_samples"
     method_description = "Filter by sum of protein intensities per sample"
 
-    input_keys = ["deviation_threshold"]
+    input_keys = ["deviation_threshold", "protein_df"]
 
     def method(self, inputs):
-        return filter_samples.by_protein_intensity_sum(inputs)
+        return filter_samples.by_protein_intensity_sum(**inputs)
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
@@ -105,7 +105,7 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using PCA"
 
-    input_keys = ["number_of_components", "threshold"]
+    input_keys = ["number_of_components", "threshold", "protein_df"]
 
     def method(self, inputs):
         return outlier_detection.by_pca(**inputs)
@@ -116,10 +116,10 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using LOF"
 
-    input_keys = ["number_of_neighbors"]
+    input_keys = ["number_of_neighbors", "protein_df"]
 
     def method(self, inputs):
-        return outlier_detection.by_lof(**inputs)
+        return outlier_detection.by_local_outlier_factor(**inputs)
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
@@ -127,7 +127,7 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using Isolation Forest"
 
-    input_keys = ["n_estimators"]
+    input_keys = ["n_estimators", "protein_df"]
 
     def method(self, inputs):
         return outlier_detection.by_isolation_forest(**inputs)
@@ -138,7 +138,7 @@ class TransformationLog(DataPreprocessingStep):
     operation = "transformation"
     method_description = "Transform data by log"
 
-    input_keys = ["log_base"]
+    input_keys = ["log_base", "protein_df"]
 
     def method(self, inputs):
         return transformation.by_log(**inputs)
@@ -149,7 +149,7 @@ class NormalisationByZScore(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by Z-Score"
 
-    input_keys = []
+    input_keys = ["protein_df"]
 
     def method(self, inputs):
         return normalisation.by_z_score(**inputs)
@@ -160,7 +160,7 @@ class NormalisationByTotalSum(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by total sum"
 
-    input_keys = []
+    input_keys = ["protein_df"]
 
     def method(self, inputs):
         return normalisation.by_totalsum(**inputs)
@@ -171,7 +171,7 @@ class NormalisationByMedian(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by median"
 
-    input_keys = ["percentile"]
+    input_keys = ["percentile", "protein_df"]
 
     def method(self, inputs):
         return normalisation.by_median(**inputs)
@@ -182,7 +182,7 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by reference protein"
 
-    input_keys = ["reference_protein"]
+    input_keys = ["reference_protein", "protein_df"]
 
     def method(self, inputs):
         return normalisation.by_reference_protein(**inputs)
@@ -193,7 +193,7 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per dataset"
 
-    input_keys = ["shrinking_value"]
+    input_keys = ["shrinking_value", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_min_per_dataset(**inputs)
@@ -218,7 +218,7 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per sample"
 
-    input_keys = ["shrinking_value"]
+    input_keys = ["shrinking_value", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
@@ -232,7 +232,7 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
         "sklearn.SimpleImputer class"
     )
 
-    input_keys = ["strategy"]
+    input_keys = ["strategy", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_simple_imputer(**inputs)
@@ -247,7 +247,7 @@ class ImputationByKNN(DataPreprocessingStep):
         "the features that neither is missing are close."
     )
 
-    parameter_names = ["number_of_neighbours"]
+    input_keys = ["number_of_neighbours", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_knn(**inputs)
@@ -258,7 +258,7 @@ class ImputationByNormalDistributionSampling(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Imputation methods include normal distribution sampling per protein or per dataset"
 
-    input_keys = ["strategy", "down_shift", "scaling_factor"]
+    input_keys = ["strategy", "down_shift", "scaling_factor", "protein_df"]
 
     def method(self, inputs):
         return imputation.by_normal_distribution_sampling(**inputs)
@@ -269,7 +269,8 @@ class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
     operation = "filter_peptides"
     method_description = "Filter by PEP-threshold"
 
-    input_keys = ["threshold", "peptide_df"]
+    input_keys = ["threshold", "peptide_df", "protein_df"]
+    output_keys = ["protein_df", "peptide_df", "filtered_peptides"]
 
     def method(self, inputs):
         return peptide_filter.by_pep_value(**inputs)
