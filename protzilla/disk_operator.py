@@ -61,6 +61,7 @@ class KEYS:
     STEP_PLOTS = "plots"
     STEP_INSTANCE_IDENTIFIER = "instance_identifier"
     STEP_TYPE = "type"
+    DF_MODE = "df_mode"
 
 
 class DiskOperator:
@@ -74,6 +75,7 @@ class DiskOperator:
     def read_run(self, file: Path = None) -> StepManager:
         run = self.yaml_operator.read(file or self.run_file)
         step_manager = StepManager()
+        step_manager.df_mode = run.get(KEYS.DF_MODE, "disk")
         for step_data in run[KEYS.STEPS]:
             step = self._read_step(step_data)
             step_manager.add_step(step)
@@ -100,7 +102,8 @@ class DiskOperator:
     def export_workflow(self, step_manager: StepManager, workflow_name: str) -> None:
         self.workflow_name = workflow_name
         workflow = {}
-        workflow[KEYS.STEPS] = {}
+        workflow[KEYS.STEPS] = []
+        workflow[KEYS.DF_MODE] = step_manager.df_mode
         for step in step_manager.all_steps:
             step_data = self._write_step(step, workflow_mode=True).copy()
             inputs = step_data.get(KEYS.STEP_INPUTS, {}).items()
@@ -111,8 +114,8 @@ class DiskOperator:
                 ) and not utilities.check_is_path(input_value):
                     inputs_to_write[input_key] = input_value
 
-            workflow[KEYS.STEPS][step.__class__.__name__] = step_data
             step_data[KEYS.STEP_INPUTS] = inputs_to_write
+            workflow[KEYS.STEPS].append(step_data)
         self.yaml_operator.write(self.workflow_file, workflow)
 
     def _read_step(self, step_data: dict) -> Step:
@@ -120,9 +123,10 @@ class DiskOperator:
 
         step_type = step_data.get(KEYS.STEP_TYPE)
         step = StepFactory.create_step(step_type)
-        step.instance_identifier = step_data.get(
-            KEYS.STEP_INSTANCE_IDENTIFIER, step_type
-        )  # here we default to the class name if no instance identifier is provided TODO
+        if step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER):
+            step.instance_identifier = step_data.get(
+                KEYS.STEP_INSTANCE_IDENTIFIER, step.__class__.__name__
+            )
         step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
         step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
         step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))

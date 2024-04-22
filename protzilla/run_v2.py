@@ -51,6 +51,7 @@ class Run:
     def __repr__(self):
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 
+    @auto_save
     def _run_read(self):
         self.steps = self.disk_operator.read_run()
 

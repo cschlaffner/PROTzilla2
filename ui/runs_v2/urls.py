@@ -31,4 +31,5 @@ urlpatterns = [
         name="protein_graph",
     ),
     path("<str:run_name>/change_method", views.change_method, name="change_method"),
+    path("<str:run_name>/add_name", views.add_name, name="add_name"),
 ]
