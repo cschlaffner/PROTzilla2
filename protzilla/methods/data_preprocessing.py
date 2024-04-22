@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-import logging
-import traceback
+import pandas as pd
 
-from protzilla.data_preprocessing import imputation
+from protzilla.data_preprocessing import filter_samples, outlier_detection, transformation, normalisation, imputation, \
+    filter_proteins, imputation, peptide_filter
+
 from protzilla.steps import Plots, Step, StepManager
 from protzilla.utilities import format_trace
+
+import logging
+import traceback
 
 
 class DataPreprocessingStep(Step):
@@ -55,6 +59,17 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
         return filter_proteins.by_samples_missing(**inputs)
 
 
+class FilterByProteinsCount(DataPreprocessingStep):
+    display_name = "Protein Count"
+    operation = "filter_samples"
+    method_description = "Filter by protein count per sample"
+
+    input_keys = ["deviation_threshold"]
+
+    def method(self, inputs):
+        return filter_samples.protein_count_filter(**inputs)
+
+
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
     display_name = "By proteins missing"
     operation = "filter_samples"
@@ -68,6 +83,19 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
         return filter_samples.by_proteins_missing(**inputs)
 
 
+class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
+    display_name = "Sum of intensities"
+    operation = "filter_samples"
+    method_description = (
+        "Filter by sum of protein intensities per sample"
+    )
+
+    input_keys = ["deviation_threshold"]
+
+    def method(self, inputs):
+        return filter_samples.by_protein_intensity_sum(inputs)
+
+
 class OutlierDetectionByPCA(DataPreprocessingStep):
     display_name = "PCA"
     operation = "outlier_detection"
@@ -75,8 +103,8 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 
     input_keys = ["number_of_components", "threshold"]
 
-    def method(self, kwargs):
-        return outlier_detection.by_pca(**kwargs)
+    def method(self, inputs):
+        return outlier_detection.by_pca(**inputs)
 
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
@@ -84,7 +112,7 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using LOF"
 
-    input_keys = ["number_of_neighbors", "n_jobs"]
+    input_keys = ["number_of_neighbors"]
 
     def method(self, inputs):
         return outlier_detection.by_lof(**inputs)
@@ -95,7 +123,7 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using Isolation Forest"
 
-    input_keys = ["n_estimators", "n_jobs"]
+    input_keys = ["n_estimators"]
 
     def method(self, inputs):
         return outlier_detection.by_isolation_forest(**inputs)
@@ -194,4 +222,51 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     input_keys = ["shrinking_value"]
 
     def method(self, inputs):
-        return by_min_per_protein(**inputs)
+        return imputation.by_min_per_protein(**inputs)
+
+
+class SimpleImputationPerProtein(DataPreprocessingStep):
+    display_name = "SimpleImputer"
+    operation = "imputation"
+    method_description = "Imputation methods include imputation by mean, median and mode. Implements the " \
+                         "sklearn.SimpleImputer class"
+
+    input_keys = ["strategy"]
+
+    def method(self, inputs):
+        return imputation.by_simple_imputer(**inputs)
+
+
+class ImputationByKNN(DataPreprocessingStep):
+    display_name = "kNN"
+    operation = "imputation"
+    input_keys = "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing " \
+                         "values for each sample based on intensity-wise similar samples. Two samples are close if " \
+                         "the features that neither is missing are close."
+
+    parameter_names = ["number_of_neighbours"]
+
+    def method(self, inputs):
+        return imputation.by_knn(**inputs)
+
+
+class ImputationByNormalDistributionSampling(DataPreprocessingStep):
+    display_name = "Normal distribution sampling"
+    operation = "imputation"
+    method_description = "Imputation methods include normal distribution sampling per protein or per dataset"
+
+    input_keys = ["strategy", "down_shift", "scaling_factor"]
+
+    def method(self, inputs):
+        return imputation.by_normal_distribution_sampling(**inputs)
+
+
+class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
+    display_name = "PEP threshold"
+    operation = "filter_peptides"
+    method_description = "Filter by PEP-threshold"
+
+    input_keys = ["threshold", "peptide_df"]
+
+    def method(self, inputs):
+        return peptide_filter.by_pep_value(**inputs)

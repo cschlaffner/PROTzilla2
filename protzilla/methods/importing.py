@@ -39,7 +39,6 @@ class MaxQuantImport(ImportingStep):
 class DiannImport(ImportingStep):
     display_name = "DIA-NN"
     operation = "msdataimport"
-    method = "diann_import"
     method_description = "DIA-NN data import"
 
     input_keys = ["file_path", "map_to_uniprot"]
@@ -52,7 +51,6 @@ class DiannImport(ImportingStep):
 class MsFraggerImport(ImportingStep):
     display_name = "MS Fragger"
     operation = "msdataimport"
-    method = "ms_fragger_import"
     method_description = "MS Fragger data import"
 
     input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
@@ -81,7 +79,6 @@ class MetadataImport(ImportingStep):
 class MetadataImportMethodDiann(ImportingStep):
     display_name = "Metadata import DIA-NN"
     operation = "metadataimport"
-    method = "metadata_import_method_diann"
     method_description = "Import metadata for run relationships of DIA-NN"
 
     input_keys = ["file_path", "groupby_sample"]
@@ -98,7 +95,6 @@ class MetadataImportMethodDiann(ImportingStep):
 class MetadataColumnAssignment(ImportingStep):
     display_name = "Metadata column assignment"
     operation = "metadataimport"
-    method = "metadata_column_assignment"
     method_description = (
         "Assign columns to metadata categories, repeatable for each category"
     )
@@ -121,7 +117,6 @@ class MetadataColumnAssignment(ImportingStep):
 class PeptideImport(ImportingStep):
     display_name = "Peptide import"
     operation = "peptide_import"
-    method = "peptide_import"
     method_description = "Import peptide data"
 
     input_keys = ["file_path", "intensity_name"]

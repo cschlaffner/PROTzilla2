@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 
 import networkx as nx
@@ -15,10 +16,14 @@ from django.urls import reverse
 from protzilla.run_helper import log_messages
 from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.stepfactory import StepFactory
-from protzilla.utilities.utilities import get_memory_usage, name_to_title
+from protzilla.utilities.utilities import format_trace, get_memory_usage, name_to_title
 from protzilla.workflow import get_available_workflow_names
 from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
-from ui.runs_v2.views_helper import display_messages, parameters_from_post
+from ui.runs_v2.views_helper import (
+    display_message,
+    display_messages,
+    parameters_from_post,
+)
 
 from .form_mapping import (
     get_empty_form_by_method,
@@ -27,9 +32,6 @@ from .form_mapping import (
 )
 
 active_runs: dict[str, Run] = {}
-
-index_error_message: str = "Something went wrong creating a new run. Are you sure the workflow exists and is in the correct format?"
-index_error: bool = False
 
 
 def detail(request: HttpRequest, run_name: str):
@@ -147,16 +149,12 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
-    index_error = request.GET.get("error", "False")
-    index_error = index_error == "True"
-
     return render(
         request,
         "runs_v2/index.html",
         context={
             "available_workflows": get_available_workflow_names(),
             "available_runs": get_available_run_names(),
-            "index_error": index_error,
         },
     )
 
@@ -178,8 +176,16 @@ def create(request: HttpRequest):
             request.POST["workflow_config_name"],
             df_mode=request.POST["df_mode"],
         )
-    except Exception:
-        return HttpResponseRedirect(reverse("runs_v2:index") + "?error=True")
+    except Exception as e:
+        display_message(
+            {
+                "level": 40,
+                "msg": "Something went wrong creating a new run.",
+                "trace": format_trace(traceback.format_exception(e)),
+            },
+            request,
+        )
+        return HttpResponseRedirect(reverse("runs_v2:index"))
 
     active_runs[run_name] = run
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))

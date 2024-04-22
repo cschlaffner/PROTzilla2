@@ -4,7 +4,7 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
-    FileField,
+    DecimalField, FileField,
     FloatField,
     MultipleChoiceField,
 )
@@ -67,7 +67,7 @@ class CustomBooleanField(BooleanField):
         self.widget = CustomCheckBoxInput(label=label)
 
 
-class CustomFloatField(FloatField):
+class CustomNumberInput(DecimalField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
@@ -77,3 +77,9 @@ class CustomCharField(CharField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
+
+class CustomFloatField(FloatField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.widget.attrs.update({"class": "form-control mb-2"})
+
