@@ -34,8 +34,10 @@ def by_log(protein_df: pd.DataFrame, log_base="log10") -> dict:
     return dict(protein_df=transformed_df)
 
 
-def by_log_plot(df, result_df, out, graph_type, group_by):
-    return _build_box_hist_plot(df, result_df, graph_type, group_by)
+def by_log_plot(method_inputs, method_outputs, graph_type, group_by):
+    return _build_box_hist_plot(
+        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+    )
 
 
 def _build_box_hist_plot(df, result_df, graph_type, group_by):

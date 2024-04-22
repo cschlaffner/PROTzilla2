@@ -36,11 +36,11 @@ def by_pep_value(
     )
 
 
-def by_pep_value_plot(df, results_df, current_out, graph_type):
+def by_pep_value_plot(method_inputs, method_outputs, graph_type):
     value_dict = dict(
         values_of_sectors=[
-            len(current_out["peptide_df"]),
-            len(current_out["filtered_peptides"]),
+            len(method_outputs["peptide_df"]),
+            len(method_outputs["filtered_peptides"]),
         ],
         names_of_sectors=["Samples kept", "Samples filtered"],
         heading="Number of Filtered Samples",

@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-import pandas as pd
-
-from protzilla.data_preprocessing import filter_samples, outlier_detection, transformation, normalisation, imputation, \
-    filter_proteins, imputation, peptide_filter
-
-from protzilla.steps import Plots, Step, StepManager
-from protzilla.utilities import format_trace
-
 import logging
 import traceback
+
+from protzilla.data_preprocessing import (
+    filter_samples,
+    outlier_detection,
+    transformation,
+    normalisation,
+    filter_proteins,
+    imputation,
+    peptide_filter,
+)
+from protzilla.steps import Plots, Step, StepManager
+from protzilla.utilities import format_trace
 
 
 class DataPreprocessingStep(Step):
@@ -40,6 +44,8 @@ class DataPreprocessingStep(Step):
             )
 
     def insert_dataframes_for_plot(self, inputs: dict) -> dict:
+        inputs["method_inputs"] = self.inputs
+        inputs["method_outputs"] = self.output
         return inputs
 
     def plot_method(self, inputs):
@@ -86,9 +92,7 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
 class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
     display_name = "Sum of intensities"
     operation = "filter_samples"
-    method_description = (
-        "Filter by sum of protein intensities per sample"
-    )
+    method_description = "Filter by sum of protein intensities per sample"
 
     input_keys = ["deviation_threshold"]
 
@@ -205,11 +209,6 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
 
-    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
-        inputs["df"] = self.inputs["protein_df"]
-        inputs["result_df"] = self.output["protein_df"]
-        return inputs
-
     def plot_method(self, inputs):
         return imputation.by_min_per_protein_plot(**inputs)
 
@@ -228,8 +227,10 @@ class ImputationByMinPerSample(DataPreprocessingStep):
 class SimpleImputationPerProtein(DataPreprocessingStep):
     display_name = "SimpleImputer"
     operation = "imputation"
-    method_description = "Imputation methods include imputation by mean, median and mode. Implements the " \
-                         "sklearn.SimpleImputer class"
+    method_description = (
+        "Imputation methods include imputation by mean, median and mode. Implements the "
+        "sklearn.SimpleImputer class"
+    )
 
     input_keys = ["strategy"]
 
@@ -240,9 +241,11 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
 class ImputationByKNN(DataPreprocessingStep):
     display_name = "kNN"
     operation = "imputation"
-    input_keys = "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing " \
-                         "values for each sample based on intensity-wise similar samples. Two samples are close if " \
-                         "the features that neither is missing are close."
+    input_keys = (
+        "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing "
+        "values for each sample based on intensity-wise similar samples. Two samples are close if "
+        "the features that neither is missing are close."
+    )
 
     parameter_names = ["number_of_neighbours"]
 
