@@ -6,7 +6,6 @@ from scipy import stats
 
 from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
-
 from .differential_expression_helper import (
     BAD_LOG_BASE_INPUT_MSG,
     INVALID_PROTEINGROUP_DATA_MSG,
@@ -100,7 +99,7 @@ def t_test(
         if was_likely_log_transformed:
             messages.append(BAD_LOG_BASE_INPUT_MSG)
         # if the data is not log-transformed, we need to do so first for the analysis
-        intensity_df, _ = by_log(intensity_df, log_base="log2")
+        intensity_df = by_log(intensity_df, log_base="log2")["protein_df"]
         messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
         log_base = 2
     else:
