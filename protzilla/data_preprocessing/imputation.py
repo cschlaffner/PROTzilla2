@@ -353,17 +353,16 @@ def by_normal_distribution_sampling(
 
 
 def by_knn_plot(
-    df,
-    result_df,
-    current_out,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,
@@ -372,17 +371,16 @@ def by_knn_plot(
 
 
 def by_normal_distribution_sampling_plot(
-    df,
-    result_df,
-    current_out,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,
@@ -391,17 +389,16 @@ def by_normal_distribution_sampling_plot(
 
 
 def by_simple_imputer_plot(
-    df,
-    result_df,
-    current_out,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,
@@ -410,17 +407,16 @@ def by_simple_imputer_plot(
 
 
 def by_min_per_sample_plot(
-    df,
-    result_df,
-    current_out,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,
@@ -429,16 +425,16 @@ def by_min_per_sample_plot(
 
 
 def by_min_per_protein_plot(
-    df,
-    result_df,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,
@@ -447,17 +443,16 @@ def by_min_per_protein_plot(
 
 
 def by_min_per_dataset_plot(
-    df,
-    result_df,
-    current_out,
+    method_inputs,
+    method_outputs,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        df,
-        result_df,
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
         graph_type,
         graph_type_quantities,
         group_by,

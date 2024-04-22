@@ -44,6 +44,8 @@ class DataPreprocessingStep(Step):
             )
 
     def insert_dataframes_for_plot(self, inputs: dict) -> dict:
+        inputs["method_inputs"] = self.inputs
+        inputs["method_outputs"] = self.output
         return inputs
 
     def plot_method(self, inputs):
@@ -207,11 +209,6 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
 
-    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
-        inputs["df"] = self.inputs["protein_df"]
-        inputs["result_df"] = self.output["protein_df"]
-        return inputs
-
     def plot_method(self, inputs):
         return imputation.by_min_per_protein_plot(**inputs)
 
@@ -244,7 +241,7 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
 class ImputationByKNN(DataPreprocessingStep):
     display_name = "kNN"
     operation = "imputation"
-    method_description = (
+    input_keys = (
         "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing "
         "values for each sample based on intensity-wise similar samples. Two samples are close if "
         "the features that neither is missing are close."

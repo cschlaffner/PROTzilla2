@@ -92,24 +92,30 @@ def by_proteins_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     )
 
 
-def by_protein_intensity_sum_plot(df, result_df, current_out, graph_type):
-    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+def by_protein_intensity_sum_plot(method_inputs, method_outputs, graph_type):
+    return _build_pie_bar_plot(
+        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
+    )
 
 
-def by_proteins_missing_plot(df, result_df, current_out, graph_type):
-    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+def by_proteins_missing_plot(method_inputs, method_outputs, graph_type):
+    return _build_pie_bar_plot(
+        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
+    )
 
 
-def by_protein_count_plot(df, result_df, current_out, graph_type):
-    return _build_pie_bar_plot(df, result_df, current_out, graph_type)
+def by_protein_count_plot(method_inputs, method_outputs, graph_type):
+    return _build_pie_bar_plot(
+        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
+    )
 
 
-def _build_pie_bar_plot(df, result_df, current_out, graph_type):
+def _build_pie_bar_plot(result_df, filtered_sampels, graph_type):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
             values_of_sectors=[
                 len(result_df["Sample"].unique()),
-                len(current_out["filtered_samples"]),
+                len(filtered_sampels),
             ],
             names_of_sectors=["Samples kept", "Samples filtered"],
             heading="Number of Filtered Samples",
@@ -118,7 +124,7 @@ def _build_pie_bar_plot(df, result_df, current_out, graph_type):
         fig = create_bar_plot(
             values_of_sectors=[
                 len(result_df["Sample"].unique()),
-                len(current_out["filtered_samples"]),
+                len(filtered_sampels),
             ],
             names_of_sectors=["Samples kept", "Samples filtered"],
             heading="Number of Filtered Samples",
