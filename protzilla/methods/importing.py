@@ -66,7 +66,7 @@ class MetadataImport(ImportingStep):
     method_description = "Import metadata"
 
     input_keys = ["file_path", "feature_orientation", "protein_df"]
-    output_keys = ["metadata_df", "protein_df"]
+    output_keys = ["metadata_df"]
 
     def method(self, inputs):
         return metadata_import_method(**inputs)
