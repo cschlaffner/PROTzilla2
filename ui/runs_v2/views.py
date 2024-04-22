@@ -57,10 +57,14 @@ def detail(request: HttpRequest, run_name: str):
     # end_of_run = not step
 
     if request.POST:
-        method_form = get_filled_form_by_request(request, run)
+        method_form = get_filled_form_by_request(
+            request, run
+        )  # TODO maybe not do this as it is done after the calculation
         if method_form.is_valid():
             method_form.submit(run)
         plot_form = get_empty_plot_form_by_method(run.current_step, run)
+        # in case the fill_form now would change it
+        method_form.fill_form(run)
     else:
         method_form = get_empty_form_by_method(run.current_step, run)
         plot_form = get_empty_plot_form_by_method(run.current_step, run)

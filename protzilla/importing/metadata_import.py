@@ -59,8 +59,7 @@ def metadata_import_method(
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
-            protein_df=None,
-            metadata=None,
+            metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
@@ -191,6 +190,6 @@ def metadata_column_assignment(
         )
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
-        columns={metadata_unknown_column: metadata_required_column}, inplace=True
+        columns={metadata_unknown_column: metadata_required_column}
     )
     return dict(protein_df=protein_df, metadata_df=renamed_metadata_df, messages=dict())
