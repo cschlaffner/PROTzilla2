@@ -268,11 +268,12 @@ class StepManager:
             + self.data_integration
         )
 
-    def get_step_instances(self, step_type: type[Step]):
+    def get_instance_identifiers(self, step_type: type[Step], output_key: str = None):
         return [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
+            and (output_key is None or output_key in step.output)
         ]
 
     def get_step_output(
@@ -290,24 +291,26 @@ class StepManager:
             )
 
         if include_current_step:
-            steps_to_serach = self.all_steps
+            steps_to_search = self.all_steps
         else:
-            steps_to_serach = self.previous_steps
+            steps_to_search = self.previous_steps
 
-        for step in reversed(steps_to_serach):
+        for step in reversed(steps_to_search):
             if (
                 isinstance(step, step_type)
                 and check_instance_identifier(step)
                 and output_key in step.output
             ):
                 val = step.output[output_key]
+                if val is None:
+                    continue
                 if isinstance(val, str) and Path(val).exists():
                     if Path(val).suffix == ".csv":
                         from protzilla.disk_operator import DataFrameOperator
 
                         df_operator = DataFrameOperator()
                         df = df_operator.read(val)
-                        if df == None or df.empty:
+                        if df.empty:
                             logging.warning(
                                 f"Could not read DataFrame from {val}, continuing"
                             )
