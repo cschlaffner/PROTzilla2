@@ -43,6 +43,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         )
         self.widget.attrs.update({"class": "form-select mb-2"})
 
+
 class CustomFileField(FileField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,18 +60,26 @@ class CustomBooleanField(BooleanField):
         self.widget = CustomCheckBoxInput(label=label)
 
 
-class CustomFloatField(FloatField):
+class CustomNumberInput(DecimalField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
+    def clean(self, data, initial=None):
+        cleaned = super().clean(data)
+        return int(cleaned)  # we cannot work with type Decimal
 
 class CustomDecimalField(DecimalField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
 
-
 class CustomCharField(CharField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.widget.attrs.update({"class": "form-control mb-2"})
+
+
+class CustomFloatField(FloatField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})

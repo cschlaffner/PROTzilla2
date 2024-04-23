@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import base64
+import inspect
 import logging
+import secrets
+import string
 import traceback
 from io import BytesIO
 from pathlib import Path
@@ -26,8 +29,15 @@ class Step:
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.finished: bool = False
-        self.instance_identifier: str = None
+        self._finished: bool = False
+
+        self.instance_identifier = (
+            self.__class__.__name__
+            + "-"
+            + "".join(
+                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+            )
+        )
 
     def __repr__(self):
         return self.__class__.__name__
@@ -35,7 +45,7 @@ class Step:
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
             self.inputs = inputs.copy()
-        self.finished = False
+        self._finished = False
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -46,7 +56,7 @@ class Step:
             self.handle_messages(output_dict)
 
             if self.validate_outputs():
-                self.finished = True
+                self._finished = True
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -67,7 +77,7 @@ class Step:
             self.messages.append(
                 dict(
                     level=logging.ERROR,
-                    msg=f"Please check the implementation of this steps method: {e}.",
+                    msg=f"Please check the implementation of this steps method class (especially the input_keys): {e}.",
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
@@ -116,19 +126,32 @@ class Step:
         # Deleting all unnecessary keys as to avoid "too many parameters" error
         for key in self.inputs.copy().keys():
             if key not in required_keys:
+                logging.warning(
+                    f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
+                )
                 self.inputs.pop(key)
 
         return True
 
-    def validate_outputs(self, required_keys: list[str] = None) -> bool:
+    def validate_outputs(
+        self, required_keys: list[str] = None, soft_check: bool = False
+    ) -> bool:
+        inspect.signature(self.method).parameters
         if required_keys is None:
             required_keys = self.output_keys
         for key in required_keys:
             if key not in self.output:
-                raise ValueError(
-                    f"Output validation failed: missing output {key} in outputs."
-                )
+                if not soft_check:
+                    raise ValueError(
+                        f"Output validation failed: missing output {key} in outputs."
+                    )
+                else:
+                    return False
         return True
+
+    @property
+    def finished(self):
+        return self._finished or self.validate_outputs(soft_check=True)
 
 
 class Output:
@@ -247,7 +270,7 @@ class StepManager:
         self.data_analysis = []
         self.data_integration = []
         self.df_mode = df_mode
-        self.disk_operator = None
+        self.disk_operator = disk_operator
         self.current_step_index = 0
 
         if steps is not None:
@@ -263,15 +286,20 @@ class StepManager:
             + self.data_integration
         )
 
-    def get_step_instances(self, step_type: type[Step]):
+    def get_instance_identifiers(self, step_type: type[Step], output_key: str = None):
         return [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
+            and (output_key is None or output_key in step.output)
         ]
 
     def get_step_output(
-        self, step_type: type[Step], output_key: str, instance_identifier: str = None
+        self,
+        step_type: type[Step],
+        output_key: str,
+        instance_identifier: str = None,
+        include_current_step: bool = False,
     ):
         def check_instance_identifier(step):
             return (
@@ -280,19 +308,32 @@ class StepManager:
                 else True
             )
 
-        for step in self.previous_steps:
+        if include_current_step:
+            steps_to_search = self.all_steps
+        else:
+            steps_to_search = self.previous_steps
+
+        for step in reversed(steps_to_search):
             if (
                 isinstance(step, step_type)
                 and check_instance_identifier(step)
                 and output_key in step.output
             ):
                 val = step.output[output_key]
+                if val is None:
+                    continue
                 if isinstance(val, str) and Path(val).exists():
                     if Path(val).suffix == ".csv":
                         from protzilla.disk_operator import DataFrameOperator
 
                         df_operator = DataFrameOperator()
-                        return df_operator.read(val)
+                        df = df_operator.read(val)
+                        if df.empty:
+                            logging.warning(
+                                f"Could not read DataFrame from {val}, continuing"
+                            )
+                            continue
+                        return df
                     else:
                         raise ValueError(f"Unsupported file format {Path(str).suffix}")
                 return val
@@ -323,9 +364,9 @@ class StepManager:
 
     @property
     def protein_df(self):
-        from protzilla.methods.importing import ImportingStep
+        from protzilla.steps import Step
 
-        df = self.get_step_output(ImportingStep, "protein_df")
+        df = self.get_step_output(Step, "protein_df")
         return df
         logging.warning("No intensity_df found in steps")
 
@@ -385,7 +426,7 @@ class StepManager:
 
         raise ValueError(f"Step {step} not found in steps")
 
-    def next_step(self):
+    def next_step(self) -> None:
         if not self.is_at_last_step:
             if self.df_mode == "disk":
                 self.current_step.output = Output(
@@ -398,7 +439,32 @@ class StepManager:
         else:
             logging.warning("Cannot go forward from the last step")
 
-    def change_method(self, new_method: str):
+    def goto_step(self, step_index: int, section) -> None:
+        if step_index < 0 or step_index >= len(self.all_steps):
+            raise ValueError(f"Step index {step_index} out of bounds")
+        # find step
+        if section == "importing":
+            step = self.importing[step_index]
+        elif section == "data_preprocessing":
+            step = self.data_preprocessing[step_index]
+        elif section == "data_analysis":
+            step = self.data_analysis[step_index]
+        elif section == "data_integration":
+            step = self.data_integration[step_index]
+        else:
+            raise ValueError(f"Unknown section {section}")
+        self.current_step_index = self.all_steps.index(step)
+
+    def name_current_step_instance(self, new_instance_identifier: str) -> None:
+        """
+        Change the instance identifier of the current step
+        :param new_instance_identifier: the new instance identifier
+        :return:
+        """
+        self.current_step.instance_identifier = new_instance_identifier
+        return
+
+    def change_method(self, new_method: str) -> None:
         from protzilla.stepfactory import StepFactory
 
         new_step = StepFactory.create_step(new_method)

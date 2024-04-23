@@ -59,8 +59,7 @@ def metadata_import_method(
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
-            protein_df=None,
-            metadata=None,
+            metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
@@ -116,7 +115,7 @@ def metadata_import_method_diann(
     if meta_df.empty:
         return dict(
             protein_df=None,
-            metadata=None,
+            metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
@@ -128,18 +127,20 @@ def metadata_import_method_diann(
     if groupby_sample:
         # we want to take the median of all MS runs (column "Sample" in the intensity df) for each Sample
         # (column "sample name" in the metadata df)
-        res = pd.merge(
+        protein_df = pd.merge(
             protein_df,
             meta_df[["MS run", "sample name"]],
             left_on="Sample",
             right_on="MS run",
             how="left",
         )
-        res = res.groupby(["Protein ID", "sample name"], as_index=False).median()
-        res.rename(columns={"sample name": "Sample"}, inplace=True)
-        return dict(res=res, metadata=meta_df)
+        protein_df = protein_df.groupby(
+            ["Protein ID", "sample name"], as_index=False
+        ).median()
+        protein_df.rename(columns={"sample name": "Sample"}, inplace=True)
+        return dict(protein_df=protein_df, metadata_df=meta_df)
 
-    return dict(protein_df=protein_df, metatdata_df=meta_df)
+    return dict(protein_df=protein_df, metadata_df=meta_df)
 
 
 def metadata_column_assignment(
@@ -189,6 +190,6 @@ def metadata_column_assignment(
         )
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(
-        columns={metadata_unknown_column: metadata_required_column}, inplace=True
+        columns={metadata_unknown_column: metadata_required_column}
     )
     return dict(protein_df=protein_df, metadata_df=renamed_metadata_df, messages=dict())

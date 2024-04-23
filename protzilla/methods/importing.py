@@ -39,7 +39,6 @@ class MaxQuantImport(ImportingStep):
 class DiannImport(ImportingStep):
     display_name = "DIA-NN"
     operation = "msdataimport"
-    method = "diann_import"
     method_description = "DIA-NN data import"
 
     input_keys = ["file_path", "map_to_uniprot"]
@@ -52,7 +51,6 @@ class DiannImport(ImportingStep):
 class MsFraggerImport(ImportingStep):
     display_name = "MS Fragger"
     operation = "msdataimport"
-    method = "ms_fragger_import"
     method_description = "MS Fragger data import"
 
     input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
@@ -67,7 +65,7 @@ class MetadataImport(ImportingStep):
     operation = "metadataimport"
     method_description = "Import metadata"
 
-    input_keys = ["file_path", "feature_orientation"]
+    input_keys = ["file_path", "feature_orientation", "protein_df"]
     output_keys = ["metadata_df"]
 
     def method(self, inputs):
@@ -81,24 +79,22 @@ class MetadataImport(ImportingStep):
 class MetadataImportMethodDiann(ImportingStep):
     display_name = "Metadata import DIA-NN"
     operation = "metadataimport"
-    method = "metadata_import_method_diann"
     method_description = "Import metadata for run relationships of DIA-NN"
 
-    input_keys = ["file_path", "groupby_sample"]
-    output_keys = ["metadata_df"]
+    input_keys = ["file_path", "groupby_sample", "protein_df"]
+    output_keys = ["metadata_df", "protein_df"]
 
     def method(self, inputs):
         return metadata_import_method_diann(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["protein_df"] = None
+        inputs["protein_df"] = steps.get_step_output(DiannImport, "protein_df")
         return inputs
 
 
 class MetadataColumnAssignment(ImportingStep):
     display_name = "Metadata column assignment"
     operation = "metadataimport"
-    method = "metadata_column_assignment"
     method_description = (
         "Assign columns to metadata categories, repeatable for each category"
     )
@@ -106,22 +102,25 @@ class MetadataColumnAssignment(ImportingStep):
     input_keys = [
         "metadata_required_column",
         "metadata_unknown_column",
+        "protein_df",
+        "metadata_df",
     ]
-    output_keys = ["metadata_df"]
+    output_keys = ["metadata_df", "protein_df"]
 
     def method(self, inputs):
         return metadata_column_assignment(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.get_step_output(ImportingStep, "protein_df")
-        inputs["metadata_df"] = steps.get_step_output(MetadataImport, "metadata_df")
+        inputs["metadata_df"] = steps.get_step_output(
+            ImportingStep, "metadata_df", include_current_step=True
+        )
         return inputs
 
 
 class PeptideImport(ImportingStep):
     display_name = "Peptide import"
     operation = "peptide_import"
-    method = "peptide_import"
     method_description = "Import peptide data"
 
     input_keys = ["file_path", "intensity_name"]

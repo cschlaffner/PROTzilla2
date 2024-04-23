@@ -8,16 +8,18 @@
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" id="contain">
   <div class="col" id="row">
-    {% if index_error %}
-    <div class="row">   
-      <div class="alert alert-dismissible fade show ps-5 alert-danger"
-            role="alert">
-            Something went wrong creating a new run. Are you sure the selected workflow is in the correct format?
-          <button type="button" class="btn-close" data-bs-dismiss="alert"
-                  aria-label="Close"></button>
+    {% if messages %}
+      <div class="messages">
+          {% for message in messages %}
+              <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                    role="alert">
+                  {{ message | safe }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"
+                          aria-label="Close"></button>
+              </div>
+          {% endfor %}
       </div>
       <br>
-    </div> 
     {% endif %}
 
     <div class="row">

@@ -112,12 +112,17 @@ def log10_transformation_expected_df():
 def test_log2_transformation(
     show_figures, log2_transformation_df, log2_transformation_expected_df
 ):
-    result_df = by_log(log2_transformation_df, log_base="log2")[0]
+    method_inputs = {
+        "protein_df": log2_transformation_df,
+        "log_base": "log2",
+    }
+    method_outputs = by_log(**method_inputs)
 
-    fig = by_log_plot(log2_transformation_df, result_df, {}, "Boxplot", "Protein ID")[0]
+    fig = by_log_plot(method_inputs, method_outputs, "Boxplot", "Protein ID")[0]
     if show_figures:
         fig.show()
 
+    result_df = method_outputs["protein_df"]
     assert result_df.equals(
         log2_transformation_expected_df
     ), f"The results of the transformation: {result_df} \
@@ -127,18 +132,22 @@ def test_log2_transformation(
 def test_log10_transformation(
     show_figures, log10_transformation_df, log10_transformation_expected_df
 ):
-    result_df = by_log(log10_transformation_df, log_base="log10")[0]
+    method_inputs = {
+        "protein_df": log10_transformation_df,
+        "log_base": "log10",
+    }
+    method_output = by_log(**method_inputs)
 
     fig = by_log_plot(
-        log10_transformation_df,
-        result_df,
-        {},
+        method_inputs,
+        method_output,
         "Boxplot",
         "Protein ID",
     )[0]
     if show_figures:
         fig.show()
 
+    result_df = method_output["protein_df"]
     assert result_df.equals(
         log10_transformation_expected_df
     ), f"The results of the transformation: {result_df} \

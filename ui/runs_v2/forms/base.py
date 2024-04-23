@@ -7,11 +7,12 @@ from ui.runs_v2.forms.custom_fields import CustomCharField, CustomFileField
 class MethodForm(Form):
     def __init__(self, run: Run, readonly: bool = False, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.fill_form(run)
 
         if readonly:
             self.replace_file_fields_with_paths()
             self.make_readonly()
+        else:
+            self.fill_form(run)
 
     def fill_form(self, run: Run) -> None:
         pass
