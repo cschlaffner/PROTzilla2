@@ -3,7 +3,7 @@ from enum import Enum
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
-from .custom_fields import CustomFileField, CustomChoiceField, CustomFloatField, CustomDecimalField, CustomCharField, \
+from .custom_fields import CustomFileField, CustomChoiceField, CustomFloatField, CustomNumberField, CustomCharField, \
     CustomMultipleChoiceField, CustomBooleanField
 
 
@@ -61,7 +61,7 @@ class GOAnalysisWithEnrichrBackgroundField(Enum):
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     # Todo: protein_df
     # Todo: differential_expression_col
-    differential_expression_threshold = CustomDecimalField(
+    differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
               "threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, "
@@ -71,7 +71,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         default=0
     )
     # Todo: gene_sets_restring
-    organism = CustomDecimalField(
+    organism = CustomNumberField(
         label="Organism / NCBI taxon identifiers (e.g. Human is 9606)",
         default=9606
     )
@@ -89,7 +89,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
 class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
     # Todo: protein_df
     # Todo: differential_expression_col
-    differential_expression_threshold = CustomDecimalField(
+    differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
               "threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, "
@@ -126,7 +126,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         label="Background set with uppercase gene symbols (one gene per line, csv or txt)",
         default=None,
     )
-    background_number = CustomDecimalField(
+    background_number = CustomNumberField(
         label="Number of expressed genes in the background",
         min_value=1,
         max_value=4294967295,
@@ -141,7 +141,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
 class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     # Todo: protein_df
     # Todo: differential_expression_col
-    differential_expression_threshold = CustomDecimalField(
+    differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
               "threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, "
@@ -174,7 +174,7 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         label="Background set with uppercase gene symbols (one protein per line, csv or txt)",
         default=None,
     )
-    background_number = CustomDecimalField(
+    background_number = CustomNumberField(
         label="Number of expressed genes",
         min_value=1,
         max_value=4294967295,
@@ -215,14 +215,14 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
                                label="Group2",
                                default=None)
 
-    min_size = CustomDecimalField(label="Minimum number of genes from gene set also in data",
-                                  default=15)
+    min_size = CustomNumberField(label="Minimum number of genes from gene set also in data",
+                                 default=15)
 
-    max_size = CustomDecimalField(label="Maximum number of genes from gene set also in data",
-                                  default=500)
+    max_size = CustomNumberField(label="Maximum number of genes from gene set also in data",
+                                 default=500)
 
-    number_of_permutations = CustomDecimalField(label="number_of_permutations",
-                                                default=1000)
+    number_of_permutations = CustomNumberField(label="number_of_permutations",
+                                               default=1000)
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
@@ -260,14 +260,14 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
                                      default=None
                                      )
     # Todo: gene_sets_enrichr
-    min_size = CustomDecimalField(label="Minimum number of genes from gene set also in data",
-                                  default=15)
+    min_size = CustomNumberField(label="Minimum number of genes from gene set also in data",
+                                 default=15)
 
-    max_size = CustomDecimalField(label="Maximum number of genes from gene set also in data",
-                                  default=500)
+    max_size = CustomNumberField(label="Maximum number of genes from gene set also in data",
+                                 default=500)
 
-    number_of_permutations = CustomDecimalField(label="number_of_permutations",
-                                                default=1000)
+    number_of_permutations = CustomNumberField(label="number_of_permutations",
+                                               default=1000)
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
