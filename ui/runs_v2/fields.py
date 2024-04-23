@@ -13,7 +13,6 @@ sys.path.append(f"{BASE_DIR}/..")
 import ui.runs_v2.form_mapping as form_map
 from protzilla.run_v2 import Run
 from protzilla.utilities import name_to_title
-from protzilla.workflow import get_workflow_default_param_value, is_last_step_in_section
 from ui.runs_v2.views_helper import get_displayed_steps
 
 
@@ -292,38 +291,15 @@ def make_name_field(
 
     :return: The html for the name field
     """
-    if end_of_run:
-        return ""
 
-    output_name = get_workflow_default_param_value(
-        run.workflow_config,
-        *run.current_run_location(),
-        run.step_index_in_current_section(),
-        "output_name",
-    )
-
-    if is_last_step_in_section(
-        run.workflow_config, run.section, run.step_index_in_current_section()
-    ):
-        if not output_name and "output_name" in run.workflow_meta[run.section]:
-            output_name = run.workflow_meta[run.section]["output_name"]
-    else:
-        if (
-            "output_name" in run.workflow_meta[run.section]
-            and output_name == run.workflow_meta[run.section]["output_name"]
-        ):
-            output_name = ""
-
-    if not output_name:
-        output_name = ""
-
+    current_instance_identifier = run.current_step.instance_identifier
     return render_to_string(
-        "runs/field_name_output_text.html",
+        "runs_v2/field_name_output_text.html",
         context=dict(
             disabled=not allow_next,
             key="name",
             name="Name:",
             form=form,
-            default=output_name,
+            default=current_instance_identifier,
         ),
     )

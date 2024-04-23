@@ -3,6 +3,8 @@ from __future__ import annotations
 import base64
 import inspect
 import logging
+import secrets
+import string
 import traceback
 from io import BytesIO
 from pathlib import Path
@@ -27,8 +29,15 @@ class Step:
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots = []
-        self.finished: bool = False
-        self.instance_identifier: str = None
+        self._finished: bool = False
+
+        self.instance_identifier = (
+            self.__class__.__name__
+            + "-"
+            + "".join(
+                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+            )
+        )
 
     def __repr__(self):
         return self.__class__.__name__
@@ -36,7 +45,7 @@ class Step:
     def calculate(self, steps: StepManager, inputs: dict = None):
         if inputs is not None:
             self.inputs = inputs.copy()
-        self.finished = False
+        self._finished = False
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -47,7 +56,7 @@ class Step:
             self.handle_messages(output_dict)
 
             if self.validate_outputs():
-                self.finished = True
+                self._finished = True
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -124,16 +133,25 @@ class Step:
 
         return True
 
-    def validate_outputs(self, required_keys: list[str] = None) -> bool:
+    def validate_outputs(
+        self, required_keys: list[str] = None, soft_check: bool = False
+    ) -> bool:
         inspect.signature(self.method).parameters
         if required_keys is None:
             required_keys = self.output_keys
         for key in required_keys:
             if key not in self.output:
-                raise ValueError(
-                    f"Output validation failed: missing output {key} in outputs."
-                )
+                if not soft_check:
+                    raise ValueError(
+                        f"Output validation failed: missing output {key} in outputs."
+                    )
+                else:
+                    return False
         return True
+
+    @property
+    def finished(self):
+        return self._finished or self.validate_outputs(soft_check=True)
 
 
 class Output:
@@ -252,7 +270,7 @@ class StepManager:
         self.data_analysis = []
         self.data_integration = []
         self.df_mode = df_mode
-        self.disk_operator = None
+        self.disk_operator = disk_operator
         self.current_step_index = 0
 
         if steps is not None:
@@ -408,7 +426,7 @@ class StepManager:
 
         raise ValueError(f"Step {step} not found in steps")
 
-    def next_step(self):
+    def next_step(self) -> None:
         if not self.is_at_last_step:
             if self.df_mode == "disk":
                 self.current_step.output = Output(
@@ -421,7 +439,32 @@ class StepManager:
         else:
             logging.warning("Cannot go forward from the last step")
 
-    def change_method(self, new_method: str):
+    def goto_step(self, step_index: int, section) -> None:
+        if step_index < 0 or step_index >= len(self.all_steps):
+            raise ValueError(f"Step index {step_index} out of bounds")
+        # find step
+        if section == "importing":
+            step = self.importing[step_index]
+        elif section == "data_preprocessing":
+            step = self.data_preprocessing[step_index]
+        elif section == "data_analysis":
+            step = self.data_analysis[step_index]
+        elif section == "data_integration":
+            step = self.data_integration[step_index]
+        else:
+            raise ValueError(f"Unknown section {section}")
+        self.current_step_index = self.all_steps.index(step)
+
+    def name_current_step_instance(self, new_instance_identifier: str) -> None:
+        """
+        Change the instance identifier of the current step
+        :param new_instance_identifier: the new instance identifier
+        :return:
+        """
+        self.current_step.instance_identifier = new_instance_identifier
+        return
+
+    def change_method(self, new_method: str) -> None:
         from protzilla.stepfactory import StepFactory
 
         new_step = StepFactory.create_step(new_method)
