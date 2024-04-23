@@ -1,0 +1,4 @@
+{% include "runs/field_named.html" with key=key name=name steps=steps disabled=disabled outputs=outputs %}
+{% for field in additional_fields %}
+    {{field|safe}}
+{% endfor %}
