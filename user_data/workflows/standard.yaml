@@ -1,0 +1,37 @@
+steps:
+- inputs:
+    intensity_name: iBAQ
+    map_to_uniprot: false
+  type: MaxQuantImport
+- inputs:
+    feature_orientation: Columns (samples in rows, features in columns)
+  instance_identifier: MetadataImport
+  type: MetadataImport
+- inputs:
+    percentage: 0.2
+  type: FilterProteinsBySamplesMissing
+- inputs:
+    deviation_threshold: 2.0
+  type: FilterSamplesByProteinIntensitiesSum
+- inputs:
+    number_of_neighbours: 10
+  type: ImputationByKNN
+- inputs:
+    number_of_neighbors: 3
+  type: OutlierDetectionByLocalOutlierFactor
+- inputs:
+    percentile: 0.4
+  type: NormalisationByMedian
+- inputs:
+    log_base: log2
+  type: TransformationLog
+- inputs: {}
+  type: PlotProtQuant
+- inputs: {}
+  type: DimensionReductionUMAP
+- inputs: {}
+  type: PlotScatter
+- inputs: {}
+  type: DifferentialExpressionTTest
+- inputs: {}
+  type: PlotVolcano
