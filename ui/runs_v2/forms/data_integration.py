@@ -292,7 +292,7 @@ class DatabaseIntegrationByGeneMappingForm(MethodForm):
                                      default=False)
 
 
-class DatabaseIntegrationByUniprot(MethodForm):
+class DatabaseIntegrationByUniprotForm(MethodForm):
     # Todo: uniprot
     # Todo: Add dynamic fill for database name and fields
     database_name = CustomChoiceField(choices=[],
@@ -301,3 +301,4 @@ class DatabaseIntegrationByUniprot(MethodForm):
     fields = CustomMultipleChoiceField(choices=[],
                                        label="Fields"
                                        )
+
