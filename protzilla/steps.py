@@ -427,8 +427,18 @@ class StepManager:
         raise ValueError(f"Step {step} not found in steps")
 
     def next_step(self) -> None:
+        """
+        Go to the next step in the workflow. Depending on the df_mode, the dataframes of the previous output are
+        replaced with the respective paths on the disk where they are saved to save memory.
+
+        :return: None
+        """
         if not self.is_at_last_step:
+            self.disk_operator.clear_upload_dir()
             if self.df_mode == "disk":
+                # TODO maybe this doesnt really need to be written to disk anymore,
+                # as it is preceeded by a calculation, after which everything is written to
+                # disk anyway
                 self.current_step.output = Output(
                     self.disk_operator._write_output(
                         step_name=self.current_step.__class__.__name__,
