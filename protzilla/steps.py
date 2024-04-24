@@ -40,11 +40,11 @@ class Step:
         self._finished: bool = False
 
         self.instance_identifier = (
-            self.__class__.__name__
-            + "-"
-            + "".join(
-                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
-            )
+                self.__class__.__name__
+                + "-"
+                + "".join(
+            secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+        )
         )
 
     def __repr__(self):
@@ -169,7 +169,7 @@ class Step:
         return True
 
     def validate_outputs(
-        self, required_keys: list[str] = None, soft_check: bool = False
+            self, required_keys: list[str] = None, soft_check: bool = False
     ) -> bool:
         """
         Validates the outputs of the step. If required_keys is not specified, the output_keys of the method class are used.
@@ -307,10 +307,10 @@ class StepManager:
         return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
 
     def __init__(
-        self,
-        steps: list[Step] = None,
-        df_mode: str = "disk",
-        disk_operator: DiskOperator = None,
+            self,
+            steps: list[Step] = None,
+            df_mode: str = "disk",
+            disk_operator: DiskOperator = None,
     ):
         self.df_mode = df_mode
         self.disk_operator = disk_operator
@@ -333,10 +333,10 @@ class StepManager:
     @property
     def all_steps(self):
         return (
-            self.importing
-            + self.data_preprocessing
-            + self.data_analysis
-            + self.data_integration
+                self.importing
+                + self.data_preprocessing
+                + self.data_analysis
+                + self.data_integration
         )
 
     def get_instance_identifiers(self, step_type: type[Step], output_key: str = None):
@@ -344,15 +344,15 @@ class StepManager:
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
-            and (output_key is None or output_key in step.output)
+               and (output_key is None or output_key in step.output)
         ]
 
     def get_step_output(
-        self,
-        step_type: type[Step],
-        output_key: str,
-        instance_identifier: str = None,
-        include_current_step: bool = False,
+            self,
+            step_type: type[Step],
+            output_key: str,
+            instance_identifier: str = None,
+            include_current_step: bool = False,
     ) -> pd.DataFrame | Any | None:
         """
         Get the specific output of the outputs of a specific step type. The step type can also a parent class of the
@@ -379,9 +379,9 @@ class StepManager:
 
         for step in reversed(steps_to_search):
             if (
-                isinstance(step, step_type)
-                and check_instance_identifier(step)
-                and output_key in step.output
+                    isinstance(step, step_type)
+                    and check_instance_identifier(step)
+                    and output_key in step.output
             ):
                 val = step.output[output_key]
                 if val is None:
@@ -534,11 +534,11 @@ class StepManager:
             raise ValueError(f"Unknown section {section}")
 
         if self.all_steps.index(step) < self.current_step_index:
-            for i in range(self.all_steps.index(step)+1, self.current_step_index):
+            for i in range(self.all_steps.index(step) + 1, self.current_step_index):
                 self.all_steps[i].output = Output()
             self.current_step_index = self.all_steps.index(step)
         else:
-            pass # TODO: implement forwards navigation
+            pass  # TODO: implement forwards navigation
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
