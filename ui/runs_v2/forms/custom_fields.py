@@ -33,7 +33,7 @@ class CustomCheckBoxInput(CheckboxInput):
 
 
 class CustomChoiceField(ChoiceField):
-    def __init__(self, choices: Enum, initial=None, *args, **kwargs):
+    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
             super().__init__(choices=choices, *args, **kwargs)
         else:
