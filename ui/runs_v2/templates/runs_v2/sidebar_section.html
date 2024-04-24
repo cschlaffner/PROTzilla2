@@ -13,18 +13,14 @@
 <div>
     {% for step in section.steps %}
         <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %} d-flex align-items-center">
-            {% if not step.finished %}
-                <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
-            {% else %}
-                <form action="{% url 'runs_v2:navigate' run_name %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="section_name" value="{{ section.id }}">
-                    <input type="hidden" name="index" value="{{ step.index }}">
-                    <button class="me-1" style="border: none; background: none; text-align: left">
-                        <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
-                    </button>
-                </form>
-            {% endif %}
+            <form action="{% url 'runs_v2:navigate' run_name %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section_name" value="{{ section.id }}">
+                <input type="hidden" name="index" value="{{ step.index }}">
+                <button class="me-1" style="border: none; background: none; text-align: left">
+                    <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
+                </button>
+            </form>
 
             {% if not step.selected and not step.finished %}
                 {# button to remove step from workflow #}

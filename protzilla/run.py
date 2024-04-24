@@ -390,17 +390,7 @@ class Run:
             )
         try:
             parameters = self.current_parameters.get(self.calculated_method, {})
-            self.history.add_step(
-                self.section,
-                self.step,
-                self.calculated_method,
-                parameters,
-                self.result_df,
-                self.current_out,
-                self.current_messages,
-                self.plots,
-                name=name,
-            )
+            self.history.add_step(self.section)
             self.update_workflow_config(parameters)
             index = self.step_index_in_current_section()
             self.workflow_config["sections"][self.section]["steps"][index][

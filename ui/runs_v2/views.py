@@ -17,9 +17,19 @@ from django.urls import reverse
 from protzilla.run_helper import log_messages
 from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.stepfactory import StepFactory
-from protzilla.utilities.utilities import format_trace, get_memory_usage, name_to_title
+from protzilla.utilities.utilities import (
+    check_is_path,
+    format_trace,
+    get_memory_usage,
+    name_to_title,
+)
 from protzilla.workflow import get_available_workflow_names
-from ui.runs_v2.fields import make_displayed_history, make_method_dropdown, make_sidebar
+from ui.runs_v2.fields import (
+    make_displayed_history,
+    make_method_dropdown,
+    make_name_field,
+    make_sidebar,
+)
 from ui.runs_v2.views_helper import (
     display_message,
     display_messages,
@@ -27,8 +37,8 @@ from ui.runs_v2.views_helper import (
 )
 
 from .form_mapping import (
-    get_empty_form_by_method,
     get_empty_plot_form_by_method,
+    get_filled_form_by_method,
     get_filled_form_by_request,
 )
 
@@ -67,7 +77,7 @@ def detail(request: HttpRequest, run_name: str):
         # in case the fill_form now would change it
         method_form.fill_form(run)
     else:
-        method_form = get_empty_form_by_method(run.current_step, run)
+        method_form = get_filled_form_by_method(run.current_step, run)
         plot_form = get_empty_plot_form_by_method(run.current_step, run)
 
     description = run.current_step.method_description
@@ -97,8 +107,10 @@ def detail(request: HttpRequest, run_name: str):
         else:
             current_plots.append(plot.to_html(include_plotlyjs=False, full_html=False))
 
-    show_table = not run.current_outputs.is_empty and any(
-        isinstance(v, pd.DataFrame) for _, v in run.current_outputs
+    show_table = (
+        not run.current_outputs.is_empty
+        and any(isinstance(v, pd.DataFrame) for _, v in run.current_outputs)
+        or any(check_is_path(v) for _, v in run.current_outputs)
     )
 
     show_protein_graph = (
@@ -125,7 +137,9 @@ def detail(request: HttpRequest, run_name: str):
                 run.current_step.operation,
                 type(run.current_step).__name__,
             ),
-            name_field="",
+            name_field=make_name_field(
+                run.current_step.finished, run, False
+            ),  # TODO end_of_run
             current_plots=current_plots,
             results_exist=run.current_step.finished,
             show_back=run.steps.current_step_index > 0,
@@ -214,24 +228,6 @@ def continue_(request: HttpRequest):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-# this function is no longer used, as the Output instance of a step has a utility method not_empty
-def results_exist(run: Run) -> bool:
-    """
-    Checks if the last step has produced valid results.
-
-    :param run: the run to check
-
-    :return: True if the results are valid, False otherwise
-    """
-    if run.section == "importing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_preprocessing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_analysis" or run.section == "data_integration":
-        return run.calculated_method is not None or (run.step == "plot" and run.plots)
-    return True
-
-
 def next_(request, run_name):
     """
     Skips to and renders the next step/method of the run.
@@ -245,7 +241,11 @@ def next_(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
+    name = request.POST.get("name", None)
+    if name:
+        run.steps.name_current_step_instance(name)
     run.step_next()
+
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
@@ -403,8 +403,25 @@ def delete_step(request: HttpRequest, run_name: str):
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
-def navigate(request, run_name):
-    raise NotImplementedError("Navigating to specific steps is not yet implemented.")
+def navigate(request, run_name: str):
+    """
+    Navigates to a specific step/method of the run.
+
+    :param request: the request object
+    :param run_name: the name of the run
+
+    :return: the rendered detail page of the run with the specified step/method
+    """
+    run = active_runs[run_name]
+
+    post = dict(request.POST)
+    index = int(post["index"][0])
+    section_name = post["section_name"][
+        0
+    ]  # TODO can this be done without the section_name, like with the delete_step method?
+
+    run.steps.goto_step(index, section_name)
+    return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
 def tables_content(request, run_name, index, key):
@@ -540,3 +557,21 @@ def fill_form(request: HttpRequest, run_name: str):
         form_html += f"<div>{field.label_tag()} {field}</div>"
 
     return HttpResponse(form_html)
+
+
+def add_name(request, run_name):
+    """
+    Adds a name to the results of a calculated method of the run. The name can be used
+    to identify the result and use them later.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the rendered detail page of the run
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    run.name_step(int(request.POST["index"]), request.POST["name"])
+    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

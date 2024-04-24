@@ -76,6 +76,10 @@ class CustomNumberInput(DecimalField):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
 
+    def clean(self, data, initial=None):
+        cleaned = super().clean(data)
+        return int(cleaned)  # we cannot work with type Decimal
+
 
 class CustomCharField(CharField):
     def __init__(self, *args, **kwargs):

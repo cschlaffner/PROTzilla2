@@ -73,13 +73,11 @@ def filter_proteins_by_samples_missing_df():
 def test_filter_proteins_by_missing_samples(
     filter_proteins_by_samples_missing_df, show_figures
 ):
-    result_df, method_output = by_samples_missing(
+    method_output = by_samples_missing(
         filter_proteins_by_samples_missing_df, percentage=1.0
     )
 
-    fig = by_samples_missing_plot(
-        filter_proteins_df, result_df, method_output, "Pie chart"
-    )[0]
+    fig = by_samples_missing_plot(filter_proteins_df, method_output, "Pie chart")[0]
     if show_figures:
         fig.show()
     assert method_output["filtered_proteins"] == [
@@ -89,14 +87,14 @@ def test_filter_proteins_by_missing_samples(
         "Protein5",
     ]
 
-    result_df, method_output = by_samples_missing(
+    method_output = by_samples_missing(
         filter_proteins_by_samples_missing_df, percentage=0.5
     )
     method_output["filtered_proteins"]
 
     assert method_output["filtered_proteins"] == ["Protein4", "Protein5"]
 
-    result_df, method_output = by_samples_missing(
+    method_output = by_samples_missing(
         filter_proteins_by_samples_missing_df, percentage=0.0
     )
     method_output["filtered_proteins"]

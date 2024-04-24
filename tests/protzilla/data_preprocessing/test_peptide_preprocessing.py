@@ -32,19 +32,21 @@ def filtered_peptides_list():
 
 
 def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
-    _, import_out = peptide_import.peptide_import(
-        ms_df=None,
+    import_outputs = peptide_import.peptide_import(
         file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
         intensity_name="Intensity",
     )
-    threshold = 0.0014
-    _, out = by_pep_value(
-        protein_df=None, peptide_df=import_out["peptide_df"], threshold=threshold
-    )
 
-    fig = by_pep_value_plot(_, _, out, "Pie chart")[0]
+    method_inputs = {
+        "protein_df": None,
+        "peptide_df": import_outputs["peptide_df"],
+        "threshold": 0.0014,
+    }
+    method_outputs = by_pep_value(**method_inputs)
+
+    fig = by_pep_value_plot(method_inputs, method_outputs, "Pie chart")[0]
     if show_figures:
         fig.show()
 
-    pd.testing.assert_frame_equal(out["peptide_df"], leftover_peptide_df)
-    assert out["filtered_peptides"] == filtered_peptides_list
+    pd.testing.assert_frame_equal(method_outputs["peptide_df"], leftover_peptide_df)
+    assert method_outputs["filtered_peptides"] == filtered_peptides_list
