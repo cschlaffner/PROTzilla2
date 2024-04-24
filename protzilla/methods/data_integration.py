@@ -102,7 +102,9 @@ class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
                   "permutation_type"
                   "ranking_method",
                   "weighted_score",
-                  "metadata_df"
+                  "metadata_df",
+                  "seed",
+                  "threads",
     ]
 
     output_keys = ["enrichment_df", "ranking"]
@@ -123,8 +125,10 @@ class EnrichmentAnalysisWithPrerankedGSEA(DataIntegrationStep):
                   "min_size",
                   "max_size",
                   "number_of_permutations",
-                  "permutation_type"
-                  "weighted_score"
+                  "permutation_type",
+                  "weighted_score",
+                  "seed",
+                  "threads",
     ]
 
     output_keys = ["enrichment_df", "ranking"]
@@ -155,7 +159,7 @@ class DatabaseIntegrationByUniprot(DataIntegrationStep):
 
     output_keys = ["results_df"]
     def method(self, inputs: dict) -> dict:
-        return database_integration.uniprot(**inputs)
+        return database_integration.add_uniprot_data(**inputs)
 
 
 class PlotGOEnrichmentBarPlot(DataIntegrationStep):
