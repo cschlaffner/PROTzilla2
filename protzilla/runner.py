@@ -80,17 +80,16 @@ class Runner:
                 self._importing(step)
             elif step.operation == "plot":
                 logging.info(
-                    f"creating plot: {*self.run.current_step.display_name,}"
+                    f"creating plot: {*self.run.steps.current_location,}"
                 )
-                self._create_plots_for_step(step.section, step)
+                self._create_plots_for_step(step)
             else:
                 logging.info(
-                    f"performing step: {*self.run.current_step.display_name,}" # TODO: Check if this is same as before
+                    f"performing step: {*self.run.steps.current_location,}"
                 )
                 self._perform_current_step(self.run)
                 if self.all_plots:
-                    self._create_plots_for_step(step.section, step)
-                    # TODO
+                    self._create_plots_for_step(step)
             self.run.step_next()
 
             log_messages(self.run.current_messages)
@@ -129,19 +128,14 @@ class Runner:
     def _perform_current_step(self, params):
         self.run.step_calculate(params)
 
-    def _create_plots_for_step(self, section, step):
-        params = dict()
-        if "graphs" in step:
-            params = _serialize_graphs(step["graphs"])
-        elif step["name"] == "plot":
-            params = get_defaults(
-                get_parameters(self.run, *self.run.current_workflow_location())
-            )
-        self.run.create_plot_from_current_location(
-            parameters=params,
-        )
+    def _create_plots_for_step(self, step):
+        if step.operation == "plot":
+            step.calculate()
+        else:
+            step.plot()
+
         for i, plot in enumerate(self.run.plots):
-            plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
+            plot_path = f"{self.plots_path}/{self.run.step_index}-{step.section}-{step['name']}-{step['method']}-{i}.html"
             if not isinstance(plot, dict):
                 plot.write_html(plot_path)
 

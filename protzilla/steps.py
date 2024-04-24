@@ -424,8 +424,17 @@ class StepManager:
             return None
         return self.all_steps[self.current_step_index]
 
+    @property
+    def current_operation(self) -> str:
+        return self.current_step.operation
+
+    @property
     def current_section(self) -> str:
         return self.current_step.section
+
+    @property
+    def current_location(self) -> tuple[str, str, str]:
+        return self.current_section, self.current_operation, self.current_step.instance_identifier
 
     @property
     def protein_df(self):
