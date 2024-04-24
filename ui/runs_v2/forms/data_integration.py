@@ -133,10 +133,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         step_size=1,
         initial=None
     )
-    background_bio_mart = CustomChoiceField(
-        # Todo: biomart_datasets
-    )
-
+    # Todo: Biomart Database
 
 class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     # Todo: protein_df

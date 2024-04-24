@@ -63,7 +63,7 @@ _forward_mapping = {
     data_integration.EnrichmentAnalysisGOAnalysisOffline: data_integration_forms.EnrichmentAnalysisGOAnalysisOfflineForm,
     data_integration.EnrichmentAnalysisWithGSEA: data_integration_forms.EnrichmentAnalysisWithGSEAForm,
     data_integration.EnrichmentAnalysisWithPrerankedGSEA: data_integration_forms.EnrichmentAnalysisWithPrerankedGSEAForm,
-    data_integration.DatabaseIntegrationDByGeneMapping: data_integration_forms.DatabaseIntegrationByGeneMappingForm,
+    data_integration.DatabaseIntegrationByGeneMapping: data_integration_forms.DatabaseIntegrationByGeneMappingForm,
     data_integration.DatabaseIntegrationByUniprot: data_integration_forms.DatabaseIntegrationByUniprotForm,
 }
 

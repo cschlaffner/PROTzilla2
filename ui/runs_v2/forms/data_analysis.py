@@ -21,7 +21,7 @@ class AnalysisLevel(Enum):
     protein = "Protein"
 
 
-class MultipelTestingCorrectionMethod(Enum):
+class MultipleTestingCorrectionMethod(Enum):
     benjamini_hochberg = "Benjamini-Hochberg"
     bonferroni = "Bonferroni"
 
@@ -139,7 +139,7 @@ class DifferentialExpressionANOVAForm(MethodForm):
     #    choices=AnalysisLevel, label="Intensitys"
     # )
     multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(
@@ -160,7 +160,7 @@ class DifferentialExpressionTTestForm(MethodForm):
         choices=[], label="Step to use protein intensities from"
     )
     multiple_testing_correction_method = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(
@@ -219,7 +219,7 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 class DifferentialExpressionLinearModelForm(MethodForm):
     multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(
