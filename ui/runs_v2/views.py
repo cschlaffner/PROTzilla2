@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from django.http import (
     HttpRequest,
+    HttpResponse,
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
@@ -138,6 +139,7 @@ def detail(request: HttpRequest, run_name: str):
             show_protein_graph=show_protein_graph,
             description=description,
             method_form=method_form,
+            is_form_dynamic=method_form.is_dynamic,
             plot_form=plot_form,
         ),
     )
@@ -517,3 +519,24 @@ def protein_graph(request, run_name, index: int):
             "used_memory": get_memory_usage(),
         },
     )
+
+
+def fill_form(request: HttpRequest, run_name: str):
+    """
+    Fills the form of the current step with the correct values.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the filled form
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    method_form = get_filled_form_by_request(request, run)
+    form_html = ""
+    for field in method_form:
+        form_html += f"<div>{field.label_tag()} {field}</div>"
+
+    return HttpResponse(form_html)

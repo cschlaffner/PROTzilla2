@@ -1,5 +1,8 @@
 from enum import Enum
 
+from protzilla.run_v2 import Run
+from protzilla.steps import Step
+
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
@@ -24,7 +27,6 @@ class MultipelTestingCorrectionMethod(Enum):
 
 
 class LogBase(Enum):
-    none = "None"
     log2 = "log2"
     log10 = "log10"
 
@@ -154,10 +156,10 @@ class DifferentialExpressionANOVAForm(MethodForm):
 
 class DifferentialExpressionTTestForm(MethodForm):
     ttest_type = CustomChoiceField(choices=TTestType, label="T-test type")
-    # intensity_df = CustomChoiceField(
-    #    choices=AnalysisLevel, label="Intensitys"
-    # )
-    multiple_testing_correction = CustomChoiceField(
+    protein_df = CustomChoiceField(
+        choices=[], label="Step to use protein intensities from"
+    )
+    multiple_testing_correction_method = CustomChoiceField(
         choices=MultipelTestingCorrectionMethod,
         label="Multiple testing correction",
     )
@@ -170,11 +172,49 @@ class DifferentialExpressionTTestForm(MethodForm):
     )
     log_base = CustomChoiceField(
         choices=LogBase,
-        label="Base of the log transformation",
+        label="Base of the log transformation (optional)",
+        required=False,
     )
-    grouping = "Put a usefull initial here"
-    group1 = "Put a usefull initial here"
-    group2 = "Put a usefull initial here"
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    group1 = CustomChoiceField(choices=[], label="Group 1")
+    group2 = CustomChoiceField(choices=[], label="Group 2")
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["protein_df"].choices = [
+            (el, el) for el in run.steps.get_instance_identifiers(Step, "protein_df")
+        ]
+        self.fields["grouping"].choices = [
+            (el, el)
+            for el in run.steps.metadata_df.columns[
+                run.steps.metadata_df.columns != "Sample"
+            ].unique()
+        ]
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+
+        # Set choices for group1 field based on selected grouping
+        self.fields["group1"].choices = [
+            (el, el) for el in run.steps.metadata_df[grouping].unique()
+        ]
+
+        # Set choices for group2 field based on selected grouping and group1
+        if (
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+        ):
+            self.fields["group2"].choices = [
+                (el, el)
+                for el in run.steps.metadata_df[grouping].unique()
+                if el != self.data["group1"]
+            ]
+        else:
+            self.fields["group2"].choices = reversed(
+                [(el, el) for el in run.steps.metadata_df[grouping].unique()]
+            )
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):

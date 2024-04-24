@@ -76,7 +76,7 @@ class DifferentialExpressionTTest(DataAnalysisStep):
     input_keys = [
         "ttest_type",
         "intensity_df",
-        "multiple_testing_correction",
+        "multiple_testing_correction_method",
         "alpha",
         "log_base",
         "grouping",

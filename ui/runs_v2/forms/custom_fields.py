@@ -4,7 +4,8 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
-    DecimalField, FileField,
+    DecimalField,
+    FileField,
     FloatField,
     MultipleChoiceField,
 )
@@ -39,6 +40,9 @@ class CustomChoiceField(ChoiceField):
             super().__init__(
                 choices=[(el.value, el.value) for el in choices], *args, **kwargs
             )
+
+        if not self.required:
+            self.choices += [(None, "---------")]
 
         self.widget.attrs.update({"class": "form-select mb-2"})
 
@@ -78,8 +82,8 @@ class CustomCharField(CharField):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
 
+
 class CustomFloatField(FloatField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
-

@@ -30,3 +30,7 @@ class MethodForm(Form):
 
     def submit(self, run: Run) -> None:
         run.step_calculate(self.cleaned_data)
+
+    @property
+    def is_dynamic(self) -> bool:
+        return False
