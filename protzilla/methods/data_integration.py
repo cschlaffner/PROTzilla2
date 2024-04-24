@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from protzilla.data_integration import enrichment_analysis, database_integration
-from protzilla.data_integration.enrichment_analysis
 from protzilla.steps import Step, StepManager
 
 class DataIntegrationStep(Step):

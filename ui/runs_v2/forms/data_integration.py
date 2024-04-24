@@ -68,21 +68,21 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
               "if log2_fold_change < -threshold downregulated",
         min_value=0,
         max_value=4294967295,
-        default=0
+        initial=0
     )
     # Todo: gene_sets_restring
     organism = CustomNumberField(
         label="Organism / NCBI taxon identifiers (e.g. Human is 9606)",
-        default=9606
+        initial=9606
     )
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        default="Both"
+        initial="Both"
     )
     background_path = CustomFileField(
         label="Background set (no upload = entire proteome), UniProt IDs (one per line, txt or csv)",
-        default=None,
+        initial=None,
     )
 
 
@@ -96,42 +96,42 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
               "if log2_fold_change < -threshold downregulated",
         min_value=0,
         max_value=4294967295,
-        default=0
+        initial=0
     )
     # Todo: gene_mapping
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="Gene sets",
-        default="Choose from Enrichr options"
+        initial="Choose from Enrichr options"
         # Todo: Dynamic parameters
     )
     # Todo: gene_sets_enrichr
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        default="Both"
+        initial="Both"
     )
     organism = CustomChoiceField(
         choices=Organism,
         label="Organism",
-        default="Human"
+        initial="Human"
     )
     background_field = CustomChoiceField(
         choices=GOAnalysisWithEnrichrBackgroundField,
         label="Background",
-        default="Upload a file (recommended)"
+        initial="Upload a file (recommended)"
         # Todo: Dynamic parameters
     )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one gene per line, csv or txt)",
-        default=None,
+        initial=None,
     )
     background_number = CustomNumberField(
         label="Number of expressed genes in the background",
         min_value=1,
         max_value=4294967295,
         step_size=1,
-        default=None
+        initial=None
     )
     background_bio_mart = CustomChoiceField(
         # Todo: biomart_datasets
@@ -148,7 +148,7 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
               "if log2_fold_change < -threshold downregulated",
         min_value=0,
         max_value=4294967295,
-        default=0
+        initial=0
     )
     # Todo: gene_mapping
     gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -156,30 +156,30 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
                                            "followed by tab-separated list of proteins | .csv (one set per line): "
                                            "SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], "
                                            "SetName2: [Gene2, Gene3, ...]})",
-                                     default=None
+                                     initial=None
                                      )
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        default="Both"
+        initial="Both"
     )
     background_field = CustomChoiceField(
         choices=GOAnalysisWithEnrichrBackgroundField,
         label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
               "will otherwise be ignored!",
-        default="Upload a file (recommended)"
+        initial="Upload a file (recommended)"
         # Todo: Dynamic parameters
     )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one protein per line, csv or txt)",
-        default=None,
+        initial=None,
     )
     background_number = CustomNumberField(
         label="Number of expressed genes",
         min_value=1,
         max_value=4294967295,
         step_size=1,
-        default=None
+        initial=None
     )
 
 
@@ -189,7 +189,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
-        default="Choose from Enrichr options"
+        initial="Choose from Enrichr options"
         # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -197,44 +197,44 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
                                            "followed by tab-separated list of proteins | .csv (one set per line): "
                                            "SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], "
                                            "SetName2: [Gene2, Gene3, ...]})",
-                                     default=None
+                                     initial=None
                                      )
     # Todo: gene_sets_enrichr
     grouping = CustomChoiceField(
         choices=GroupingField,
         label="Grouping from metadata",
-        default=None
+        initial=None
         # Todo: Dynamic parameters
     )
     # Todo: add dynamic filling to group1, group2
     group1 = CustomChoiceField(choices=[],
                                label="Group1",
-                               default=None)
+                               initial=None)
 
     group2 = CustomChoiceField(choices=[],
                                label="Group2",
-                               default=None)
+                               initial=None)
 
     min_size = CustomNumberField(label="Minimum number of genes from gene set also in data",
-                                 default=15)
+                                 initial=15)
 
     max_size = CustomNumberField(label="Maximum number of genes from gene set also in data",
-                                 default=500)
+                                 initial=500)
 
     number_of_permutations = CustomNumberField(label="number_of_permutations",
-                                               default=1000)
+                                               initial=1000)
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
-                                         default="phenotype")
+                                         initial="phenotype")
 
     ranking_method = CustomChoiceField(choices=RankingMethodField,
                                        label="Method to calculate correlation or ranking",
-                                       default="signal_to_noise")
+                                       initial="signal_to_noise")
 
     weighted_score = CustomFloatField(label="Weighted score for the enrichment score calculation, recommended values: "
                                             "0, 1, 1.5 or 2",
-                                      default=1)
+                                      initial=1)
     # Todo: metadata_df
 
 
@@ -244,12 +244,12 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
     ranking_direction = CustomChoiceField(choices=RankingDirectionField,
                                           label="Sort the ranking column (ascending - smaller values are better, "
                                                 "descending - larger values are better)",
-                                          default="ascending")
+                                          initial="ascending")
     # Todo: gene_mapping
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
-        default="Choose from Enrichr options"
+        initial="Choose from Enrichr options"
         # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -257,29 +257,29 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
                                            "followed by tab-separated list of proteins | .csv (one set per line): "
                                            "SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], "
                                            "SetName2: [Gene2, Gene3, ...]})",
-                                     default=None
+                                     initial=None
                                      )
     # Todo: gene_sets_enrichr
     min_size = CustomNumberField(label="Minimum number of genes from gene set also in data",
-                                 default=15)
+                                 initial=15)
 
     max_size = CustomNumberField(label="Maximum number of genes from gene set also in data",
-                                 default=500)
+                                 initial=500)
 
     number_of_permutations = CustomNumberField(label="number_of_permutations",
-                                               default=1000)
+                                               initial=1000)
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
-                                         default="phenotype")
+                                         initial="phenotype")
 
     ranking_method = CustomChoiceField(choices=RankingMethodField,
                                        label="Method to calculate correlation or ranking",
-                                       default="signal_to_noise")
+                                       initial="signal_to_noise")
 
     weighted_score = CustomFloatField(label="Weighted score for the enrichment score calculation, recommended values: "
                                             "0, 1, 1.5 or 2",
-                                      default=1)
+                                      initial=1)
 
 
 class DatabaseIntegrationByGeneMappingForm(MethodForm):
@@ -289,7 +289,7 @@ class DatabaseIntegrationByGeneMappingForm(MethodForm):
                                               label="Uniprot databases (offline)",
                                               )
     use_biomart = CustomBooleanField(label="Use Biomart after Uniprot databases (online)",
-                                     default=False)
+                                     initial=False)
 
 
 class DatabaseIntegrationByUniprotForm(MethodForm):
