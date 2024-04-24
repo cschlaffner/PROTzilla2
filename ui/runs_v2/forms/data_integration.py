@@ -57,6 +57,9 @@ class GOAnalysisWithEnrichrBackgroundField(Enum):
     number_of_expressed_genes = "Specify number of expressed genes (not recommended)"
     all_genes = "Use all genes in the gene set"
 
+class GOEnrichmentBarPlotValue(Enum):
+    p_value = "p-value"
+    fdr = "FDR"
 
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     # Todo: protein_df
@@ -78,7 +81,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        initial="Both"
+        initial=Direction.both
     )
     background_path = CustomFileField(
         label="Background set (no upload = entire proteome), UniProt IDs (one per line, txt or csv)",
@@ -102,24 +105,24 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="Gene sets",
-        initial="Choose from Enrichr options"
+        initial=GeneSetField.choose_from_enrichr_options
         # Todo: Dynamic parameters
     )
     # Todo: gene_sets_enrichr
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        initial="Both"
+        initial=Direction.both
     )
     organism = CustomChoiceField(
         choices=Organism,
         label="Organism",
-        initial="Human"
+        initial=Organism.human
     )
     background_field = CustomChoiceField(
         choices=GOAnalysisWithEnrichrBackgroundField,
         label="Background",
-        initial="Upload a file (recommended)"
+        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file
         # Todo: Dynamic parameters
     )
     background_path = CustomFileField(
@@ -158,13 +161,13 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
-        initial="Both"
+        initial=Direction.both
     )
     background_field = CustomChoiceField(
         choices=GOAnalysisWithEnrichrBackgroundField,
         label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
               "will otherwise be ignored!",
-        initial="Upload a file (recommended)"
+        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file
         # Todo: Dynamic parameters
     )
     background_path = CustomFileField(
@@ -223,11 +226,11 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
-                                         initial="phenotype")
+                                         initial=PermutationTypeField.phenotype)
 
     ranking_method = CustomChoiceField(choices=RankingMethodField,
                                        label="Method to calculate correlation or ranking",
-                                       initial="signal_to_noise")
+                                       initial=RankingMethodField.signal_to_noise)
 
     weighted_score = CustomFloatField(label="Weighted score for the enrichment score calculation, recommended values: "
                                             "0, 1, 1.5 or 2",
@@ -241,12 +244,12 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
     ranking_direction = CustomChoiceField(choices=RankingDirectionField,
                                           label="Sort the ranking column (ascending - smaller values are better, "
                                                 "descending - larger values are better)",
-                                          initial="ascending")
+                                          initial=RankingDirectionField.ascending)
     # Todo: gene_mapping
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
-        initial="Choose from Enrichr options"
+        initial=GeneSetField.choose_from_enrichr_options
         # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -268,11 +271,11 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
 
     permutation_type = CustomChoiceField(choices=PermutationTypeField,
                                          label="Permutation type (if samples >=15 set to phenotype)",
-                                         initial="phenotype")
+                                         initial=PermutationTypeField.phenotype)
 
     ranking_method = CustomChoiceField(choices=RankingMethodField,
                                        label="Method to calculate correlation or ranking",
-                                       initial="signal_to_noise")
+                                       initial=RankingMethodField.signal_to_noise)
 
     weighted_score = CustomFloatField(label="Weighted score for the enrichment score calculation, recommended values: "
                                             "0, 1, 1.5 or 2",
@@ -298,4 +301,24 @@ class DatabaseIntegrationByUniprotForm(MethodForm):
     fields = CustomMultipleChoiceField(choices=[],
                                        label="Fields"
                                        )
+
+class PlotGOEnrichmentBarPlotForm(MethodForm):
+    #TODO: input:df fill dynamic with fill_forms
+    gene_sets = CustomChoiceField(choices=GOEnrichmentBarPlotValue,
+                                  label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
+                                  initial=GOEnrichmentBarPlotValue.p_value
+                              )
+    top_terms = CustomNumberField(label="Number of top enriched terms per category",
+                                  min_value=1,
+                                  max_value=100,
+                                  step_size=1,
+                                  initial=10)
+    cutoff = CustomNumberField(label="Only terms with adjusted p-value (or FDR) < cutoff will be shown",
+                               min_value = 0,
+                               max_value = 1,
+                               step_size = 0.01,
+                               initial = 0.05)
+    title = CustomCharField(label="Title of the plot (optional)")
+    #todo: fill with colors
+    colors = CustomMultipleChoiceField(label="Colors for the plot (optional)")
 

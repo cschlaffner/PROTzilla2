@@ -1,13 +1,23 @@
 from __future__ import annotations
 
-from protzilla.data_integration import enrichment_analysis, database_integration
-from protzilla.steps import Step, StepManager
+from protzilla.data_integration import enrichment_analysis, database_integration, di_plots,
+from protzilla.steps import Step, StepManager, Plots
+
 
 class DataIntegrationStep(Step):
     section = "data_integration"
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
+
+class PlotStep(DataIntegrationStep):
+    operation = "plot"
+
+    def handle_outputs(self, outputs: dict):
+        plots = outputs.pop("plots", [])
+        self.plots = Plots(plots)
+
+
 class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
     display_name = "GO analysis with STRING"
     operation = "enrichment_analysis"
@@ -146,5 +156,26 @@ class DatabaseIntegrationByUniprot(DataIntegrationStep):
     output_keys = ["results_df"]
     def method(self, inputs: dict) -> dict:
         return database_integration.uniprot(**inputs)
+
+
+class PlotGOEnrichmentBarPlot(DataIntegrationStep):
+    display_name = "Bar plot for GO enrichment analysis"
+    operation = "plot"
+    method_description = "Creates a bar plot from GO enrichment data"
+    input_keys = ["gene_sets",
+                  "value",
+                  "top_terms",
+                  "cutoff",
+                  "title",
+                  "colors",
+                  "figsize",
+    ]
+    #TODO: input figsize optional?
+    output_keys = ["plots"]
+    def method(self, inputs: dict) -> dict:
+        return di_plots.GO_enrichment_bar_plot(**inputs)
+
+    def plot(self, inputs):
+        return inputs["Plotting is not implemented yet for this step."]
 
 

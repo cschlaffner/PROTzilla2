@@ -26,7 +26,7 @@ class DataAnalysisStep(Step):
 
 
 class PlotStep(DataAnalysisStep):
-    step = "plot"
+    operation = "plot"
 
     def handle_outputs(self, outputs: dict):
         plots = outputs.pop("plots", [])
@@ -167,7 +167,7 @@ class PlotVolcano(DataAnalysisStep):
         return inputs["Plotting is not implemented yet for this step."]
 
 
-class PlotScatter(DataAnalysisStep):
+class PlotScatterPlot(DataAnalysisStep):
     display_name = "Scatter Plot"
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
