@@ -76,9 +76,7 @@ class Runner:
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
         for step in self.run.steps.all_steps:
-            if step.section == "importing":
-                self._importing(step)
-            elif step.operation == "plot":
+            if step.operation == "plot":
                 logging.info(
                     f"creating plot: {*self.run.steps.current_location,}"
                 )
@@ -87,7 +85,9 @@ class Runner:
                 logging.info(
                     f"performing step: {*self.run.steps.current_location,}"
                 )
-                self._perform_current_step(self.run)
+                if step.section == "importing":
+                    self._insert_commandline_inputs(step)
+                self._perform_current_step()
                 if self.all_plots:
                     self._create_plots_for_step(step)
             self.run.step_next()
@@ -95,12 +95,9 @@ class Runner:
             log_messages(self.run.current_messages)
             self.run.current_messages.clear()
 
-    def _importing(self, step):
+    def _insert_commandline_inputs(self, step):
         if step.operation == "msdataimport":
-            params = step.inputs
-            params["file_path"] = self.ms_data_path
-            self._perform_current_step(params)
-            logging.info("imported MS Data")
+            step.inputs["file_path"] = self.ms_data_path
 
         elif step.operation == "metadataimport":
             if self.meta_data_path is None:
@@ -108,24 +105,18 @@ class Runner:
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
                     f" but is required for {step['name']}"
                 )
-            params = step.inputs
-            params["file_path"] = self.meta_data_path
-            self._perform_current_step(params)
-            logging.info("imported Meta Data")
+            step.inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
                     f"but is required for {step['name']}"
                 )
-            params = step.inputs
-            params["file_path"] = self.peptides_path
-            self._perform_current_step(params)
-            logging.info("imported Peptide Data")
+            step.inputs["file_path"] = self.peptides_path
         else:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
-    def _perform_current_step(self, params):
+    def _perform_current_step(self, params=None):
         self.run.step_calculate(params)
 
     def _create_plots_for_step(self, step):
