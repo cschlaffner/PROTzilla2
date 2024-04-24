@@ -463,7 +463,13 @@ class StepManager:
             step = self.data_integration[step_index]
         else:
             raise ValueError(f"Unknown section {section}")
-        self.current_step_index = self.all_steps.index(step)
+
+        if self.all_steps.index(step) < self.current_step_index:
+            for i in range(self.all_steps.index(step)+1, self.current_step_index):
+                self.all_steps[i].output = Output()
+            self.current_step_index = self.all_steps.index(step)
+        else:
+            pass # TODO: implement forwards navigation
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
