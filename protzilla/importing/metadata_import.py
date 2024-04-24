@@ -165,7 +165,6 @@ def metadata_column_assignment(
     :rtype: dict of pd.Dataframe and dict of messages
     """
 
-    # TODO add info box in UI explaining that no option for unknown columns means all columns are named correctly
     # check if required column already in metadata, if so give error message
     if (
         metadata_required_column is None
