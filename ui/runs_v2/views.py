@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from django.http import (
     HttpRequest,
+    HttpResponse,
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
@@ -152,6 +153,7 @@ def detail(request: HttpRequest, run_name: str):
             show_protein_graph=show_protein_graph,
             description=description,
             method_form=method_form,
+            is_form_dynamic=method_form.is_dynamic,
             plot_form=plot_form,
         ),
     )
@@ -224,24 +226,6 @@ def continue_(request: HttpRequest):
     active_runs[run_name] = Run(run_name)
 
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
-
-
-# this function is no longer used, as the Output instance of a step has a utility method not_empty
-def results_exist(run: Run) -> bool:
-    """
-    Checks if the last step has produced valid results.
-
-    :param run: the run to check
-
-    :return: True if the results are valid, False otherwise
-    """
-    if run.section == "importing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_preprocessing":
-        return run.result_df is not None or (run.step == "plot" and run.plots)
-    if run.section == "data_analysis" or run.section == "data_integration":
-        return run.calculated_method is not None or (run.step == "plot" and run.plots)
-    return True
 
 
 def next_(request, run_name):
@@ -432,7 +416,9 @@ def navigate(request, run_name: str):
 
     post = dict(request.POST)
     index = int(post["index"][0])
-    section_name = post["section_name"][0]
+    section_name = post["section_name"][
+        0
+    ]  # TODO can this be done without the section_name, like with the delete_step method?
 
     run.steps.goto_step(index, section_name)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
@@ -550,6 +536,27 @@ def protein_graph(request, run_name, index: int):
             "used_memory": get_memory_usage(),
         },
     )
+
+
+def fill_form(request: HttpRequest, run_name: str):
+    """
+    Fills the form of the current step with the correct values.
+
+    :param request: the request object
+    :type request: HttpRequest
+    :param run_name: the name of the run
+    :type run_name: str
+
+    :return: the filled form
+    :rtype: HttpResponse
+    """
+    run = active_runs[run_name]
+    method_form = get_filled_form_by_request(request, run)
+    form_html = ""
+    for field in method_form:
+        form_html += f"<div>{field.label_tag()} {field}</div>"
+
+    return HttpResponse(form_html)
 
 
 def add_name(request, run_name):

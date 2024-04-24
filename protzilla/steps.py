@@ -6,6 +6,7 @@ import logging
 import secrets
 import string
 import traceback
+from enum import Enum
 from io import BytesIO
 from pathlib import Path
 
@@ -14,6 +15,13 @@ import plotly
 from PIL import Image
 
 from protzilla.utilities import format_trace
+
+
+class Section(Enum):
+    IMPORTING = "importing"
+    DATA_PREPROCESSING = "data_preprocessing"
+    DATA_ANALYSIS = "data_analysis"
+    DATA_INTEGRATION = "data_integration"
 
 
 class Step:
@@ -42,7 +50,14 @@ class Step:
     def __repr__(self):
         return self.__class__.__name__
 
-    def calculate(self, steps: StepManager, inputs: dict = None):
+    def calculate(self, steps: StepManager, inputs: dict = None) -> None:
+        """
+        Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
+
+        :param steps: The StepManager object that contains all steps
+        :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
+        :return: None
+        """
         if inputs is not None:
             self.inputs = inputs.copy()
         self._finished = False
@@ -93,20 +108,33 @@ class Step:
                 )
             )
 
-    def method(self, **kwargs):
+    def method(self, **kwargs) -> dict:
         raise NotImplementedError("This method must be implemented in a subclass.")
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
 
-    def handle_outputs(self, outputs: dict):
+    def handle_outputs(self, outputs: dict) -> None:
+        """
+        Handles the dictionary from the calculation method and creates an Output object from it.
+        Responsible for checking if the output is a dictionary and if it is empty, and setting the output attribute of the instance.
+
+        :param outputs: A dictionary received after the calculation
+        :return: None
+        """
         if not isinstance(outputs, dict):
             raise TypeError("Output of calculation is not a dictionary.")
         if not outputs:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
 
-    def handle_messages(self, outputs: dict):
+    def handle_messages(self, outputs: dict) -> None:
+        """
+        Handles the messages from the calculation method and creates a Messages object from it.
+        Responsible for clearing and setting the messages attribute of the class.
+        :param outputs: A dictionary received after the calculation
+        :return: None
+        """
         self.messages.clear()
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
@@ -117,6 +145,13 @@ class Step:
         )
 
     def validate_inputs(self, required_keys: list[str] = None) -> bool:
+        """
+        Validates the inputs of the step. If required_keys is not specified, the input_keys of the method class are used.
+        Will delete unnecessary keys from the inputs dictionary to avoid passing unwanted parameters to the method.
+        :param required_keys: The keys that are required in the inputs dictionary (optional)
+        :return: True if the inputs are valid, False otherwise
+        :raises ValueError: If a required key is missing in the inputs
+        """
         if required_keys is None:
             required_keys = self.input_keys
         for key in required_keys:
@@ -136,6 +171,14 @@ class Step:
     def validate_outputs(
         self, required_keys: list[str] = None, soft_check: bool = False
     ) -> bool:
+        """
+        Validates the outputs of the step. If required_keys is not specified, the output_keys of the method class are used.
+
+        :param required_keys: The keys that are required in the outputs dictionary (optional)
+        :param soft_check: Whether to raise errors or just return False if the output is invalid
+        :return: True if the outputs are valid, False otherwise
+        :raises ValueError: If a required key is missing in the outputs
+        """
         inspect.signature(self.method).parameters
         if required_keys is None:
             required_keys = self.output_keys
@@ -150,7 +193,11 @@ class Step:
         return True
 
     @property
-    def finished(self):
+    def finished(self) -> bool:
+        """
+        Return whether the step has valid outputs and is therefore considered finished.
+        :return: True if the step is finished, False otherwise
+        """
         return self._finished or self.validate_outputs(soft_check=True)
 
 
@@ -265,13 +312,19 @@ class StepManager:
         df_mode: str = "disk",
         disk_operator: DiskOperator = None,
     ):
+        self.df_mode = df_mode
+        self.disk_operator = disk_operator
+        self.current_step_index = 0
         self.importing = []
         self.data_preprocessing = []
         self.data_analysis = []
         self.data_integration = []
-        self.df_mode = df_mode
-        self.disk_operator = disk_operator
-        self.current_step_index = 0
+        self.sections = {
+            "importing": self.importing,
+            "data_preprocessing": self.data_preprocessing,
+            "data_analysis": self.data_analysis,
+            "data_integration": self.data_integration,
+        }
 
         if steps is not None:
             for step in steps:
@@ -300,7 +353,18 @@ class StepManager:
         output_key: str,
         instance_identifier: str = None,
         include_current_step: bool = False,
-    ):
+    ) -> pd.DataFrame | Any | None:
+        """
+        Get the specific output of the outputs of a specific step type. The step type can also a parent class of the
+        step type, in which case the output of the most recent step of the specific type is returned.
+
+        :param step_type: The type of the step as a class object
+        :param output_key: The key of the desired output in the output dictionary of the step
+        :param instance_identifier: The instance identifier of the step to get the output from
+        :param include_current_step: Whether to include the current step in the search
+        :return: The value of the output of the step or None
+        """
+
         def check_instance_identifier(step):
             return (
                 step.instance_identifier == instance_identifier
@@ -339,15 +403,14 @@ class StepManager:
                 return val
         return None
 
-    def all_steps_in_section(self, section: str):
-        if section == "importing":
-            return self.importing
-        elif section == "data_preprocessing":
-            return self.data_preprocessing
-        elif section == "data_analysis":
-            return self.data_analysis
-        elif section == "data_integration":
-            return self.data_integration
+    def all_steps_in_section(self, section: str) -> list[Step]:
+        """
+        Get all steps in a specific section via the section name
+        :param section: The section name
+        :return: A list of steps in the section
+        """
+        if section in self.sections:
+            return self.sections[section]
         else:
             raise ValueError(f"Unknown section {section}")
 
@@ -357,6 +420,8 @@ class StepManager:
 
     @property
     def current_step(self) -> Step:
+        if self.current_step_index >= len(self.all_steps):
+            return None
         return self.all_steps[self.current_step_index]
 
     def current_section(self) -> str:
@@ -368,7 +433,6 @@ class StepManager:
 
         df = self.get_step_output(Step, "protein_df")
         return df
-        logging.warning("No intensity_df found in steps")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
@@ -393,8 +457,7 @@ class StepManager:
     def is_at_last_step(self):
         return self.current_step_index == len(self.all_steps) - 1
 
-    def add_step(self, step, index: int | None = None):
-        # TODO add support for index
+    def add_step(self, step):
         if step.section == "importing":
             self.importing.append(step)
         elif step.section == "data_preprocessing":
@@ -406,7 +469,7 @@ class StepManager:
         else:
             raise ValueError(f"Unknown section {step.section}")
 
-    def remove_step(self, step: Step, step_index: int = None):
+    def remove_step(self, step: Step, step_index: int = None) -> None:
         if step_index is not None:
             if step_index < self.current_step_index:
                 self.current_step_index -= 1
@@ -427,8 +490,18 @@ class StepManager:
         raise ValueError(f"Step {step} not found in steps")
 
     def next_step(self) -> None:
+        """
+        Go to the next step in the workflow. Depending on the df_mode, the dataframes of the previous output are
+        replaced with the respective paths on the disk where they are saved to save memory.
+
+        :return: None
+        """
         if not self.is_at_last_step:
+            self.disk_operator.clear_upload_dir()  # TODO this could be a problem when using protzilla for multiple users
             if self.df_mode == "disk":
+                # TODO maybe this doesnt really need to be written to disk anymore,
+                # as it is preceeded by a calculation, after which everything is written to
+                # disk anyway. Better would be if it would just replace the dfs with their respective paths
                 self.current_step.output = Output(
                     self.disk_operator._write_output(
                         step_name=self.current_step.__class__.__name__,
@@ -439,7 +512,13 @@ class StepManager:
         else:
             logging.warning("Cannot go forward from the last step")
 
-    def goto_step(self, step_index: int, section) -> None:
+    def goto_step(self, step_index: int, section: str) -> None:
+        """
+        Go to a specific step in the workflow.
+        :param step_index: The index of the step in the respective section
+        :param section: The section of the step to go to
+        :return:
+        """
         if step_index < 0 or step_index >= len(self.all_steps):
             raise ValueError(f"Step index {step_index} out of bounds")
         # find step
@@ -453,18 +532,29 @@ class StepManager:
             step = self.data_integration[step_index]
         else:
             raise ValueError(f"Unknown section {section}")
-        self.current_step_index = self.all_steps.index(step)
+
+        if self.all_steps.index(step) < self.current_step_index:
+            for i in range(self.all_steps.index(step)+1, self.current_step_index):
+                self.all_steps[i].output = Output()
+            self.current_step_index = self.all_steps.index(step)
+        else:
+            pass # TODO: implement forwards navigation
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
         Change the instance identifier of the current step
+        :return: None
         :param new_instance_identifier: the new instance identifier
-        :return:
         """
         self.current_step.instance_identifier = new_instance_identifier
-        return
 
     def change_method(self, new_method: str) -> None:
+        """
+        Change the method of the current step,
+        :param new_method: the new method, the name of the method class (accessible via __class__.__name__)
+        :return: None
+        :raises ValueError: if the section of the current step is unknown
+        """
         from protzilla.stepfactory import StepFactory
 
         new_step = StepFactory.create_step(new_method)

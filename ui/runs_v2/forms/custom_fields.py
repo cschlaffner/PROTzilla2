@@ -33,6 +33,9 @@ class CustomChoiceField(ChoiceField):
                 choices=[(el.value, el.value) for el in choices], initial=initial  *args, **kwargs
             )
 
+        if not self.required:
+            self.choices += [(None, "---------")]
+
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
