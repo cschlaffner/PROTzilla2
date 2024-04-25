@@ -21,7 +21,7 @@ class AnalysisLevel(Enum):
     protein = "Protein"
 
 
-class MultipelTestingCorrectionMethod(Enum):
+class MultipleTestingCorrectionMethod(Enum):
     benjamini_hochberg = "Benjamini-Hochberg"
     bonferroni = "Bonferroni"
 
@@ -135,11 +135,11 @@ class DimensionReductionMetric(Enum):
 
 
 class DifferentialExpressionANOVAForm(MethodForm):
-    # intensity_df = CustomChoiceField(
-    #    choices=AnalysisLevel, label="Intensitys"
-    # )
-    multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+    protein_df = CustomChoiceField(
+        choices=[], label="Step to use protein intensities from"
+    )
+    multiple_testing_correction_method = CustomChoiceField(
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(
@@ -148,10 +148,32 @@ class DifferentialExpressionANOVAForm(MethodForm):
     log_base = CustomChoiceField(
         choices=LogBase,
         label="Base of the log transformation",
+        required=False,
     )
-    # TODO: Add dynamic fill for grouping & selected_groups
-    grouping = "Put a usefull initial here"
-    selected_groups = "Put a usefull initial here"
+
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    selected_groups = CustomMultipleChoiceField(
+        choices=[], label="Select groups to perform ANOVA on"
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["protein_df"].choices = [
+            (el, el) for el in run.steps.get_instance_identifiers(Step, "protein_df")
+        ]
+        self.fields["grouping"].choices = [
+            (el, el)
+            for el in run.steps.metadata_df.columns[
+                run.steps.metadata_df.columns != "Sample"
+            ].unique()
+        ]
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+        self.fields["selected_groups"].choices = [
+            (el, el) for el in run.steps.metadata_df[grouping].unique()
+        ]
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
 
 
 class DifferentialExpressionTTestForm(MethodForm):
@@ -160,7 +182,7 @@ class DifferentialExpressionTTestForm(MethodForm):
         choices=[], label="Step to use protein intensities from"
     )
     multiple_testing_correction_method = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(
@@ -219,7 +241,7 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 class DifferentialExpressionLinearModelForm(MethodForm):
     multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
     )
     alpha = CustomFloatField(

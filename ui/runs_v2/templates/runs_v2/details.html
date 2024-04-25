@@ -139,7 +139,12 @@
                                         {{ method_dropdown }}
                                     </div>
                                     <div class="mb-2" id="method-form">
-                                        {{ method_form }}
+                                        {% for field in method_form %}
+                                            <div class="fieldWrapper">
+                                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                                {{ field }}
+                                            </div>
+                                        {% endfor %}
                                     </div>
                                     <input type="submit" id="calculate_parameters_submit" value="Calculate"
                                            class="btn btn-red">
@@ -167,7 +172,12 @@
                                             {{ method_dropdown }}
                                         </div>
                                         <div class="mb-2" id="method-form">
-                                            {{ method_form }}
+                                            {% for field in method_form %}
+                                                <div class="fieldWrapper">
+                                                    {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                                    {{ field }}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                         <div class="form-group">
                                             <input type="submit" value="Calculate" id="calculate_parameters_submit"
@@ -192,7 +202,12 @@
                                         {% csrf_token %}
                                         {{ method_dropdown }}
                                         <div class="mb-2" id="method-form">
-                                            {method_form %}
+                                            {% for field in method_form %}
+                                                <div class="fieldWrapper">
+                                                    {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                                    {{ field }}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                         <div class="form-group">
                                             <input type="submit" id="plot_parameters_submit" value="Plot"
