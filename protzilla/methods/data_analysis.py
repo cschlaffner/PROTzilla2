@@ -29,7 +29,8 @@ class PlotStep(DataAnalysisStep):
     step = "plot"
 
     def handle_outputs(self, outputs: dict):
-        plots = outputs.pop("plots", [])
+        super().handle_outputs(outputs)
+        plots = outputs["plots"] if "plots" in outputs else []
         self.plots = Plots(plots)
 
 
@@ -215,7 +216,7 @@ class PlotClustergram(DataAnalysisStep):
         return inputs["Plotting is not implemented yet for this step."]
 
 
-class PlotProtQuant(DataAnalysisStep):
+class PlotProtQuant(PlotStep):
     display_name = "Protein Quantification Plot"
     operation = "plot"
     method_description = (
@@ -232,9 +233,6 @@ class PlotProtQuant(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["color_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class PlotPrecisionRecallCurve(DataAnalysisStep):
