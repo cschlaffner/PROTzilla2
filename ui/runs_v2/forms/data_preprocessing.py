@@ -5,7 +5,7 @@ from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
-    CustomNumberInput,
+    CustomNumberField,
 )
 
 
@@ -121,15 +121,15 @@ class OutlierDetectionByPCAForm(MethodForm):
     threshold = CustomFloatField(
         label="Threshold for number of standard deviations from the median:"
     )
-    number_of_components = CustomNumberInput(label="Number of components")
+    number_of_components = CustomNumberField(label="Number of components")
 
 
 class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
-    number_of_neighbors = CustomNumberInput(label="Number of neighbours")
+    number_of_neighbors = CustomNumberField(label="Number of neighbours")
 
 
 class OutlierDetectionByIsolationForestForm(MethodForm):
-    n_estimators = CustomNumberInput(label="Number of estimators")
+    n_estimators = CustomNumberField(label="Number of estimators")
 
 
 class TransformationLogForm(MethodForm):
@@ -155,7 +155,7 @@ class SimpleImputationPerProteinForm(MethodForm):
 
 
 class ImputationByKNNForms(MethodForm):
-    number_of_neighbours = CustomNumberInput(label="Number of neighbours")
+    number_of_neighbours = CustomNumberField(label="Number of neighbours")
 
 
 class ImputationByNormalDistributionSamplingForm(MethodForm):
