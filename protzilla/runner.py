@@ -76,20 +76,18 @@ class Runner:
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
         for step in self.run.steps.all_steps:
-            if step.operation == "plot":
-                logging.info(
-                    f"creating plot: {*self.run.steps.current_location,}"
-                )
-                self._create_plots_for_step(step)
-            else:
-                logging.info(
-                    f"performing step: {*self.run.steps.current_location,}"
-                )
-                if step.section == "importing":
-                    self._insert_commandline_inputs(step)
-                self._perform_current_step()
-                if self.all_plots:
-                    self._create_plots_for_step(step)
+
+            logging.info(
+                f"performing step: {*self.run.steps.current_location,}"
+            )
+            if step.section == "importing":
+                self._insert_commandline_inputs(step)
+            self._perform_current_step()
+            if self.all_plots:
+                step.plot()
+            if step.plots:
+                self._save_plots_html(step)
+
             self.run.step_next()
 
             log_messages(self.run.current_messages)
@@ -119,16 +117,10 @@ class Runner:
     def _perform_current_step(self, params=None):
         self.run.step_calculate(params)
 
-    def _create_plots_for_step(self, step):
-        if step.operation == "plot":
-            step.calculate()
-        else:
-            step.plot()
-
+    def _save_plots_html(self, step):
         for i, plot in enumerate(self.run.plots):
             plot_path = f"{self.plots_path}/{self.run.step_index}-{step.section}-{step['name']}-{step['method']}-{i}.html"
-            if not isinstance(plot, dict):
-                plot.write_html(plot_path)
+            plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
         answer = input(

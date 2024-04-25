@@ -70,6 +70,7 @@ class KEYS:
     STEPS = "steps"
     STEP_OUTPUTS = "output"
     STEP_INPUTS = "inputs"
+    STEP_PLOT_INPUTS = "plot_inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
     STEP_INSTANCE_IDENTIFIER = "instance_identifier"
@@ -160,6 +161,8 @@ class DiskOperator:
         with ErrorHandler():
             step_data = {}
             step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
+            if step.section == "data_preprocessing":
+                step_data[KEYS.STEP_PLOT_INPUTS] = sanitize_inputs(step.plot_inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
             if not workflow_mode:
