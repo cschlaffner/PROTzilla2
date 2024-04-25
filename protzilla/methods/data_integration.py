@@ -14,7 +14,8 @@ class PlotStep(DataIntegrationStep):
     operation = "plot"
 
     def handle_outputs(self, outputs: dict):
-        plots = outputs.pop("plots", [])
+        super().handle_outputs(outputs)
+        plots = outputs["plots"] if "plots" in outputs else []
         self.plots = Plots(plots)
 
 
@@ -162,7 +163,7 @@ class DatabaseIntegrationByUniprot(DataIntegrationStep):
         return database_integration.add_uniprot_data(**inputs)
 
 
-class PlotGOEnrichmentBarPlot(DataIntegrationStep):
+class PlotGOEnrichmentBarPlot(PlotStep):
     display_name = "Bar plot for GO enrichment analysis"
     operation = "plot"
     method_description = "Creates a bar plot from GO enrichment data"

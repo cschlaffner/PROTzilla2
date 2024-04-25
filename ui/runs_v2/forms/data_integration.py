@@ -1,5 +1,7 @@
 from enum import Enum
 
+import matplotlib
+
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
@@ -39,10 +41,10 @@ class PermutationTypeField(Enum):
 
 
 class RankingMethodField(Enum):
-    log2_ratio_of_classes = "Log2 Ratio of classes",
-    signal_to_noise = "Signal to noise",
-    t_test = "t-Test",
-    ratio_of_classes = "Ratio of classes",
+    log2_ratio_of_classes = "Log2 Ratio of classes"
+    signal_to_noise = "Signal to noise"
+    t_test = "t-Test"
+    ratio_of_classes = "Ratio of classes"
     diff_of_classes = "Difference of classes"
 
 
@@ -60,6 +62,7 @@ class GOAnalysisWithEnrichrBackgroundField(Enum):
 class GOEnrichmentBarPlotValue(Enum):
     p_value = "p-value"
     fdr = "FDR"
+
 
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     # Todo: protein_df
@@ -304,7 +307,9 @@ class DatabaseIntegrationByUniprotForm(MethodForm):
 
 class PlotGOEnrichmentBarPlotForm(MethodForm):
     #TODO: input:df fill dynamic with fill_forms
-    gene_sets = CustomChoiceField(choices=GOEnrichmentBarPlotValue,
+
+    gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
+    value = CustomChoiceField(choices=GOEnrichmentBarPlotValue,
                                   label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
                                   initial=GOEnrichmentBarPlotValue.p_value
                               )
@@ -320,5 +325,5 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
                                initial = 0.05)
     title = CustomCharField(label="Title of the plot (optional)")
     #todo: fill with colors
-    colors = CustomMultipleChoiceField(label="Colors for the plot (optional)")
+    colors = CustomMultipleChoiceField(choices=matplotlib.colors, label="Colors for the plot (optional)")
 
