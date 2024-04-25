@@ -129,3 +129,10 @@ def check_is_path(path: str | Path):
             Path(path).exists() or len(path.split("/")) > 1 or len(path.split("\\")) > 1
         )  # couldn't think of a good check with pathlib
     return False
+
+
+def get_file_name_from_upload_path(upload_path: str) -> str:
+    file_name_randomized = upload_path.split("/")[-1]
+    base_name = file_name_randomized.split("_")[0]
+    file_extension = file_name_randomized.split(".")[-1]
+    return f"{base_name}.{file_extension}"
