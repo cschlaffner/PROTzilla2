@@ -146,7 +146,7 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
 
 
-class PlotVolcano(DataAnalysisStep):
+class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
     input_keys = [
@@ -164,11 +164,9 @@ class PlotVolcano(DataAnalysisStep):
         inputs["ttest_results"] = steps.ttest_results
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
-class PlotScatter(DataAnalysisStep):
+class PlotScatter(PlotStep):
     display_name = "Scatter Plot"
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
@@ -188,11 +186,9 @@ class PlotScatter(DataAnalysisStep):
         inputs["color_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
-class PlotClustergram(DataAnalysisStep):
+class PlotClustergram(PlotStep):
     display_name = "Clustergram"
     operation = "plot"
     method_description = "Creates a clustergram from data"
@@ -212,8 +208,6 @@ class PlotClustergram(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class PlotProtQuant(PlotStep):
@@ -235,7 +229,7 @@ class PlotProtQuant(PlotStep):
         return inputs
 
 
-class PlotPrecisionRecallCurve(DataAnalysisStep):
+class PlotPrecisionRecallCurve(PlotStep):
     display_name = "Precision Recall"
     operation = "plot"
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
@@ -253,11 +247,9 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
         # TODO: Input
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
-class PlotROC(DataAnalysisStep):
+class PlotROC(PlotStep):
     display_name = "Receiver Operating Characteristic curve"
     operation = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
@@ -274,9 +266,6 @@ class PlotROC(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         # Todo: Input
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClusteringKMeans(DataAnalysisStep):
@@ -313,8 +302,6 @@ class ClusteringKMeans(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClusteringExpectationMaximisation(DataAnalysisStep):
@@ -352,8 +339,6 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
@@ -389,8 +374,6 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClassificationRandomForest(DataAnalysisStep):
@@ -436,8 +419,6 @@ class ClassificationRandomForest(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClassificationSVM(DataAnalysisStep):
@@ -483,8 +464,6 @@ class ClassificationSVM(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ModelEvaluationClassificationModel(DataAnalysisStep):
@@ -505,9 +484,6 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class DimensionReductionTSNE(DataAnalysisStep):
@@ -534,9 +510,6 @@ class DimensionReductionTSNE(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class DimensionReductionUMAP(DataAnalysisStep):
     display_name = "UMAP"
@@ -561,8 +534,6 @@ class DimensionReductionUMAP(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
@@ -591,8 +562,6 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         inputs["isoform_df"] = steps.isoform_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ProteinGraphVariationGraph(DataAnalysisStep):
@@ -617,5 +586,3 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         inputs["isoform_df"] = steps.isoform_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
