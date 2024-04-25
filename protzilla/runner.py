@@ -83,7 +83,7 @@ class Runner:
             if step.section == "importing":
                 self._insert_commandline_inputs(step)
             self._perform_current_step()
-            if self.all_plots:
+            if self.all_plots and step.section == "data_preprocessing":
                 step.plot()
             if step.plots:
                 self._save_plots_html(step)
@@ -118,7 +118,7 @@ class Runner:
         self.run.step_calculate(params)
 
     def _save_plots_html(self, step):
-        for i, plot in enumerate(self.run.plots):
+        for i, plot in enumerate(step.plots):
             plot_path = f"{self.plots_path}/{self.run.step_index}-{step.section}-{step['name']}-{step['method']}-{i}.html"
             plot.write_html(plot_path)
 

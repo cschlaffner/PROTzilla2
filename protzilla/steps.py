@@ -59,7 +59,8 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        self.inputs = inputs.copy()
+        if inputs is not None:
+            self.inputs = inputs.copy()
         self._finished = False
 
         try:
@@ -139,9 +140,9 @@ class Step:
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
-    def plot(self, inputs: dict):
+    def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
-            "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
+            f"Plotting is not implemented for this step ({self.display_name}). Only preprocessing methods can have additional plots."
         )
 
     def validate_inputs(self, required_keys: list[str] = None) -> bool:

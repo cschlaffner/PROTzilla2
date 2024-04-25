@@ -29,9 +29,13 @@ class DataPreprocessingStep(Step):
         inputs["protein_df"] = steps.protein_df
         return inputs
 
-    def plot(self, inputs: dict):
-        self.plot_inputs = inputs.copy()
+    def plot(self, inputs: dict = None):
+        if inputs is None:
+            inputs = self.plot_inputs
+        else:
+            self.plot_inputs = inputs.copy()
         inputs = self.insert_dataframes_for_plot(inputs)
+
         try:
             self.plots = Plots(self.plot_method(inputs))
         except Exception as e:

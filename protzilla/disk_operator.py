@@ -152,6 +152,8 @@ class DiskOperator:
                     KEYS.STEP_INSTANCE_IDENTIFIER, step.__class__.__name__
                 )
             step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
+            if step.section == "data_preprocessing":
+                step.plot_inputs = step_data.get(KEYS.STEP_PLOT_INPUTS, {})
             step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
