@@ -36,9 +36,10 @@ class Step:
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
-        self.plots = []
+        self.plots: Plots = Plots()
         self._finished: bool = False
 
+        # append a random string of 5 chars to make the instance_identifier unique
         self.instance_identifier = (
             self.__class__.__name__
             + "-"
@@ -50,7 +51,7 @@ class Step:
     def __repr__(self):
         return self.__class__.__name__
 
-    def calculate(self, steps: StepManager, inputs: dict = None) -> None:
+    def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
 
@@ -58,8 +59,7 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        if inputs is not None:
-            self.inputs = inputs.copy()
+        self.inputs = inputs.copy()
         self._finished = False
 
         try:
@@ -221,14 +221,7 @@ class Output:
         return key in self.output
 
     @property
-    def intensity_df(self):
-        if "intensity_df" in self.output:
-            return self.output["intensity_df"]
-        else:
-            return None
-
-    @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.output) == 0 or all(
             value is None for value in self.output.values()
         )
@@ -331,7 +324,11 @@ class StepManager:
                 self.add_step(step)
 
     @property
-    def all_steps(self):
+    def all_steps(self) -> list[Step]:
+        """
+        This is read-only, meaning the changes made to this list will not persist.
+        :return: a list of all the steps in the current StepManager
+        """
         return (
             self.importing
             + self.data_preprocessing
@@ -339,7 +336,9 @@ class StepManager:
             + self.data_integration
         )
 
-    def get_instance_identifiers(self, step_type: type[Step], output_key: str = None):
+    def get_instance_identifiers(
+        self, step_type: type[Step], output_key: str = None
+    ) -> list[str]:
         return [
             step.instance_identifier
             for step in self.all_steps
@@ -351,7 +350,7 @@ class StepManager:
         self,
         step_type: type[Step],
         output_key: str,
-        instance_identifier: str = None,
+        instance_identifier: str | None = None,
         include_current_step: bool = False,
     ) -> pd.DataFrame | Any | None:
         """
@@ -424,11 +423,12 @@ class StepManager:
             return None
         return self.all_steps[self.current_step_index]
 
+    @property
     def current_section(self) -> str:
         return self.current_step.section
 
     @property
-    def protein_df(self):
+    def protein_df(self) -> pd.DataFrame:
         from protzilla.steps import Step
 
         df = self.get_step_output(Step, "protein_df")
@@ -443,9 +443,9 @@ class StepManager:
 
     @property
     def preprocessed_output(self) -> Output:
-        if self.current_section() == "importing":
+        if self.current_section == "importing":
             return None
-        if self.current_section() == "data_preprocessing":
+        if self.current_section == "data_preprocessing":
             return (
                 self.current_step.output
                 if self.current_step.finished
@@ -454,10 +454,10 @@ class StepManager:
         return self.data_preprocessing[-1].output
 
     @property
-    def is_at_last_step(self):
+    def is_at_last_step(self) -> bool:
         return self.current_step_index == len(self.all_steps) - 1
 
-    def add_step(self, step):
+    def add_step(self, step) -> None:
         if step.section == "importing":
             self.importing.append(step)
         elif step.section == "data_preprocessing":
@@ -534,11 +534,11 @@ class StepManager:
             raise ValueError(f"Unknown section {section}")
 
         if self.all_steps.index(step) < self.current_step_index:
-            for i in range(self.all_steps.index(step)+1, self.current_step_index):
+            for i in range(self.all_steps.index(step) + 1, self.current_step_index):
                 self.all_steps[i].output = Output()
             self.current_step_index = self.all_steps.index(step)
         else:
-            pass # TODO: implement forwards navigation
+            pass  # TODO: implement forwards navigation
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
@@ -559,25 +559,12 @@ class StepManager:
 
         new_step = StepFactory.create_step(new_method)
 
-        if self.current_section() == "importing":
-            self.importing = [
-                new_step if step == self.current_step else step
-                for step in self.importing
-            ]
-        elif self.current_section() == "data_preprocessing":
-            self.data_preprocessing = [
-                new_step if step == self.current_step else step
-                for step in self.data_preprocessing
-            ]
-        elif self.current_section() == "data_analysis":
-            self.data_analysis = [
-                new_step if step == self.current_step else step
-                for step in self.data_analysis
-            ]
-        elif self.current_section() == "data_integration":
-            self.data_integration = [
-                new_step if step == self.current_step else step
-                for step in self.data_integration
-            ]
-        else:
-            raise ValueError(f"Unknown section {self.current_section()}")
+        try:
+            current_index = self.all_steps_in_section(self.current_section).index(
+                self.current_step
+            )
+            self.all_steps_in_section(self.current_section)[current_index] = new_step
+        except ValueError:
+            raise ValueError(f"Unknown section {self.current_section}")
+        except Exception as e:
+            logging.error(f"Error while changing method: {e}")
