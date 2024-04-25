@@ -33,12 +33,12 @@ class CustomCheckBoxInput(CheckboxInput):
 
 
 class CustomChoiceField(ChoiceField):
-    def __init__(self, choices: Enum | list, *args, **kwargs):
+    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
             super().__init__(choices=choices, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices], *args, **kwargs
+                choices=[(el.value, el.value) for el in choices], initial=initial,  *args, **kwargs
             )
 
         if not self.required:
@@ -48,10 +48,13 @@ class CustomChoiceField(ChoiceField):
 
 
 class CustomMultipleChoiceField(MultipleChoiceField):
-    def __init__(self, choices: Enum, *args, **kwargs):
-        super().__init__(
-            choices=[(el.value, el.value) for el in choices], *args, **kwargs
-        )
+    def __init__(self, choices: Enum, initial=None, *args, **kwargs):
+        if isinstance(choices, list):
+            super().__init__(choices=choices, *args, **kwargs)
+        else:
+            super().__init__(
+                choices=[(el.value, el.value) for el in choices], initial=initial,  *args, **kwargs
+            )
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
@@ -71,7 +74,7 @@ class CustomBooleanField(BooleanField):
         self.widget = CustomCheckBoxInput(label=label)
 
 
-class CustomNumberInput(DecimalField):
+class CustomNumberField(DecimalField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})

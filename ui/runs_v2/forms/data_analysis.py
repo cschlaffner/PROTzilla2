@@ -7,7 +7,7 @@ from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
-    CustomFloatField,
+    CustomNumberField,
     CustomMultipleChoiceField,
 )
 
@@ -21,7 +21,7 @@ class AnalysisLevel(Enum):
     protein = "Protein"
 
 
-class MultipelTestingCorrectionMethod(Enum):
+class MultipleTestingCorrectionMethod(Enum):
     benjamini_hochberg = "Benjamini-Hochberg"
     bonferroni = "Bonferroni"
 
@@ -109,7 +109,12 @@ class ClusteringLinkage(Enum):
 
 
 class ClassificationValidationStrategy(Enum):
-    pass
+    k_fold = "KFold"
+    repeated_k_fold = "repeated K-Fold"
+    stratified_k_fold = "Stratified K-Fold"
+    leave_one_out = "Leave One Out"
+    leave_p_out = "Leave P Out"
+    manual = "Manual"
 
 
 class ClassificationScoring(Enum):
@@ -135,20 +140,28 @@ class DimensionReductionMetric(Enum):
 
 
 class DifferentialExpressionANOVAForm(MethodForm):
-    # intensity_df = CustomChoiceField(
-    #    choices=AnalysisLevel, label="Intensitys"
-    # )
-    multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
-        label="Multiple testing correction",
+    protein_df = CustomChoiceField(
+        choices=[], label="Step to use protein intensities from"
     )
-    alpha = CustomFloatField(
+    multiple_testing_correction = CustomChoiceField(
+        choices=MultipleTestingCorrectionMethod,
+        label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
+    )
+    alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
     log_base = CustomChoiceField(
         choices=LogBase,
         label="Base of the log transformation",
+        initial=LogBase.log2,
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["protein_df"].choices = [
+            (el, el) for el in run.steps.get_instance_identifiers(Step, "protein_df")
+        ]
+
     # TODO: Add dynamic fill for grouping & selected_groups
     grouping = "Put a usefull initial here"
     selected_groups = "Put a usefull initial here"
@@ -160,10 +173,11 @@ class DifferentialExpressionTTestForm(MethodForm):
         choices=[], label="Step to use protein intensities from"
     )
     multiple_testing_correction_method = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
         label="Multiple testing correction",
     )
-    alpha = CustomFloatField(
+    alpha = CustomNumberField(
         label="Error rate (alpha)",
         min_value=0,
         max_value=1,
@@ -219,15 +233,17 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 class DifferentialExpressionLinearModelForm(MethodForm):
     multiple_testing_correction = CustomChoiceField(
-        choices=MultipelTestingCorrectionMethod,
+        choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
-    alpha = CustomFloatField(
+    alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
     log_base = CustomChoiceField(
         choices=LogBase,
         label="Base of the log transformation",
+        initial=LogBase.log2,
     )
     grouping = "Put a usefull initial here"
     group1 = "Put a usefull initial here"
@@ -237,7 +253,7 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 class PlotVolcanoForm(MethodForm):
     # TODO: Add inbput_dict
     input_dict = "Put a usefull initial here"
-    fc_threshold = CustomFloatField(
+    fc_threshold = CustomNumberField(
         label="log 2 fold change threshold", min_value=0, initial=0
     )
     # TODO: Add dynamic fill for proteins_of_interest
@@ -272,6 +288,7 @@ class PlotClustergramForm(MethodForm):
     flip_axis = CustomChoiceField(
         choices=YesNo,
         label="Flip axis",
+        initial=YesNo.no,
     )
 
 
@@ -287,8 +304,9 @@ class PlotProtQuantForm(MethodForm):
     similarity_measure = CustomChoiceField(
         choices=SimilarityMeasure,
         label="Similarity Measurement: choose how to compare protein groups",
+        initial=SimilarityMeasure.euclidean_distance,
     )
-    similarity = CustomFloatField(
+    similarity = CustomNumberField(
         label="Similarity", min_value=-1, max_value=999, step_size=1, initial=1
     )
 
@@ -335,6 +353,7 @@ class ClusteringKMeansForm(MethodForm):
     model_selection = CustomChoiceField(
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
+        initial=ModelSelection.grid_search,
     )
     # TODO: Add dynamic parameters for grid search & randomized search
     # TODO Add dynamic parameter for model selection scoring
@@ -347,11 +366,11 @@ class ClusteringKMeansForm(MethodForm):
         label="Scoring for the model",
     )
     # TODO: workflow_meta line 1375
-    n_clusters = CustomFloatField(
+    n_clusters = CustomNumberField(
         label="Number of clusters to find", min_value=1, step_size=1, initial=8
     )
     # TODO: workflow_meta line 1384
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for centroid initialisation",
         min_value=0,
         max_value=4294967295,
@@ -361,23 +380,24 @@ class ClusteringKMeansForm(MethodForm):
     init_centroid_strategy = CustomMultipleChoiceField(
         choices=InitCentroidStrategy,
         label="Method for initialisation of centroids",
+        initial=InitCentroidStrategy.random,
     )
     # TODO: workflow_meta line 1402
-    n_init = CustomFloatField(
+    n_init = CustomNumberField(
         label="Number of times the k-means algorithm is run with different centroid seeds",
         min_value=1,
         step_size=1,
         initial=10,
     )
     # TODO: workflow_meta line 1410
-    max_iter = CustomFloatField(
+    max_iter = CustomNumberField(
         label="Maximum number of iterations of the k-means algorithm for a single run",
         min_value=1,
         step_size=1,
         initial=300,
     )
     # TODO: workflow_meta line 1417
-    tolerance = CustomFloatField(
+    tolerance = CustomNumberField(
         label="Relative tolerance with regards to Frobenius norm",
         min_value=0,
         initial=1e-4,
@@ -401,6 +421,8 @@ class ClusteringExpectationMaximizationForm(MethodForm):
     model_selection = CustomChoiceField(
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
+        initial=ModelSelection.grid_search,
+
     )
     # TODO: Add dynamic parameters for grid search & randomized search
     # TODO Add dynamic parameter for model selection scoring
@@ -411,11 +433,12 @@ class ClusteringExpectationMaximizationForm(MethodForm):
     scoring = CustomMultipleChoiceField(
         choices=ClusteringScoring,
         label="Scoring for the model",
+        initial=ClusteringScoring.adjusted_rand_score,
     )
     # TODO: workflow_meta line 1509
-    n_components = CustomFloatField(label="The number of mixture components", initial=1)
+    n_components = CustomNumberField(label="The number of mixture components", initial=1)
     # TODO: workflow_meta line 1515
-    reg_covar = CustomFloatField(
+    reg_covar = CustomNumberField(
         label="Non-negative regularization added to the diagonal of covariance",
         min_value=0,
         initial=1e-6,
@@ -423,15 +446,16 @@ class ClusteringExpectationMaximizationForm(MethodForm):
     covariance_type = CustomMultipleChoiceField(
         choices=ClusteringCovarianceType,
         label="Type of covariance",
+        initial=ClusteringCovarianceType.full,
     )
     init_params = CustomMultipleChoiceField(
         choices=ClusteringInitParams,
         label="The method used to initialize the weights, the means and the precisions.",
     )
-    max_iter = CustomFloatField(
+    max_iter = CustomNumberField(
         label="The number of EM iterations to perform", initial=100
     )
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
@@ -453,28 +477,32 @@ class ClusteringHierarchicalAgglomerativeClusteringForm(MethodForm):
     model_selection = CustomChoiceField(
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
+        initial=ModelSelection.grid_search,
     )
     # TODO: Add dynamic parameters for grid search & randomized search
     # TODO Add dynamic parameter for model selection scoring
     model_selection_scoring = CustomChoiceField(
         choices=ClusteringScoring,
         label="Select a scoring for identifying the best estimator following a grid search",
+        initial=ClusteringScoring.adjusted_rand_score,
     )
     scoring = CustomMultipleChoiceField(
         choices=ClusteringScoring,
         label="Scoring for the model",
     )
     # TODO: workflow_meta line 1647
-    n_clusters = CustomFloatField(
+    n_clusters = CustomNumberField(
         label="The number of clusters to find", min_value=1, step_size=1, initial=2
     )
     metric = CustomMultipleChoiceField(
         choices=ClusteringMetric,
         label="Distance metric",
+        initial=ClusteringMetric.euclidean,
     )
     linkage = CustomMultipleChoiceField(
         choices=ClusteringLinkage,
         label="The linkage criterion to use in order to to determine the distance to use between sets of observation",
+        initial=ClusteringLinkage.ward,
     )
 
 
@@ -488,33 +516,39 @@ class ClassificationRandomForestForm(MethodForm):
         choices=[], label="Choose labels column from metadata"
     )
     positive_label = CustomChoiceField(choices=[], label="Choose positive class")
-    test_size = CustomFloatField(label="Test size", min_value=0, initial=0.20)
+    test_size = CustomNumberField(label="Test size", min_value=0, initial=0.20)
     split_stratify = CustomChoiceField(
         choices=YesNo,
         label="Stratify the split",
+        initial=YesNo.yes,
     )
     # TODO: Validation strategy
-    validatation_strategy = CustomChoiceField(choices=ClassificationValidationStrategy)
+    validatation_strategy = CustomChoiceField(
+        choices=ClassificationValidationStrategy,
+        label="Validation strategy",
+        initial=ClassificationValidationStrategy.k_fold,
+    )
     # TODO: Workflow_meta line 1763
-    train_val_split = CustomFloatField(
+    train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
-    n_splits = CustomFloatField(label="Number of folds", min_value=2, initial=5)
+    n_splits = CustomNumberField(label="Number of folds", min_value=2, initial=5)
     # TODO: workflow_meta line 1781-1784
     shuffle = CustomChoiceField(
         choices=YesNo,
         label="Whether to shuffle the data before splitting into batches",
+        initial=YesNo.yes,
     )
     # TODO: workflow_meta line 1791
-    n_repeats = CustomFloatField(
+    n_repeats = CustomNumberField(
         label="Number of times cross-validator needs to be repeated",
         min_value=1,
         initial=10,
     )
     # TODO: workflow_meta line 1801
-    random_state_cv = CustomFloatField(
+    random_state_cv = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
@@ -522,32 +556,36 @@ class ClassificationRandomForestForm(MethodForm):
         initial=42,
     )
     # TODO: workflow_meta line 1806
-    p_samples = CustomFloatField(label="Size of the test sets", initial=1)
+    p_samples = CustomNumberField(label="Size of the test sets", initial=1)
     scoring = CustomMultipleChoiceField(
         choices=ClassificationScoring,
         label="Scoring for the model",
+        initial=ClassificationScoring.accuracy,
     )
     # TODO: workflow_meta line 1830-1837
     model_selection = CustomChoiceField(
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
+        initial=ModelSelection.grid_search,
     )
     # TODO: workflow_meta line 1849
     model_selection_scoring = CustomChoiceField(
         choices=ClassificationScoring,
         label="Select a scoring for identifying the best estimator following a grid search",
+        initial=ClassificationScoring.accuracy,
     )
-    n_estimators = CustomFloatField(
+    n_estimators = CustomNumberField(
         label="The number of trees in the forest", min_value=1, step_size=1, initial=100
     )
     criterion = CustomMultipleChoiceField(
         choices=ClusteringCriterion,
         label="The function to measure the quality of a split",
+        initial=ClusteringCriterion.gini,
     )
-    max_depth = CustomFloatField(
+    max_depth = CustomNumberField(
         label="The maximum depth of the tree", min_value=1, initial=1
     )
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
@@ -566,50 +604,63 @@ class ClassificationSVMForm(MethodForm):
         choices=[], label="Choose labels column from metadata"
     )
     positive_label = CustomChoiceField(choices=[], label="Choose positive class")
-    test_size = CustomFloatField(label="Test size", min_value=0, initial=0.20)
+    test_size = CustomNumberField(label="Test size", min_value=0, initial=0.20)
     split_stratify = CustomChoiceField(
         choices=YesNo,
         label="Stratify the split",
+        initial=YesNo.yes,
     )
     # TODO: Validation strategy
-    validatation_strategy = CustomChoiceField(choices=ClassificationValidationStrategy)
-    train_val_split = CustomFloatField(
+    validatation_strategy = CustomChoiceField(
+        choices=ClassificationValidationStrategy,
+        label="Validation strategy",
+        initial=ClassificationValidationStrategy.k_fold,
+    )
+    train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
-    n_splits = CustomFloatField(label="Number of folds", min_value=2, initial=5)
+    n_splits = CustomNumberField(label="Number of folds", min_value=2, initial=5)
     # TODO: workflow_meta line 1984-1989
     shuffle = CustomChoiceField(
         choices=YesNo,
         label="Whether to shuffle the data before splitting into batches",
+        initial=YesNo.yes,
     )
     # TODO: workflow_meta line 1994
-    n_repeats = CustomFloatField(
+    n_repeats = CustomNumberField(
         label="Number of times cross-validator needs to be repeated",
         min_value=1,
         initial=10,
     )
     # TODO: workflow_meta line 2004
-    random_state_cv = CustomFloatField(
+    random_state_cv = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
         step_size=1,
         initial=42,
     )
-    p_samples = CustomFloatField(label="Size of the test sets", initial=1)
+    p_samples = CustomNumberField(label="Size of the test sets", initial=1)
     scoring = CustomMultipleChoiceField(
         choices=ClassificationScoring,
         label="Scoring for the model",
+        initial=ClassificationScoring.accuracy,
     )
     # TODO: workflow_meta line 2033-2040
     model_selection = CustomChoiceField(
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
+        initial=ModelSelection.grid_search,
+    )
+    model_selection_scoring = CustomChoiceField(
+        choices=ClassificationScoring,
+        label="Select a scoring for identifying the best estimator following a grid search",
+        initial=ClassificationScoring.accuracy,
     )
     # TODO: workflow_meta line 2059
-    C = CustomFloatField(
+    C = CustomNumberField(
         label="C: regularization parameter (the strength of the regularization is inversely proportional to C)",
         min_value=0.0,
         initial=1.0,
@@ -617,11 +668,12 @@ class ClassificationSVMForm(MethodForm):
     kernel = CustomMultipleChoiceField(
         choices=ClassificationKernel,
         label="Specifies the kernel type to be used in the algorithm",
+        initial=ClassificationKernel.linear,
     )
-    tolerance = CustomFloatField(
+    tolerance = CustomNumberField(
         label="Tolerance for stopping criterion", min_value=0.0, initial=1e-4
     )
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
@@ -635,6 +687,7 @@ class ModelEvaluationClassificationModelForm(MethodForm):
     scoring = CustomMultipleChoiceField(
         choices=ClassificationScoring,
         label="Scoring for the model",
+        initial=ClassificationScoring.accuracy,
     )
 
 
@@ -643,29 +696,30 @@ class DimensionReductionTSNEForm(MethodForm):
         choices=AnalysisLevel,
         label="Dimension reduction of a dataframe using t-SNE",
     )
-    n_components = CustomFloatField(
+    n_components = CustomNumberField(
         label="Dimension of the embedded space", min_value=1, step_size=1, initial=2
     )
-    perplexity = CustomFloatField(
+    perplexity = CustomNumberField(
         label="Perplexity", min_value=5.0, max_value=50.0, initial=30.0
     )
     metric = CustomMultipleChoiceField(
         choices=DimensionReductionMetric,
         label="Metric",
+        initial=DimensionReductionMetric.euclidean,
     )
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
         step_size=1,
         initial=6,
     )
-    n_iter = CustomFloatField(
+    n_iter = CustomNumberField(
         label="Maximum number of iterations for the optimization",
         min_value=250,
         initial=1000,
     )
-    n_iter_without_progress = CustomFloatField(
+    n_iter_without_progress = CustomNumberField(
         label="Maximum number of iterations without progress before we abort the optimization",
         min_value=250,
         step_size=1,
@@ -678,17 +732,17 @@ class DimensionReductionUMAPForm(MethodForm):
         choices=AnalysisLevel,
         label="Dimension reduction of a dataframe using UMAP",
     )
-    n_neighbors = CustomFloatField(
+    n_neighbors = CustomNumberField(
         label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation",
         min_value=2,
         max_value=100,
         step_size=1,
         initial=15,
     )
-    n_components = CustomFloatField(
+    n_components = CustomNumberField(
         label="Number of components", min_value=1, step_size=1, initial=2
     )
-    min_dist = CustomFloatField(
+    min_dist = CustomNumberField(
         label="The minimum distance between embedded points",
         min_value=0.1,
         step_size=0.1,
@@ -697,8 +751,9 @@ class DimensionReductionUMAPForm(MethodForm):
     metric = CustomMultipleChoiceField(
         choices=DimensionReductionMetric,
         label="Metric",
+        initial=DimensionReductionMetric.euclidean,
     )
-    random_state = CustomFloatField(
+    random_state = CustomNumberField(
         label="Seed for random number generation",
         min_value=0,
         max_value=4294967295,
@@ -712,8 +767,8 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2255 - 2263
-    k = CustomFloatField(label="k-mer length", min_value=1, step_size=1, initial=5)
-    allowed_mismatches = CustomFloatField(
+    k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
+    allowed_mismatches = CustomNumberField(
         label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
         min_value=0,
         step_size=1,
