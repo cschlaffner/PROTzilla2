@@ -52,7 +52,10 @@ class CustomChoiceField(ChoiceField):
             super().__init__(choices=choices, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices], initial=initial,  *args, **kwargs
+                choices=[(el.value, el.value) for el in choices],
+                initial=initial,
+                *args,
+                **kwargs
             )
 
         if not self.required:
@@ -67,13 +70,16 @@ class CustomMultipleChoiceField(MultipleChoiceField):
             super().__init__(choices=choices, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices], initial=initial,  *args, **kwargs
+                choices=[(el.value, el.value) for el in choices],
+                initial=initial,
+                *args,
+                **kwargs
             )
         self.widget = CustomSelectMultiple()
         self.widget.attrs.update({"class": "form-select mb-2"})
 
     def clean(self, value):
-        return [el for el in value if el != "hidden"]
+        return [el for el in value if el != "hidden"] if value else None
 
 
 class CustomFileField(FileField):

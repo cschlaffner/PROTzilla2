@@ -133,7 +133,7 @@
                         {% if plot_form %}
                             <div class="col">
                                 <form action="{% url 'runs_v2:detail' run_name %}" id="calc_form" method="post"
-                                      enctype="multipart/form-data" {% if is_form_dynamic %} hx-post="{% url 'runs_v2:fill_form' run_name %}" hx-trigger="change" hx-target="#method-form" {% endif %}>
+                                      enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div class="mb-1">
                                         {{ method_dropdown }}
@@ -166,7 +166,7 @@
                             <div class="col-7">
                                 {% if step != "plot" %}
                                     <form action="{% url 'runs_v2:detail' run_name %}" method="post"
-                                          enctype="multipart/form-data" {% if is_form_dynamic %} hx-post="{% url 'runs_v2:fill_form' run_name %}" hx-trigger="change" hx-target="#method-form" {% endif %}>
+                                          enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="mb-2">
                                             {{ method_dropdown }}
@@ -198,7 +198,7 @@
                                     </form>
                                 {% else %}
                                     <form action="{% url 'runs_v2:plot' run_name %}" id="plot_form" method="post"
-                                          enctype="multipart/form-data" {% if is_form_dynamic %} hx-post="{% url 'runs_v2:fill_form' run_name %}" hx-trigger="change" hx-target="#method-form" {% endif %}>
+                                          enctype="multipart/form-data">
                                         {% csrf_token %}
                                         {{ method_dropdown }}
                                         <div class="mb-2" id="method-form">

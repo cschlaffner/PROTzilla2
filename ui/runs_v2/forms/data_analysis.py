@@ -1,14 +1,14 @@
 from enum import Enum
 
 from protzilla.run_v2 import Run
-from protzilla.steps import Step
 
+from . import fill_helper as fh
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
-    CustomNumberField,
     CustomMultipleChoiceField,
+    CustomNumberField,
 )
 
 
@@ -163,19 +163,14 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = [
-            (el, el) for el in run.steps.get_instance_identifiers(Step, "protein_df")
-        ]
-        self.fields["grouping"].choices = [
-            (el, el)
-            for el in run.steps.metadata_df.columns[
-                run.steps.metadata_df.columns != "Sample"
-            ].unique()
-        ]
+        self.fields["protein_df"].choices = fh.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fh.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
-        self.fields["selected_groups"].choices = [
-            (el, el) for el in run.steps.metadata_df[grouping].unique()
-        ]
+        self.fields["selected_groups"].choices = fh.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
 
     @property
     def is_dynamic(self) -> bool:
@@ -208,22 +203,17 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = [
-            (el, el) for el in run.steps.get_instance_identifiers(Step, "protein_df")
-        ]
-        self.fields["grouping"].choices = [
-            (el, el)
-            for el in run.steps.metadata_df.columns[
-                run.steps.metadata_df.columns != "Sample"
-            ].unique()
-        ]
+        self.fields["protein_df"].choices = fh.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fh.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
         # Set choices for group1 field based on selected grouping
-        self.fields["group1"].choices = [
-            (el, el) for el in run.steps.metadata_df[grouping].unique()
-        ]
+        self.fields["group1"].choices = fh.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
 
         # Set choices for group2 field based on selected grouping and group1
         if (
@@ -237,7 +227,7 @@ class DifferentialExpressionTTestForm(MethodForm):
             ]
         else:
             self.fields["group2"].choices = reversed(
-                [(el, el) for el in run.steps.metadata_df[grouping].unique()]
+                fh.to_choices(run.steps.metadata_df[grouping].unique())
             )
 
     @property
@@ -421,7 +411,6 @@ class ClusteringExpectationMaximizationForm(MethodForm):
         choices=ModelSelection,
         label="Choose strategy to perform parameter fine-tuning",
         initial=ModelSelection.grid_search,
-
     )
     # TODO: Add dynamic parameters for grid search & randomized search
     # TODO Add dynamic parameter for model selection scoring
@@ -435,7 +424,9 @@ class ClusteringExpectationMaximizationForm(MethodForm):
         initial=ClusteringScoring.adjusted_rand_score,
     )
     # TODO: workflow_meta line 1509
-    n_components = CustomNumberField(label="The number of mixture components", initial=1)
+    n_components = CustomNumberField(
+        label="The number of mixture components", initial=1
+    )
     # TODO: workflow_meta line 1515
     reg_covar = CustomNumberField(
         label="Non-negative regularization added to the diagonal of covariance",

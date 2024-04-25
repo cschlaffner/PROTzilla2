@@ -1,4 +1,5 @@
 from django.forms import Form
+from django.urls import reverse
 
 from protzilla.run_v2 import Run
 from protzilla.utilities import get_file_name_from_upload_path
@@ -21,6 +22,17 @@ class MethodForm(Form):
             self.make_readonly()
         else:
             self.fill_form(run)
+
+        if self.is_dynamic:
+            for field in self.fields.values():
+                field.widget.attrs.update(
+                    {
+                        "hx-post": reverse(
+                            "runs_v2:fill_form", kwargs={"run_name": run.run_name}
+                        ),
+                        "hx-target": "#method-form",
+                    }
+                )
 
     def fill_form(self, run: Run) -> None:
         pass
