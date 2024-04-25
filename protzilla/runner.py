@@ -3,10 +3,9 @@ import os
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
+from .run_helper import log_messages
 from .run_v2 import Run
-from .run_helper import get_parameters, log_messages
 from .utilities import random_string
-from .workflow import get_defaults
 
 
 class Runner:
@@ -76,10 +75,7 @@ class Runner:
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
         for step in self.run.steps.all_steps:
-
-            logging.info(
-                f"performing step: {*self.run.steps.current_location,}"
-            )
+            logging.info(f"performing step: {*self.run.steps.current_location,}")
             if step.section == "importing":
                 self._insert_commandline_inputs(step)
             self._perform_current_step()
@@ -92,6 +88,7 @@ class Runner:
 
             log_messages(self.run.current_messages)
             self.run.current_messages.clear()
+        self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
         if step.operation == "msdataimport":
@@ -115,7 +112,7 @@ class Runner:
             raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params=None):
-        self.run.step_calculate(params)
+        self.run.current_step.calculate(self.run.steps, params)
 
     def _save_plots_html(self, step):
         for i, plot in enumerate(step.plots):
