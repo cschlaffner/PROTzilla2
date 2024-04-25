@@ -96,6 +96,7 @@ class Run:
     def step_plot(self) -> None:
         self.steps.current_step.plot()
 
+    @auto_save
     def step_next(self) -> None:
         self.steps.next_step()
 

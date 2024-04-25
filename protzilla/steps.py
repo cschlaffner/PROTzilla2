@@ -36,21 +36,22 @@ class Step:
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
-        self.plots = []
+        self.plots: Plots = Plots()
         self._finished: bool = False
 
+        # append a random string of 5 chars to make the instance_identifier unique
         self.instance_identifier = (
-                self.__class__.__name__
-                + "-"
-                + "".join(
-            secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
-        )
+            self.__class__.__name__
+            + "-"
+            + "".join(
+                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+            )
         )
 
     def __repr__(self):
         return self.__class__.__name__
 
-    def calculate(self, steps: StepManager, inputs: dict = None) -> None:
+    def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
 
@@ -58,8 +59,7 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        if inputs is not None:
-            self.inputs = inputs.copy()
+        self.inputs = inputs.copy()
         self._finished = False
 
         try:
@@ -169,7 +169,7 @@ class Step:
         return True
 
     def validate_outputs(
-            self, required_keys: list[str] = None, soft_check: bool = False
+        self, required_keys: list[str] = None, soft_check: bool = False
     ) -> bool:
         """
         Validates the outputs of the step. If required_keys is not specified, the output_keys of the method class are used.
@@ -221,14 +221,7 @@ class Output:
         return key in self.output
 
     @property
-    def intensity_df(self):
-        if "intensity_df" in self.output:
-            return self.output["intensity_df"]
-        else:
-            return None
-
-    @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.output) == 0 or all(
             value is None for value in self.output.values()
         )
@@ -307,10 +300,10 @@ class StepManager:
         return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
 
     def __init__(
-            self,
-            steps: list[Step] = None,
-            df_mode: str = "disk",
-            disk_operator: DiskOperator = None,
+        self,
+        steps: list[Step] = None,
+        df_mode: str = "disk",
+        disk_operator: DiskOperator = None,
     ):
         self.df_mode = df_mode
         self.disk_operator = disk_operator
@@ -331,28 +324,34 @@ class StepManager:
                 self.add_step(step)
 
     @property
-    def all_steps(self):
+    def all_steps(self) -> list[Step]:
+        """
+        This is read-only, meaning the changes made to this list will not persist.
+        :return: a list of all the steps in the current StepManager
+        """
         return (
-                self.importing
-                + self.data_preprocessing
-                + self.data_analysis
-                + self.data_integration
+            self.importing
+            + self.data_preprocessing
+            + self.data_analysis
+            + self.data_integration
         )
 
-    def get_instance_identifiers(self, step_type: type[Step], output_key: str = None):
+    def get_instance_identifiers(
+        self, step_type: type[Step], output_key: str = None
+    ) -> list[str]:
         return [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
-               and (output_key is None or output_key in step.output)
+            and (output_key is None or output_key in step.output)
         ]
 
     def get_step_output(
-            self,
-            step_type: type[Step],
-            output_key: str,
-            instance_identifier: str = None,
-            include_current_step: bool = False,
+        self,
+        step_type: type[Step],
+        output_key: str,
+        instance_identifier: str | None = None,
+        include_current_step: bool = False,
     ) -> pd.DataFrame | Any | None:
         """
         Get the specific output of the outputs of a specific step type. The step type can also a parent class of the
@@ -379,9 +378,9 @@ class StepManager:
 
         for step in reversed(steps_to_search):
             if (
-                    isinstance(step, step_type)
-                    and check_instance_identifier(step)
-                    and output_key in step.output
+                isinstance(step, step_type)
+                and check_instance_identifier(step)
+                and output_key in step.output
             ):
                 val = step.output[output_key]
                 if val is None:
@@ -437,7 +436,7 @@ class StepManager:
         return self.current_section, self.current_operation, self.current_step.instance_identifier
 
     @property
-    def protein_df(self):
+    def protein_df(self) -> pd.DataFrame:
         from protzilla.steps import Step
 
         df = self.get_step_output(Step, "protein_df")
@@ -452,9 +451,9 @@ class StepManager:
 
     @property
     def preprocessed_output(self) -> Output:
-        if self.current_section() == "importing":
+        if self.current_section == "importing":
             return None
-        if self.current_section() == "data_preprocessing":
+        if self.current_section == "data_preprocessing":
             return (
                 self.current_step.output
                 if self.current_step.finished
@@ -463,10 +462,10 @@ class StepManager:
         return self.data_preprocessing[-1].output
 
     @property
-    def is_at_last_step(self):
+    def is_at_last_step(self) -> bool:
         return self.current_step_index == len(self.all_steps) - 1
 
-    def add_step(self, step):
+    def add_step(self, step) -> None:
         if step.section == "importing":
             self.importing.append(step)
         elif step.section == "data_preprocessing":
@@ -568,25 +567,12 @@ class StepManager:
 
         new_step = StepFactory.create_step(new_method)
 
-        if self.current_section == "importing":
-            self.importing = [
-                new_step if step == self.current_step else step
-                for step in self.importing
-            ]
-        elif self.current_section == "data_preprocessing":
-            self.data_preprocessing = [
-                new_step if step == self.current_step else step
-                for step in self.data_preprocessing
-            ]
-        elif self.current_section == "data_analysis":
-            self.data_analysis = [
-                new_step if step == self.current_step else step
-                for step in self.data_analysis
-            ]
-        elif self.current_section == "data_integration":
-            self.data_integration = [
-                new_step if step == self.current_step else step
-                for step in self.data_integration
-            ]
-        else:
+        try:
+            current_index = self.all_steps_in_section(self.current_section).index(
+                self.current_step
+            )
+            self.all_steps_in_section(self.current_section)[current_index] = new_step
+        except ValueError:
             raise ValueError(f"Unknown section {self.current_section}")
+        except Exception as e:
+            logging.error(f"Error while changing method: {e}")
