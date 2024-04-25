@@ -281,7 +281,7 @@ class PlotProtQuantForm(MethodForm):
         label="Choose dataframe to be plotted",
     )
     protein_group = CustomChoiceField(
-        choices=DynamicProteinFill,
+        choices=[],
         label="Protein group: choose highlighted protein group",
     )
     similarity_measure = CustomChoiceField(
@@ -291,6 +291,21 @@ class PlotProtQuantForm(MethodForm):
     similarity = CustomFloatField(
         label="Similarity", min_value=-1, max_value=999, step_size=1, initial=1
     )
+
+    def fill_form(self, run: Run) -> None:
+        # TODO why is there not input_df in self.data?
+        if "input_df" not in self.data or self.data["input_df"] == "Protein":
+            self.fields["protein_group"].choices = [
+                (el, el) for el in run.steps.protein_df["Protein ID"].unique()
+            ]
+        else:
+            self.fields["protein_group"].choices = [
+                (el, el) for el in run.steps.protein_df["Protein ID"].unique()
+            ]
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
 
 
 class PlotPrecisionRecallCurveForm(MethodForm):
