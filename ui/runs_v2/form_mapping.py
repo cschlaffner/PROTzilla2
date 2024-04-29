@@ -38,7 +38,7 @@ _forward_mapping = {
     data_analysis.DifferentialExpressionTTest: data_analysis_forms.DifferentialExpressionTTestForm,
     data_analysis.DifferentialExpressionLinearModel: data_analysis_forms.DifferentialExpressionLinearModelForm,
     data_analysis.PlotVolcano: data_analysis_forms.PlotVolcanoForm,
-    data_analysis.PlotScatter: data_analysis_forms.PlotScatterPlotForm,
+    data_analysis.PlotScatterPlot: data_analysis_forms.PlotScatterPlotForm,
     data_analysis.PlotClustergram: data_analysis_forms.PlotClustergramForm,
     data_analysis.PlotProtQuant: data_analysis_forms.PlotProtQuantForm,
     data_analysis.PlotPrecisionRecallCurve: data_analysis_forms.PlotPrecisionRecallCurveForm,
@@ -66,6 +66,9 @@ _forward_mapping = {
     data_integration.DatabaseIntegrationByGeneMapping: data_integration_forms.DatabaseIntegrationByGeneMappingForm,
     data_integration.DatabaseIntegrationByUniprot: data_integration_forms.DatabaseIntegrationByUniprotForm,
     data_integration.PlotGOEnrichmentBarPlot: data_integration_forms.PlotGOEnrichmentBarPlotForm,
+    data_integration.PlotGOEnrichmentDotPlot: data_integration_forms.PlotGOEnrichmentDotPlotForm,
+    data_integration.PlotGSEADotPlot: data_integration_forms.PlotGSEADotPlotForm,
+    data_integration.PlotGSEAEnrichmentPlot: data_integration_forms.PlotGSEAEnrichmentPlotForm,
 }
 
 _forward_mapping_plots = {

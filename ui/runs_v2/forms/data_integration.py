@@ -2,6 +2,7 @@ from enum import Enum
 
 import matplotlib
 
+from protzilla.methods.data_integration import PlotStep
 from protzilla.run_v2 import Run
 
 from .base import MethodForm
@@ -14,11 +15,9 @@ class Direction(Enum):
     down = "Down"
     both = "Both"
 
-
 class GeneSetField(Enum):
     upload_a_file = "Upload a file"
     choose_from_enrichr_options = "Choose from Enrichr options"
-
 
 class Organism(Enum):
     human = "Human"
@@ -29,16 +28,13 @@ class Organism(Enum):
     fish = "Fish"
     worm = "Worm"
 
-
 class GroupingField(Enum):
     group1 = "Group 1"
     group2 = "Group 2"
 
-
 class PermutationTypeField(Enum):
     phenotype = "Phenotype"
     gene_set = "Gene Set"
-
 
 class RankingMethodField(Enum):
     log2_ratio_of_classes = "Log2 Ratio of classes"
@@ -47,11 +43,9 @@ class RankingMethodField(Enum):
     ratio_of_classes = "Ratio of classes"
     diff_of_classes = "Difference of classes"
 
-
 class RankingDirectionField(Enum):
     ascending = "ascending"
     descending = "descending"
-
 
 class GOAnalysisWithEnrichrBackgroundField(Enum):
     upload_a_file = "Upload a file (recommended)"
@@ -63,6 +57,20 @@ class GOEnrichmentBarPlotValue(Enum):
     p_value = "p-value"
     fdr = "FDR"
 
+class GOEnrichmentDotPlotXAxisType(Enum):
+    gene_sets = "Gene Sets"
+    combined_score = "Combined Score"
+
+class GSEADotPlotDotColorValue(Enum):
+    fdr_q_val = "FDR q-val"
+    nom_p_val = "NOM p-val"
+
+class GSEADotPlotXAxisValue(Enum):
+    es = "ES"
+    nes = "NES"
+
+class EmptyEnum(Enum):
+    pass
 
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     # Todo: protein_df
@@ -307,7 +315,7 @@ class DatabaseIntegrationByUniprotForm(MethodForm):
 
 class PlotGOEnrichmentBarPlotForm(MethodForm):
     #TODO: input:df fill dynamic with fill_forms
-
+    input_df = CustomChoiceField(choices=[], label="Choose dataframe to be plotted")
     gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
     value = CustomChoiceField(choices=GOEnrichmentBarPlotValue,
                                   label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
@@ -325,5 +333,78 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
                                initial = 0.05)
     title = CustomCharField(label="Title of the plot (optional)")
     #todo: fill with colors
-    colors = CustomMultipleChoiceField(choices=matplotlib.colors, label="Colors for the plot (optional)")
+    #colors = CustomMultipleChoiceField(choices=matplotlib.colors, label="Colors for the plot (optional)")
+    """
+    def fill_form(self, run: Run) -> None:
+        if "input_df" not in self.data or self.data["input_df"] == "Protein":
+            self.fields["protein_group"].choices = [
+                (el, el) for el in run.steps.get_instance_identifiers(PlotStep, "enrichment_df").unique()
+            ]
+            run.steps.get_step_output(PlotStep, "gene_sets" )
+    @property
+    def is_dynamic(self) -> bool:
+        return True
+    """
 
+class PlotGOEnrichmentDotPlotForm(MethodForm):
+    # TODO: input_df fill dynamic with fill_forms
+    input_df = CustomChoiceField(choices=[], label="Choose enrichment dataframe to be plotted")
+    x_axis_type = CustomChoiceField(choices=GOEnrichmentDotPlotXAxisType,
+                                    label="Variable for x-axis: categorical scatter plot for one or multiple gene "
+                                          "sets, or display combined score for one gene set",
+                                    initial=GOEnrichmentDotPlotXAxisType.gene_sets)
+    gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
+    top_terms = CustomNumberField(label="Number of top enriched terms per category",
+                                  min_value=1,
+                                  max_value=100,
+                                  initial=5)
+    cutoff = CustomNumberField(label="Only terms with adjusted p-value (or FDR) < cutoff will be shown",
+                               min_value=0,
+                               max_value=1,
+                               step_size=0.01,
+                               initial=0.05)
+    title = CustomCharField(label="Title of the plot (optional)")
+    rotate_x_labels = CustomBooleanField(label="Rotate x-axis labels (if multiple categories are selected)",
+                                         initial=True)
+    show_ring = CustomBooleanField(label="Show ring around the dots",
+                                   initial=False)
+    dot_size = CustomNumberField(label="Scale the size of the dots",
+                                 initial=5)
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["gene_sets"].choices = [
+            (el, el) for el in run.steps.protein_df["enrichment_categories"].unique()]
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
+
+class PlotGSEADotPlotForm(MethodForm):
+    # TODO: input_df fill dynamic with fill_forms
+    input_df = CustomChoiceField(choices=[], label="Choose enrichment dataframe to be plotted")
+    gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
+    dot_color_value = CustomChoiceField(choices=GSEADotPlotDotColorValue, label="Color the dots by value",
+                                        initial=GSEADotPlotDotColorValue.fdr_q_val)
+    x_axis_value = CustomChoiceField(choices=GSEADotPlotXAxisValue, label="Value to display on x axis",
+                                     initial=GSEADotPlotXAxisValue.nes)
+    cutoff = CustomNumberField(label="Cutoff value for fdr q-value or nominal p-value",
+                               min_value=0,
+                               max_value=1,
+                               step_size=0.01,
+                               initial=0.05)
+    title = CustomCharField(label="Title of the plot (optional)")
+    dot_size = CustomNumberField(label="Scale the size of the dots",
+                                 initial=5)
+    show_ring = CustomBooleanField(label="Show ring around the dots",
+                                   initial=False)
+    remove_library_names = CustomBooleanField(label="Remove library names from gene sets (e.g. 'KEGG_2013__')",
+                                              initial=False)
+
+class PlotGSEAEnrichmentPlotForm(MethodForm):
+    term_dict = CustomChoiceField(choices=[], label="Enrichment details gene set to be plotted")
+    term_name = CustomChoiceField(choices=EmptyEnum, label="name of the term_dict for title", required=False)
+    ranking = CustomChoiceField(choices=[], label="Ranking from GSEA")
+    pos_pheno_label = CustomCharField(label="Label for positively correlated phenotype",
+                                      initial="")
+    neg_pheno_label = CustomCharField(label="Label for positively correlated phenotype",
+                                      initial="")

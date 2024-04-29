@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from protzilla.data_integration import enrichment_analysis, database_integration, di_plots,
+from protzilla.data_integration import enrichment_analysis, database_integration, di_plots
 from protzilla.steps import Step, StepManager, Plots
 
 
@@ -180,7 +180,56 @@ class PlotGOEnrichmentBarPlot(PlotStep):
     def method(self, inputs: dict) -> dict:
         return di_plots.GO_enrichment_bar_plot(**inputs)
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
+
+class PlotGOEnrichmentDotPlot(PlotStep):
+    display_name = "Dot plot for GO enrichment analysis (offline & with Enrichr) "
+    operation = "plot"
+    method_description = "Creates a categorical scatter plot from GO enrichment data"
+    input_keys = ["x_axis_type",
+                  "gene_sets",
+                  "top_terms",
+                  "cutoff",
+                  "title",
+                  "rotate_x_labels",
+                  "show_ring",
+                  "dot_size",
+                  "figsize",
+    ]
+    output_keys = ["plots"]
+    def method(self, inputs: dict) -> dict:
+        return di_plots.GO_enrichment_dot_plot(**inputs)
 
 
+class PlotGSEADotPlot(PlotStep):
+    display_name = "Dot plot for (pre-ranked) GSEA"
+    operation = "plot"
+    method_description = "Creates a categorical scatter plot from GSEA data"
+    input_keys = ["cutoff",
+                  "gene_sets",
+                  "dot_color_value",
+                  "x_axis_value",
+                  "title",
+                  "show_ring",
+                  "dot_size",
+                  "remove_library_names",
+                  "figsize",
+    ]
+    output_keys = ["plots"]
+    def method(self, inputs: dict) -> dict:
+        return di_plots.gsea_dot_plot(**inputs)
+
+
+class PlotGSEAEnrichmentPlot(PlotStep):
+    display_name = "Enrichment plot for (pre-ranked) GSEA"
+    operation = "plot"
+    method_description = "Creates an enrichment plot from (pre-ranked) GSEA data with the enrichment score, ranked_metric, gene rank and hits"
+    input_keys = ["term_dict",
+                  "term_name",
+                  "ranking",
+                  "pos_pheno_label",
+                  "neg_pheno_label",
+                  "figsize",
+    ]
+    output_keys = ["plots"]
+    def method(self, inputs: dict) -> dict:
+        return di_plots.gsea_enrichment_plot(**inputs)

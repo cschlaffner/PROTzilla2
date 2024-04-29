@@ -30,7 +30,7 @@ steps:
 - inputs: {}
   type: DimensionReductionUMAP
 - inputs: {}
-  type: PlotScatter
+  type: PlotScatterPlot
 - inputs: {}
   type: DifferentialExpressionTTest
 - inputs: {}
