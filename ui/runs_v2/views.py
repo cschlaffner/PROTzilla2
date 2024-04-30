@@ -420,7 +420,7 @@ def navigate(request, run_name: str):
         0
     ]  # TODO can this be done without the section_name, like with the delete_step method?
 
-    run.steps.goto_step(index, section_name)
+    run.step_goto(index, section_name)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
