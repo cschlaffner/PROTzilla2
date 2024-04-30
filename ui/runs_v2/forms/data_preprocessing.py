@@ -14,55 +14,165 @@ class EmptyEnum(Enum):
 
 
 class LogTransformationBaseType(Enum):
-    LOG2 = "log2"
-    LOG10 = "log10"
+    log2 = "log2"
+    log10 = "log10"
 
 
 class SimpleImputerStrategyType(Enum):
-    MEAN = "mean"
-    MEDIAN = "median"
-    MOST_FREQUENT = "most_frequent"
+    mean = "mean"
+    median = "median"
+    most_frequent = "most_frequent"
 
 
 class ImputationByNormalDistributionSamplingStrategyType(Enum):
-    PERPROTEIN = "perProtein"
-    PERDATASET = "perDataset"
+    per_protein = "perProtein"
+    per_dataset = "perDataset"
 
 
 class ImputationGraphTypes(Enum):
-    Boxplot = "Boxplot"
-    Histogram = "Histogram"
+    boxplot = "Boxplot"
+    histogram = "Histogram"
 
 
 class GroupBy(Enum):
-    NoGrouping = "None"
-    Sample = "Sample"
-    ProteinID = "Protein ID"
+    no_grouping = "None"
+    sample = "Sample"
+    protein_id = "Protein ID"
 
 
 class VisualTrasformations(Enum):
     linear = "linear"
-    Log10 = "log10"
+    log10 = "log10"
 
 
 class GraphTypesImputedValues(Enum):
-    Bar = "Bar chart"
-    Pie = "Pie chart"
-
-
-class ImputationMinPerProteinForm(MethodForm):
-    shrinking_value = CustomFloatField(label="Shrinking value")
+    bar = "Bar chart"
+    pie = "Pie chart"
 
 
 class FilterProteinsBySamplesMissingForm(MethodForm):
     percentage = CustomFloatField(
-        label="Percentage of minimum non-missing samples per protein"
+        label="Percentage of minimum non-missing samples per protein",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
 
 
 class FilterByProteinsCountForm(MethodForm):
+    deviation_threshold = CustomNumberField(
+        label="Number of standard deviations from the median",
+        min_value=0,
+        initial=2,
+    )
+
+
+class FilterSamplesByProteinsMissingForm(MethodForm):
+    percentage = CustomFloatField(
+        label="Percentage of minimum non-missing proteins per sample",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
+    )
+
+
+class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
     deviation_threshold = CustomFloatField(
-        label="Number of standard deviations from the median"
+        label="Number of standard deviations from the median:",
+        min_value=0,
+        initial=2,
+    )
+
+
+class OutlierDetectionByPCAForm(MethodForm):
+    threshold = CustomFloatField(
+        label="Threshold for number of standard deviations from the median:",
+        min_value=0,
+        initial=2,
+    )
+    number_of_components = CustomNumberField(
+        label="Number of components",
+        min_value=2,
+        max_value=3,
+        step_size=1,
+        initial=3,
+    )
+
+
+class OutlierDetectionByIsolationForestForm(MethodForm):
+    n_estimators = CustomNumberField(
+        label="Number of estimators",
+        min_value=1,
+        step_size=1,
+        initial=100,
+    )
+
+
+class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
+    number_of_neighbors = CustomNumberField(
+        label="Number of neighbours",
+        min_value=1,
+        step_size=1,
+        initial=20,
+    )
+
+
+class OutlierDetectionByPCAForm(MethodForm):
+    threshold = CustomFloatField(
+        label="Threshold for number of standard deviations from the median:",
+        min_value=0,
+        initial=2,
+    )
+    number_of_components = CustomNumberField(
+        label="Number of components",
+        min_value=2,
+        max_value=3,
+        step_size=1,
+        initial=3,)
+
+class OutlierDetectionByIsolationForestForm(MethodForm):
+    n_estimators = CustomNumberField(
+        label="Number of estimators",
+        min_value=1,
+        step_size=1,
+        initial=100,
+    )
+
+
+class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
+    number_of_neighbors = CustomNumberField(
+        label="Number of neighbours",
+        min_value=1,
+        step_size=1,
+        initial=20,
+    )
+
+
+class TransformationLogForm(MethodForm):
+    log_base = CustomChoiceField(
+        choices=LogTransformationBaseType,
+        label="Log transformation base:",
+        initial=LogTransformationBaseType.log2,
+    )
+
+
+class NormalisationByZScoreForm(MethodForm):
+    pass
+
+
+class NormalisationByTotalSumForm(MethodForm):
+    pass
+
+
+class NormalisationByMedianForm(MethodForm):
+    percentile = CustomFloatField(
+        label="Percentile for normalisation:",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
 
 
@@ -82,12 +192,20 @@ class NormalisationByReferenceProteinForms(MethodForm):
 
 
 class ImputationByMinPerDatasetForm(MethodForm):
-    shrinking_value = CustomFloatField(
+    shrinking_value = CustomNumberField(
         label="A function to impute missing values for each protein by taking into account "
         "data from the entire dataframe. Sets missing value to the smallest measured "
         "value in the dataframe. The user can also assign a shrinking factor to take a "
-        "fraction of that minimum value for imputation."
+        "fraction of that minimum value for imputation.",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
+
+
+class ImputationMinPerProteinForm(MethodForm):
+    shrinking_value = CustomFloatField(label="Shrinking value")
 
 
 class ImputationByMinPerProteinForm(MethodForm):
@@ -95,80 +213,72 @@ class ImputationByMinPerProteinForm(MethodForm):
         label="A function to impute missing values for each protein by taking into account data from each protein. "
         "Sets missing value to the smallest measured value for each protein column. The user can also assign a "
         "shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without "
-        "any values will be filtered out."
+        "any values will be filtered out.",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
 
 
 class ImputationByMinPerSampleForms(MethodForm):
     shrinking_value = CustomFloatField(
-        label="Sets missing intensity values to the smallest measured value for each sample"
+        label="Sets missing intensity values to the smallest measured value for each sample",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
-
-
-class FilterSamplesByProteinsMissingForm(MethodForm):
-    percentage = CustomFloatField(
-        label="Percentage of minimum non-missing proteins per sample"
-    )
-
-
-class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
-    deviation_threshold = CustomFloatField(
-        label="Number of standard deviations from the median:"
-    )
-
-
-class OutlierDetectionByPCAForm(MethodForm):
-    threshold = CustomFloatField(
-        label="Threshold for number of standard deviations from the median:"
-    )
-    number_of_components = CustomNumberField(label="Number of components")
-
-
-class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
-    number_of_neighbors = CustomNumberField(label="Number of neighbours")
-
-
-class OutlierDetectionByIsolationForestForm(MethodForm):
-    n_estimators = CustomNumberField(label="Number of estimators")
-
-
-class TransformationLogForm(MethodForm):
-    log_base = CustomChoiceField(
-        choices=LogTransformationBaseType, label="Log transformation base:"
-    )
-
-
-class NormalisationByZScoreForm(MethodForm):
-    pass
-
-
-class NormalisationByTotalSumForm(MethodForm):
-    pass
-
-
-class NormalisationByMedianForm(MethodForm):
-    percentile = CustomFloatField(label="Percentile for normalisation:")
 
 
 class SimpleImputationPerProteinForm(MethodForm):
-    strategy = CustomChoiceField(choices=SimpleImputerStrategyType, label="Strategy")
+    strategy = CustomChoiceField(
+        choices=SimpleImputerStrategyType,
+        label="Strategy",
+        initial=SimpleImputerStrategyType.mean,
+    )
 
 
 class ImputationByKNNForms(MethodForm):
-    number_of_neighbours = CustomNumberField(label="Number of neighbours")
+    number_of_neighbours = CustomNumberField(
+        label="Number of neighbours",
+        min_value=1,
+        step_size=1,
+        initial=5,
+    )
 
 
 class ImputationByNormalDistributionSamplingForm(MethodForm):
     strategy = CustomChoiceField(
-        choices=ImputationByNormalDistributionSamplingStrategyType, label="Strategy"
+        choices=ImputationByNormalDistributionSamplingStrategyType,
+        label="Strategy",
+        initial=ImputationByNormalDistributionSamplingStrategyType.per_protein,
     )
-    down_shift = CustomFloatField(label="Downshift")
-    scaling_factor = CustomFloatField(label="Scaling factor")
+    down_shift = CustomNumberField(
+        label="Downshift",
+        min_value=-10,
+        max_value=10,
+        initial=-1
+    )
+    scaling_factor = CustomFloatField(
+        label="Scaling factor",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5
+    )
 
 
 class FilterPeptidesByPEPThresholdForm(MethodForm):
-    threshold = CustomFloatField(label="Threshold value for PEP")
-    peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
+    threshold = CustomFloatField(
+        label="Threshold value for PEP",
+        min_value=0,
+        initial=0
+    )
+    peptide_df = CustomChoiceField(
+        choices=EmptyEnum,
+        label="peptide_df"
+    )
 
 
 class ImputationMinPerProteinPlotForm(MethodForm):

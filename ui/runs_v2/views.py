@@ -205,6 +205,7 @@ def create(request: HttpRequest):
             },
             request,
         )
+        traceback.print_exc()
         return HttpResponseRedirect(reverse("runs_v2:index"))
 
     active_runs[run_name] = run
