@@ -7,6 +7,8 @@ from ui.runs_v2.forms.custom_fields import CustomCharField, CustomFileField
 
 
 class MethodForm(Form):
+    is_dynamic = False
+
     def __init__(
         self,
         run: Run,
@@ -55,7 +57,3 @@ class MethodForm(Form):
 
     def submit(self, run: Run) -> None:
         run.step_calculate(self.cleaned_data)
-
-    @property
-    def is_dynamic(self) -> bool:
-        return False

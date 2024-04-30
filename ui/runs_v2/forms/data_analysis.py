@@ -1,8 +1,9 @@
 from enum import Enum
 
+import fill_helper
+
 from protzilla.run_v2 import Run
 
-from . import fill_helper as fh
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
@@ -140,6 +141,8 @@ class DimensionReductionMetric(Enum):
 
 
 class DifferentialExpressionANOVAForm(MethodForm):
+    is_dynamic = True
+
     protein_df = CustomChoiceField(
         choices=[], label="Step to use protein intensities from"
     )
@@ -163,18 +166,16 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fh.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
         self.fields[
             "grouping"
-        ].choices = fh.get_choices_for_metadata_non_sample_columns(run)
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
-        self.fields["selected_groups"].choices = fh.to_choices(
+        self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
         )
-
-    @property
-    def is_dynamic(self) -> bool:
-        return True
 
 
 class DifferentialExpressionTTestForm(MethodForm):
@@ -203,15 +204,17 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fh.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
         self.fields[
             "grouping"
-        ].choices = fh.get_choices_for_metadata_non_sample_columns(run)
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
         # Set choices for group1 field based on selected grouping
-        self.fields["group1"].choices = fh.to_choices(
+        self.fields["group1"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
         )
 
@@ -227,12 +230,8 @@ class DifferentialExpressionTTestForm(MethodForm):
             ]
         else:
             self.fields["group2"].choices = reversed(
-                fh.to_choices(run.steps.metadata_df[grouping].unique())
+                fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
             )
-
-    @property
-    def is_dynamic(self) -> bool:
-        return True
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):

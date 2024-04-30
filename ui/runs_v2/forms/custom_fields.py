@@ -38,9 +38,7 @@ class CustomSelectMultiple(SelectMultiple):
             "<option value='hidden' style='display: none;' selected>Hidden option</option>"
         )
         idx = input_html.find(">") + 3
-        return mark_safe(
-            "{}{}{}".format(input_html[:idx], hidden_option_html, input_html[idx:])
-        )
+        return mark_safe(f"{input_html[:idx]}{hidden_option_html}{input_html[idx:]}")
 
 
 # Custom Fields
@@ -55,7 +53,7 @@ class CustomChoiceField(ChoiceField):
                 choices=[(el.value, el.value) for el in choices],
                 initial=initial,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
         if not self.required:
@@ -73,12 +71,12 @@ class CustomMultipleChoiceField(MultipleChoiceField):
                 choices=[(el.value, el.value) for el in choices],
                 initial=initial,
                 *args,
-                **kwargs
+                **kwargs,
             )
         self.widget = CustomSelectMultiple()
         self.widget.attrs.update({"class": "form-select mb-2"})
 
-    def clean(self, value):
+    def clean(self, value: list[str] | None):
         return [el for el in value if el != "hidden"] if value else None
 
 
