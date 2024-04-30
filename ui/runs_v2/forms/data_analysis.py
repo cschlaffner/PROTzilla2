@@ -1,13 +1,14 @@
-from enum import Enum
-
-import fill_helper
+from enum import Enum, StrEnum
 
 from protzilla.run_v2 import Run
+from protzilla.steps import Step
 
+from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
+    CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
 )
@@ -47,9 +48,9 @@ class DynamicProteinFill(Enum):
     pass
 
 
-class SimilarityMeasure(Enum):
-    euclidean_distance = "Euclidean distance"
-    cosine_similarity = "Cosine similarity"
+class SimilarityMeasure(StrEnum):
+    euclidean_distance = "euclidean distance"
+    cosine_similarity = "cosine similarity"
 
 
 class ModelSelection(Enum):
@@ -297,7 +298,7 @@ class PlotClustergramForm(MethodForm):
 
 class PlotProtQuantForm(MethodForm):
     input_df = CustomChoiceField(
-        choices=AnalysisLevel,
+        choices=[],
         label="Choose dataframe to be plotted",
     )
     protein_group = CustomChoiceField(
@@ -314,15 +315,54 @@ class PlotProtQuantForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        # TODO why is there not input_df in self.data?
-        if "input_df" not in self.data or self.data["input_df"] == "Protein":
-            self.fields["protein_group"].choices = [
-                (el, el) for el in run.steps.protein_df["Protein ID"].unique()
-            ]
+        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        input_df_instance_id = self.data.get(
+            "input_df", self.fields["input_df"].choices[0][0]
+        )
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+
+        similarity_measure = self.data.get(
+            "similarity_measure", self.fields["similarity_measure"].choices[0][0]
+        )
+        self.data = self.data.copy()
+        if similarity_measure == SimilarityMeasure.cosine_similarity:
+            self.fields["similarity"] = CustomFloatField(
+                label="Cosine Similarity",
+                min_value=-1,
+                max_value=1,
+                step_size=0.1,
+                initial=0,
+            )
+            if (
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < -1
+                or float(self.data["similarity"]) > 1
+            ):
+                self.data["similarity"] = 0
         else:
-            self.fields["protein_group"].choices = [
-                (el, el) for el in run.steps.protein_df["Protein ID"].unique()
-            ]
+            self.fields["similarity"] = CustomNumberField(
+                label="Euclidean Distance",
+                min_value=0,
+                max_value=999,
+                step_size=1,
+                initial=1,
+            )
+            if (
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < 0
+                or float(self.data["similarity"]) > 999
+            ):
+                self.data["similarity"] = 1
 
     @property
     def is_dynamic(self) -> bool:
