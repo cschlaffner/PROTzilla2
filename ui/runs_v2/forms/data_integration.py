@@ -4,7 +4,9 @@ import matplotlib
 
 from protzilla.methods.data_integration import PlotStep
 from protzilla.run_v2 import Run
+from protzilla.steps import Step
 
+from .import fill_helper
 from .base import MethodForm
 from .custom_fields import CustomFileField, CustomChoiceField, CustomFloatField, CustomNumberField, CustomCharField, \
     CustomMultipleChoiceField, CustomBooleanField
@@ -74,7 +76,8 @@ class EmptyEnum(Enum):
 
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     # Todo: protein_df
-    # Todo: differential_expression_col
+    protein_df = CustomChoiceField(choices=[], label="Dataframe with protein IDs and direction of expression change column (e.g. log2FC)")
+    differential_expression_col = CustomChoiceField(choices=[], label="Column name with differential expression values indicating direction of change")
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
@@ -85,6 +88,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         initial=0
     )
     # Todo: gene_sets_restring
+    gene_sets_restring = CustomChoiceField(choices=GeneSetsRestring, label="Knowledge bases for enrichment")
     organism = CustomNumberField(
         label="Organism / NCBI taxon identifiers (e.g. Human is 9606)",
         initial=9606
@@ -99,10 +103,45 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         initial=None,
     )
 
+    def fill_form(self, run: Run) -> None:
+        #fill_helper needs to get merged into this branch from overhaul_analysis_plot-branch
+        self.fields["protein_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        protein_df_instance_id = self.data.get(
+            "protein_df", self.fields["protein_df"].choices[0][0]
+        )
+
+        self.fields["differential_expression_col"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=protein_df_instance_id,
+            )["protein_df_columns"].unique()
+        )
+
+        gene_sets_restring_id = self.data.get("protein_df", self.fields["gene_sets_restring"].choices[0]
+        )
+        self.fields["gene_sets_restring"].choices = fill_helper.to_choices(
+            run.step.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=gene_sets_restring_id,
+            )["dbs_restring"].unique()
+        )
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
+
 
 class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
     # Todo: protein_df
-    # Todo: differential_expression_col
+    protein_df = CustomChoiceField(choices=[],
+                                    label="Dataframe with protein IDs and direction of expression change column (e.g. log2FC)")
+    differential_expression_col = CustomChoiceField(choices=[],
+                                                    label="Column name with differential expression values indicating direction of change")
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
@@ -112,7 +151,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         max_value=4294967295,
         initial=0
     )
-    # Todo: gene_mapping
+    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="Gene sets",
@@ -120,6 +159,8 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         # Todo: Dynamic parameters
     )
     # Todo: gene_sets_enrichr
+    gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName followed by tab-separated list of proteins | .csv (one set per line): SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], SetName2: [Gene2, Gene3, ...]})")
+    gene_sets_enrichr = CustomChoiceField(choices=[], label="Gene set libraries")
     direction = CustomChoiceField(
         choices=Direction,
         label="Direction of the analysis",
@@ -147,11 +188,53 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         step_size=1,
         initial=None
     )
-    # Todo: Biomart Database
+    background_biomart = CustomChoiceField(choices=[], label="Biomart dataset")
+
+    # TODO: correct fill_form, especially how dynamic_parameters work
+    def fill_form(self, run: Run) -> None:
+
+        self.fields["protein_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        protein_df_instance_id = self.data.get(
+            "proteins_df", self.fields["protein_df"].choices[0][0]
+        )
+
+        self.fields["differential_expression_col"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=protein_df_instance_id,
+            )["protein_df_columns"].unique()
+        )
+
+        gene_sets_field = self.data.get(
+            "gene_sets_field", self.fields["gene_sets_field"].choices[0][0]
+        )
+
+        self.data = self.data.copy()
+        if gene_sets_field == GeneSetField.choose_from_enrichr_options:
+            self.fields["gene_sets_enrichr"].choices = fill_helper.to_choices(run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=protein_df_instance_id, #???? TODO
+            )["dbs_gseapy"].unique()
+        )
+
+        else:
+            self.fields["gene_sets_path"] = CustomFileField
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
 
 class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     # Todo: protein_df
-    # Todo: differential_expression_col
+    proteins_df = CustomChoiceField(choices=[],
+                                    label="Dataframe with protein IDs and direction of expression change column (e.g. log2FC)")
+    differential_expression_col = CustomChoiceField(choices=[],
+                                                    label="Column name with differential expression values indicating direction of change")
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: proteins with values > threshold are upregulated, proteins "
               "values < threshold downregulated. If \"log\" is in the name of differential_expression_col, "
@@ -161,7 +244,7 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         max_value=4294967295,
         initial=0
     )
-    # Todo: gene_mapping
+    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_path = CustomFileField(label="Upload gene sets with uppercase gene symbols (any of the following file "
                                            "types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName "
                                            "followed by tab-separated list of proteins | .csv (one set per line): "
@@ -192,11 +275,32 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         step_size=1,
         initial=None
     )
+    def fill_form(self, run: Run) -> None:
+
+        self.fields["protein_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        protein_df_instance_id = self.data.get(
+            "proteins_df", self.fields["protein_df"].choices[0][0]
+        )
+
+        self.fields["differential_expression_col"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=protein_df_instance_id,
+            )["protein_df_columns"].unique()
+        )
+
+    @property
+    def is_dynamic(self) -> bool:
+        return True
 
 
 class EnrichmentAnalysisWithGSEAForm(MethodForm):
-    # Todo: protein_df
-    # Todo: gene_mapping
+    protein_df = CustomChoiceField(choices=[], label="Dataframe with protein IDs, samples and intensities")
+    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_field = CustomChoiceField(
         choices=GeneSetField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
@@ -210,7 +314,8 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
                                            "SetName2: [Gene2, Gene3, ...]})",
                                      initial=None
                                      )
-    # Todo: gene_sets_enrichr
+    # Todo: gene_sets_enrichr dynamic filling
+    gene_sets_enrichr = CustomChoiceField(choices=[], label= "Gene sets")
     grouping = CustomChoiceField(
         choices=GroupingField,
         label="Grouping from metadata",
@@ -246,8 +351,16 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
     weighted_score = CustomFloatField(label="Weighted score for the enrichment score calculation, recommended values: "
                                             "0, 1, 1.5 or 2",
                                       initial=1)
-    # Todo: metadata_df
+    metadata_df = CustomChoiceField(choices=EmptyEnum, label="metadata_df")
 
+    """
+    def fill_form(self, run: Run) -> None:
+        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+        self.fields["grouping"].choices = fill_helper.to_choices(
+            run.steps.metadata_df["group1"].unique()
+        )
+    """
 
 class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
     # Todo: protein_df
