@@ -69,6 +69,7 @@ class KEYS:
     CURRENT_STEP_INDEX = "current_step_index"
     STEPS = "steps"
     STEP_OUTPUTS = "output"
+    STEP_FORM_INPUTS = "form_inputs"
     STEP_INPUTS = "inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
@@ -154,6 +155,7 @@ class DiskOperator:
             step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
+            step.form_inputs = step_data.get(KEYS.STEP_FORM_INPUTS, {})
             return step
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
@@ -162,6 +164,7 @@ class DiskOperator:
             step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
+            step_data[KEYS.STEP_FORM_INPUTS] = step.form_inputs
             if not workflow_mode:
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
                     step_name=step.__class__.__name__, output=step.output

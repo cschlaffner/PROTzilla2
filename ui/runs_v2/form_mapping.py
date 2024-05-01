@@ -123,7 +123,9 @@ def get_filled_form_by_method(
 ) -> MethodForm:
     form_class = _get_form_class_by_step(step)
     return form_class(
-        run=run, readonly=in_history, data=step.inputs if bool(step.inputs) else None
+        run=run,
+        readonly=in_history,
+        data=step.form_inputs if bool(step.form_inputs) else None,
     )
 
 

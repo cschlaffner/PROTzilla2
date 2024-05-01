@@ -165,7 +165,6 @@ class PlotVolcano(PlotStep):
         return inputs
 
 
-
 class PlotScatter(PlotStep):
     display_name = "Scatter Plot"
     operation = "plot"
@@ -185,7 +184,6 @@ class PlotScatter(PlotStep):
         inputs["input_df"] = steps.protein_df
         inputs["color_df"] = steps.metadata_df
         return inputs
-
 
 
 class PlotClustergram(PlotStep):
@@ -209,7 +207,6 @@ class PlotClustergram(PlotStep):
         return inputs
 
 
-
 class PlotProtQuant(PlotStep):
     display_name = "Protein Quantification Plot"
     operation = "plot"
@@ -224,8 +221,9 @@ class PlotProtQuant(PlotStep):
         return prot_quant_plot(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["color_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["input_df"]
+        )
         return inputs
 
 
@@ -246,7 +244,6 @@ class PlotPrecisionRecallCurve(PlotStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         # TODO: Input
         return inputs
-
 
 
 class PlotROC(PlotStep):
@@ -303,7 +300,6 @@ class ClusteringKMeans(DataAnalysisStep):
         return inputs
 
 
-
 class ClusteringExpectationMaximisation(DataAnalysisStep):
     display_name = "Expectation-maximization (EM)"
     operation = "clustering"
@@ -340,7 +336,6 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
         return inputs
 
 
-
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
     display_name = "Hierarchical Agglomerative Clustering"
     operation = "clustering"
@@ -373,7 +368,6 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
 
 
 class ClassificationRandomForest(DataAnalysisStep):
@@ -420,7 +414,6 @@ class ClassificationRandomForest(DataAnalysisStep):
         return inputs
 
 
-
 class ClassificationSVM(DataAnalysisStep):
     display_name = "Support Vector Machine"
     operation = "classification"
@@ -463,7 +456,6 @@ class ClassificationSVM(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
 
 
 class ModelEvaluationClassificationModel(DataAnalysisStep):
@@ -535,7 +527,6 @@ class DimensionReductionUMAP(DataAnalysisStep):
         return inputs
 
 
-
 class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     display_name = "Peptides to Isoform"
     operation = "protein_graph"
@@ -563,7 +554,6 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         return inputs
 
 
-
 class ProteinGraphVariationGraph(DataAnalysisStep):
     display_name = "Protein Variation Graph"
     operation = "protein_graph"
@@ -585,4 +575,3 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         inputs["peptide_df"] = steps.peptide_df
         inputs["isoform_df"] = steps.isoform_df
         return inputs
-
