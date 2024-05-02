@@ -10,6 +10,7 @@ class DataIntegrationStep(Step):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
 
+
 class PlotStep(DataIntegrationStep):
     operation = "plot"
 
@@ -33,8 +34,9 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
                   "organism",
                   "direction",
                   "background_path",
-    ]
+                  ]
     output_keys = ["enrichment_df"]
+
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_with_STRING(**inputs)
 
@@ -58,10 +60,12 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
                   "background_path",
                   "background_number",
                   "background_biomart"
-    ]
+                  ]
     output_keys = ["enrichment_df"]
+
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_with_Enrichr(**inputs)
+
 
 class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
     display_name = "GO analysis offline"
@@ -78,10 +82,12 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
                   "background_field",
                   "background_path",
                   "background_number",
-    ]
+                  ]
     output_keys = ["enrichment_df"]
+
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_offline(**inputs)
+
 
 class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
     display_name = "GSEA"
@@ -106,11 +112,13 @@ class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
                   "metadata_df",
                   "seed",
                   "threads",
-    ]
+                  ]
 
     output_keys = ["enrichment_df", "ranking"]
+
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.gsea(**inputs)
+
 
 class EnrichmentAnalysisWithPrerankedGSEA(DataIntegrationStep):
     display_name = "GSEA preranked"
@@ -130,11 +138,13 @@ class EnrichmentAnalysisWithPrerankedGSEA(DataIntegrationStep):
                   "weighted_score",
                   "seed",
                   "threads",
-    ]
+                  ]
 
     output_keys = ["enrichment_df", "ranking"]
+
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.gsea_preranked(**inputs)
+
 
 class DatabaseIntegrationByGeneMapping(DataIntegrationStep):
     display_name = "Gene mapping"
@@ -143,11 +153,13 @@ class DatabaseIntegrationByGeneMapping(DataIntegrationStep):
     input_keys = ["dataframe",
                   "database_names",
                   "use_biomart"
-    ]
+                  ]
 
     output_keys = ["gene_mapping"]
+
     def method(self, inputs: dict) -> dict:
         return database_integration.gene_mapping(**inputs)
+
 
 class DatabaseIntegrationByUniprot(DataIntegrationStep):
     display_name = "Uniprot"
@@ -156,9 +168,10 @@ class DatabaseIntegrationByUniprot(DataIntegrationStep):
     input_keys = ["dataframe",
                   "database_names",
                   "fields"
-    ]
+                  ]
 
     output_keys = ["results_df"]
+
     def method(self, inputs: dict) -> dict:
         return database_integration.add_uniprot_data(**inputs)
 
@@ -174,9 +187,10 @@ class PlotGOEnrichmentBarPlot(PlotStep):
                   "title",
                   "colors",
                   "figsize",
-    ]
-    #TODO: input figsize optional?
+                  ]
+    # TODO: input figsize optional?
     output_keys = ["plots"]
+
     def method(self, inputs: dict) -> dict:
         return di_plots.GO_enrichment_bar_plot(**inputs)
 
@@ -194,8 +208,9 @@ class PlotGOEnrichmentDotPlot(PlotStep):
                   "show_ring",
                   "dot_size",
                   "figsize",
-    ]
+                  ]
     output_keys = ["plots"]
+
     def method(self, inputs: dict) -> dict:
         return di_plots.GO_enrichment_dot_plot(**inputs)
 
@@ -213,8 +228,9 @@ class PlotGSEADotPlot(PlotStep):
                   "dot_size",
                   "remove_library_names",
                   "figsize",
-    ]
+                  ]
     output_keys = ["plots"]
+
     def method(self, inputs: dict) -> dict:
         return di_plots.gsea_dot_plot(**inputs)
 
@@ -229,7 +245,8 @@ class PlotGSEAEnrichmentPlot(PlotStep):
                   "pos_pheno_label",
                   "neg_pheno_label",
                   "figsize",
-    ]
+                  ]
     output_keys = ["plots"]
+
     def method(self, inputs: dict) -> dict:
         return di_plots.gsea_enrichment_plot(**inputs)

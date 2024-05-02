@@ -1,6 +1,7 @@
 from enum import Enum
 
-import ui.runs_v2.forms.fill_helper as fill_helper
+from . import fill_helper
+
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
 
