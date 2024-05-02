@@ -64,6 +64,9 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
     def method(self, inputs):
         return filter_proteins.by_samples_missing(**inputs)
 
+    def plot_method(self, inputs):
+        return filter_proteins.by_samples_missing_plot(**inputs)
+
 
 class FilterByProteinsCount(DataPreprocessingStep):
     display_name = "Protein Count"
@@ -73,7 +76,10 @@ class FilterByProteinsCount(DataPreprocessingStep):
     input_keys = ["deviation_threshold", "protein_df"]
 
     def method(self, inputs):
-        return filter_samples.protein_count_filter(**inputs)
+        return filter_samples.by_protein_count(**inputs)
+
+    def plot_method(self, inputs):
+        return filter_samples.by_protein_count_plot(**inputs)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
@@ -88,6 +94,9 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
     def method(self, inputs):
         return filter_samples.by_proteins_missing(**inputs)
 
+    def plot_method(self, inputs):
+        return filter_samples.by_proteins_missing_plot(**inputs)
+
 
 class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
     display_name = "Sum of intensities"
@@ -98,6 +107,9 @@ class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
 
     def method(self, inputs):
         return filter_samples.by_protein_intensity_sum(**inputs)
+
+    def plot_method(self, inputs):
+        return filter_samples.by_protein_intensity_sum_plot(**inputs)
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
@@ -110,6 +122,9 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
     def method(self, inputs):
         return outlier_detection.by_pca(**inputs)
 
+    def plot_method(self, inputs):
+        return outlier_detection.by_pca_plot(**inputs)
+
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     display_name = "LOF"
@@ -120,6 +135,9 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
 
     def method(self, inputs):
         return outlier_detection.by_local_outlier_factor(**inputs)
+
+    def plot_method(self, inputs):
+        return outlier_detection.by_local_outlier_factor_plot(**inputs)
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
@@ -132,6 +150,9 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     def method(self, inputs):
         return outlier_detection.by_isolation_forest(**inputs)
 
+    def plot_method(self, inputs):
+        return outlier_detection.by_isolation_forest_plot(**inputs)
+
 
 class TransformationLog(DataPreprocessingStep):
     display_name = "Log"
@@ -142,6 +163,9 @@ class TransformationLog(DataPreprocessingStep):
 
     def method(self, inputs):
         return transformation.by_log(**inputs)
+
+    def plot_method(self, inputs):
+        return transformation.by_log_plot(**inputs)
 
 
 class NormalisationByZScore(DataPreprocessingStep):
@@ -154,6 +178,9 @@ class NormalisationByZScore(DataPreprocessingStep):
     def method(self, inputs):
         return normalisation.by_z_score(**inputs)
 
+    def plot_method(self, inputs):
+        return normalisation.by_z_score_plot(**inputs)
+
 
 class NormalisationByTotalSum(DataPreprocessingStep):
     display_name = "Total sum"
@@ -164,6 +191,9 @@ class NormalisationByTotalSum(DataPreprocessingStep):
 
     def method(self, inputs):
         return normalisation.by_totalsum(**inputs)
+
+    def plot_method(self, inputs):
+        return normalisation.by_totalsum_plot(**inputs)
 
 
 class NormalisationByMedian(DataPreprocessingStep):
@@ -176,6 +206,9 @@ class NormalisationByMedian(DataPreprocessingStep):
     def method(self, inputs):
         return normalisation.by_median(**inputs)
 
+    def plot_method(self, inputs):
+        return normalisation.by_median_plot(**inputs)
+
 
 class NormalisationByReferenceProtein(DataPreprocessingStep):
     display_name = "Reference protein"
@@ -187,6 +220,9 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
     def method(self, inputs):
         return normalisation.by_reference_protein(**inputs)
 
+    def plot_method(self, inputs):
+        return normalisation.by_reference_protein_plot(**inputs)
+
 
 class ImputationByMinPerDataset(DataPreprocessingStep):
     display_name = "Min per dataset"
@@ -197,6 +233,9 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
 
     def method(self, inputs):
         return imputation.by_min_per_dataset(**inputs)
+
+    def plot_method(self, inputs):
+        return imputation.by_min_per_dataset_plot(**inputs)
 
 
 class ImputationByMinPerProtein(DataPreprocessingStep):
@@ -223,6 +262,9 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
 
+    def plot_method(self, inputs):
+        return imputation.by_min_per_sample_plot(**inputs)
+
 
 class SimpleImputationPerProtein(DataPreprocessingStep):
     display_name = "SimpleImputer"
@@ -236,6 +278,9 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
 
     def method(self, inputs):
         return imputation.by_simple_imputer(**inputs)
+
+    def plot_method(self, inputs):
+        return imputation.by_simple_imputer_plot(**inputs)
 
 
 class ImputationByKNN(DataPreprocessingStep):
@@ -252,6 +297,9 @@ class ImputationByKNN(DataPreprocessingStep):
     def method(self, inputs):
         return imputation.by_knn(**inputs)
 
+    def plot_method(self, inputs):
+        return imputation.by_knn_plot(**inputs)
+
 
 class ImputationByNormalDistributionSampling(DataPreprocessingStep):
     display_name = "Normal distribution sampling"
@@ -262,6 +310,9 @@ class ImputationByNormalDistributionSampling(DataPreprocessingStep):
 
     def method(self, inputs):
         return imputation.by_normal_distribution_sampling(**inputs)
+
+    def plot_method(self, inputs):
+        return imputation.by_normal_distribution_sampling_plot(**inputs)
 
 
 class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
@@ -274,3 +325,6 @@ class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
 
     def method(self, inputs):
         return peptide_filter.by_pep_value(**inputs)
+
+    def plot_method(self, inputs):
+        return peptide_filter.by_pep_value_plot(**inputs)

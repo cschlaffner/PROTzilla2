@@ -28,8 +28,12 @@ class ImputationByNormalDistributionSamplingStrategyType(Enum):
     per_protein = "perProtein"
     per_dataset = "perDataset"
 
+class BarAndPieChart(Enum):
+    bar_plot = "Bar chart"
+    pie_chart = "Pie chart"
 
-class ImputationGraphTypes(Enum):
+
+class BoxAndHistogramGraph(Enum):
     boxplot = "Boxplot"
     histogram = "Histogram"
 
@@ -50,6 +54,11 @@ class GraphTypesImputedValues(Enum):
     pie = "Pie chart"
 
 
+class VisulaTransformations(Enum):
+    linear = "linear"
+    log10 = "log10"
+
+
 class FilterProteinsBySamplesMissingForm(MethodForm):
     percentage = CustomFloatField(
         label="Percentage of minimum non-missing samples per protein",
@@ -60,11 +69,27 @@ class FilterProteinsBySamplesMissingForm(MethodForm):
     )
 
 
+class FilterProteinsBySamplesMissingPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type",
+        initial=BarAndPieChart.pie_chart,
+    )
+
+
 class FilterByProteinsCountForm(MethodForm):
     deviation_threshold = CustomNumberField(
         label="Number of standard deviations from the median",
         min_value=0,
         initial=2,
+    )
+
+
+class FilterByProteinsCountPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type",
+        initial=BarAndPieChart.pie_chart,
     )
 
 
@@ -78,11 +103,27 @@ class FilterSamplesByProteinsMissingForm(MethodForm):
     )
 
 
+class FilterSamplesByProteinsMissingPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type",
+        initial=BarAndPieChart.pie_chart,
+    )
+
+
 class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
     deviation_threshold = CustomFloatField(
         label="Number of standard deviations from the median:",
         min_value=0,
         initial=2,
+    )
+
+
+class FilterSamplesByProteinIntensitiesSumPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type",
+        initial=BarAndPieChart.pie_chart,
     )
 
 
@@ -119,37 +160,6 @@ class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
     )
 
 
-class OutlierDetectionByPCAForm(MethodForm):
-    threshold = CustomFloatField(
-        label="Threshold for number of standard deviations from the median:",
-        min_value=0,
-        initial=2,
-    )
-    number_of_components = CustomNumberField(
-        label="Number of components",
-        min_value=2,
-        max_value=3,
-        step_size=1,
-        initial=3,)
-
-class OutlierDetectionByIsolationForestForm(MethodForm):
-    n_estimators = CustomNumberField(
-        label="Number of estimators",
-        min_value=1,
-        step_size=1,
-        initial=100,
-    )
-
-
-class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
-    number_of_neighbors = CustomNumberField(
-        label="Number of neighbours",
-        min_value=1,
-        step_size=1,
-        initial=20,
-    )
-
-
 class TransformationLogForm(MethodForm):
     log_base = CustomChoiceField(
         choices=LogTransformationBaseType,
@@ -158,12 +168,51 @@ class TransformationLogForm(MethodForm):
     )
 
 
+class TransformationLogPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+
+
 class NormalisationByZScoreForm(MethodForm):
     pass
 
 
+class NormalisationByZscorePlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+
+
 class NormalisationByTotalSumForm(MethodForm):
     pass
+
+
+class NormalisationByTotalSumPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
 
 
 class NormalisationByMedianForm(MethodForm):
@@ -173,6 +222,19 @@ class NormalisationByMedianForm(MethodForm):
         max_value=1,
         step_size=0.1,
         initial=0.5,
+    )
+
+
+class NormalisationByMedianPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
     )
 
 
@@ -191,6 +253,19 @@ class NormalisationByReferenceProteinForms(MethodForm):
     )
 
 
+class NormalisationByReferenceProteinPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+
+
 class ImputationByMinPerDatasetForm(MethodForm):
     shrinking_value = CustomNumberField(
         label="A function to impute missing values for each protein by taking into account "
@@ -204,8 +279,27 @@ class ImputationByMinPerDatasetForm(MethodForm):
     )
 
 
-class ImputationMinPerProteinForm(MethodForm):
-    shrinking_value = CustomFloatField(label="Shrinking value")
+class ImputationByMinPerDatasetPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
+    )
 
 
 class ImputationByMinPerProteinForm(MethodForm):
@@ -221,6 +315,29 @@ class ImputationByMinPerProteinForm(MethodForm):
     )
 
 
+class ImputationByMinPerProteinPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
+    )
+
+
 class ImputationByMinPerSampleForms(MethodForm):
     shrinking_value = CustomFloatField(
         label="Sets missing intensity values to the smallest measured value for each sample",
@@ -228,6 +345,29 @@ class ImputationByMinPerSampleForms(MethodForm):
         max_value=1,
         step_size=0.1,
         initial=0.5,
+    )
+
+
+class ImputationByMinPerSamplePlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
     )
 
 
@@ -239,12 +379,58 @@ class SimpleImputationPerProteinForm(MethodForm):
     )
 
 
+class SimpleImputationPerProteinPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
+    )
+
+
 class ImputationByKNNForms(MethodForm):
     number_of_neighbours = CustomNumberField(
         label="Number of neighbours",
         min_value=1,
         step_size=1,
         initial=5,
+    )
+
+
+class ImputationByKNNPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
     )
 
 
@@ -269,6 +455,29 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
     )
 
 
+class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BoxAndHistogramGraph,
+        label="Graph type",
+        initial=BoxAndHistogramGraph.boxplot,
+    )
+    group_by = CustomChoiceField(
+        choices=GroupBy,
+        label="Group by",
+        initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
+    graph_type_quantities = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type - quantity of imputed values",
+        initial=BarAndPieChart.pie_chart,
+    )
+
+
 class FilterPeptidesByPEPThresholdForm(MethodForm):
     threshold = CustomFloatField(
         label="Threshold value for PEP",
@@ -281,15 +490,9 @@ class FilterPeptidesByPEPThresholdForm(MethodForm):
     )
 
 
-class ImputationMinPerProteinPlotForm(MethodForm):
-    graph_type = CustomChoiceField(choices=ImputationGraphTypes, label="Graph type")
-
-    group_by = CustomChoiceField(choices=GroupBy, label="Group by")
-
-    visual_transformation = CustomChoiceField(
-        VisualTrasformations, label="Visual transformation"
-    )
-
-    graph_type_quantities = CustomChoiceField(
-        GraphTypesImputedValues, label="Graph type - quantity of imputed values"
+class FilterPeptidesByPEPThresholdPlotForm(MethodForm):
+    graph_type = CustomChoiceField(
+        choices=BarAndPieChart,
+        label="Graph type",
+        initial=BarAndPieChart.pie_chart,
     )
