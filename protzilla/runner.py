@@ -85,7 +85,7 @@ class Runner:
                 self._save_plots_html(step)
 
             log_messages(self.run.current_messages)
-            if self.run.current_messages and self.run.current_messages.contains_error_message:
+            if not self.run.current_step.finished:
                 if self.run.steps.current_section == "importing" or self.run.steps.current_section == "data_preprocessing":
                     logging.error(f"Errors occurred in {self.run.steps.current_section} steps. Exiting.")
                     break
