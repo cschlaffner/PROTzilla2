@@ -257,9 +257,9 @@ class Messages:
 
 
 class Plots:
-    def __init__(self, plots: list = None):
+    def __init__(self, plots: list | None = None):
         if plots is None:
-            plots = []
+            plots: list = []
         self.plots = plots
 
     def __iter__(self):
@@ -267,6 +267,10 @@ class Plots:
 
     def __repr__(self):
         return f"Plots: {len(self.plots)}"
+
+    @property
+    def empty(self) -> bool:
+        return len(self.plots) == 0
 
     def export(self, format_):
         exports = []
