@@ -286,7 +286,7 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
 class ImputationByKNN(DataPreprocessingStep):
     display_name = "kNN"
     operation = "imputation"
-    input_keys = (
+    method_description = (
         "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing "
         "values for each sample based on intensity-wise similar samples. Two samples are close if "
         "the features that neither is missing are close."

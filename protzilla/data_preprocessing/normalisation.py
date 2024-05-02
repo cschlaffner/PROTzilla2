@@ -230,25 +230,25 @@ def by_reference_protein(
 
 def by_z_score_plot(method_inputs, method_outputs, graph_type, group_by):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_inputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
     )
 
 
 def by_median_plot(method_inputs, method_outputs, graph_type, group_by):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_inputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
     )
 
 
 def by_totalsum_plot(method_inputs, method_outputs, graph_type, group_by):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_inputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
     )
 
 
 def by_reference_protein_plot(method_inputs, method_outputs, graph_type, group_by):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_inputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
     )
 
 

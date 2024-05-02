@@ -86,7 +86,7 @@ def get_displayed_steps(steps: StepManager) -> list[dict]:
                 "name": name_to_title(section),
                 "possible_steps": possible_steps_in_section,
                 "steps": workflow_steps,
-                "selected": steps.current_section() == section,
+                "selected": steps.current_section == section,
                 "finished": index_global <= steps.current_step_index,
             }
         )

@@ -205,6 +205,7 @@ def create(request: HttpRequest):
             },
             request,
         )
+        traceback.print_exc()
         return HttpResponseRedirect(reverse("runs_v2:index"))
 
     active_runs[run_name] = run
@@ -398,8 +399,9 @@ def delete_step(request: HttpRequest, run_name: str):
 
     post = dict(request.POST)
     index = int(post["index"][0])
+    section = post["section"][0]
 
-    run.step_remove(step_index=index)
+    run.step_remove(step_index=index, section=section)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
@@ -420,7 +422,7 @@ def navigate(request, run_name: str):
         0
     ]  # TODO can this be done without the section_name, like with the delete_step method?
 
-    run.steps.goto_step(index, section_name)
+    run.step_goto(index, section_name)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 

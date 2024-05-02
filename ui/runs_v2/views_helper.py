@@ -57,6 +57,7 @@ def get_displayed_steps(
                     "id": step.operation,
                     "name": name_to_title(step.operation),
                     "index": index_in_section,
+                    "section": step.section,
                     "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
@@ -90,7 +91,7 @@ def get_displayed_steps(
                 "name": name_to_title(section),
                 "possible_steps": possible_steps_in_section,
                 "steps": workflow_steps,
-                "selected": steps.current_section() == section,
+                "selected": steps.current_section == section,
                 "finished": index_global - 1 < steps.current_step_index,
             }
         )
