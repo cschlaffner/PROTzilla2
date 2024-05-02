@@ -8,6 +8,7 @@ import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
+
 from .forms.base import MethodForm
 
 _forward_mapping = {
@@ -56,7 +57,6 @@ _forward_mapping = {
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
-
 }
 
 _forward_mapping_plots = {

@@ -28,6 +28,7 @@ class ImputationByNormalDistributionSamplingStrategyType(Enum):
     per_protein = "perProtein"
     per_dataset = "perDataset"
 
+
 class BarAndPieChart(Enum):
     bar_plot = "Bar chart"
     pie_chart = "Pie chart"
