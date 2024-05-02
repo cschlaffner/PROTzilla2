@@ -51,6 +51,13 @@ class Step:
     def __repr__(self):
         return self.__class__.__name__
 
+    def __eq__(self, other):
+        return (
+            self.__class__ == other.__class__
+            and self.instance_identifier == other.instance_identifier
+            and self.output == other.output
+        )
+
     def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
@@ -304,7 +311,7 @@ class Plots:
 
 class StepManager:
     def __repr__(self):
-        return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
+        return f"IMP: {self.importing} PRE: {self.data_preprocessing} ANA: {self.data_analysis} INT: {self.data_integration}"
 
     def __init__(
         self,
@@ -525,7 +532,19 @@ class StepManager:
                 )
             self.current_step_index += 1
         else:
-            logging.warning("Cannot go forward from the last step")
+            raise ValueError("Cannot go to the next step from the last step")
+
+    def previous_step(self) -> None:
+        """
+        Go to the previous step in the workflow. If the previous step is in disk mode, the respective dataframes are
+        loaded from disk and replaced in the output dictionary of the step.
+
+        :return: None
+        """
+        if self.current_step_index > 0:
+            self.current_step_index -= 1
+        else:
+            raise ValueError("Cannot go back from the first step")
 
     def goto_step(self, step_index: int, section: str) -> None:
         """
@@ -534,26 +553,21 @@ class StepManager:
         :param section: The section of the step to go to
         :return:
         """
-        if step_index < 0 or step_index >= len(self.all_steps):
-            raise ValueError(f"Step index {step_index} out of bounds")
-        # find step
-        if section == "importing":
-            step = self.importing[step_index]
-        elif section == "data_preprocessing":
-            step = self.data_preprocessing[step_index]
-        elif section == "data_analysis":
-            step = self.data_analysis[step_index]
-        elif section == "data_integration":
-            step = self.data_integration[step_index]
-        else:
+        if section not in self.sections:
             raise ValueError(f"Unknown section {section}")
+        if step_index < 0 or step_index >= len(self.sections[section]):
+            raise ValueError(
+                f"Step index {step_index} out of bounds for section {section}"
+            )
 
-        if self.all_steps.index(step) < self.current_step_index:
-            for i in range(self.all_steps.index(step) + 1, self.current_step_index):
+        step = self.all_steps_in_section(section)[step_index]
+        new_step_index = self.all_steps.index(step)
+        if new_step_index < self.current_step_index:
+            for i in range(new_step_index, self.current_step_index):
                 self.all_steps[i].output = Output()
-            self.current_step_index = self.all_steps.index(step)
+            self.current_step_index = new_step_index
         else:
-            pass  # TODO: implement forwards navigation
+            raise ValueError("Cannot go to a step that is after the current step")
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """

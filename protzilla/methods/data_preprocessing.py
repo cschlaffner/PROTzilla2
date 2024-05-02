@@ -80,7 +80,7 @@ class FilterByProteinsCount(DataPreprocessingStep):
     input_keys = ["deviation_threshold", "protein_df"]
 
     def method(self, inputs):
-        return filter_samples.protein_count_filter(**inputs)
+        return filter_samples.by_protein_count(**inputs)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
@@ -248,7 +248,7 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
 class ImputationByKNN(DataPreprocessingStep):
     display_name = "kNN"
     operation = "imputation"
-    input_keys = (
+    method_description = (
         "A function to perform value imputation based on KNN (k-nearest neighbors). Imputes missing "
         "values for each sample based on intensity-wise similar samples. Two samples are close if "
         "the features that neither is missing are close."
