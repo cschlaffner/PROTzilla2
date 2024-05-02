@@ -249,6 +249,12 @@ class Messages:
     def clear(self):
         self.messages = []
 
+    @property
+    def contains_error_message(self) -> bool:
+        return any(
+            message["level"] == logging.ERROR for message in self.messages
+        )
+
 
 class Plots:
     def __init__(self, plots: list = None):

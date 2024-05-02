@@ -28,6 +28,31 @@ def metadata_path():
 def peptide_path():
     return "tests/test_data/peptides_vsmall.txt"
 
+def mock_perform_method(runner: Runner):
+    mock_perform = mock.MagicMock()
+    mock_perform.methods = []
+    mock_perform.inputs = []
+
+    def mock_current_parameters(*args, **kwargs):
+        mock_perform.methods.append(str(runner.run.current_step))
+        mock_perform.inputs.append(runner.run.current_step.inputs)
+
+    mock_perform.side_effect = mock_current_parameters
+
+    return mock_perform
+
+
+def mock_perform_plot(runner: Runner):
+    mock_plot = mock.MagicMock()
+    mock_plot.inputs = []
+
+    def mock_current_parameters(*args, **kwargs):
+        mock_plot.inputs.append(runner.run.current_step.plot_inputs)
+
+    mock_plot.side_effect = mock_current_parameters
+
+    return mock_plot
+
 
 def test_runner_imports(
     monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
@@ -37,37 +62,28 @@ def test_runner_imports(
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
-        f"--peptides_path={peptide_path}",
     ]
 
     kwargs = args_parser().parse_args(importing_args).__dict__
     runner = Runner(**kwargs)
 
-    mock_perform = mock.MagicMock()
-    mock_add_step = mock.MagicMock()
-
-    def mock_current_parameters(*args, **kwargs):
-        runner.run.current_parameters = {None: {}}
-
-    mock_perform.side_effect = mock_current_parameters
-    monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
-    monkeypatch.setattr(runner.run.history, "add_step", mock_add_step)
+    mock_method = mock_perform_method(runner)
+    monkeypatch.setattr(runner, "_perform_current_step", mock_method)
 
     runner.compute_workflow()
 
-    calls = [
-        mock.call({"intensity_name": "iBAQ", "file_path": ms_data_path}),
-        mock.call(
-            {
-                "feature_orientation": "Columns (samples in rows, features in columns)",
-                "file_path": metadata_path,
-            }
-        ),
-        mock.call({"intensity_name": "iBAQ", "file_path": peptide_path}),
+    expected_methods = ["MaxQuantImport", "MetadataImport"]
+    expected_method_parameters = [
+        {'file_path': ms_data_path, 'intensity_name': 'iBAQ', 'map_to_uniprot': False},
+        {
+            'file_path': metadata_path,
+            'feature_orientation': 'Columns (samples in rows, features in columns)',
+        },
     ]
 
-    mock_perform.assert_has_calls(calls)
-    assert mock_perform.call_count == 3
+    assert mock_method.methods == expected_methods
+    assert mock_method.inputs == expected_method_parameters
+    assert mock_method.call_count == 2
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
@@ -78,22 +94,13 @@ def test_runner_raises_error_for_missing_metadata_arg(
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
     ]
+    kwargs = args_parser().parse_args(no_metadata_args).__dict__
+    runner = Runner(**kwargs)
+    mock_method = mock.MagicMock()
+
+    monkeypatch.setattr(runner, "_perform_current_step", mock_method)
+
     with pytest.raises(ValueError) as e:
-        kwargs = args_parser().parse_args(no_metadata_args).__dict__
-        runner = Runner(**kwargs)
-        mock_perform = mock.MagicMock()
-
-        def mock_current_parameters(*args, **kwargs):
-            runner.run.current_parameters = {None: {}}
-
-        mock_perform.side_effect = mock_current_parameters
-
-        monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
-        monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-        monkeypatch.setattr(
-            runner.run, "create_plot_from_current_location", mock.MagicMock()
-        )
-
         runner.compute_workflow()
 
 
@@ -102,34 +109,33 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+        f"--meta_data_path={metadata_path}",
     ]
     kwargs = args_parser().parse_args(calculating_args).__dict__
     runner = Runner(**kwargs)
 
-    mock_perform = mock.MagicMock()
+    mock_method = mock_perform_method(runner)
 
-    def mock_current_parameters(*args, **kwargs):
-        runner.run.current_parameters = {None: {}}
+    mock_plot = mock_perform_plot(runner)
 
-    mock_perform.side_effect = mock_current_parameters
-    mock_plot = mock.MagicMock()
-
-    monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
-    monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
+    monkeypatch.setattr(runner, "_perform_current_step", mock_method)
+    for step in runner.run.steps.data_preprocessing:
+        monkeypatch.setattr(step, "plot", mock_plot)
 
     runner.compute_workflow()
 
-    mock_perform.assert_any_call({"percentage": 0.2})
-    assert mock_perform.call_count == 2
+    assert mock_method.methods == ["MaxQuantImport", "MetadataImport", "FilterProteinsBySamplesMissing"]
+    assert {"percentage": 0.2} in mock_method.inputs
+    assert mock_method.call_count == 3
     mock_plot.assert_not_called()
 
 
-def test_runner_calculates_logging(caplog, tests_folder_name):
+def test_runner_calculates_logging(caplog, tests_folder_name, ms_data_path):
     calculating_args = [
         "only_import_and_filter_proteins",
         "wrong_ms_data_path",
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+        f"--meta_data_path={metadata_path}",
     ]
     kwargs = args_parser().parse_args(calculating_args).__dict__
     runner = Runner(**kwargs)
@@ -140,33 +146,28 @@ def test_runner_calculates_logging(caplog, tests_folder_name):
     assert "FileNotFoundError" in caplog.text
 
 
-def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path):
+def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
     plot_args = [
         "only_import_and_filter_proteins",
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
+        f"--meta_data_path={metadata_path}",
         "--all_plots",
     ]
     kwargs = args_parser().parse_args(plot_args).__dict__
     runner = Runner(**kwargs)
 
-    mock_plot = mock.MagicMock()
-    mock_perform = mock.MagicMock()
+    mock_method = mock_perform_method(runner)
+    mock_plot = mock_perform_plot(runner)
 
-    def mock_current_parameters(*args, **kwargs):
-        runner.run.current_parameters = {None: {}}
-
-    mock_perform.side_effect = mock_current_parameters
-
-    monkeypatch.setattr(runner, "_perform_current_step", mock_perform)
-    monkeypatch.setattr(runner.run.history, "add_step", mock.MagicMock())
-    monkeypatch.setattr(runner.run, "create_plot_from_current_location", mock_plot)
+    monkeypatch.setattr(runner, "_perform_current_step", mock_method)
+    for step in runner.run.steps.data_preprocessing:
+        monkeypatch.setattr(step, "plot", mock_plot)
 
     runner.compute_workflow()
 
-    mock_plot.assert_called_once_with(
-        parameters={"graph_type": "Pie chart"},
-    )
+    assert mock_plot.call_count == 1
+    assert mock_plot.inputs == [{"graph_type": "Pie chart"}]
 
 
 def test_serialize_graphs():

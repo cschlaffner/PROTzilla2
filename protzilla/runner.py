@@ -84,10 +84,17 @@ class Runner:
             if step.plots:
                 self._save_plots_html(step)
 
-            self.run.step_next()
-
             log_messages(self.run.current_messages)
+            if self.run.current_messages and self.run.current_messages.contains_error_message:
+                if self.run.steps.current_section == "importing" or self.run.steps.current_section == "data_preprocessing":
+                    logging.error(f"Errors occurred in {self.run.steps.current_section} steps. Exiting.")
+                    break
+                else:
+                    logging.warning(f"Errors occurred in {self.run.steps.current_section} steps. "
+                                    f"Continuing without this step.")
             self.run.current_messages.clear()
+
+            self.run.step_next()
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
@@ -98,18 +105,18 @@ class Runner:
             if self.meta_data_path is None:
                 raise ValueError(
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
-                    f" but is required for {step['name']}"
+                    f" but is required for {step.display_name}"
                 )
             step.inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"but is required for {step.display_name}"
                 )
             step.inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step['name']} in importing")
+            raise ValueError(f"Cannot find step with name {step.display_name} in importing")
 
     def _perform_current_step(self, params=None):
         self.run.current_step.calculate(self.run.steps, params)
