@@ -123,9 +123,12 @@ class Run:
     @error_handling
     @auto_save
     def step_remove(
-        self, step: Step | None = None, step_index: int | None = None
+        self,
+        step: Step | None = None,
+        step_index: int | None = None,
+        section: str | None = None,
     ) -> None:
-        self.steps.remove_step(step=step, step_index=step_index)
+        self.steps.remove_step(step=step, step_index=step_index, section=section)
 
     @error_handling
     @auto_save
