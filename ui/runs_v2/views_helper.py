@@ -57,6 +57,7 @@ def get_displayed_steps(
                     "id": step.operation,
                     "name": name_to_title(step.operation),
                     "index": index_in_section,
+                    "section": step.section,
                     "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,

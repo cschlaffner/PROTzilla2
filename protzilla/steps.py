@@ -257,9 +257,9 @@ class Messages:
 
 
 class Plots:
-    def __init__(self, plots: list = None):
+    def __init__(self, plots: list | None = None):
         if plots is None:
-            plots = []
+            plots: list = []
         self.plots = plots
 
     def __iter__(self):
@@ -267,6 +267,10 @@ class Plots:
 
     def __repr__(self):
         return f"Plots: {len(self.plots)}"
+
+    @property
+    def empty(self) -> bool:
+        return len(self.plots) == 0
 
     def export(self, format_):
         exports = []
@@ -476,25 +480,30 @@ class StepManager:
         else:
             raise ValueError(f"Unknown section {step.section}")
 
-    def remove_step(self, step: Step, step_index: int = None) -> None:
-        if step_index is not None:
+    def remove_step(
+        self, step: Step, step_index: int = None, section: str = None
+    ) -> None:
+        """
+        Removes a step. Either the step must be passed or both section and step_index in the specific section.
+        :param step: the step instance object
+        :param step_index: the step index in the section
+        :param section: the section as a string
+        """
+        if section not in self.sections:
+            raise ValueError(f"Unknown section {section}")
+        if step_index >= len(self.sections[section]):
+            raise ValueError(
+                f"Step index {step_index} out of bounds for section {section}"
+            )
+        if step is None and (step_index is None or section is None):
+            raise ValueError("Either step or step_index and section must be provided")
+
+        if step is None:
             if step_index < self.current_step_index:
                 self.current_step_index -= 1
-            step = self.all_steps[step_index]
+            step = self.all_steps_in_section(section)[step_index]
 
-        for section in [
-            self.importing,
-            self.data_preprocessing,
-            self.data_analysis,
-            self.data_integration,
-        ]:
-            try:
-                section.remove(step)
-                return
-            except ValueError:
-                pass
-
-        raise ValueError(f"Step {step} not found in steps")
+        self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
         """

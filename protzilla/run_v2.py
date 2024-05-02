@@ -28,16 +28,17 @@ class Run:
         def __exit__(self, exc_type, exc_value, tb):
             if exc_type:
                 formatted_trace = format_trace(traceback.format_exception(exc_value))
-                self.run.steps.current_step.messages.append(
-                    dict(
-                        level=logging.ERROR,
-                        msg=(
-                            f"An error occurred while running this step: {exc_value.__class__.__name__}: {exc_value}."
-                            f"Please check your parameters or report a potential programming issue."
-                        ),
-                        trace=formatted_trace,
+                if self.run.steps.current_step is not None:
+                    self.run.steps.current_step.messages.append(
+                        dict(
+                            level=logging.ERROR,
+                            msg=(
+                                f"An error occurred: {exc_value.__class__.__name__}: {exc_value}."
+                                f"Please check your parameters or report a potential programming issue if this is unexpected."
+                            ),
+                            trace=formatted_trace,
+                        )
                     )
-                )
                 return True
 
     def error_handling(func):
@@ -122,9 +123,12 @@ class Run:
     @error_handling
     @auto_save
     def step_remove(
-        self, step: Step | None = None, step_index: int | None = None
+        self,
+        step: Step | None = None,
+        step_index: int | None = None,
+        section: str | None = None,
     ) -> None:
-        self.steps.remove_step(step=step, step_index=step_index)
+        self.steps.remove_step(step=step, step_index=step_index, section=section)
 
     @error_handling
     @auto_save
