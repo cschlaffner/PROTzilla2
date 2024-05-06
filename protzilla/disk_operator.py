@@ -183,7 +183,7 @@ class DiskOperator:
                     else:
                         logging.warning(f"Output file {value} does not exist")
                 else:
-                    output[key] = value
+                    step_output[key] = value
             return Output(step_output)
 
     def _write_output(self, step_name: str, output: Output) -> dict:

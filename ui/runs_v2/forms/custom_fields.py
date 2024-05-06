@@ -1,10 +1,18 @@
+import logging
 from enum import Enum
 
-from django.forms import BooleanField, CharField, ChoiceField, FileField, FloatField, DecimalField, MultipleChoiceField
+from django.forms import (
+    BooleanField,
+    CharField,
+    ChoiceField,
+    DecimalField,
+    FileField,
+    FloatField,
+    MultipleChoiceField,
+)
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
-
 
 # Custom widgets
 
@@ -54,6 +62,16 @@ class CustomChoiceField(ChoiceField):
 
         self.widget.attrs.update({"class": "form-select mb-2"})
 
+    @property
+    def default_value(self):
+        if len(self.choices) > 0:
+            # we need to unpack the tuple, thats why we need to use [0][0]
+            if isinstance(self.choices[0], tuple):
+                return self.choices[0][0]
+            return self.choices[0]
+        logging.warning("Attempted to get default value of empty choice field.")
+        return None
+
 
 class CustomMultipleChoiceField(MultipleChoiceField):
     def __init__(self, choices: Enum, initial=None, *args, **kwargs):
@@ -84,8 +102,8 @@ class CustomFileField(FileField):
 
 
 class CustomBooleanField(BooleanField):
-    def __init__(self, label: str, *args, **kwargs):
-        super().__init__(label="", *args, **kwargs)
+    def __init__(self, label: str, required=False, *args, **kwargs):
+        super().__init__(label="", required=required, *args, **kwargs)
         self.widget = CustomCheckBoxInput(label=label)
 
 

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-from protzilla.data_integration import enrichment_analysis, database_integration, di_plots
-from protzilla.steps import Step, StepManager, Plots
+from protzilla.data_integration import (
+    database_integration,
+    di_plots,
+    enrichment_analysis,
+)
+from protzilla.steps import Plots, Step, StepManager
 
 
 class DataIntegrationStep(Step):
@@ -23,18 +27,17 @@ class PlotStep(DataIntegrationStep):
 class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
     display_name = "GO analysis with STRING"
     operation = "enrichment_analysis"
-    method_description = (
-        "Online GO analysis using STRING API"
-    )
+    method_description = "Online GO analysis using STRING API"
 
-    input_keys = ["proteins_df",
-                  "differential_expression_col",
-                  "differential_expression_threshold",
-                  "gene_sets_restring",
-                  "organism",
-                  "direction",
-                  "background_path",
-                  ]
+    input_keys = [
+        "proteins_df",
+        "differential_expression_col",
+        "differential_expression_threshold",
+        "gene_sets_restring",
+        "organism",
+        "direction",
+        "background_path",
+    ]
     output_keys = ["enrichment_df"]
 
     def method(self, inputs: dict) -> dict:
@@ -44,45 +47,52 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
 class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
     display_name = "GO analysis with Enrichr"
     operation = "enrichment_analysis"
-    method_description = (
-        "Online GO analysis using Enrichr API"
-    )
-    input_keys = ["protein_df",
-                  "differential_expression_col",
-                  "differential_expression_threshold",
-                  "gene_mapping",
-                  "gene_sets_field",
-                  "gene_sets_path",
-                  "gene_sets_enrichr",
-                  "direction",
-                  "organism",
-                  "background_field",
-                  "background_path",
-                  "background_number",
-                  "background_biomart"
-                  ]
+    method_description = "Online GO analysis using Enrichr API"
+    input_keys = [
+        "protein_df",
+        "differential_expression_col",
+        "differential_expression_threshold",
+        "gene_mapping",
+        "gene_sets_field",
+        "gene_sets_path",
+        "gene_sets_enrichr",
+        "direction",
+        "organism",
+        "background_field",
+        "background_path",
+        "background_number",
+        "background_biomart",
+    ]
     output_keys = ["enrichment_df"]
 
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_with_Enrichr(**inputs)
 
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["protein_df"]
+        )  # TODO name fix
+        inputs["gene_mapping"] = steps.get_step_output(
+            Step, "gene_mapping", inputs["gene_mapping"]
+        )
+        return inputs
+
 
 class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
     display_name = "GO analysis offline"
     operation = "enrichment_analysis"
-    method_description = (
-        "Offline GO Analysis using a hypergeometric test"
-    )
-    input_keys = ["protein_df",
-                  "differential_expression_col",
-                  "differential_expression_threshold",
-                  "gene_mapping",
-                  "gene_sets_path",
-                  "direction",
-                  "background_field",
-                  "background_path",
-                  "background_number",
-                  ]
+    method_description = "Offline GO Analysis using a hypergeometric test"
+    input_keys = [
+        "protein_df",
+        "differential_expression_col",
+        "differential_expression_threshold",
+        "gene_mapping",
+        "gene_sets_path",
+        "direction",
+        "background_field",
+        "background_path",
+        "background_number",
+    ]
     output_keys = ["enrichment_df"]
 
     def method(self, inputs: dict) -> dict:
@@ -92,27 +102,25 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
 class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
     display_name = "GSEA"
     operation = "enrichment_analysis"
-    method_description = (
-        "Perform gene set enrichment analysis"
-    )
-    input_keys = ["protein_df",
-                  "gene_mapping",
-                  "gene_sets_field",
-                  "gene_sets_path",
-                  "gene_sets_enrichr",
-                  "grouping",
-                  "group1",
-                  "group2",
-                  "min_size",
-                  "max_size",
-                  "number_of_permutations",
-                  "permutation_type"
-                  "ranking_method",
-                  "weighted_score",
-                  "metadata_df",
-                  "seed",
-                  "threads",
-                  ]
+    method_description = "Perform gene set enrichment analysis"
+    input_keys = [
+        "protein_df",
+        "gene_mapping",
+        "gene_sets_field",
+        "gene_sets_path",
+        "gene_sets_enrichr",
+        "grouping",
+        "group1",
+        "group2",
+        "min_size",
+        "max_size",
+        "number_of_permutations",
+        "permutation_type" "ranking_method",
+        "weighted_score",
+        "metadata_df",
+        "seed",
+        "threads",
+    ]
 
     output_keys = ["enrichment_df", "ranking"]
 
@@ -124,21 +132,22 @@ class EnrichmentAnalysisWithPrerankedGSEA(DataIntegrationStep):
     display_name = "GSEA preranked"
     operation = "enrichment_analysis"
     method_description = "Maps proteins to genes and performs GSEA according using provided numerical column for ranking"
-    input_keys = ["protein_df",
-                  "ranking_column",
-                  "ranking_direction",
-                  "gene_mapping",
-                  "gene_sets_field",
-                  "gene_sets_path",
-                  "gene_sets_enrichr",
-                  "min_size",
-                  "max_size",
-                  "number_of_permutations",
-                  "permutation_type",
-                  "weighted_score",
-                  "seed",
-                  "threads",
-                  ]
+    input_keys = [
+        "protein_df",
+        "ranking_column",
+        "ranking_direction",
+        "gene_mapping",
+        "gene_sets_field",
+        "gene_sets_path",
+        "gene_sets_enrichr",
+        "min_size",
+        "max_size",
+        "number_of_permutations",
+        "permutation_type",
+        "weighted_score",
+        "seed",
+        "threads",
+    ]
 
     output_keys = ["enrichment_df", "ranking"]
 
@@ -150,25 +159,25 @@ class DatabaseIntegrationByGeneMapping(DataIntegrationStep):
     display_name = "Gene mapping"
     operation = "database_integration"
     method_description = "Map protein groups to genes"
-    input_keys = ["dataframe",
-                  "database_names",
-                  "use_biomart"
-                  ]
+    input_keys = ["dataframe", "database_names", "use_biomart"]
 
     output_keys = ["gene_mapping"]
 
     def method(self, inputs: dict) -> dict:
         return database_integration.gene_mapping(**inputs)
 
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["dataframe"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["dataframe"]
+        )
+        return inputs
+
 
 class DatabaseIntegrationByUniprot(DataIntegrationStep):
     display_name = "Uniprot"
     operation = "database_integration"
     method_description = "Add Uniprot data to a dataframe"
-    input_keys = ["dataframe",
-                  "database_names",
-                  "fields"
-                  ]
+    input_keys = ["dataframe", "database_names", "fields"]
 
     output_keys = ["results_df"]
 
@@ -180,14 +189,15 @@ class PlotGOEnrichmentBarPlot(PlotStep):
     display_name = "Bar plot for GO enrichment analysis"
     operation = "plot"
     method_description = "Creates a bar plot from GO enrichment data"
-    input_keys = ["gene_sets",
-                  "value",
-                  "top_terms",
-                  "cutoff",
-                  "title",
-                  "colors",
-                  "figsize",
-                  ]
+    input_keys = [
+        "gene_sets",
+        "value",
+        "top_terms",
+        "cutoff",
+        "title",
+        "colors",
+        "figsize",
+    ]
     # TODO: input figsize optional?
     output_keys = ["plots"]
 
@@ -199,16 +209,17 @@ class PlotGOEnrichmentDotPlot(PlotStep):
     display_name = "Dot plot for GO enrichment analysis (offline & with Enrichr) "
     operation = "plot"
     method_description = "Creates a categorical scatter plot from GO enrichment data"
-    input_keys = ["x_axis_type",
-                  "gene_sets",
-                  "top_terms",
-                  "cutoff",
-                  "title",
-                  "rotate_x_labels",
-                  "show_ring",
-                  "dot_size",
-                  "figsize",
-                  ]
+    input_keys = [
+        "x_axis_type",
+        "gene_sets",
+        "top_terms",
+        "cutoff",
+        "title",
+        "rotate_x_labels",
+        "show_ring",
+        "dot_size",
+        "figsize",
+    ]
     output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
@@ -219,16 +230,17 @@ class PlotGSEADotPlot(PlotStep):
     display_name = "Dot plot for (pre-ranked) GSEA"
     operation = "plot"
     method_description = "Creates a categorical scatter plot from GSEA data"
-    input_keys = ["cutoff",
-                  "gene_sets",
-                  "dot_color_value",
-                  "x_axis_value",
-                  "title",
-                  "show_ring",
-                  "dot_size",
-                  "remove_library_names",
-                  "figsize",
-                  ]
+    input_keys = [
+        "cutoff",
+        "gene_sets",
+        "dot_color_value",
+        "x_axis_value",
+        "title",
+        "show_ring",
+        "dot_size",
+        "remove_library_names",
+        "figsize",
+    ]
     output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
@@ -239,13 +251,14 @@ class PlotGSEAEnrichmentPlot(PlotStep):
     display_name = "Enrichment plot for (pre-ranked) GSEA"
     operation = "plot"
     method_description = "Creates an enrichment plot from (pre-ranked) GSEA data with the enrichment score, ranked_metric, gene rank and hits"
-    input_keys = ["term_dict",
-                  "term_name",
-                  "ranking",
-                  "pos_pheno_label",
-                  "neg_pheno_label",
-                  "figsize",
-                  ]
+    input_keys = [
+        "term_dict",
+        "term_name",
+        "ranking",
+        "pos_pheno_label",
+        "neg_pheno_label",
+        "figsize",
+    ]
     output_keys = ["plots"]
 
     def method(self, inputs: dict) -> dict:
