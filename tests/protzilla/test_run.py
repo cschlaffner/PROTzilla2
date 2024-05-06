@@ -82,14 +82,14 @@ class TestRun:
         run.step_calculate(inputs={"protein_df": maxquant_data_file})
         assert run.current_step.output["protein_df"] is not None
 
-    def test_step_plot(self, run_with_data):
+    def test_step_plot(self, run):
         step = ImputationByMinPerProtein()
-        run_with_data.step_add(step)
-        run_with_data.step_next()
-        run_with_data.step_calculate(inputs={"shrinking_value": 0.5})
-        assert run_with_data.current_step == step
-        run_with_data.step_plot()  # TODO Plots are broken, waiting for fix
-        assert not run_with_data.current_step.plots.empty
+        run.step_add(step)
+        run.step_next()
+        run.step_calculate(inputs={"shrinking_value": 0.5})
+        assert run.current_step == step
+        run.step_plot()  # TODO Plots are broken, waiting for fix
+        assert not run.current_step.plots.empty
 
     def test_step_next(self, run):
         step = ImputationByMinPerProtein()

@@ -66,7 +66,8 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        self.inputs = inputs.copy()
+        if inputs:
+            self.inputs = inputs.copy()
         self._finished = False
 
         try:
@@ -489,19 +490,20 @@ class StepManager:
         :param step_index: the step index in the section
         :param section: the section as a string
         """
+        if step is None and (step_index is None or section is None):
+            raise ValueError("Either step or step_index and section must be provided")
+        if step is not None:
+            section = step.section
+            step_index = self.all_steps_in_section(section).index(step)
+        else:
+            step = self.all_steps_in_section(section)[step_index]
+
         if section not in self.sections:
             raise ValueError(f"Unknown section {section}")
         if step_index >= len(self.sections[section]):
-            raise ValueError(
-                f"Step index {step_index} out of bounds for section {section}"
-            )
-        if step is None and (step_index is None or section is None):
-            raise ValueError("Either step or step_index and section must be provided")
-
-        if step is None:
-            if step_index < self.current_step_index:
-                self.current_step_index -= 1
-            step = self.all_steps_in_section(section)[step_index]
+            raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+        if step.finished:
+            raise ValueError("Cannot remove a finished step. Please go back before this step, to remove it.")
 
         self.sections[step.section].remove(step)
 

@@ -200,7 +200,7 @@ class DiskOperator:
 
     def _read_plots(self, plots: list) -> Plots:
         if plots:
-            raise NotImplementedError  # TODo
+            raise NotImplementedError  # TODO
         return []
 
     def _write_plots(self, plots: list) -> dict:
