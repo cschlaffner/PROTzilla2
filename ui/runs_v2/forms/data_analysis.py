@@ -172,12 +172,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -212,12 +212,12 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 

@@ -52,6 +52,13 @@ class Step:
     def __repr__(self):
         return self.__class__.__name__
 
+    def __eq__(self, other):
+        return (
+            self.__class__ == other.__class__
+            and self.instance_identifier == other.instance_identifier
+            and self.output == other.output
+        )
+
     def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
@@ -252,9 +259,9 @@ class Messages:
 
 
 class Plots:
-    def __init__(self, plots: list = None):
+    def __init__(self, plots: list | None = None):
         if plots is None:
-            plots = []
+            plots: list = []
         self.plots = plots
 
     def __iter__(self):
@@ -262,6 +269,10 @@ class Plots:
 
     def __repr__(self):
         return f"Plots: {len(self.plots)}"
+
+    @property
+    def empty(self) -> bool:
+        return len(self.plots) == 0
 
     def export(self, format_):
         exports = []
@@ -299,7 +310,7 @@ class Plots:
 
 class StepManager:
     def __repr__(self):
-        return f"Importing: {self.importing}\nData Preprocessing: {self.data_preprocessing}\nData Analysis: {self.data_analysis}\nData Integration: {self.data_integration}"
+        return f"IMP: {self.importing} PRE: {self.data_preprocessing} ANA: {self.data_analysis} INT: {self.data_integration}"
 
     def __init__(
         self,
@@ -471,25 +482,30 @@ class StepManager:
         else:
             raise ValueError(f"Unknown section {step.section}")
 
-    def remove_step(self, step: Step, step_index: int = None) -> None:
-        if step_index is not None:
+    def remove_step(
+        self, step: Step, step_index: int = None, section: str = None
+    ) -> None:
+        """
+        Removes a step. Either the step must be passed or both section and step_index in the specific section.
+        :param step: the step instance object
+        :param step_index: the step index in the section
+        :param section: the section as a string
+        """
+        if section not in self.sections:
+            raise ValueError(f"Unknown section {section}")
+        if step_index >= len(self.sections[section]):
+            raise ValueError(
+                f"Step index {step_index} out of bounds for section {section}"
+            )
+        if step is None and (step_index is None or section is None):
+            raise ValueError("Either step or step_index and section must be provided")
+
+        if step is None:
             if step_index < self.current_step_index:
                 self.current_step_index -= 1
-            step = self.all_steps[step_index]
+            step = self.all_steps_in_section(section)[step_index]
 
-        for section in [
-            self.importing,
-            self.data_preprocessing,
-            self.data_analysis,
-            self.data_integration,
-        ]:
-            try:
-                section.remove(step)
-                return
-            except ValueError:
-                pass
-
-        raise ValueError(f"Step {step} not found in steps")
+        self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
         """
@@ -512,7 +528,19 @@ class StepManager:
                 )
             self.current_step_index += 1
         else:
-            logging.warning("Cannot go forward from the last step")
+            raise ValueError("Cannot go to the next step from the last step")
+
+    def previous_step(self) -> None:
+        """
+        Go to the previous step in the workflow. If the previous step is in disk mode, the respective dataframes are
+        loaded from disk and replaced in the output dictionary of the step.
+
+        :return: None
+        """
+        if self.current_step_index > 0:
+            self.current_step_index -= 1
+        else:
+            raise ValueError("Cannot go back from the first step")
 
     def goto_step(self, step_index: int, section: str) -> None:
         """
@@ -521,26 +549,21 @@ class StepManager:
         :param section: The section of the step to go to
         :return:
         """
-        if step_index < 0 or step_index >= len(self.all_steps):
-            raise ValueError(f"Step index {step_index} out of bounds")
-        # find step
-        if section == "importing":
-            step = self.importing[step_index]
-        elif section == "data_preprocessing":
-            step = self.data_preprocessing[step_index]
-        elif section == "data_analysis":
-            step = self.data_analysis[step_index]
-        elif section == "data_integration":
-            step = self.data_integration[step_index]
-        else:
+        if section not in self.sections:
             raise ValueError(f"Unknown section {section}")
+        if step_index < 0 or step_index >= len(self.sections[section]):
+            raise ValueError(
+                f"Step index {step_index} out of bounds for section {section}"
+            )
 
-        if self.all_steps.index(step) < self.current_step_index:
-            for i in range(self.all_steps.index(step) + 1, self.current_step_index):
+        step = self.all_steps_in_section(section)[step_index]
+        new_step_index = self.all_steps.index(step)
+        if new_step_index < self.current_step_index:
+            for i in range(new_step_index, self.current_step_index):
                 self.all_steps[i].output = Output()
-            self.current_step_index = self.all_steps.index(step)
+            self.current_step_index = new_step_index
         else:
-            pass  # TODO: implement forwards navigation
+            raise ValueError("Cannot go to a step that is after the current step")
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
