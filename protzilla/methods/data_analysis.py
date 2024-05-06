@@ -13,6 +13,7 @@ from protzilla.data_analysis.plots import (
     clustergram_plot,
     create_volcano_plot,
     prot_quant_plot,
+    scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.steps import Plots, Step, StepManager
@@ -30,7 +31,7 @@ class PlotStep(DataAnalysisStep):
 
     def handle_outputs(self, outputs: dict):
         super().handle_outputs(outputs)
-        plots = outputs["plots"] if "plots" in outputs else []
+        plots = outputs.pop("plots", [])
         self.plots = Plots(plots)
 
 
@@ -150,18 +151,34 @@ class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
     input_keys = [
-        # TODO: Input the results from the differential expression analysis,
+        "p_values",
         "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
         "proteins_of_interest",
+        "log2_fc",
     ]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return create_volcano_plot(**inputs)
 
-    # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["ttest_results"] = steps.ttest_results
+        inputs["p_values"] = steps.get_step_output(
+            Step, "corrected_p_values_df", inputs["input_dict"]
+        )
+
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        inputs["log2_fc"] = steps.get_step_output(
+            Step, "log2_fold_change_df", inputs["input_dict"]
+        )
+
         return inputs
 
 
@@ -174,15 +191,17 @@ class PlotScatter(PlotStep):
         "input_df",
         "color_df",
     ]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
-        return prot_quant_plot(**inputs)
+        return scatter_plot(**inputs)
 
     # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["color_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "embedded_data", inputs["input_df"]
+        )
+        inputs["color_df"] = steps.get_step_output(Step, "color_df", inputs["color_df"])
         return inputs
 
 
@@ -215,7 +234,7 @@ class PlotProtQuant(PlotStep):
     )
 
     input_keys = ["input_df", "protein_group", "similarity_measure", "similarity"]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
@@ -522,8 +541,9 @@ class DimensionReductionUMAP(DataAnalysisStep):
         return umap(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["sample_group_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["input_df"]
+        )
         return inputs
 
 
