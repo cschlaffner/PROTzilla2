@@ -183,6 +183,8 @@ class DifferentialExpressionANOVAForm(MethodForm):
 
 
 class DifferentialExpressionTTestForm(MethodForm):
+    is_dynamic = True
+    print("hello")
     ttest_type = CustomChoiceField(choices=TTestType, label="T-test type")
     protein_df = CustomChoiceField(
         choices=[], label="Step to use protein intensities from"

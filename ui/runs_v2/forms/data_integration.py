@@ -1,6 +1,7 @@
 from enum import Enum
 
 import matplotlib
+import restring
 
 from protzilla.methods.data_integration import PlotStep
 from protzilla.run_v2 import Run
@@ -83,7 +84,6 @@ class EmptyEnum(Enum):
 
 
 class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
-    # Todo: protein_df
     protein_df = CustomChoiceField(choices=[],
                                    label="Dataframe with protein IDs and direction of expression change column (e.g. "
                                          "log2FC)")
@@ -99,7 +99,6 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         max_value=4294967295,
         initial=0
     )
-    # Todo: gene_sets_restring
     gene_sets_restring = CustomMultipleChoiceField(choices=[], label="Knowledge bases for enrichment")
     organism = CustomNumberField(
         label="Organism / NCBI taxon identifiers (e.g. Human is 9606)",
@@ -124,23 +123,17 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
             "protein_df", self.fields["protein_df"].choices[0][0]
         )
 
-        self.fields["differential_expression_col"].choices = fill_helper.to_choices(
+        column_name = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="protein_df",
+                output_key="differentially_expressed_proteins_df",
                 instance_identifier=protein_df_instance_id,
-            )["protein_df_columns"].unique()
+            ).columns.unique()
         )
+        column_name = [(value, label) for value, label in column_name if label not in ["Protein ID", "Sample"]]
+        self.fields["differential_expression_col"].choices = column_name
 
-        gene_sets_restring_id = self.data.get("protein_df", self.fields["gene_sets_restring"].choices[0])
-
-        self.fields["gene_sets_restring"].choices = fill_helper.to_choices(
-            run.step.get_step_output(
-                step_type=Step,
-                output_key="protein_df",
-                instance_identifier=gene_sets_restring_id,
-            )["dbs_restring"].unique()
-        )
+        self.fields["gene_sets_restring"].choices = fill_helper.to_choices(restring.settings.file_types)
 
     @property
     def is_dynamic(self) -> bool:
