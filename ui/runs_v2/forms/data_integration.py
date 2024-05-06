@@ -131,9 +131,9 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields["protein_df"].choices = fill_helper.get_choices(
+            run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
+        )
 
         protein_df_instance_id = self.data.get(
             "protein_df", self.fields["protein_df"].choices[0][0]
@@ -342,21 +342,21 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-
-        protein_df_instance_id = self.data.get(
-            "proteins_df", self.fields["protein_df"].choices[0][0]
+        self.fields["protein_df"].choices = fill_helper.get_choices(
+            run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )
 
-        self.fields["differential_expression_col"].choices = fill_helper.to_choices(
+        protein_df_instance_id = self.get_field("protein_df")
+
+        column_name = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="protein_df",
+                output_key="differentially_expressed_proteins_df",
                 instance_identifier=protein_df_instance_id,
-            )["protein_df_columns"].unique()
+            ).columns.unique()
         )
+        column_name = [(value, label) for value, label in column_name if label not in ["Protein ID", "Sample"]]
+        self.fields["differential_expression_col"].choices = column_name
 
     @property
     def is_dynamic(self) -> bool:
