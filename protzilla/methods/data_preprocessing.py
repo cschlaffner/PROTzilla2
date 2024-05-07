@@ -23,7 +23,9 @@ class DataPreprocessingStep(Step):
     plot_input_names = ["protein_df"]
     plot_output_names = ["plots"]
 
-    plot_inputs: dict = {}
+    def __init__(self):
+        super().__init__()
+        self.plot_inputs: dict = {}
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.protein_df

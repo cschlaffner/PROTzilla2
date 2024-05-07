@@ -34,8 +34,12 @@ def mock_perform_method(runner: Runner):
     mock_perform.inputs = []
 
     def mock_current_parameters(*args, **kwargs):
+        # saving parameters for later inspection
         mock_perform.methods.append(str(runner.run.current_step))
         mock_perform.inputs.append(runner.run.current_step.inputs)
+
+        # side effect to mark the step as finished
+        runner.run.current_step._finished = True
 
     mock_perform.side_effect = mock_current_parameters
 
@@ -47,6 +51,7 @@ def mock_perform_plot(runner: Runner):
     mock_plot.inputs = []
 
     def mock_current_parameters(*args, **kwargs):
+        # saving parameters for later inspection
         mock_plot.inputs.append(runner.run.current_step.plot_inputs)
 
     mock_plot.side_effect = mock_current_parameters
@@ -96,7 +101,7 @@ def test_runner_raises_error_for_missing_metadata_arg(
     ]
     kwargs = args_parser().parse_args(no_metadata_args).__dict__
     runner = Runner(**kwargs)
-    mock_method = mock.MagicMock()
+    mock_method = mock_perform_method(runner)
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_method)
 
