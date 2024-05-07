@@ -33,6 +33,7 @@ class Step:
     output_keys: list[str] = []
 
     def __init__(self):
+        self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
@@ -66,6 +67,7 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
+        self.form_inputs = inputs.copy()
         self.inputs = inputs.copy()
         self._finished = False
 

@@ -137,7 +137,11 @@ def get_filled_form_by_method(
     step: Step, run: Run, in_history: bool = False
 ) -> MethodForm:
     form_class = _get_form_class_by_step(step)
-    return form_class(run=run, readonly=in_history, data=step.inputs)
+    return form_class(
+        run=run,
+        readonly=in_history,
+        data=step.form_inputs if bool(step.form_inputs) else None,
+    )
 
 
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:

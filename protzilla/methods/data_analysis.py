@@ -13,6 +13,7 @@ from protzilla.data_analysis.plots import (
     clustergram_plot,
     create_volcano_plot,
     prot_quant_plot,
+    scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.steps import Plots, Step, StepManager
@@ -29,6 +30,7 @@ class PlotStep(DataAnalysisStep):
     step = "plot"
 
     def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
         plots = outputs.pop("plots", [])
         self.plots = Plots(plots)
 
@@ -145,29 +147,42 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
 
 
-class PlotVolcano(DataAnalysisStep):
+class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
     input_keys = [
-        # TODO: Input the results from the differential expression analysis,
+        "p_values",
         "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
         "proteins_of_interest",
+        "log2_fc",
     ]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return create_volcano_plot(**inputs)
 
-    # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["ttest_results"] = steps.ttest_results
+        inputs["p_values"] = steps.get_step_output(
+            Step, "corrected_p_values_df", inputs["input_dict"]
+        )
+
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        inputs["log2_fc"] = steps.get_step_output(
+            Step, "log2_fold_change_df", inputs["input_dict"]
+        )
+
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
-
-class PlotScatter(DataAnalysisStep):
+class PlotScatter(PlotStep):
     display_name = "Scatter Plot"
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
@@ -176,22 +191,21 @@ class PlotScatter(DataAnalysisStep):
         "input_df",
         "color_df",
     ]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
-        return prot_quant_plot(**inputs)
+        return scatter_plot(**inputs)
 
     # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["color_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "embedded_data", inputs["input_df"]
+        )
+        inputs["color_df"] = steps.get_step_output(Step, "color_df", inputs["color_df"])
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
-
-class PlotClustergram(DataAnalysisStep):
+class PlotClustergram(PlotStep):
     display_name = "Clustergram"
     operation = "plot"
     method_description = "Creates a clustergram from data"
@@ -211,11 +225,8 @@ class PlotClustergram(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
-
-class PlotProtQuant(DataAnalysisStep):
+class PlotProtQuant(PlotStep):
     display_name = "Protein Quantification Plot"
     operation = "plot"
     method_description = (
@@ -223,21 +234,19 @@ class PlotProtQuant(DataAnalysisStep):
     )
 
     input_keys = ["input_df", "protein_group", "similarity_measure", "similarity"]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return prot_quant_plot(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["color_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["input_df"]
+        )
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
-
-class PlotPrecisionRecallCurve(DataAnalysisStep):
+class PlotPrecisionRecallCurve(PlotStep):
     display_name = "Precision Recall"
     operation = "plot"
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
@@ -255,11 +264,8 @@ class PlotPrecisionRecallCurve(DataAnalysisStep):
         # TODO: Input
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
-
-class PlotROC(DataAnalysisStep):
+class PlotROC(PlotStep):
     display_name = "Receiver Operating Characteristic curve"
     operation = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
@@ -276,9 +282,6 @@ class PlotROC(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         # Todo: Input
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClusteringKMeans(DataAnalysisStep):
@@ -314,9 +317,6 @@ class ClusteringKMeans(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClusteringExpectationMaximisation(DataAnalysisStep):
@@ -354,9 +354,6 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
     display_name = "Hierarchical Agglomerative Clustering"
@@ -390,9 +387,6 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ClassificationRandomForest(DataAnalysisStep):
@@ -438,9 +432,6 @@ class ClassificationRandomForest(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class ClassificationSVM(DataAnalysisStep):
     display_name = "Support Vector Machine"
@@ -485,9 +476,6 @@ class ClassificationSVM(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class ModelEvaluationClassificationModel(DataAnalysisStep):
     display_name = "Evaluation of classification models"
@@ -507,9 +495,6 @@ class ModelEvaluationClassificationModel(DataAnalysisStep):
         inputs["input_df"] = steps.protein_df
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class DimensionReductionTSNE(DataAnalysisStep):
@@ -536,9 +521,6 @@ class DimensionReductionTSNE(DataAnalysisStep):
         inputs["sample_group_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class DimensionReductionUMAP(DataAnalysisStep):
     display_name = "UMAP"
@@ -559,12 +541,10 @@ class DimensionReductionUMAP(DataAnalysisStep):
         return umap(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["sample_group_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["input_df"]
+        )
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
 
 
 class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
@@ -593,9 +573,6 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         inputs["isoform_df"] = steps.isoform_df
         return inputs
 
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]
-
 
 class ProteinGraphVariationGraph(DataAnalysisStep):
     display_name = "Protein Variation Graph"
@@ -618,6 +595,3 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         inputs["peptide_df"] = steps.peptide_df
         inputs["isoform_df"] = steps.isoform_df
         return inputs
-
-    def plot(self, inputs):
-        return inputs["Plotting is not implemented yet for this step."]

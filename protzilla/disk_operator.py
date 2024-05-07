@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
 from protzilla.constants import paths
@@ -69,6 +70,7 @@ class KEYS:
     CURRENT_STEP_INDEX = "current_step_index"
     STEPS = "steps"
     STEP_OUTPUTS = "output"
+    STEP_FORM_INPUTS = "form_inputs"
     STEP_INPUTS = "inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
@@ -154,6 +156,7 @@ class DiskOperator:
             step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
+            step.form_inputs = step_data.get(KEYS.STEP_FORM_INPUTS, {})
             return step
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
@@ -162,6 +165,10 @@ class DiskOperator:
             step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
+            step_data[KEYS.STEP_FORM_INPUTS] = step.form_inputs
+            step_data[KEYS.STEP_PLOTS] = self._write_plots(
+                step.__class__.__name__, step.plots
+            )
             if not workflow_mode:
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
                     step_name=step.__class__.__name__, output=step.output
@@ -198,13 +205,24 @@ class DiskOperator:
                     output_data[key] = value
             return output_data
 
-    def _read_plots(self, plots: list) -> Plots:
+    def _read_plots(self, plots: dict) -> Plots:
         if plots:
-            raise NotImplementedError  # TODo
-        return []
+            figures = []
+            for plot in plots.values():
+                figures.append(read_json(plot))
+            return Plots(figures)
+        return Plots([])
 
-    def _write_plots(self, plots: list) -> dict:
-        raise NotImplementedError  # TODO
+    def _write_plots(self, step_name: str, plots: Plots) -> dict:
+        with ErrorHandler():
+            plots_data = {}
+            for i, plot in enumerate(plots):
+                file_path = self.plot_dir / f"{step_name}_plot{i}.json"
+                self.plot_dir.mkdir(parents=True, exist_ok=True)
+                write_json(plot, file_path)
+                plot.write_image(str(file_path).replace(".json", ".png"))
+                plots_data[i] = str(file_path)
+            return plots_data
 
     @property
     def run_dir(self):
