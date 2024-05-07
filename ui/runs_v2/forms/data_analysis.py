@@ -14,8 +14,6 @@ from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
-    CustomNumberField,
-    CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
 )
@@ -175,12 +173,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -199,7 +197,7 @@ class DifferentialExpressionTTestForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
         label="Multiple testing correction",
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)",
         min_value=0,
         max_value=1,
@@ -216,12 +214,12 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -616,7 +614,7 @@ class ClassificationRandomForestForm(MethodForm):
     # TODO: Workflow_meta line 1763
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
@@ -704,7 +702,7 @@ class ClassificationSVMForm(MethodForm):
     )
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
@@ -821,7 +819,7 @@ class DimensionReductionUMAPForm(MethodForm):
     )
     n_neighbors = CustomNumberField(
         label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold "
-              "approximation",
+        "approximation",
         min_value=2,
         max_value=100,
         step_size=1,
@@ -862,7 +860,7 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
     k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
     allowed_mismatches = CustomNumberField(
         label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a "
-              "long time.",
+        "long time.",
         min_value=0,
         step_size=1,
         initial=2,
