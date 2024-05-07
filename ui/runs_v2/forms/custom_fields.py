@@ -37,7 +37,7 @@ class CustomSelectMultiple(SelectMultiple):
         hidden_option_html = mark_safe(
             "<option value='hidden' style='display: none;' selected>Hidden option</option>"
         )
-        idx = input_html.find(">") + 3
+        idx = input_html.find(">") + 1
         return mark_safe(f"{input_html[:idx]}{hidden_option_html}{input_html[idx:]}")
 
 
