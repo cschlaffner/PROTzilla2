@@ -43,6 +43,21 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_with_STRING(**inputs)
 
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["protein_df"]
+        )  # TODO name fix
+        if (
+            inputs.get("proteins_df") is None
+            or not "log2_fold_change" in inputs["proteins_df"].columns
+        ):
+            raise ValueError(
+                "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
+            )
+        inputs["differential_expression_col"] = "log2_fold_change"
+
+        return inputs
+
 
 class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
     display_name = "GO analysis with Enrichr"
@@ -106,6 +121,20 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
     def method(self, inputs: dict) -> dict:
         return enrichment_analysis.GO_analysis_offline(**inputs)
 
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["protein_df"]
+        )  # TODO name fix
+        if (
+                inputs.get("proteins_df") is None
+                or not "log2_fold_change" in inputs["proteins_df"].columns
+        ):
+            raise ValueError(
+                "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
+            )
+        inputs["differential_expression_col"] = "log2_fold_change"
+
+        return inputs
 
 class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
     display_name = "GSEA"

@@ -32,7 +32,7 @@ class Direction(Enum):
     both = "both"
 
 
-class GeneSetField(Enum):
+class GeneSetsField(Enum):
     upload_a_file = "Upload a file"
     choose_from_enrichr_options = "Choose from Enrichr options"
 
@@ -133,25 +133,9 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     def fill_form(self, run: Run) -> None:
         self.fields["protein_df"].choices = fill_helper.get_choices(
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
-        )
+        )  # TODO maybe a step type? and maybe rename protein_df to something better
 
-        protein_df_instance_id = self.data.get(
-            "protein_df", self.fields["protein_df"].choices[0][0]
-        )
-
-        column_name = fill_helper.to_choices(
-            run.steps.get_step_output(
-                step_type=Step,
-                output_key="differentially_expressed_proteins_df",
-                instance_identifier=protein_df_instance_id,
-            ).columns.unique()
-        )
-        column_name = [
-            (value, label)
-            for value, label in column_name
-            if label not in ["Protein ID", "Sample"]
-        ]
-        self.fields["differential_expression_col"].choices = column_name
+        self.get_field("protein_df")
 
         self.fields["gene_sets_restring"].choices = fill_helper.to_choices(
             restring.settings.file_types
@@ -185,9 +169,9 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         choices=Organism, label="Organism", initial=Organism.human
     )
     gene_sets_field = CustomChoiceField(
-        choices=GeneSetField,
+        choices=GeneSetsField,
         label="Gene sets",
-        initial=GeneSetField.choose_from_enrichr_options,
+        initial=GeneSetsField.choose_from_enrichr_options,
     )
     gene_sets_path = CustomFileField(
         label="Upload gene sets with uppercase gene symbols (any of the following file types: .gmt, .txt, .csv, "
@@ -248,7 +232,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         ]:
             self.toggle_visibility(field_name, False)
 
-        if gene_sets_field == GeneSetField.choose_from_enrichr_options.value:
+        if gene_sets_field == GeneSetsField.choose_from_enrichr_options.value:
             self.toggle_visibility("gene_sets_enrichr", True)
             self.fields["gene_sets_enrichr"].choices = fill_helper.to_choices(
                 gseapy.get_library_name()
@@ -285,7 +269,6 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
 
 
 class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
-    # Todo: protein_df
     proteins_df = CustomChoiceField(
         choices=[],
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
@@ -322,7 +305,7 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
         "will otherwise be ignored!",
         initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file
-        # Todo: Dynamic parameters
+
     )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one protein per line, csv or txt)",
@@ -357,6 +340,26 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         ]
         self.fields["differential_expression_col"].choices = column_name
 
+        set.fields["gene_mapping"].choices = fill_helper.get_choices(run, "gene_mapping")
+
+        self.data = self.data.copy()
+        for field_name in [
+            "background_path",
+            "background_number",
+        ]:
+            self.toggle_visibility(field_name, False)
+
+        if (
+            self.get_field("background_field")
+            == GOAnalysisWithEnrichrBackgroundField.upload_a_file.value
+        ):
+            self.toggle_visibility("background_path", True)
+        elif (
+            self.get_field("background_field")
+            == GOAnalysisWithEnrichrBackgroundField.number_of_expressed_genes.value
+        ):
+            self.toggle_visibility("background_number", True)
+
     @property
     def is_dynamic(self) -> bool:
         return True
@@ -368,7 +371,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
     )
     gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_field = CustomChoiceField(
-        choices=GeneSetField,
+        choices=GeneSetsField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
         initial="Choose from Enrichr options"
         # Todo: Dynamic parameters
@@ -447,7 +450,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         ]:
             self.toggle_visibility(field_name, False)
 
-        if gene_sets_field == GeneSetField.choose_from_enrichr_options.value:
+        if gene_sets_field == GeneSetsField.choose_from_enrichr_options.value:
             self.toggle_visibility("gene_sets_enrichr", True)
             self.fields["gene_sets_enrichr"].choices = fill_helper.to_choices(
                 gseapy.get_library_name()
@@ -501,9 +504,9 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
     )
     # Todo: gene_mapping
     gene_sets_field = CustomChoiceField(
-        choices=GeneSetField,
+        choices=GeneSetsField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
-        initial=GeneSetField.choose_from_enrichr_options
+        initial=GeneSetsField.choose_from_enrichr_options
         # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(
