@@ -334,6 +334,8 @@ class PlotClustergramForm(MethodForm):
 
 
 class PlotProtQuantForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=[],
         label="Choose dataframe to be plotted",
@@ -400,10 +402,6 @@ class PlotProtQuantForm(MethodForm):
                 or float(self.data["similarity"]) > 999
             ):
                 self.data["similarity"] = 1
-
-    @property
-    def is_dynamic(self) -> bool:
-        return True
 
 
 class PlotPrecisionRecallCurveForm(MethodForm):

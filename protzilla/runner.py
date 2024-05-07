@@ -3,10 +3,9 @@ import os
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
-from .run import Run
-from .run_helper import get_parameters, log_messages
+from .run_helper import log_messages
+from .run_v2 import Run
 from .utilities import random_string
-from .workflow import get_defaults
 
 
 class Runner:
@@ -58,95 +57,74 @@ class Runner:
             self._overwrite_run_prompt()
             print("\n\n")
 
-        self.run = Run.create(
+        self.run = Run(
             run_name=self.run_name,
-            workflow_config_name=self.workflow,
+            workflow_name=self.workflow,
             df_mode=self.df_mode,
         )
         logging.info(f"Run {self.run_name} created at {self.run.run_path}")
 
         self.all_plots = all_plots
         self.plots_path = Path(f"{self.run.run_path}/plots")
-        self.plots_path.mkdir()
+        self.plots_path.mkdir(parents=True)
         logging.info(f"Saving plots at {self.plots_path}")
 
         log_messages(self.run.current_messages)
-        self.run.current_messages = []
+        self.run.current_messages.clear()
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
-        for section, steps in self.run.workflow_config["sections"].items():
-            for step in steps["steps"]:
-                if section == "importing":
-                    self._importing(step)
-                elif step["name"] == "plot":
-                    logging.info(
-                        f"creating plot: {*self.run.current_workflow_location(),}"
-                    )
-                    self._create_plots_for_step(section, step)
+        for step in self.run.steps.all_steps:
+            logging.info(f"performing step: {*self.run.steps.current_location,}")
+            if step.section == "importing":
+                self._insert_commandline_inputs(step)
+            self._perform_current_step()
+            if self.all_plots and step.section == "data_preprocessing":
+                step.plot()
+            if step.plots:
+                self._save_plots_html(step)
+
+            log_messages(self.run.current_messages)
+            if not self.run.current_step.finished:
+                if self.run.steps.current_section == "importing" or self.run.steps.current_section == "data_preprocessing":
+                    logging.error(f"Errors occurred in {self.run.steps.current_section} steps. Exiting.")
+                    break
                 else:
-                    logging.info(
-                        f"performing step: {*self.run.current_workflow_location(),}"
-                    )
-                    params = get_parameters(
-                        self.run, *self.run.current_workflow_location()
-                    )
-                    self._perform_current_step(get_defaults(params))
-                    if self.all_plots:
-                        self._create_plots_for_step(section, step)
-                self.run.next_step()
+                    logging.warning(f"Errors occurred in {self.run.steps.current_section} steps. "
+                                    f"Continuing without this step.")
+            self.run.current_messages.clear()
 
-                log_messages(self.run.current_messages)
-                self.run.current_messages = []
+            self.run.step_next()
+        self.run._run_write()
 
-    def _importing(self, step):
-        if step["name"] == "ms_data_import":
-            params = step["parameters"]
-            params["file_path"] = self.ms_data_path
-            self._perform_current_step(params)
-            logging.info("imported MS Data")
+    def _insert_commandline_inputs(self, step):
+        if step.operation == "msdataimport":
+            step.inputs["file_path"] = self.ms_data_path
 
-        elif step["name"] == "metadata_import":
+        elif step.operation == "metadataimport":
             if self.meta_data_path is None:
                 raise ValueError(
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
-                    f" but is required for {step['name']}"
+                    f" but is required for {step.display_name}"
                 )
-            params = step["parameters"]
-            params["file_path"] = self.meta_data_path
-            self._perform_current_step(params)
-            logging.info("imported Meta Data")
-        elif step["name"] == "peptide_import":
+            step.inputs["file_path"] = self.meta_data_path
+        elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"but is required for {step.display_name}"
                 )
-            params = step["parameters"]
-            params["file_path"] = self.peptides_path
-            self._perform_current_step(params)
-            logging.info("imported Peptide Data")
+            step.inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step['name']} in importing")
+            raise ValueError(f"Cannot find step with name {step.display_name} in importing")
 
-    def _perform_current_step(self, params):
-        self.run.perform_current_calculation_step(params)
+    def _perform_current_step(self, params=None):
+        self.run.current_step.calculate(self.run.steps, params)
 
-    def _create_plots_for_step(self, section, step):
-        params = dict()
-        if "graphs" in step:
-            params = _serialize_graphs(step["graphs"])
-        elif step["name"] == "plot":
-            params = get_defaults(
-                get_parameters(self.run, *self.run.current_workflow_location())
-            )
-        self.run.create_plot_from_current_location(
-            parameters=params,
-        )
-        for i, plot in enumerate(self.run.plots):
-            plot_path = f"{self.plots_path}/{self.run.step_index}-{section}-{step['name']}-{step['method']}-{i}.html"
-            if not isinstance(plot, dict):
-                plot.write_html(plot_path)
+    def _save_plots_html(self, step):
+        for i, plot in enumerate(step.plots):
+            plot_path = f"{self.plots_path}/{self.run.steps.current_step_index}-{step.section}-{step.operation}-{step.instance_identifier}-{i}.html"
+            plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
         answer = input(
