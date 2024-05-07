@@ -69,7 +69,6 @@ def insert_special_params(param_dict, run):
             param_dict["categories"] = run.metadata.columns[
                 ~run.metadata.columns.isin(["Sample", "Group", "Batch"])
             ].unique()
-
         elif param_dict["fill"] == "metadata_required_columns":
             # TODO add other possible metadata columns
             # exclude columns that are already in metadata and known to be required
@@ -78,7 +77,8 @@ def insert_special_params(param_dict, run):
                 for col in ["Sample", "Group", "Batch"]
                 if col not in run.metadata.columns
             ]
-
+        elif param_dict["fill"] == "metadata_columns":
+            param_dict["categories"] = run.metadata.columns.unique()
         elif param_dict["fill"] == "metadata_column_data":
             # per default fill with second column data since it is selected in dropdown
             param_dict["categories"] = run.metadata.iloc[:, 1].unique()
@@ -134,6 +134,13 @@ def get_parameters(run, section, step, method):
     output = {}
 
     for key, param_dict in parameters.items():
+        # allow for conditional parameters that are only shown if a certain condition
+        # is met all parameters that depend on the condition need to have a "condition"
+        # key and the fitting value
+        if "condition" in param_dict:
+            if param_dict["condition"] == "metadata":
+                if not run.has_metadata:
+                    continue
         workflow_default = get_workflow_default_param_value(
             run.workflow_config,
             section,

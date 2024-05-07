@@ -29,6 +29,11 @@ def filter_samples_df():
         ["Sample3", "Protein3", "Gene3", 10],
         ["Sample3", "Protein4", "Gene4", 20],
         ["Sample3", "Protein5", "Gene5", 20],
+        ["Sample4", "Protein1", "Gene1"],
+        ["Sample4", "Protein2", "Gene2"],
+        ["Sample4", "Protein3", "Gene3"],
+        ["Sample4", "Protein4", "Gene4"],
+        ["Sample4", "Protein5", "Gene5"],
     )
 
     filter_samples_df = pd.DataFrame(
@@ -59,19 +64,22 @@ def test_by_proteins_missing(filter_samples_df, show_figures):
         fig.show()
 
     assert list_samples_excluded_1 == [
-        "Sample2"
+        "Sample2",
+        "Sample4",
     ], f"excluded samples do not match \
-                Sample2, but are {list_samples_excluded_1}"
+                Sample2 and Sampel4, but are {list_samples_excluded_1}"
 
     assert list_samples_excluded_2 == [
         "Sample2",
+        "Sample4",
     ], f"excluded samples do not match \
-                Sample2 and Sample3, but are {list_samples_excluded_2}"
+                Sample2 and Sample4, but are {list_samples_excluded_2}"
     assert list_samples_excluded_3 == [
         "Sample2",
         "Sample3",
+        "Sample4",
     ], f"excluded samples do not match \
-                    Sample2 and Sample3, but are {list_samples_excluded_3}"
+                    Sample2, Sampel3 and Sample, but are {list_samples_excluded_3}"
 
 
 def test_filter_samples_by_protein_count(filter_samples_df, show_figures):
@@ -122,7 +130,7 @@ def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures
             Sample3, but are {list_samples_excluded_1}"
 
     assert list_samples_excluded_2 == [
-        "Sample2",
         "Sample3",
+        "Sample4",
     ], f"excluded samples do not match \
             Sample2 and Sample3, but are {list_samples_excluded_2}"
