@@ -8,6 +8,7 @@ import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
+
 from .forms.base import MethodForm
 
 _forward_mapping = {
@@ -121,7 +122,11 @@ def get_filled_form_by_method(
     step: Step, run: Run, in_history: bool = False
 ) -> MethodForm:
     form_class = _get_form_class_by_step(step)
-    return form_class(run=run, readonly=in_history, data=step.inputs)
+    return form_class(
+        run=run,
+        readonly=in_history,
+        data=step.form_inputs if bool(step.form_inputs) else None,
+    )
 
 
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:

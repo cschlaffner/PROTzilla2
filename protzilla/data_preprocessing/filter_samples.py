@@ -82,6 +82,7 @@ def by_proteins_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
         protein_df[~protein_df[intensity_name].isnull()]
         .groupby("Sample")["Protein ID"]
         .nunique()
+        .reindex(intensity_df["Sample"].unique(), fill_value=0)
     )
     filtered_samples_list = sample_protein_count[
         ~sample_protein_count.ge(total_protein_count * percentage)
