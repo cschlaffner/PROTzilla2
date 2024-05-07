@@ -399,8 +399,9 @@ def delete_step(request: HttpRequest, run_name: str):
 
     post = dict(request.POST)
     index = int(post["index"][0])
+    section = post["section"][0]
 
-    run.step_remove(step_index=index)
+    run.step_remove(step_index=index, section=section)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 
 
