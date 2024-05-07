@@ -48,8 +48,8 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
         if (
-            inputs.get("proteins_df") is None
-            or not "log2_fold_change" in inputs["proteins_df"].columns
+                inputs.get("proteins_df") is None
+                or not "log2_fold_change" in inputs["proteins_df"].columns
         ):
             raise ValueError(
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
@@ -88,8 +88,8 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
         if (
-            inputs.get("proteins_df") is None
-            or not "log2_fold_change" in inputs["proteins_df"].columns
+                inputs.get("proteins_df") is None
+                or not "log2_fold_change" in inputs["proteins_df"].columns
         ):
             raise ValueError(
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
@@ -136,6 +136,7 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
 
         return inputs
 
+
 class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
     display_name = "GSEA"
     operation = "enrichment_analysis"
@@ -152,11 +153,9 @@ class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
         "min_size",
         "max_size",
         "number_of_permutations",
-        "permutation_type" "ranking_method",
+        "permutation_type",
+        "ranking_method",
         "weighted_score",
-        "metadata_df",
-        "seed",
-        "threads",
     ]
 
     output_keys = ["enrichment_df", "ranking"]

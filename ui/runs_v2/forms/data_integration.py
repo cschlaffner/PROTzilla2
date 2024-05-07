@@ -426,13 +426,14 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         "0, 1, 1.5 or 2",
         initial=1,
     )
-    metadata_df = CustomChoiceField(choices=EmptyEnum, label="metadata_df")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-
+        self.fields["protein_df"].choices = fill_helper.get_choices(
+            run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
+        )
+        self.fields["gene_mapping"].choices = fill_helper.get_choices(
+            run, "gene_mapping"
+        )
         protein_df_instance_id = self.data.get(
             "proteins_df", self.fields["protein_df"].choices[0][0]
         )
@@ -444,9 +445,6 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         for field_name in [
             "gene_sets_enrichr",
             "gene_sets_path",
-            #"background_path",
-            #"background_number",
-            #"background_biomart",
         ]:
             self.toggle_visibility(field_name, False)
 
@@ -483,6 +481,9 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
                 fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
             )
 
+    @property
+    def is_dynamic(self) -> bool:
+        return True
     """
     def fill_form(self, run: Run) -> None:
         self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
