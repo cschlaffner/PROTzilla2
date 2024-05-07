@@ -48,8 +48,8 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
         if (
-                inputs.get("proteins_df") is None
-                or not "log2_fold_change" in inputs["proteins_df"].columns
+            inputs.get("proteins_df") is None
+            or not "log2_fold_change" in inputs["proteins_df"].columns
         ):
             raise ValueError(
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
@@ -85,18 +85,20 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["proteins_df"] = steps.get_step_output(
-            Step, "differentially_expressed_proteins_df", inputs["protein_df"]
+            Step,
+            "differentially_expressed_proteins_df",
+            inputs["protein_df_step_instance"],
         )  # TODO name fix
         if (
-                inputs.get("proteins_df") is None
-                or not "log2_fold_change" in inputs["proteins_df"].columns
+            inputs.get("proteins_df") is None
+            or not "log2_fold_change" in inputs["proteins_df"].columns
         ):
             raise ValueError(
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
             )
         inputs["differential_expression_col"] = "log2_fold_change"
         inputs["gene_mapping"] = steps.get_step_output(
-            Step, "gene_mapping", inputs["gene_mapping"]
+            Step, "gene_mapping", inputs["gene_mapping_step_instance"]
         )
         return inputs
 
@@ -126,8 +128,8 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
         if (
-                inputs.get("proteins_df") is None
-                or not "log2_fold_change" in inputs["proteins_df"].columns
+            inputs.get("proteins_df") is None
+            or not "log2_fold_change" in inputs["proteins_df"].columns
         ):
             raise ValueError(
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
@@ -226,6 +228,7 @@ class PlotGOEnrichmentBarPlot(PlotStep):
     operation = "plot"
     method_description = "Creates a bar plot from GO enrichment data"
     input_keys = [
+        "input_df",
         "gene_sets",
         "value",
         "top_terms",
@@ -239,6 +242,15 @@ class PlotGOEnrichmentBarPlot(PlotStep):
 
     def method(self, inputs: dict) -> dict:
         return di_plots.GO_enrichment_bar_plot(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs[
+            "figsize"
+        ] = None  # TODO this should not have to be done manually if the parameter is optional
+        inputs["input_df"] = steps.get_step_output(
+            Step, "enrichment_df", inputs["input_df_step_instance"]
+        )
+        return inputs
 
 
 class PlotGOEnrichmentDotPlot(PlotStep):

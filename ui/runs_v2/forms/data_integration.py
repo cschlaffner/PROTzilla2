@@ -1,8 +1,10 @@
 from enum import Enum
 
 import gseapy
+import matplotlib.colors as mcolors
 import restring
 
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.data_integration.database_query import (
     biomart_database,
     uniprot_databases,
@@ -92,6 +94,10 @@ class GSEADotPlotXAxisValue(Enum):
     nes = "NES"
 
 
+class PlotColors(Enum):
+    PROTzilla_default = PROTZILLA_DISCRETE_COLOR_SEQUENCE
+
+
 class EmptyEnum(Enum):
     pass
 
@@ -147,7 +153,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
 
 
 class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
-    protein_df = CustomChoiceField(
+    protein_df_step_instance = CustomChoiceField(
         choices=[],
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
         "log2FC)",
@@ -161,7 +167,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         max_value=4294967295,
         initial=0,
     )
-    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
+    gene_mapping_step_instance = CustomChoiceField(choices=[], label="Gene mapping")
     direction = CustomChoiceField(
         choices=Direction, label="Direction of the analysis", initial=Direction.both
     )
@@ -200,22 +206,10 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
 
     # TODO: correct fill_form, especially how dynamic_parameters work
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fill_helper.get_choices(
+        self.fields["protein_df_step_instance"].choices = fill_helper.get_choices(
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
-        )  # TODO maybe a step type? and maybe rename protein_df to something better
-
-        self.get_field("protein_df")
-
-        # self.fields[
-        #     "differential_expression_col"
-        # ].choices = fill_helper.to_choices(  # TODO this can be moved to the calulcate method
-        #     run.steps.get_step_output(
-        #         step_type=Step,
-        #         output_key=DIFFERENTIALLY_EXPRESSED_PROTEINS_DF,
-        #         instance_identifier=protein_df_instance_id,
-        #     ).columns.unique()
-        # )
-        self.fields["gene_mapping"].choices = fill_helper.get_choices(
+        )
+        self.fields["gene_mapping_step_instance"].choices = fill_helper.get_choices(
             run, "gene_mapping"
         )
 
@@ -304,8 +298,7 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         choices=GOAnalysisWithEnrichrBackgroundField,
         label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
         "will otherwise be ignored!",
-        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file
-
+        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file,
     )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one protein per line, csv or txt)",
@@ -340,7 +333,9 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         ]
         self.fields["differential_expression_col"].choices = column_name
 
-        set.fields["gene_mapping"].choices = fill_helper.get_choices(run, "gene_mapping")
+        set.fields["gene_mapping"].choices = fill_helper.get_choices(
+            run, "gene_mapping"
+        )
 
         self.data = self.data.copy()
         for field_name in [
@@ -468,8 +463,8 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         )
         # Set choices for group2 field based on selected grouping and group1
         if (
-                "group1" in self.data
-                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -484,6 +479,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
     @property
     def is_dynamic(self) -> bool:
         return True
+
     """
     def fill_form(self, run: Run) -> None:
         self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
@@ -551,8 +547,6 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
 
 
 class DatabaseIntegrationByGeneMappingForm(MethodForm):
-    # Todo: gene_mapping
-    # Todo: Add dynamic fill for database name
     database_names = CustomMultipleChoiceField(
         choices=[],
         label="Uniprot databases (offline)",
@@ -573,7 +567,6 @@ class DatabaseIntegrationByGeneMappingForm(MethodForm):
         self.fields["dataframe"].choices = fill_helper.get_choices(
             run, "differentially_expressed_proteins_df"
         )
-        return  # TODO remove this
 
 
 class DatabaseIntegrationByUniprotForm(MethodForm):
@@ -588,7 +581,9 @@ class DatabaseIntegrationByUniprotForm(MethodForm):
 
 class PlotGOEnrichmentBarPlotForm(MethodForm):
     # TODO: input:df fill dynamic with fill_forms
-    input_df = CustomChoiceField(choices=[], label="Choose dataframe to be plotted")
+    input_df_step_instance = CustomChoiceField(
+        choices=[], label="Choose dataframe to be plotted"
+    )
     gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
     value = CustomChoiceField(
         choices=GOEnrichmentBarPlotValue,
@@ -602,27 +597,37 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
         step_size=1,
         initial=10,
     )
-    cutoff = CustomNumberField(
+    cutoff = CustomFloatField(
         label="Only terms with adjusted p-value (or FDR) < cutoff will be shown",
         min_value=0,
         max_value=1,
         step_size=0.01,
         initial=0.05,
     )
-    title = CustomCharField(label="Title of the plot (optional)")
-    # todo: fill with colors
-    # colors = CustomMultipleChoiceField(choices=matplotlib.colors, label="Colors for the plot (optional)")
-    """
+    title = CustomCharField(label="Title of the plot (optional)", required=False)
+
+    colors = CustomMultipleChoiceField(
+        choices=[], label="Colors for the plot (optional)"
+    )  # TODO this should  not have to be set in fill_form
+
     def fill_form(self, run: Run) -> None:
-        if "input_df" not in self.data or self.data["input_df"] == "Protein":
-            self.fields["protein_group"].choices = [
-                (el, el) for el in run.steps.get_instance_identifiers(PlotStep, "enrichment_df").unique()
-            ]
-            run.steps.get_step_output(PlotStep, "gene_sets" )
+        self.fields["colors"].choices = [
+            (v, k) for k, v, in mcolors.CSS4_COLORS.items()
+        ]
+
+        self.fields["input_df_step_instance"].choices = fill_helper.get_choices(
+            run, "enrichment_df"
+        )
+        if self.get_field("input_df_step_instance"):
+            self.fields["gene_sets"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "enrichment_df", self.get_field("input_df_step_instance")
+                )["Gene_set"].unique()
+            )
+
     @property
     def is_dynamic(self) -> bool:
         return True
-    """
 
 
 class PlotGOEnrichmentDotPlotForm(MethodForm):

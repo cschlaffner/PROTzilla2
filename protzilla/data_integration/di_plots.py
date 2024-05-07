@@ -103,7 +103,7 @@ def GO_enrichment_bar_plot(
                     ]
                 )
             ]
-    elif value == "p_value":
+    elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
 
     if colors == "" or colors is None or len(colors) == 0:
@@ -123,7 +123,7 @@ def GO_enrichment_bar_plot(
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
-    return [fig_to_base64(ax.get_figure())]
+    return {"plots": [fig_to_base64(ax.get_figure())]}
 
 
 def GO_enrichment_dot_plot(
