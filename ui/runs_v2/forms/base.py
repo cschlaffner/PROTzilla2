@@ -72,7 +72,7 @@ class MethodForm(Form):
         for field_name, field in self.fields.items():
             if type(field) == CustomFileField:
                 file_name_to_show = self.data[field_name]
-                if pretty_file_names:
+                if pretty_file_names and file_name_to_show:
                     file_name_to_show = get_file_name_from_upload_path(
                         file_name_to_show
                     )
