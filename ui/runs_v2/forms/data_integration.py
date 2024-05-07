@@ -108,11 +108,6 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
         "log2FC)",
     )
-    differential_expression_col = CustomChoiceField(
-        choices=[],
-        label="Column name with differential expression values indicating "
-        "direction of change",
-    )
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
         'values < threshold downregulated. If "log" is in the name of differential_expression_col, '
@@ -133,7 +128,7 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
     )
     background_path = CustomFileField(
         label="Background set (no upload = entire proteome), UniProt IDs (one per line, txt or csv)",
-        initial=None,
+        required=False,
     )
 
     def fill_form(self, run: Run) -> None:

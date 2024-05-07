@@ -35,3 +35,5 @@ steps:
   type: DifferentialExpressionTTest
 - inputs: {}
   type: PlotVolcano
+- inputs: {}
+  type: EnrichmentAnalysisGOAnalysisWithString
