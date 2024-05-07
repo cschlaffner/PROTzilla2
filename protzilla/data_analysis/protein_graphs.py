@@ -1,4 +1,3 @@
-import logging
 import re
 import subprocess
 from collections import defaultdict
@@ -10,6 +9,7 @@ import requests
 
 from protzilla.constants.paths import RUNS_PATH
 from protzilla.constants.protzilla_logging import logger
+from logging import INFO, ERROR
 
 
 def variation_graph(protein_id: str, run_name: str):
@@ -32,7 +32,7 @@ def variation_graph(protein_id: str, run_name: str):
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=ERROR, msg="No protein ID provided")],
         )
 
     out = _create_protein_variation_graph(protein_id=protein_id, run_name=run_name)
@@ -73,7 +73,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
         return dict(
             graph_path=None,
             filtered_blocks=filtered_blocks,
-            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
+            messages=[dict(level=ERROR, msg=msg, trace=request.__dict__)],
         )
 
     output_folder_path = run_path / "graphs"
@@ -92,7 +92,7 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
     return dict(
         graph_path=str(graph_path),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=logging.INFO, msg=msg)],
+        messages=[dict(level=INFO, msg=msg)],
     )
 
 
@@ -102,6 +102,9 @@ def peptides_to_isoform(
     run_name: str,
     k: int = 5,
     allowed_mismatches: int = 2,
+    metadata_df: pd.DataFrame = None,
+    grouping: str = None,
+    selected_groups: list = None,
 ):
     """
     Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph and
@@ -116,6 +119,8 @@ def peptides_to_isoform(
 
     :param peptide_df: Peptide Dataframe with columns "sequence", "protein_id"
     :type peptide_df: pd.DataFrame
+    :param metadata_df: Metadata Dataframe, expected to have a column "Sample"
+    :type metadata_df: pd.DataFrame
     :param protein_id: UniProt Protein-ID
     :type protein_id: str
     :param run_name: name of the run this is executed from. Used for saving the protein
@@ -127,10 +132,14 @@ def peptides_to_isoform(
         peptide and the reference sequence at a given starting location of a potential
         match
     :type allowed_mismatches: int
+    :param grouping: column name of the metadata_df to group by, defaults to None
+    :type grouping: str, optional
+    :param selected_groups: list of groups to include in the analysis, defaults to None
+    :type selected_groups: list, optional
 
     :return: dict of path to graph - either the modified graph or the original graph if
-        the modification failed, the protein id, list of matched peptides, list of unmatched
-        peptides, messages passed to the frontend
+        the modification failed, the protein id, list of matched peptides, list of
+        unmatched peptides, messages passed to the frontend
     :rtype: dict[str, str, list, list, list]
     """
 
@@ -147,17 +156,44 @@ def peptides_to_isoform(
     if not protein_id:
         return dict(
             graph_path=None,
-            messages=[dict(level=logging.ERROR, msg="No protein ID provided")],
+            messages=[dict(level=ERROR, msg="No protein ID provided")],
         )
 
-    peptides = _get_peptides(peptide_df=peptide_df, protein_id=protein_id)
+    if grouping:
+        assert (
+            metadata_df is not None
+        ), f"When selecting Peptides by grouping, Metadata has to have been imported"
+        assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
+    if selected_groups:
+        # convert to always deal with list, will be string if only one category was selected  # noqa E501
+        if isinstance(selected_groups, str):
+            selected_groups = [selected_groups]
+        for group in selected_groups:
+            assert (
+                group in metadata_df[grouping].unique()
+            ), f"Group '{group}' not found in metadata_df column '{grouping}'"
+
+    if grouping is not None and grouping != "Sample":
+        peptide_df = pd.merge(
+            left=peptide_df,
+            right=metadata_df[["Sample", grouping]],
+            on="Sample",
+            copy=False,
+        )
+
+    peptides = _get_peptides(
+        peptide_df=peptide_df,
+        protein_id=protein_id,
+        grouping=grouping,
+        selected_groups=selected_groups,
+    )
 
     if not peptides:
         msg = f"No peptides found for isoform {protein_id} in Peptide Dataframe"
         logger.error(msg)
         return dict(
             graph_path=None,
-            messages=[dict(level=logging.ERROR, msg=msg)],
+            messages=[dict(level=ERROR, msg=msg)],
         )
 
     potential_graph_path = RUNS_PATH / run_name / "graphs" / f"{protein_id}.graphml"
@@ -187,7 +223,7 @@ def peptides_to_isoform(
     if msg:
         return dict(
             graph_path=graph_path,
-            messages=[dict(level=logging.ERROR, msg=msg)],
+            messages=[dict(level=ERROR, msg=msg)],
         )
 
     potential_peptide_matches, peptide_mismatches = _potential_peptide_matches(
@@ -220,65 +256,7 @@ def peptides_to_isoform(
         peptide_matches=sorted(list(peptide_match_node_start_end.keys())),
         peptide_mismatches=sorted(peptide_mismatches),
         filtered_blocks=filtered_blocks,
-        messages=[dict(level=logging.INFO, msg=msg)],
-    )
-
-
-def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
-    """
-    Creates a Protein-Variation-Graph for a given UniProt Protein ID using ProtGraph.
-    Included features are just `Variation`, digestion is skipped.
-    The Graph is saved in .graphml-Format.
-
-    This is designed, so it can be used for peptides_to_isoform but works independently
-    as well
-
-    ProtGraph: https://github.com/mpc-bioinformatics/ProtGraph/
-
-    :param protein_id: UniProt Protein-ID
-    :type protein_id: str
-    :param run_name: name of the run this is executed from. Used for saving the protein
-        file, graph
-    :type run_name: str
-    :param queue_size: Queue Size for ProtGraph, This is yet to be merged by ProtGraph
-    :type queue_size: int
-
-    :return: dict(graph_path, messages)
-    """
-
-    logger.info(f"Creating graph for protein {protein_id}")
-    run_path = RUNS_PATH / run_name
-    path_to_protein_file, filtered_blocks, request = _get_protein_file(
-        protein_id, run_path
-    )
-
-    path_to_protein_file = Path(path_to_protein_file)
-    if not path_to_protein_file.exists() and request.status_code != 200:
-        msg = f"error while downloading protein file for {protein_id}. Statuscode:{request.status_code}, {request.reason}. Got: {request.text}. Tip: check if the ID is correct"
-        logger.error(msg)
-        return dict(
-            graph_path=None,
-            filtered_blocks=filtered_blocks,
-            messages=[dict(level=logging.ERROR, msg=msg, trace=request.__dict__)],
-        )
-
-    output_folder_path = run_path / "graphs"
-    output_csv = output_folder_path / f"{protein_id}.csv"
-    graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
-                --export_output_folder={output_folder_path} \
-                --output_csv={output_csv} \
-                -ft VARIANT \
-                -d skip"
-
-    subprocess.run(cmd_str, shell=True)
-
-    msg = f"Graph created for protein {protein_id} at {graph_path} using {path_to_protein_file}"
-    logger.info(msg)
-    return dict(
-        graph_path=str(graph_path),
-        filtered_blocks=filtered_blocks,
-        messages=[dict(level=logging.INFO, msg=msg)],
+        messages=[dict(level=INFO, msg=msg)],
     )
 
 
@@ -398,7 +376,8 @@ def _longest_paths(protein_graph: nx.DiGraph, start_node: str):
                 distances[succ] = max(distances[succ], distances[node] + node_len)
         else:
             raise Exception(
-                f"The node {node} was not visited in the topological order (distance should be set already)"  # noqa E501
+                f"The node {node} was not visited in the topological order (distance should be set already)"
+                # noqa E501
             )
 
     longest_paths = dict(sorted(distances.items(), key=lambda x: x[1]))
@@ -1024,20 +1003,44 @@ def _modify_graph(graph, contig_positions):
     return graph
 
 
-def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None:
+def _get_peptides(
+    peptide_df: pd.DataFrame,
+    protein_id: str,
+    grouping: str | None,
+    selected_groups: list | None,
+) -> list[str] | None:
     """
     Get peptides for a protein ID from a peptide dataframe.
     Includes all peptides where either just the protein ID occurs or it is in the group
-    of proteins associated with a given peptide
+    of proteins associated with a given peptide. After selecting by protein id and if
+    the grouping and selected_groups are set, the peptides are filtered by the grouping
+    column, including everything that matches any of the selected groups.
 
     :param peptide_df: Peptide dataframe
     :type peptide_df: pd.DataFrame
     :param protein_id: (UniProt) Protein ID
     :type protein_id: str
+    :param grouping: Column name of the grouping column in the peptide dataframe
+    :type: str | None
+    :param selected_groups: List of groups from grouping column to include
+    :type: str | None
 
     :return: List of peptides
     :rtype: list[str]
     """
+
+    if grouping is not None:
+        assert (
+            grouping in peptide_df.columns
+        ), f"Grouping '{grouping}' not found in peptide_df"
+
+    if selected_groups is not None:
+        if grouping is None:
+            raise ValueError("Grouping must be set if selected_groups is set")
+        for group in selected_groups:
+            assert (
+                group in peptide_df[grouping].unique()
+            ), f"Group '{group}' not found in peptide_df column '{grouping}'"
 
     df = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     pattern = rf"^({protein_id}-\d+)$"
@@ -1047,6 +1050,11 @@ def _get_peptides(peptide_df: pd.DataFrame, protein_id: str) -> list[str] | None
     intensity_name = [col for col in df.columns if "intensity" in col.lower()][0]
     df = df.dropna(subset=[intensity_name])
     df = df[df[intensity_name] != 0]
+
+    # only get peptides where grouping-column matches at least one of selected_groups
+    if grouping is not None and selected_groups is not None:
+        mask = df[grouping].isin(selected_groups)
+        df = df[mask]
 
     peptides = df["Sequence"].unique().tolist()
     return peptides
