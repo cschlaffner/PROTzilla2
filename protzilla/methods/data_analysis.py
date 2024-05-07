@@ -16,6 +16,7 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
+from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
 
@@ -62,6 +63,7 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
         return anova(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
@@ -101,6 +103,7 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         return t_test(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
@@ -139,6 +142,7 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         return linear_model(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs

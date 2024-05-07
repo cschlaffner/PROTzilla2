@@ -415,6 +415,36 @@ class StepManager:
                 return val
         return None
 
+    def get_step_input(
+        self,
+        step_type: type[Step],
+        input_key: str,
+        instance_identifier: str | None = None,
+    ):
+        """
+        Get the specific input of the inputs of a specific step type. The step type can also a parent class of the
+        step type, in which case the input of the most recent step of the specific type is returned.
+        :param step_type: The type of the step as a class object
+        :param input_key: The key of the desired input in the input dictionary of the step
+        :return: The value of the input of the step or None
+        """
+
+        def check_instance_identifier(step):
+            return (
+                step.instance_identifier == instance_identifier
+                if instance_identifier is not None
+                else True
+            )
+
+        for step in reversed(self.previous_steps):
+            if (
+                isinstance(step, step_type)
+                and check_instance_identifier(step)
+                and input_key in step.inputs
+            ):
+                return step.inputs[input_key]
+        return None
+
     def all_steps_in_section(self, section: str) -> list[Step]:
         """
         Get all steps in a specific section via the section name

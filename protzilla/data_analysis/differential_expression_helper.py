@@ -78,9 +78,9 @@ INVALID_PROTEINGROUP_DATA_MSG = {
 }
 LOG_TRANSFORMATION_MESSAGE_MSG = {
     "level": logging.INFO,
-    "msg": "Because the data was not log-transformed, it was log2-transformed for this analysis. If this is incorrect, please select the correct log base.",
+    "msg": "Because the data was not log-transformed, it was log2-transformed for this analysis. If this is incorrect, please transform it yourself with the correct log base",
 }
 BAD_LOG_BASE_INPUT_MSG = {
-    "level": logging.WARNING,
-    "msg": "The log-base is likely wrong, as the value range of the intensity does not match the given log-base. Please make sure that you have selected the correct log-base.",
+    "level": logging.ERROR,
+    "msg": "The log-base is likely wrong, as the value range of the intensity does not match the calculated log-base. Please report this to the developer with your workflow.",
 }

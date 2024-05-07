@@ -188,7 +188,9 @@ class DiskOperator:
                             logging.error(f"Error while reading output {key}: {e}")
                             step_output[key] = value
                     else:
-                        logging.warning(f"Output file {value} does not exist")
+                        logging.warning(
+                            f"Output file {value} does not exist"
+                        )  # TODO sometimes there are strings that should still be saved as such, fix this
                 else:
                     step_output[key] = value
             return Output(step_output)
@@ -219,9 +221,12 @@ class DiskOperator:
             for i, plot in enumerate(plots):
                 file_path = self.plot_dir / f"{step_name}_plot{i}.json"
                 self.plot_dir.mkdir(parents=True, exist_ok=True)
-                write_json(plot, file_path)
-                plot.write_image(str(file_path).replace(".json", ".png"))
-                plots_data[i] = str(file_path)
+                if not isinstance(
+                    plot, bytes
+                ):  # TODO the data integration plots are of type byte, and therefore cannot be written using this methodology
+                    write_json(plot, file_path)
+                    plot.write_image(str(file_path).replace(".json", ".png"))
+                    plots_data[i] = str(file_path)
             return plots_data
 
     @property

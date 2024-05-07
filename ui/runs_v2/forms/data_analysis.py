@@ -33,11 +33,6 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
-class LogBase(Enum):
-    log2 = "log2"
-    log10 = "log10"
-
-
 class YesNo(Enum):
     yes = "Yes"
     no = "No"
@@ -160,12 +155,6 @@ class DifferentialExpressionANOVAForm(MethodForm):
     alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        initial=LogBase.log2,
-        required=False,
-    )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     selected_groups = CustomMultipleChoiceField(
@@ -204,11 +193,11 @@ class DifferentialExpressionTTestForm(MethodForm):
         step_size=0.05,
         initial=0.05,
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation (optional)",
-        required=False,
-    )
+    # log_base = CustomChoiceField(
+    #     choices=LogBase,
+    #     label="Base of the log transformation (optional)",
+    #     required=False,
+    # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
@@ -252,11 +241,6 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     )
     alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
-    )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        initial=LogBase.log2,
     )
     grouping = "Put a usefull initial here"
     group1 = "Put a usefull initial here"
