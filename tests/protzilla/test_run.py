@@ -1,5 +1,6 @@
 from pathlib import Path
 from shutil import rmtree
+import logging
 
 import pytest
 
@@ -12,7 +13,7 @@ from protzilla.run_v2 import Run
 class TestRun:
     @pytest.fixture
     def run_standard(
-        self,
+            self,
     ):
         # delete the previous run
         run_path = Path(paths.RUNS_PATH) / "test_run"
@@ -45,7 +46,7 @@ class TestRun:
     def maxquant_data_file(self):
         return str(
             (
-                Path(paths.TEST_DATA_PATH) / "MaxQuant_data" / "proteinGroups.txt"
+                    Path(paths.TEST_DATA_PATH) / "MaxQuant_data" / "proteinGroups.txt"
             ).absolute()
         )
 
@@ -106,11 +107,15 @@ class TestRun:
         run.step_previous()
         assert run.current_step != step
 
-    def test_step_goto(self, run):
+    def test_step_goto(self, caplog, run):
         step = ImputationByMinPerProtein()
         run.step_add(step)
-        with pytest.raises(ValueError):
-            run.step_goto(0, "data_preprocessing")
+        run.step_goto(0, "data_preprocessing")
+        assert any(
+            message["level"] == logging.ERROR and
+            "ValueError" in message["msg"]
+            for message in run.current_messages
+        ), "No error messages found in run.current_messages"
         assert run.current_step != step
         run.step_next()
         assert run.current_step == step
