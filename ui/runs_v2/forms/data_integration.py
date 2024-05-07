@@ -27,9 +27,9 @@ DIFFERENTIALLY_EXPRESSED_PROTEINS_DF = "differentially_expressed_proteins_df"
 
 
 class Direction(Enum):
-    up = "Up"
-    down = "Down"
-    both = "Both"
+    up = "up"
+    down = "down"
+    both = "both"
 
 
 class GeneSetField(Enum):
@@ -168,11 +168,6 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
         "log2FC)",
     )
-    differential_expression_col = CustomChoiceField(
-        choices=[],
-        label="Column name with differential expression values indicating "
-        "direction of change",
-    )
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
         'values < threshold downregulated. If "log" is in the name of differential_expression_col, '
@@ -225,17 +220,17 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )  # TODO maybe a step type? and maybe rename protein_df to something better
 
-        protein_df_instance_id = self.get_field("protein_df")
+        self.get_field("protein_df")
 
-        self.fields[
-            "differential_expression_col"
-        ].choices = fill_helper.to_choices(  # TODO this can be moved to the calulcate method
-            run.steps.get_step_output(
-                step_type=Step,
-                output_key=DIFFERENTIALLY_EXPRESSED_PROTEINS_DF,
-                instance_identifier=protein_df_instance_id,
-            ).columns.unique()
-        )
+        # self.fields[
+        #     "differential_expression_col"
+        # ].choices = fill_helper.to_choices(  # TODO this can be moved to the calulcate method
+        #     run.steps.get_step_output(
+        #         step_type=Step,
+        #         output_key=DIFFERENTIALLY_EXPRESSED_PROTEINS_DF,
+        #         instance_identifier=protein_df_instance_id,
+        #     ).columns.unique()
+        # )
         self.fields["gene_mapping"].choices = fill_helper.get_choices(
             run, "gene_mapping"
         )
@@ -355,7 +350,11 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
                 instance_identifier=protein_df_instance_id,
             ).columns.unique()
         )
-        column_name = [(value, label) for value, label in column_name if label not in ["Protein ID", "Sample"]]
+        column_name = [
+            (value, label)
+            for value, label in column_name
+            if label not in ["Protein ID", "Sample"]
+        ]
         self.fields["differential_expression_col"].choices = column_name
 
     @property

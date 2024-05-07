@@ -49,7 +49,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
     operation = "enrichment_analysis"
     method_description = "Online GO analysis using Enrichr API"
     input_keys = [
-        "protein_df",
+        "proteins_df",
         "differential_expression_col",
         "differential_expression_threshold",
         "gene_mapping",
@@ -72,6 +72,14 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
         inputs["proteins_df"] = steps.get_step_output(
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
+        if (
+            inputs.get("proteins_df") is None
+            or not "log2_fold_change" in inputs["proteins_df"].columns
+        ):
+            raise ValueError(
+                "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
+            )
+        inputs["differential_expression_col"] = "log2_fold_change"
         inputs["gene_mapping"] = steps.get_step_output(
             Step, "gene_mapping", inputs["gene_mapping"]
         )
