@@ -38,11 +38,8 @@ class CustomSelectMultiple(SelectMultiple):
         hidden_option_html = mark_safe(
             "<option value='hidden' style='display: none;' selected>Hidden option</option>"
         )
-        idx = input_html.find(">") + 3
+        idx = input_html.find(">") + 1
         return mark_safe(f"{input_html[:idx]}{hidden_option_html}{input_html[idx:]}")
-
-
-# Custom Fields
 
 
 class CustomChoiceField(ChoiceField):
@@ -74,7 +71,7 @@ class CustomChoiceField(ChoiceField):
 
 
 class CustomMultipleChoiceField(MultipleChoiceField):
-    def __init__(self, choices: Enum, initial=None, *args, **kwargs):
+    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
             super().__init__(choices=choices, *args, **kwargs)
         else:
