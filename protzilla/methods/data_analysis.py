@@ -182,7 +182,7 @@ class PlotVolcano(PlotStep):
         return inputs
 
 
-class PlotScatter(PlotStep):
+class PlotScatterPlot(PlotStep):
     display_name = "Scatter Plot"
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
