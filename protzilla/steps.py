@@ -501,10 +501,10 @@ class StepManager:
             raise ValueError("Either step or step_index and section must be provided")
 
         if step is None:
-            if step_index < self.current_step_index:
-                self.current_step_index -= 1
             step = self.all_steps_in_section(section)[step_index]
-
+            global_step_index = self.all_steps.index(step)
+            if global_step_index < self.current_step_index:
+                self.current_step_index -= 1
         self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
