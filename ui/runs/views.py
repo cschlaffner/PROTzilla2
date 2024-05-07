@@ -139,7 +139,7 @@ def detail(request, run_name):
             plot_fields=make_plot_fields(run, section, step, method),  # TODO
             name_field=make_name_field(
                 run.current_step.finished, run, end_of_run
-            ),  # TODo
+            ),  # TODO
             current_plots=current_plots,
             results_exist=run.current_step.finished,
             show_back=run.steps.current_step_index > 0,

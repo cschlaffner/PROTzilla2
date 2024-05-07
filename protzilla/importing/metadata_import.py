@@ -114,7 +114,6 @@ def metadata_import_method_diann(
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
-            protein_df=None,
             metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
