@@ -234,22 +234,27 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):
+    is_dynamic = True
     protein_df = CustomChoiceField(
         choices=[], label="Step to use protein intensities from"
     )
-    multiple_testing_correction = CustomChoiceField(
+    multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
-        label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
+        label="Multiple testing correction",
     )
-    alpha = CustomNumberField(
-        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.05,
+        initial=0.05,
     )
-    #log_base = CustomChoiceField(
-    #    choices=LogBase,
-    #    label="Base of the log transformation",
-    #    required=False,
-    #)
+    # log_base = CustomChoiceField(
+    #     choices=LogBase,
+    #     label="Base of the log transformation (optional)",
+    #     required=False,
+    # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
@@ -283,6 +288,7 @@ class DifferentialExpressionLinearModelForm(MethodForm):
             self.fields["group2"].choices = reversed(
                 fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
             )
+
 
 class PlotVolcanoForm(MethodForm):
     is_dynamic = True
