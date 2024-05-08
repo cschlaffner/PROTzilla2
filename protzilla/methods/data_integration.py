@@ -199,7 +199,7 @@ class DatabaseIntegrationByGeneMapping(DataIntegrationStep):
     method_description = "Map protein groups to genes"
     input_keys = ["dataframe", "database_names", "use_biomart"]
 
-    output_keys = ["gene_mapping"]
+    output_keys = ["protein_group_to_genes", "gene_to_protein_groups", "filtered"]
 
     def method(self, inputs: dict) -> dict:
         return database_integration.gene_mapping(**inputs)

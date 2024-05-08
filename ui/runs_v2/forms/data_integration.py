@@ -136,18 +136,13 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )  # TODO maybe a step type? and maybe rename protein_df to something better
 
-        self.get_field("protein_df")
-
         self.fields["gene_sets_restring"].choices = fill_helper.to_choices(
             restring.settings.file_types
         )
 
-    @property
-    def is_dynamic(self) -> bool:
-        return True
-
 
 class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
+    is_dynamic = True
     protein_df_step_instance = CustomChoiceField(
         choices=[],
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
@@ -199,7 +194,6 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
     )
     background_biomart = CustomChoiceField(choices=[], label="Biomart dataset")
 
-    # TODO: correct fill_form, especially how dynamic_parameters work
     def fill_form(self, run: Run) -> None:
         self.fields["protein_df_step_instance"].choices = fill_helper.get_choices(
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
@@ -252,21 +246,13 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         ):
             self.toggle_visibility("background_number", True)
 
-    @property
-    def is_dynamic(self) -> bool:
-        return True
-
 
 class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
-    proteins_df = CustomChoiceField(
+    is_dynamic = True
+    protein_df_step_instance = CustomChoiceField(
         choices=[],
         label="Dataframe with protein IDs and direction of expression change column (e.g. "
         "log2FC)",
-    )
-    differential_expression_col = CustomChoiceField(
-        choices=[],
-        label="Column name with differential expression values indicating "
-        "direction of change",
     )
     differential_expression_threshold = CustomNumberField(
         label="Threshold for differential expression: proteins with values > threshold are upregulated, proteins "
@@ -277,14 +263,13 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
         max_value=4294967295,
         initial=0,
     )
-    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
+    gene_mapping_step_instance = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_path = CustomFileField(
         label="Upload gene sets with uppercase gene symbols (any of the following file "
         "types: .gmt, .txt, .csv, .json | .txt (one set per line): SetName "
         "followed by tab-separated list of proteins | .csv (one set per line): "
         "SetName, Gene1, Gene2, ... | .json: {SetName: [Gene1, Gene2, ...], "
         "SetName2: [Gene2, Gene3, ...]})",
-        initial=None,
     )
     direction = CustomChoiceField(
         choices=Direction, label="Direction of the analysis", initial=Direction.both
@@ -308,27 +293,10 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fill_helper.get_choices(
+        self.fields["protein_df_step_instance"].choices = fill_helper.get_choices(
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )
-
-        protein_df_instance_id = self.get_field("protein_df")
-
-        column_name = fill_helper.to_choices(
-            run.steps.get_step_output(
-                step_type=Step,
-                output_key="differentially_expressed_proteins_df",
-                instance_identifier=protein_df_instance_id,
-            ).columns.unique()
-        )
-        column_name = [
-            (value, label)
-            for value, label in column_name
-            if label not in ["Protein ID", "Sample"]
-        ]
-        self.fields["differential_expression_col"].choices = column_name
-
-        set.fields["gene_mapping"].choices = fill_helper.get_choices(
+        self.fields["gene_mapping_step_instance"].choices = fill_helper.get_choices(
             run, "gene_mapping"
         )
 
@@ -349,10 +317,6 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
             == GOAnalysisWithEnrichrBackgroundField.number_of_expressed_genes.value
         ):
             self.toggle_visibility("background_number", True)
-
-    @property
-    def is_dynamic(self) -> bool:
-        return True
 
 
 class EnrichmentAnalysisWithGSEAForm(MethodForm):

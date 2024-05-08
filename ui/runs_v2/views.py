@@ -10,6 +10,7 @@ from django.http import (
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
+    FileResponse,
 )
 from django.shortcuts import render
 from django.urls import reverse
@@ -41,6 +42,12 @@ from .form_mapping import (
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
+
+from protzilla.steps import Step
+
+import pandas as pd
+
+import io
 
 active_runs: dict[str, Run] = {}
 
@@ -577,3 +584,21 @@ def add_name(request, run_name):
     run = active_runs[run_name]
     run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
+
+
+def download_table(request, run_name, index, key):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
+    run = active_runs[run_name]
+
+    instance_id = run.steps.all_steps[index].instance_identifier
+    buffer = io.StringIO()
+    df: pd.DataFrame = run.steps.get_step_output(
+        Step, key, instance_id, include_current_step=True
+    )
+    df.to_csv(buffer)
+
+    buffer.seek(0)
+    csv_bytes = buffer.getvalue()
+
+    return FileResponse(csv_bytes, content_type="text/csv")
