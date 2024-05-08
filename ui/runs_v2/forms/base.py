@@ -29,6 +29,9 @@ class MethodForm(Form):
         else:
             try:
                 self.fill_form(run)
+                for field_name, field in self.fields.items():
+                    if hasattr(field, "choices"):
+                        self.fields[field_name].choices = field.choices
             except Exception as e:
                 logging.error(f"Error while filling form {e}: {traceback.format_exc()}")
 
