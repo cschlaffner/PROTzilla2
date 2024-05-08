@@ -38,7 +38,6 @@ class Step:
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
-        self._finished: bool = False
 
         # append a random string of 5 chars to make the instance_identifier unique
         self.instance_identifier = (
@@ -67,9 +66,10 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
+        steps._clear_future_steps()
+
         self.form_inputs = inputs.copy()
         self.inputs = inputs.copy()
-        self._finished = False
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -79,8 +79,7 @@ class Step:
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
 
-            if self.validate_outputs():
-                self._finished = True
+            self.validate_outputs()
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -205,9 +204,12 @@ class Step:
     def finished(self) -> bool:
         """
         Return whether the step has valid outputs and is therefore considered finished.
+        Plot steps without required outputs are considered finished if they have plots.
         :return: True if the step is finished, False otherwise
         """
-        return self._finished or self.validate_outputs(soft_check=True)
+        if len(self.output_keys) == 0:
+            return not self.plots.empty
+        return self.validate_outputs(soft_check=True)
 
 
 class Output:
@@ -352,12 +354,15 @@ class StepManager:
     def get_instance_identifiers(
         self, step_type: type[Step], output_key: str = None
     ) -> list[str]:
-        return [
+        instance_identifiers = [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
             and (output_key is None or output_key in step.output)
         ]
+        if not instance_identifiers:
+            logging.warning(f"No instance identifiers found for {step_type}")
+        return instance_identifiers
 
     def get_step_output(
         self,
@@ -541,12 +546,12 @@ class StepManager:
             )
         if step is None and (step_index is None or section is None):
             raise ValueError("Either step or step_index and section must be provided")
-
         if step is None:
             step = self.all_steps_in_section(section)[step_index]
-            global_step_index = self.all_steps.index(step)
-            if global_step_index < self.current_step_index:
-                self.current_step_index -= 1
+        global_step_index = self.all_steps.index(step)
+        self._clear_future_steps(global_step_index)
+        if global_step_index < self.current_step_index:
+            self.current_step_index -= 1
         self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
@@ -584,6 +589,16 @@ class StepManager:
         else:
             raise ValueError("Cannot go back from the first step")
 
+    @property
+    def future_steps(self) -> list[Step]:
+        """
+        Get all steps that are after the current step in the workflow.
+        :return: A list of steps that are after the current step
+        """
+        if self.is_at_last_step:
+            return []
+        return self.all_steps[self.current_step_index + 1 :]
+
     def goto_step(self, step_index: int, section: str) -> None:
         """
         Go to a specific step in the workflow.
@@ -601,8 +616,6 @@ class StepManager:
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
         if new_step_index < self.current_step_index:
-            for i in range(new_step_index, self.current_step_index):
-                self.all_steps[i].output = Output()
             self.current_step_index = new_step_index
         else:
             raise ValueError("Cannot go to a step that is after the current step")
@@ -631,7 +644,18 @@ class StepManager:
                 self.current_step
             )
             self.all_steps_in_section(self.current_section)[current_index] = new_step
+            self._clear_future_steps()
         except ValueError:
             raise ValueError(f"Unknown section {self.current_section}")
         except Exception as e:
             logging.error(f"Error while changing method: {e}")
+
+    def _clear_future_steps(self, index: int | None = None) -> None:
+        if index == None:
+            index = self.current_step_index
+        if index == len(self.all_steps) - 1:
+            return
+        for step in self.all_steps[index + 1 :]:
+            step.output = Output()
+            step.messages = Messages()
+            step.plots = Plots()
