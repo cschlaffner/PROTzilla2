@@ -9,6 +9,7 @@ from django.forms import (
     FileField,
     FloatField,
     MultipleChoiceField,
+    TextInput,
 )
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
@@ -98,6 +99,8 @@ class CustomFileField(FileField):
         if cleaned is not None:
             return cleaned.file.file.name
         return ""
+
+
 class CustomBooleanField(BooleanField):
     def __init__(self, label: str, required=False, *args, **kwargs):
         super().__init__(label="", required=required, *args, **kwargs)
@@ -115,8 +118,10 @@ class CustomNumberField(DecimalField):
 
 
 class CustomCharField(CharField):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, placeholder: str | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if placeholder:
+            self.widget = TextInput(attrs={"placeholder": placeholder})
         self.widget.attrs.update({"class": "form-control mb-2"})
 
 
