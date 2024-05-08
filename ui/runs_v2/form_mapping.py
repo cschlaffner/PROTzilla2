@@ -1,13 +1,13 @@
 from django.http import HttpRequest
 
 import protzilla.methods.data_analysis as data_analysis
+import protzilla.methods.data_integration as data_integration
 import protzilla.methods.data_preprocessing as data_preprocessing
 import protzilla.methods.importing as importing
-import protzilla.methods.data_integration as data_integration
 import ui.runs_v2.forms.data_analysis as data_analysis_forms
+import ui.runs_v2.forms.data_integration as data_integration_forms
 import ui.runs_v2.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs_v2.forms.importing as importing_forms
-import ui.runs_v2.forms.data_integration as data_integration_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
 
@@ -34,7 +34,11 @@ _forward_mapping = {
     data_preprocessing.NormalisationByMedian: data_preprocessing_forms.NormalisationByMedianForm,
     data_preprocessing.NormalisationByReferenceProtein: data_preprocessing_forms.NormalisationByReferenceProteinForms,
     data_preprocessing.ImputationByMinPerDataset: data_preprocessing_forms.ImputationByMinPerDatasetForm,
-    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinForm,
+    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationByMinPerProteinForm,
+    data_preprocessing.SimpleImputationPerProtein: data_preprocessing_forms.SimpleImputationPerProteinForm,
+    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNForms,
+    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingForm,
+    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdForm,
     data_analysis.DifferentialExpressionANOVA: data_analysis_forms.DifferentialExpressionANOVAForm,
     data_analysis.DifferentialExpressionTTest: data_analysis_forms.DifferentialExpressionTTestForm,
     data_analysis.DifferentialExpressionLinearModel: data_analysis_forms.DifferentialExpressionLinearModelForm,
@@ -55,10 +59,6 @@ _forward_mapping = {
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
-    data_preprocessing.SimpleImputationPerProtein: data_preprocessing_forms.SimpleImputationPerProteinForm,
-    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNForms,
-    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingForm,
-    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithString: data_integration_forms.EnrichmentAnalysisGOAnalysisWithStringForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithEnrichr: data_integration_forms.EnrichmentAnalysisGOAnalysisWithEnrichrForm,
     data_integration.EnrichmentAnalysisGOAnalysisOffline: data_integration_forms.EnrichmentAnalysisGOAnalysisOfflineForm,
@@ -73,7 +73,22 @@ _forward_mapping = {
 }
 
 _forward_mapping_plots = {
-    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationMinPerProteinPlotForm,
+    data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingPlotForm,
+    data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountPlotForm,
+    data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingPlotForm,
+    data_preprocessing.FilterSamplesByProteinIntensitiesSum: data_preprocessing_forms.FilterSamplesByProteinIntensitiesSumPlotForm,
+    data_preprocessing.TransformationLog: data_preprocessing_forms.TransformationLogPlotForm,
+    data_preprocessing.NormalisationByZScore: data_preprocessing_forms.NormalisationByZscorePlotForm,
+    data_preprocessing.NormalisationByTotalSum: data_preprocessing_forms.NormalisationByTotalSumPlotForm,
+    data_preprocessing.NormalisationByMedian: data_preprocessing_forms.NormalisationByMedianPlotForm,
+    data_preprocessing.NormalisationByReferenceProtein: data_preprocessing_forms.NormalisationByReferenceProteinPlotForm,
+    data_preprocessing.ImputationByMinPerDataset: data_preprocessing_forms.ImputationByMinPerDatasetPlotForm,
+    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationByMinPerProteinPlotForm,
+    data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSamplePlotForm,
+    data_preprocessing.SimpleImputationPerProtein: data_preprocessing_forms.SimpleImputationPerProteinPlotForm,
+    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNPlotForm,
+    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingPlotForm,
+    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdPlotForm,
 }
 
 
