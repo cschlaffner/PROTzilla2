@@ -8,6 +8,11 @@ html, body {
     align-items: stretch;
 }
 
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
 #content {
     order: 1;
     padding: 20px;
