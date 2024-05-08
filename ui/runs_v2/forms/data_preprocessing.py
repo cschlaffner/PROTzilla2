@@ -50,11 +50,6 @@ class VisualTrasformations(Enum):
     log10 = "log10"
 
 
-class GraphTypesImputedValues(Enum):
-    bar = "Bar chart"
-    pie = "Pie chart"
-
-
 class VisulaTransformations(Enum):
     linear = "linear"
     log10 = "log10"

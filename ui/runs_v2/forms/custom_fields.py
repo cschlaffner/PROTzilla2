@@ -45,7 +45,7 @@ class CustomSelectMultiple(SelectMultiple):
 class CustomChoiceField(ChoiceField):
     def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
-            super().__init__(choices=choices, *args, **kwargs)
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
                 choices=[(el.value, el.value) for el in choices],
@@ -73,7 +73,7 @@ class CustomChoiceField(ChoiceField):
 class CustomMultipleChoiceField(MultipleChoiceField):
     def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
-            super().__init__(choices=choices, *args, **kwargs)
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
                 choices=[(el.value, el.value) for el in choices],
