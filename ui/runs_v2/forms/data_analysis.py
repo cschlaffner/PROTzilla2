@@ -245,11 +245,11 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    #log_base = CustomChoiceField(
+    # log_base = CustomChoiceField(
     #    choices=LogBase,
     #    label="Base of the log transformation",
     #    required=False,
-    #)
+    # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
@@ -283,6 +283,7 @@ class DifferentialExpressionLinearModelForm(MethodForm):
             self.fields["group2"].choices = reversed(
                 fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
             )
+
 
 class PlotVolcanoForm(MethodForm):
     is_dynamic = True
@@ -888,6 +889,5 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
 
 class ProteinGraphVariationGraphForm(MethodForm):
     protein_ID = CustomCharField(
-        label="Protein ID", initial="Enter the Uniprot-ID of the protein"
+        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
     )
-    # TODO: workflow_meta line 2291 - 2295

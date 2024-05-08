@@ -583,10 +583,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."
 
-    input_keys = [
-        "protein_id",
-        "run_name",
-    ]
+    input_keys = ["protein_id"]
     output_keys = [
         "graph_path",
         "filtered_blocks",
@@ -596,6 +593,4 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         return variation_graph(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["peptide_df"] = steps.peptide_df
-        inputs["isoform_df"] = steps.isoform_df
         return inputs
