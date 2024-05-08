@@ -104,6 +104,10 @@ class Run:
     def _run_write(self) -> None:
         self.disk_operator.write_run(self.steps)
 
+    @property
+    def run_path(self) -> str:
+        return self.disk_operator.run_dir
+
     @error_handling
     @auto_save
     def _workflow_read(self) -> None:

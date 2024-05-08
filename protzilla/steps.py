@@ -148,9 +148,9 @@ class Step:
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
-    def plot(self, inputs: dict):
+    def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
-            "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
+            f"Plotting is not implemented for this step ({self.display_name}). Only preprocessing methods can have additional plots."
         )
 
     def validate_inputs(self, required_keys: list[str] = None) -> bool:
@@ -467,8 +467,20 @@ class StepManager:
         return self.all_steps[self.current_step_index]
 
     @property
+    def current_operation(self) -> str:
+        return self.current_step.operation
+
+    @property
     def current_section(self) -> str:
         return self.current_step.section
+
+    @property
+    def current_location(self) -> tuple[str, str, str]:
+        return (
+            self.current_section,
+            self.current_operation,
+            self.current_step.instance_identifier,
+        )
 
     @property
     def protein_df(self) -> pd.DataFrame:
