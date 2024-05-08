@@ -17,6 +17,7 @@ from .custom_fields import (
     CustomMultipleChoiceField,
     CustomNumberField,
 )
+from .fill_helper import to_choices
 
 
 class TTestType(Enum):
@@ -452,6 +453,8 @@ class PlotROCCurveForm(MethodForm):
 
 
 class ClusteringKMeansForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -514,8 +517,23 @@ class ClusteringKMeansForm(MethodForm):
         initial=1e-4,
     )
 
+    def fill_form(self, run: Run) -> None:
+        self.fields["labels_column"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        metadata = run.steps.metadata_df
+        metadata_column = self.data.get("labels_column", self.fields["labels_column"].choices[0][0])
+        self.fields["positive_label"].choices = to_choices(metadata[metadata_column].unique())
+
+        model_selection = self.data.get("model_selection", self.fields["model_selection"].choices[0][0])
+        if model_selection == ModelSelection.grid_search.value or model_selection == ModelSelection.randomized_search.value:
+            self.toggle_visibility("model_selection_scoring", True)
+        else:
+            self.toggle_visibility("model_selection_scoring", False)
+
 
 class ClusteringExpectationMaximizationForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -524,7 +542,6 @@ class ClusteringExpectationMaximizationForm(MethodForm):
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
     )
-    # TODO: Add dynamic fill for labels_column & positive_label
     labels_column = CustomChoiceField(
         choices=[], label="Choose labels column from metadata"
     )
@@ -534,7 +551,7 @@ class ClusteringExpectationMaximizationForm(MethodForm):
         label="Choose strategy to perform parameter fine-tuning",
         initial=ModelSelection.grid_search,
     )
-    # TODO: Add dynamic parameters for grid search & randomized search
+    # TODO Add dynamic parameters for grid search & randomized search
     # TODO Add dynamic parameter for model selection scoring
     model_selection_scoring = CustomChoiceField(
         choices=ClusteringScoring,
@@ -575,13 +592,27 @@ class ClusteringExpectationMaximizationForm(MethodForm):
         initial=0,
     )
 
+    def fill_form(self, run: Run) -> None:
+        self.fields["labels_column"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        metadata = run.steps.metadata_df
+        metadata_column = self.data.get("labels_column", self.fields["labels_column"].choices[0][0])
+        self.fields["positive_label"].choices = to_choices(metadata[metadata_column].unique())
+
+        model_selection = self.data.get("model_selection", self.fields["model_selection"].choices[0][0])
+        if model_selection == ModelSelection.grid_search.value or model_selection == ModelSelection.randomized_search.value:
+            self.toggle_visibility("model_selection_scoring", True)
+        else:
+            self.toggle_visibility("model_selection_scoring", False)
+
 
 class ClusteringHierarchicalAgglomerativeClusteringForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
     )
-    # TODO: Add dynamic fill for labels_column & positive_label
     labels_column = CustomChoiceField(
         choices=[], label="Choose labels column from metadata"
     )
@@ -616,6 +647,19 @@ class ClusteringHierarchicalAgglomerativeClusteringForm(MethodForm):
         label="The linkage criterion to use in order to to determine the distance to use between sets of observation",
         initial=ClusteringLinkage.ward,
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["labels_column"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        metadata = run.steps.metadata_df
+        metadata_column = self.data.get("labels_column", self.fields["labels_column"].choices[0][0])
+        self.fields["positive_label"].choices = to_choices(metadata[metadata_column].unique())
+
+        model_selection = self.data.get("model_selection", self.fields["model_selection"].choices[0][0])
+        if model_selection == ModelSelection.grid_search.value or model_selection == ModelSelection.randomized_search.value:
+            self.toggle_visibility("model_selection_scoring", True)
+        else:
+            self.toggle_visibility("model_selection_scoring", False)
 
 
 class ClassificationRandomForestForm(MethodForm):
