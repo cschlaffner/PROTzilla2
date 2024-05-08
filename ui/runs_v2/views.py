@@ -127,7 +127,7 @@ def detail(request: HttpRequest, run_name: str):
             run_name=run_name,
             section=run.current_step.section,
             step=run.current_step,
-            display_name=f"{name_to_title(run.current_step.section)} - {run.current_step.display_name}",
+            display_name=f"{name_to_title(run.current_step.operation)} - {run.current_step.display_name}",
             displayed_history=make_displayed_history(
                 run
             ),  # TODO: make NewRun compatible
