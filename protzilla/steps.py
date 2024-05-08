@@ -66,10 +66,8 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        for step in steps.future_steps:
-            step.output = Output()
-            step.messages = Messages()
-            step.plots = Plots()
+        steps._clear_future_steps()
+
         self.form_inputs = inputs.copy()
         self.inputs = inputs.copy()
 
@@ -356,12 +354,15 @@ class StepManager:
     def get_instance_identifiers(
         self, step_type: type[Step], output_key: str = None
     ) -> list[str]:
-        return [
+        instance_identifiers = [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
             and (output_key is None or output_key in step.output)
         ]
+        if not instance_identifiers:
+            logging.warning(f"No instance identifiers found for {step_type}")
+        return instance_identifiers
 
     def get_step_output(
         self,
@@ -545,12 +546,12 @@ class StepManager:
             )
         if step is None and (step_index is None or section is None):
             raise ValueError("Either step or step_index and section must be provided")
-
         if step is None:
             step = self.all_steps_in_section(section)[step_index]
-            global_step_index = self.all_steps.index(step)
-            if global_step_index < self.current_step_index:
-                self.current_step_index -= 1
+        global_step_index = self.all_steps.index(step)
+        self._clear_future_steps(global_step_index)
+        if global_step_index < self.current_step_index:
+            self.current_step_index -= 1
         self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
@@ -643,7 +644,18 @@ class StepManager:
                 self.current_step
             )
             self.all_steps_in_section(self.current_section)[current_index] = new_step
+            self._clear_future_steps()
         except ValueError:
             raise ValueError(f"Unknown section {self.current_section}")
         except Exception as e:
             logging.error(f"Error while changing method: {e}")
+
+    def _clear_future_steps(self, index: int | None = None) -> None:
+        if index == None:
+            index = self.current_step_index
+        if index == len(self.all_steps) - 1:
+            return
+        for step in self.all_steps[index + 1 :]:
+            step.output = Output()
+            step.messages = Messages()
+            step.plots = Plots()
