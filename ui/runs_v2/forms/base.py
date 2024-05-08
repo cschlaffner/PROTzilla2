@@ -70,15 +70,19 @@ class MethodForm(Form):
 
     def replace_file_fields_with_paths(self, pretty_file_names: bool) -> None:
         for field_name, field in self.fields.items():
-            if type(field) == CustomFileField:
-                file_name_to_show = self.data[field_name]
-                if pretty_file_names and file_name_to_show:
-                    file_name_to_show = get_file_name_from_upload_path(
-                        file_name_to_show
-                    )
+            if not isinstance(field, CustomFileField):
+                continue
+            if field_name not in self.data:
                 self.fields[field_name] = CustomCharField(
-                    label=field.label, initial=file_name_to_show
+                    label=field.label, initial=None
                 )
+                continue
+            file_name_to_show = self.data[field_name]
+            if pretty_file_names:
+                file_name_to_show = get_file_name_from_upload_path(file_name_to_show)
+            self.fields[field_name] = CustomCharField(
+                label=field.label, initial=file_name_to_show
+            )
 
     def submit(self, run: Run) -> None:
         # add the missing fields to the form
