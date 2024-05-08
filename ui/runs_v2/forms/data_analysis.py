@@ -240,8 +240,8 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     )
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
-        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
         label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
         label="Error rate (alpha)",
@@ -251,9 +251,9 @@ class DifferentialExpressionLinearModelForm(MethodForm):
         initial=0.05,
     )
     # log_base = CustomChoiceField(
-    #     choices=LogBase,
-    #     label="Base of the log transformation (optional)",
-    #     required=False,
+    #    choices=LogBase,
+    #    label="Base of the log transformation (optional)",
+    #    required=False,
     # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
@@ -894,6 +894,5 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
 
 class ProteinGraphVariationGraphForm(MethodForm):
     protein_ID = CustomCharField(
-        label="Protein ID", initial="Enter the Uniprot-ID of the protein"
+        label="Protein ID", placeholder="Enter the Uniprot-ID of the protein"
     )
-    # TODO: workflow_meta line 2291 - 2295
