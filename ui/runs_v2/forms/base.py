@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from django.forms import Form
 from django.urls import reverse
@@ -26,7 +27,10 @@ class MethodForm(Form):
             self.replace_file_fields_with_paths(pretty_file_names)
             self.make_readonly()
         else:
-            self.fill_form(run)
+            try:
+                self.fill_form(run)
+            except Exception as e:
+                logging.error(f"Error while filling form {e}: {traceback.format_exc()}")
 
         if self.is_dynamic:
             for field in self.fields.values():
