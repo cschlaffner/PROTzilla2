@@ -659,6 +659,8 @@ class ClusteringHierarchicalAgglomerativeClusteringForm(MethodForm):
 
 
 class ClassificationRandomForestForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -675,7 +677,7 @@ class ClassificationRandomForestForm(MethodForm):
         initial=YesNo.yes,
     )
     # TODO: Validation strategy
-    validatation_strategy = CustomChoiceField(
+    validation_strategy = CustomChoiceField(
         choices=ClassificationValidationStrategy,
         label="Validation strategy",
         initial=ClassificationValidationStrategy.k_fold,
@@ -746,8 +748,43 @@ class ClassificationRandomForestForm(MethodForm):
         initial=6,
     )
 
+    def fill_form(self, run: Run) -> None:
+        self.fields["labels_column"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        metadata = run.steps.metadata_df
+        metadata_column = self.data.get("labels_column", self.fields["labels_column"].choices[0][0])
+        self.fields["positive_label"].choices = to_choices(metadata[metadata_column].unique())
+
+        for field_name in [
+            "n_splits", "shuffle", "n_repeats", "random_state_cv", "p_samples", "train_val_split",
+        ]:
+            self.toggle_visibility(field_name, False)
+        validation_strategy = self.data.get("validation_strategy", self.fields["validation_strategy"].choices[0][0])
+        if (validation_strategy == ClassificationValidationStrategy.k_fold.value or
+                validation_strategy == ClassificationValidationStrategy.stratified_k_fold.value):
+            self.toggle_visibility("n_splits", True)
+            self.toggle_visibility("shuffle", True)
+            if self.data.get("shuffle", self.fields["shuffle"].choices[0][0]) == YesNo.yes:
+                self.toggle_visibility("random_state_cv", True)
+        elif validation_strategy == ClassificationValidationStrategy.repeated_k_fold.value:
+            self.toggle_visibility("n_splits", True)
+            self.toggle_visibility("n_repeats", True)
+            self.toggle_visibility("random_state_cv", True)
+        elif validation_strategy == ClassificationValidationStrategy.leave_p_out.value:
+            self.toggle_visibility("p_samples", True)
+        elif validation_strategy == ClassificationValidationStrategy.manual.value:
+            self.toggle_visibility("train_val_split", True)
+
+        model_selection = self.data.get("model_selection", self.fields["model_selection"].choices[0][0])
+        if model_selection == ModelSelection.grid_search.value or model_selection == ModelSelection.randomized_search.value:
+            self.toggle_visibility("model_selection_scoring", True)
+        else:
+            self.toggle_visibility("model_selection_scoring", False)
+
 
 class ClassificationSVMForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
         choices=AnalysisLevel,
         label="Choose dataframe to be plotted",
@@ -764,7 +801,7 @@ class ClassificationSVMForm(MethodForm):
         initial=YesNo.yes,
     )
     # TODO: Validation strategy
-    validatation_strategy = CustomChoiceField(
+    validation_strategy = CustomChoiceField(
         choices=ClassificationValidationStrategy,
         label="Validation strategy",
         initial=ClassificationValidationStrategy.k_fold,
@@ -834,6 +871,39 @@ class ClassificationSVMForm(MethodForm):
         step_size=1,
         initial=6,
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["labels_column"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        metadata = run.steps.metadata_df
+        metadata_column = self.data.get("labels_column", self.fields["labels_column"].choices[0][0])
+        self.fields["positive_label"].choices = to_choices(metadata[metadata_column].unique())
+
+        for field_name in [
+            "n_splits", "shuffle", "n_repeats", "random_state_cv", "p_samples", "train_val_split",
+        ]:
+            self.toggle_visibility(field_name, False)
+        validation_strategy = self.data.get("validation_strategy", self.fields["validation_strategy"].choices[0][0])
+        if (validation_strategy == ClassificationValidationStrategy.k_fold.value or
+                validation_strategy == ClassificationValidationStrategy.stratified_k_fold.value):
+            self.toggle_visibility("n_splits", True)
+            self.toggle_visibility("shuffle", True)
+            if self.data.get("shuffle", self.fields["shuffle"].choices[0][0]) == YesNo.yes:
+                self.toggle_visibility("random_state_cv", True)
+        elif validation_strategy == ClassificationValidationStrategy.repeated_k_fold.value:
+            self.toggle_visibility("n_splits", True)
+            self.toggle_visibility("n_repeats", True)
+            self.toggle_visibility("random_state_cv", True)
+        elif validation_strategy == ClassificationValidationStrategy.leave_p_out.value:
+            self.toggle_visibility("p_samples", True)
+        elif validation_strategy == ClassificationValidationStrategy.manual.value:
+            self.toggle_visibility("train_val_split", True)
+
+        model_selection = self.data.get("model_selection", self.fields["model_selection"].choices[0][0])
+        if model_selection == ModelSelection.grid_search.value or model_selection == ModelSelection.randomized_search.value:
+            self.toggle_visibility("model_selection_scoring", True)
+        else:
+            self.toggle_visibility("model_selection_scoring", False)
 
 
 class ModelEvaluationClassificationModelForm(MethodForm):
