@@ -209,6 +209,17 @@ class Step:
         """
         return self._finished or self.validate_outputs(soft_check=True)
 
+    def reset(self):
+        """
+        Reset the step to its initial state, removing all values except for form_inputs.
+        :return: None
+        """
+        self.output = Output()
+        self.inputs = {}
+        self.messages.clear()
+        self.plots = Plots()
+        self._finished = False
+
 
 class Output:
     def __init__(self, output: dict = None):
@@ -602,10 +613,11 @@ class StepManager:
         new_step_index = self.all_steps.index(step)
         if new_step_index < self.current_step_index:
             for i in range(new_step_index, self.current_step_index):
-                self.all_steps[i].output = Output()
+                self.all_steps[i].reset()
             self.current_step_index = new_step_index
         else:
-            raise ValueError("Cannot go to a step that is after the current step")
+            # TODO implement forward navigation here
+            pass
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
