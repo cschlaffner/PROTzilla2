@@ -206,8 +206,11 @@ class Step:
     def finished(self) -> bool:
         """
         Return whether the step has valid outputs and is therefore considered finished.
+        Plot steps without required outputs are considered finished if they have plots.
         :return: True if the step is finished, False otherwise
         """
+        if len(self.output_keys) == 0:
+            return not self.plots.empty
         return self.validate_outputs(soft_check=True)
 
 
