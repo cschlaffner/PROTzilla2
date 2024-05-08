@@ -230,28 +230,30 @@ def test_protein_variation_graph():
 
 @pytest.fixture
 def test_peptide_df() -> pd.DataFrame:
-    # sample, protein groups, sequence, intensity, pep
+    # sample, protein groups, sequence, intensity, pep, Group
     peptide_protein_list = (
-        ["Sample01", "MadeUp", "COOLSEQ", 123123.0, 0.87452],
-        ["Sample02", "MadeUp-2", "SHOUDLNTAPPEAR", 234234.0, 0.86723],
-        ["Sample03", "MadeUp-1;MadeUp", "SHOULDAPPEAR", 234234.0, 0.57263],
-        ["Sample01", "MadeDown", "VCOOLSEQ1", 253840.0, 0.98734],
-        ["Sample02", "MadeDown", "VCOOLSEQ2", np.NaN, 0.86723],
-        ["Sample03", "MadeDown", "VCOOLSEQ3", 0, 0.87643],
-        ["Sample01", "MadeLeft", "LCOOLSEQ1", np.NaN, 0.2876],
-        ["Sample02", "MadeLeft-2;MadeLeft", "LCOOLSEQ2", 13200.0, 0.549078],
-        ["Sample03", "MadeLeft", "LCOOLSEQ3", 7100.0, 0.726354],
-        ["Sample01", "MadeRight", "RCOOLSEQ", np.NaN, 0.75498],
-        ["Sample02", "MadeRight", "RCOOLSEQ", np.NaN, 0.87423],
-        ["Sample03", "MadeRight", "RCOOLSEQ", np.NaN, 0.01922],
+        ["Sample01", "MadeUp", "COOLSEQ", 123123.0, 0.87452, "D"],
+        ["Sample02", "MadeUp-2", "SHOUDLNTAPPEAR", 234234.0, 0.86723, "CTR"],
+        ["Sample03", "MadeUp-1;MadeUp", "SHOULDAPPEAR", 234234.0, 0.57263, "D"],
+        ["Sample01", "MadeDown", "VCOOLSEQ1", 253840.0, 0.98734, "D"],
+        ["Sample02", "MadeDown", "VCOOLSEQ2", np.NaN, 0.86723, "CTR"],
+        ["Sample03", "MadeDown", "VCOOLSEQ3", 0, 0.87643, "D"],
+        ["Sample01", "MadeLeft", "LCOOLSEQ1", np.NaN, 0.2876, "D"],
+        ["Sample02", "MadeLeft-2;MadeLeft", "LCOOLSEQ2", 13200.0, 0.549078, "CTR"],
+        ["Sample03", "MadeLeft", "LCOOLSEQ3", 7100.0, 0.726354, "D"],
+        ["Sample01", "MadeRight", "RCOOLSEQ", np.NaN, 0.75498, "D"],
+        ["Sample02", "MadeRight", "RCOOLSEQ", np.NaN, 0.87423, "CTR"],
+        ["Sample03", "MadeRight", "RCOOLSEQ", np.NaN, 0.01922, "D"],
     )
 
     peptide_df = pd.DataFrame(
         data=peptide_protein_list,
-        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP", "Group"],
     )
 
-    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
+    peptide_df = peptide_df[
+        ["Sample", "Protein ID", "Sequence", "Intensity", "PEP", "Group"]
+    ]
     peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return peptide_df
@@ -1197,29 +1199,89 @@ def test_modify_graphs_1_pep_variation_match(multi_route_long_nodes):
 def test_get_peptides_all_0(test_peptide_df):
     protein_id = "MadeUp"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["COOLSEQ", "SHOULDAPPEAR"]
 
 
 def test_get_peptides_nan_0(test_peptide_df):
     protein_id = "MadeDown"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["VCOOLSEQ1"]
 
 
 def test_get_peptides_all_nan(test_peptide_df):
     protein_id = "MadeRight"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == []
 
 
 def test_get_peptides_one_nan(test_peptide_df):
     protein_id = "MadeLeft"
     peptide_df = test_peptide_df
-    peptides = _get_peptides(peptide_df, protein_id)
+    peptides = _get_peptides(peptide_df, protein_id, None, None)
     assert peptides == ["LCOOLSEQ2", "LCOOLSEQ3"]
+
+
+def test_get_peptides_group_by_sample(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id, "Sample", ["Sample01"])
+    assert peptides == ["COOLSEQ"]
+
+
+def test_get_peptides_group_by_sample_no_match(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id, "Sample", ["Sample02"])
+    assert peptides == []
+
+
+def test_get_peptides_group_by_group_D(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id, "Group", ["D"])
+    assert peptides == ["COOLSEQ", "SHOULDAPPEAR"]
+
+
+def test_get_peptides_group_by_group_CTR(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id, "Group", ["CTR"])
+    assert peptides == []
+
+
+def test_get_peptides_group_by_group_D_CTR(test_peptide_df):
+    protein_id = "MadeLeft"
+    peptide_df = test_peptide_df
+    peptides = _get_peptides(peptide_df, protein_id, "Group", ["D", "CTR"])
+    assert peptides == ["LCOOLSEQ2", "LCOOLSEQ3"]
+
+
+def test_get_peptides_group_by_non_existent_group(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    error_msg = f"Group 'NonExistent' not found in peptide_df column 'Group'"
+    with pytest.raises(AssertionError, match=re.escape(error_msg)):
+        _get_peptides(peptide_df, protein_id, "Group", ["NonExistent"])
+
+
+def test_get_peptides_group_by_non_existent_grouping(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    grouping = "NonExistent"
+    error_msg = f"Grouping '{grouping}' not found in peptide_df"
+    with pytest.raises(AssertionError, match=re.escape(error_msg)):
+        _get_peptides(peptide_df, protein_id, grouping, ["D"])
+
+
+def test_get_peptides_no_grouping_selected_groups(test_peptide_df):
+    protein_id = "MadeUp"
+    peptide_df = test_peptide_df
+    error_msg = "Grouping must be set if selected_groups is set"
+    with pytest.raises(ValueError, match=re.escape(error_msg)):
+        _get_peptides(peptide_df, protein_id, None, ["D"])
 
 
 @mock.patch("protzilla.data_analysis.protein_graphs._get_peptides")

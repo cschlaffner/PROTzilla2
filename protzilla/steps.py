@@ -33,6 +33,7 @@ class Step:
     output_keys: list[str] = []
 
     def __init__(self):
+        self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
@@ -66,7 +67,9 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        self.inputs = inputs.copy()
+        self.form_inputs = inputs.copy()
+        if inputs is not None:
+            self.inputs = inputs.copy()
         self._finished = False
 
         try:
@@ -146,9 +149,9 @@ class Step:
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
-    def plot(self, inputs: dict):
+    def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
-            "Plotting is not implemented for this step. Only preprocessing methods can have additional plots."
+            f"Plotting is not implemented for this step ({self.display_name}). Only preprocessing methods can have additional plots."
         )
 
     def validate_inputs(self, required_keys: list[str] = None) -> bool:
@@ -254,6 +257,12 @@ class Messages:
 
     def clear(self):
         self.messages = []
+
+    @property
+    def contains_error_message(self) -> bool:
+        return any(
+            message["level"] == logging.ERROR for message in self.messages
+        )
 
 
 class Plots:
@@ -435,8 +444,16 @@ class StepManager:
         return self.all_steps[self.current_step_index]
 
     @property
+    def current_operation(self) -> str:
+        return self.current_step.operation
+
+    @property
     def current_section(self) -> str:
         return self.current_step.section
+
+    @property
+    def current_location(self) -> tuple[str, str, str]:
+        return self.current_section, self.current_operation, self.current_step.instance_identifier
 
     @property
     def protein_df(self) -> pd.DataFrame:
