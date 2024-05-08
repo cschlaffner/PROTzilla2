@@ -135,9 +135,9 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
 
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
-    display_name = "LOF"
+    display_name = "Local outlier factor"
     operation = "outlier_detection"
-    method_description = "Detect outliers using LOF"
+    method_description = "Detect outliers using the local outlier factor"
 
     input_keys = ["number_of_neighbors", "protein_df"]
 
