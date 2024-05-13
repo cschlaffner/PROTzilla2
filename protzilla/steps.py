@@ -169,7 +169,7 @@ class Step:
         # Deleting all unnecessary keys as to avoid "too many parameters" error
         for key in self.inputs.copy().keys():
             if key not in required_keys:
-                logging.warning(
+                logging.info(
                     f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
                 )
                 self.inputs.pop(key)

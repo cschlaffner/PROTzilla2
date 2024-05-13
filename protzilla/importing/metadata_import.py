@@ -56,11 +56,21 @@ def metadata_import_method(
 
     returns: dict of DataFrame and other dict of metadata and messages
     """
+    messages = []
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
             metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
+        )
+
+    messages.append({"level": logging.INFO, "msg": msg})
+    if meta_df.shape[1] > meta_df.shape[0]:
+        messages.append(
+            {
+                "level": logging.INFO,
+                "msg": "The imported dataframe indicates an incorrent orientation. Consider viewing the table to ensure the orientation is correct.",
+            }
         )
 
     # always return metadata in the same orientation (features as columns)
@@ -97,10 +107,7 @@ def metadata_import_method(
             ["Protein ID", "sample name"], as_index=False
         ).median()  # TODO why do we do this?
 
-    return dict(
-        metadata_df=meta_df,
-        messages=[dict(level=logging.INFO, msg=msg)],
-    )
+    return dict(metadata_df=meta_df, messages=messages)
 
 
 def metadata_import_method_diann(
