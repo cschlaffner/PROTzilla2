@@ -93,7 +93,7 @@ class DiskOperator:
             step_manager = StepManager()
             step_manager.df_mode = run.get(KEYS.DF_MODE, "disk")
             for step_data in run[KEYS.STEPS]:
-                step = self._read_step(step_data)
+                step = self._read_step(step_data, step_manager)
                 step_manager.add_step(step)
             step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
             return step_manager
@@ -143,12 +143,12 @@ class DiskOperator:
             for file in upload_dir.iterdir():
                 file.unlink()
 
-    def _read_step(self, step_data: dict) -> Step:
+    def _read_step(self, step_data: dict, steps: StepManager) -> Step:
         from protzilla.stepfactory import StepFactory
 
         with ErrorHandler():
             step_type = step_data.get(KEYS.STEP_TYPE)
-            step = StepFactory.create_step(step_type)
+            step = StepFactory.create_step(step_type, steps)
             if step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER):
                 step.instance_identifier = step_data.get(
                     KEYS.STEP_INSTANCE_IDENTIFIER, step.__class__.__name__
