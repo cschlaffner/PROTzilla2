@@ -43,7 +43,14 @@ class CustomSelectMultiple(SelectMultiple):
 
 
 class CustomChoiceField(ChoiceField):
-    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
+    def __init__(
+        self,
+        choices: Enum | list,
+        initial=None,
+        searchable: bool = False,
+        *args,
+        **kwargs,
+    ):
         if isinstance(choices, list):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
@@ -58,6 +65,8 @@ class CustomChoiceField(ChoiceField):
             self.choices += [(None, "---------")]
 
         self.widget.attrs.update({"class": "form-select mb-2"})
+        if searchable:
+            self.widget.attrs.update({"class": "form-select mb-2 searchable"})
 
     @property
     def default_value(self):
@@ -98,6 +107,8 @@ class CustomFileField(FileField):
         if cleaned is not None:
             return cleaned.file.file.name
         return ""
+
+
 class CustomBooleanField(BooleanField):
     def __init__(self, label: str, required=False, *args, **kwargs):
         super().__init__(label="", required=required, *args, **kwargs)

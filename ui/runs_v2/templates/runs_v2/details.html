@@ -11,7 +11,15 @@
     <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
 
     <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
+<!-- Include the CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 
+    <script>
+    $(document).ready(function() {
+        $('.searchable').select2();
+});
+</script>
     {% include 'runs/dynamic_methods.html' %}
     {# TODO 129 Better buttons for analysis and importing #}
     {% include 'runs/plot_width.html' with displayed_history=displayed_history %}

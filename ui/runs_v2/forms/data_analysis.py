@@ -329,6 +329,7 @@ class PlotProtQuantForm(MethodForm):
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: choose highlighted protein group",
+        searchable=True,
     )
     similarity_measure = CustomChoiceField(
         choices=SimilarityMeasure,
