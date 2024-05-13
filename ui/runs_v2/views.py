@@ -1,4 +1,6 @@
+import tempfile
 import traceback
+import zipfile
 from pathlib import Path
 
 import networkx as nx
@@ -9,7 +11,7 @@ from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseRedirect,
-    JsonResponse,
+    JsonResponse, FileResponse,
 )
 from django.shortcuts import render
 from django.urls import reverse
@@ -127,7 +129,7 @@ def detail(request: HttpRequest, run_name: str):
             run_name=run_name,
             section=run.current_step.section,
             step=run.current_step,
-            display_name=f"{name_to_title(run.current_step.section)} - {run.current_step.display_name}",
+            display_name=f"{name_to_title(run.current_step.operation)} - {run.current_step.display_name}",
             displayed_history=make_displayed_history(
                 run
             ),  # TODO: make NewRun compatible
@@ -379,8 +381,42 @@ def export_workflow(request: HttpRequest, run_name: str):
 
 
 def download_plots(request: HttpRequest, run_name: str):
-    # TODO: implement
-    raise NotImplementedError("Downloading workflows is not yet implemented.")
+        """
+        Downloads all plots of the current method in the run. If multiple plots are created,
+        they are zipped together. The format of the plots is specified in the request.
+
+        :param request: the request object
+        :type request: HttpRequest
+        :param run_name: the name of the run
+        :type run_name: str
+
+        :return: a FileResponse with the plots
+        :rtype: FileResponse
+        """
+
+        run = active_runs[run_name]
+        format_ = request.GET["format"]
+        index = run.steps.current_step_index
+        section = run.current_step.section
+        operation = run.current_step.operation
+        exported = run.current_plots.export(format_=format_)
+        if len(exported) == 1:
+            filename = f"{index}-{section}-{operation}.{format_}"
+            return FileResponse(exported[0], filename=filename, as_attachment=True)
+
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            temp_filename = f.name
+        with zipfile.ZipFile(temp_filename, "w") as zf:
+            for i, plot in enumerate(exported):
+                filename = (
+                    f"{index}-{section}-{operation}-{i}.{format_}"
+                )
+                zf.writestr(filename, plot.getvalue())
+        return FileResponse(
+            open(temp_filename, "rb"),
+            filename=f"{index}-{section}-{operation}.zip",
+            as_attachment=True,
+        )
 
 
 def delete_step(request: HttpRequest, run_name: str):

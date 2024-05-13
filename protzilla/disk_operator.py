@@ -165,16 +165,16 @@ class DiskOperator:
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         with ErrorHandler():
             step_data = {}
-            step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
             if step.section == "data_preprocessing":
                 step_data[KEYS.STEP_PLOT_INPUTS] = sanitize_inputs(step.plot_inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
-            step_data[KEYS.STEP_FORM_INPUTS] = step.form_inputs
-            step_data[KEYS.STEP_PLOTS] = self._write_plots(
-                step.__class__.__name__, step.plots
-            )
+            step_data[KEYS.STEP_FORM_INPUTS] = sanitize_inputs(step.form_inputs)
             if not workflow_mode:
+                step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
+                step_data[KEYS.STEP_PLOTS] = self._write_plots(
+                    step.__class__.__name__, step.plots
+                )
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
                     step_name=step.__class__.__name__, output=step.output
                 )
@@ -256,4 +256,13 @@ class DiskOperator:
 
 
 def sanitize_inputs(inputs: dict) -> dict:
-    return {key: value for key, value in inputs.items() if type(value) != pd.DataFrame}
+    """
+
+    :param inputs:
+    :return:
+    """
+    return {
+        key: value
+        for key, value in inputs.items()
+        if type(value) != pd.DataFrame and not utilities.check_is_path(value)
+    }
