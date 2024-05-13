@@ -46,8 +46,8 @@ class GroupBy(Enum):
 
 
 class VisualTrasformations(Enum):
-    linear = "linear"
     log10 = "log10"
+    linear = "linear"
 
 
 class VisulaTransformations(Enum):
@@ -192,6 +192,11 @@ class NormalisationByZscorePlotForm(MethodForm):
         label="Group by",
         initial=GroupBy.no_grouping
     )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
+    )
 
 
 class NormalisationByTotalSumForm(MethodForm):
@@ -208,6 +213,11 @@ class NormalisationByTotalSumPlotForm(MethodForm):
         choices=GroupBy,
         label="Group by",
         initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
     )
 
 
@@ -231,6 +241,11 @@ class NormalisationByMedianPlotForm(MethodForm):
         choices=GroupBy,
         label="Group by",
         initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
     )
 
 
@@ -259,6 +274,11 @@ class NormalisationByReferenceProteinPlotForm(MethodForm):
         choices=GroupBy,
         label="Group by",
         initial=GroupBy.no_grouping
+    )
+    visual_transformation = CustomChoiceField(
+        choices=VisualTrasformations,
+        label="Visual transformation",
+        initial=VisualTrasformations.log10,
     )
 
 
