@@ -355,7 +355,7 @@ def add(request: HttpRequest, run_name: str):
     run = active_runs[run_name]
     method = dict(request.POST)["method"][0]
 
-    step = StepFactory.create_step(method)
+    step = StepFactory.create_step(method, run.steps)
     run.step_add(step)
     return HttpResponseRedirect(reverse("runs_v2:detail", args=(run_name,)))
 

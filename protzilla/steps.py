@@ -3,8 +3,6 @@ from __future__ import annotations
 import base64
 import inspect
 import logging
-import secrets
-import string
 import traceback
 from enum import Enum
 from io import BytesIO
@@ -32,21 +30,18 @@ class Step:
     input_keys: list[str] = []
     output_keys: list[str] = []
 
-    def __init__(self):
+    def __init__(self, instance_identifier: str = None):
         self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
+        self.instance_identifier = instance_identifier
 
-        # append a random string of 5 chars to make the instance_identifier unique
-        self.instance_identifier = (
-            self.__class__.__name__
-            + "-"
-            + "".join(
-                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+        if self.instance_identifier is None:
+            logging.warning(
+                f"No instance identifier provided for step {self.__class__.__name__}"
             )
-        )
 
     def __repr__(self):
         return self.__class__.__name__
@@ -637,7 +632,7 @@ class StepManager:
         """
         from protzilla.stepfactory import StepFactory
 
-        new_step = StepFactory.create_step(new_method)
+        new_step = StepFactory.create_step(new_method, self)
 
         try:
             current_index = self.all_steps_in_section(self.current_section).index(
