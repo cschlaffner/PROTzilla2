@@ -5,19 +5,25 @@ from protzilla.steps import Step, StepManager
 
 class StepFactory:
     @staticmethod
-    def create_step(step_type: str, steps: StepManager) -> Step:
+    def create_step(
+        step_type: str, steps: StepManager, instance_identifier: str | None = None
+    ) -> Step:
         """
         Returns a step instance of the a step of the given type.
         :param step_type: The type of step to create. Is the name of the step class.
         :param steps: The StepManager instance to which the step should be added.
+        :param instance_identifier: The identifier of the step instance. Will be generated based on steps if not provided.
         :return: The created step instance.
         """
-        from ui.runs_v2.form_mapping import (
-            get_all_methods,
-        )  # to avoid a circular import
+        from ui.runs_v2.form_mapping import get_all_methods
+
+        if not step_type:
+            raise ValueError("No step type provided.")
 
         for method in get_all_methods():
             if method.__name__ == step_type:
+                if instance_identifier:
+                    return method(instance_identifier=instance_identifier)
                 instance_count = len(
                     [
                         instance
