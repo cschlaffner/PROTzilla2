@@ -228,31 +228,69 @@ def by_reference_protein(
     return dict(protein_df=scaled_df, dropped_samples=dropped_samples)
 
 
-def by_z_score_plot(method_inputs, method_outputs, graph_type, group_by):
+def by_z_score_plot(
+        method_inputs,
+        method_outputs,
+        graph_type,
+        group_by,
+        visual_transformation
+):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
+        graph_type,
+        group_by,
+        visual_transformation
     )
 
 
-def by_median_plot(method_inputs, method_outputs, graph_type, group_by):
+def by_median_plot(
+        method_inputs,
+        method_outputs,
+        graph_type,
+        group_by,
+        visual_transformation
+):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
+        graph_type, group_by,
+        visual_transformation
     )
 
 
-def by_totalsum_plot(method_inputs, method_outputs, graph_type, group_by):
+def by_totalsum_plot(
+        method_inputs,
+        method_outputs,
+        graph_type,
+        group_by,
+        visual_transformation
+):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
+        graph_type, group_by,
+        visual_transformation
     )
 
 
-def by_reference_protein_plot(method_inputs, method_outputs, graph_type, group_by):
+def by_reference_protein_plot(
+        method_inputs,
+        method_outputs,
+        graph_type,
+        group_by,
+        visual_transformation
+):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
+        graph_type,
+        group_by,
+        visual_transformation
     )
 
 
-def _build_box_hist_plot(df, result_df, graph_type, group_by):
+def _build_box_hist_plot(df, result_df, graph_type, group_by, visual_transformation):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
@@ -263,6 +301,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             x_title="",
             y_title="Intensity",
             group_by=group_by,
+            visual_transformation=visual_transformation,
         )
     if graph_type == "Histogram":
         fig = create_histograms(
@@ -273,5 +312,6 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             heading="Distribution of Protein Intensities",
             x_title="Protein Intensities",
             y_title="Frequency of Protein Intensities",
+            visual_transformation=visual_transformation,
         )
     return [fig]
