@@ -24,9 +24,7 @@ class ErrorHandler:
             elif issubclass(exc_type, PermissionError):
                 logging.error(f"Permission denied: {exc_val}")
             else:
-                logging.exception(
-                    "An error occurred", exc_info=(exc_type, exc_val, exc_tb)
-                )
+                logging.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
         return False  # maybe return False here to re-raise the exception
 
 
@@ -106,6 +104,7 @@ class DiskOperator:
                 self.dataframe_dir.mkdir(parents=True)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
+            run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
                 run[KEYS.STEPS].append(self._write_step(step))
@@ -147,12 +146,11 @@ class DiskOperator:
         from protzilla.stepfactory import StepFactory
 
         with ErrorHandler():
-            step_type = step_data.get(KEYS.STEP_TYPE)
-            step = StepFactory.create_step(step_type, steps)
-            if step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER):
-                step.instance_identifier = step_data.get(
-                    KEYS.STEP_INSTANCE_IDENTIFIER, step.__class__.__name__
-                )
+            step = StepFactory.create_step(
+                step_type=step_data.get(KEYS.STEP_TYPE),
+                steps=steps,
+                instance_identifier=step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER),
+            )
             step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
             if step.section == "data_preprocessing":
                 step.plot_inputs = step_data.get(KEYS.STEP_PLOT_INPUTS, {})
@@ -173,10 +171,10 @@ class DiskOperator:
             if not workflow_mode:
                 step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
                 step_data[KEYS.STEP_PLOTS] = self._write_plots(
-                    step.__class__.__name__, step.plots
+                    step.instance_identifier, step.plots
                 )
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
-                    step_name=step.__class__.__name__, output=step.output
+                    instance_identifier=step.instance_identifier, output=step.output
                 )
                 step_data[KEYS.STEP_MESSAGES] = step.messages.messages
             return step_data
@@ -185,27 +183,18 @@ class DiskOperator:
         with ErrorHandler():
             step_output = {}
             for key, value in output.items():
-                if isinstance(value, str):
-                    if Path(value).exists():
-                        try:
-                            step_output[key] = self.dataframe_operator.read(value)
-                        except Exception as e:
-                            logging.error(f"Error while reading output {key}: {e}")
-                            step_output[key] = value
-                    else:
-                        logging.warning(
-                            f"Output file {value} does not exist"
-                        )  # TODO sometimes there are strings that should still be saved as such, fix this
+                if isinstance(value, str) and Path(value).exists():
+                    step_output[key] = self.dataframe_operator.read(value)
                 else:
                     step_output[key] = value
             return Output(step_output)
 
-    def _write_output(self, step_name: str, output: Output) -> dict:
+    def _write_output(self, instance_identifier: str, output: Output) -> dict:
         with ErrorHandler():
             output_data = {}
             for key, value in output:
                 if isinstance(value, pd.DataFrame):
-                    file_path = self.dataframe_dir / f"{step_name}_{key}.csv"
+                    file_path = self.dataframe_dir / f"{instance_identifier}_{key}.csv"
                     self.dataframe_operator.write(file_path, value)
                     output_data[key] = str(file_path)
                 else:
@@ -220,11 +209,11 @@ class DiskOperator:
             return Plots(figures)
         return Plots([])
 
-    def _write_plots(self, step_name: str, plots: Plots) -> dict:
+    def _write_plots(self, instance_identifier: str, plots: Plots) -> dict:
         with ErrorHandler():
             plots_data = {}
             for i, plot in enumerate(plots):
-                file_path = self.plot_dir / f"{step_name}_plot{i}.json"
+                file_path = self.plot_dir / f"{instance_identifier}_plot{i}.json"
                 self.plot_dir.mkdir(parents=True, exist_ok=True)
                 if not isinstance(
                     plot, bytes

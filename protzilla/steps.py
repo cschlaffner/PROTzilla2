@@ -564,7 +564,7 @@ class StepManager:
                 # disk anyway. Better would be if it would just replace the dfs with their respective paths
                 self.current_step.output = Output(
                     self.disk_operator._write_output(
-                        step_name=self.current_step.__class__.__name__,
+                        instance_identifier=self.current_step.instance_identifier,
                         output=self.current_step.output,
                     )
                 )
