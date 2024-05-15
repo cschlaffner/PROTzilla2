@@ -171,9 +171,7 @@ class TransformationLogPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
 
 
@@ -188,9 +186,7 @@ class NormalisationByZscorePlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -210,9 +206,7 @@ class NormalisationByTotalSumPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -238,9 +232,7 @@ class NormalisationByMedianPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -271,9 +263,7 @@ class NormalisationByReferenceProteinPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -302,9 +292,7 @@ class ImputationByMinPerDatasetPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -338,9 +326,7 @@ class ImputationByMinPerProteinPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -371,9 +357,7 @@ class ImputationByMinPerSamplePlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -402,9 +386,7 @@ class SimpleImputationPerProteinPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -434,9 +416,7 @@ class ImputationByKNNPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -457,17 +437,10 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
         initial=ImputationByNormalDistributionSamplingStrategyType.per_protein,
     )
     down_shift = CustomNumberField(
-        label="Downshift",
-        min_value=-10,
-        max_value=10,
-        initial=-1
+        label="Downshift", min_value=-10, max_value=10, initial=-1
     )
     scaling_factor = CustomFloatField(
-        label="Scaling factor",
-        min_value=0,
-        max_value=1,
-        step_size=0.1,
-        initial=0.5
+        label="Scaling factor", min_value=0, max_value=1, step_size=0.1, initial=0.5
     )
 
 
@@ -478,9 +451,7 @@ class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
         initial=BoxAndHistogramGraph.boxplot,
     )
     group_by = CustomChoiceField(
-        choices=GroupBy,
-        label="Group by",
-        initial=GroupBy.no_grouping
+        choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
     visual_transformation = CustomChoiceField(
         choices=VisualTrasformations,
@@ -496,14 +467,9 @@ class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
 
 class FilterPeptidesByPEPThresholdForm(MethodForm):
     threshold = CustomFloatField(
-        label="Threshold value for PEP",
-        min_value=0,
-        initial=0
+        label="Threshold value for PEP", min_value=0, initial=0
     )
-    peptide_df = CustomChoiceField(
-        choices=EmptyEnum,
-        label="peptide_df"
-    )
+    peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
 
 
 class FilterPeptidesByPEPThresholdPlotForm(MethodForm):

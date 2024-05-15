@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'runs/sidebar.css' %}">
 {% endblock %}
 
-<div class="container">
+<div class="container container-fixed-width" style="width: 2000px; max-width: 100%;">
     <div id="accordion" class="">
         {% for section in workflow_steps %}
             <div class="border-top">
