@@ -1,0 +1,4 @@
+current_step_index: 0
+steps:
+  MaxQuantImport:
+    inputs: {}
