@@ -1,39 +1,94 @@
+df_mode: disk
 steps:
-- inputs:
-    intensity_name: iBAQ
-    map_to_uniprot: false
-  type: MaxQuantImport
-- inputs:
-    feature_orientation: Columns (samples in rows, features in columns)
-  instance_identifier: MetadataImport
-  type: MetadataImport
-- inputs:
-    percentage: 0.2
-  type: FilterProteinsBySamplesMissing
-- inputs:
-    deviation_threshold: 2.0
-  type: FilterSamplesByProteinIntensitiesSum
-- inputs:
-    number_of_neighbours: 10
-  type: ImputationByKNN
-- inputs:
-    number_of_neighbors: 3
-  type: OutlierDetectionByLocalOutlierFactor
-- inputs:
-    percentile: 0.4
-  type: NormalisationByMedian
-- inputs:
-    log_base: log2
-  type: TransformationLog
-- inputs: {}
-  type: PlotProtQuant
-- inputs: {}
-  type: DimensionReductionUMAP
-- inputs: {}
-  type: PlotScatterPlot
-- inputs: {}
-  type: DifferentialExpressionTTest
-- inputs: {}
-  type: PlotVolcano
-- inputs: {}
-  type: EnrichmentAnalysisGOAnalysisWithString
+  - form_inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+    inputs: { }
+    type: MaxQuantImport
+  - form_inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
+    inputs: { }
+    type: MetadataImport
+  - form_inputs:
+      percentage: 0.5
+    inputs: { }
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterProteinsBySamplesMissing
+  - form_inputs:
+      deviation_threshold: 2.0
+    inputs: { }
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterSamplesByProteinIntensitiesSum
+  - form_inputs:
+      number_of_neighbours: 5
+    inputs: { }
+    plot_inputs:
+      graph_type: Boxplot
+      graph_type_quantities: Bar chart
+      group_by: None
+      visual_transformation: log10
+    type: ImputationByKNN
+  - form_inputs:
+      number_of_neighbors: 20
+    inputs: { }
+    plot_inputs: { }
+    type: OutlierDetectionByLocalOutlierFactor
+  - form_inputs:
+      percentile: 0.5
+    inputs: { }
+    plot_inputs:
+      graph_type: Boxplot
+      group_by: None
+      visual_transformation: log10
+    type: NormalisationByMedian
+  - form_inputs:
+      log_base: log2
+    inputs: { }
+    plot_inputs:
+      graph_type: Histogram
+      group_by: None
+    type: TransformationLog
+  - form_inputs:
+      similarity_measure: euclidean distance
+    inputs: { }
+    type: PlotProtQuant
+  - form_inputs:
+      metric: euclidean
+      min_dist: 0.1
+      n_components: 2
+      n_neighbors: 15
+      random_state: 42
+    inputs: { }
+    type: DimensionReductionUMAP
+  - form_inputs: { }
+    inputs: { }
+    type: PlotScatterPlot
+  - form_inputs:
+      alpha: 0.05
+    inputs: { }
+    type: DifferentialExpressionTTest
+  - form_inputs:
+      fc_threshold: 1
+    inputs: { }
+    type: PlotVolcano
+  - form_inputs:
+      differential_expression_threshold: 1
+      direction: both
+      gene_sets_restring: [ ]
+      organism: 9606
+    inputs: { }
+    type: EnrichmentAnalysisGOAnalysisWithString
+  - form_inputs:
+      colors: [ ]
+      cutoff: 0.05
+      gene_sets:
+        - Process
+        - Component
+        - Function
+        - KEGG
+      top_terms: 10
+      value: p-value
+    inputs: { }
+    type: PlotGOEnrichmentBarPlot
