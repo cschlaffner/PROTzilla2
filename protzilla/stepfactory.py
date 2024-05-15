@@ -9,7 +9,7 @@ class StepFactory:
         step_type: str, steps: StepManager, instance_identifier: str | None = None
     ) -> Step:
         """
-        Returns a step instance of the a step of the given type.
+        Returns an instance of a step of the given type.
         :param step_type: The type of step to create. Is the name of the step class.
         :param steps: The StepManager instance to which the step should be added.
         :param instance_identifier: The identifier of the step instance. Will be generated based on steps if not provided.

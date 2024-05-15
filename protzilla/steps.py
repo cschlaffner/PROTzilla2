@@ -30,7 +30,7 @@ class Step:
     input_keys: list[str] = []
     output_keys: list[str] = []
 
-    def __init__(self, instance_identifier: str = None):
+    def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
@@ -40,8 +40,9 @@ class Step:
 
         if self.instance_identifier is None:
             logging.warning(
-                f"No instance identifier provided for step {self.__class__.__name__}"
+                f"No instance identifier provided for step {self.__class__.__name__}, defaulting to class name."
             )
+            self.instance_identifier = self.__class__.__name__
 
     def __repr__(self):
         return self.__class__.__name__
