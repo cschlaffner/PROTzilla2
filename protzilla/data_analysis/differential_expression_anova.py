@@ -4,16 +4,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
 
 from .differential_expression_helper import (
-    BAD_LOG_BASE_INPUT_MSG,
     INVALID_PROTEINGROUP_DATA_MSG,
-    LOG_TRANSFORMATION_MESSAGE_MSG,
     _map_log_base,
     apply_multiple_testing_correction,
-    log_transformed_check,
 )
 
 
@@ -97,17 +93,6 @@ def anova(
     intensity_name = default_intensity_column(intensity_df, intensity_name)
 
     log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
-    was_likely_log_transformed = log_transformed_check(intensity_df, intensity_name)
-    if log_base == None:
-        if was_likely_log_transformed:
-            messages.append(BAD_LOG_BASE_INPUT_MSG)
-        # if the data is not log-transformed, we need to do so first for the analysis
-        intensity_df = by_log(intensity_df, log_base="log2")["protein_df"]
-        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
-        log_base = 2
-    else:
-        if not was_likely_log_transformed:
-            messages.append(BAD_LOG_BASE_INPUT_MSG)
 
     # Perform ANOVA and calculate p-values for each protein
     proteins = intensity_df["Protein ID"].unique()

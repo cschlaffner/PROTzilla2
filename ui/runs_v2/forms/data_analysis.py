@@ -234,17 +234,44 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):
-    multiple_testing_correction = CustomChoiceField(
+    multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    grouping = "Put a usefull initial here"
-    group1 = "Put a usefull initial here"
-    group2 = "Put a usefull initial here"
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    group1 = CustomChoiceField(choices=[], label="Group 1")
+    group2 = CustomChoiceField(choices=[], label="Group 2")
+
+    def fill_form(self, run: Run) -> None:
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+
+        # Set choices for group1 field based on selected grouping
+        self.fields["group1"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+        # Set choices for group2 field based on selected grouping and group1
+        if (
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+        ):
+            self.fields["group2"].choices = [
+                (el, el)
+                for el in run.steps.metadata_df[grouping].unique()
+                if el != self.data["group1"]
+            ]
+        else:
+            self.fields["group2"].choices = reversed(
+                fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
+            )
 
 
 class PlotVolcanoForm(MethodForm):

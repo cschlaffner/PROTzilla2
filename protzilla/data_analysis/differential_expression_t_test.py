@@ -4,15 +4,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from protzilla.data_preprocessing.transformation import by_log
 from protzilla.utilities import default_intensity_column, exists_message
+
 from .differential_expression_helper import (
-    BAD_LOG_BASE_INPUT_MSG,
     INVALID_PROTEINGROUP_DATA_MSG,
-    LOG_TRANSFORMATION_MESSAGE_MSG,
     _map_log_base,
     apply_multiple_testing_correction,
-    log_transformed_check,
 )
 
 
@@ -94,17 +91,6 @@ def t_test(
     intensity_name = default_intensity_column(intensity_df, intensity_name)
 
     log_base = _map_log_base(log_base)  # now log_base in [2, 10, None]
-    was_likely_log_transformed = log_transformed_check(intensity_df, intensity_name)
-    if log_base == None:
-        if was_likely_log_transformed:
-            messages.append(BAD_LOG_BASE_INPUT_MSG)
-        # if the data is not log-transformed, we need to do so first for the analysis
-        intensity_df = by_log(intensity_df, log_base="log2")["protein_df"]
-        messages.append(LOG_TRANSFORMATION_MESSAGE_MSG)
-        log_base = 2
-    else:
-        if not was_likely_log_transformed:
-            messages.append(BAD_LOG_BASE_INPUT_MSG)
 
     proteins = intensity_df["Protein ID"].unique()
     p_values = []
@@ -115,17 +101,20 @@ def t_test(
         protein_df = intensity_df[intensity_df["Protein ID"] == protein]
         group1_intensities = protein_df[protein_df[grouping] == group1][intensity_name]
         group2_intensities = protein_df[protein_df[grouping] == group2][intensity_name]
-        if ttest_type == "Student's t-Test":
-            t, p = stats.ttest_ind(group1_intensities, group2_intensities)
-        else:
-            t, p = stats.ttest_ind(
-                group1_intensities, group2_intensities, equal_var=False
-            )
+        t, p = stats.ttest_ind(
+            group1_intensities,
+            group2_intensities,
+            equal_var=not (ttest_type == "Student's t-Test"),
+        )
 
         if not np.isnan(p):
-            log2_fold_change = np.log2(
-                np.power(log_base, group2_intensities).mean()
-                / np.power(log_base, group1_intensities).mean()
+            log2_fold_change = (
+                np.log2(
+                    np.power(log_base, group2_intensities).mean()
+                    / np.power(log_base, group1_intensities).mean()
+                )
+                if log_base
+                else np.log2(group2_intensities.mean() / group1_intensities.mean())
             )
 
             valid_protein_groups.append(protein)
