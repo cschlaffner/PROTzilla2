@@ -219,14 +219,15 @@ class PlotClustergram(PlotStep):
         "sample_group_df",
         "flip_axes",
     ]
-    output_keys = ["plots"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return clustergram_plot(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.protein_df
-        inputs["sample_group_df"] = steps.metadata_df
+        inputs["input_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["input_df"]
+        )
         return inputs
 
 
