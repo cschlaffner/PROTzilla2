@@ -164,10 +164,6 @@ def GO_analysis_with_STRING(
     ):
         msg = "Proteins must be a dataframe with Protein ID and direction of expression change column (e.g. log2FC)"
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
-    if gene_sets_restring is None:
-        msg = "No knowledge databases selected. Using all knowledge databases."
-        out_messages.append(dict(level=logging.INFO, msg=msg))
-        gene_sets_restring = ["KEGG", "Component", "Function", "Process", "RCTM"]
 
     # remove all columns but "Protein ID" and differential_expression_col column
     proteins_df = proteins_df[["Protein ID", differential_expression_col]]
@@ -297,7 +293,7 @@ def GO_analysis_with_STRING(
     merged_df.rename(columns={"category": "Gene_set"}, inplace=True)
 
     if len(out_messages) > 0:
-        return dict(messages=out_messages, results=merged_df)
+        return dict(messages=out_messages, enrichment_df=merged_df)
 
     return {"enrichment_df": merged_df}
 

@@ -109,10 +109,8 @@ class EnrichmentAnalysisGOAnalysisWithStringForm(MethodForm):
         "log2FC)",
     )
     differential_expression_threshold = CustomNumberField(
-        label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
-        'values < threshold downregulated. If "log" is in the name of differential_expression_col, '
-        "threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, "
-        "if log2_fold_change < -threshold downregulated",
+        label="Threshold for differential expression: Proteins with fold change > threshold are upregulated, proteins "
+        "fold change < threshold downregulated. Applied symmetrically to log fold changes:",
         min_value=0,
         max_value=4294967295,
         initial=0,
@@ -149,10 +147,8 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         "log2FC)",
     )
     differential_expression_threshold = CustomNumberField(
-        label="Threshold for differential expression: Proteins with values > threshold are upregulated, proteins "
-        'values < threshold downregulated. If "log" is in the name of differential_expression_col, '
-        "threshold is applied symmetrically: e.g. log2_fold_change > threshold is upregulated, "
-        "if log2_fold_change < -threshold downregulated",
+        label="Threshold for differential expression: Proteins with fold change > threshold are upregulated, proteins "
+        "fold change < threshold downregulated. Applied symmetrically to log fold changes:",
         min_value=0,
         max_value=4294967295,
         initial=0,

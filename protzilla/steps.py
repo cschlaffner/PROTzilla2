@@ -357,7 +357,9 @@ class StepManager:
             and (output_key is None or output_key in step.output)
         ]
         if not instance_identifiers:
-            logging.warning(f"No instance identifiers found for {step_type}")
+            logging.warning(
+                f"No instance identifiers found for {step_type} and output_key {output_key}"
+            )
         return instance_identifiers
 
     def get_step_output(
