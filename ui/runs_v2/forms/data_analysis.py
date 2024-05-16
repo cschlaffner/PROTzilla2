@@ -331,19 +331,24 @@ class PlotScatterPlotForm(MethodForm):
 
 class PlotClustergramForm(MethodForm):
     input_df = CustomChoiceField(
-        choices=AnalysisLevel,
+        choices=[],
         label="Choose dataframe to be plotted",
     )
     sample_group_df = CustomChoiceField(
-        choices=AnalysisLevel,
-        label="Choose dataframe to be used for coloring",
+        choices=[],
+        label="Grouping dataframe: choose a dataframe that assigns the samples present in the input dataframe to a group they belong (optional)",
         required=False,
     )
-    flip_axis = CustomChoiceField(
+    flip_axes = CustomChoiceField(
         choices=YesNo,
         label="Flip axis",
-        initial=YesNo.no,
+        initial=YesNo.no.value,
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
 
 
 class PlotProtQuantForm(MethodForm):
