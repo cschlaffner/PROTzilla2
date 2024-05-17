@@ -51,11 +51,15 @@ class DataFrameOperator:
     @staticmethod
     def read(file_path: Path):
         with ErrorHandler():
+            logging.info(f"Reading dataframe from {file_path}")
             return pd.read_csv(file_path)
 
     @staticmethod
     def write(file_path: Path, dataframe: pd.DataFrame):
         with ErrorHandler():
+            if file_path.exists():
+                return
+            logging.info(f"Writing dataframe to {file_path}")
             dataframe.to_csv(file_path, index=False)
 
 
@@ -102,6 +106,7 @@ class DiskOperator:
                 self.run_dir.mkdir(parents=True)
             if not self.dataframe_dir.exists():
                 self.dataframe_dir.mkdir(parents=True)
+            self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
             run[KEYS.DF_MODE] = step_manager.df_mode
@@ -133,6 +138,29 @@ class DiskOperator:
                 step_data[KEYS.STEP_INPUTS] = inputs_to_write
                 workflow[KEYS.STEPS].append(step_data)
             self.yaml_operator.write(self.workflow_file, workflow)
+
+    def check_file_validity(self, file: Path, steps: StepManager) -> bool:
+        """
+        Check if the file is still valid, i.e. if it is still needed or if it can be deleted.
+        :param file: The file to check
+        :param steps: the current StepManager object
+        :return: whether the file is valid
+        """
+        # if we are writing the run, chances are the outputs of the current step
+        # have recently been (re)calculcated, therefore invalidating the existing file
+        if steps.current_step.instance_identifier in file.name:
+            return False
+        return any(
+            step.instance_identifier in file.name and step.finished
+            for step in steps.all_steps
+        )
+
+    def clean_dataframes_dir(self, steps: StepManager) -> None:
+        with ErrorHandler():
+            for file in self.dataframe_dir.iterdir():
+                if not self.check_file_validity(file, steps):
+                    logging.warning(f"Deleting dataframe {file}")
+                    file.unlink()
 
     def clear_upload_dir(self) -> None:
         # TODO in general our way of handling file uploads is kind of non-straightforward, maybe we should switch
@@ -246,9 +274,10 @@ class DiskOperator:
 
 def sanitize_inputs(inputs: dict) -> dict:
     """
+    Remove dataframes and paths from inputs.
 
-    :param inputs:
-    :return:
+    :param inputs: The inputs to sanitize
+    :return: The sanitized inputs
     """
     return {
         key: value
