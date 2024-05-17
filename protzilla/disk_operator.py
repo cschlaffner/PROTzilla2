@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,6 +9,7 @@ from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
 from protzilla.constants import paths
+from protzilla.constants.protzilla_logging import logger
 from protzilla.steps import Messages, Output, Plots, Step, StepManager
 
 
@@ -20,12 +20,12 @@ class ErrorHandler:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             if issubclass(exc_type, FileNotFoundError):
-                logging.error(f"File not found: {exc_val}")
+                logger.error(f"File not found: {exc_val}")
             elif issubclass(exc_type, PermissionError):
-                logging.error(f"Permission denied: {exc_val}")
+                logger.error(f"Permission denied: {exc_val}")
             else:
-                logging.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
-        return False  # maybe return False here to re-raise the exception
+                logger.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
+        return False
 
 
 class YamlOperator:
@@ -33,6 +33,7 @@ class YamlOperator:
     def read(file_path: Path):
         with ErrorHandler():
             with open(file_path, "r") as file:
+                logger.info(f"Reading yaml from {file_path}")
                 return yaml.safe_load(file)
 
     @staticmethod
@@ -40,9 +41,10 @@ class YamlOperator:
         with ErrorHandler():
             if not file_path.exists():
                 if not file_path.parent.exists():
+                    logger.info(
+                        f"Parent directory {file_path.parent} did not exist and was created"
+                    )
                     file_path.parent.mkdir(parents=True)
-                file_path.touch()
-                logging.warning(f"File {file_path} did not exist and was created")
             with open(file_path, "w") as file:
                 yaml.dump(data, file)
 
@@ -51,7 +53,7 @@ class DataFrameOperator:
     @staticmethod
     def read(file_path: Path):
         with ErrorHandler():
-            logging.info(f"Reading dataframe from {file_path}")
+            logger.info(f"Reading dataframe from {file_path}")
             return pd.read_csv(file_path)
 
     @staticmethod
@@ -59,7 +61,7 @@ class DataFrameOperator:
         with ErrorHandler():
             if file_path.exists():
                 return
-            logging.info(f"Writing dataframe to {file_path}")
+            logger.info(f"Writing dataframe to {file_path}")
             dataframe.to_csv(file_path, index=False)
 
 
@@ -159,7 +161,7 @@ class DiskOperator:
         with ErrorHandler():
             for file in self.dataframe_dir.iterdir():
                 if not self.check_file_validity(file, steps):
-                    logging.warning(f"Deleting dataframe {file}")
+                    logger.warning(f"Deleting dataframe {file}")
                     file.unlink()
 
     def clear_upload_dir(self) -> None:
