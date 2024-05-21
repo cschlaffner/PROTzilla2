@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,6 +9,7 @@ from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
 from protzilla.constants import paths
+from protzilla.constants.protzilla_logging import logger
 from protzilla.steps import Messages, Output, Plots, Step, StepManager
 
 
@@ -20,12 +20,12 @@ class ErrorHandler:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             if issubclass(exc_type, FileNotFoundError):
-                logging.error(f"File not found: {exc_val}")
+                logger.error(f"File not found: {exc_val}")
             elif issubclass(exc_type, PermissionError):
-                logging.error(f"Permission denied: {exc_val}")
+                logger.error(f"Permission denied: {exc_val}")
             else:
-                logging.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
-        return False  # maybe return False here to re-raise the exception
+                logger.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
+        return False
 
 
 class YamlOperator:
@@ -33,6 +33,7 @@ class YamlOperator:
     def read(file_path: Path):
         with ErrorHandler():
             with open(file_path, "r") as file:
+                logger.info(f"Reading yaml from {file_path}")
                 return yaml.safe_load(file)
 
     @staticmethod
@@ -40,9 +41,10 @@ class YamlOperator:
         with ErrorHandler():
             if not file_path.exists():
                 if not file_path.parent.exists():
+                    logger.info(
+                        f"Parent directory {file_path.parent} did not exist and was created"
+                    )
                     file_path.parent.mkdir(parents=True)
-                file_path.touch()
-                logging.warning(f"File {file_path} did not exist and was created")
             with open(file_path, "w") as file:
                 yaml.dump(data, file)
 
@@ -51,11 +53,18 @@ class DataFrameOperator:
     @staticmethod
     def read(file_path: Path):
         with ErrorHandler():
+            logger.info(f"Reading dataframe from {file_path}")
             return pd.read_csv(file_path)
 
     @staticmethod
     def write(file_path: Path, dataframe: pd.DataFrame):
         with ErrorHandler():
+            if file_path.exists():
+                logger.warning(
+                    f"Skipping writing dataframe to {file_path}, valid file already exists"
+                )
+                return
+            logger.info(f"Writing dataframe to {file_path}")
             dataframe.to_csv(file_path, index=False)
 
 
@@ -102,6 +111,7 @@ class DiskOperator:
                 self.run_dir.mkdir(parents=True)
             if not self.dataframe_dir.exists():
                 self.dataframe_dir.mkdir(parents=True)
+            self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
             run[KEYS.DF_MODE] = step_manager.df_mode
@@ -133,6 +143,29 @@ class DiskOperator:
                 step_data[KEYS.STEP_INPUTS] = inputs_to_write
                 workflow[KEYS.STEPS].append(step_data)
             self.yaml_operator.write(self.workflow_file, workflow)
+
+    def check_file_validity(self, file: Path, steps: StepManager) -> bool:
+        """
+        Check if the file is still valid, i.e. if it is still needed or if it can be deleted.
+        :param file: The file to check
+        :param steps: the current StepManager object
+        :return: whether the file is valid
+        """
+        # if we are writing the run, chances are the outputs of the current step
+        # have recently been (re)calculcated, therefore invalidating the existing file
+        if steps.current_step.instance_identifier in file.name:
+            return False
+        return any(
+            step.instance_identifier in file.name and step.finished
+            for step in steps.all_steps
+        )
+
+    def clean_dataframes_dir(self, steps: StepManager) -> None:
+        with ErrorHandler():
+            for file in self.dataframe_dir.iterdir():
+                if not self.check_file_validity(file, steps):
+                    logger.warning(f"Deleting dataframe {file}")
+                    file.unlink()
 
     def clear_upload_dir(self) -> None:
         # TODO in general our way of handling file uploads is kind of non-straightforward, maybe we should switch
@@ -246,9 +279,10 @@ class DiskOperator:
 
 def sanitize_inputs(inputs: dict) -> dict:
     """
+    Remove dataframes and paths from inputs.
 
-    :param inputs:
-    :return:
+    :param inputs: The inputs to sanitize
+    :return: The sanitized inputs
     """
     return {
         key: value
