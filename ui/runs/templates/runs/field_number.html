@@ -1,9 +1,0 @@
-<label for="{{ key }}">{{ name }}</label>
-{% if multiple %}
-    <input name="{{ key }}" type="text" id="{{ key }}" class="form-control {{ class }}" inputmode="numeric"
-           pattern="\d+(\.\d+)?(\|\d+(\.\d+)?)*" value="{{ default }}" {% if disabled %} disabled {% endif %}>
-{% else %}
-    <input name="{{ key }}" type="number" id="{{ key }}" class="form-control {{ class }}" min="{{ min }}"
-           max="{{ max }}" step="{{ step }}" value="{{ default }}" {% if disabled %} disabled {% endif %}>
-{% endif %}
-

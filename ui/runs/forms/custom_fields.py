@@ -98,6 +98,8 @@ class CustomFileField(FileField):
         if cleaned is not None:
             return cleaned.file.file.name
         return ""
+
+
 class CustomBooleanField(BooleanField):
     def __init__(self, label: str, required=False, *args, **kwargs):
         super().__init__(label="", required=required, *args, **kwargs)
