@@ -60,6 +60,9 @@ class DataFrameOperator:
     def write(file_path: Path, dataframe: pd.DataFrame):
         with ErrorHandler():
             if file_path.exists():
+                logger.warning(
+                    f"Skipping writing dataframe to {file_path}, valid file already exists"
+                )
                 return
             logger.info(f"Writing dataframe to {file_path}")
             dataframe.to_csv(file_path, index=False)
