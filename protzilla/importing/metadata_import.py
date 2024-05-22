@@ -189,7 +189,7 @@ def metadata_column_assignment(
         return dict(
             protein_df=protein_df,
             metadata_df=metadata_df,
-            messages=[dict(level=logging.INFO, msg=msg)],
+            messages=[dict(level=logging.ERROR, msg=msg)],
         )
     # rename given in metadata_sample_column column to "Sample" if it is called otherwise
     renamed_metadata_df = metadata_df.rename(

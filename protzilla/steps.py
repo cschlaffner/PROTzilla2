@@ -244,8 +244,12 @@ class Messages:
     def __iter__(self):
         return iter(self.messages)
 
+    def __getitem__(self, key):
+        return self.messages[key]
+
     def __repr__(self):
         return f"Messages: {[message['message'] for message in self.messages]}"
+
 
     def append(self, param):
         self.messages.append(param)
