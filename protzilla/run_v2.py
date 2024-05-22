@@ -5,7 +5,7 @@ import threading
 import traceback
 
 import protzilla.constants.paths as paths
-from protzilla.steps import Messages, Output, Plots, Step, StepManager
+from protzilla.steps import Messages, Output, Plots, Step
 from protzilla.utilities import format_trace
 
 
@@ -76,16 +76,12 @@ class Run:
 
         self.run_name = run_name
         self.workflow_name = workflow_name
-        self.df_mode = df_mode
-
         self.disk_operator: DiskOperator = DiskOperator(run_name, workflow_name)
-        self.steps: StepManager = StepManager(
-            df_mode=self.df_mode, disk_operator=self.disk_operator
-        )
 
         if run_name in get_available_run_names():
             self._run_read()
         elif workflow_name:
+            self.df_mode = df_mode
             self._workflow_read()
         else:
             raise ValueError(
@@ -96,9 +92,10 @@ class Run:
         return f"Run({self.run_name}) with {len(self.steps.all_steps)} steps."
 
     @error_handling
-    @auto_save
     def _run_read(self) -> None:
         self.steps = self.disk_operator.read_run()
+        self.steps.disk_operator = self.disk_operator
+        self.df_mode = self.steps.df_mode
 
     @error_handling
     def _run_write(self) -> None:

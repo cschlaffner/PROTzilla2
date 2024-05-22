@@ -53,18 +53,20 @@
         <p>
             Index {{ index|add:1 }}, Section {{ section }}, step {{ step }}, method {{ method }}
             <br>
-            {% if name %} Name: {{ name }} {% endif %}
         </p>
         <div class="d-flex justify-content-between">
             <div class="input-group mb-3 w-50">
                 <span class="input-group-text">Choose table</span>
                 {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options only %}
             </div>
+            <div>
             {% if clean_ids %}
                 <a class="mb-3 btn btn-grey" href="{% url 'runs:tables' run_name index key %}">Enable Isoforms</a>
             {% else %}
                 <a class="mb-3 btn btn-grey" href="?clean-ids">Disable Isoforms</a>
             {% endif %}
+            <a class="mb-3 btn btn-grey" href="{% url 'runs:download_table' run_name index key %}">Download Table</a>
+            </div>
         </div>
         <table id="datatable" class="display"></table>
     </div>
