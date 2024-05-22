@@ -15,7 +15,7 @@ class StepFactory:
         :param instance_identifier: The identifier of the step instance. Will be generated based on steps if not provided.
         :return: The created step instance.
         """
-        from ui.runs_v2.form_mapping import get_all_methods
+        from ui.runs.form_mapping import get_all_methods
 
         if not step_type:
             raise ValueError("No step type provided.")

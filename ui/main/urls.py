@@ -21,7 +21,6 @@ from . import views
 urlpatterns = [
     path("", views.index),
     path("runs/", include("runs.urls")),
-    path("runs_v2/", include("runs_v2.urls")),
     path("databases", views.databases, name="databases"),
     path("databases/upload", views.database_upload, name="database_upload"),
     path("databases/delete", views.database_delete, name="database_delete"),
