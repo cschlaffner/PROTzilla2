@@ -502,9 +502,7 @@ class StepManager:
             raise ValueError(f"Unknown section {section}")
         if step_index >= len(self.sections[section]):
             raise ValueError(f"Step index {step_index} out of bounds for section {section}")
-        if step.finished:
-            raise ValueError("Cannot remove a finished step. Please go back before this step, to remove it.")
-
+        
         self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
