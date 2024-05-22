@@ -119,7 +119,7 @@ def create_volcano_plot(
         gene=None,
         genomewideline_value=-np.log10(alpha),
         effect_size_line=[-fc_threshold, fc_threshold],
-        xlabel=f"log2(fc) ({group1} vs. {group2})",
+        xlabel=f"log2(fc) ({group2} / {group1})",
         ylabel="-log10(p)",
         title="Volcano Plot",
         annotation="Protein ID",

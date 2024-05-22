@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 
 from django.forms import (
@@ -37,17 +38,14 @@ class CustomSelectMultiple(SelectMultiple):
         hidden_option_html = mark_safe(
             "<option value='hidden' style='display: none;' selected>Hidden option</option>"
         )
-        idx = input_html.find(">") + 3
+        idx = input_html.find(">") + 1
         return mark_safe(f"{input_html[:idx]}{hidden_option_html}{input_html[idx:]}")
-
-
-# Custom Fields
 
 
 class CustomChoiceField(ChoiceField):
     def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
-            super().__init__(choices=choices, *args, **kwargs)
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
                 choices=[(el.value, el.value) for el in choices],
@@ -61,11 +59,21 @@ class CustomChoiceField(ChoiceField):
 
         self.widget.attrs.update({"class": "form-select mb-2"})
 
+    @property
+    def default_value(self):
+        if len(self.choices) > 0:
+            # we need to unpack the tuple, thats why we need to use [0][0]
+            if isinstance(self.choices[0], tuple):
+                return self.choices[0][0]
+            return self.choices[0]
+        logging.warning("Attempted to get default value of empty choice field.")
+        return None
+
 
 class CustomMultipleChoiceField(MultipleChoiceField):
-    def __init__(self, choices: Enum, initial=None, *args, **kwargs):
+    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
-            super().__init__(choices=choices, *args, **kwargs)
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
                 choices=[(el.value, el.value) for el in choices],
@@ -87,12 +95,12 @@ class CustomFileField(FileField):
 
     def clean(self, data, initial=None):
         cleaned = super().clean(data, initial)
-        return cleaned.file.file.name
-
-
+        if cleaned is not None:
+            return cleaned.file.file.name
+        return ""
 class CustomBooleanField(BooleanField):
-    def __init__(self, label: str, *args, **kwargs):
-        super().__init__(label="", *args, **kwargs)
+    def __init__(self, label: str, required=False, *args, **kwargs):
+        super().__init__(label="", required=required, *args, **kwargs)
         self.widget = CustomCheckBoxInput(label=label)
 
 

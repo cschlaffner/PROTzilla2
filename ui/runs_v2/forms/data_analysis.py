@@ -33,11 +33,6 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
-class LogBase(Enum):
-    log2 = "log2"
-    log10 = "log10"
-
-
 class YesNo(Enum):
     yes = "Yes"
     no = "No"
@@ -160,11 +155,6 @@ class DifferentialExpressionANOVAForm(MethodForm):
     alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        required=False,
-    )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     selected_groups = CustomMultipleChoiceField(
@@ -172,12 +162,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -193,31 +183,32 @@ class DifferentialExpressionTTestForm(MethodForm):
     )
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
         label="Multiple testing correction",
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)",
         min_value=0,
         max_value=1,
         step_size=0.05,
         initial=0.05,
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation (optional)",
-        required=False,
-    )
+    # log_base = CustomChoiceField(
+    #     choices=LogBase,
+    #     label="Base of the log transformation (optional)",
+    #     required=False,
+    # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -243,22 +234,44 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):
-    multiple_testing_correction = CustomChoiceField(
+    multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        initial=LogBase.log2,
-    )
-    grouping = "Put a usefull initial here"
-    group1 = "Put a usefull initial here"
-    group2 = "Put a usefull initial here"
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    group1 = CustomChoiceField(choices=[], label="Group 1")
+    group2 = CustomChoiceField(choices=[], label="Group 2")
+
+    def fill_form(self, run: Run) -> None:
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+
+        # Set choices for group1 field based on selected grouping
+        self.fields["group1"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+        # Set choices for group2 field based on selected grouping and group1
+        if (
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+        ):
+            self.fields["group2"].choices = [
+                (el, el)
+                for el in run.steps.metadata_df[grouping].unique()
+                if el != self.data["group1"]
+            ]
+        else:
+            self.fields["group2"].choices = reversed(
+                fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
+            )
 
 
 class PlotVolcanoForm(MethodForm):
@@ -609,7 +622,8 @@ class ClassificationRandomForestForm(MethodForm):
     )
     # TODO: Workflow_meta line 1763
     train_val_split = CustomNumberField(
-        label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        label="Choose the size of the validation data set (you can either enter the absolute number of validation "
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
@@ -696,7 +710,8 @@ class ClassificationSVMForm(MethodForm):
         initial=ClassificationValidationStrategy.k_fold,
     )
     train_val_split = CustomNumberField(
-        label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        label="Choose the size of the validation data set (you can either enter the absolute number of validation "
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
@@ -812,7 +827,8 @@ class DimensionReductionUMAPForm(MethodForm):
         label="Dimension reduction of a dataframe using UMAP",
     )
     n_neighbors = CustomNumberField(
-        label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation",
+        label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold "
+        "approximation",
         min_value=2,
         max_value=100,
         step_size=1,
@@ -852,7 +868,8 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
     # TODO: workflow_meta line 2255 - 2263
     k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
     allowed_mismatches = CustomNumberField(
-        label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
+        label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a "
+        "long time.",
         min_value=0,
         step_size=1,
         initial=2,

@@ -3,8 +3,6 @@ from __future__ import annotations
 import base64
 import inspect
 import logging
-import secrets
-import string
 import traceback
 from enum import Enum
 from io import BytesIO
@@ -32,22 +30,19 @@ class Step:
     input_keys: list[str] = []
     output_keys: list[str] = []
 
-    def __init__(self):
+    def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
-        self._finished: bool = False
+        self.instance_identifier = instance_identifier
 
-        # append a random string of 5 chars to make the instance_identifier unique
-        self.instance_identifier = (
-            self.__class__.__name__
-            + "-"
-            + "".join(
-                secrets.choice(string.ascii_lowercase + string.digits) for _ in range(5)
+        if self.instance_identifier is None:
+            logging.warning(
+                f"No instance identifier provided for step {self.__class__.__name__}, defaulting to class name."
             )
-        )
+            self.instance_identifier = self.__class__.__name__
 
     def __repr__(self):
         return self.__class__.__name__
@@ -67,10 +62,11 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        if inputs is not None:
-            self.form_inputs = inputs.copy()
+        steps._clear_future_steps()
+
+        if inputs:
             self.inputs = inputs.copy()
-        self._finished = False
+        self.form_inputs = self.inputs.copy()
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -80,8 +76,7 @@ class Step:
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
 
-            if self.validate_outputs():
-                self._finished = True
+            self.validate_outputs()
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -171,7 +166,7 @@ class Step:
         # Deleting all unnecessary keys as to avoid "too many parameters" error
         for key in self.inputs.copy().keys():
             if key not in required_keys:
-                logging.warning(
+                logging.info(
                     f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
                 )
                 self.inputs.pop(key)
@@ -206,9 +201,12 @@ class Step:
     def finished(self) -> bool:
         """
         Return whether the step has valid outputs and is therefore considered finished.
+        Plot steps without required outputs are considered finished if they have plots.
         :return: True if the step is finished, False otherwise
         """
-        return self._finished or self.validate_outputs(soft_check=True)
+        if len(self.output_keys) == 0:
+            return not self.plots.empty
+        return self.validate_outputs(soft_check=True)
 
 
 class Output:
@@ -257,12 +255,6 @@ class Messages:
 
     def clear(self):
         self.messages = []
-
-    @property
-    def contains_error_message(self) -> bool:
-        return any(
-            message["level"] == logging.ERROR for message in self.messages
-        )
 
 
 class Plots:
@@ -359,12 +351,17 @@ class StepManager:
     def get_instance_identifiers(
         self, step_type: type[Step], output_key: str = None
     ) -> list[str]:
-        return [
+        instance_identifiers = [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
             and (output_key is None or output_key in step.output)
         ]
+        if not instance_identifiers:
+            logging.warning(
+                f"No instance identifiers found for {step_type} and output_key {output_key}"
+            )
+        return instance_identifiers
 
     def get_step_output(
         self,
@@ -422,6 +419,36 @@ class StepManager:
                 return val
         return None
 
+    def get_step_input(
+        self,
+        step_type: type[Step],
+        input_key: str,
+        instance_identifier: str | None = None,
+    ):
+        """
+        Get the specific input of the inputs of a specific step type. The step type can also a parent class of the
+        step type, in which case the input of the most recent step of the specific type is returned.
+        :param step_type: The type of the step as a class object
+        :param input_key: The key of the desired input in the input dictionary of the step
+        :return: The value of the input of the step or None
+        """
+
+        def check_instance_identifier(step):
+            return (
+                step.instance_identifier == instance_identifier
+                if instance_identifier is not None
+                else True
+            )
+
+        for step in reversed(self.previous_steps):
+            if (
+                isinstance(step, step_type)
+                and check_instance_identifier(step)
+                and input_key in step.inputs
+            ):
+                return step.inputs[input_key]
+        return None
+
     def all_steps_in_section(self, section: str) -> list[Step]:
         """
         Get all steps in a specific section via the section name
@@ -453,7 +480,11 @@ class StepManager:
 
     @property
     def current_location(self) -> tuple[str, str, str]:
-        return self.current_section, self.current_operation, self.current_step.instance_identifier
+        return (
+            self.current_section,
+            self.current_operation,
+            self.current_step.instance_identifier,
+        )
 
     @property
     def protein_df(self) -> pd.DataFrame:
@@ -508,19 +539,18 @@ class StepManager:
         """
         if step is None and (step_index is None or section is None):
             raise ValueError("Either step or step_index and section must be provided")
-        if step is not None:
-            section = step.section
-            step_index = self.all_steps_in_section(section).index(step)
-        else:
+        if step is None:
+            if section not in self.sections:
+                raise ValueError(f"Unknown section {section}")
+            if step_index >= len(self.sections[section]):
+                raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+
             step = self.all_steps_in_section(section)[step_index]
 
-        if section not in self.sections:
-            raise ValueError(f"Unknown section {section}")
-        if step_index >= len(self.sections[section]):
-            raise ValueError(f"Step index {step_index} out of bounds for section {section}")
-        if step.finished:
-            raise ValueError("Cannot remove a finished step. Please go back before this step, to remove it.")
-
+        global_step_index = self.all_steps.index(step)
+        self._clear_future_steps(global_step_index)
+        if global_step_index < self.current_step_index:
+            self.current_step_index -= 1
         self.sections[step.section].remove(step)
 
     def next_step(self) -> None:
@@ -538,7 +568,7 @@ class StepManager:
                 # disk anyway. Better would be if it would just replace the dfs with their respective paths
                 self.current_step.output = Output(
                     self.disk_operator._write_output(
-                        step_name=self.current_step.__class__.__name__,
+                        instance_identifier=self.current_step.instance_identifier,
                         output=self.current_step.output,
                     )
                 )
@@ -558,6 +588,16 @@ class StepManager:
         else:
             raise ValueError("Cannot go back from the first step")
 
+    @property
+    def future_steps(self) -> list[Step]:
+        """
+        Get all steps that are after the current step in the workflow.
+        :return: A list of steps that are after the current step
+        """
+        if self.is_at_last_step:
+            return []
+        return self.all_steps[self.current_step_index + 1 :]
+
     def goto_step(self, step_index: int, section: str) -> None:
         """
         Go to a specific step in the workflow.
@@ -575,8 +615,6 @@ class StepManager:
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
         if new_step_index < self.current_step_index:
-            for i in range(new_step_index, self.current_step_index):
-                self.all_steps[i].output = Output()
             self.current_step_index = new_step_index
         else:
             raise ValueError("Cannot go to a step that is after the current step")
@@ -598,14 +636,25 @@ class StepManager:
         """
         from protzilla.stepfactory import StepFactory
 
-        new_step = StepFactory.create_step(new_method)
+        new_step = StepFactory.create_step(new_method, self)
 
         try:
             current_index = self.all_steps_in_section(self.current_section).index(
                 self.current_step
             )
             self.all_steps_in_section(self.current_section)[current_index] = new_step
+            self._clear_future_steps()
         except ValueError:
             raise ValueError(f"Unknown section {self.current_section}")
         except Exception as e:
             logging.error(f"Error while changing method: {e}")
+
+    def _clear_future_steps(self, index: int | None = None) -> None:
+        if index == None:
+            index = self.current_step_index
+        if index == len(self.all_steps) - 1:
+            return
+        for step in self.all_steps[index + 1 :]:
+            step.output = Output()
+            step.messages = Messages()
+            step.plots = Plots()

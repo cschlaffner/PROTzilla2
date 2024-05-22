@@ -28,6 +28,7 @@ def metadata_path():
 def peptide_path():
     return "tests/test_data/peptides_vsmall.txt"
 
+
 def mock_perform_method(runner: Runner):
     mock_perform = mock.MagicMock()
     mock_perform.methods = []
@@ -39,7 +40,7 @@ def mock_perform_method(runner: Runner):
         mock_perform.inputs.append(runner.run.current_step.inputs)
 
         # side effect to mark the step as finished
-        runner.run.current_step._finished = True
+        # runner.run.current_step._finished = True # TODO is deprecated
 
     mock_perform.side_effect = mock_current_parameters
 
@@ -79,10 +80,10 @@ def test_runner_imports(
 
     expected_methods = ["MaxQuantImport", "MetadataImport"]
     expected_method_parameters = [
-        {'file_path': ms_data_path, 'intensity_name': 'iBAQ', 'map_to_uniprot': False},
+        {"file_path": ms_data_path, "intensity_name": "iBAQ", "map_to_uniprot": False},
         {
-            'file_path': metadata_path,
-            'feature_orientation': 'Columns (samples in rows, features in columns)',
+            "file_path": metadata_path,
+            "feature_orientation": "Columns (samples in rows, features in columns)",
         },
     ]
 
@@ -129,7 +130,11 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     runner.compute_workflow()
 
-    assert mock_method.methods == ["MaxQuantImport", "MetadataImport", "FilterProteinsBySamplesMissing"]
+    assert mock_method.methods == [
+        "MaxQuantImport",
+        "MetadataImport",
+        "FilterProteinsBySamplesMissing",
+    ]
     assert {"percentage": 0.2} in mock_method.inputs
     assert mock_method.call_count == 3
     mock_plot.assert_not_called()

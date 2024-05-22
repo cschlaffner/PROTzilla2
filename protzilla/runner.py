@@ -84,17 +84,10 @@ class Runner:
             if step.plots:
                 self._save_plots_html(step)
 
-            log_messages(self.run.current_messages)
-            if not self.run.current_step.finished:
-                if self.run.steps.current_section == "importing" or self.run.steps.current_section == "data_preprocessing":
-                    logging.error(f"Errors occurred in {self.run.steps.current_section} steps. Exiting.")
-                    break
-                else:
-                    logging.warning(f"Errors occurred in {self.run.steps.current_section} steps. "
-                                    f"Continuing without this step.")
-            self.run.current_messages.clear()
-
             self.run.step_next()
+
+            log_messages(self.run.current_messages)
+            self.run.current_messages.clear()
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
@@ -105,25 +98,25 @@ class Runner:
             if self.meta_data_path is None:
                 raise ValueError(
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
-                    f" but is required for {step.display_name}"
+                    f" but is required for {step['name']}"
                 )
             step.inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
-                    f"but is required for {step.display_name}"
+                    f"but is required for {step['name']}"
                 )
             step.inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step.display_name} in importing")
+            raise ValueError(f"Cannot find step with name {step['name']} in importing")
 
     def _perform_current_step(self, params=None):
         self.run.current_step.calculate(self.run.steps, params)
 
     def _save_plots_html(self, step):
         for i, plot in enumerate(step.plots):
-            plot_path = f"{self.plots_path}/{self.run.steps.current_step_index}-{step.section}-{step.operation}-{step.instance_identifier}-{i}.html"
+            plot_path = f"{self.plots_path}/{self.run.step_index}-{step.section}-{step['name']}-{step['method']}-{i}.html"
             plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
