@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .constants.paths import RUNS_PATH
 from .run_helper import log_messages
-from .run_v2 import Run
+from .run import Run
 from .utilities import random_string
 
 

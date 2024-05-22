@@ -7,7 +7,7 @@ import pytest
 from protzilla.constants import paths
 from protzilla.methods.data_preprocessing import ImputationByMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 
 
 class TestRun:

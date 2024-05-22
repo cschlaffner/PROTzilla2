@@ -1,7 +1,7 @@
 from enum import Enum
 
 from protzilla.methods.importing import ImportingStep
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
