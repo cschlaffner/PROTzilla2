@@ -112,7 +112,7 @@ def test_all_button_parameters():
 
 def test_step_finished():
     run_name = "test_step_finished" + random_string()
-    run = Run.create(run_name)
+    run = Run(run_name, "only_import")
     active_runs[run_name] = run
 
     assert not run.current_step.finished
@@ -120,15 +120,13 @@ def test_step_finished():
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         "intensity_name": "Intensity",
+        "map_to_uniprot": False,
     }
-    run.perform_calculation_from_location(
-        "importing", "ms_data_import", "max_quant_import", parameters
-    )
+    run.step_calculate(parameters)
 
     assert run.current_step.finished
 
-    run.next_step()
-    run.step_index = 1
+    run.step_next()
 
     assert not run.current_step.finished
 
@@ -136,9 +134,7 @@ def test_step_finished():
         "file_path": f"",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.perform_calculation_from_location(
-        "importing", "metadata_import", "metadata_import_method", parameters
-    )
+    run.step_calculate(parameters)
 
     assert not run.current_step.finished
 
@@ -146,9 +142,7 @@ def test_step_finished():
         "file_path": f"{PROJECT_PATH}/tests/nonexistent_file.txt",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.perform_calculation_from_location(
-        "importing", "metadata_import", "metadata_import_method", parameters
-    )
+    run.step_calculate(parameters)
 
     assert not run.current_step.finished
 
@@ -156,9 +150,7 @@ def test_step_finished():
         "file_path": f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.perform_calculation_from_location(
-        "importing", "metadata_import", "metadata_import_method", parameters
-    )
+    run.step_calculate(parameters)
 
     assert run.current_step.finished
 

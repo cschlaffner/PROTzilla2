@@ -60,7 +60,6 @@ def metadata_import_method(
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
-            metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
@@ -121,7 +120,6 @@ def metadata_import_method_diann(
     meta_df, msg = file_importer(file_path)
     if meta_df.empty:
         return dict(
-            metadata_df=None,
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
 
