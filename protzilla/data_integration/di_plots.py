@@ -50,7 +50,7 @@ def GO_enrichment_bar_plot(
 
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # This method can be used for both restring and gseapy results
     # restring results are different from the expected gseapy results
@@ -68,11 +68,11 @@ def GO_enrichment_bar_plot(
         input_df["Overlap"] = "0/0"
     elif not "Term" in input_df.columns:
         msg = "Please choose an enrichment result dataframe to plot."
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if not gene_sets:
         msg = "Please select at least one category to plot."
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
 
@@ -86,24 +86,23 @@ def GO_enrichment_bar_plot(
             df = df[df["fdr"] <= cutoff]
             if len(df) == 0:
                 msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-                return [dict(messages=[dict(level=logging.WARNING, msg=msg)])]
+                return dict(messages=[dict(level=logging.WARNING, msg=msg)])
 
             column = "-log10(FDR)"
             df[column] = -1 * np.log10(df["fdr"])
             # prevent cutoff from being applied again by bar plot method
             cutoff = df[column].max()
         else:
-            return [
-                dict(
-                    messages=[
-                        dict(
-                            level=logging.ERROR,
-                            msg="FDR is not available for this enrichment result.",
-                        )
-                    ]
-                )
-            ]
-    elif value == "p_value":
+            return dict(
+                messages=[
+                    dict(
+                        level=logging.ERROR,
+                        msg="FDR is not available for this enrichment result.",
+                    )
+                ]
+            )
+
+    elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
 
     if colors == "" or colors is None or len(colors) == 0:
@@ -122,8 +121,8 @@ def GO_enrichment_bar_plot(
         )
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
-        return [dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])]
-    return [fig_to_base64(ax.get_figure())]
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
+    return {"plots": [fig_to_base64(ax.get_figure())]}
 
 
 def GO_enrichment_dot_plot(

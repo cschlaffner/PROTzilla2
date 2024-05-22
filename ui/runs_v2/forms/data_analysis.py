@@ -1,12 +1,19 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
-import ui.runs_v2.forms.fill_helper as fill_helper
+from protzilla.methods.data_analysis import (
+    DifferentialExpressionLinearModel,
+    DifferentialExpressionTTest,
+    DimensionReductionUMAP,
+)
 from protzilla.run_v2 import Run
+from protzilla.steps import Step
 
+from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
+    CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
 )
@@ -26,11 +33,6 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
-class LogBase(Enum):
-    log2 = "log2"
-    log10 = "log10"
-
-
 class YesNo(Enum):
     yes = "Yes"
     no = "No"
@@ -46,9 +48,9 @@ class DynamicProteinFill(Enum):
     pass
 
 
-class SimilarityMeasure(Enum):
-    euclidean_distance = "Euclidean distance"
-    cosine_similarity = "Cosine similarity"
+class SimilarityMeasure(StrEnum):
+    euclidean_distance = "euclidean distance"
+    cosine_similarity = "cosine similarity"
 
 
 class ModelSelection(Enum):
@@ -153,11 +155,6 @@ class DifferentialExpressionANOVAForm(MethodForm):
     alpha = CustomNumberField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        required=False,
-    )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     selected_groups = CustomMultipleChoiceField(
@@ -178,26 +175,29 @@ class DifferentialExpressionANOVAForm(MethodForm):
 
 
 class DifferentialExpressionTTestForm(MethodForm):
+    is_dynamic = True
+
     ttest_type = CustomChoiceField(choices=TTestType, label="T-test type")
     protein_df = CustomChoiceField(
         choices=[], label="Step to use protein intensities from"
     )
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
         label="Multiple testing correction",
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)",
         min_value=0,
         max_value=1,
         step_size=0.05,
         initial=0.05,
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation (optional)",
-        required=False,
-    )
+    # log_base = CustomChoiceField(
+    #     choices=LogBase,
+    #     label="Base of the log transformation (optional)",
+    #     required=False,
+    # )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
@@ -234,47 +234,99 @@ class DifferentialExpressionTTestForm(MethodForm):
 
 
 class DifferentialExpressionLinearModelForm(MethodForm):
-    multiple_testing_correction = CustomChoiceField(
+    multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
-    alpha = CustomNumberField(
+    alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
-    log_base = CustomChoiceField(
-        choices=LogBase,
-        label="Base of the log transformation",
-        initial=LogBase.log2,
-    )
-    grouping = "Put a usefull initial here"
-    group1 = "Put a usefull initial here"
-    group2 = "Put a usefull initial here"
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    group1 = CustomChoiceField(choices=[], label="Group 1")
+    group2 = CustomChoiceField(choices=[], label="Group 2")
+
+    def fill_form(self, run: Run) -> None:
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+
+        # Set choices for group1 field based on selected grouping
+        self.fields["group1"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+        # Set choices for group2 field based on selected grouping and group1
+        if (
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+        ):
+            self.fields["group2"].choices = [
+                (el, el)
+                for el in run.steps.metadata_df[grouping].unique()
+                if el != self.data["group1"]
+            ]
+        else:
+            self.fields["group2"].choices = reversed(
+                fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
+            )
 
 
 class PlotVolcanoForm(MethodForm):
-    # TODO: Add inbput_dict
-    input_dict = "Put a usefull initial here"
+    is_dynamic = True
+
+    input_dict = CustomChoiceField(
+        choices=[],
+        label="Input data dict (generated by t-Test or Linear Model Diff Exp)",
+    )
     fc_threshold = CustomNumberField(
-        label="log 2 fold change threshold", min_value=0, initial=0
+        label="Log2 fold change threshold", min_value=0, initial=0
     )
-    # TODO: Add dynamic fill for proteins_of_interest
     proteins_of_interest = CustomMultipleChoiceField(
-        choices=ProteinsOfInterest,
-        label="Proteins of interest",
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_dict"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(
+                DifferentialExpressionTTest | DifferentialExpressionLinearModel,
+                "differentially_expressed_proteins_df",
+            )
+        )
+
+        input_dict_instance_id = self.data.get(
+            "input_dict", self.fields["input_dict"].choices[0][0]
+        )
+
+        proteins = run.steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", input_dict_instance_id
+        )["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class PlotScatterPlotForm(MethodForm):
     input_df = CustomChoiceField(
-        choices=AnalysisLevel,
+        choices=[],
         label="Choose dataframe to be plotted",
     )
     color_df = CustomChoiceField(
-        choices=AnalysisLevel,
+        choices=[],
         label="Choose dataframe to be used for coloring",
         required=False,
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_df"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(DimensionReductionUMAP, "embedded_data")
+        )
+
+        self.fields["color_df"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(Step, "color_df"), required=False
+        )
 
 
 class PlotClustergramForm(MethodForm):
@@ -295,12 +347,14 @@ class PlotClustergramForm(MethodForm):
 
 
 class PlotProtQuantForm(MethodForm):
+    is_dynamic = True
+
     input_df = CustomChoiceField(
-        choices=AnalysisLevel,
+        choices=[],
         label="Choose dataframe to be plotted",
     )
     protein_group = CustomChoiceField(
-        choices=DynamicProteinFill,
+        choices=[],
         label="Protein group: choose highlighted protein group",
     )
     similarity_measure = CustomChoiceField(
@@ -311,6 +365,56 @@ class PlotProtQuantForm(MethodForm):
     similarity = CustomNumberField(
         label="Similarity", min_value=-1, max_value=999, step_size=1, initial=1
     )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        input_df_instance_id = self.data.get(
+            "input_df", self.fields["input_df"].choices[0][0]
+        )
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+
+        similarity_measure = self.data.get(
+            "similarity_measure", self.fields["similarity_measure"].choices[0][0]
+        )
+        self.data = self.data.copy()
+        if similarity_measure == SimilarityMeasure.cosine_similarity:
+            self.fields["similarity"] = CustomFloatField(
+                label="Cosine Similarity",
+                min_value=-1,
+                max_value=1,
+                step_size=0.1,
+                initial=0,
+            )
+            if (
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < -1
+                or float(self.data["similarity"]) > 1
+            ):
+                self.data["similarity"] = 0
+        else:
+            self.fields["similarity"] = CustomNumberField(
+                label="Euclidean Distance",
+                min_value=0,
+                max_value=999,
+                step_size=1,
+                initial=1,
+            )
+            if (
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < 0
+                or float(self.data["similarity"]) > 999
+            ):
+                self.data["similarity"] = 1
 
 
 class PlotPrecisionRecallCurveForm(MethodForm):
@@ -518,7 +622,8 @@ class ClassificationRandomForestForm(MethodForm):
     )
     # TODO: Workflow_meta line 1763
     train_val_split = CustomNumberField(
-        label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        label="Choose the size of the validation data set (you can either enter the absolute number of validation "
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
@@ -605,7 +710,8 @@ class ClassificationSVMForm(MethodForm):
         initial=ClassificationValidationStrategy.k_fold,
     )
     train_val_split = CustomNumberField(
-        label="Choose the size of the validation data set (you can either enter the absolute number of validation samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        label="Choose the size of the validation data set (you can either enter the absolute number of validation "
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
@@ -721,25 +827,25 @@ class DimensionReductionUMAPForm(MethodForm):
         label="Dimension reduction of a dataframe using UMAP",
     )
     n_neighbors = CustomNumberField(
-        label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation",
+        label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold "
+        "approximation",
         min_value=2,
         max_value=100,
         step_size=1,
         initial=15,
     )
     n_components = CustomNumberField(
-        label="Number of components", min_value=1, step_size=1, initial=2
+        label="Number of components", min_value=1, max_value=100, step_size=1, initial=2
     )
-    min_dist = CustomNumberField(
-        label="The minimum distance between embedded points",
+    min_dist = CustomFloatField(
+        label="The effective minimum distance between embedded points",
         min_value=0.1,
         step_size=0.1,
         initial=0.1,
     )
-    metric = CustomMultipleChoiceField(
+    metric = CustomChoiceField(
         choices=DimensionReductionMetric,
-        label="Metric",
-        initial=DimensionReductionMetric.euclidean,
+        label="Distance metric",
     )
     random_state = CustomNumberField(
         label="Seed for random number generation",
@@ -749,6 +855,11 @@ class DimensionReductionUMAPForm(MethodForm):
         initial=42,
     )
 
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
 
 class ProteinGraphPeptidesToIsoformForm(MethodForm):
     protein_ID = CustomCharField(
@@ -757,7 +868,8 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
     # TODO: workflow_meta line 2255 - 2263
     k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
     allowed_mismatches = CustomNumberField(
-        label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a long time.",
+        label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a "
+        "long time.",
         min_value=0,
         step_size=1,
         initial=2,

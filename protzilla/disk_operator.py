@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
 from protzilla.constants import paths
@@ -23,9 +24,7 @@ class ErrorHandler:
             elif issubclass(exc_type, PermissionError):
                 logging.error(f"Permission denied: {exc_val}")
             else:
-                logging.exception(
-                    "An error occurred", exc_info=(exc_type, exc_val, exc_tb)
-                )
+                logging.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
         return False  # maybe return False here to re-raise the exception
 
 
@@ -69,7 +68,9 @@ class KEYS:
     CURRENT_STEP_INDEX = "current_step_index"
     STEPS = "steps"
     STEP_OUTPUTS = "output"
+    STEP_FORM_INPUTS = "form_inputs"
     STEP_INPUTS = "inputs"
+    STEP_PLOT_INPUTS = "plot_inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
     STEP_INSTANCE_IDENTIFIER = "instance_identifier"
@@ -90,7 +91,7 @@ class DiskOperator:
             step_manager = StepManager()
             step_manager.df_mode = run.get(KEYS.DF_MODE, "disk")
             for step_data in run[KEYS.STEPS]:
-                step = self._read_step(step_data)
+                step = self._read_step(step_data, step_manager)
                 step_manager.add_step(step)
             step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
             return step_manager
@@ -103,6 +104,7 @@ class DiskOperator:
                 self.dataframe_dir.mkdir(parents=True)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
+            run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
                 run[KEYS.STEPS].append(self._write_step(step))
@@ -140,31 +142,39 @@ class DiskOperator:
             for file in upload_dir.iterdir():
                 file.unlink()
 
-    def _read_step(self, step_data: dict) -> Step:
+    def _read_step(self, step_data: dict, steps: StepManager) -> Step:
         from protzilla.stepfactory import StepFactory
 
         with ErrorHandler():
-            step_type = step_data.get(KEYS.STEP_TYPE)
-            step = StepFactory.create_step(step_type)
-            if step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER):
-                step.instance_identifier = step_data.get(
-                    KEYS.STEP_INSTANCE_IDENTIFIER, step.__class__.__name__
-                )
+            step = StepFactory.create_step(
+                step_type=step_data.get(KEYS.STEP_TYPE),
+                steps=steps,
+                instance_identifier=step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER),
+            )
             step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
+            if step.section == "data_preprocessing":
+                step.plot_inputs = step_data.get(KEYS.STEP_PLOT_INPUTS, {})
             step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
+            step.form_inputs = step_data.get(KEYS.STEP_FORM_INPUTS, {})
             return step
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         with ErrorHandler():
             step_data = {}
-            step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
+            if step.section == "data_preprocessing":
+                step_data[KEYS.STEP_PLOT_INPUTS] = sanitize_inputs(step.plot_inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
+            step_data[KEYS.STEP_FORM_INPUTS] = sanitize_inputs(step.form_inputs)
             if not workflow_mode:
+                step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
+                step_data[KEYS.STEP_PLOTS] = self._write_plots(
+                    step.instance_identifier, step.plots
+                )
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
-                    step_name=step.__class__.__name__, output=step.output
+                    instance_identifier=step.instance_identifier, output=step.output
                 )
                 step_data[KEYS.STEP_MESSAGES] = step.messages.messages
             return step_data
@@ -173,38 +183,45 @@ class DiskOperator:
         with ErrorHandler():
             step_output = {}
             for key, value in output.items():
-                if isinstance(value, str):
-                    if Path(value).exists():
-                        try:
-                            step_output[key] = self.dataframe_operator.read(value)
-                        except Exception as e:
-                            logging.error(f"Error while reading output {key}: {e}")
-                            step_output[key] = value
-                    else:
-                        logging.warning(f"Output file {value} does not exist")
+                if isinstance(value, str) and Path(value).exists():
+                    step_output[key] = self.dataframe_operator.read(value)
                 else:
-                    output[key] = value
+                    step_output[key] = value
             return Output(step_output)
 
-    def _write_output(self, step_name: str, output: Output) -> dict:
+    def _write_output(self, instance_identifier: str, output: Output) -> dict:
         with ErrorHandler():
             output_data = {}
             for key, value in output:
                 if isinstance(value, pd.DataFrame):
-                    file_path = self.dataframe_dir / f"{step_name}_{key}.csv"
+                    file_path = self.dataframe_dir / f"{instance_identifier}_{key}.csv"
                     self.dataframe_operator.write(file_path, value)
                     output_data[key] = str(file_path)
                 else:
                     output_data[key] = value
             return output_data
 
-    def _read_plots(self, plots: list) -> Plots:
+    def _read_plots(self, plots: dict) -> Plots:
         if plots:
-            raise NotImplementedError  # TODO
-        return []
+            figures = []
+            for plot in plots.values():
+                figures.append(read_json(plot))
+            return Plots(figures)
+        return Plots([])
 
-    def _write_plots(self, plots: list) -> dict:
-        raise NotImplementedError  # TODO
+    def _write_plots(self, instance_identifier: str, plots: Plots) -> dict:
+        with ErrorHandler():
+            plots_data = {}
+            for i, plot in enumerate(plots):
+                file_path = self.plot_dir / f"{instance_identifier}_plot{i}.json"
+                self.plot_dir.mkdir(parents=True, exist_ok=True)
+                if not isinstance(
+                    plot, bytes
+                ):  # TODO the data integration plots are of type byte, and therefore cannot be written using this methodology
+                    write_json(plot, file_path)
+                    plot.write_image(str(file_path).replace(".json", ".png"))
+                    plots_data[i] = str(file_path)
+            return plots_data
 
     @property
     def run_dir(self):
@@ -228,4 +245,13 @@ class DiskOperator:
 
 
 def sanitize_inputs(inputs: dict) -> dict:
-    return {key: value for key, value in inputs.items() if type(value) != pd.DataFrame}
+    """
+
+    :param inputs:
+    :return:
+    """
+    return {
+        key: value
+        for key, value in inputs.items()
+        if type(value) != pd.DataFrame and not utilities.check_is_path(value)
+    }

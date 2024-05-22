@@ -313,7 +313,7 @@ def change_field(request, run_name):
                     param_dict["categories"] = protein_iterable
                 else:
                     param_dict["categories"] = []
-                    print(
+                    logger.warning(
                         f"Warning: expected protein_iterable to be a DataFrame, Series or list, but got {type(protein_iterable)}. Proceeding with empty list."
                     )
 

@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from django.contrib import messages
 from scipy import stats
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 
@@ -120,7 +119,7 @@ def create_volcano_plot(
         gene=None,
         genomewideline_value=-np.log10(alpha),
         effect_size_line=[-fc_threshold, fc_threshold],
-        xlabel=f"log2(fc) ({group1} vs. {group2})",
+        xlabel=f"log2(fc) ({group2} / {group1})",
         ylabel="-log10(p)",
         title="Volcano Plot",
         annotation="Protein ID",
@@ -311,21 +310,16 @@ def prot_quant_plot(
 
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
-    try:
-        if protein_group not in wide_df.columns:
-            raise ValueError("Please select a valid protein group.")
-        elif similarity_measure == "euclidean distance" and similarity < 0:
-            raise ValueError(
-                "Similarity for euclidean distance should be greater than or equal to 0."
-            )
-        elif similarity_measure == "cosine similarity" and (
-            similarity < -1 or similarity > 1
-        ):
-            raise ValueError(
-                "Similarity for cosine similarity should be between -1 and 1."
-            )
-    except ValueError as error:
-        return dict(messages=[dict(level=messages.ERROR, msg=str(error))])
+    if protein_group not in wide_df.columns:
+        raise ValueError("Please select a valid protein group.")
+    elif similarity_measure == "euclidean distance" and similarity < 0:
+        raise ValueError(
+            "Similarity for euclidean distance should be greater than or equal to 0."
+        )
+    elif similarity_measure == "cosine similarity" and (
+        similarity < -1 or similarity > 1
+    ):
+        raise ValueError("Similarity for cosine similarity should be between -1 and 1")
 
     fig = go.Figure()
 
