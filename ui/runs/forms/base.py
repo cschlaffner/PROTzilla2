@@ -4,7 +4,7 @@ import traceback
 from django.forms import Form
 from django.urls import reverse
 
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.utilities import get_file_name_from_upload_path
 from ui.runs.forms.custom_fields import CustomCharField, CustomFileField
 

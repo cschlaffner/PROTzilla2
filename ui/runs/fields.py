@@ -11,7 +11,7 @@ from main.settings import BASE_DIR
 
 sys.path.append(f"{BASE_DIR}/..")
 import ui.runs.form_mapping as form_map
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.utilities import name_to_title
 from ui.runs.views_helper import get_displayed_steps
 
