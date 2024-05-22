@@ -539,10 +539,7 @@ class StepManager:
         """
         if step is None and (step_index is None or section is None):
             raise ValueError("Either step or step_index and section must be provided")
-        if step is not None:
-            section = step.section
-            step_index = self.all_steps_in_section(section).index(step)
-        else:
+        if step is None:
             if section not in self.sections:
                 raise ValueError(f"Unknown section {section}")
             if step_index >= len(self.sections[section]):
