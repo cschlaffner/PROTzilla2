@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python ui/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/project_root
+      - user_data_volume:/project_root/user_data
+    ports:
+      - "8000:8000"
+
+volumes:
+  user_data_volume:
