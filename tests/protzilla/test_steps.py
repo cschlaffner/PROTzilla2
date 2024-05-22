@@ -21,8 +21,7 @@ class TestStepManager:
         assert step_manager.current_step == step
 
     def test_remove_step(self, step_manager):
-        step = Step()
-        step.section = Section.IMPORTING.value
+        step = MaxQuantImport()
         step_manager.add_step(step)
         assert len(step_manager.importing) == 1
         step_manager.remove_step(step)
@@ -83,8 +82,7 @@ class TestStepManager:
 
     def test_all_steps_in_section(self, step_manager):
         assert len(step_manager.all_steps_in_section(Section.IMPORTING.value)) == 0
-        step = Step()
-        step.section = Section.IMPORTING.value
+        step = MaxQuantImport()
         step_manager.add_step(step)
         assert len(step_manager.all_steps_in_section(Section.IMPORTING.value)) == 1
         assert step_manager.all_steps_in_section(Section.IMPORTING.value)[0] == step

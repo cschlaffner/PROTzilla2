@@ -64,8 +64,9 @@ class Step:
         """
         steps._clear_future_steps()
 
-        self.form_inputs = inputs.copy()
-        self.inputs = inputs.copy()
+        if inputs:
+            self.inputs = inputs.copy()
+        self.form_inputs = self.inputs.copy()
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -536,16 +537,16 @@ class StepManager:
         :param step_index: the step index in the section
         :param section: the section as a string
         """
-        if section not in self.sections:
-            raise ValueError(f"Unknown section {section}")
-        if step_index >= len(self.sections[section]):
-            raise ValueError(
-                f"Step index {step_index} out of bounds for section {section}"
-            )
         if step is None and (step_index is None or section is None):
             raise ValueError("Either step or step_index and section must be provided")
         if step is None:
+            if section not in self.sections:
+                raise ValueError(f"Unknown section {section}")
+            if step_index >= len(self.sections[section]):
+                raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+
             step = self.all_steps_in_section(section)[step_index]
+
         global_step_index = self.all_steps.index(step)
         self._clear_future_steps(global_step_index)
         if global_step_index < self.current_step_index:

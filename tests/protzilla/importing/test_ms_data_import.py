@@ -190,45 +190,45 @@ def diann_import_intensity_df():
 
 def test_max_quant_import_different_intensity_names():
     for intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]:
-        df, msg = ms_data_import.max_quant_import(
-            _=None,
+        outputs = ms_data_import.max_quant_import(
             file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small.tsv",
             intensity_name=intensity_name,
         )
-        assert df is not None
-        assert intensity_name in df.columns
+        assert "protein_df" in outputs
+        assert outputs["protein_df"] is not None
+        assert intensity_name in outputs["protein_df"].columns
 
 
 def test_max_quant_import_file_not_exist():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
+    outputs = ms_data_import.max_quant_import(
         file_path="non_existent_file_path",
         intensity_name="Intensity",
     )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "found" in msg["messages"][0]["msg"].lower()
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
+    assert any("found" in message["msg"].lower() for message in outputs["messages"])
 
 
 def test_max_quant_import_no_protein_ids_column():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
+    outputs = ms_data_import.max_quant_import(
         file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_noproteincolumn.tsv",
         intensity_name="Intensity",
     )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
-    assert "Protein IDs" in msg["messages"][0]["msg"]
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
+    assert any("Protein IDs" in message["msg"] for message in outputs["messages"])
 
 
 def test_max_quant_import_invalid_data():
-    df, msg = ms_data_import.max_quant_import(
-        _=None,
+    outputs = ms_data_import.max_quant_import(
         file_path=f"{PROJECT_PATH}/tests/test_data/data_import/maxquant_small_invalid.tsv",
         intensity_name="Intensity",
     )
-    assert df is None
-    assert msg["messages"][0]["level"] == logging.ERROR
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
 
 
 @pytest.mark.parametrize(
@@ -246,42 +246,39 @@ def test_max_quant_import_invalid_data():
     ],
 )
 def test_ms_fragger_import(intensity_name):
-    test_intensity_df, _ = ms_data_import.ms_fragger_import(
-        _=None,
+    outputs = ms_data_import.ms_fragger_import(
         file_path=f"{PROJECT_PATH}/tests/combined_protein_method_small_cut.tsv",
         intensity_name=intensity_name,
     )
 
-    intensity_df = ms_fragger_import_intensity_df(intensity_name)
+    expected_protein_df = ms_fragger_import_intensity_df(intensity_name)
 
     # we do not care about the genes column, it is never used (and replaced by nan)
-    intensity_df = intensity_df.drop(columns=["Gene"])
-    test_intensity_df = test_intensity_df.drop(columns=["Gene"])
+    expected_protein_df = expected_protein_df.drop(columns=["Gene"])
+    result_protein_df = outputs["protein_df"].drop(columns=["Gene"])
 
-    pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
+    pd.testing.assert_frame_equal(expected_protein_df, result_protein_df)
 
 
 def test_diann_import():
-    test_intensity_df, _ = ms_data_import.diann_import(
-        _=None,
+    outputs = ms_data_import.diann_import(
         file_path=f"{PROJECT_PATH}/tests/diann_intensities.tsv",
     )
 
-    intensity_df = diann_import_intensity_df()
+    expected_intensity_df = diann_import_intensity_df()
 
     # we do not care about the genes column, it is never used (and replaced by nan)
-    intensity_df = intensity_df.drop(columns=["Gene"])
-    test_intensity_df = test_intensity_df.drop(columns=["Gene"])
-    pd.testing.assert_frame_equal(test_intensity_df, intensity_df)
+    expected_intensity_df = expected_intensity_df.drop(columns=["Gene"])
+    result_intensity_df = outputs["protein_df"].drop(columns=["Gene"])
+    pd.testing.assert_frame_equal(result_intensity_df, expected_intensity_df)
 
 
 def test_filter_rev_con():
-    intensity_df, other = ms_data_import.max_quant_import(
-        _=None,
+    outputs = ms_data_import.max_quant_import(
         file_path=PROJECT_PATH / "tests" / "proteinGroups_small_cut.txt",
         intensity_name="Intensity",
     )
-    protein_ids = intensity_df["Protein ID"].unique().tolist()
+    protein_ids = outputs["protein_df"]["Protein ID"].unique().tolist()
     # not the complete group should be filtered out if contains valid ids
     assert "P00000" in protein_ids
     # all instances of rev and con should be filtered out
@@ -312,17 +309,17 @@ def test_transform_and_clean():
         ["C", "Q11111", np.nan],
     ]
     df = pd.DataFrame(data, columns=columns)
-    res, other = ms_data_import.transform_and_clean(
+    outputs = ms_data_import.transform_and_clean(
         df, "intensity", map_to_uniprot=False
     )
     expected_df = pd.DataFrame(expected_output, columns=out_col)
 
     # we do not care about the genes column, it is deprecated (and replaced by nan)
-    res = res.drop(columns=["Gene"])
+    protein_df = outputs["protein_df"].drop(columns=["Gene"])
 
-    assert res.equals(expected_df)
-    assert other["contaminants"] == ["Q11111;CON__P12345"]
-    assert other["filtered_proteins"] == ["REV__P12345"]
+    assert protein_df.equals(expected_df)
+    assert outputs["contaminants"] == ["Q11111;CON__P12345"]
+    assert outputs["filtered_proteins"] == ["REV__P12345"]
 
 
 def test_clean_protein_groups():

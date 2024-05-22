@@ -24,7 +24,7 @@ def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) 
 
         if intensity_df.empty:
             msg = f"{intensity_name} was not found in the provided file, please use another intensity and try again or verify your file."
-            return dict(protein_df=None, messages=[dict(level=logging.ERROR, msg=msg)])
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
         intensity_df.columns = [
             c[len(intensity_name) + 1 :] for c in intensity_df.columns
@@ -34,7 +34,7 @@ def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) 
 
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid Max Quant file."
-        return dict(protein_df=None, messages=[dict(level=logging.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
 
 def ms_fragger_import(
