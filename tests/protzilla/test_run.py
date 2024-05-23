@@ -1,5 +1,3 @@
-import logging
-import uuid
 from pathlib import Path
 from shutil import rmtree
 
@@ -49,7 +47,7 @@ class TestRun:
     def maxquant_data_file(self):
         return str(
             (
-                Path(paths.TEST_DATA_PATH) / "MaxQuant_data" / "proteinGroups.txt"
+                Path(paths.TEST_DATA_PATH) / "data_import" / "maxquant_small.tsv"
             ).absolute()
         )
 
@@ -84,13 +82,20 @@ class TestRun:
         run.step_calculate(inputs={"protein_df": maxquant_data_file})
         assert run.current_step.output["protein_df"] is not None
 
-    def test_step_plot(self, run):
+    def test_step_plot(self, run: Run):
         step = ImputationByMinPerProtein()
         run.step_add(step)
         run.step_next()
         run.step_calculate(inputs={"shrinking_value": 0.5})
         assert run.current_step == step
-        run.step_plot()  # TODO Plots are broken, waiting for fix
+        run.step_plot(
+            inputs={
+                "graph_type": "Boxplot",
+                "graph_type_quantities": "Pie chart",
+                "group_by": "None",
+                "visual_transformation": "linear",
+            }
+        )
         assert not run.current_step.plots.empty
 
     def test_step_next(self, run):
