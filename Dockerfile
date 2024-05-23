@@ -40,8 +40,8 @@ COPY requirements.txt /project_root/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy the entire project to the container
-COPY . /project_root/
 
 # Run the Django development server
+RUN adduser --disabled-password --gecos '' myuser
+USER myuser
 CMD ["python", "ui/manage.py", "runserver", "0.0.0.0:8000"]
