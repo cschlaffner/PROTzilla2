@@ -108,9 +108,9 @@ class DiskOperator:
     def write_run(self, step_manager: StepManager) -> None:
         with ErrorHandler():
             if not self.run_dir.exists():
-                self.run_dir.mkdir(parents=True)
+                self.run_dir.mkdir(parents=True, exist_ok=True)
             if not self.dataframe_dir.exists():
-                self.dataframe_dir.mkdir(parents=True)
+                self.dataframe_dir.mkdir(parents=True, exist_ok=True)
             self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
