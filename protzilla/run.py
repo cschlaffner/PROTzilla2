@@ -138,8 +138,8 @@ class Run:
 
     @error_handling
     @auto_save
-    def step_plot(self) -> None:
-        self.steps.current_step.plot()
+    def step_plot(self, inputs: dict | None = None) -> None:
+        self.steps.current_step.plot(inputs)
 
     @error_handling
     @auto_save
