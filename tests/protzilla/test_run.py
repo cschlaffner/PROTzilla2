@@ -1,6 +1,7 @@
+import logging
+import uuid
 from pathlib import Path
 from shutil import rmtree
-import logging
 
 import pytest
 
@@ -13,22 +14,24 @@ from protzilla.run import Run
 class TestRun:
     @pytest.fixture
     def run_standard(
-            self,
+        self,
     ):
-        # delete the previous run
-        run_path = Path(paths.RUNS_PATH) / "test_run"
+        run_name = f"test_run_{uuid.uuid4()}"
+        run_path = Path(paths.RUNS_PATH) / run_name
+        yield Run(run_name=run_name, workflow_name="standard")
+        print(f"Now deleting {run_path}")
+        rmtree(run_path, ignore_errors=True)
         if run_path.exists():
-            rmtree(run_path)
-        yield Run(run_name="test_run", workflow_name="standard")
-        rmtree(run_path)
+            logging.error(f"Could not delete {run_path}")
 
     @pytest.fixture
     def run_empty(self):
-        run_path = Path(paths.RUNS_PATH) / "test_run"
+        run_name = f"test_run_{uuid.uuid4()}"
+        run_path = Path(paths.RUNS_PATH) / run_name
+        yield Run(run_name=run_name, workflow_name="test-run-empty")
+        rmtree(run_path, ignore_errors=True)
         if run_path.exists():
-            rmtree(run_path)
-        yield Run(run_name="test_run", workflow_name="test-run-empty")
-        rmtree(run_path)
+            logging.error(f"Could not delete {run_path}")
 
     @pytest.fixture
     def run(self, run_empty, maxquant_data_file):
@@ -46,12 +49,11 @@ class TestRun:
     def maxquant_data_file(self):
         return str(
             (
-                    Path(paths.TEST_DATA_PATH) / "MaxQuant_data" / "proteinGroups.txt"
+                Path(paths.TEST_DATA_PATH) / "MaxQuant_data" / "proteinGroups.txt"
             ).absolute()
         )
 
     def test_init_standard(self, run_standard):
-        assert run_standard.run_name == "test_run"
         assert run_standard.workflow_name == "standard"
         assert run_standard.steps is not None
         assert run_standard.current_step is not None
@@ -59,7 +61,6 @@ class TestRun:
         assert run_standard.steps.current_section == "importing"
 
     def test_init_empty(self, run_empty):
-        assert run_empty.run_name == "test_run"
         assert run_empty.workflow_name == "test-run-empty"
         assert run_empty.steps is not None
         assert len(run_empty.steps.all_steps) == 0
@@ -112,8 +113,7 @@ class TestRun:
         run.step_add(step)
         run.step_goto(0, "data_preprocessing")
         assert any(
-            message["level"] == logging.ERROR and
-            "ValueError" in message["msg"]
+            message["level"] == logging.ERROR and "ValueError" in message["msg"]
             for message in run.current_messages
         ), "No error messages found in run.current_messages"
         assert run.current_step != step
