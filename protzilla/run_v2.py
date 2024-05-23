@@ -10,6 +10,8 @@ from protzilla.utilities import format_trace
 
 
 def get_available_run_names() -> list[str]:
+    if not paths.RUNS_PATH.exists():
+        return []
     return [
         directory.name
         for directory in paths.RUNS_PATH.iterdir()
