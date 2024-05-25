@@ -8,6 +8,7 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
+from protzilla.data_analysis.filter_peptieds_of_protein import by_select_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -598,4 +599,27 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.peptide_df
         inputs["isoform_df"] = steps.isoform_df
+        return inputs
+
+class SelectProtein(DataAnalysisStep):
+    display_name = "Select Protein"
+    operation = "Filter Peptides of Protein"
+    method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
+
+    input_keys = [
+        "peptide_df",
+        "protein_id",
+    ]
+    output_keys = [
+        "single_protein_peptide_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return by_select_protein(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        peptide_df = steps.get_step_output(Step, "peptide_df")
+        if peptide_df is None:
+            "You need to import peptide data to perform this step"
+        inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
         return inputs

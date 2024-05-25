@@ -881,3 +881,16 @@ class ProteinGraphVariationGraphForm(MethodForm):
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
+
+
+class SelectProteinOfInterestForm(MethodForm):
+    protein_id = CustomChoiceField(
+        choices=[], label="Protein ID", initial="Enter the Uniprot-ID of the protein"
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["protein_id"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                Step, "protein_df"
+            )["Protein ID"].unique()
+        )
