@@ -160,6 +160,27 @@
             "default": "Intensity"
           }
         }
+      },
+      "evidence_import": {
+        "name": "Evidence import",
+        "description": "Import peptide and PTM data, from an evidence file",
+        "parameters": {
+          "file_path": {
+            "name": "Evidence file",
+            "type": "file",
+            "default": null
+          },
+          "intensity_name": {
+            "name": "Intensity parameter (same as MS-Data)",
+            "type": "categorical",
+            "categories": [
+              "LFQ intensity",
+              "Intensity",
+              "iBAQ"
+            ],
+            "default": "Intensity"
+          }
+        }
       }
     }
   },

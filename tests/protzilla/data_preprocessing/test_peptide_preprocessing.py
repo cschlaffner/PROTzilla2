@@ -33,7 +33,7 @@ def filtered_peptides_list():
 
 def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
     import_outputs = peptide_import.peptide_import(
-        file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="Intensity",
     )
 

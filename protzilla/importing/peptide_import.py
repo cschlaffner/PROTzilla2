@@ -23,7 +23,7 @@ def peptide_import(file_path, intensity_name) -> dict:
         "LFQ intensity" if intensity_name == "iBAQ" else intensity_name
     )
 
-    id_columns = ["Proteins", "Sequence", "PEP"]
+    id_columns = ["Proteins", "Sequence", "Missed cleavages", "PEP"]
     read = pd.read_csv(
         file_path,
         sep="\t",
@@ -53,3 +53,54 @@ def peptide_import(file_path, intensity_name) -> dict:
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return dict(peptide_df=ordered)
+
+
+def evidence_import(file_path, intensity_name) -> dict:
+    try:
+        assert intensity_name in [
+            "Intensity",
+            "iBAQ",
+            "LFQ intensity",
+        ], f"Unknown intensity name: {intensity_name}"
+        assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
+    except AssertionError as e:
+        return dict(messages=[dict(level=logging.ERROR, msg=e)])
+
+    # Intensity -> Intensity, iBAQ -> LFQ, LFQ -> LFQ
+    peptide_intensity_name = (
+        "LFQ intensity" if intensity_name == "iBAQ" else intensity_name
+    )
+
+    id_columns = [
+        "Experiment",
+        "Proteins",
+        "Sequence",
+        peptide_intensity_name,
+        "Modifications",
+        "Modified sequence",
+        "Missed cleavages",
+        "PEP",
+        "Raw file",
+    ]
+
+    read = pd.read_csv(
+        file_path,
+        sep="\t",
+        low_memory=False,
+        na_values=["", 0],
+        keep_default_na=True,
+    )
+
+    df = read[id_columns]
+
+    df = df.rename(columns={"Proteins": "Protein ID"})
+    df = df.rename(columns={"Experiment": "Sample"})
+
+    df.dropna(subset=["Protein ID"], inplace=True)
+    df.sort_values(
+        by=["Sample", "Protein ID", "Sequence", "Modifications"],
+        ignore_index=True,
+        inplace=True,
+    )
+
+    return dict(peptide_df=df)
