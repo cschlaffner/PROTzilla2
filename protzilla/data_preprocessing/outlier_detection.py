@@ -18,7 +18,7 @@ def by_isolation_forest(
         peptide_df: pd.DataFrame = None,
         n_estimators: int = 100,
         n_jobs: int = -1,
-) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+) -> dict:
     """
     This function filters out outliers using a clustering
     isolation forest approach.
@@ -75,7 +75,7 @@ def by_isolation_forest(
             encoded as NaN. Consider preprocessing your data to remove NaN values."
         return dict(
             protein_df=protein_df,
-            peptide_df,
+            peptide_df=peptide_df,
             outlier_list=None,
             anomaly_df=None,
             messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],

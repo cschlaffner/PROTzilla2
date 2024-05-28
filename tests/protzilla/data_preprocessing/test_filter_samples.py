@@ -51,10 +51,10 @@ def filter_samples_df():
     return filter_samples_df
 
 
-def test_by_proteins_missing(filter_samples_df, show_figures):
+def test_by_proteins_missing(filter_samples_df, show_figures, peptides_df):
     method_input1 = {"protein_df": filter_samples_df, "percentage": 0.5}
     method_output1 = by_proteins_missing(**method_input1)
-    method_input2 = {"protein_df": filter_samples_df, "peptides_df": peptides_df, "percentage": 0.6}
+    method_input2 = {"protein_df": filter_samples_df, "peptide_df": peptides_df, "percentage": 0.6}
     method_output2 = by_proteins_missing(**method_input2)
     method_input3 = {"protein_df": filter_samples_df, "percentage": 0.65}
     method_output3 = by_proteins_missing(**method_input3)
@@ -139,7 +139,7 @@ def test_filter_samples_by_protein_count(filter_samples_df, show_figures, peptid
         "Sample",
     )
 
-def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures):
+def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures, peptides_df):
     method_input1 = {"protein_df": filter_samples_df, "deviation_threshold": 1.0}
     method_output1 = by_protein_intensity_sum(**method_input1)
     method_input2 = {"protein_df": filter_samples_df, "peptide_df": peptides_df, "deviation_threshold": 0.3}
@@ -170,8 +170,8 @@ def test_filter_samples_by_protein_intensity_sum(filter_samples_df, show_figures
         "Sample",
     )
     assert_peptide_filtering_matches_protein_filtering(
-        method_output1["protein_df"],
+        method_output2["protein_df"],
         peptides_df,
-        method_output1["peptide_df"],
+        method_output2["peptide_df"],
         "Sample",
     )

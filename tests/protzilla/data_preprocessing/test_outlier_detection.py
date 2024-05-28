@@ -30,6 +30,9 @@ def outlier_detection_df():
         ["Sample3", "Protein1", "Gene1", 100],
         ["Sample3", "Protein2", "Gene2", 50],
         ["Sample3", "Protein3", "Gene3", 80],
+        ["Sample4", "Protein1", "Gene1", 100],
+        ["Sample4", "Protein2", "Gene2", 50],
+        ["Sample4", "Protein3", "Gene3", 80],
     )
 
     outlier_detection_df = pd.DataFrame(
@@ -75,7 +78,7 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
         fig.show()
 
     assert_peptide_filtering_matches_protein_filtering(
-        method_outputs["protein_df"], peptides_df, method_outputs["peptides_df"], "Sample"
+        method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
     )
 
 
@@ -134,7 +137,7 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df, peptides
         fig.show()
 
     assert_peptide_filtering_matches_protein_filtering(
-            method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
+        method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
     )
 
 
