@@ -126,3 +126,10 @@ class PeptideImportForm(MethodForm):
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter (same as MS-Data)"
     )
+
+
+class EvidenceImportForm(MethodForm):
+    file_path = CustomFileField(label="Evidence file")
+    intensity_name = CustomChoiceField(
+        choices=IntensityType, label="Intensity parameter (same as MS-Data)"
+    )

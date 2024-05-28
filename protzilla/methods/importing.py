@@ -128,3 +128,15 @@ class PeptideImport(ImportingStep):
 
     def method(self, inputs):
         return peptide_import(**inputs)
+
+
+class EvidenceImport(ImportingStep):
+    display_name = "Evidence import"
+    operation = "peptide_import"
+    method_description = "Import an evidence file"
+
+    input_keys = ["file_path", "intensity_name"]
+    output_keys = ["peptide_df"]
+
+    def method(self, inputs):
+        return peptide_import(**inputs)
