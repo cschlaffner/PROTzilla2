@@ -243,12 +243,12 @@ def test_log10_transformation(
 
 @pytest.mark.parametrize("log_base", ["log2", "log10"])
 def test_by_log_without_peptide_df(log2_transformation_df, log_base):
-    result_df, result_peptide_df, method_output = by_log(
+    method_outputs = by_log(
         log2_transformation_df, log_base=log_base
     )
 
     assert (
-            result_peptide_df is None
+            method_outputs["peptide_df"] is None
     ), "The peptide DataFrame should be None, if no input peptide DataFrame is given."
 
 
