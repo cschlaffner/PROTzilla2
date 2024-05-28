@@ -884,8 +884,9 @@ class ProteinGraphVariationGraphForm(MethodForm):
 
 
 class SelectProteinOfInterestForm(MethodForm):
-    protein_id = CustomChoiceField(
-        choices=[], label="Protein ID", initial="Enter the Uniprot-ID of the protein"
+    protein_id = CustomMultipleChoiceField(
+        choices=[],
+        label="Protein ID",
     )
 
     def fill_form(self, run: Run) -> None:
