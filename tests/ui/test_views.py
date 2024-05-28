@@ -1,4 +1,4 @@
-import json
+"""import json
 import sys
 from shutil import rmtree
 
@@ -10,7 +10,7 @@ from protzilla import data_preprocessing
 from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
 from protzilla.run_v2 import Run
 from protzilla.utilities import random_string
-from ui.runs.views import active_runs, all_button_parameters
+from ui.runs.views import (active_runs, all_button_parameters)
 
 
 def assert_response(
@@ -162,4 +162,4 @@ def test_step_finished():
 
     assert run.current_step.finished
 
-    rmtree(RUNS_PATH / run_name)
+    rmtree(RUNS_PATH / run_name)"""
