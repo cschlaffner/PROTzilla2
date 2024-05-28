@@ -57,6 +57,7 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
 
 def by_knn(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     number_of_neighbours: int = 5,
     **kwargs,  # quantile, default is median
 ) -> dict:
@@ -104,6 +105,7 @@ def by_knn(
 
 def by_simple_imputer(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     strategy: str = "mean",
 ) -> dict:
     """
@@ -144,6 +146,7 @@ def by_simple_imputer(
 
 def by_min_per_sample(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -186,6 +189,7 @@ def by_min_per_sample(
 
 def by_min_per_protein(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -229,6 +233,7 @@ def by_min_per_protein(
 
 def by_min_per_dataset(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     shrinking_value: float = 1,
 ) -> dict:
     """
@@ -259,6 +264,7 @@ def by_min_per_dataset(
 
 def by_normal_distribution_sampling(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame = None,
     strategy: str = "perProtein",
     down_shift: float = 0,
     scaling_factor: float = 1,

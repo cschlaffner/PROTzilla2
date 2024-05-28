@@ -129,6 +129,7 @@ class Step:
         """
         if not isinstance(outputs, dict):
             raise TypeError("Output of calculation is not a dictionary.")
+        outputs = {key: value for key, value in outputs.items() if value is not None}
         if not outputs:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
