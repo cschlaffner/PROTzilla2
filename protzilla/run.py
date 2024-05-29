@@ -28,8 +28,8 @@ class Run:
         def __exit__(self, exc_type, exc_value, tb):
             if exc_type:
                 formatted_trace = format_trace(traceback.format_exception(exc_value))
-                if self.run.steps.current_step is not None:
-                    self.run.steps.current_step.messages.append(
+                if self.run.current_step is not None:
+                    self.run.current_step.messages.append(
                         dict(
                             level=logging.ERROR,
                             msg=(

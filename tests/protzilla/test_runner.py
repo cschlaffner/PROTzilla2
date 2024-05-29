@@ -177,7 +177,7 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path, metadata_pat
     runner.compute_workflow()
 
     assert mock_plot.call_count == 1
-    assert mock_plot.inputs == [{"graph_type": "Pie chart"}]
+    assert mock_plot.inputs == [{"graph_type": "Bar chart"}]
 
 
 def test_serialize_graphs():
