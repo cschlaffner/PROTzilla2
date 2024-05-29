@@ -112,7 +112,7 @@ def test_all_button_parameters():
 
 def test_step_finished():
     run_name = "test_step_finished" + random_string()
-    run = Run(run_name, "only_import")
+    run = Run(run_name, "standard")
     active_runs[run_name] = run
 
     assert not run.current_step.finished
