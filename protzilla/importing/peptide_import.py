@@ -14,7 +14,6 @@ def peptide_import(file_path, intensity_name) -> dict:
         assert Path(file_path).is_file(), f"Cannot find Peptide File at {file_path}"
     except AssertionError as e:
         return dict(
-            peptide_df=None,
             messages=[dict(level=logging.ERROR, msg=e)],
         )
 
