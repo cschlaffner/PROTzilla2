@@ -3,7 +3,7 @@ from enum import Enum, StrEnum
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
-    DimensionReductionUMAP,
+    DimensionReductionUMAP, DataAnalysisStep,
 )
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
@@ -219,8 +219,8 @@ class DifferentialExpressionTTestForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-            "group1" in self.data
-            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+                "group1" in self.data
+                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -260,8 +260,8 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-            "group1" in self.data
-            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+                "group1" in self.data
+                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -396,9 +396,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=0,
             )
             if (
-                "similarity" not in self.data
-                or float(self.data["similarity"]) < -1
-                or float(self.data["similarity"]) > 1
+                    "similarity" not in self.data
+                    or float(self.data["similarity"]) < -1
+                    or float(self.data["similarity"]) > 1
             ):
                 self.data["similarity"] = 0
         else:
@@ -410,9 +410,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=1,
             )
             if (
-                "similarity" not in self.data
-                or float(self.data["similarity"]) < 0
-                or float(self.data["similarity"]) > 999
+                    "similarity" not in self.data
+                    or float(self.data["similarity"]) < 0
+                    or float(self.data["similarity"]) > 999
             ):
                 self.data["similarity"] = 1
 
@@ -623,7 +623,7 @@ class ClassificationRandomForestForm(MethodForm):
     # TODO: Workflow_meta line 1763
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
@@ -711,7 +711,7 @@ class ClassificationSVMForm(MethodForm):
     )
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
@@ -828,7 +828,7 @@ class DimensionReductionUMAPForm(MethodForm):
     )
     n_neighbors = CustomNumberField(
         label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold "
-        "approximation",
+              "approximation",
         min_value=2,
         max_value=100,
         step_size=1,
@@ -869,7 +869,7 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
     k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
     allowed_mismatches = CustomNumberField(
         label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a "
-        "long time.",
+              "long time.",
         min_value=0,
         step_size=1,
         initial=2,
@@ -884,14 +884,39 @@ class ProteinGraphVariationGraphForm(MethodForm):
 
 
 class SelectProteinOfInterestForm(MethodForm):
+    is_dynamic = True
+
+    protein_list = CustomChoiceField(
+        choices=[],
+        label="Select a list of Proteins from which you wand to choose your Proteins of Interest",
+        required=False
+    )
+
     protein_id = CustomMultipleChoiceField(
         choices=[],
         label="Protein ID",
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_id"].choices = fill_helper.to_choices(
-            run.steps.get_step_output(
-                Step, "protein_df"
-            )["Protein ID"].unique()
+        choices = ["all proteins"]
+        choices.extend(
+            run.steps.get_instance_identifiers(DataAnalysisStep, "significant_proteins_df")
         )
+        self.fields["protein_list"].choices = fill_helper.to_choices(
+            choices
+        )
+
+        chosen_list = self.data.get("protein_list", self.fields["protein_list"].choices[0][0])
+        if chosen_list == "all proteins":
+            self.fields["protein_id"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "protein_df"
+                )["Protein ID"].unique()
+            )
+        else:
+            self.fields["protein_id"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    DataAnalysisStep, "significant_proteins_df", chosen_list
+                )["Protein ID"].unique()
+            )
+            """.sort_values(by="corrected_p_value")"""
