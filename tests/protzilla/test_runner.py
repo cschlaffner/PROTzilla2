@@ -64,7 +64,7 @@ def test_runner_imports(
     monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
 ):
     importing_args = [
-        "only_import",  # expects max-quant import, metadata import
+        "standard",  # expects max-quant import, metadata import
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
@@ -78,18 +78,40 @@ def test_runner_imports(
 
     runner.compute_workflow()
 
-    expected_methods = ["MaxQuantImport", "MetadataImport"]
+    expected_methods = [
+        'MaxQuantImport',
+        'MetadataImport',
+        'FilterProteinsBySamplesMissing',
+        'FilterSamplesByProteinIntensitiesSum',
+        'ImputationByKNN',
+        'OutlierDetectionByLocalOutlierFactor',
+        'NormalisationByMedian',
+        'TransformationLog',
+        'PlotProtQuant',
+        'DifferentialExpressionTTest',
+        'PlotVolcano',
+        'EnrichmentAnalysisGOAnalysisWithString',
+        'PlotGOEnrichmentBarPlot'
+    ]
     expected_method_parameters = [
-        {"file_path": ms_data_path, "intensity_name": "iBAQ", "map_to_uniprot": False},
-        {
-            "file_path": metadata_path,
-            "feature_orientation": "Columns (samples in rows, features in columns)",
-        },
+        {'file_path': 'tests/proteinGroups_small_cut.txt'},
+        {'file_path': 'tests/metadata_cut_columns.csv'},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
     ]
 
     assert mock_method.methods == expected_methods
     assert mock_method.inputs == expected_method_parameters
-    assert mock_method.call_count == 2
+    assert mock_method.call_count == 13
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
