@@ -10,7 +10,7 @@ from protzilla.importing.ms_data_import import (
     max_quant_import,
     ms_fragger_import,
 )
-from protzilla.importing.peptide_import import peptide_import
+from protzilla.importing.peptide_import import peptide_import, evidence_import
 from protzilla.steps import Step, StepManager
 
 
@@ -139,4 +139,4 @@ class EvidenceImport(ImportingStep):
     output_keys = ["peptide_df"]
 
     def method(self, inputs):
-        return peptide_import(**inputs)
+        return evidence_import(**inputs)
