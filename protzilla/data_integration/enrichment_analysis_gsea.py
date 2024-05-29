@@ -379,7 +379,7 @@ def gsea(
         and (protein_df[intensity_name] < 0).any()
     ):
         msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=l<ogging.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
