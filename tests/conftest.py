@@ -2,6 +2,8 @@ import base64
 import io
 import json
 import logging
+import time
+import uuid
 from pathlib import Path
 from shutil import rmtree
 
@@ -10,7 +12,10 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from protzilla.methods.importing import MaxQuantImport
+from protzilla.run import Run
+
+from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH, TEST_DATA_PATH
 from ..protzilla.utilities import random_string
 
 
@@ -21,6 +26,53 @@ def pytest_addoption(parser):
         default=False,
         help="If 'True', tests will open figures using the default renderer",
     )
+
+
+@pytest.fixture(scope="function")
+def run_name_and_cleanup():
+    # Generate a unique run name
+    run_name = f"test_run_{uuid.uuid4()}"
+    run_path = Path(RUNS_PATH) / run_name
+
+    # Yield the run name to the test or fixture that uses this fixture
+    yield run_name
+
+    # After the test or fixture that uses this fixture is done, remove the directory
+    while run_path.exists():
+        time.sleep(1)
+        rmtree(run_path)
+
+
+@pytest.fixture
+def maxquant_data_file():
+    return str((Path(TEST_DATA_PATH) / "data_import" / "maxquant_small.tsv").absolute())
+
+
+@pytest.fixture(scope="function")
+def run_standard(run_name_and_cleanup):
+    run_name = run_name_and_cleanup
+    yield Run(run_name=run_name, workflow_name="standard", df_mode="memory")
+
+
+@pytest.fixture(scope="function")
+def run_empty(run_name_and_cleanup):
+    run_name = run_name_and_cleanup
+    yield Run(run_name=run_name, workflow_name="test-run-empty", df_mode="memory")
+
+
+@pytest.fixture(scope="function")
+def run_imported(run_name_and_cleanup, maxquant_data_file):
+    run_name = run_name_and_cleanup
+    run = Run(run_name=run_name, workflow_name="test-run-empty", df_mode="memory")
+    run.step_add(MaxQuantImport())
+    run.step_calculate(
+        {
+            "file_path": str(maxquant_data_file),
+            "intensity_name": "iBAQ",
+            "map_to_uniprot": False,
+        }
+    )
+    yield run
 
 
 @pytest.fixture(scope="session")
@@ -36,10 +88,14 @@ def workflow_meta():
 
 @pytest.fixture(scope="session")
 def tests_folder_name():
-    return f"tests_{random_string()}"
+    name = f"tests_{random_string()}"
+    yield name
+    while Path(f"{RUNS_PATH}/{name}").exists():
+        time.sleep(1)
+        rmtree(Path(f"{RUNS_PATH}/{name}"))
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def run_test_folder(tests_folder_name):
     Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
     yield
