@@ -98,18 +98,18 @@ class Runner:
             if self.meta_data_path is None:
                 raise ValueError(
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
-                    f" but is required for {step['name']}"
+                    f" but is required for {step.operation} with {step.display_name}"
                 )
             step.inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"but is required for {step.operation} with {step.display_name}"
                 )
             step.inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step['name']} in importing")
+            raise ValueError(f"Cannot find step with name {step.operation} with {step.display_name} in importing")
 
     def _perform_current_step(self, params=None):
         self.run.current_step.calculate(self.run.steps, params)
