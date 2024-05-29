@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python ui/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/project_root
+      - ./user_data:/project_root/user_data
+    ports:
+      - "8000:8000"

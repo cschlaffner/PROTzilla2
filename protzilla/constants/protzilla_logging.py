@@ -71,6 +71,7 @@ protzilla_logging_level = logging.INFO
 logger = logging.getLogger("protzilla")
 logger.setLevel(protzilla_logging_level)
 logger.addHandler(ProtzillaLoggingHandler(protzilla_logging_level))
+logger.propagate = False
 
 # Map the error levels to the logging functions
 MESSAGE_TO_LOGGING_FUNCTION = {

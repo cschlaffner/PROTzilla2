@@ -54,17 +54,6 @@ steps:
     inputs: { }
     type: PlotProtQuant
   - form_inputs:
-      metric: euclidean
-      min_dist: 0.1
-      n_components: 2
-      n_neighbors: 15
-      random_state: 42
-    inputs: { }
-    type: DimensionReductionUMAP
-  - form_inputs: { }
-    inputs: { }
-    type: PlotScatterPlot
-  - form_inputs:
       alpha: 0.05
     inputs: { }
     type: DifferentialExpressionTTest
