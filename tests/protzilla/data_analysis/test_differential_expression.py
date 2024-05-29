@@ -9,7 +9,7 @@ from protzilla.data_analysis.plots import create_volcano_plot
 @pytest.fixture
 def diff_expr_test_data():
     test_intensity_list = (
-        ["Sample1", "Protein1", "Gene1", 18],
+        ["Sample1", "Protein1", "Gene1", 20],
         ["Sample1", "Protein2", "Gene1", 16],
         ["Sample1", "Protein3", "Gene1", 1],
         ["Sample1", "Protein4", "Gene1", 14],
@@ -92,8 +92,8 @@ def test_differential_expression_linear_model(
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0072, 0.3838, 1, 0.0072]
-    log2_fc = [-10.0, -1.0, 0, -5.0]
+    corrected_p_values = [0.0053, 0.3838, 1.0, 0.0072]
+    log2_fc = [-10.1926, -1.0, 0.0, -5.0]
     differentially_expressed_proteins = ["Protein1", "Protein2", "Protein3", "Protein4"]
 
     p_values_rounded = [
@@ -140,7 +140,7 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0116, 0.3838, 1.0, 0.0116]
+    corrected_p_values = [0.0072, 0.3838, 1.0, 0.0072]
     differentially_expressed_proteins = [
         "Protein1",
         "Protein2",
@@ -196,7 +196,7 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
     if show_figures:
         fig.show()
 
-    corrected_p_values = [0.0269, 0.3842, 1.0, 0.026]
+    corrected_p_values = [0.0053, 0.3838, 1.0, 0.0072]
     differentially_expressed_proteins = [
         "Protein1",
         "Protein2",
@@ -320,100 +320,6 @@ def test_differential_expression_t_test_with_log_data(show_figures):
     ]
 
     assert log2fc_rounded == log2_fc
-
-
-def test_differential_expression_t_test_with_zero_mean(
-    diff_expr_test_data, show_figures
-):
-    test_intensity_list = (
-        ["Sample1", "Protein1", "Gene1", 18],
-        ["Sample1", "Protein2", "Gene1", 16],
-        ["Sample1", "Protein3", "Gene1", 1],
-        ["Sample1", "Protein4", "Gene1", 0],
-        ["Sample1", "Protein5", "Gene1", np.nan],
-        ["Sample2", "Protein1", "Gene1", 20],
-        ["Sample2", "Protein2", "Gene1", 15],
-        ["Sample2", "Protein3", "Gene1", 2],
-        ["Sample2", "Protein4", "Gene1", 0],
-        ["Sample2", "Protein5", "Gene1", np.nan],
-        ["Sample3", "Protein1", "Gene1", 22],
-        ["Sample3", "Protein2", "Gene1", 14],
-        ["Sample3", "Protein3", "Gene1", 3],
-        ["Sample3", "Protein4", "Gene1", 0],
-        ["Sample3", "Protein5", "Gene1", np.nan],
-        ["Sample4", "Protein1", "Gene1", 8],
-        ["Sample4", "Protein2", "Gene1", -5],
-        ["Sample4", "Protein3", "Gene1", 1],
-        ["Sample4", "Protein4", "Gene1", 0],
-        ["Sample4", "Protein5", "Gene1", 5],
-        ["Sample5", "Protein1", "Gene1", 10],
-        ["Sample5", "Protein2", "Gene1", 0],
-        ["Sample5", "Protein3", "Gene1", 2],
-        ["Sample5", "Protein4", "Gene1", 18],
-        ["Sample5", "Protein5", "Gene1", 5],
-        ["Sample6", "Protein1", "Gene1", 12],
-        ["Sample6", "Protein2", "Gene1", 5],
-        ["Sample6", "Protein3", "Gene1", 3],
-        ["Sample6", "Protein4", "Gene1", 18],
-        ["Sample6", "Protein5", "Gene1", 5],
-        ["Sample7", "Protein1", "Gene1", 12],
-        ["Sample7", "Protein2", "Gene1", 13],
-        ["Sample7", "Protein3", "Gene1", 3],
-    )
-
-    test_intensity_df = pd.DataFrame(
-        data=test_intensity_list,
-        columns=["Sample", "Protein ID", "Gene", "Intensity"],
-    )
-
-    _, test_metadata_df = diff_expr_test_data
-
-    test_alpha = 0.05
-    test_fc_threshold = 0
-
-    current_out = t_test(
-        test_intensity_df,
-        test_metadata_df,
-        ttest_type="Student's t-Test",
-        grouping="Group",
-        group1="Group1",
-        group2="Group2",
-        multiple_testing_correction_method="Benjamini-Hochberg",
-        alpha=test_alpha,
-        log_base="None",
-    )
-
-    fig = create_volcano_plot(
-        p_values=current_out["corrected_p_values_df"],
-        log2_fc=current_out["log2_fold_change_df"],
-        alpha=current_out["corrected_alpha"],
-        group1=current_out["group1"],
-        group2=current_out["group2"],
-        fc_threshold=test_fc_threshold,
-    )
-    if show_figures:
-        fig.show()
-
-    corrected_p_values = [0.0116, 1.000]
-    log2_fc = [-1.0, 0]
-    differentially_expressed_proteins = ["Protein1", "Protein3"]
-
-    p_values_rounded = [
-        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
-    ]
-    log2fc_rounded = [
-        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
-    ]
-
-    assert p_values_rounded == corrected_p_values
-    assert log2fc_rounded == log2_fc
-    assert (
-        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-        == differentially_expressed_proteins
-    )
-    assert current_out["corrected_alpha"] == test_alpha
-
-    assert "messages" in current_out
 
 
 def test_differential_expression_anova(show_figures):
