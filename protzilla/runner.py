@@ -78,21 +78,23 @@ class Runner:
             logging.info(f"performing step: {*self.run.steps.current_location,}")
             if step.section == "importing":
                 self._insert_commandline_inputs(step)
-            self._perform_current_step()
+            self._perform_current_step(step.form_inputs)
             if self.all_plots and step.section == "data_preprocessing":
                 step.plot()
-            if step.plots:
+            if step.plots and not step.plots.empty:
                 self._save_plots_html(step)
 
-            self.run.step_next()
-
             log_messages(self.run.current_messages)
+            if any(message["level"] == logging.ERROR for message in self.run.current_messages):
+                break
             self.run.current_messages.clear()
+
+            self.run.step_next()
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
         if step.operation == "msdataimport":
-            step.inputs["file_path"] = self.ms_data_path
+            step.form_inputs["file_path"] = self.ms_data_path
 
         elif step.operation == "metadataimport":
             if self.meta_data_path is None:
@@ -100,14 +102,14 @@ class Runner:
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
                     f" but is required for {step.operation} with {step.display_name}"
                 )
-            step.inputs["file_path"] = self.meta_data_path
+            step.form_inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
                     f"but is required for {step.operation} with {step.display_name}"
                 )
-            step.inputs["file_path"] = self.peptides_path
+            step.form_inputs["file_path"] = self.peptides_path
         else:
             raise ValueError(f"Cannot find step with name {step.operation} with {step.display_name} in importing")
 
