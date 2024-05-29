@@ -623,3 +623,33 @@ class SelectProtein(DataAnalysisStep):
             "You need to import peptide data to perform this step"
         inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
         return inputs
+
+
+class MostSignificantProtein(DataAnalysisStep):
+    display_name = "Most Significant Protein"
+    operation = "Filter Peptides of Protein"
+    method_description = "Filter peptides for the most significant protein in the selected differential expression data"
+
+    input_keys = [
+        "peptide_df",
+        "protein_id",
+    ]
+    output_keys = [
+        "single_protein_peptide_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return by_select_protein(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        peptide_df = steps.get_step_output(Step, "peptide_df")
+        if peptide_df is None:
+            "You need to import peptide data to perform this step"
+        inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
+
+        significant_proteins = steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"])
+        most_significant_protein = significant_proteins.iloc[0]
+        inputs["protein_id"] = most_significant_protein["Protein ID"]
+
+        inputs.pop("protein_list", None)
+        return inputs

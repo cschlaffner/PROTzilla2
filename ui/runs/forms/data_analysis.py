@@ -883,13 +883,12 @@ class ProteinGraphVariationGraphForm(MethodForm):
     # TODO: workflow_meta line 2291 - 2295
 
 
-class SelectProteinOfInterestForm(MethodForm):
+class SelectProteinForm(MethodForm):
     is_dynamic = True
 
     protein_list = CustomChoiceField(
         choices=[],
         label="Select a list of Proteins from which you wand to choose your Proteins of Interest",
-        required=False
     )
 
     protein_id = CustomMultipleChoiceField(
@@ -920,3 +919,15 @@ class SelectProteinOfInterestForm(MethodForm):
                 )["Protein ID"].unique()
             )
             """.sort_values(by="corrected_p_value")"""
+
+
+class MostSignificantProteinForm(MethodForm):
+    protein_list = CustomChoiceField(
+        choices=[],
+        label="Select differential expression data form which to choose the most significant proteins",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["protein_list"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(DataAnalysisStep, "significant_proteins_df")
+        )

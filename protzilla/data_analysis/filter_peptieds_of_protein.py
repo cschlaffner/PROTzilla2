@@ -24,5 +24,5 @@ def by_select_protein(
     filtered_peptides = peptide_df[peptide_df["Protein ID"].isin(list(protein_id))]
 
     return dict(
-        peptide_df=filtered_peptides,
+        single_protein_peptide_df=filtered_peptides,
     )
