@@ -80,6 +80,10 @@ def test_runner_imports(
 
     mock_method = mock_perform_method(runner)
     monkeypatch.setattr(runner, "_perform_current_step", mock_method)
+    mock_write = mock.MagicMock()
+    monkeypatch.setattr(runner.run, "_run_write", mock_write)
+    mock_plot_safe = mock.MagicMock()
+    monkeypatch.setattr(runner, "_save_plots_html", mock_plot_safe)
 
     runner.compute_workflow()
 
@@ -247,7 +251,7 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
 
 
-def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+def test_integration_runner(metadata_path, ms_data_path, tests_folder_name, monkeypatch):
     name = tests_folder_name + "/test_runner_integration_" + random_string()
     runner = Runner(
         **{
@@ -261,6 +265,10 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
             "verbose": False,
         }
     )
+    mock_write = mock.MagicMock()
+    monkeypatch.setattr(runner.run, "_run_write", mock_write)
+    mock_plot_safe = mock.MagicMock()
+    monkeypatch.setattr(runner, "_save_plots_html", mock_plot_safe)
     runner.compute_workflow()
 
 
