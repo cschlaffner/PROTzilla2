@@ -85,9 +85,10 @@ class Runner:
                 self._save_plots_html(step)
 
             log_messages(self.run.current_messages)
-            if any(message["level"] == logging.ERROR for message in self.run.current_messages):
-                break
             self.run.current_messages.clear()
+
+            if not step.finished:
+                break
 
             self.run.step_next()
         self.run._run_write()
