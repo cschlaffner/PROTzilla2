@@ -13,7 +13,7 @@ sys.path.append(f"{PROJECT_PATH}")
 
 from protzilla.runner import Runner, _serialize_graphs
 from runner_cli import args_parser
-from protzilla.steps import Output
+from protzilla.steps import Output, Plots
 
 
 @pytest.fixture
@@ -44,6 +44,8 @@ def mock_perform_method(runner: Runner):
         # side effect to mark the step as finished
         runner.run.current_step.output = Output(
             {key: "mock_output_value" for key in runner.run.current_step.output_keys})
+        if len(runner.run.current_step.output_keys) == 0:
+            runner.run.current_step.plots = Plots(["mock_plot"])
 
     mock_perform.side_effect = mock_current_parameters
 
@@ -112,9 +114,9 @@ def test_runner_imports(
         call({'colors': [], 'cutoff': 0.05, 'gene_sets': ['Process', 'Component', 'Function', 'KEGG'], 'top_terms': 10, 'value': 'p-value'})
     ]
 
+    assert mock_method.call_count == 13
     assert mock_method.methods == expected_methods
     assert mock_method.call_args_list == expected_method_parameters
-    assert mock_method.call_count == 13
 
 
 def test_runner_raises_error_for_missing_metadata_arg(

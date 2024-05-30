@@ -117,7 +117,7 @@ class DiskOperator:
             run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
-                run[KEYS.STEPS].append(self._write_step(step))
+                run[KEYS.STEPS].append(self._write_step(step)) # TODO this takes a long time
             self.yaml_operator.write(self.run_file, run)
 
     def read_workflow(self) -> StepManager:
