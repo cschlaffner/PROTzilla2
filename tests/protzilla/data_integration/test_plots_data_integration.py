@@ -128,7 +128,7 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
         input_df=enrichment_df,
         top_terms=10,
         cutoff=0,
-        value="p_value",
+        value="p-value",
         gene_sets=["Reactome_2013"],
     )
     assert "messages" in current_out
