@@ -15,8 +15,8 @@ def by_samples_missing(
 
     :param protein_df: the protein dataframe that should be filtered
     :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
-    :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present
-        inorder for the protein to be kept.
+    :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present in,
+        in order for the protein to be kept.
     :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs that were discarded
         and a list of Protein IDs that were kept
     """

@@ -8,7 +8,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_z_score(protein_df: pd.DataFrame, peptide_df: pd.DataFrame = None) -> dict:
+def by_z_score(protein_df: pd.DataFrame, peptide_df: pd.DataFrame) -> dict:
     """
     A function to run the sklearn StandardScaler class on your dataframe.
     Normalises the data on the level of each sample.
@@ -49,7 +49,7 @@ def by_z_score(protein_df: pd.DataFrame, peptide_df: pd.DataFrame = None) -> dic
 
 def by_median(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame = None,
+    peptide_df: pd.DataFrame,
     percentile=0.5,  # quartile, default is median
 ) -> dict:
     """
@@ -114,7 +114,7 @@ def by_median(
     )
 
 
-def by_totalsum(protein_df: pd.DataFrame, peptide_df: pd.DataFrame = None) -> dict:
+def by_totalsum(protein_df: pd.DataFrame, peptide_df: pd.DataFrame) -> dict:
     """
     A function to perform normalisation using the total sum
     of sample intensities on your dataframe.
@@ -172,8 +172,8 @@ def by_totalsum(protein_df: pd.DataFrame, peptide_df: pd.DataFrame = None) -> di
 
 def by_reference_protein(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame = None,
-    reference_protein: str = "",
+    peptide_df: pd.DataFrame,
+    reference_protein: str,
 ) -> dict:
     """
     A function to perform protein-intensity normalisation in reference
