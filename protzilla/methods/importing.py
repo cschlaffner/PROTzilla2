@@ -135,7 +135,7 @@ class EvidenceImport(ImportingStep):
     operation = "peptide_import"
     method_description = "Import an evidence file"
 
-    input_keys = ["file_path", "intensity_name"]
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
     output_keys = ["peptide_df"]
 
     def method(self, inputs):

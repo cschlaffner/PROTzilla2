@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from protzilla.importing.ms_data_import import clean_protein_groups
+
 
 def peptide_import(file_path, intensity_name) -> dict:
     try:
@@ -54,7 +56,7 @@ def peptide_import(file_path, intensity_name) -> dict:
     return dict(peptide_df=ordered)
 
 
-def evidence_import(file_path, intensity_name) -> dict:
+def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:
     try:
         assert intensity_name in [
             "Intensity",
@@ -101,5 +103,10 @@ def evidence_import(file_path, intensity_name) -> dict:
         ignore_index=True,
         inplace=True,
     )
+
+    new_groups, filtered_proteins = clean_protein_groups(
+        df["Protein ID"].tolist(), map_to_uniprot
+    )
+    df = df.assign(**{"Protein ID": new_groups})
 
     return dict(peptide_df=df)

@@ -133,3 +133,12 @@ class EvidenceImportForm(MethodForm):
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter (same as MS-Data)"
     )
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+
+    def fill_form(self, run: Run) -> None:
+        from protzilla.methods.importing import MaxQuantImport, MsFraggerImport, DiannImport
+
+        self.fields["map_to_uniprot"].initial = (
+            run.steps.get_step_input([MaxQuantImport, MsFraggerImport, DiannImport], "map_to_uniprot"))
