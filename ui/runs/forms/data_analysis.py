@@ -891,7 +891,7 @@ class SelectProteinForm(MethodForm):
         label="Select a list of Proteins from which you wand to choose your Proteins of Interest",
     )
 
-    protein_id = CustomMultipleChoiceField(
+    protein_id = CustomChoiceField(
         choices=[],
         label="Protein ID",
     )

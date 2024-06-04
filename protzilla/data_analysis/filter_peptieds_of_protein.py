@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def by_select_protein(
-        peptide_df: pd.DataFrame, protein_id: list[str] | None = None,
+        peptide_df: pd.DataFrame, protein_id: str | None = None,
 ) -> dict:
     """
     This function filters out all peptides with a PEP value (assigned to all samples
@@ -23,7 +23,7 @@ def by_select_protein(
     :rtype: Tuple[pd.Dataframe, dict(pd.Dataframe, list)]
     """
 
-    filtered_peptides = peptide_df[peptide_df["Protein ID"].isin(list(protein_id))]
+    filtered_peptides = peptide_df[protein_id in peptide_df["Protein ID"]]
 
     return dict(
         single_protein_peptide_df=filtered_peptides,
