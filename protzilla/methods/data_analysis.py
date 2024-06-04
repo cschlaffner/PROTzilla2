@@ -1,3 +1,5 @@
+import logging
+
 from protzilla.data_analysis.classification import random_forest, svm
 from protzilla.data_analysis.clustering import (
     expectation_maximisation,
@@ -648,8 +650,15 @@ class MostSignificantProtein(DataAnalysisStep):
         inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
 
         significant_proteins = steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"])
-        most_significant_protein = significant_proteins.iloc[0]
+        index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
+        most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
         inputs["protein_id"] = most_significant_protein["Protein ID"]
+        self.messages.append({
+            "level": logging.INFO,
+            "msg":
+                f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                f"from {inputs['protein_list']}"
+        })
 
         inputs.pop("protein_list", None)
         return inputs

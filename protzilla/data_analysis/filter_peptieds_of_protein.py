@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 
 
@@ -25,4 +27,8 @@ def by_select_protein(
 
     return dict(
         single_protein_peptide_df=filtered_peptides,
+        messages=[{
+            "level": logging.INFO if len(filtered_peptides) > 0 else logging.WARNING,
+            "msg": f"Selected {len(filtered_peptides)} entry's from the peptide dataframe."
+        }],
     )
