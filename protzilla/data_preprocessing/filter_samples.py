@@ -6,7 +6,7 @@ from protzilla.utilities import default_intensity_column
 
 def by_protein_intensity_sum(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
     deviation_threshold: float,
 ) -> dict:
     """
@@ -47,7 +47,7 @@ def by_protein_intensity_sum(
 
 def by_protein_count(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
     deviation_threshold: float,
 ) -> dict:
     """
@@ -93,7 +93,7 @@ def by_protein_count(
 
 def by_proteins_missing(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
     percentage: float,
 ) -> dict:
     """
