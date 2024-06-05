@@ -62,7 +62,8 @@ def by_isolation_forest(
         ].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
@@ -124,7 +125,9 @@ def by_local_outlier_factor(
         outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+
         return dict(
             protein_df=protein_df,
             peptide_df=peptide_df,
@@ -229,7 +232,8 @@ def by_pca(
             df_transformed_pca_data["Outlier"]
         ].index.tolist()
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
