@@ -182,7 +182,7 @@ class NormalisationByZScore(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by Z-Score"
 
-    plot_input_names = ["protein_df", "peptide_df"]
+    plot_input_names = ["protein_df"]
 
     def method(self, inputs):
         return normalisation.by_z_score(**inputs)
@@ -196,7 +196,7 @@ class NormalisationByTotalSum(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by total sum"
 
-    plot_input_names = ["protein_df", "peptide_df"]
+    plot_input_names = ["protein_df"]
 
     def method(self, inputs):
         return normalisation.by_totalsum(**inputs)
@@ -210,7 +210,7 @@ class NormalisationByMedian(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by median"
 
-    input_keys = ["protein_df", "peptide_df", "percentile"]
+    input_keys = ["protein_df", "percentile"]
 
     def method(self, inputs):
         return normalisation.by_median(**inputs)
@@ -224,7 +224,7 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by reference protein"
 
-    input_keys = ["protein_df", "peptide_df", "reference_protein"]
+    input_keys = ["protein_df", "reference_protein"]
 
     def method(self, inputs):
         return normalisation.by_reference_protein(**inputs)
@@ -238,7 +238,7 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per dataset"
 
-    input_keys = ["protein_df", "peptide_df", "shrinking_value"]
+    input_keys = ["protein_df", "shrinking_value"]
 
     def method(self, inputs):
         return imputation.by_min_per_dataset(**inputs)
@@ -252,7 +252,7 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per protein"
 
-    input_keys = ["protein_df", "peptide_df", "shrinking_value"]
+    input_keys = ["protein_df", "shrinking_value"]
 
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
@@ -266,7 +266,7 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per sample"
 
-    input_keys = ["protein_df", "peptide_df", "shrinking_value"]
+    input_keys = ["protein_df", "shrinking_value"]
 
     def method(self, inputs):
         return imputation.by_min_per_protein(**inputs)
@@ -283,7 +283,7 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
         "sklearn.SimpleImputer class"
     )
 
-    input_keys = ["protein_df", "peptide_df", "strategy"]
+    input_keys = ["protein_df", "strategy"]
 
     def method(self, inputs):
         return imputation.by_simple_imputer(**inputs)
@@ -301,7 +301,7 @@ class ImputationByKNN(DataPreprocessingStep):
         "the features that neither is missing are close."
     )
 
-    input_keys = ["protein_df", "peptide_df", "number_of_neighbours"]
+    input_keys = ["protein_df", "number_of_neighbours"]
 
     def method(self, inputs):
         return imputation.by_knn(**inputs)
@@ -315,7 +315,7 @@ class ImputationByNormalDistributionSampling(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Imputation methods include normal distribution sampling per protein or per dataset"
 
-    input_keys = ["protein_df", "peptide_df", "strategy", "down_shift", "scaling_factor"]
+    input_keys = ["protein_df", "strategy", "down_shift", "scaling_factor"]
 
     def method(self, inputs):
         return imputation.by_normal_distribution_sampling(**inputs)

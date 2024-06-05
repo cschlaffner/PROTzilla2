@@ -5,8 +5,8 @@ from ..utilities.transform_dfs import long_to_wide
 
 
 def by_samples_missing(
-    protein_df: pd.DataFrame = None,
-    peptide_df: pd.DataFrame = None,
+    protein_df: pd.DataFrame | None,
+    peptide_df: pd.DataFrame | None,
     percentage: float = 0.5,
 ) -> dict:
     """
