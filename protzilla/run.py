@@ -28,7 +28,10 @@ class Run:
         def __exit__(self, exc_type, exc_value, tb):
             if exc_type:
                 formatted_trace = format_trace(traceback.format_exception(exc_value))
-                if self.run.current_step is not None:
+                if (
+                    hasattr(self.run, "current_step")
+                    and self.run.current_step is not None
+                ):
                     self.run.current_step.messages.append(
                         dict(
                             level=logging.ERROR,
@@ -39,6 +42,8 @@ class Run:
                             trace=formatted_trace,
                         )
                     )
+                else:
+                    raise exc_value
                 return True
 
     def error_handling(func):

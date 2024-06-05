@@ -3,8 +3,8 @@ import os
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
-from .run_helper import log_messages
 from .run import Run
+from .run_helper import log_messages
 from .utilities import random_string
 
 
@@ -66,11 +66,13 @@ class Runner:
 
         self.all_plots = all_plots
         self.plots_path = Path(f"{self.run.run_path}/plots")
-        self.plots_path.mkdir(parents=True)
+        self.plots_path.mkdir(parents=True, exist_ok=True)
         logging.info(f"Saving plots at {self.plots_path}")
 
         log_messages(self.run.current_messages)
         self.run.current_messages.clear()
+
+        self.run._run_write()
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
@@ -112,7 +114,9 @@ class Runner:
                 )
             step.form_inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step.operation} with {step.display_name} in importing")
+            raise ValueError(
+                f"Cannot find step with name {step.operation} with {step.display_name} in importing"
+            )
 
     def _perform_current_step(self, params=None):
         self.run.current_step.calculate(self.run.steps, params)
