@@ -129,6 +129,7 @@ class Step:
         """
         if not isinstance(outputs, dict):
             raise TypeError("Output of calculation is not a dictionary.")
+        outputs = {key: value for key, value in outputs.items() if value is not None}
         if not outputs:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
@@ -421,7 +422,7 @@ class StepManager:
 
     def get_step_input(
         self,
-        step_type: type[Step],
+        step_type: type[Step] | list[type[Step]],
         input_key: str,
         instance_identifier: str | None = None,
     ):
@@ -440,9 +441,10 @@ class StepManager:
                 else True
             )
 
+        step_type = [step_type] if not isinstance(step_type, list) else step_type
         for step in reversed(self.previous_steps):
             if (
-                isinstance(step, step_type)
+                any(isinstance(step, st) for st in step_type)
                 and check_instance_identifier(step)
                 and input_key in step.inputs
             ):

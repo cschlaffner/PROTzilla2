@@ -14,7 +14,10 @@ from ..utilities.transform_dfs import long_to_wide
 
 
 def by_isolation_forest(
-    protein_df: pd.DataFrame, n_estimators: int = 100, n_jobs: int = -1
+        protein_df: pd.DataFrame,
+        peptide_df: pd.DataFrame | None,
+        n_estimators: int = 100,
+        n_jobs: int = -1,
 ) -> dict:
     """
     This function filters out outliers using a clustering
@@ -59,9 +62,12 @@ def by_isolation_forest(
         ].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=outlier_list,
             anomaly_df=df_isolation_forest_data[["Anomaly Score", "Outlier"]],
         )
@@ -70,6 +76,7 @@ def by_isolation_forest(
             encoded as NaN. Consider preprocessing your data to remove NaN values."
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=None,
             anomaly_df=None,
             messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
@@ -78,6 +85,7 @@ def by_isolation_forest(
 
 def by_local_outlier_factor(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
     number_of_neighbors: int = 20,
     n_jobs: int = -1,
 ) -> dict:
@@ -117,8 +125,12 @@ def by_local_outlier_factor(
         outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=outlier_list,
             anomaly_df=df_lof_data[["Anomaly Score", "Outlier"]],
         )
@@ -127,6 +139,7 @@ def by_local_outlier_factor(
             encoded as NaN. Consider preprocessing your data to remove NaN values."
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=None,
             anomaly_df=None,
             messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],
@@ -135,6 +148,7 @@ def by_local_outlier_factor(
 
 def by_pca(
     protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
     threshold: int = 2,
     number_of_components: int = 3,
 ) -> dict:
@@ -218,9 +232,12 @@ def by_pca(
             df_transformed_pca_data["Outlier"]
         ].index.tolist()
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=outlier_list,
             pca_df=df_transformed_pca_data,
             explained_variance_ratio=list(pca_model.explained_variance_ratio_),
@@ -231,6 +248,7 @@ def by_pca(
         encoded as NaN. Consider preprocessing your data to remove NaN values."
         return dict(
             protein_df=protein_df,
+            peptide_df=peptide_df,
             outlier_list=None,
             anomaly_df=None,
             messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))],

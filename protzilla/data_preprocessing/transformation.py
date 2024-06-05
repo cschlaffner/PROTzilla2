@@ -5,7 +5,7 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(protein_df: pd.DataFrame, log_base="log10") -> dict:
+def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10") -> dict:
     """
     This function log-transforms intensity
     DataFrames. Supports log-transformation to the base
@@ -13,6 +13,7 @@ def by_log(protein_df: pd.DataFrame, log_base="log10") -> dict:
 
     :param protein_df: a protein data frame in long format
     :type protein_df: pd.DataFrame
+    :param peptide_df: a peptide data frame, that is to be transformed the same way as the protein data frame
     :param log_base: String of the used log method "log10" (base 10)
         or "log2" (base 2). Default: "log10"
     :type log_base: str
@@ -23,15 +24,24 @@ def by_log(protein_df: pd.DataFrame, log_base="log10") -> dict:
     """
     intensity_name = default_intensity_column(protein_df)
     transformed_df = protein_df.copy()
+    transformed_peptide_df = peptide_df.copy() if peptide_df is not None else None
 
     # TODO 41 drop data when intensity is 0 and return them in dict
     if log_base == "log2":
         transformed_df[intensity_name] = np.log2(transformed_df[intensity_name])
+        if transformed_peptide_df is not None:
+            transformed_peptide_df["Intensity"] = np.log2(
+                transformed_peptide_df["Intensity"]
+            )
     elif log_base == "log10":
         transformed_df[intensity_name] = np.log10(transformed_df[intensity_name])
+        if transformed_peptide_df is not None:
+            transformed_peptide_df["Intensity"] = np.log10(
+                transformed_peptide_df["Intensity"]
+            )
     else:
         raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
-    return dict(protein_df=transformed_df)
+    return dict(protein_df=transformed_df, peptide_df=transformed_peptide_df)
 
 
 def by_log_plot(method_inputs, method_outputs, graph_type, group_by):
