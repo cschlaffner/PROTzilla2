@@ -15,6 +15,7 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
+from protzilla.data_analysis.power_analysis import sample_size_calculation
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
@@ -598,4 +599,52 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.peptide_df
         inputs["isoform_df"] = steps.isoform_df
+        return inputs
+
+class PowerAnalysisPowerCalculation(DataAnalysisStep):
+    display_name = "Power Calculation"
+    operation = "Power Analysis"
+    method_description = "post-hoc Power Calculation"
+
+    input_keys = [
+        "significant_proteins_df"
+    ]
+
+class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
+    display_name = "Sample Size Calculation"
+    operation = "Power Analysis"
+    method_description = "(apriori) Sample Size Calculation"
+
+    input_keys = [
+        "significant_proteins_df",
+        "alpha",
+        "group1",
+        "group2",
+        "effect_size",
+        "power",
+        "intensity_name",
+        "log2_fc",
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return sample_size_calculation(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        inputs["significant_"]
+        inputs["effect_size"] = step.inputs["effect_size"]
+        inputs["power"] = step.inputs["power"]
+        inputs["intensity_name"] = step.inputs["intensity_name"]
+        inputs["log2_fc"] = steps.get_step_output(
+            Step, "log2_fold_change_df", inputs["input_dict"]
+        )
         return inputs

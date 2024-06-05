@@ -140,7 +140,6 @@ class DimensionReductionMetric(Enum):
     cosine = "cosine"
     havensine = "havensine"
 
-
 class DifferentialExpressionANOVAForm(MethodForm):
     is_dynamic = True
 
@@ -881,3 +880,61 @@ class ProteinGraphVariationGraphForm(MethodForm):
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
+
+class PowerAnalysisPowerCalculationForm(MethodForm):
+    t_test_results = CustomChoiceField(
+        choices=[],
+        label="T-test results",
+    )
+    #fill alpha dynamic from t-test
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.05,
+    )
+    def fill_form(self, run: Run) -> None:
+        self.fields["t_test_results"].choices = get_t_test_results(run)
+
+class PowerAnalysisSampleSizeCalculationForm(MethodForm):
+    is_dynamic = True
+
+    input_dict = CustomChoiceField(
+        choices=[],
+        label="Input data dict (generated e.g. by t-Test)",
+    )
+    effect_size = CustomNumberField(
+        label="Effect size", min_value=0, initial=0.5
+    )
+    #fill alpha dynamic from t-test
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.05,
+    )
+    power = CustomFloatField(
+        label="Power",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.8,
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_dict"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(
+                DifferentialExpressionTTest | DifferentialExpressionLinearModel,
+                "differentially_expressed_proteins_df",
+            )
+        )
+
+        input_dict_instance_id = self.data.get(
+            "input_dict", self.fields["input_dict"].choices[0][0]
+        )
+
+        self.fields["alpha"].initial = run.steps.get_step_output(
+            Step, "corrected_alpha", input_dict_instance_id
+        )
