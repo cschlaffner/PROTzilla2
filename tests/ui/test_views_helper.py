@@ -4,6 +4,8 @@ import pandas as pd
 import pytest
 from django.test.client import RequestFactory
 
+from protzilla.run_v2 import Run
+from protzilla.steps import StepManager
 from ui.runs.views_helper import (
     convert_str_if_possible,
     get_displayed_steps,
@@ -58,8 +60,7 @@ def test_convert_str_if_possible():
 
 
 def test_get_displayed_steps_structure(
-    workflow_meta,
-    example_workflow_short,
+    run_standard: Run
 ):
     section_keys = {"finished", "id", "name", "possible_steps", "steps", "selected"}
     possible_steps_keys = {"id", "methods", "name"}
@@ -68,6 +69,7 @@ def test_get_displayed_steps_structure(
         "id",
         "name",
         "selected",
+        "section",
         "index",
         "method_name",
         "name",
@@ -75,7 +77,7 @@ def test_get_displayed_steps_structure(
         "finished",
     }
 
-    result = get_displayed_steps(example_workflow_short, workflow_meta, 1)
+    result = get_displayed_steps(run_standard.steps)
 
     assert all(set(section.keys()) == section_keys for section in result)
     assert set(result[0]["possible_steps"][0].keys()) == possible_steps_keys
@@ -83,12 +85,4 @@ def test_get_displayed_steps_structure(
         set(result[0]["possible_steps"][0]["methods"][0].keys())
         == possible_steps_keys_methods
     )
-    assert result[0]["steps"][0].keys() == steps_keys
-
-
-def test_get_displayed_steps_no_side_effects(workflow_meta, example_workflow_short):
-    example_workflow_copy = copy.deepcopy(example_workflow_short)
-    workflow_meta_copy = copy.deepcopy(workflow_meta)
-    get_displayed_steps(example_workflow_short, workflow_meta, 0)
-    assert example_workflow_short == example_workflow_copy
-    assert workflow_meta == workflow_meta_copy
+    assert set(result[0]["steps"][0].keys()) == steps_keys
