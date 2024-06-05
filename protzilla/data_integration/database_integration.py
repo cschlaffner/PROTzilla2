@@ -95,8 +95,7 @@ def gene_mapping(
     :param use_biomart: should biomart be used to map ids that could not be mapped with databases
     :type use_biomart: bool
 
-    :return: the gene mapping, consisting of protein_group_to_genes, gene_to_protein_groups, filtered and
-        the dataframes of the mappings
+    :return: the mapping results, containing the mapping dataframe and filtered proteins list, and a message if applicable
     :rtype: dict
     """
     try:
@@ -108,8 +107,6 @@ def gene_mapping(
         )
     if isinstance(database_names, str):
         database_names = [database_names]
-        # TODO rename the function to the old name, and handle input correctly
-        # TODO fix the return type and adjust the caller functions to correctly handle new output format
 
     mapping_results = database_query.uniprot_groups_to_genes(
         protein_groups, database_names, use_biomart=use_biomart
