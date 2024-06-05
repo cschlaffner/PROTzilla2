@@ -1,4 +1,4 @@
-"""import json
+import json
 import sys
 from shutil import rmtree
 
@@ -162,4 +162,4 @@ def test_step_finished():
 
     assert run.current_step.finished
 
-    rmtree(RUNS_PATH / run_name)"""
+    rmtree(RUNS_PATH / run_name)
