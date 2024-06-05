@@ -5,9 +5,9 @@ from protzilla.utilities import default_intensity_column
 
 
 def by_protein_intensity_sum(
-    protein_df: pd.DataFrame = None,
-    peptide_df: pd.DataFrame = None,
-    deviation_threshold: float = 2.0,
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame,
+    deviation_threshold: float,
 ) -> dict:
     """
     This function filters samples based on the sum of the protein intensities.
@@ -46,9 +46,9 @@ def by_protein_intensity_sum(
 
 
 def by_protein_count(
-    protein_df: pd.DataFrame = None,
-    peptide_df: pd.DataFrame = None,
-    deviation_threshold: float = 2.0,
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame,
+    deviation_threshold: float,
 ) -> dict:
     """
     This function filters samples based on their deviation of amount of proteins with a non-nan value from
@@ -92,9 +92,9 @@ def by_protein_count(
 
 
 def by_proteins_missing(
-    protein_df: pd.DataFrame = None,
-    peptide_df: pd.DataFrame = None,
-    percentage: float = 0.5,
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame,
+    percentage: float,
 ) -> dict:
     """
     This function filters samples based on the amount of proteins with nan values, if the percentage of nan values

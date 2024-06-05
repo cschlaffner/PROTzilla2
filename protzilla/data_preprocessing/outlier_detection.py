@@ -15,7 +15,7 @@ from ..utilities.transform_dfs import long_to_wide
 
 def by_isolation_forest(
         protein_df: pd.DataFrame,
-        peptide_df: pd.DataFrame = None,
+        peptide_df: pd.DataFrame,
         n_estimators: int = 100,
         n_jobs: int = -1,
 ) -> dict:
@@ -62,7 +62,8 @@ def by_isolation_forest(
         ].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
@@ -84,7 +85,7 @@ def by_isolation_forest(
 
 def by_local_outlier_factor(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame = None,
+    peptide_df: pd.DataFrame,
     number_of_neighbors: int = 20,
     n_jobs: int = -1,
 ) -> dict:
@@ -124,7 +125,9 @@ def by_local_outlier_factor(
         outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+
         return dict(
             protein_df=protein_df,
             peptide_df=peptide_df,
@@ -145,7 +148,7 @@ def by_local_outlier_factor(
 
 def by_pca(
     protein_df: pd.DataFrame,
-    peptide_df: pd.DataFrame = None,
+    peptide_df: pd.DataFrame,
     threshold: int = 2,
     number_of_components: int = 3,
 ) -> dict:
@@ -229,7 +232,8 @@ def by_pca(
             df_transformed_pca_data["Outlier"]
         ].index.tolist()
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        peptide_df = (None if peptide_df is None
+                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
 
         return dict(
             protein_df=protein_df,
