@@ -10,7 +10,7 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.filter_peptieds_of_protein import by_select_protein
+from protzilla.data_analysis.filter_peptieds_of_protein import filter_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -617,7 +617,7 @@ class SelectProtein(DataAnalysisStep):
     ]
 
     def method(self, inputs: dict) -> dict:
-        return by_select_protein(**inputs)
+        return filter_peptides_of_protein(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         peptide_df = steps.get_step_output(Step, "peptide_df")
@@ -641,7 +641,7 @@ class MostSignificantProtein(DataAnalysisStep):
     ]
 
     def method(self, inputs: dict) -> dict:
-        return by_select_protein(**inputs)
+        return filter_peptides_of_protein(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         peptide_df = steps.get_step_output(Step, "peptide_df")

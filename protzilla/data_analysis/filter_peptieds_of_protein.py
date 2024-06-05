@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 
 
-def by_select_protein(
+def filter_peptides_of_protein(
         peptide_df: pd.DataFrame, protein_id: str | None = None,
 ) -> dict:
     """
