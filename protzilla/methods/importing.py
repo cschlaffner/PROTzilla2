@@ -123,7 +123,7 @@ class PeptideImport(ImportingStep):
     operation = "peptide_import"
     method_description = "Import peptide data"
 
-    input_keys = ["file_path", "intensity_name"]
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
     output_keys = ["peptide_df"]
 
     def method(self, inputs):
