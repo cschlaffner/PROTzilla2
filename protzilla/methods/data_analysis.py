@@ -604,7 +604,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         return inputs
 
 class SelectProtein(DataAnalysisStep):
-    display_name = "Select Protein"
+    display_name = "Peptide analysis"
     operation = "Filter Peptides of Protein"
     method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
 
@@ -624,41 +624,21 @@ class SelectProtein(DataAnalysisStep):
         if peptide_df is None:
             "You need to import peptide data to perform this step"
         inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
-        return inputs
 
-
-class MostSignificantProtein(DataAnalysisStep):
-    display_name = "Most Significant Protein"
-    operation = "Filter Peptides of Protein"
-    method_description = "Filter peptides for the most significant protein in the selected differential expression data"
-
-    input_keys = [
-        "peptide_df",
-        "protein_id",
-    ]
-    output_keys = [
-        "single_protein_peptide_df",
-    ]
-
-    def method(self, inputs: dict) -> dict:
-        return filter_peptides_of_protein(**inputs)
-
-    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        peptide_df = steps.get_step_output(Step, "peptide_df")
-        if peptide_df is None:
-            "You need to import peptide data to perform this step"
-        inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
-
-        significant_proteins = steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"])
-        index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
-        most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
-        inputs["protein_id"] = most_significant_protein["Protein ID"]
-        self.messages.append({
-            "level": logging.INFO,
-            "msg":
-                f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
-                f"from {inputs['protein_list']}"
-        })
+        if inputs["auto_select"]:
+            significant_proteins = (
+                steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
+            index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
+            most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
+            inputs["protein_id"] = most_significant_protein["Protein ID"]
+            self.messages.append({
+                "level": logging.INFO,
+                "msg":
+                    f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                    f"from {inputs['protein_list']}"
+            })
 
         inputs.pop("protein_list", None)
+        inputs.pop("auto_select", None)
+        inputs.pop("sort_proteins", None)
         return inputs

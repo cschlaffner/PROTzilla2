@@ -1,3 +1,4 @@
+import logging
 from enum import Enum, StrEnum
 
 from protzilla.methods.data_analysis import (
@@ -15,7 +16,7 @@ from .custom_fields import (
     CustomChoiceField,
     CustomFloatField,
     CustomMultipleChoiceField,
-    CustomNumberField,
+    CustomNumberField, CustomBooleanField,
 )
 
 
@@ -883,12 +884,22 @@ class ProteinGraphVariationGraphForm(MethodForm):
     # TODO: workflow_meta line 2291 - 2295
 
 
-class SelectProteinForm(MethodForm):
+class SelectPeptidesForProteinForm(MethodForm):
     is_dynamic = True
+
+    auto_select = CustomBooleanField(
+        label="Automatically select most significant Protein",
+        initial=False,
+    )
 
     protein_list = CustomChoiceField(
         choices=[],
         label="Select a list of Proteins from which you wand to choose your Proteins of Interest",
+    )
+
+    sort_proteins = CustomBooleanField(
+        label="Sort Proteins by p-value (requires a list of Proteins from a Differential Expression Analysis to be selected)",
+        initial=False,
     )
 
     protein_id = CustomChoiceField(
@@ -897,7 +908,9 @@ class SelectProteinForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        choices = ["all proteins"]
+        selected_auto_select = self.data.get("auto_select")
+
+        choices = [] if selected_auto_select else ["all proteins"]
         choices.extend(
             run.steps.get_instance_identifiers(DataAnalysisStep, "significant_proteins_df")
         )
@@ -906,28 +919,29 @@ class SelectProteinForm(MethodForm):
         )
 
         chosen_list = self.data.get("protein_list", self.fields["protein_list"].choices[0][0])
-        if chosen_list == "all proteins":
-            self.fields["protein_id"].choices = fill_helper.to_choices(
-                run.steps.get_step_output(
-                    Step, "protein_df"
-                )["Protein ID"].unique()
-            )
+        if not selected_auto_select:
+            self.toggle_visibility("sort_proteins", True)
+            self.toggle_visibility("protein_id", True)
+
+            if chosen_list == "all proteins":
+                self.fields["protein_id"].choices = fill_helper.to_choices(
+                    run.steps.get_step_output(
+                        Step, "protein_df"
+                    )["Protein ID"].unique()
+                )
+            else:
+                if self.data.get("sort_proteins"):
+                    self.fields["protein_id"].choices = fill_helper.to_choices(
+                        run.steps.get_step_output(
+                            DataAnalysisStep, "significant_proteins_df", chosen_list
+                        ).sort_values(by="corrected_p_value")["Protein ID"].unique()
+                    )
+                else:
+                    self.fields["protein_id"].choices = fill_helper.to_choices(
+                        run.steps.get_step_output(
+                            DataAnalysisStep, "significant_proteins_df", chosen_list
+                        )["Protein ID"].unique()
+                    )
         else:
-            self.fields["protein_id"].choices = fill_helper.to_choices(
-                run.steps.get_step_output(
-                    DataAnalysisStep, "significant_proteins_df", chosen_list
-                )["Protein ID"].unique()
-            )
-            """.sort_values(by="corrected_p_value")"""
-
-
-class MostSignificantProteinForm(MethodForm):
-    protein_list = CustomChoiceField(
-        choices=[],
-        label="Select differential expression data form which to choose the most significant proteins",
-    )
-
-    def fill_form(self, run: Run) -> None:
-        self.fields["protein_list"].choices = fill_helper.to_choices(
-            run.steps.get_instance_identifiers(DataAnalysisStep, "significant_proteins_df")
-        )
+            self.toggle_visibility("sort_proteins", False)
+            self.toggle_visibility("protein_id", False)
