@@ -5,12 +5,15 @@ from protzilla.utilities import default_intensity_column
 
 
 def by_protein_intensity_sum(
-    protein_df: pd.DataFrame, deviation_threshold: float
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
+    deviation_threshold: float,
 ) -> dict:
     """
     This function filters samples based on the sum of the protein intensities.
 
     :param protein_df: the intensity dataframe that should be filtered
+    :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
     :param deviation_threshold: defining the maximally allowed deviation from the median (in standard deviations)
         to keep a sample
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
@@ -27,18 +30,32 @@ def by_protein_intensity_sum(
             (median + deviation_threshold * sd),
         )
     ].index.tolist()
+
+    filtered_df = protein_df[~(protein_df["Sample"].isin(filtered_samples_list))]
+    filtered_peptide_df = None
+    if peptide_df is not None:
+        filtered_peptide_df = peptide_df[
+            ~(peptide_df["Sample"].isin(filtered_samples_list))
+        ]
+
     return dict(
-        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
+        protein_df=filtered_df,
+        peptide_df=filtered_peptide_df,
         filtered_samples=filtered_samples_list,
     )
 
 
-def by_protein_count(protein_df: pd.DataFrame, deviation_threshold: float) -> dict:
+def by_protein_count(
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
+    deviation_threshold: float,
+) -> dict:
     """
     This function filters samples based on their deviation of amount of proteins with a non-nan value from
     the median across all samples.
 
     :param protein_df: the intensity dataframe that should be filtered
+    :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
     :param deviation_threshold: float, defining the allowed deviation (in standard deviations) from the median number
         of non-nan values to keep a sample
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
@@ -59,18 +76,32 @@ def by_protein_count(protein_df: pd.DataFrame, deviation_threshold: float) -> di
             (median + deviation_threshold * sd),
         )
     ].index.tolist()
+
+    filtered_df = protein_df[~(protein_df["Sample"].isin(filtered_samples_list))]
+    filtered_peptide_df = None
+    if peptide_df is not None:
+        filtered_peptide_df = peptide_df[
+            ~(peptide_df["Sample"].isin(filtered_samples_list))
+        ]
+
     return dict(
-        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
+        protein_df=filtered_df,
+        peptide_df=filtered_peptide_df,
         filtered_samples=filtered_samples_list,
     )
 
 
-def by_proteins_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
+def by_proteins_missing(
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
+    percentage: float,
+) -> dict:
     """
     This function filters samples based on the amount of proteins with nan values, if the percentage of nan values
     is below a threshold (percentage).
 
     :param protein_df: the intensity dataframe that should be filtered
+    :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
     :param percentage: ranging from 0 to 1. Defining the relative share of proteins that were detected in the
         sample in inorder to be kept.
     :return: the filtered df as a Dataframe and a dict with a list of Sample IDs that have been filtered
@@ -87,8 +118,17 @@ def by_proteins_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     filtered_samples_list = sample_protein_count[
         ~sample_protein_count.ge(total_protein_count * percentage)
     ].index.tolist()
+
+    filtered_df = protein_df[~(protein_df["Sample"].isin(filtered_samples_list))]
+    filtered_peptide_df = None
+    if peptide_df is not None:
+        filtered_peptide_df = peptide_df[
+            ~(peptide_df["Sample"].isin(filtered_samples_list))
+        ]
+
     return dict(
-        protein_df=protein_df[~(protein_df["Sample"].isin(filtered_samples_list))],
+        protein_df=filtered_df,
+        peptide_df=filtered_peptide_df,
         filtered_samples=filtered_samples_list,
     )
 
