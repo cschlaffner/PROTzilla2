@@ -1,16 +1,11 @@
-import json
 import sys
-from shutil import rmtree
 
 from protzilla.constants.paths import UI_PATH
 
 sys.path.append(f"{UI_PATH}")
 
-from protzilla import data_preprocessing
-from protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
-from protzilla.run import Run
-from protzilla.utilities import random_string
-from ui.runs.views import active_runs
+from protzilla.constants.paths import PROJECT_PATH
+
 """, all_button_parameters
 
 
@@ -110,48 +105,42 @@ def test_all_button_parameters():
     rmtree(RUNS_PATH / run_name)"""
 
 
-def test_step_finished():
-    run_name = "test_step_finished" + random_string()
-    run = Run(run_name, "standard")
-    active_runs[run_name] = run
-
-    assert not run.current_step.finished
+def test_step_finished(run_standard):
+    assert not run_standard.current_step.finished
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         "intensity_name": "Intensity",
         "map_to_uniprot": False,
     }
-    run.step_calculate(parameters)
+    run_standard.step_calculate(parameters)
 
-    assert run.current_step.finished
+    assert run_standard.current_step.finished
 
-    run.step_next()
+    run_standard.step_next()
 
-    assert not run.current_step.finished
+    assert not run_standard.current_step.finished
 
     parameters = {
         "file_path": f"",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.step_calculate(parameters)
+    run_standard.step_calculate(parameters)
 
-    assert not run.current_step.finished
+    assert not run_standard.current_step.finished
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/nonexistent_file.txt",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.step_calculate(parameters)
+    run_standard.step_calculate(parameters)
 
-    assert not run.current_step.finished
+    assert not run_standard.current_step.finished
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
         "feature_orientation": "Columns (samples in rows, features in columns)",
     }
-    run.step_calculate(parameters)
+    run_standard.step_calculate(parameters)
 
-    assert run.current_step.finished
-
-    rmtree(RUNS_PATH / run_name)
+    assert run_standard.current_step.finished
