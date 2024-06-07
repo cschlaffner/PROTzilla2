@@ -910,13 +910,11 @@ class SelectPeptidesForProteinForm(MethodForm):
     def fill_form(self, run: Run) -> None:
         selected_auto_select = self.data.get("auto_select")
 
-        choices = [] if selected_auto_select else ["all proteins"]
-        choices.extend(
-            run.steps.get_instance_identifiers(DataAnalysisStep, "significant_proteins_df")
-        )
-        self.fields["protein_list"].choices = fill_helper.to_choices(
-            choices
-        )
+        choices = fill_helper.to_choices([] if selected_auto_select else ["all proteins"])
+        choices.extend(fill_helper.get_choices(
+            run, "significant_proteins_df", DataAnalysisStep
+        ))
+        self.fields["protein_list"].choices = choices
 
         chosen_list = self.data.get("protein_list", self.fields["protein_list"].choices[0][0])
         if not selected_auto_select:
