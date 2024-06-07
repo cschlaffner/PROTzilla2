@@ -199,8 +199,9 @@ def uniprot_to_genes(uniprot_ids, databases, use_biomart):
     return out_dict, list(not_found)
 
 
-# TODO adjust the caller functions
-def uniprot_groups_to_genes(uniprot_groups, databases, use_biomart):
+def uniprot_groups_to_genes(
+    uniprot_groups: list[str], databases: list[str], use_biomart: bool
+):
     """
     Maps uniprot ID groups to hgnc gene symbols. Returns a DataFrame with "Protein ID" and "Gene" columns.
 
