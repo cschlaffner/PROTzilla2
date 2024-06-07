@@ -55,6 +55,7 @@ method_map = {
         "metadata_column_assignment",
     ): metadata_import.metadata_column_assignment,
     ("importing", "peptide_import", "peptide_import"): peptide_import.peptide_import,
+    ("importing", "peptide_import", "evidence_import"): peptide_import.evidence_import,
     (
         "data_preprocessing",
         "filter_proteins",

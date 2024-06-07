@@ -4,14 +4,19 @@ from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 from ..utilities.transform_dfs import long_to_wide
 
 
-def by_samples_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
+def by_samples_missing(
+    protein_df: pd.DataFrame | None,
+    peptide_df: pd.DataFrame | None,
+    percentage: float = 0.5,
+) -> dict:
     """
     This function filters proteins based on the amount of samples with nan values, if the percentage of nan values
     is below a threshold (percentage).
 
-    :param df: the intensity dataframe that should be filtered
-    :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present
-        in in order for the protein to be kept.
+    :param protein_df: the protein dataframe that should be filtered
+    :param peptide_df: the peptide dataframe that should be filtered in accordance to the intensity dataframe (optional)
+    :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present in,
+        in order for the protein to be kept.
     :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs that were discarded
         and a list of Protein IDs that were kept
     """
@@ -25,9 +30,17 @@ def by_samples_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     filtered_proteins_list = (
         transformed_df.drop(remaining_proteins_list, axis=1).columns.unique().tolist()
     )
-    filtered_df = protein_df[(protein_df["Protein ID"].isin(remaining_proteins_list))]
+    filtered_df = protein_df[
+        (protein_df["Protein ID"].isin(remaining_proteins_list))
+    ]
+    filtered_peptide_df = None
+    if peptide_df is not None:
+        filtered_peptide_df = peptide_df[
+            (peptide_df["Protein ID"].isin(remaining_proteins_list))
+        ]
     return dict(
         protein_df=filtered_df,
+        peptide_df=filtered_peptide_df,
         filtered_proteins=filtered_proteins_list,
         remaining_proteins=remaining_proteins_list,
     )
