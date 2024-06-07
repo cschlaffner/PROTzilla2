@@ -607,8 +607,8 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
 
 
 class SelectPeptidesForProtein(DataAnalysisStep):
-    display_name = "Peptide analysis"
     operation = "Filter Peptides of Protein"
+    display_name = "Peptide analysis"
     method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
 
     input_keys = [
