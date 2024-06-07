@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+import re
 
 
 def filter_peptides_of_protein(
@@ -27,5 +28,21 @@ def filter_peptides_of_protein(
     )
 
 
-def single_protein_ptm_analysis(single_protein_peptide_df: pd.DataFrame) -> dict:
-    return dict()
+def ptms_per_sampel(single_protein_peptide_df: pd.DataFrame) -> dict:
+
+    modifications = pd.Series(sum(single_protein_peptide_df["Modifications"].str.split(","), [])).unique()
+    sampels = single_protein_peptide_df["Sample"].unique()
+
+    all_mod_counts = pd.DataFrame(single_protein_peptide_df["Sample"].unique())
+
+    for mod in modifications:
+        filtered = single_protein_peptide_df[single_protein_peptide_df["Modifications"].str.contains(re.escape(mod))]
+
+        mod_counts = filtered.groupby('Sample')["Modifications"].size()
+
+        mod_counts = mod_counts.reindex(sampels).fillna(0)
+
+        all_mod_counts[mod] = mod_counts.values
+
+
+    return dict(ptm_df=all_mod_counts)

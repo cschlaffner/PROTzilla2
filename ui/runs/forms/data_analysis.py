@@ -945,13 +945,13 @@ class SelectPeptidesForProteinForm(MethodForm):
             self.toggle_visibility("protein_id", False)
 
 
-class SingleProteinPTMAnalysisForm(MethodForm):
+class PTMsPerSampleForm(MethodForm):
     single_protein_peptide_df = CustomChoiceField(
         choices=[],
         label="Peptide dataframe containing the peptides of a single protein",
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["single_protein_peptide_df"].choices = fill_helper.to_choices(
-            run.steps.get_instance_identifiers(SelectPeptidesForProtein, "single_protein_peptide_df")
+        self.fields["single_protein_peptide_df"].choices = fill_helper.get_choices(
+            run, "single_protein_peptide_df"
         )
