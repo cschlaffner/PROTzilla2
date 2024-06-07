@@ -262,6 +262,7 @@ class PlotPrecisionRecallCurve(PlotStep):
         # TODO: Input
         "plot_title",
     ]
+
     # Todo: output_keys
 
     def method(self, inputs: dict) -> dict:
@@ -281,6 +282,7 @@ class PlotROC(PlotStep):
         # TODO: Input
         "plot_title",
     ]
+
     # Todo: output_keys
 
     def method(self, inputs: dict) -> dict:
@@ -603,7 +605,8 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         inputs["isoform_df"] = steps.isoform_df
         return inputs
 
-class SelectProtein(DataAnalysisStep):
+
+class SelectPeptidesForProtein(DataAnalysisStep):
     display_name = "Peptide analysis"
     operation = "Filter Peptides of Protein"
     method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
