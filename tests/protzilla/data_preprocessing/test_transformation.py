@@ -244,7 +244,7 @@ def test_log10_transformation(
 @pytest.mark.parametrize("log_base", ["log2", "log10"])
 def test_by_log_without_peptide_df(log2_transformation_df, log_base):
     method_outputs = by_log(
-        log2_transformation_df, log_base=log_base
+        log2_transformation_df, None, log_base=log_base
     )
 
     assert (
@@ -259,4 +259,4 @@ def test_log_by_0_transformation():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    by_log(df, log_base="log2")
+    by_log(df, None, log_base="log2")

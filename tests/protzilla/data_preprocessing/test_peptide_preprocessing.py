@@ -101,10 +101,10 @@ def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
     import_outputs = peptide_import.peptide_import(
         file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="Intensity",
+        map_to_uniprot=False,
     )
 
     method_inputs = {
-        "protein_df": None,
         "peptide_df": import_outputs["peptide_df"],
         "threshold": 0.0014,
     }

@@ -78,7 +78,7 @@ def test_filter_proteins_by_missing_samples(
         filter_proteins_by_samples_missing_df, peptides_df, show_figures
 ):
     method_output = by_samples_missing(
-        filter_proteins_by_samples_missing_df, percentage=1.0
+        filter_proteins_by_samples_missing_df, peptide_df=None, percentage=1.0
     )
 
     fig = by_samples_missing_plot(filter_proteins_df, method_output, "Pie chart")[0]
@@ -99,7 +99,7 @@ def test_filter_proteins_by_missing_samples(
     )
 
     method_output = by_samples_missing(
-        filter_proteins_by_samples_missing_df, percentage=0.5
+        filter_proteins_by_samples_missing_df, None, percentage=0.5
     )
     method_output["filtered_proteins"]
 

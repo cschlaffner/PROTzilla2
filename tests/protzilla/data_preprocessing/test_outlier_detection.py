@@ -85,6 +85,7 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
 def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_with_nan):
     method_inputs = {
         "protein_df": outlier_detection_df_with_nan,
+        "peptide_df": None,
         "n_estimators": 50,
         "n_jobs": -1,
     }
@@ -115,6 +116,7 @@ def test_outlier_detection_by_local_outlier_factor_and_nan(
 ):
     method_inputs = {
         "protein_df": outlier_detection_df_with_nan,
+        "peptide_df": None,
         "number_of_neighbors": 35,
         "n_jobs": -1,
     }
@@ -144,6 +146,7 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df, peptides
 def test_outlier_detection_with_pca_and_nan(outlier_detection_df_with_nan):
     method_inputs = {
         "protein_df": outlier_detection_df_with_nan,
+        "peptide_df": None,
         "threshold": 2,
         "number_of_components": 3,
     }
