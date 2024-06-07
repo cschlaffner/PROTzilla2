@@ -38,7 +38,7 @@ def ptms_per_sampel(peptide_df: pd.DataFrame) -> dict:
     modifications = pd.Series(sum(peptide_df["Modifications"].str.split(","), [])).unique()
     sampels = peptide_df["Sample"].unique()
 
-    all_mod_counts = pd.DataFrame(sampels)
+    all_mod_counts = pd.DataFrame(sampels).rename(columns={0: "Sample"})
 
     for mod in modifications:
         filtered = peptide_df[peptide_df["Modifications"].str.contains(re.escape(mod))]
