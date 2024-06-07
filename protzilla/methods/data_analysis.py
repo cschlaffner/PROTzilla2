@@ -10,7 +10,7 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.filter_peptieds_of_protein import filter_peptides_of_protein
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, single_protein_ptm_analysis
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -607,7 +607,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
 
 
 class SelectPeptidesForProtein(DataAnalysisStep):
-    display_name = "Filter Peptides of Protein"
+    display_name = "Select Peptides of Protein"
     operation = "Peptide analysis"
     method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
 
@@ -645,3 +645,19 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         inputs.pop("auto_select", None)
         inputs.pop("sort_proteins", None)
         return inputs
+
+
+class SingleProteinPTMAnalysis(DataAnalysisStep):
+    display_name = "Single Protein PTM Analysis"
+    operation = "Peptide analysis"
+    method_description = "Analyze the post-translational modifications (PTMs) of a single protein of interest. This function requires a peptide dataframe with PTM information."
+
+    input_keys = [
+        "single_protein_peptide_df",
+    ]
+    output_keys = [
+        "ptm_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return single_protein_ptm_analysis(**inputs)

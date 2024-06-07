@@ -4,7 +4,7 @@ from enum import Enum, StrEnum
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
-    DimensionReductionUMAP, DataAnalysisStep,
+    DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein,
 )
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
@@ -945,3 +945,15 @@ class SelectPeptidesForProteinForm(MethodForm):
         else:
             self.toggle_visibility("sort_proteins", False)
             self.toggle_visibility("protein_id", False)
+
+
+class SingleProteinPTMAnalysisForm(MethodForm):
+    single_protein_peptide_df = CustomChoiceField(
+        choices=[],
+        label="Peptide dataframe containing the peptides of a single protein",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["single_protein_peptide_df"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(SelectPeptidesForProtein, "single_protein_peptide_df")
+        )

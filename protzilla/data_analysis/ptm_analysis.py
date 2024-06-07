@@ -25,3 +25,7 @@ def filter_peptides_of_protein(
             "msg": f"Selected {len(filtered_peptides)} entry's from the peptide dataframe."
         }],
     )
+
+
+def single_protein_ptm_analysis(single_protein_peptide_df: pd.DataFrame) -> dict:
+    return dict()
