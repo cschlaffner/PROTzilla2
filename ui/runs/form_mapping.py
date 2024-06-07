@@ -21,6 +21,7 @@ _forward_mapping = {
     importing.MetadataImportMethodDiann: importing_forms.MetadataImportMethodDiannForm,
     importing.MetadataColumnAssignment: importing_forms.MetadataColumnAssignmentForm,
     importing.PeptideImport: importing_forms.PeptideImportForm,
+    importing.EvidenceImport: importing_forms.EvidenceImportForm,
     data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingForm,
     data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountForm,
     data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingForm,
