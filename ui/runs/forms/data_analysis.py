@@ -885,6 +885,10 @@ class ProteinGraphVariationGraphForm(MethodForm):
     # TODO: workflow_meta line 2291 - 2295
 
 
+class PredictWithPrositForm(MethodForm):
+    pass
+
+
 class SelectPeptidesForProteinForm(MethodForm):
     is_dynamic = True
 
