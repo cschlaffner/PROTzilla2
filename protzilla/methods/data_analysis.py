@@ -616,7 +616,7 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         "protein_id",
     ]
     output_keys = [
-        "single_protein_peptide_df",
+        "peptide_df",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -653,7 +653,7 @@ class PTMsPerSample(DataAnalysisStep):
     method_description = "Analyze the post-translational modifications (PTMs) of a single protein of interest. This function requires a peptide dataframe with PTM information."
 
     input_keys = [
-        "single_protein_peptide_df",
+        "peptide_df",
     ]
     output_keys = [
         "ptm_df",
@@ -663,7 +663,7 @@ class PTMsPerSample(DataAnalysisStep):
         return ptms_per_sampel(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["single_protein_peptide_df"] = steps.get_step_output(
-            DataAnalysisStep, "single_protein_peptide_df", inputs["single_protein_peptide_df"]
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
         )
         return inputs

@@ -20,7 +20,7 @@ def filter_peptides_of_protein(
     filtered_peptides = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
 
     return dict(
-        single_protein_peptide_df=filtered_peptides,
+        peptide_df=filtered_peptides,
         messages=[{
             "level": logging.INFO if len(filtered_peptides) > 0 else logging.WARNING,
             "msg": f"Selected {len(filtered_peptides)} entry's from the peptide dataframe."
@@ -28,19 +28,23 @@ def filter_peptides_of_protein(
     )
 
 
-def ptms_per_sampel(single_protein_peptide_df: pd.DataFrame) -> dict:
+def ptms_per_sampel(peptide_df: pd.DataFrame) -> dict:
+    """
+    This function calculates the amount of every PTMs per sample.
 
-    modifications = pd.Series(sum(single_protein_peptide_df["Modifications"].str.split(","), [])).unique()
-    sampels = single_protein_peptide_df["Sample"].unique()
+    :param peptide_df: the pandas dataframe containing the peptide information
+    """
 
-    all_mod_counts = pd.DataFrame(single_protein_peptide_df["Sample"].unique())
+    modifications = pd.Series(sum(peptide_df["Modifications"].str.split(","), [])).unique()
+    sampels = peptide_df["Sample"].unique()
+
+    all_mod_counts = pd.DataFrame(sampels)
 
     for mod in modifications:
-        filtered = single_protein_peptide_df[single_protein_peptide_df["Modifications"].str.contains(re.escape(mod))]
+        filtered = peptide_df[peptide_df["Modifications"].str.contains(re.escape(mod))]
 
-        mod_counts = filtered.groupby('Sample')["Modifications"].size()
-
-        mod_counts = mod_counts.reindex(sampels).fillna(0)
+        mod_counts_without_zero = filtered.groupby('Sample')["Modifications"].size()
+        mod_counts = mod_counts_without_zero.reindex(sampels).fillna(0)
 
         all_mod_counts[mod] = mod_counts.values
 

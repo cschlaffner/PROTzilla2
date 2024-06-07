@@ -946,12 +946,13 @@ class SelectPeptidesForProteinForm(MethodForm):
 
 
 class PTMsPerSampleForm(MethodForm):
-    single_protein_peptide_df = CustomChoiceField(
+    peptide_df = CustomChoiceField(
         choices=[],
         label="Peptide dataframe containing the peptides of a single protein",
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["single_protein_peptide_df"].choices = fill_helper.get_choices(
-            run, "single_protein_peptide_df"
+        single_protein_peptides = run.steps.get_instance_identifiers(
+            SelectPeptidesForProtein, "peptide_df"
         )
+        self.fields["peptide_df"].choices = fill_helper.to_choices(single_protein_peptides)
