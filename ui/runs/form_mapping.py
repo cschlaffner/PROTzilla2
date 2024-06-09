@@ -61,6 +61,7 @@ _forward_mapping = {
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
     data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
     data_analysis.PTMsPerSample: data_analysis_forms.PTMsPerSampleForm,
+    data_analysis.PTMsProteinAndPerSample: data_analysis_forms.PTMsPerProteinAndSampleForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
     data_integration.EnrichmentAnalysisGOAnalysisWithString: data_integration_forms.EnrichmentAnalysisGOAnalysisWithStringForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithEnrichr: data_integration_forms.EnrichmentAnalysisGOAnalysisWithEnrichrForm,
