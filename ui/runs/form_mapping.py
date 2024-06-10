@@ -4,16 +4,19 @@ import protzilla.methods.data_analysis as data_analysis
 import protzilla.methods.data_integration as data_integration
 import protzilla.methods.data_preprocessing as data_preprocessing
 import protzilla.methods.importing as importing
+import protzilla.methods.customising as customising
 import ui.runs.forms.data_analysis as data_analysis_forms
 import ui.runs.forms.data_integration as data_integration_forms
 import ui.runs.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs.forms.importing as importing_forms
+import ui.runs.forms.customising as customising_forms
 from protzilla.run_v2 import Run
 from protzilla.steps import Step
 
 from .forms.base import MethodForm
 
 _forward_mapping = {
+    customising.ChangeColor: customising_forms.ColorForm,
     importing.MaxQuantImport: importing_forms.MaxQuantImportForm,
     importing.DiannImport: importing_forms.DiannImportForm,
     importing.MsFraggerImport: importing_forms.MSFraggerImportForm,

@@ -20,6 +20,7 @@ class Section(Enum):
     DATA_PREPROCESSING = "data_preprocessing"
     DATA_ANALYSIS = "data_analysis"
     DATA_INTEGRATION = "data_integration"
+    CUSTOMISING = "customising"
 
 
 class Step:
@@ -309,7 +310,7 @@ class Plots:
 
 class StepManager:
     def __repr__(self):
-        return f"IMP: {self.importing} PRE: {self.data_preprocessing} ANA: {self.data_analysis} INT: {self.data_integration}"
+        return f"IMP: {self.importing} PRE: {self.data_preprocessing} ANA: {self.data_analysis} INT: {self.data_integration} CUS: {self.customising}"
 
     def __init__(
         self,
@@ -324,11 +325,13 @@ class StepManager:
         self.data_preprocessing = []
         self.data_analysis = []
         self.data_integration = []
+        self.customising = []
         self.sections = {
             "importing": self.importing,
             "data_preprocessing": self.data_preprocessing,
             "data_analysis": self.data_analysis,
             "data_integration": self.data_integration,
+            "customising": self.customising
         }
 
         if steps is not None:
@@ -342,10 +345,12 @@ class StepManager:
         :return: a list of all the steps in the current StepManager
         """
         return (
-            self.importing
+            self.customising
+            + self.importing
             + self.data_preprocessing
             + self.data_analysis
             + self.data_integration
+
         )
 
     def get_instance_identifiers(
@@ -517,7 +522,9 @@ class StepManager:
         return self.current_step_index == len(self.all_steps) - 1
 
     def add_step(self, step) -> None:
-        if step.section == "importing":
+        if step.section == "customising":
+            self.customising.append(step)
+        elif step.section == "importing":
             self.importing.append(step)
         elif step.section == "data_preprocessing":
             self.data_preprocessing.append(step)

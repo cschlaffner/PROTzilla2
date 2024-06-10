@@ -6,3 +6,33 @@ PROTZILLA_DISCRETE_COLOR_SEQUENCE = [
     "#E2A46D",
 ]
 PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = ["#4A536A", "#CE5A5A"]
+
+BLACK_DISCRETE_COLOR_SEQUENCE = [
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+]
+
+
+PROTAN_DISCRETE_COLOR_SEQUENCE = [
+    "#3673c4",
+    "#e3a22a",
+]
+#justify how colors come about
+DEUTAN_DISCRETE_COLOR_SEQUENCE = [
+    "#3673c4",
+    "#e3a22a",
+]
+
+TRITAN_DISCRETE_COLOR_SEQUENCE = [
+    "#3673c4",
+    "#f48e9b"
+]
+
+MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE = [
+    "#3b3b3b",
+    "#D3D3D3"
+]

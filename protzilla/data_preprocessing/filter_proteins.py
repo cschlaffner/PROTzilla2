@@ -33,9 +33,10 @@ def by_samples_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     )
 
 
-def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type):
+def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type, color):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
+            colormap=color,
             values_of_sectors=[
                 len(remaining_proteins),
                 len(filtered_proteins),
@@ -45,6 +46,7 @@ def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type):
         )
     elif graph_type == "Bar chart":
         fig = create_bar_plot(
+            colormap=color,
             values_of_sectors=[
                 len(remaining_proteins),
                 len(filtered_proteins),
@@ -56,9 +58,10 @@ def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type):
     return [fig]
 
 
-def by_samples_missing_plot(method_inputs, method_outputs, graph_type):
+def by_samples_missing_plot(method_inputs, method_outputs, graph_type, color):
     return _build_pie_bar_plot(
         method_outputs["remaining_proteins"],
         method_outputs["filtered_proteins"],
         graph_type,
+        color,
     )

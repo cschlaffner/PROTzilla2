@@ -55,6 +55,14 @@ class VisulaTransformations(Enum):
     log10 = "log10"
 
 
+class ColorChoices(Enum):
+    standard = "standard"
+    protan = "protan"
+    deutan = "deutan"
+    tritan = "tritan"
+    monochromatic = "monochromatic"
+
+
 class FilterProteinsBySamplesMissingForm(MethodForm):
     percentage = CustomFloatField(
         label="Percentage of minimum non-missing samples per protein",
@@ -70,6 +78,11 @@ class FilterProteinsBySamplesMissingPlotForm(MethodForm):
         choices=BarAndPieChart,
         label="Graph type",
         initial=BarAndPieChart.pie_chart,
+    )
+    color = CustomChoiceField(
+        choices=ColorChoices,
+        label="Color",
+        initial=ColorChoices.standard,
     )
 
 
@@ -244,15 +257,15 @@ class NormalisationByMedianPlotForm(MethodForm):
 class NormalisationByReferenceProteinForms(MethodForm):
     reference_protein = CustomCharField(
         label="A function to perform protein-intensity normalisation in reference to "
-        "a selected protein on your dataframe. Normalises the data on the level "
-        "of each sample. Divides each intensity by the intensity of the chosen "
-        "reference protein in each sample. Samples where this value is zero "
-        "will be removed and returned separately.A function to perform "
-        "protein-intensity normalisation in reference to a selected protein on "
-        "your dataframe. Normalises the data on the level of each sample. "
-        "Divides each intensity by the intensity of the chosen reference "
-        "protein in each sample. Samples where this value is zero will be "
-        "removed and returned separately."
+              "a selected protein on your dataframe. Normalises the data on the level "
+              "of each sample. Divides each intensity by the intensity of the chosen "
+              "reference protein in each sample. Samples where this value is zero "
+              "will be removed and returned separately.A function to perform "
+              "protein-intensity normalisation in reference to a selected protein on "
+              "your dataframe. Normalises the data on the level of each sample. "
+              "Divides each intensity by the intensity of the chosen reference "
+              "protein in each sample. Samples where this value is zero will be "
+              "removed and returned separately."
     )
 
 
@@ -275,9 +288,9 @@ class NormalisationByReferenceProteinPlotForm(MethodForm):
 class ImputationByMinPerDatasetForm(MethodForm):
     shrinking_value = CustomNumberField(
         label="A function to impute missing values for each protein by taking into account "
-        "data from the entire dataframe. Sets missing value to the smallest measured "
-        "value in the dataframe. The user can also assign a shrinking factor to take a "
-        "fraction of that minimum value for imputation.",
+              "data from the entire dataframe. Sets missing value to the smallest measured "
+              "value in the dataframe. The user can also assign a shrinking factor to take a "
+              "fraction of that minimum value for imputation.",
         min_value=0,
         max_value=1,
         step_size=0.1,
@@ -309,9 +322,9 @@ class ImputationByMinPerDatasetPlotForm(MethodForm):
 class ImputationByMinPerProteinForm(MethodForm):
     shrinking_value = CustomFloatField(
         label="A function to impute missing values for each protein by taking into account data from each protein. "
-        "Sets missing value to the smallest measured value for each protein column. The user can also assign a "
-        "shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without "
-        "any values will be filtered out.",
+              "Sets missing value to the smallest measured value for each protein column. The user can also assign a "
+              "shrinking factor to take a fraction of that minimum value for imputation. CAVE: All proteins without "
+              "any values will be filtered out.",
         min_value=0,
         max_value=1,
         step_size=0.1,
