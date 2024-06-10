@@ -19,7 +19,7 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
-from protzilla.data_analysis.spectrum_prediction import predict_with_prosit
+from protzilla.data_analysis.spectrum_prediction import predict
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -644,18 +644,16 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         return inputs
 
 
-class PredictWithProsit(DataAnalysisStep):
-    display_name = "Predict with Prosit"
+class PredictSpectra(DataAnalysisStep):
+    display_name = "Predict spectra with various models"
     operation = "spectrum_prediction"
-    method_description = "Predict the MS/MS spectra of a list of peptides using the Prosit model. The prediction is done using the KOINA API."
+    method_description = "Predict the MS/MS spectra of a list of peptides using different models. The models are trained on experimental data and predict the intensity of the fragment ions"
 
-    input_keys = ["peptide_df"]
-    output_keys = [
-        "predicted_spectra",
-    ]
+    input_keys = ["peptide_df", "model_name"]
+    output_keys = ["predicted_spectra"]
 
     def method(self, inputs: dict) -> dict:
-        return predict_with_prosit(**inputs)
+        return predict(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")

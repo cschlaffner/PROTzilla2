@@ -5,6 +5,29 @@ import pandas as pd
 import requests
 from tqdm import tqdm
 
+AVAILABLE_MODELS = {
+    "PrositIntensityHCD": {
+        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_HCD/infer",
+        "required_keys": [
+            "peptide_sequences",
+            "precursor_charges",
+            "collision_energies",
+        ],
+    },
+    "PrositIntensityCID": {
+        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_CID/infer",
+        "required_keys": ["peptide_sequences", "precursor_charges"],
+    },
+    "PrositIntensityXL_CMS3": {
+        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_XL_CMS3/infer",
+        "required_keys": ["peptide_sequences", "precursor_charges"],
+    },
+    # "PrositIntensityXL_CMS2": {
+    #     "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_XL_CMS2/infer",
+    #     "required_keys": ["peptide_sequences", "precursor_charges"]
+    # },
+}
+
 
 class SpectrumPredictor:
     def __init__(self, prediction_df: pd.DataFrame, dissociation_method: str = "HCD"):
@@ -47,11 +70,21 @@ class SpectrumPredictor:
             raise ValueError("The input dataframe should have a 'nce' column")
 
 
-class PrositPredictor(SpectrumPredictor):
-    KOINA_URL = "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_HCD/infer"
-
-    def __init__(self, prediction_df: pd.DataFrame, dissociation_method: str = "HCD"):
+class KoinaModel(SpectrumPredictor):
+    def __init__(
+        self,
+        prediction_df: pd.DataFrame,
+        required_keys: list[str],
+        dissociation_method: str = "HCD",
+        url: str = None,
+    ):
         super().__init__(prediction_df, dissociation_method)
+        self.required_keys = required_keys
+        self.KOINA_URL = (
+            url
+            if url
+            else "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_HCD/infer"
+        )
 
     def predict(self):
         predicted_spectra = []
@@ -66,32 +99,44 @@ class PrositPredictor(SpectrumPredictor):
 
             else:
                 raise ValueError(f"Error in the request: {response.status_code}")
+        return predicted_spectra
 
-    @staticmethod
-    def format_for_request(to_predict: pd.DataFrame) -> dict:
+    def format_for_request(self, to_predict: pd.DataFrame) -> dict:
+        inputs = []
+        if (
+            "peptide_sequences" in self.required_keys
+            and "Sequence" in to_predict.columns
+        ):
+            inputs.append(
+                {
+                    "name": "peptide_sequences",
+                    "shape": [len(to_predict), 1],
+                    "datatype": "BYTES",
+                    "data": to_predict["Sequence"].to_list(),
+                }
+            )
+        if "precursor_charges" in self.required_keys and "Charge" in to_predict.columns:
+            inputs.append(
+                {
+                    "name": "precursor_charges",
+                    "shape": [len(to_predict), 1],
+                    "datatype": "INT32",
+                    "data": to_predict["Charge"].to_list(),
+                }
+            )
+        if "collision_energies" in self.required_keys and "NCE" in to_predict.columns:
+            inputs.append(
+                {
+                    "name": "collision_energies",
+                    "shape": [len(to_predict), 1],
+                    "datatype": "FP32",
+                    "data": to_predict["NCE"].to_list(),
+                }
+            )
         return json.dumps(
             {
                 "id": "0",
-                "inputs": [
-                    {
-                        "name": "peptide_sequences",
-                        "shape": [len(to_predict), 1],
-                        "datatype": "BYTES",
-                        "data": to_predict["Sequence"].to_list(),
-                    },
-                    {
-                        "name": "precursor_charges",
-                        "shape": [len(to_predict), 1],
-                        "datatype": "INT32",
-                        "data": to_predict["Charge"].to_list(),
-                    },
-                    {
-                        "name": "collision_energies",
-                        "shape": [len(to_predict), 1],
-                        "datatype": "FP32",
-                        "data": to_predict["NCE"].to_list(),
-                    },
-                ],
+                "inputs": inputs,
             }
         )
 
@@ -115,11 +160,24 @@ class PrositPredictor(SpectrumPredictor):
         return spectra
 
 
-def predict_with_prosit(peptide_df: pd.DataFrame):
-    prediction_df = PrositPredictor.create_prediction_df(peptide_df["Sequence"], 2, 30)
-    predictor = PrositPredictor(prediction_df)
-    predictor.predict()
-    return dict(predicted_spectra=predictor.prediction_df)
+class SpectrumPredictorFactory:
+    @staticmethod
+    def create_predictor(model_name: str, prediction_df: pd.DataFrame):
+        if model_name not in AVAILABLE_MODELS:
+            raise ValueError(f"Model '{model_name}' is not available.")
+        return KoinaModel(prediction_df, **AVAILABLE_MODELS[model_name])
+
+
+def predict(model_name: str, peptide_df: pd.DataFrame):
+    prediction_df = SpectrumPredictor.create_prediction_df(
+        peptide_df["Sequence"], 2, 30
+    )
+    predictor = SpectrumPredictorFactory.create_predictor(model_name, prediction_df)
+    predicted_spectra = predictor.predict()
+    # merge df's into big df
+    return {
+        "predicted_spectra": pd.concat([s.to_mergeable_df() for s in predicted_spectra])
+    }
 
 
 class Spectrum:
@@ -139,6 +197,12 @@ class Spectrum:
         if sanitize:
             self._sanitize_spectrum()
 
+    def __repr__(self):
+        return f"{self.peptide_sequence}: {self.charge}, {self.spectrum.shape[0]} peaks"
+
     def _sanitize_spectrum(self):
         self.spectrum = self.spectrum.drop_duplicates(subset="m/z")
         self.spectrum = self.spectrum[self.spectrum["Intensity"] > 0]
+
+    def to_mergeable_df(self):
+        return self.spectrum.assign(Sequence=self.peptide_sequence, Charge=self.charge)

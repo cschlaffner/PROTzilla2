@@ -59,6 +59,7 @@ _forward_mapping = {
     data_analysis.DimensionReductionUMAP: data_analysis_forms.DimensionReductionUMAPForm,
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
+    data_analysis.PredictSpectra: data_analysis_forms.PredictSpectraForm,
     data_analysis.PredictWithProsit: data_analysis_forms.PredictWithPrositForm,
     data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,

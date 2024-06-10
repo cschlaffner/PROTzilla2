@@ -1,6 +1,7 @@
 import logging
 from enum import Enum, StrEnum
 
+from protzilla.data_analysis import spectrum_prediction
 from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
@@ -885,8 +886,15 @@ class ProteinGraphVariationGraphForm(MethodForm):
     # TODO: workflow_meta line 2291 - 2295
 
 
-class PredictWithPrositForm(MethodForm):
-    pass
+class PredictSpectraForm(MethodForm):
+    model_name = CustomChoiceField(
+        choices=[], label="Choose the Prosit model to predict with"
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["model_name"].choices = fill_helper.to_choices(
+            spectrum_prediction.AVAILABLE_MODELS.keys()
+        )
 
 
 class SelectPeptidesForProteinForm(MethodForm):
