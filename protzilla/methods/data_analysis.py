@@ -35,7 +35,7 @@ class PlotStep(DataAnalysisStep):
 
     def handle_outputs(self, outputs: dict):
         super().handle_outputs(outputs)
-        plots = outputs.pop("plots", [])
+        plots = self.output.output.pop("plots", [])
         self.plots = Plots(plots)
 
 
