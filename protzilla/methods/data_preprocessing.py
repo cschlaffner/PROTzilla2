@@ -20,7 +20,7 @@ class DataPreprocessingStep(Step):
     section = "data_preprocessing"
     output_keys = ["protein_df"]
 
-    plot_input_names = ["protein_df"]
+    plot_input_names = ["protein_df", "colors"]
     plot_output_names = ["plots"]
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +29,8 @@ class DataPreprocessingStep(Step):
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.protein_df
+        inputs["colors"] = steps.customising
+
         return inputs
 
     def plot(self, inputs: dict = None):
@@ -71,6 +73,10 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
 
     def method(self, inputs):
         return filter_proteins.by_samples_missing(**inputs)
+
+    #def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+    #    inputs["colors"] = steps.customising
+    #    return inputs
 
     def plot_method(self, inputs):
         return filter_proteins.by_samples_missing_plot(**inputs)

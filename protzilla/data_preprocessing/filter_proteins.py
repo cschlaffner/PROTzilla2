@@ -2,16 +2,18 @@ import pandas as pd
 
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 from ..utilities.transform_dfs import long_to_wide
-
+from protzilla.customising.colorways import customise
+from protzilla.steps import StepManager
+from protzilla.methods.customising import CustomisingStep  # replace with the actual import
 
 def by_samples_missing(protein_df: pd.DataFrame, percentage: float) -> dict:
     """
     This function filters proteins based on the amount of samples with nan values, if the percentage of nan values
     is below a threshold (percentage).
 
-    :param df: the intensity dataframe that should be filtered
+    :param protein_df: the intensity dataframe that should be filtered
     :param percentage: ranging from 0 to 1. Defining the relative share of samples the proteins need to be present
-        in in order for the protein to be kept.
+        in, in order for the protein to be kept.
     :return: returns the filtered df as a Dataframe and a dict with a list of Protein IDs that were discarded
         and a list of Protein IDs that were kept
     """
@@ -58,10 +60,13 @@ def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type, color
     return [fig]
 
 
-def by_samples_missing_plot(method_inputs, method_outputs, graph_type, color):
+def by_samples_missing_plot(method_inputs, method_outputs, graph_type):
+    #color_output = steps.get_step_output(CustomisingStep, 'colors')
+    #print(color_output)
+    print(method_inputs)
     return _build_pie_bar_plot(
         method_outputs["remaining_proteins"],
         method_outputs["filtered_proteins"],
         graph_type,
-        color,
+        color=method_inputs["colors"],
     )
