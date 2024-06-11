@@ -902,9 +902,9 @@ class SelectPeptidesForProteinForm(MethodForm):
         initial=False,
     )
 
-    protein_id = CustomChoiceField(
+    protein_ids = CustomMultipleChoiceField(
         choices=[],
-        label="Protein ID",
+        label="Protein IDs",
     )
 
     def fill_form(self, run: Run) -> None:
@@ -919,27 +919,27 @@ class SelectPeptidesForProteinForm(MethodForm):
         chosen_list = self.data.get("protein_list", self.fields["protein_list"].choices[0][0])
         if not selected_auto_select:
             self.toggle_visibility("sort_proteins", True)
-            self.toggle_visibility("protein_id", True)
+            self.toggle_visibility("protein_ids", True)
 
             if chosen_list == "all proteins":
-                self.fields["protein_id"].choices = fill_helper.to_choices(
+                self.fields["protein_ids"].choices = fill_helper.to_choices(
                     run.steps.get_step_output(
                         Step, "protein_df"
                     )["Protein ID"].unique()
                 )
             else:
                 if self.data.get("sort_proteins"):
-                    self.fields["protein_id"].choices = fill_helper.to_choices(
+                    self.fields["protein_ids"].choices = fill_helper.to_choices(
                         run.steps.get_step_output(
                             DataAnalysisStep, "significant_proteins_df", chosen_list
                         ).sort_values(by="corrected_p_value")["Protein ID"].unique()
                     )
                 else:
-                    self.fields["protein_id"].choices = fill_helper.to_choices(
+                    self.fields["protein_ids"].choices = fill_helper.to_choices(
                         run.steps.get_step_output(
                             DataAnalysisStep, "significant_proteins_df", chosen_list
                         )["Protein ID"].unique()
                     )
         else:
             self.toggle_visibility("sort_proteins", False)
-            self.toggle_visibility("protein_id", False)
+            self.toggle_visibility("protein_ids", False)
