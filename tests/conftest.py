@@ -1,6 +1,5 @@
 import base64
 import io
-import json
 import logging
 import time
 import uuid
@@ -15,7 +14,7 @@ from PIL import Image
 from protzilla.methods.importing import MaxQuantImport
 from protzilla.run import Run
 
-from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH, TEST_DATA_PATH
+from ..protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
 from ..protzilla.utilities import random_string
 
 
@@ -81,25 +80,12 @@ def show_figures(request):
 
 
 @pytest.fixture(scope="session")
-def workflow_meta():
-    with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture(scope="session")
 def tests_folder_name():
     name = f"tests_{random_string()}"
     yield name
     while Path(f"{RUNS_PATH}/{name}").exists():
         time.sleep(1)
         rmtree(Path(f"{RUNS_PATH}/{name}"))
-
-
-@pytest.fixture(scope="session")
-def run_test_folder(tests_folder_name):
-    Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
-    yield
-    rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
 
 
 @pytest.fixture
@@ -137,20 +123,6 @@ def debug_logger():
     logger.setLevel(logging.DEBUG)
     yield
     logger.setLevel(logging.INFO)
-
-
-@pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
-        return json.load(f)
 
 
 @pytest.fixture

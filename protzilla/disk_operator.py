@@ -117,7 +117,9 @@ class DiskOperator:
             run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
-                run[KEYS.STEPS].append(self._write_step(step)) # TODO this takes a long time
+                run[KEYS.STEPS].append(
+                    self._write_step(step)
+                )  # TODO this takes a long time
             self.yaml_operator.write(self.run_file, run)
 
     def read_workflow(self) -> StepManager:
@@ -170,6 +172,8 @@ class DiskOperator:
     def clear_upload_dir(self) -> None:
         # TODO in general our way of handling file uploads is kind of non-straightforward, maybe we should switch
         # to directly using the FileUpload provided by Django instead of the work-around with the path of the upload as a str
+        if not paths.UPLOAD_PATH.exists():
+            return
         with ErrorHandler():
             upload_dir = paths.UPLOAD_PATH
             for file in upload_dir.iterdir():
