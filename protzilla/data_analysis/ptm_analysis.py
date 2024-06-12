@@ -5,7 +5,7 @@ import re
 
 
 def filter_peptides_of_protein(
-        peptide_df: pd.DataFrame, protein_id: str | None = None,
+        peptide_df: pd.DataFrame, protein_ids: list[str],
 ) -> dict:
     """
     This function filters out all peptides with a PEP value (assigned to all samples
@@ -17,7 +17,10 @@ def filter_peptides_of_protein(
     :return: dict of the filtered peptide dataframe
     """
 
-    filtered_peptides = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
+    filtered_peptide_dfs = [len(protein_ids)]
+    for i, protein_id in enumerate(protein_ids):
+        filtered_peptide_dfs[i] = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
+    filtered_peptides = pd.concat(filtered_peptide_dfs)
 
     return dict(
         peptide_df=filtered_peptides,
