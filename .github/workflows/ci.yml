@@ -45,7 +45,7 @@ jobs:
 
       - name: Print PROJECT_PATH
         run: |
-          python -c "from protzilla.paths import PROJECT_PATH; print(f'PROJECT_PATH: {PROJECT_PATH}')"
+          export PYTHONPATH=. python -c "from protzilla.paths import PROJECT_PATH; print(f'PROJECT_PATH: {PROJECT_PATH}')"
       - name: run tests, build coverage file
         run: |
           export PYTHONPATH=. pytest
