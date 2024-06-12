@@ -16,7 +16,7 @@ def filter_peptides_of_protein(
     :return: dict of the filtered peptide dataframe
     """
 
-    filtered_peptide_dfs = [len(protein_ids)]
+    filtered_peptide_dfs = [pd.DataFrame] * len(protein_ids)
     for i, protein_id in enumerate(protein_ids):
         filtered_peptide_dfs[i] = peptide_df[peptide_df["Protein ID"].str.contains(protein_id)]
     filtered_peptides = pd.concat(filtered_peptide_dfs)
