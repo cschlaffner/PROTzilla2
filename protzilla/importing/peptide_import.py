@@ -6,7 +6,7 @@ import pandas as pd
 from protzilla.importing.ms_data_import import clean_protein_groups
 
 
-def peptide_import(file_path, intensity_name) -> dict:
+def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
     try:
         assert intensity_name in [
             "Intensity",
@@ -43,17 +43,22 @@ def peptide_import(file_path, intensity_name) -> dict:
         pd.concat([id_df, intensity_df], axis=1),
         id_vars=id_columns,
         var_name="Sample",
-        value_name=peptide_intensity_name,
+        value_name="Intensity",
     )
 
     molten = molten.rename(columns={"Proteins": "Protein ID"})
     ordered = molten[
-        ["Sample", "Protein ID", "Sequence", peptide_intensity_name, "PEP"]
+        ["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]
     ]
     ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
-    return dict(peptide_df=ordered)
+    new_groups, filtered_proteins = clean_protein_groups(
+        ordered["Protein ID"].tolist(), map_to_uniprot
+    )
+    cleaned = ordered.assign(**{"Protein ID": new_groups})
+
+    return dict(peptide_df=cleaned)
 
 
 def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:

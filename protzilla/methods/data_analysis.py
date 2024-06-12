@@ -36,7 +36,7 @@ class PlotStep(DataAnalysisStep):
 
     def handle_outputs(self, outputs: dict):
         super().handle_outputs(outputs)
-        plots = outputs.pop("plots", [])
+        plots = self.output.output.pop("plots", [])
         self.plots = Plots(plots)
 
 
@@ -614,7 +614,7 @@ class SelectPeptidesForProtein(DataAnalysisStep):
 
     input_keys = [
         "peptide_df",
-        "protein_id",
+        "protein_ids",
     ]
     output_keys = [
         "peptide_df",
@@ -634,7 +634,7 @@ class SelectPeptidesForProtein(DataAnalysisStep):
                 steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
             index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
             most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
-            inputs["protein_id"] = most_significant_protein["Protein ID"]
+            inputs["protein_id"] = [most_significant_protein["Protein ID"]]
             self.messages.append({
                 "level": logging.INFO,
                 "msg":

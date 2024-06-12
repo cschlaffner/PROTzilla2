@@ -95,8 +95,7 @@ def gene_mapping(
     :param use_biomart: should biomart be used to map ids that could not be mapped with databases
     :type use_biomart: bool
 
-    :return: the gene mapping, consisting of protein_group_to_genes, gene_to_protein_groups, filtered and
-        the dataframes of the mappings
+    :return: the mapping results, containing the mapping dataframe and filtered proteins list, and a message if applicable
     :rtype: dict
     """
     try:
@@ -108,38 +107,8 @@ def gene_mapping(
         )
     if isinstance(database_names, str):
         database_names = [database_names]
-    (
-        gene_to_protein_groups,
-        protein_group_to_genes,
-        filtered,
-    ) = database_query.uniprot_groups_to_genes(
+
+    mapping_results = database_query.uniprot_groups_to_genes(
         protein_groups, database_names, use_biomart=use_biomart
     )
-
-    # We need to unpack the dictionaries to be able to create a dataframe, as this is potentially a many-to-many mapping
-    gene_to_protein_groups_unpacked = [
-        (key, value)
-        for key, values in gene_to_protein_groups.items()
-        for value in values
-    ]
-    gene_to_protein_groups_df = pd.DataFrame.from_records(
-        gene_to_protein_groups_unpacked, columns=["Gene", "Protein ID"]
-    )
-
-    protein_group_to_genes_unpacked = [
-        (key, value)
-        for key, values in protein_group_to_genes.items()
-        for value in values
-    ]
-    protein_groups_to_groups_df = pd.DataFrame.from_records(
-        protein_group_to_genes_unpacked, columns=["Protein ID", "Gene"]
-    )
-    return {
-        "protein_group_to_genes": pd.DataFrame(
-            protein_group_to_genes.items(), columns=["Protein ID", "Gene"]
-        ),
-        "gene_to_protein_groups": pd.DataFrame(
-            gene_to_protein_groups.items(), columns=["Gene", "Protein ID"]
-        ),
-        "filtered": filtered,
-    }
+    return mapping_results

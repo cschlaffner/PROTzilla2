@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import time
-import json
 import pandas as pd
 import numpy as np
 import pytest
@@ -383,7 +382,7 @@ def test_GO_analysis_with_enrichr_wrong_proteins_input():
         organism="human",
         differential_expression_col="log2_fold_change",
         gene_sets_enrichr=["KEGG"],
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -401,7 +400,7 @@ def test_GO_analysis_with_enrichr_wrong_gene_sets_input():
         organism="human",
         differential_expression_col="log2_fold_change",
         gene_sets_path="aMadeUpInputFormat.abc",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
 
@@ -415,7 +414,7 @@ def test_GO_analysis_with_no_gene_sets_input():
         differential_expression_col="log2_fold_change",
         gene_sets_path=None,
         gene_sets_enrichr=None,
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -447,31 +446,27 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
         data_folder_tests / "Reactome_enrichment_enrichr_2022.csv",
         index_col=0,
     )
+    gene_mapping_df = pd.DataFrame(
+        {
+            "Protein ID": [
+                "Protein2",
+                "Protein3",
+                "Protein4",
+                "Protein6;Protein7;Protein8",
+                "Protein6;Protein7;Protein8",
+                "Protein6;Protein7;Protein8",
+                "Protein9;Protein10;Protein11",
+                "Protein9;Protein10;Protein11",
+            ],
+            "Gene": ["ENO2", "ENO3", "HK2", "HK1", "HK3", "IDH3B", "GPT2", "SDHB"],
+        }
+    )
 
-    gene_mapping = {
-        "gene_to_protein_groups": {
-            "ENO2": ["Protein2"],
-            "ENO3": ["Protein3"],
-            "HK2": ["Protein4"],
-            "HK1": ["Protein6;Protein7;Protein8"],
-            "HK3": ["Protein6;Protein7;Protein8"],
-            "IDH3B": ["Protein6;Protein7;Protein8"],
-            "GPT2": ["Protein9;Protein10;Protein11"],
-            "SDHB": ["Protein9;Protein10;Protein11"],
-        },
-        "protein_group_to_genes": {
-            "Protein2": ["ENO2"],
-            "Protein3": ["ENO3"],
-            "Protein4": ["HK2"],
-            "Protein6;Protein7;Protein8": ["HK1", "HK3", "IDH3B"],
-            "Protein9;Protein10;Protein11": ["GPT2", "SDHB"],
-        },
-        "filtered": ["Protein1", "Protein5", "Protein12;Protein13"],
-    }
+    filtered_protein_ids = (["Protein1", "Protein5", "Protein12;Protein13"],)
 
     current_out = GO_analysis_with_Enrichr(
         proteins_df=pd.DataFrame({"Protein ID": proteins, "fold_change": [1.0] * 8}),
-        gene_mapping=gene_mapping,
+        gene_mapping_df=gene_mapping_df,
         organism="human",
         differential_expression_col="fold_change",
         direction="up",
@@ -514,7 +509,7 @@ def test_GO_analysis_Enrichr_wrong_background_file(data_folder_tests):
         direction="both",
         gene_sets_path=data_folder_tests / "Reactome_2022.txt",
         background_path="aMadeUpInputFormat.abc",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
     assert "Invalid file type for background" in current_out["messages"][0]["msg"]
@@ -563,25 +558,20 @@ def GO_analysis_offline_result_with_bg():
 
 @pytest.fixture
 def offline_mock_mapping():
-    return {
-        "gene_to_protein_groups": {
-            "Gene1": ["Protein1"],
-            "Gene2": ["Protein2"],
-            "Gene3": ["Protein3"],
-            "Gene4": ["Protein4"],
-            "Gene5": ["Protein5"],
-            "Gene6": ["Protein6"],
-        },
-        "protein_group_to_genes": {
-            "Protein1": ["Gene1"],
-            "Protein2": ["Gene2"],
-            "Protein3": ["Gene3"],
-            "Protein4": ["Gene4"],
-            "Protein5": ["Gene5"],
-            "Protein6": ["Gene6"],
-        },
-        "filtered": [],
+    data = {
+        "Protein ID": [
+            "Protein1",
+            "Protein2",
+            "Protein3",
+            "Protein4",
+            "Protein5",
+            "Protein6",
+        ],
+        "Gene": ["Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6"],
     }
+    mapping_df = pd.DataFrame(data)
+    filtered = []
+    return mapping_df, filtered
 
 
 @pytest.mark.parametrize(
@@ -613,7 +603,7 @@ def test_GO_analysis_offline_protein_sets(
         gene_sets_path=protein_sets_path,
         differential_expression_col="fold_change",
         direction="up",
-        gene_mapping=offline_mock_mapping,
+        gene_mapping_df=offline_mock_mapping[0],
     )
     df = current_out["enrichment_df"]
 
@@ -674,7 +664,7 @@ def test_GO_analysis_offline_background(
         differential_expression_threshold=1.0,  # all are downregulated
         direction="down",
         background_path=background_path,
-        gene_mapping=offline_mock_mapping,
+        gene_mapping_df=offline_mock_mapping[0],
     )
     df = current_out["enrichment_df"]
 
@@ -713,7 +703,7 @@ def test_GO_analysis_offline_no_protein_sets():
         differential_expression_col="fold_change",
         direction="up",
         background=None,
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -733,7 +723,7 @@ def test_GO_analysis_offline_invalid_protein_set_file():
         differential_expression_col="fold_change",
         direction="up",
         background="",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -754,7 +744,7 @@ def test_GO_analysis_offline_invalid_background_set_file():
         differential_expression_col="fold_change",
         direction="up",
         background_path="an_invalid_filetype.png",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -980,7 +970,7 @@ def test_gsea_log2_metric_with_negative_values(data_folder_tests):
         min_size=4,
         number_of_permutations=500,
         ranking_method="log2_ratio_of_classes",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
     assert "Negative values" in current_out["messages"][0]["msg"]
@@ -997,8 +987,7 @@ def test_gsea(data_folder_tests):
         data_folder_tests / "gsea_result_sig_prot.csv", index_col=0
     )
 
-    with open(data_folder_tests / "gene_mapping.json", "r") as f:
-        mock_mapping = json.load(f)
+    mock_mapping_df = pd.read_csv(data_folder_tests / "gene_mapping.csv")
 
     current_out = gsea(
         protein_df=proteins,
@@ -1009,7 +998,7 @@ def test_gsea(data_folder_tests):
         gene_sets_enrichr=["KEGG_2016"],
         min_size=7,
         number_of_permutations=500,
-        gene_mapping=mock_mapping,
+        gene_mapping_df=mock_mapping_df,
     )
     assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
@@ -1054,7 +1043,7 @@ def test_gsea_wrong_protein_df(data_folder_tests):
         grouping="Group",
         group1="CTR",
         group2="AD",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
     assert "Input must be a dataframe" in current_out["messages"][0]["msg"]
@@ -1071,7 +1060,7 @@ def test_gsea_no_gene_sets(data_folder_tests):
         grouping="Group",
         group1="CTR",
         group2="AD",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
     assert "No gene sets provided" in current_out["messages"][0]["msg"]
@@ -1089,7 +1078,7 @@ def test_gsea_wrong_gene_sets(data_folder_tests):
         group1="CTR",
         group2="AD",
         gene_sets_path="a_made_up_path.png",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
 
@@ -1108,11 +1097,6 @@ def test_gsea_no_gene_symbols(data_folder_tests):
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
     metadata_df = pd.read_csv(data_folder_tests / "metadata_full.csv")
-    mock_mapping = {
-        "gene_to_protein_groups": {},
-        "protein_group_to_genes": {},
-        "filtered": ["Protein1", "Protein2"],
-    }
     current_out = gsea(
         protein_df,
         metadata_df=metadata_df,
@@ -1120,7 +1104,7 @@ def test_gsea_no_gene_symbols(data_folder_tests):
         group1="CTR",
         group2="AD",
         gene_sets_enrichr=["KEGG_2019_Human"],
-        gene_mapping=mock_mapping,
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -1136,7 +1120,7 @@ def test_gsea_grouping_not_in_metadata_df():
         metadata_df=pd.DataFrame(),
         grouping="Group",
         gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -1151,7 +1135,7 @@ def test_gsea_group_not_in_grouping():
         group1="Group1",
         group2="Group2",
         gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
-        gene_mapping={},
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
@@ -1176,11 +1160,9 @@ def test_gsea_catch_fail():
         ),
         columns=["Sample", "Group"],
     )
-    mock_mapping = {
-        "gene_to_protein_groups": {"Gene1": "Protein1", "Gene2": "Protein2"},
-        "protein_group_to_genes": {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
-        "filtered": [],
-    }
+    mock_mapping_df = pd.DataFrame(
+        {"Protein ID": ["Protein1", "Protein2"], "Gene": ["Gene1", "Gene2"]}
+    )
 
     current_out = gsea(
         protein_df=protein_df,
@@ -1189,7 +1171,7 @@ def test_gsea_catch_fail():
         group1="Group1",
         group2="Group2",
         gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
-        gene_mapping=mock_mapping,
+        gene_mapping_df=mock_mapping_df,
     )  # gp.gsea() should fail
     assert "messages" in current_out
     assert "GSEA failed. Please check your input" in current_out["messages"][0]["msg"]
@@ -1302,15 +1284,14 @@ def test_gsea_preranked(data_folder_tests):
         data_folder_tests / "gsea_preranked_enriched.csv", index_col=0
     )
 
-    with open(data_folder_tests / "gene_mapping.json", "r") as f:
-        mock_mapping = json.load(f)
+    mock_mapping_df = pd.read_csv(data_folder_tests / "gene_mapping.csv")
 
     current_out = gsea_preranked(
         protein_df=proteins_significant,
         ranking_column="corrected_p_value",
         ranking_direction="ascending",
         gene_sets_enrichr=["KEGG_2019_Human"],
-        gene_mapping=mock_mapping,
+        gene_mapping_df=mock_mapping_df,
     )
     assert "messages" in current_out
     assert "Some proteins could not be mapped" in current_out["messages"][0]["msg"]
@@ -1353,7 +1334,9 @@ def test_gsea_preranked_wrong_protein_df():
         {"Protein ID": ["Protein1", "Protein2"], "Sample1": ["Sample1", "Sample2"]}
     )
 
-    current_out = gsea_preranked(df, gene_mapping={})
+    current_out = gsea_preranked(
+        df, gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"])
+    )
     assert "messages" in current_out
     assert "Proteins must be a dataframe" in current_out["messages"][0]["msg"]
 
@@ -1364,7 +1347,9 @@ def test_gsea_preranked_no_gene_sets(data_folder_tests):
         index_col=0,
     )
     current_out = gsea_preranked(
-        protein_df=proteins_df, ranking_column="corrected_p_value", gene_mapping={}
+        protein_df=proteins_df,
+        ranking_column="corrected_p_value",
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out
     assert "No gene sets provided" in current_out["messages"][0]["msg"]
@@ -1376,7 +1361,9 @@ def test_gsea_preranked_wrong_gene_sets(data_folder_tests):
         index_col=0,
     )
     current_out = gsea_preranked(
-        proteins_df, gene_sets_path="a_made_up_path.png", gene_mapping={}
+        proteins_df,
+        gene_sets_path="a_made_up_path.png",
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
     assert "messages" in current_out  # read_protein_or_gene_sets_file should fail
 
@@ -1389,42 +1376,13 @@ def test_gsea_preranked_no_gene_symbols():
         ),
         columns=["Protein ID", "corrected_p_value"],
     )
-    mock_mapping = {
-        "gene_to_protein_groups": {},
-        "protein_group_to_genes": {},
-        "filtered": ["Protein1", "Protein2"],
-    }
 
     current_out = gsea_preranked(
         proteins_df,
         ranking_column="corrected_p_value",
         gene_sets_enrichr=["KEGG_2019_Human"],
-        gene_mapping=mock_mapping,
+        gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
     assert "messages" in current_out
     assert "No proteins could be mapped" in current_out["messages"][0]["msg"]
-
-
-def test_gsea_preranked_catch_fail():
-    proteins_df = pd.DataFrame(
-        data=(
-            ["Protein1", 0.01],
-            ["Protein2", 0.02],
-        ),
-        columns=["Protein ID", "corrected_p_value"],
-    )
-    mock_mapping = {
-        "gene_to_protein_groups": {"Gene1": "Protein1", "Gene2": "Protein2"},
-        "protein_group_to_genes": {"Protein1": ["Gene1"], "Protein2": ["Gene2"]},
-        "filtered": [],
-    }
-    current_out = gsea_preranked(
-        proteins_df,
-        ranking_column="corrected_p_value",
-        gene_sets_path="a_made_up_path_but_valid_filetype.gmt",
-        gene_mapping=mock_mapping,
-    )  # gp.prerank() function should fail
-
-    assert "messages" in current_out
-    assert "An error occurred while running GSEA" in current_out["messages"][0]["msg"]
