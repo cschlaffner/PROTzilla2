@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.transformation import by_log, by_log_plot
-from tests.protzilla.data_preprocessing.test_peptide_preprocessing import peptides_df
+from tests.conftest import peptides_df
 
 
 @pytest.fixture
