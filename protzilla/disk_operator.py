@@ -115,8 +115,13 @@ class DiskOperator:
                     logger.error(f"Error reading step: {e}")
                     continue
                 step_manager.add_step(step)
-            step_manager.current_step_index = min(
-                run.get(KEYS.CURRENT_STEP_INDEX, 0), len(step_manager.all_steps) - 1
+
+            # this expression ensures that the current step index is within the bounds of the steps list, and at least 0
+            step_manager.current_step_index = max(
+                0,
+                min(
+                    run.get(KEYS.CURRENT_STEP_INDEX, 0), len(step_manager.all_steps) - 1
+                ),
             )
             return step_manager
 
@@ -132,9 +137,7 @@ class DiskOperator:
             run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
-                run[KEYS.STEPS].append(
-                    self._write_step(step)
-                )  # TODO this takes a long time
+                run[KEYS.STEPS].append(self._write_step(step))
             self.yaml_operator.write(self.run_file, run)
 
     def read_workflow(self) -> StepManager:
