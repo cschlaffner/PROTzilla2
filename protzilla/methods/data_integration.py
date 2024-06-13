@@ -67,7 +67,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
         "proteins_df",
         "differential_expression_col",
         "differential_expression_threshold",
-        "gene_mapping",
+        "gene_mapping_df",
         "gene_sets_field",
         "gene_sets_path",
         "gene_sets_enrichr",
@@ -97,8 +97,8 @@ class EnrichmentAnalysisGOAnalysisWithEnrichr(DataIntegrationStep):
                 "No data found to be enriched. Please do a differential expression analysis first or select the corrent step"
             )
         inputs["differential_expression_col"] = "log2_fold_change"
-        inputs["gene_mapping"] = steps.get_step_output(
-            Step, "gene_mapping", inputs["gene_mapping_step_instance"]
+        inputs["gene_mapping_df"] = steps.get_step_output(
+            Step, "gene_mapping_df", inputs["gene_mapping_step_instance"]
         )
         return inputs
 
@@ -111,7 +111,7 @@ class EnrichmentAnalysisGOAnalysisOffline(DataIntegrationStep):
         "protein_df",
         "differential_expression_col",
         "differential_expression_threshold",
-        "gene_mapping",
+        "gene_mapping",  # TODO adjust this method to use the gene_mapping_df from gene_mapping
         "gene_sets_path",
         "direction",
         "background_field",
@@ -145,7 +145,7 @@ class EnrichmentAnalysisWithGSEA(DataIntegrationStep):
     method_description = "Perform gene set enrichment analysis"
     input_keys = [
         "protein_df",
-        "gene_mapping",
+        "gene_mapping_df",
         "gene_sets_field",
         "gene_sets_path",
         "gene_sets_enrichr",
@@ -174,7 +174,7 @@ class EnrichmentAnalysisWithPrerankedGSEA(DataIntegrationStep):
         "protein_df",
         "ranking_column",
         "ranking_direction",
-        "gene_mapping",
+        "gene_mapping_df",
         "gene_sets_field",
         "gene_sets_path",
         "gene_sets_enrichr",
@@ -199,7 +199,7 @@ class DatabaseIntegrationByGeneMapping(DataIntegrationStep):
     method_description = "Map protein groups to genes"
     input_keys = ["dataframe", "database_names", "use_biomart"]
 
-    output_keys = ["protein_group_to_genes", "gene_to_protein_groups", "filtered"]
+    output_keys = ["gene_mapping_df", "filtered_protein_ids"]
 
     def method(self, inputs: dict) -> dict:
         return database_integration.gene_mapping(**inputs)
