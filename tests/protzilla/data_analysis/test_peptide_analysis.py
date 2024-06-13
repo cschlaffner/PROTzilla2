@@ -1,6 +1,6 @@
 import pytest
 
-from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, ptms_per_sampel
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, ptms_per_sample
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import peptides_df, evidence_peptide_df
 
 
@@ -18,7 +18,7 @@ def test_filter_peptides_of_protein(peptides_df, evidence_peptide_df, df_num):
 
 
 def test_ptms_per_sampel(evidence_peptide_df):
-    ptm_df = ptms_per_sampel(evidence_peptide_df)["ptm_df"]
+    ptm_df = ptms_per_sample(evidence_peptide_df)["ptm_df"]
 
     assert ptm_df.columns.tolist() == ["Sample", "Unmodified", "Acetyl (Protein N-term)", "Oxidation (M)"]
     assert ptm_df["Sample"].tolist() == ["Sample1", "Sample2", "Sample3", "Sample4"]

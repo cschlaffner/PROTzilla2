@@ -1,6 +1,11 @@
 import logging
+from math import log
 
+import numpy as np
 import pandas as pd
+import re
+
+from protzilla.utilities.transform_dfs import long_to_wide
 
 
 def filter_peptides_of_protein(
@@ -30,7 +35,7 @@ def filter_peptides_of_protein(
     )
 
 
-def ptms_per_sampel(peptide_df: pd.DataFrame) -> dict:
+def ptms_per_sample(peptide_df: pd.DataFrame) -> dict:
     """
     This function calculates the amount of every PTMs per sample.
 
@@ -40,23 +45,28 @@ def ptms_per_sampel(peptide_df: pd.DataFrame) -> dict:
     with the cells containing the amount of the PTM in the sample
     """
 
-    modifications = pd.Series(sum(peptide_df["Modifications"].str.split(","), [])).unique()
-    sampels = peptide_df["Sample"].unique()
+    modification_df = peptide_df[["Sample", "Modifications"]]
 
-    all_mod_counts = pd.DataFrame(sampels).rename(columns={0: "Sample"})
+    modification_df = pd.concat(  #0:10
+        [modification_df["Sample"],
+         (modification_df['Modifications'].str.replace(",", "|").str.get_dummies())], axis=1)
 
-    for mod in modifications:
-        filtered = peptide_df[peptide_df["Modifications"].str.contains(re.escape(mod))]
+    for column, data in modification_df.iteritems():
+        amount, name = from_string(column)
+        if amount > 1:
+            modification_df[column] = modification_df[column].multiply(amount)
+            modification_df = modification_df.rename(columns={column: name})
 
-        mod_counts_without_zero = filtered.groupby('Sample')["Modifications"].size()
-        mod_counts = mod_counts_without_zero.reindex(sampels).fillna(0)
+    modification_df = modification_df.groupby(["Sample"]).sum()
 
-        all_mod_counts[mod] = mod_counts.values
+    modification_df = modification_df.groupby(modification_df.columns, axis=1).sum()
 
-    return dict(ptm_df=all_mod_counts)
+    modification_df = modification_df.reset_index()
+
+    return dict(ptm_df=modification_df)
 
 
-def ptms_per_protein_and_sampel(peptide_df: pd.DataFrame) -> dict:
+def ptms_per_protein_and_sample(peptide_df: pd.DataFrame) -> dict:
     """
     This function calculates the amount of every PTM per sample and protein.
 
@@ -67,32 +77,50 @@ def ptms_per_protein_and_sampel(peptide_df: pd.DataFrame) -> dict:
     their amount in the protein and sample
     """
 
-    proteins = peptide_df["Protein ID"].unique()
-    samples = peptide_df["Sample"].unique()
+    modification_df = peptide_df[["Sample", "Protein ID", "Modifications"]]
 
-    ptm_df = pd.DataFrame(samples).rename(columns={0: "Sample"})
-    ptm_df = ptm_df.assign(**{protein: None for protein in proteins})
+    modification_df = modification_df[["Sample", "Protein ID"]].join(
+        modification_df['Modifications'].str.get_dummies(sep=",")
+    )
 
-    for j, protein in enumerate(proteins):
-        filtered = peptide_df[peptide_df["Protein ID"].str.contains(re.escape(protein))]
+    for column, data in modification_df.iteritems():
+        amount, name = from_string(column)
+        if amount > 1:
+            modification_df[column] = modification_df[column].multiply(amount)
+            modification_df = modification_df.rename(columns={column: name})
 
-        for i, sample in enumerate(samples):
-            filtered_sample = filtered[filtered["Sample"] == sample]
+    modification_df = modification_df.groupby(["Sample", "Protein ID"]).sum()
 
-            modifications = pd.Series(sum(filtered_sample["Modifications"].str.split(","), [])).unique()
+    modification_df = modification_df.groupby(modification_df.columns, axis=1).sum()
 
-            modifications_str = ""
+    modification_df = modification_df.reset_index()
 
-            for mod in modifications:
-                filtered_mod = filtered_sample[filtered_sample["Modifications"].str.contains(re.escape(mod))]
+    modi = (
+        modification_df.drop(["Sample", "Protein ID"], axis=1).apply(lambda x: ('(' + x.astype(str) + ') ' + x.name + ", ")))
 
-                mod_counts = filtered_mod.groupby('Sample')["Modifications"].size()
-                mod_counts = mod_counts.reindex(samples).fillna(0)
+    for column, data in modi.iteritems():
+        modi[column] = np.where(modification_df[column] > 0, modi[column], "")
 
-                modifications_str += f"{int(mod_counts[sample])} {mod}, \n"
+    modification_df["Modifications"] = modi.apply(''.join, axis=1)
+    modification_df = modification_df[['Sample', 'Protein ID', 'Modifications']]
 
-            ptm_df[f"{protein}"][i] = modifications_str
+    modification_df = long_to_wide(modification_df, "Modifications").fillna("").reset_index()
 
-        print(f"analyzed protein  {protein} ({j}/{len(proteins)})")
+    return dict(ptm_df=modification_df)
 
-    return dict(ptm_df=ptm_df)
+
+def from_string(mod_string: str) -> tuple[int, str]:
+    """
+    This function extracts the amount and name of a modification from its listing in the evidence file.
+
+    :param mod_string: a string containing the amount and name of the modification
+
+    :return: tuple containing the amount and name of the modification
+    """
+
+    re_search = re.search(r'\d+', mod_string)
+    amount = int(re_search.group()) if re_search else 1
+    name = re.search(r'\D+', mod_string).group()
+    name = name[1:] if name[0] == " " else name
+
+    return amount, name

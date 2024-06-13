@@ -957,6 +957,16 @@ class PTMsPerSampleForm(MethodForm):
         )
         self.fields["peptide_df"].choices = fill_helper.to_choices(single_protein_peptides)
 
+        self.fields["peptide_df"].choices = fill_helper.get_choices(
+            run, "peptide_df"
+        )
+
+        single_protein_peptides = run.steps.get_instance_identifiers(
+            SelectPeptidesForProtein, "peptide_df"
+        )
+        if single_protein_peptides:
+            self.fields["peptide_df"].initial = single_protein_peptides[0]
+
 
 class PTMsPerProteinAndSampleForm(MethodForm):
     peptide_df = CustomChoiceField(
