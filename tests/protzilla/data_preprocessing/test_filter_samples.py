@@ -12,7 +12,6 @@ from protzilla.data_preprocessing.filter_samples import (
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
     assert_peptide_filtering_matches_protein_filtering,
 )
-from tests.conftest import peptides_df
 
 
 @pytest.fixture

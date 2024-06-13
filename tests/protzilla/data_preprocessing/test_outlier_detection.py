@@ -13,7 +13,6 @@ from protzilla.data_preprocessing.outlier_detection import (
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
     assert_peptide_filtering_matches_protein_filtering,
 )
-from tests.conftest import peptides_df
 
 # TODO #21: implement actual tests for outlier detection
 

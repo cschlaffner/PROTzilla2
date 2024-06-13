@@ -1,7 +1,6 @@
 import pytest
 
 from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
-from tests.conftest import peptides_df
 
 
 def test_filter_peptides_of_protein(peptides_df):
