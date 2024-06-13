@@ -9,7 +9,7 @@ from protzilla.data_integration.database_query import (
     biomart_database,
     uniprot_databases,
 )
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
