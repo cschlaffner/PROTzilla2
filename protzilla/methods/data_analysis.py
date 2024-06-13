@@ -608,7 +608,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
 
 
 class SelectPeptidesForProtein(DataAnalysisStep):
-    display_name = "Select Peptides of Protein"
+    display_name = "Filter Peptides of Protein"
     operation = "Peptide analysis"
     method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
 
@@ -624,10 +624,9 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         return filter_peptides_of_protein(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        peptide_df = steps.get_step_output(Step, "peptide_df")
-        if peptide_df is None:
-            "You need to import peptide data to perform this step"
-        inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
 
         if inputs["auto_select"]:
             significant_proteins = (
@@ -642,9 +641,6 @@ class SelectPeptidesForProtein(DataAnalysisStep):
                     f"from {inputs['protein_list']}"
             })
 
-        inputs.pop("protein_list", None)
-        inputs.pop("auto_select", None)
-        inputs.pop("sort_proteins", None)
         return inputs
 
 

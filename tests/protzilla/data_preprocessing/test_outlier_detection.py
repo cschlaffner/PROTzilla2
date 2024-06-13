@@ -65,7 +65,8 @@ def outlier_detection_df_with_nan():
 
 
 def test_outlier_detection_with_isolation_forest(
-    show_figures, outlier_detection_df, peptides_df
+    show_figures, outlier_detection_df,
+        peptides_df
 ):
     method_inputs = {
         "protein_df": outlier_detection_df,

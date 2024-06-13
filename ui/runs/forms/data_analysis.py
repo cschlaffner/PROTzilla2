@@ -1,6 +1,7 @@
 import logging
 from enum import Enum, StrEnum
 
+from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
@@ -16,7 +17,8 @@ from .custom_fields import (
     CustomChoiceField,
     CustomFloatField,
     CustomMultipleChoiceField,
-    CustomNumberField, CustomBooleanField,
+    CustomNumberField,
+    CustomBooleanField,
 )
 
 
@@ -220,8 +222,8 @@ class DifferentialExpressionTTestForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-                "group1" in self.data
-                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -261,8 +263,8 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-                "group1" in self.data
-                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -397,9 +399,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=0,
             )
             if (
-                    "similarity" not in self.data
-                    or float(self.data["similarity"]) < -1
-                    or float(self.data["similarity"]) > 1
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < -1
+                or float(self.data["similarity"]) > 1
             ):
                 self.data["similarity"] = 0
         else:
@@ -411,9 +413,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=1,
             )
             if (
-                    "similarity" not in self.data
-                    or float(self.data["similarity"]) < 0
-                    or float(self.data["similarity"]) > 999
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < 0
+                or float(self.data["similarity"]) > 999
             ):
                 self.data["similarity"] = 1
 
@@ -887,6 +889,10 @@ class ProteinGraphVariationGraphForm(MethodForm):
 class SelectPeptidesForProteinForm(MethodForm):
     is_dynamic = True
 
+    peptide_df = CustomChoiceField(
+        choices=[], label="Step to use peptide dataframe from"
+    )
+
     auto_select = CustomBooleanField(
         label="Automatically select most significant Protein",
         initial=False,
@@ -894,7 +900,7 @@ class SelectPeptidesForProteinForm(MethodForm):
 
     protein_list = CustomChoiceField(
         choices=[],
-        label="Select a list of Proteins from which you wand to choose your Proteins of Interest",
+        label="Select a list of Proteins from which you want to choose your Proteins of Interest",
     )
 
     sort_proteins = CustomBooleanField(
@@ -908,6 +914,13 @@ class SelectPeptidesForProteinForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(
+            run, "peptide_df", Step
+        )
+        self.fields["peptide_df"].initial = run.steps.get_instance_identifiers(
+            DataPreprocessingStep, "peptide_df"
+        )[-1]
+
         selected_auto_select = self.data.get("auto_select")
 
         choices = fill_helper.to_choices([] if selected_auto_select else ["all proteins"])
