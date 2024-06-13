@@ -3,8 +3,8 @@ import os
 from pathlib import Path
 
 from .constants.paths import RUNS_PATH
+from .run import Run
 from .run_helper import log_messages
-from .run_v2 import Run
 from .utilities import random_string
 
 
@@ -66,11 +66,13 @@ class Runner:
 
         self.all_plots = all_plots
         self.plots_path = Path(f"{self.run.run_path}/plots")
-        self.plots_path.mkdir(parents=True)
+        self.plots_path.mkdir(parents=True, exist_ok=True)
         logging.info(f"Saving plots at {self.plots_path}")
 
         log_messages(self.run.current_messages)
         self.run.current_messages.clear()
+
+        self.run._run_write()
 
     def compute_workflow(self):
         logging.info("------ computing workflow\n")
@@ -78,45 +80,50 @@ class Runner:
             logging.info(f"performing step: {*self.run.steps.current_location,}")
             if step.section == "importing":
                 self._insert_commandline_inputs(step)
-            self._perform_current_step()
+            self._perform_current_step(step.form_inputs)
             if self.all_plots and step.section == "data_preprocessing":
                 step.plot()
-            if step.plots:
+            if step.plots and not step.plots.empty:
                 self._save_plots_html(step)
-
-            self.run.step_next()
 
             log_messages(self.run.current_messages)
             self.run.current_messages.clear()
+
+            if not step.finished:
+                break
+
+            self.run.step_next()
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
         if step.operation == "msdataimport":
-            step.inputs["file_path"] = self.ms_data_path
+            step.form_inputs["file_path"] = self.ms_data_path
 
         elif step.operation == "metadataimport":
             if self.meta_data_path is None:
                 raise ValueError(
                     f"meta_data_path (--meta_data_path=<path/to/data) is not specified,"
-                    f" but is required for {step['name']}"
+                    f" but is required for {step.operation} with {step.display_name}"
                 )
-            step.inputs["file_path"] = self.meta_data_path
+            step.form_inputs["file_path"] = self.meta_data_path
         elif step.operation == "peptideimport":
             if self.peptides_path is None:
                 raise ValueError(
                     f"peptide_path (--peptide_path=<path/to/data>) is not specified, "
-                    f"but is required for {step['name']}"
+                    f"but is required for {step.operation} with {step.display_name}"
                 )
-            step.inputs["file_path"] = self.peptides_path
+            step.form_inputs["file_path"] = self.peptides_path
         else:
-            raise ValueError(f"Cannot find step with name {step['name']} in importing")
+            raise ValueError(
+                f"Cannot find step with name {step.operation} with {step.display_name} in importing"
+            )
 
     def _perform_current_step(self, params=None):
         self.run.current_step.calculate(self.run.steps, params)
 
     def _save_plots_html(self, step):
         for i, plot in enumerate(step.plots):
-            plot_path = f"{self.plots_path}/{self.run.step_index}-{step.section}-{step['name']}-{step['method']}-{i}.html"
+            plot_path = f"{self.plots_path}/{self.run.steps.current_step_index}-{step.section}-{step.operation}-{step.display_name}-{i}.html"
             plot.write_html(plot_path)
 
     def _overwrite_run_prompt(self):
