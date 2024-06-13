@@ -47,9 +47,9 @@ def ptms_per_sample(peptide_df: pd.DataFrame) -> dict:
 
     modification_df = peptide_df[["Sample", "Modifications"]]
 
-    modification_df = pd.concat(  #0:10
+    modification_df = pd.concat(
         [modification_df["Sample"],
-         (modification_df['Modifications'].str.replace(",", "|").str.get_dummies())], axis=1)
+         (modification_df['Modifications'].str.get_dummies(sep=","))], axis=1)
 
     for column, data in modification_df.iteritems():
         amount, name = from_string(column)
