@@ -11,7 +11,6 @@ from protzilla.data_preprocessing.outlier_detection import (
     by_pca_plot,
 )
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
-    peptides_df,
     assert_peptide_filtering_matches_protein_filtering,
 )
 
@@ -65,7 +64,9 @@ def outlier_detection_df_with_nan():
     return outlier_detection_df
 
 
-def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection_df, peptides_df):
+def test_outlier_detection_with_isolation_forest(
+    show_figures, outlier_detection_df, peptides_df
+):
     method_inputs = {
         "protein_df": outlier_detection_df,
         "peptide_df": peptides_df,
@@ -78,7 +79,10 @@ def test_outlier_detection_with_isolation_forest(show_figures, outlier_detection
         fig.show()
 
     assert_peptide_filtering_matches_protein_filtering(
-        method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
+        method_outputs["protein_df"],
+        peptides_df,
+        method_outputs["peptide_df"],
+        "Sample",
     )
 
 
@@ -95,7 +99,9 @@ def test_outlier_detection_with_isolation_forest_and_nan(outlier_detection_df_wi
     assert "NaN values" in methtod_outputs["messages"][0]["msg"]
 
 
-def test_outlier_detection_by_local_outlier_factor(show_figures, outlier_detection_df, peptides_df):
+def test_outlier_detection_by_local_outlier_factor(
+    show_figures, outlier_detection_df, peptides_df
+):
     method_inputs = {
         "protein_df": outlier_detection_df,
         "peptide_df": peptides_df,
@@ -107,7 +113,10 @@ def test_outlier_detection_by_local_outlier_factor(show_figures, outlier_detecti
     if show_figures:
         fig.show()
         assert_peptide_filtering_matches_protein_filtering(
-            method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
+            method_outputs["protein_df"],
+            peptides_df,
+            method_outputs["peptide_df"],
+            "Sample",
         )
 
 
@@ -139,7 +148,10 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df, peptides
         fig.show()
 
     assert_peptide_filtering_matches_protein_filtering(
-        method_outputs["protein_df"], peptides_df, method_outputs["peptide_df"], "Sample"
+        method_outputs["protein_df"],
+        peptides_df,
+        method_outputs["peptide_df"],
+        "Sample",
     )
 
 

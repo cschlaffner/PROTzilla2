@@ -7,7 +7,6 @@ from protzilla.data_preprocessing.filter_proteins import (
     by_samples_missing_plot,
 )
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
-    peptides_df,
     assert_peptide_filtering_matches_protein_filtering,
 )
 
@@ -75,7 +74,7 @@ def filter_proteins_by_samples_missing_df():
 
 
 def test_filter_proteins_by_missing_samples(
-        filter_proteins_by_samples_missing_df, peptides_df, show_figures
+    filter_proteins_by_samples_missing_df, peptides_df, show_figures
 ):
     method_output = by_samples_missing(
         filter_proteins_by_samples_missing_df, peptide_df=None, percentage=1.0
@@ -113,5 +112,8 @@ def test_filter_proteins_by_missing_samples(
     assert method_output["filtered_proteins"] == []
 
     assert_peptide_filtering_matches_protein_filtering(
-        method_output["protein_df"], peptides_df, method_output["peptide_df"], "Protein ID"
+        method_output["protein_df"],
+        peptides_df,
+        method_output["peptide_df"],
+        "Protein ID",
     )
