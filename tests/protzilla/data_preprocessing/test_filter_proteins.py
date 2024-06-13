@@ -7,7 +7,7 @@ from protzilla.data_preprocessing.filter_proteins import (
     by_samples_missing_plot,
 )
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import (
-    assert_peptide_filtering_matches_protein_filtering,
+    peptides_df, assert_peptide_filtering_matches_protein_filtering,
 )
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from protzilla.data_analysis.filter_peptieds_of_protein import filter_peptides_of_protein
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from tests.protzilla.data_preprocessing.test_peptide_preprocessing import peptides_df
 
 

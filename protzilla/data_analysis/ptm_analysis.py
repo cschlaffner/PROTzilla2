@@ -22,7 +22,7 @@ def filter_peptides_of_protein(
     filtered_peptides = pd.concat(filtered_peptide_dfs)
 
     return dict(
-        single_protein_peptide_df=filtered_peptides,
+        peptide_df=filtered_peptides,
         messages=[{
             "level": logging.INFO if len(filtered_peptides) > 0 else logging.WARNING,
             "msg": f"Selected {len(filtered_peptides)} entry's from the peptide dataframe."
