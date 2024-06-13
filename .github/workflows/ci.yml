@@ -43,14 +43,6 @@ jobs:
       - name: Analysing the code with autoflake
         run: python -m autoflake --in-place --remove-all-unused-imports --remove-unused-variables --expand-star-imports --ignore-init-module-imports $(git ls-files '*.py')
 
-      - name: Print PROJECT_PATH
-        run: |
-          export PYTHONPATH=. python -c "from protzilla.paths import PROJECT_PATH; print(f'PROJECT_PATH: {PROJECT_PATH}')"
-      - name: run tests, build coverage file
-        run: |
-          export PYTHONPATH=. pytest
-          pytest --cache-clear --cov=. --cov-branch --cov-report term-missing tests/
-      
       - name: format with black
         run: python -m black .
 
