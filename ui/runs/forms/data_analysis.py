@@ -6,7 +6,7 @@ from protzilla.methods.data_analysis import (
     DifferentialExpressionTTest,
     DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein,
 )
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
