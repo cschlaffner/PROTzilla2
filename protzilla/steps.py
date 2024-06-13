@@ -69,6 +69,7 @@ class Step:
         self.form_inputs = self.inputs.copy()
 
         try:
+            self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
 
@@ -141,7 +142,6 @@ class Step:
         :param outputs: A dictionary received after the calculation
         :return: None
         """
-        self.messages.clear()
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 

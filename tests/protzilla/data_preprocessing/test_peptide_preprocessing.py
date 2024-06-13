@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from protzilla.constants.paths import TEST_DATA_PATH
 from protzilla.data_preprocessing.peptide_filter import by_pep_value, by_pep_value_plot
@@ -56,3 +57,4 @@ def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
 
     pd.testing.assert_frame_equal(method_outputs["peptide_df"], leftover_peptide_df)
     assert method_outputs["filtered_peptides"] == filtered_peptides_list
+
