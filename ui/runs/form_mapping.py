@@ -8,7 +8,7 @@ import ui.runs.forms.data_analysis as data_analysis_forms
 import ui.runs.forms.data_integration as data_integration_forms
 import ui.runs.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs.forms.importing as importing_forms
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from .forms.base import MethodForm
