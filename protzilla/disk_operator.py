@@ -115,7 +115,9 @@ class DiskOperator:
                     logger.error(f"Error reading step: {e}")
                     continue
                 step_manager.add_step(step)
-            step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
+            step_manager.current_step_index = max(
+                run.get(KEYS.CURRENT_STEP_INDEX, 0), len(step_manager.all_steps) - 1
+            )
             return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
