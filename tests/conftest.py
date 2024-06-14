@@ -148,11 +148,11 @@ def df_with_nan():
 def leftover_peptide_df():
     # sample, protein id, sequence, intensity, pep
     leftover_peptide_protein_list = (
-        ["Sample01", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample02", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample03", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 6923600.0, 0.037779],
-        ["Sample04", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample05", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 37440000.0, 0.037779],
+        ["Sample01", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample02", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample03", "Q13748", "EDLAALEK", 6923600.0, 0.037779],
+        ["Sample04", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample05", "Q13748", "EDLAALEK", 37440000.0, 0.037779],
     )
 
     peptide_df = pd.DataFrame(

@@ -134,21 +134,21 @@ def diann_import_intensity_df():
             14: "LM07063",
         },
         "Protein ID": {
-            0: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
-            1: "A0A0B4J2A2;P0DN37",
-            2: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            0: "A0A087WWU8",
+            1: "A0A0B4J2A2",
+            2: "A0A0G2JPD3",
             3: "A0A0U1RQV3",
-            4: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
-            5: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
-            6: "A0A0B4J2A2;P0DN37",
-            7: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            4: "A0A140T913",
+            5: "A0A087WWU8",
+            6: "A0A0B4J2A2",
+            7: "A0A0G2JPD3",
             8: "A0A0U1RQV3",
-            9: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
-            10: "A0A087WWU8;A0A2R2Y2Q3;A0A494C0P6;J3KN67",
-            11: "A0A0B4J2A2;P0DN37",
-            12: "A0A0G2JPD3;A0A140T8W8;A0A140T8Y4;A0A1W2PPF8;A0A1W2PR61;Q5SPM2",
+            9: "A0A140T913",
+            10: "A0A087WWU8",
+            11: "A0A0B4J2A2",
+            12: "A0A0G2JPD3",
             13: "A0A0U1RQV3",
-            14: "A0A140T913;A0A140T933;A0A140T955;A0A140T9I0;A0A140T9X5;A0A1W2PPQ2;A0A1W2PRT9;Q53Z42",
+            14: "A0A140T913",
         },
         "Gene": {
             0: np.nan,
@@ -218,7 +218,7 @@ def test_max_quant_import_no_protein_ids_column():
     assert "protein_df" not in outputs
     assert "messages" in outputs
     assert any(message["level"] == logging.ERROR for message in outputs["messages"])
-    assert any("Protein IDs" in message["msg"] for message in outputs["messages"])
+    assert any("Majority protein IDs" in message["msg"] for message in outputs["messages"])
 
 
 def test_max_quant_import_invalid_data():
@@ -280,7 +280,7 @@ def test_filter_rev_con():
     )
     protein_ids = outputs["protein_df"]["Protein ID"].unique().tolist()
     # not the complete group should be filtered out if contains valid ids
-    assert "P00000" in protein_ids
+    assert "P04211" in protein_ids
     # all instances of rev and con should be filtered out
     assert all(
         not any(

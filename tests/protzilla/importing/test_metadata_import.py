@@ -56,6 +56,15 @@ def test_metadata_import_diann(run_empty):
     pd.testing.assert_frame_equal(
         test_metadata, run_empty.current_outputs["metadata_df"]
     )
+    test_protein_df.sort_values(by=["Protein ID", "Sample"], ignore_index=True, inplace=True)
+    data = (run_empty.steps.get_step_output(DiannImport, "protein_df"))
+    data.sort_values(
+        by=["Protein ID", "Sample"], ignore_index=True, inplace=True
+    )
+    for i in range(39179):
+        if (test_protein_df["Protein ID"][i].split(";")[0] != data["Protein ID"][i]):
+            print(i)
+
     pd.testing.assert_frame_equal(
         test_protein_df, run_empty.steps.get_step_output(DiannImport, "protein_df")
     )

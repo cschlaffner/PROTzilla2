@@ -18,7 +18,7 @@ def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) 
             na_values=["", 0],
             keep_default_na=True,
         )
-        protein_groups = df["Protein IDs"]
+        protein_groups = df["Majority protein IDs"]
         intensity_df = df.filter(regex=f"^{intensity_name} ", axis=1)
         intensity_df = intensity_df.filter(regex=r"^(?!.*peptides).*$", axis=1)
 
@@ -146,13 +146,14 @@ def transform_and_clean(
     new_groups, filtered_proteins = clean_protein_groups(
         df["Protein ID"].tolist(), map_to_uniprot
     )
+    new_groups = pd.Series(new_groups).str.split(";").str[0]
     df = df.assign(**{"Protein ID": new_groups})
 
     has_valid_protein_id = df["Protein ID"].map(bool)
     df = df[has_valid_protein_id]
 
     # sum intensities for duplicate protein groups, NaN if all are NaN, sum of numbers otherwise
-    df = df.groupby("Protein ID", as_index=False).sum(min_count=1)
+    df = df.groupby("Protein ID", as_index=False).sum(min_count=1) # TODO make aggregation method optional for user (sum, median, mean)
 
     df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 
