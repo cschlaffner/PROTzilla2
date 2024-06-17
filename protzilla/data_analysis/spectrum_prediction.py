@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -154,7 +155,10 @@ class KoinaModel(SpectrumPredictor):
         for i, (_, row) in tqdm(enumerate(request.iterrows()), total=len(request)):
             spectra.append(
                 Spectrum(
-                    row["Sequence"], row["Charge"], mz_values[i], intensity_values[i]
+                    row["Sequence"],
+                    mz_values[i],
+                    intensity_values[i],
+                    {"Charge": row["Charge"]},
                 )
             )
         return spectra
@@ -170,27 +174,27 @@ class SpectrumPredictorFactory:
 
 def predict(model_name: str, peptide_df: pd.DataFrame):
     prediction_df = SpectrumPredictor.create_prediction_df(
-        peptide_df["Sequence"], 2, 30
+        peptide_df["Sequence"][::10], 2, 30
     )
     predictor = SpectrumPredictorFactory.create_predictor(model_name, prediction_df)
     predicted_spectra = predictor.predict()
     # merge df's into big df
-    return {
-        "predicted_spectra": pd.concat([s.to_mergeable_df() for s in predicted_spectra])
-    }
+    export_path = "/home/henning/test.msp"
+    SpectrumExporter.export_to_msp(predicted_spectra, export_path)
+    return {"export_path": export_path}
 
 
 class Spectrum:
     def __init__(
         self,
         peptide_sequence: str,
-        charge: int,
         mz_values: np.array,
         intensity_values: np.array,
+        metadata: Optional[dict] = None,
         sanitize: bool = True,
     ):
         self.peptide_sequence = peptide_sequence
-        self.charge = charge
+        self.metadata = metadata if metadata else {}
         self.spectrum = pd.DataFrame(
             zip(mz_values, intensity_values), columns=["m/z", "Intensity"]
         )
@@ -206,3 +210,39 @@ class Spectrum:
 
     def to_mergeable_df(self):
         return self.spectrum.assign(Sequence=self.peptide_sequence, Charge=self.charge)
+
+
+class SpectrumExporter:
+    @staticmethod
+    def export_to_msp(spectra: list[Spectrum], path: str):
+        with open(path, "w") as f:
+            for spectrum in spectra:
+                header_dict = {
+                    "Name": spectrum.peptide_sequence,
+                    "Comment": "".join(
+                        [f"{k}={v} " for k, v in spectrum.metadata.items()]
+                    ),
+                    "Num Peaks": len(spectrum.spectrum),
+                }
+                header = "\n".join([f"{k}: {v}" for k, v in header_dict.items()])
+                peaks = "\n".join(
+                    [f"{mz}\t{intensity}" for mz, intensity in spectrum.spectrum.values]
+                )
+                f.write(f"{header}\n{peaks}\n\n")
+
+    @staticmethod
+    def export_to_mgf(spectra: list[Spectrum], path: str):
+        with open(path, "w") as f:
+            for spectrum in spectra:
+                header_dict = {
+                    "Name": spectrum.peptide_sequence,
+                    "Comment": "".join(
+                        [f"{k}={v} " for k, v in spectrum.metadata.items()]
+                    ),
+                    "Num Peaks": len(spectrum.spectrum),
+                }
+                header = "\n".join([f"{k}: {v}" for k, v in header_dict.items()])
+                peaks = "\n".join(
+                    [f"{mz}\t{intensity}" for mz, intensity in spectrum.spectrum.values]
+                )
+                f.write(f"{header}\n{peaks}\n\n")
