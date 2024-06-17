@@ -7,12 +7,11 @@ from plotly.subplots import make_subplots
 
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
-
+import protzilla.constants.colors as colorscheme
 from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE, PROTAN_DISCRETE_COLOR_SEQUENCE, DEUTAN_DISCRETE_COLOR_SEQUENCE, TRITAN_DISCRETE_COLOR_SEQUENCE, MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-
+from protzilla.steps import StepManager
 
 def create_pie_plot(
-    colormap,
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
     heading: str = "",
@@ -30,22 +29,11 @@ def create_pie_plot(
     """
     if any(i < 0 for i in values_of_sectors):
         raise ValueError
-
-    if colormap == "standard":
-        colors = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    elif colormap == "protan":
-        colors = PROTAN_DISCRETE_COLOR_SEQUENCE
-    elif colormap == "deutan":
-        colors = DEUTAN_DISCRETE_COLOR_SEQUENCE
-    elif colormap == "tritan":
-        colors = TRITAN_DISCRETE_COLOR_SEQUENCE
-    else:
-        colors = MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-
+    print(colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE)
     fig = px.pie(
         names=names_of_sectors,
         values=values_of_sectors,
-        color_discrete_sequence=colors,
+        color_discrete_sequence=colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     )
 
     fig.update_layout(
@@ -64,11 +52,10 @@ def create_pie_plot(
 
 
 def create_bar_plot(
-    colormap,
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
     heading: str = "",
-    colors: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+    #colors: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
     y_title: str = "",
     x_title: str = "",
 ) -> Figure:
@@ -85,17 +72,7 @@ def create_bar_plot(
     :param x_title: Optional x-axis title.
     :return: returns a bar chart of the data
     """
-    if colormap == "standard":
-        colors = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    elif colormap == "protan":
-        colors = PROTAN_DISCRETE_COLOR_SEQUENCE
-    elif colormap == "deutan":
-        colors = DEUTAN_DISCRETE_COLOR_SEQUENCE
-    elif colormap == "tritan":
-        colors = TRITAN_DISCRETE_COLOR_SEQUENCE
-    else:
-        colors = MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-
+    colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
     fig = px.bar(
         x=names_of_sectors,
         y=values_of_sectors,
