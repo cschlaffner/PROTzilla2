@@ -33,7 +33,7 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
-class YesNo(Enum):
+class YesNo(StrEnum):
     yes = "Yes"
     no = "No"
 
@@ -904,10 +904,6 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
         choices=[],
         label="Input data dict (generated e.g. by t-Test)",
     )
-    effect_size = CustomNumberField(
-        label="Effect size", min_value=0, initial=0.5
-    )
-    #fill alpha dynamic from t-test
     alpha = CustomFloatField(
         label="Error rate (alpha)",
         min_value = 0,
@@ -922,11 +918,20 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
         step_size = 0.05,
         initial = 0.8,
     )
+    selected_protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group to calculate sample size for",
+    )
+    significant_proteins_only = CustomChoiceField(
+        choices=YesNo,
+        label="Select only significant proteins",
+        initial = YesNo.yes,
+    )
 
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(
-                DifferentialExpressionTTest | DifferentialExpressionLinearModel,
+                DifferentialExpressionTTest,
                 "differentially_expressed_proteins_df",
             )
         )
@@ -934,6 +939,29 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
         input_dict_instance_id = self.data.get(
             "input_dict", self.fields["input_dict"].choices[0][0]
         )
+
+        self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                Step, "differentially_expressed_proteins_df", input_dict_instance_id
+            )["Protein ID"].unique()
+        )
+
+        significant_proteins_only = self.data.get(
+            "significant_proteins_only", self.fields["significant_proteins_only"].choices[0][0]
+        )
+
+        if significant_proteins_only == YesNo.yes:
+            self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "significant_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
+        else:
+            self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "differentially_expressed_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
 
         self.fields["alpha"].initial = run.steps.get_step_output(
             Step, "corrected_alpha", input_dict_instance_id

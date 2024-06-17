@@ -613,16 +613,16 @@ class PowerAnalysisPowerCalculation(DataAnalysisStep):
 class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     display_name = "Sample Size Calculation"
     operation = "Power Analysis"
-    method_description = "(apriori) Sample Size Calculation"
+    method_description = "Calculates sample size for protein groups"
 
     input_keys = [
-        "significant_proteins_df",
+        "corrected_p_values_df",
+        "selected_protein_group",
+        "significant_proteins_only"
         "alpha",
         "group1",
         "group2",
-        "effect_size",
         "power",
-        "intensity_name",
         "log2_fc",
     ]
     output_keys = []
@@ -631,8 +631,8 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         return sample_size_calculation(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["significant_proteins_df"] = steps.get_step_output(
-            Step, "significant_proteins_df", inputs["input_dict"]
+        inputs["corrected_p_values_df"] = steps.get_step_output(
+            Step, "corrected_p_values_df", inputs["input_dict"]
         )
         step = next(
             s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
@@ -640,10 +640,6 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         inputs["alpha"] = step.inputs["alpha"]
         inputs["group1"] = step.inputs["group1"]
         inputs["group2"] = step.inputs["group2"]
-        inputs["significant_"]
-        inputs["effect_size"] = step.inputs["effect_size"]
-        inputs["power"] = step.inputs["power"]
-        inputs["intensity_name"] = step.inputs["intensity_name"]
         inputs["log2_fc"] = steps.get_step_output(
             Step, "log2_fold_change_df", inputs["input_dict"]
         )
