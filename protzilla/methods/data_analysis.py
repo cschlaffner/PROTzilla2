@@ -16,6 +16,7 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
+from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -598,4 +599,35 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.peptide_df
         inputs["isoform_df"] = steps.isoform_df
+        return inputs
+
+
+class FLEXIQuantLF(PlotStep):
+    display_name = "FLEXIQuant-LF"
+    operation = "modification_quantification"
+    method_description = "FLEXIQuant-LF is an unbiased, label-free computational tool to indirectly detect modified peptides and to quantify the degree of modification based solely on the unmodified peptide species."
+
+    input_keys = [
+        "peptide_df",
+        "metadata_df",
+        "reference_group",
+        "protein_id",
+        "num_init",
+        "mod_cutoff",
+    ]
+    output_keys = [
+        "raw_scores",
+        "RM_scores",
+        "diff_modified",
+        "removed_peptides",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return flexiquant_lf(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
         return inputs

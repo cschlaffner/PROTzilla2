@@ -881,3 +881,36 @@ class ProteinGraphVariationGraphForm(MethodForm):
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295
+
+
+class FLEXIQuantLFForm(MethodForm):
+    is_dynamic = True
+
+    peptide_df = CustomChoiceField(label="Peptide dataframe", choices=[])
+    reference_group = CustomChoiceField(label="Reference group", choices=[])
+    protein_id = CustomChoiceField(label="Protein ID", choices=[])
+    num_init = CustomNumberField(
+        label="Number of RANSAC initiations",
+        initial=30,
+        min_value=1,
+        max_value=60,
+        step_size=1,
+    )
+    mod_cutoff = CustomFloatField(
+        label="Modification cutoff", initial=0.5, min_value=0, max_value=1
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
+        self.fields["reference_group"].choices = fill_helper.to_choices(
+            run.steps.metadata_df["Group"].unique()
+        )
+        peptide_df_instance_id = self.data.get(
+            "peptide_df", self.fields["peptide_df"].choices[0][0]
+        )
+
+        self.fields["protein_id"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(Step, "peptide_df", peptide_df_instance_id)[
+                "Protein ID"
+            ].unique()
+        )
