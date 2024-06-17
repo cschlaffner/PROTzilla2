@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 from protzilla.data_preprocessing.transformation import by_log, by_log_plot
-from tests.protzilla.data_preprocessing.test_peptide_preprocessing import peptides_df
 
 
 @pytest.fixture
@@ -173,11 +172,11 @@ def log10_transformation_expected_peptide_intensities():
 
 
 def test_log2_transformation(
-        show_figures,
-        log2_transformation_df,
-        log2_transformation_expected_df,
-        peptides_df,
-        log2_transformation_expected_peptide_intensities,
+    show_figures,
+    log2_transformation_df,
+    log2_transformation_expected_df,
+    peptides_df,
+    log2_transformation_expected_peptide_intensities,
 ):
     method_inputs = {
         "protein_df": log2_transformation_df,
@@ -205,11 +204,11 @@ def test_log2_transformation(
 
 
 def test_log10_transformation(
-        show_figures,
-        log10_transformation_df,
-        log10_transformation_expected_df,
-        peptides_df,
-        log10_transformation_expected_peptide_intensities,
+    show_figures,
+    log10_transformation_df,
+    log10_transformation_expected_df,
+    peptides_df,
+    log10_transformation_expected_peptide_intensities,
 ):
     method_inputs = {
         "protein_df": log10_transformation_df,
@@ -243,12 +242,10 @@ def test_log10_transformation(
 
 @pytest.mark.parametrize("log_base", ["log2", "log10"])
 def test_by_log_without_peptide_df(log2_transformation_df, log_base):
-    method_outputs = by_log(
-        log2_transformation_df, log_base=log_base
-    )
+    method_outputs = by_log(log2_transformation_df, None, log_base=log_base)
 
     assert (
-            method_outputs["peptide_df"] is None
+        method_outputs["peptide_df"] is None
     ), "The peptide DataFrame should be None, if no input peptide DataFrame is given."
 
 
@@ -259,4 +256,4 @@ def test_log_by_0_transformation():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    by_log(df, log_base="log2")
+    by_log(df, None, log_base="log2")

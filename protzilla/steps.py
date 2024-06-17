@@ -69,6 +69,7 @@ class Step:
         self.form_inputs = self.inputs.copy()
 
         try:
+            self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
 
@@ -141,7 +142,6 @@ class Step:
         :param outputs: A dictionary received after the calculation
         :return: None
         """
-        self.messages.clear()
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
@@ -244,6 +244,9 @@ class Messages:
 
     def __iter__(self):
         return iter(self.messages)
+
+    def __getitem__(self, key):
+        return self.messages[key]
 
     def __repr__(self):
         return f"Messages: {[message['message'] for message in self.messages]}"
@@ -545,7 +548,9 @@ class StepManager:
             if section not in self.sections:
                 raise ValueError(f"Unknown section {section}")
             if step_index >= len(self.sections[section]):
-                raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+                raise ValueError(
+                    f"Step index {step_index} out of bounds for section {section}"
+                )
 
             step = self.all_steps_in_section(section)[step_index]
 

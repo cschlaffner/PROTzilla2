@@ -54,8 +54,8 @@ def peptide_df(intensity_name):
         ],
     }
 
-    peptide_df[intensity_name] = intensity_name_to_intensities[intensity_name]
-    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", intensity_name, "PEP"]]
+    peptide_df["Intensity"] = intensity_name_to_intensities[intensity_name]
+    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
     peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     return peptide_df
@@ -88,7 +88,7 @@ def evidence_df(intensity_name):
         ],
         [
             "CTR17_C2_INSOLUBLE_01",
-            "O75822-2;O75822-3;O75822",
+            "O75822;O75822-2;O75822-3",
             "AAAAAAAGDSDSWDADAFSVEDPVRK",
             13249000,
             "Acetyl (Protein N-term)",
@@ -128,6 +128,7 @@ def test_peptide_import(intensity_name):
     outputs = peptide_import.peptide_import(
         file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name=intensity_name,
+        map_to_uniprot=False,
     )
 
     if "messages" in outputs and outputs["messages"]:
@@ -144,6 +145,7 @@ def test_peptide_import_ibaq():
     outputs = peptide_import.peptide_import(
         file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="iBAQ",
+        map_to_uniprot=False,
     )
 
     pd.testing.assert_frame_equal(
@@ -156,6 +158,7 @@ def test_evidence_import(intensity_name):
     outputs = peptide_import.evidence_import(
         file_path=f"{TEST_DATA_PATH}/peptides/evidence-vsmall.txt",
         intensity_name=intensity_name,
+        map_to_uniprot=False,
     )
 
     if "messages" in outputs and outputs["messages"]:

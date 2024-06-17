@@ -1,11 +1,14 @@
+import logging
 from enum import Enum, StrEnum
 
+from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
     DimensionReductionUMAP,
+    DataAnalysisStep,
 )
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
@@ -16,6 +19,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
+    CustomBooleanField,
 )
 
 
@@ -162,12 +166,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -203,12 +207,12 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -247,9 +251,9 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -914,3 +918,79 @@ class FLEXIQuantLFForm(MethodForm):
                 "Protein ID"
             ].unique()
         )
+
+
+class SelectPeptidesForProteinForm(MethodForm):
+    is_dynamic = True
+
+    peptide_df = CustomChoiceField(
+        choices=[], label="Step to use peptide dataframe from"
+    )
+
+    auto_select = CustomBooleanField(
+        label="Automatically select most significant Protein",
+        initial=False,
+    )
+
+    protein_list = CustomChoiceField(
+        choices=[],
+        label="Select a list of Proteins from which you want to choose your Proteins of Interest",
+    )
+
+    sort_proteins = CustomBooleanField(
+        label="Sort Proteins by p-value (requires a list of Proteins from a Differential Expression Analysis to be selected)",
+        initial=False,
+    )
+
+    protein_ids = CustomMultipleChoiceField(
+        choices=[],
+        label="Protein IDs",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(
+            run, "peptide_df", Step
+        )
+        self.fields["peptide_df"].initial = run.steps.get_instance_identifiers(
+            DataPreprocessingStep, "peptide_df"
+        )[-1]
+
+        selected_auto_select = self.data.get("auto_select")
+
+        choices = fill_helper.to_choices(
+            [] if selected_auto_select else ["all proteins"]
+        )
+        choices.extend(
+            fill_helper.get_choices(run, "significant_proteins_df", DataAnalysisStep)
+        )
+        self.fields["protein_list"].choices = choices
+
+        chosen_list = self.data.get(
+            "protein_list", self.fields["protein_list"].choices[0][0]
+        )
+        if not selected_auto_select:
+            self.toggle_visibility("sort_proteins", True)
+            self.toggle_visibility("protein_ids", True)
+
+            if chosen_list == "all proteins":
+                self.fields["protein_ids"].choices = fill_helper.to_choices(
+                    run.steps.get_step_output(Step, "protein_df")["Protein ID"].unique()
+                )
+            else:
+                if self.data.get("sort_proteins"):
+                    self.fields["protein_ids"].choices = fill_helper.to_choices(
+                        run.steps.get_step_output(
+                            DataAnalysisStep, "significant_proteins_df", chosen_list
+                        )
+                        .sort_values(by="corrected_p_value")["Protein ID"]
+                        .unique()
+                    )
+                else:
+                    self.fields["protein_ids"].choices = fill_helper.to_choices(
+                        run.steps.get_step_output(
+                            DataAnalysisStep, "significant_proteins_df", chosen_list
+                        )["Protein ID"].unique()
+                    )
+        else:
+            self.toggle_visibility("sort_proteins", False)
+            self.toggle_visibility("protein_ids", False)
