@@ -616,14 +616,16 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     method_description = "Calculates sample size for protein groups"
 
     input_keys = [
-        "corrected_p_values_df",
+        "differentially_expressed_proteins_df",
+        "metadata_df",
         "selected_protein_group",
-        "significant_proteins_only"
+        "significant_proteins_df",
+        "significant_proteins_only",
+        "fc_threshold",
         "alpha",
         "group1",
         "group2",
         "power",
-        "log2_fc",
     ]
     output_keys = []
 
@@ -631,16 +633,21 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         return sample_size_calculation(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["corrected_p_values_df"] = steps.get_step_output(
-            Step, "corrected_p_values_df", inputs["input_dict"]
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
         )
         step = next(
             s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
         )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+
+        inputs["metadata_df"] = steps.metadata_df
         inputs["alpha"] = step.inputs["alpha"]
         inputs["group1"] = step.inputs["group1"]
         inputs["group2"] = step.inputs["group2"]
-        inputs["log2_fc"] = steps.get_step_output(
+        inputs["fc_threshold"] = steps.get_step_output(
             Step, "log2_fold_change_df", inputs["input_dict"]
         )
         return inputs

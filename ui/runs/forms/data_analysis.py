@@ -918,15 +918,19 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
         step_size = 0.05,
         initial = 0.8,
     )
-    selected_protein_group = CustomChoiceField(
-        choices=[],
-        label="Protein group to calculate sample size for",
+    fc_threshold = CustomNumberField(
+        label="Log2 fold change threshold", min_value=0, initial=1
     )
     significant_proteins_only = CustomChoiceField(
         choices=YesNo,
         label="Select only significant proteins",
-        initial = YesNo.yes,
+        initial=YesNo.yes,
     )
+    selected_protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group to calculate sample size for",
+    )
+
 
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(
