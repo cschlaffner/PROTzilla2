@@ -69,6 +69,7 @@ def run_imported(run_name_and_cleanup, maxquant_data_file):
             "file_path": str(maxquant_data_file),
             "intensity_name": "iBAQ",
             "map_to_uniprot": False,
+            "aggregation_method": "Sum",
         }
     )
     yield run

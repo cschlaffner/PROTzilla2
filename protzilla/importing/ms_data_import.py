@@ -11,7 +11,7 @@ from protzilla.utilities import format_trace
 
 
 def max_quant_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="SUM"
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="Sum"
 ) -> dict:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
@@ -42,7 +42,7 @@ def max_quant_import(
 
 
 def ms_fragger_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="SUM"
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="Sum"
 ) -> dict:
     assert intensity_name in [
         "Intensity",
@@ -93,7 +93,7 @@ def ms_fragger_import(
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
-def diann_import(file_path, map_to_uniprot=False, aggregation_method="SUM") -> dict:
+def diann_import(file_path, map_to_uniprot=False, aggregation_method="Sum") -> dict:
     try:
         df = pd.read_csv(
             file_path,
@@ -124,7 +124,7 @@ def diann_import(file_path, map_to_uniprot=False, aggregation_method="SUM") -> d
 
 
 def transform_and_clean(
-    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method="SUM"
+    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method="Sum"
 ) -> dict:
     """
     Transforms a dataframe that is read from a file in wide format into long format,
@@ -228,7 +228,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
                 all_ids_of_group.append(old_id)
             elif map_to_uniprot:
                 new_ids = pd.Series(id_to_uniprot.get(old_id, []))
-                new_ids = new_ids[new_ids.str.notin(all_ids_of_group)]
+                new_ids = new_ids[~new_ids.isin(all_ids_of_group)]
                 all_ids_of_group.extend(new_ids)
             else:
                 all_ids_of_group.append(old_id)

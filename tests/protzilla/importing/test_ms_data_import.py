@@ -134,21 +134,21 @@ def diann_import_intensity_df():
             14: "LM07063",
         },
         "Protein ID": {
-            0: "A0A087WWU8",
-            1: "A0A0B4J2A2",
-            2: "A0A0G2JPD3",
-            3: "A0A0U1RQV3",
-            4: "A0A140T913",
-            5: "A0A087WWU8",
-            6: "A0A0B4J2A2",
-            7: "A0A0G2JPD3",
-            8: "A0A0U1RQV3",
-            9: "A0A140T913",
-            10: "A0A087WWU8",
-            11: "A0A0B4J2A2",
-            12: "A0A0G2JPD3",
-            13: "A0A0U1RQV3",
-            14: "A0A140T913",
+            0: "A0A0B4J2A2",
+            1: "A0A0G2JPD3",
+            2: "A0A0U1RQV3",
+            3: "A0A140T913",
+            4: "A0A2R2Y2Q3",
+            5: "A0A0B4J2A2",
+            6: "A0A0G2JPD3",
+            7: "A0A0U1RQV3",
+            8: "A0A140T913",
+            9: "A0A2R2Y2Q3",
+            10: "A0A0B4J2A2",
+            11: "A0A0G2JPD3",
+            12: "A0A0U1RQV3",
+            13: "A0A140T913",
+            14: "A0A2R2Y2Q3",
         },
         "Gene": {
             0: np.nan,
@@ -168,21 +168,21 @@ def diann_import_intensity_df():
             14: np.nan,
         },
         "Intensity": {
-            0: 329042.0,
-            1: 138322.0,
-            2: np.nan,
-            3: 122984.0,
-            4: 36317.0,
-            5: 367477.0,
-            6: 572539.0,
-            7: np.nan,
-            8: 59042.7,
-            9: np.nan,
-            10: 381325.0,
-            11: 96522.7,
-            12: np.nan,
-            13: 72372.5,
-            14: 27456.7,
+            0: 138322.0,
+            1: np.nan,
+            2: 122984.0,
+            3: 36317.0,
+            4: 329042.0,
+            5: 572539.0,
+            6: np.nan,
+            7: 59042.7,
+            8: np.nan,
+            9: 367477.0,
+            10: 96522.7,
+            11: np.nan,
+            12: 72372.5,
+            13: 27456.7,
+            14: 381325.0,
         },
     }
     return pd.DataFrame(data=diann_intensity_df)
@@ -263,6 +263,7 @@ def test_ms_fragger_import(intensity_name):
 def test_diann_import():
     outputs = ms_data_import.diann_import(
         file_path=f"{PROJECT_PATH}/tests/diann_intensities.tsv",
+        aggregation_method="Sum",
     )
 
     expected_intensity_df = diann_import_intensity_df()
@@ -324,9 +325,9 @@ def test_transform_and_clean():
 
 def test_clean_protein_groups():
     expected = [
-        "A0A009IHW8-8-7-6;M99999_7-8;P12345;Q12345-3",
-        "P00000;P12345;P12345-1;P12345-11;P12345-9",
-        "ENSP12345678901;NP_123456;NP_123456789;XP_123456789",
+        "P12345",
+        "P12345-9",
+        "ENSP12345678901",
         "P12345",
         "",
     ]
@@ -347,7 +348,7 @@ def test_clean_protein_groups():
 @patch("protzilla.importing.ms_data_import.map_ids_to_uniprot")
 def test_clean_protein_groups_map(ids_to_uniprot_mock):
     ids_to_uniprot_mock.return_value = {"NP_123456": ["P54321", "P12345"]}
-    expected = ["P12321;P12345;P54321", ""]
+    expected = ["P54321", ""]
     test_data = ["NP_123456;P12321", "XP_123456789"]
     clean_groups, filtered = ms_data_import.clean_protein_groups(
         test_data, map_to_uniprot=True
