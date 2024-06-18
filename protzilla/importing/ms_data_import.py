@@ -8,11 +8,10 @@ import pandas as pd
 
 from protzilla.data_integration.database_query import biomart_query
 from protzilla.utilities import format_trace
-from ui.runs.forms.importing import AggregationMethods
 
 
 def max_quant_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="SUM"
 ) -> dict:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
@@ -43,7 +42,7 @@ def max_quant_import(
 
 
 def ms_fragger_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="SUM"
 ) -> dict:
     assert intensity_name in [
         "Intensity",
@@ -94,7 +93,7 @@ def ms_fragger_import(
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
-def diann_import(file_path, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM) -> dict:
+def diann_import(file_path, map_to_uniprot=False, aggregation_method="SUM") -> dict:
     try:
         df = pd.read_csv(
             file_path,
@@ -125,7 +124,7 @@ def diann_import(file_path, map_to_uniprot=False, aggregation_method=Aggregation
 
 
 def transform_and_clean(
-    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method=AggregationMethods.SUM
+    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method="SUM"
 ) -> dict:
     """
     Transforms a dataframe that is read from a file in wide format into long format,
@@ -157,12 +156,8 @@ def transform_and_clean(
     df = df[has_valid_protein_id]
 
     # applies the selected aggregation to duplicate protein groups, NaN if all are NaN, aggregation of numbers otherwise
-    agg_methods = {
-        AggregationMethods.SUM: 'sum',
-        AggregationMethods.MEDIAN: 'median',
-        AggregationMethods.MEAN: 'mean'
-    }
-    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method])(min_count=1)
+    agg_methods = {"Sum": 'sum', "Median": 'median', "Mean": 'mean'}
+    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method], min_count=1)
 
     df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 
