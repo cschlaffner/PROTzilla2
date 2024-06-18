@@ -8,9 +8,12 @@ import pandas as pd
 
 from protzilla.data_integration.database_query import biomart_query
 from protzilla.utilities import format_trace
+from ui.runs.forms.importing import AggregationMethods
 
 
-def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) -> dict:
+def max_quant_import(
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM
+) -> dict:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
         df = pd.read_csv(
@@ -32,7 +35,7 @@ def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) 
             c[len(intensity_name) + 1 :] for c in intensity_df.columns
         ]
         intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
+        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot, aggregation_method)
 
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid Max Quant file."
@@ -40,7 +43,7 @@ def max_quant_import(file_path: str, intensity_name: str, map_to_uniprot=False) 
 
 
 def ms_fragger_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM
 ) -> dict:
     assert intensity_name in [
         "Intensity",
@@ -85,13 +88,13 @@ def ms_fragger_import(
         )
         intensity_df = intensity_df.assign(**{"Protein ID": protein_groups})
 
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
+        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot, aggregation_method)
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid MS Fragger file."
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
-def diann_import(file_path, map_to_uniprot=False) -> dict:
+def diann_import(file_path, map_to_uniprot=False, aggregation_method=AggregationMethods.SUM) -> dict:
     try:
         df = pd.read_csv(
             file_path,
@@ -115,14 +118,14 @@ def diann_import(file_path, map_to_uniprot=False) -> dict:
 
         intensity_name = "Intensity"
 
-        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot)
+        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot, aggregation_method)
     except Exception as e:
         msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid DIA-NN MS file."
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
 def transform_and_clean(
-    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool
+    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method=AggregationMethods.SUM
 ) -> dict:
     """
     Transforms a dataframe that is read from a file in wide format into long format,
@@ -153,8 +156,13 @@ def transform_and_clean(
     has_valid_protein_id = df["Protein ID"].map(bool)
     df = df[has_valid_protein_id]
 
-    # sum intensities for duplicate protein groups, NaN if all are NaN, sum of numbers otherwise
-    df = df.groupby("Protein ID", as_index=False).sum(min_count=1) # TODO make aggregation method optional for user (sum, median, mean)
+    # applies the selected aggregation to duplicate protein groups, NaN if all are NaN, aggregation of numbers otherwise
+    agg_methods = {
+        AggregationMethods.SUM: 'sum',
+        AggregationMethods.MEDIAN: 'median',
+        AggregationMethods.MEAN: 'mean'
+    }
+    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method])(min_count=1)
 
     df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 

@@ -34,6 +34,12 @@ class EmptyEnum(Enum):
     pass
 
 
+class AggregationMethods(Enum):
+    MEDIAN = "Median"
+    MEAN = "Mean"
+    SUM = "Sum"
+
+
 class MaxQuantImportForm(MethodForm):
     file_path = CustomFileField(label="MaxQuant intensities file")
     intensity_name = CustomChoiceField(
@@ -42,12 +48,18 @@ class MaxQuantImportForm(MethodForm):
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
+    )
 
 
 class DiannImportForm(MethodForm):
     file_path = CustomFileField(label="DIA-NN intensities file:")
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
     )
 
 
@@ -58,6 +70,9 @@ class MSFraggerImportForm(MethodForm):
     )
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
     )
 
 
