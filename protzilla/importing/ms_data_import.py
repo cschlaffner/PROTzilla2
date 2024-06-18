@@ -157,7 +157,8 @@ def transform_and_clean(
 
     # applies the selected aggregation to duplicate protein groups, NaN if all are NaN, aggregation of numbers otherwise
     agg_methods = {"Sum": 'sum', "Median": 'median', "Mean": 'mean'}
-    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method], min_count=1)
+    agg_kwargs = {"Sum": {"min_count": 1}, "Median": {}, "Mean": {}}
+    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method], **agg_kwargs[aggregation_method])
 
     df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 
