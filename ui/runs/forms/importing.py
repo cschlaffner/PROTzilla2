@@ -35,9 +35,9 @@ class EmptyEnum(Enum):
 
 
 class AggregationMethods(Enum):
+    SUM = "Sum"
     MEDIAN = "Median"
     MEAN = "Mean"
-    SUM = "Sum"
 
 
 class MaxQuantImportForm(MethodForm):
@@ -49,7 +49,7 @@ class MaxQuantImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
     aggregation_method = CustomChoiceField(
-        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
+        choices=AggregationMethods, label="Aggregation method", initial="Sum"
     )
 
 
@@ -59,7 +59,7 @@ class DiannImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
     aggregation_method = CustomChoiceField(
-        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
+        choices=AggregationMethods, label="Aggregation method", initial="Sum"
     )
 
 
@@ -72,7 +72,7 @@ class MSFraggerImportForm(MethodForm):
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
     aggregation_method = CustomChoiceField(
-        choices=AggregationMethods, label="Aggregation method", required=False, initial="Sum"
+        choices=AggregationMethods, label="Aggregation method", initial="Sum"
     )
 
 
