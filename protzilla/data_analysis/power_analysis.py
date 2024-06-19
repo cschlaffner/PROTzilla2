@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import math
 from scipy import stats
 from statsmodels.stats.power import TTestIndPower
 
@@ -27,17 +28,8 @@ def variance_protein_group_calculation(
     """
 
     if intensity_name is None:
-        intensity_name = "Intensity"
-
+        intensity_name = "Normalised iBAQ"
     protein_group = intensity_df[intensity_df["Protein ID"] == protein_id]
-
-    protein_group = pd.merge(
-        left=protein_group,
-        right=metadata_df[["Sample", "Group"]],
-        on="Sample",
-        copy=False,
-    )
-
 
     group1_intensities = protein_group[protein_group["Group"] == group1][intensity_name].values
     group2_intensities = protein_group[protein_group["Group"] == group2][intensity_name].values
@@ -61,7 +53,7 @@ def sample_size_calculation(
     group2: str,
     selected_protein_group: str,
     intensity_name: str = None
-) -> pd.DataFrame:
+) -> float:
     """
     Function to calculate the required sample size for each significant protein to achieve the required power .
 
@@ -90,10 +82,10 @@ def sample_size_calculation(
     )
 
     required_sample_size = (2 * ((z_alpha + z_beta)/ fc_threshold) ** 2 * variance_protein_group)
-
+    required_sample_size = math.ceil(required_sample_size)
     print(required_sample_size)
 
-    return required_sample_size
+    return dict(required_sample_size=required_sample_size)
 
 
 

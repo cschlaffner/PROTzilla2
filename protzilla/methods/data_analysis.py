@@ -627,7 +627,9 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         "group2",
         "power",
     ]
-    output_keys = []
+    output_keys = [
+        "required_sample_size",
+    ]
 
     def method(self, inputs: dict) -> dict:
         return sample_size_calculation(**inputs)
@@ -647,7 +649,4 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         inputs["alpha"] = step.inputs["alpha"]
         inputs["group1"] = step.inputs["group1"]
         inputs["group2"] = step.inputs["group2"]
-        inputs["fc_threshold"] = steps.get_step_output(
-            Step, "log2_fold_change_df", inputs["input_dict"]
-        )
         return inputs

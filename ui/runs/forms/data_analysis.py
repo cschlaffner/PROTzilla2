@@ -918,7 +918,7 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
         step_size = 0.05,
         initial = 0.8,
     )
-    fc_threshold = CustomNumberField(
+    fc_threshold = CustomFloatField(
         label="Log2 fold change threshold", min_value=0, initial=1
     )
     significant_proteins_only = CustomChoiceField(
