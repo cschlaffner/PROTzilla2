@@ -206,7 +206,6 @@ def flexiquant_lf(
             slope,
             alpha,
         ]
-        # regression_plots.append(fig_to_base64(create_regression_plots(df_train, idx, r2_score_model, r2_score_data, slope, alpha, sample_column)))
 
     df_distance_RL["Slope"] = slope_list
     df_raw_scores = calc_raw_scores(df_distance_RL, median_intensities)
