@@ -8,7 +8,7 @@ import ui.runs.forms.data_analysis as data_analysis_forms
 import ui.runs.forms.data_integration as data_integration_forms
 import ui.runs.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs.forms.importing as importing_forms
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from .forms.base import MethodForm
@@ -59,6 +59,7 @@ _forward_mapping = {
     data_analysis.DimensionReductionUMAP: data_analysis_forms.DimensionReductionUMAPForm,
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
+    data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
     data_integration.EnrichmentAnalysisGOAnalysisWithString: data_integration_forms.EnrichmentAnalysisGOAnalysisWithStringForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithEnrichr: data_integration_forms.EnrichmentAnalysisGOAnalysisWithEnrichrForm,

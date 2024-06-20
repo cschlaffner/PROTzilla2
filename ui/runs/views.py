@@ -19,7 +19,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from protzilla.run_helper import log_messages
-from protzilla.run_v2 import Run, get_available_run_names
+from protzilla.run import Run, get_available_run_names
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
 from protzilla.utilities.utilities import (

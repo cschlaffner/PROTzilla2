@@ -42,12 +42,12 @@ jobs:
       
       - name: Analysing the code with autoflake
         run: python -m autoflake --in-place --remove-all-unused-imports --remove-unused-variables --expand-star-imports --ignore-init-module-imports $(git ls-files '*.py')
-      
+
       - name: run tests, build coverage file
         run: |
-          export PYTHONPATH=. pytest
-          pytest --cache-clear --cov=. --cov-branch --cov-report term-missing tests/
-      
+          export PYTHONPATH=. pytest 
+          pytest --cache-clear --cov=. --cov-report term-missing tests/
+
       - name: format with black
         run: python -m black .
 

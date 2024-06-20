@@ -1,9 +1,9 @@
-import json
 import logging
 import sys
 from unittest import mock
 
 import pytest
+import yaml
 
 from protzilla.constants.paths import PROJECT_PATH
 from protzilla.utilities import random_string
@@ -33,9 +33,10 @@ def test_existing_workflow(tests_folder_name):
     runner = Runner(**parsed_args)
 
     assert runner.workflow == workflow_name
-    with open(f"{runner.run.run_path}/run_config.json", "r") as f:
-        run_config = json.load(f)
-    assert run_config["workflow_config_name"] == workflow_name
+    with open(f"{runner.run.run_path}/run.yaml", "r") as f:
+        run_config = yaml.safe_load(f)
+
+    assert len(run_config["steps"]) == len(runner.run.steps.all_steps)
 
 
 def test_non_existing_workflow(tests_folder_name):
