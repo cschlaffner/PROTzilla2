@@ -1,7 +1,7 @@
 from enum import Enum
 
 from protzilla.methods.importing import ImportingStep
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 
 from .base import MethodForm
 from .custom_fields import CustomBooleanField, CustomChoiceField, CustomFileField
@@ -126,3 +126,46 @@ class PeptideImportForm(MethodForm):
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter (same as MS-Data)"
     )
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+
+    def fill_form(self, run: Run) -> None:
+        from protzilla.methods.importing import (
+            DiannImport,
+            MaxQuantImport,
+            MsFraggerImport,
+        )
+
+        self.fields["intensity_name"].initial = run.steps.get_step_input(
+            [MaxQuantImport, MsFraggerImport, DiannImport], "intensity_name"
+        )
+
+        self.fields["map_to_uniprot"].initial = run.steps.get_step_input(
+            [MaxQuantImport, MsFraggerImport, DiannImport], "map_to_uniprot"
+        )
+
+
+class EvidenceImportForm(MethodForm):
+    file_path = CustomFileField(label="Evidence file")
+    intensity_name = CustomChoiceField(
+        choices=IntensityType, label="Intensity parameter"
+    )
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+
+    def fill_form(self, run: Run) -> None:
+        from protzilla.methods.importing import (
+            DiannImport,
+            MaxQuantImport,
+            MsFraggerImport,
+        )
+
+        self.fields["intensity_name"].initial = run.steps.get_step_input(
+            [MaxQuantImport, MsFraggerImport, DiannImport], "intensity_name"
+        )
+
+        self.fields["map_to_uniprot"].initial = run.steps.get_step_input(
+            [MaxQuantImport, MsFraggerImport, DiannImport], "map_to_uniprot"
+        )

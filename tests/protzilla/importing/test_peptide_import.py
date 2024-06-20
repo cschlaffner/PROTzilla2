@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -52,9 +54,71 @@ def peptide_df(intensity_name):
         ],
     }
 
-    peptide_df[intensity_name] = intensity_name_to_intensities[intensity_name]
-    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", intensity_name, "PEP"]]
+    peptide_df["Intensity"] = intensity_name_to_intensities[intensity_name]
+    peptide_df = peptide_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
     peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+
+    return peptide_df
+
+
+def evidence_df(intensity_name):
+    # sample, protein id, sequence, intensity, pep
+    peptide_protein_list = (
+        [
+            "AD01_C1_INSOLUBLE_02",
+            "P36578",
+            "AAAAAAALQAK",
+            1362600,
+            "Unmodified",
+            "_AAAAAAALQAK_",
+            None,
+            0.05224,
+            "AD01_BA39-Cohort1_INSOLUBLE_02",
+        ],
+        [
+            "AD06_C1_INSOLUBLE_01",
+            "P36578",
+            "AAAAAAALQAK",
+            5739600,
+            "Unmodified",
+            "_AAAAAAALQAK_",
+            None,
+            0.01578,
+            "AD06_BA39-Cohort1_INSOLUBLE_01",
+        ],
+        [
+            "CTR17_C2_INSOLUBLE_01",
+            "O75822;O75822-2;O75822-3",
+            "AAAAAAAGDSDSWDADAFSVEDPVRK",
+            13249000,
+            "Acetyl (Protein N-term)",
+            "_(Acetyl (Protein N-term))AAAAAAAGDSDSWDADAFSVEDPVRK_",
+            1.00000,
+            0.00000,
+            "CTR17_BA39-Cohort2_INSOLUBLE_01",
+        ],
+    )
+
+    peptide_df = pd.DataFrame(
+        data=peptide_protein_list,
+        columns=[
+            "Sample",
+            "Protein ID",
+            "Sequence",
+            intensity_name,
+            "Modifications",
+            "Modified sequence",
+            "Missed cleavages",
+            "PEP",
+            "Raw file",
+        ],
+    )
+
+    peptide_df.sort_values(
+        by=["Sample", "Protein ID", "Sequence", "Modifications"],
+        ignore_index=True,
+        inplace=True,
+    )
 
     return peptide_df
 
@@ -62,9 +126,15 @@ def peptide_df(intensity_name):
 @pytest.mark.parametrize("intensity_name", ["LFQ intensity", "Intensity"])
 def test_peptide_import(intensity_name):
     outputs = peptide_import.peptide_import(
-        file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name=intensity_name,
+        map_to_uniprot=False,
     )
+
+    if "messages" in outputs and outputs["messages"]:
+        for message in outputs["messages"]:
+            if message["level"] == logging.ERROR:
+                assert False, message["msg"]
 
     pd.testing.assert_frame_equal(
         outputs["peptide_df"], peptide_df(intensity_name), check_dtype=False
@@ -73,10 +143,38 @@ def test_peptide_import(intensity_name):
 
 def test_peptide_import_ibaq():
     outputs = peptide_import.peptide_import(
-        file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="iBAQ",
+        map_to_uniprot=False,
     )
 
     pd.testing.assert_frame_equal(
         outputs["peptide_df"], peptide_df("LFQ intensity"), check_dtype=False
+    )
+
+
+@pytest.mark.parametrize("intensity_name", ["Intensity"])
+def test_evidence_import(intensity_name):
+    outputs = peptide_import.evidence_import(
+        file_path=f"{TEST_DATA_PATH}/peptides/evidence-vsmall.txt",
+        intensity_name=intensity_name,
+        map_to_uniprot=False,
+    )
+
+    if "messages" in outputs and outputs["messages"]:
+        for message in outputs["messages"]:
+            if message["level"] == logging.ERROR:
+                assert False, message["msg"]
+
+    assert np.allclose(
+        outputs["peptide_df"]["PEP"],
+        evidence_df(intensity_name)["PEP"],
+        rtol=1e-02,  # Relative tolerance
+        atol=1e-04,  # Absolute tolerance
+    )
+
+    pd.testing.assert_frame_equal(
+        outputs["peptide_df"].drop(columns=["PEP"]),
+        evidence_df(intensity_name).drop(columns=["PEP"]),
+        check_dtype=False,
     )

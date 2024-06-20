@@ -10,7 +10,7 @@ from protzilla.importing.ms_data_import import (
     max_quant_import,
     ms_fragger_import,
 )
-from protzilla.importing.peptide_import import peptide_import
+from protzilla.importing.peptide_import import peptide_import, evidence_import
 from protzilla.steps import Step, StepManager
 
 
@@ -123,8 +123,20 @@ class PeptideImport(ImportingStep):
     operation = "peptide_import"
     method_description = "Import peptide data"
 
-    input_keys = ["file_path", "intensity_name"]
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
     output_keys = ["peptide_df"]
 
     def method(self, inputs):
         return peptide_import(**inputs)
+
+
+class EvidenceImport(ImportingStep):
+    display_name = "Evidence import"
+    operation = "peptide_import"
+    method_description = "Import an evidence file"
+
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
+    output_keys = ["peptide_df"]
+
+    def method(self, inputs):
+        return evidence_import(**inputs)

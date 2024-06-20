@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -7,38 +6,46 @@ from protzilla.data_preprocessing.peptide_filter import by_pep_value, by_pep_val
 from protzilla.importing import peptide_import
 
 
-@pytest.fixture
-def leftover_peptide_df():
-    # sample, protein id, sequence, intensity, pep
-    leftover_peptide_protein_list = (
-        ["Sample01", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample02", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample03", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 6923600.0, 0.037779],
-        ["Sample04", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample05", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 37440000.0, 0.037779],
-    )
-
-    peptide_df = pd.DataFrame(
-        data=leftover_peptide_protein_list,
-        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
-    )
-    peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
-    return peptide_df
-
-
-@pytest.fixture
-def filtered_peptides_list():
-    return ["AAQSTAMNR"]
+def assert_peptide_filtering_matches_protein_filtering(
+    result_protein_df: pd.DataFrame,
+    initial_peptide_df: pd.DataFrame,
+    result_peptide_df: pd.DataFrame,
+    filtered_attribue: str,
+) -> bool:
+    if initial_peptide_df is None:
+        assert (
+            result_peptide_df is None
+        ), "Output peptide dataframe should be None, if no input peptide dataframe is provided"
+    else:
+        assert (
+            result_peptide_df is not None
+        ), "Peptide dataframe should not be None, if an input peptide dataframe is provided"
+        assert (
+            result_peptide_df[filtered_attribue]
+            .isin(result_protein_df[filtered_attribue])
+            .all()
+        ), f"Peptide dataframe should not contain any {filtered_attribue} that were filtered out"
+        assert (
+            initial_peptide_df[
+                initial_peptide_df[filtered_attribue].isin(
+                    result_protein_df[filtered_attribue]
+                )
+            ]
+            .isin(result_peptide_df)
+            .all()
+            .all()
+        ), f"Peptide dataframe should contain all entry's on {filtered_attribue} that are in the filtered dataframe"
+    return True
 
 
 def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
     import_outputs = peptide_import.peptide_import(
-        file_path=f"{TEST_DATA_PATH}/peptides-vsmall.txt",
+        file_path=f"{TEST_DATA_PATH}/peptides/peptides-vsmall.txt",
         intensity_name="Intensity",
+        map_to_uniprot=False,
     )
 
     method_inputs = {
-        "protein_df": None,
         "peptide_df": import_outputs["peptide_df"],
         "threshold": 0.0014,
     }
@@ -50,3 +57,4 @@ def test_pep_filter(show_figures, leftover_peptide_df, filtered_peptides_list):
 
     pd.testing.assert_frame_equal(method_outputs["peptide_df"], leftover_peptide_df)
     assert method_outputs["filtered_peptides"] == filtered_peptides_list
+

@@ -1,0 +1,10 @@
+steps:
+  - form_inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+    inputs: { }
+    type: MaxQuantImport
+  - form_inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
+    inputs: { }
+    type: MetadataImport

@@ -8,7 +8,7 @@ import ui.runs.forms.data_analysis as data_analysis_forms
 import ui.runs.forms.data_integration as data_integration_forms
 import ui.runs.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs.forms.importing as importing_forms
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from .forms.base import MethodForm
@@ -21,6 +21,7 @@ _forward_mapping = {
     importing.MetadataImportMethodDiann: importing_forms.MetadataImportMethodDiannForm,
     importing.MetadataColumnAssignment: importing_forms.MetadataColumnAssignmentForm,
     importing.PeptideImport: importing_forms.PeptideImportForm,
+    importing.EvidenceImport: importing_forms.EvidenceImportForm,
     data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingForm,
     data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountForm,
     data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingForm,
@@ -60,6 +61,7 @@ _forward_mapping = {
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
     data_analysis.PowerAnalysisPowerCalculation: data_analysis_forms.PowerAnalysisPowerCalculationForm,
     data_analysis.PowerAnalysisSampleSizeCalculation: data_analysis_forms.PowerAnalysisSampleSizeCalculationForm,
+    data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
     data_integration.EnrichmentAnalysisGOAnalysisWithString: data_integration_forms.EnrichmentAnalysisGOAnalysisWithStringForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithEnrichr: data_integration_forms.EnrichmentAnalysisGOAnalysisWithEnrichrForm,

@@ -66,9 +66,9 @@ def test_enrichment_bar_plot_wrong_value(data_folder_tests):
         cutoff=0.05,
         value="fdr",
         gene_sets=["Reactome_2013"],
-    )[0]
+    )
     assert "messages" in current_out
-    assert "FDR is not available" in current_out["messages"][0]["msg"]
+    assert any(("FDR is not available" in message["msg"]) for message in current_out["messages"])
 
 
 def test_enrichment_bar_plot_empty_df():
@@ -79,9 +79,9 @@ def test_enrichment_bar_plot_empty_df():
         cutoff=0.05,
         value="p_value",
         gene_sets=["Reactome_2013"],
-    )[0]
+    )
     assert "messages" in current_out
-    assert "No data to plot" in current_out["messages"][0]["msg"]
+    assert any(("No data to plot" in message["msg"]) for message in current_out["messages"])
 
 
 def test_enrichment_bar_plot_no_category(data_folder_tests):
@@ -90,9 +90,9 @@ def test_enrichment_bar_plot_no_category(data_folder_tests):
     )
     current_out = GO_enrichment_bar_plot(
         input_df=enrichment_df, top_terms=10, cutoff=0.05, value="p_value", gene_sets=[]
-    )[0]
+    )
     assert "messages" in current_out
-    assert "Please select at least one category" in current_out["messages"][0]["msg"]
+    assert any(("Please select at least one category" in message["msg"]) for message in current_out["messages"])
 
 
 def test_enrichment_bar_plot_wrong_df():
@@ -103,12 +103,9 @@ def test_enrichment_bar_plot_wrong_df():
         cutoff=0.05,
         value="p_value",
         gene_sets=["KEGG"],
-    )[0]
-    assert "messages" in current_out
-    assert (
-        "Please choose an enrichment result dataframe"
-        in current_out["messages"][0]["msg"]
     )
+    assert "messages" in current_out
+    assert any(("Please choose an enrichment result dataframe" in message["msg"]) for message in current_out["messages"])
 
 
 def test_enrichment_bar_plot_cutoff(data_folder_tests):
@@ -119,10 +116,10 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
         cutoff=0,
         value="fdr",
         gene_sets=["KEGG", "Process"],
-    )[0]
+    )
 
     assert "messages" in current_out
-    assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
+    assert any(("No data to plot when applying cutoff" in message["msg"]) for message in current_out["messages"])
 
     enrichment_df = pd.read_csv(
         data_folder_tests / "Reactome_enrichment_enrichr.csv", sep="\t"
@@ -131,11 +128,11 @@ def test_enrichment_bar_plot_cutoff(data_folder_tests):
         input_df=enrichment_df,
         top_terms=10,
         cutoff=0,
-        value="p_value",
+        value="p-value",
         gene_sets=["Reactome_2013"],
-    )[0]
+    )
     assert "messages" in current_out
-    assert "No data to plot when applying cutoff" in current_out["messages"][0]["msg"]
+    assert any(("No data to plot when applying cutoff" in message["msg"]) for message in current_out["messages"])
 
 
 @pytest.mark.parametrize("x_axis_type", ["Gene Sets", "Combined Score"])

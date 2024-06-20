@@ -9,7 +9,7 @@ from protzilla.data_integration.database_query import (
     biomart_database,
     uniprot_databases,
 )
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
@@ -195,7 +195,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )
         self.fields["gene_mapping_step_instance"].choices = fill_helper.get_choices(
-            run, "gene_mapping"
+            run, "gene_mapping_df"
         )
 
         gene_sets_field = self.get_field("gene_sets_field")
@@ -319,7 +319,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
     protein_df = CustomChoiceField(
         choices=[], label="Dataframe with protein IDs, samples and intensities"
     )
-    gene_mapping = CustomChoiceField(choices=[], label="Gene mapping")
+    gene_mapping_step_instance = CustomChoiceField(choices=[], label="Gene mapping")
     gene_sets_field = CustomChoiceField(
         choices=GeneSetsField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
@@ -381,8 +381,8 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         self.fields["protein_df"].choices = fill_helper.get_choices(
             run, DIFFERENTIALLY_EXPRESSED_PROTEINS_DF
         )
-        self.fields["gene_mapping"].choices = fill_helper.get_choices(
-            run, "gene_mapping"
+        self.fields["gene_mapping_step_instance"].choices = fill_helper.get_choices(
+            run, "gene_mapping_df"
         )
         protein_df_instance_id = self.data.get(
             "proteins_df", self.fields["protein_df"].choices[0][0]

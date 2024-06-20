@@ -109,11 +109,78 @@ def log10_transformation_expected_df():
     )
 
 
+@pytest.fixture
+def log2_transformation_expected_peptide_intensities():
+    return pd.Series(
+        [
+            19.93157,
+            20.93157,
+            21.51653,
+            21.93157,
+            22.25350,
+            22.51653,
+            22.73892,
+            22.93157,
+            23.10149,
+            23.25350,
+            23.39100,
+            23.51653,
+            23.63201,
+            23.73892,
+            23.83846,
+            23.93157,
+            24.01903,
+            24.10149,
+            24.17950,
+            24.25350,
+            24.32389,
+            24.39100,
+            24.45513,
+        ]
+    )
+
+
+@pytest.fixture
+def log10_transformation_expected_peptide_intensities():
+    return pd.Series(
+        [
+            6.00000,
+            6.30103,
+            6.47712,
+            6.60206,
+            6.69897,
+            6.77815,
+            6.84510,
+            6.90309,
+            6.95424,
+            7.00000,
+            7.04139,
+            7.07918,
+            7.11394,
+            7.14613,
+            7.17609,
+            7.20412,
+            7.23045,
+            7.25527,
+            7.27875,
+            7.30103,
+            7.32222,
+            7.34242,
+            7.36173,
+        ]
+    )
+
+
 def test_log2_transformation(
-    show_figures, log2_transformation_df, log2_transformation_expected_df
+    show_figures,
+    log2_transformation_df,
+    log2_transformation_expected_df,
+    peptides_df,
+    log2_transformation_expected_peptide_intensities,
 ):
     method_inputs = {
         "protein_df": log2_transformation_df,
+        "peptide_df": peptides_df,
         "log_base": "log2",
     }
     method_outputs = by_log(**method_inputs)
@@ -128,12 +195,24 @@ def test_log2_transformation(
     ), f"The results of the transformation: {result_df} \
             are not equal to the expected result: {log2_transformation_expected_df}"
 
+    assert np.allclose(
+        method_outputs["peptide_df"]["Intensity"],
+        log2_transformation_expected_peptide_intensities,
+        rtol=1e-02,  # Relative tolerance
+        atol=1e-04,  # Absolute tolerance
+    )
+
 
 def test_log10_transformation(
-    show_figures, log10_transformation_df, log10_transformation_expected_df
+    show_figures,
+    log10_transformation_df,
+    log10_transformation_expected_df,
+    peptides_df,
+    log10_transformation_expected_peptide_intensities,
 ):
     method_inputs = {
         "protein_df": log10_transformation_df,
+        "peptide_df": peptides_df,
         "log_base": "log10",
     }
     method_output = by_log(**method_inputs)
@@ -153,6 +232,22 @@ def test_log10_transformation(
     ), f"The results of the transformation: {result_df} \
             are not equal to the expected result: {log10_transformation_expected_df}"
 
+    assert np.allclose(
+        method_output["peptide_df"]["Intensity"],
+        log10_transformation_expected_peptide_intensities,
+        rtol=1e-02,  # Relative tolerance
+        atol=1e-04,  # Absolute tolerance
+    )
+
+
+@pytest.mark.parametrize("log_base", ["log2", "log10"])
+def test_by_log_without_peptide_df(log2_transformation_df, log_base):
+    method_outputs = by_log(log2_transformation_df, None, log_base=log_base)
+
+    assert (
+        method_outputs["peptide_df"] is None
+    ), "The peptide DataFrame should be None, if no input peptide DataFrame is given."
+
 
 def test_log_by_0_transformation():
     # TODO 41 test expected behaviour when 0 occurs in df
@@ -161,4 +256,4 @@ def test_log_by_0_transformation():
         columns=["Sample", "Protein ID", "Gene", "Intensity"],
     )
 
-    by_log(df, log_base="log2")
+    by_log(df, None, log_base="log2")

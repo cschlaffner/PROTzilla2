@@ -1,6 +1,7 @@
 import json
 import sys
 from unittest import mock
+from unittest.mock import call
 
 import pytest
 
@@ -12,6 +13,7 @@ sys.path.append(f"{PROJECT_PATH}")
 
 from protzilla.runner import Runner, _serialize_graphs
 from runner_cli import args_parser
+from protzilla.steps import Output, Plots
 
 
 @pytest.fixture
@@ -40,7 +42,10 @@ def mock_perform_method(runner: Runner):
         mock_perform.inputs.append(runner.run.current_step.inputs)
 
         # side effect to mark the step as finished
-        # runner.run.current_step._finished = True # TODO is deprecated
+        runner.run.current_step.output = Output(
+            {key: "mock_output_value" for key in runner.run.current_step.output_keys})
+        if len(runner.run.current_step.output_keys) == 0:
+            runner.run.current_step.plots = Plots(["mock_plot"])
 
     mock_perform.side_effect = mock_current_parameters
 
@@ -64,7 +69,7 @@ def test_runner_imports(
     monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
 ):
     importing_args = [
-        "only_import",  # expects max-quant import, metadata import
+        "standard",  # expects max-quant import, metadata import
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
@@ -75,21 +80,47 @@ def test_runner_imports(
 
     mock_method = mock_perform_method(runner)
     monkeypatch.setattr(runner, "_perform_current_step", mock_method)
+    mock_write = mock.MagicMock()
+    monkeypatch.setattr(runner.run, "_run_write", mock_write)
+    mock_plot_safe = mock.MagicMock()
+    monkeypatch.setattr(runner, "_save_plots_html", mock_plot_safe)
 
     runner.compute_workflow()
 
-    expected_methods = ["MaxQuantImport", "MetadataImport"]
+    expected_methods = [
+        'MaxQuantImport',
+        'MetadataImport',
+        'FilterProteinsBySamplesMissing',
+        'FilterSamplesByProteinIntensitiesSum',
+        'ImputationByKNN',
+        'OutlierDetectionByLocalOutlierFactor',
+        'NormalisationByMedian',
+        'TransformationLog',
+        'PlotProtQuant',
+        'DifferentialExpressionTTest',
+        'PlotVolcano',
+        'EnrichmentAnalysisGOAnalysisWithString',
+        'PlotGOEnrichmentBarPlot'
+    ]
     expected_method_parameters = [
-        {"file_path": ms_data_path, "intensity_name": "iBAQ", "map_to_uniprot": False},
-        {
-            "file_path": metadata_path,
-            "feature_orientation": "Columns (samples in rows, features in columns)",
-        },
+        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
+        call({'feature_orientation': 'Columns (samples in rows, features in columns)', 'file_path': 'tests/metadata_cut_columns.csv'}),
+        call({'percentage': 0.5}),
+        call({'deviation_threshold': 2.0}),
+        call({'number_of_neighbours': 5}),
+        call({'number_of_neighbors': 20}),
+        call({'percentile': 0.5}),
+        call({'log_base': 'log2'}),
+        call({'similarity_measure': 'euclidean distance'}),
+        call({'alpha': 0.05}),
+        call({'fc_threshold': 1}),
+        call({'differential_expression_threshold': 1, 'direction': 'both', 'gene_sets_restring': [], 'organism': 9606}),
+        call({'colors': [], 'cutoff': 0.05, 'gene_sets': ['Process', 'Component', 'Function', 'KEGG'], 'top_terms': 10, 'value': 'p-value'})
     ]
 
+    assert mock_method.call_count == 13
     assert mock_method.methods == expected_methods
-    assert mock_method.inputs == expected_method_parameters
-    assert mock_method.call_count == 2
+    assert mock_method.call_args_list == expected_method_parameters
 
 
 def test_runner_raises_error_for_missing_metadata_arg(
@@ -130,13 +161,18 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
 
     runner.compute_workflow()
 
+    assert mock_method.call_count == 3
     assert mock_method.methods == [
         "MaxQuantImport",
         "MetadataImport",
         "FilterProteinsBySamplesMissing",
     ]
-    assert {"percentage": 0.2} in mock_method.inputs
-    assert mock_method.call_count == 3
+    assert mock_method.call_args_list == [
+        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
+        call({'feature_orientation': 'Columns (samples in rows, features in columns)',
+              'file_path': 'tests/metadata_cut_columns.csv'}),
+        call({'percentage': 0.5})
+    ]
     mock_plot.assert_not_called()
 
 
@@ -177,7 +213,7 @@ def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path, metadata_pat
     runner.compute_workflow()
 
     assert mock_plot.call_count == 1
-    assert mock_plot.inputs == [{"graph_type": "Pie chart"}]
+    assert mock_plot.inputs == [{"graph_type": "Bar chart"}]
 
 
 def test_serialize_graphs():
@@ -215,7 +251,7 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
 
 
-def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
+def test_integration_runner(metadata_path, ms_data_path, tests_folder_name, monkeypatch):
     name = tests_folder_name + "/test_runner_integration_" + random_string()
     runner = Runner(
         **{
@@ -229,6 +265,10 @@ def test_integration_runner(metadata_path, ms_data_path, tests_folder_name):
             "verbose": False,
         }
     )
+    mock_write = mock.MagicMock()
+    monkeypatch.setattr(runner.run, "_run_write", mock_write)
+    mock_plot_safe = mock.MagicMock()
+    monkeypatch.setattr(runner, "_save_plots_html", mock_plot_safe)
     runner.compute_workflow()
 
 
