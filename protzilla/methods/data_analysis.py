@@ -650,3 +650,7 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         inputs["group1"] = step.inputs["group1"]
         inputs["group2"] = step.inputs["group2"]
         return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output["required_sample_size"] = outputs["required_sample_size"]
