@@ -1,11 +1,16 @@
 from enum import Enum
 
+
+from protzilla.run_v2 import Run
+
+from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
     CustomNumberField,
+    CustomMultipleChoiceField,
 )
 
 
@@ -173,6 +178,16 @@ class TransformationLogPlotForm(MethodForm):
     group_by = CustomChoiceField(
         choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
+
 
 
 class NormalisationByZScoreForm(MethodForm):
@@ -192,6 +207,10 @@ class NormalisationByZscorePlotForm(MethodForm):
         choices=VisualTrasformations,
         label="Visual transformation",
         initial=VisualTrasformations.log10,
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
 
 
@@ -239,6 +258,10 @@ class NormalisationByMedianPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
+    )
 
 
 class NormalisationByReferenceProteinForms(MethodForm):
@@ -270,6 +293,10 @@ class NormalisationByReferenceProteinPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
+    )
 
 
 class ImputationByMinPerDatasetForm(MethodForm):
@@ -298,6 +325,10 @@ class ImputationByMinPerDatasetPlotForm(MethodForm):
         choices=VisualTrasformations,
         label="Visual transformation",
         initial=VisualTrasformations.log10,
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
@@ -333,6 +364,10 @@ class ImputationByMinPerProteinPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
@@ -364,6 +399,10 @@ class ImputationByMinPerSamplePlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
@@ -392,6 +431,10 @@ class SimpleImputationPerProteinPlotForm(MethodForm):
         choices=VisualTrasformations,
         label="Visual transformation",
         initial=VisualTrasformations.log10,
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
@@ -422,6 +465,10 @@ class ImputationByKNNPlotForm(MethodForm):
         choices=VisualTrasformations,
         label="Visual transformation",
         initial=VisualTrasformations.log10,
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
@@ -457,6 +504,10 @@ class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
         choices=VisualTrasformations,
         label="Visual transformation",
         initial=VisualTrasformations.log10,
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
     )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,

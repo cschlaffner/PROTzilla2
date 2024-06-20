@@ -44,13 +44,28 @@ def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="
     return dict(protein_df=transformed_df, peptide_df=transformed_peptide_df)
 
 
-def by_log_plot(method_inputs, method_outputs, graph_type, group_by):
+def by_log_plot(
+    method_inputs,
+    method_outputs,
+    graph_type,
+    group_by,
+    proteins_of_interest=None,
+):
     return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
+        method_inputs["protein_df"],
+        method_outputs["protein_df"],
+        graph_type,
+        group_by,
+        [] if proteins_of_interest is None else proteins_of_interest,
     )
 
-
-def _build_box_hist_plot(df, result_df, graph_type, group_by):
+def _build_box_hist_plot(
+    df,
+    result_df,
+    graph_type,
+    group_by,
+    proteins_of_interest=None,
+):
     if graph_type == "Boxplot":
         fig = create_box_plots(
             dataframe_a=df,
@@ -59,6 +74,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
             group_by=group_by,
+            proteins_of_interest=proteins_of_interest,
             y_title="Intensity",
         )
     if graph_type == "Histogram":
@@ -68,6 +84,7 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
             name_a="Before Transformation",
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
+            proteins_of_interest=proteins_of_interest,
             x_title="Protein Intensities",
             y_title="Frequency of Protein Intensities",
         )
