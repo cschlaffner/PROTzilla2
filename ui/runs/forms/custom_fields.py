@@ -85,6 +85,8 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         self.widget.attrs.update({"class": "form-select mb-2"})
 
     def clean(self, value: list[str] | None):
+        if not isinstance(value, list):
+            value = [value]
         return [el for el in value if el != "hidden"] if value else None
 
 

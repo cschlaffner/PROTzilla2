@@ -545,7 +545,9 @@ class StepManager:
             if section not in self.sections:
                 raise ValueError(f"Unknown section {section}")
             if step_index >= len(self.sections[section]):
-                raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+                raise ValueError(
+                    f"Step index {step_index} out of bounds for section {section}"
+                )
 
             step = self.all_steps_in_section(section)[step_index]
 
@@ -656,7 +658,7 @@ class StepManager:
             index = self.current_step_index
         if index == len(self.all_steps) - 1:
             return
-        for step in self.all_steps[index + 1 :]:
+        for step in self.all_steps[index:]:
             step.output = Output()
             step.messages = Messages()
             step.plots = Plots()

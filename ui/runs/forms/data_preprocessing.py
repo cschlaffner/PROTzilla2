@@ -1,16 +1,15 @@
 from enum import Enum
 
-
 from protzilla.run_v2 import Run
 
 from . import fill_helper
-from .base import MethodForm
+from .base import MethodForm, PlotForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
-    CustomNumberField,
     CustomMultipleChoiceField,
+    CustomNumberField,
 )
 
 
@@ -169,7 +168,7 @@ class TransformationLogForm(MethodForm):
     )
 
 
-class TransformationLogPlotForm(MethodForm):
+class TransformationLogPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -187,7 +186,6 @@ class TransformationLogPlotForm(MethodForm):
         proteins = run.steps.protein_df["Protein ID"].unique()
 
         self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
-
 
 
 class NormalisationByZScoreForm(MethodForm):
