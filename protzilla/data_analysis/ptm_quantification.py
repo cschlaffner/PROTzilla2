@@ -270,12 +270,38 @@ def flexiquant_lf(
                 )
             )
 
+    messages = []
+    if len(regression_plots) == 0:
+        messages.append(
+            dict(
+                level=logging.WARNING,
+                msg="No samples were processed. This is probably due to the fact that there are not enough valid peptides in the samples.",
+            )
+        )
+    else:
+        if len(regression_plots) == len(sample_column):
+            messages.append(
+                dict(
+                    level=logging.INFO,
+                    msg=f"All {len(sample_column)} samples have been processed successfully. {len(removed)} peptides have been removed.",
+                )
+            )
+        else:
+            messages.append(
+                dict(
+                    level=logging.INFO,
+                    msg=f"{len(regression_plots)}/{len(sample_column)} samples have been processed successfully. "
+                    f"The remaining samples have been skipped due to insufficient valid peptides. {len(removed)} peptides have been removed.",
+                )
+            )
+
     return dict(
         raw_scores=df_raw_scores,
         RM_scores=df_RM[df_RM.columns[::-1]],
         diff_modified=df_RM_mod[df_RM_mod.columns[::-1]],
         removed_peptides=removed.to_list(),
         plots=regression_plots,
+        messages=messages,
     )
 
 
