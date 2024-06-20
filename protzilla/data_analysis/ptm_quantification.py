@@ -9,10 +9,11 @@ from sklearn import linear_model
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from matplotlib.colors import LinearSegmentedColormap
-from seaborn import distplot, lineplot, scatterplot
+from seaborn import distplot, diverging_palette, lineplot, scatterplot
 
 from protzilla.utilities.utilities import fig_to_base64
+
+CONFIDENCE_BAND_ALPHA = 0.3
 
 
 def flexiquant_lf(
@@ -35,9 +36,7 @@ def flexiquant_lf(
         copy=False,
     )
 
-    try:
-        df["Group"]
-    except KeyError:
+    if not "Group" in df:
         return dict(
             messages=[
                 dict(
@@ -55,7 +54,7 @@ def flexiquant_lf(
             messages=[
                 dict(
                     level=logging.ERROR,
-                    msg=f"Reference sample '{reference_group}' not found in provided dataframe.",
+                    msg=f"Reference sample '{reference_group}' not found in provided data.",
                 )
             ]
         )
@@ -186,7 +185,15 @@ def flexiquant_lf(
         # calculate confidence band
         alpha = 0.3
         df_distance_RL, df_train = calculate_confidence_band(
-            slope, median_intensities, df_train, X, y, row, idx, df_distance_RL, alpha
+            slope,
+            median_intensities,
+            df_train,
+            X,
+            y,
+            row,
+            idx,
+            df_distance_RL,
+            CONFIDENCE_BAND_ALPHA,
         )
 
         # plot scatter plot with regression line
@@ -259,6 +266,7 @@ def flexiquant_lf(
                         *plot_dict[sample],
                         sample_column,
                         df_RM[df_RM["Sample"] == sample].iloc[0],
+                        mod_cutoff=mod_cutoff,
                     )
                 )
             )
@@ -273,7 +281,15 @@ def flexiquant_lf(
 
 
 def calculate_confidence_band(
-    slope, median_int, dataframe_train, X, y, row, idx, matrix_distance_RL, alpha
+    slope: float,
+    median_int: float,
+    dataframe_train: pd.DataFrame,
+    X: array,
+    y: pd.Series,
+    row: pd.Series,
+    idx: int,
+    matrix_distance_RL: pd.DataFrame,
+    alpha: float,
 ):
     """Calculates confidence bands arround the regression line"""
 
@@ -338,14 +354,15 @@ def calculate_confidence_band(
 
 
 def create_regression_plots(
-    dataframe_train,
-    idx,
-    r2_score_model,
-    r2_score_data,
-    slope,
-    alpha,
-    sample_column,
-    rm_scores,
+    dataframe_train: pd.DataFrame,
+    idx: int,
+    r2_score_model: float,
+    r2_score_data: float,
+    slope: float,
+    alpha: float,
+    sample_column: pd.Series,
+    rm_scores: pd.DataFrame,
+    mod_cutoff: float,
 ):
     """Creates a scatter plot with regression line and confidence bands"""
 
@@ -383,25 +400,31 @@ def create_regression_plots(
     rm_scores = rm_scores.drop(
         ["Slope", "R2 model", "R2 data", "Reproducibility factor", "Group", "Sample"]
     )
-    rm_scores.dropna(inplace=True)
+    # rm_scores.dropna(inplace=True)
     rm_scores.clip(0, 1, inplace=True)
-
-    colors = ["red", "blue", "green"]  # Red to green
-    cmap = LinearSegmentedColormap.from_list("custom_red_green", colors, N=256)
 
     rm_scores = rm_scores.to_frame(name="RM score")
     # outliers in dataframe_train don't have an RM score
     rm_scores = dataframe_train.merge(
         rm_scores, left_index=True, right_index=True, how="left"
     )
-    rm_scores.fillna(1, inplace=True)
+    rm_scores.fillna(-1, inplace=True)
+
+    palette = diverging_palette(h_neg=0, h_pos=120, as_cmap=True, center="dark")
+
+    def cmap(values: list[float]):
+        nanIdx = set([i for i, x in enumerate(values) if x == -1])
+        return [
+            color if i not in nanIdx else [0.75, 0.75, 0.75, 1.0]
+            for i, color in enumerate(palette(values))
+        ]
 
     scatterplot(
         x="Reference intensity",
         y="Sample intensity",
         data=dataframe_train,
         hue=list(rm_scores.index),
-        palette=cmap(list(rm_scores["RM score"])),
+        palette=cmap(scale_to_mod_cutoff(list(rm_scores["RM score"]), mod_cutoff)),
     )
 
     # draw regression line
@@ -446,7 +469,7 @@ def create_regression_plots(
     return fig
 
 
-def calc_raw_scores(df_distance, median_int):
+def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
     """
     Parameters:
          df_distance: Pandas DataFrame containing the vertical distances to the regression line
@@ -506,3 +529,14 @@ def normalize_t3median(dataframe):
         dataframe_t3med.loc[idx] = row_norm
 
     return dataframe_t3med
+
+
+def scale_to_mod_cutoff(values: list[float], cutoff: float) -> list[float]:
+    return [
+        0.5 + (v - cutoff) * 0.5 / (1 - cutoff)
+        if v >= 0.5
+        else v * 0.5 / cutoff
+        if v >= 0
+        else v
+        for v in values
+    ]
