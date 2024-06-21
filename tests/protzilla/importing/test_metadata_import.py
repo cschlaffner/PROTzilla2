@@ -57,7 +57,7 @@ def test_metadata_import_diann(run_empty):
         test_metadata, run_empty.current_outputs["metadata_df"]
     )
     pd.testing.assert_frame_equal(
-        test_protein_df, run_empty.steps.get_step_output(DiannImport, "protein_df")
+        test_protein_df, run_empty.current_outputs["protein_df"]
     )
 
 

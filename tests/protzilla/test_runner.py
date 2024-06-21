@@ -12,13 +12,13 @@ sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")
 
 from protzilla.runner import Runner, _serialize_graphs
-from runner_cli import args_parser
 from protzilla.steps import Output, Plots
+from runner_cli import args_parser
 
 
 @pytest.fixture
 def ms_data_path():
-    return "tests/proteinGroups_small_cut.txt"
+    return "tests/proteinGroups_small.txt"
 
 
 @pytest.fixture
@@ -43,7 +43,8 @@ def mock_perform_method(runner: Runner):
 
         # side effect to mark the step as finished
         runner.run.current_step.output = Output(
-            {key: "mock_output_value" for key in runner.run.current_step.output_keys})
+            {key: "mock_output_value" for key in runner.run.current_step.output_keys}
+        )
         if len(runner.run.current_step.output_keys) == 0:
             runner.run.current_step.plots = Plots(["mock_plot"])
 
@@ -69,7 +70,7 @@ def test_runner_imports(
     monkeypatch, tests_folder_name, ms_data_path, metadata_path, peptide_path
 ):
     importing_args = [
-        "standard",  # expects max-quant import, metadata import
+        ".standard",  # expects max-quant import, metadata import
         ms_data_path,
         f"--run_name={tests_folder_name}/test_runner_{random_string()}",
         f"--meta_data_path={metadata_path}",
@@ -88,34 +89,87 @@ def test_runner_imports(
     runner.compute_workflow()
 
     expected_methods = [
-        'MaxQuantImport',
-        'MetadataImport',
-        'FilterProteinsBySamplesMissing',
-        'FilterSamplesByProteinIntensitiesSum',
-        'ImputationByKNN',
-        'OutlierDetectionByLocalOutlierFactor',
-        'NormalisationByMedian',
-        'TransformationLog',
-        'PlotProtQuant',
-        'DifferentialExpressionTTest',
-        'PlotVolcano',
-        'EnrichmentAnalysisGOAnalysisWithString',
-        'PlotGOEnrichmentBarPlot'
+        "MaxQuantImport",
+        "MetadataImport",
+        "FilterProteinsBySamplesMissing",
+        "FilterSamplesByProteinIntensitiesSum",
+        "ImputationByKNN",
+        "OutlierDetectionByLocalOutlierFactor",
+        "NormalisationByMedian",
+        "TransformationLog",
+        "PlotProtQuant",
+        "DifferentialExpressionTTest",
+        "PlotVolcano",
+        "EnrichmentAnalysisGOAnalysisWithString",
+        "PlotGOEnrichmentBarPlot",
     ]
     expected_method_parameters = [
-        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
-        call({'feature_orientation': 'Columns (samples in rows, features in columns)', 'file_path': 'tests/metadata_cut_columns.csv'}),
-        call({'percentage': 0.5}),
-        call({'deviation_threshold': 2.0}),
-        call({'number_of_neighbours': 5}),
-        call({'number_of_neighbors': 20}),
-        call({'percentile': 0.5}),
-        call({'log_base': 'log2'}),
-        call({'similarity_measure': 'euclidean distance'}),
-        call({'alpha': 0.05}),
-        call({'fc_threshold': 1}),
-        call({'differential_expression_threshold': 1, 'direction': 'both', 'gene_sets_restring': [], 'organism': 9606}),
-        call({'colors': [], 'cutoff': 0.05, 'gene_sets': ['Process', 'Component', 'Function', 'KEGG'], 'top_terms': 10, 'value': 'p-value'})
+        call(
+            {
+                "intensity_name": "iBAQ",
+                "map_to_uniprot": False,
+                "file_path": "tests/proteinGroups_small.txt",
+            }
+        ),
+        call(
+            {
+                "feature_orientation": "Columns (samples in rows, features in columns)",
+                "file_path": "tests/metadata_cut_columns.csv",
+            }
+        ),
+        call({"percentage": 0.5}),
+        call({"deviation_threshold": 2.0}),
+        call({"number_of_neighbours": 5}),
+        call({"number_of_neighbors": 20}),
+        call({"percentile": 0.5}),
+        call({"log_base": "log2"}),
+        call(
+            {
+                "input_df": "TransformationLog_1",
+                "protein_group": "P10636;P10636-9",
+                "similarity": 1,
+                "similarity_measure": "euclidean distance",
+            }
+        ),
+        call(
+            {
+                "alpha": 0.05,
+                "group1": "AD",
+                "group2": "CTR",
+                "grouping": "Group",
+                "multiple_testing_correction_method": "Benjamini-Hochberg",
+                "protein_df": "TransformationLog_1",
+                "ttest_type": "Welch's t-Test",
+            }
+        ),
+        call(
+            {
+                "fc_threshold": 1,
+                "input_dict": "DifferentialExpressionTTest_1",
+                "proteins_of_interest": [],
+            }
+        ),
+        call(
+            {
+                "background_path": None,
+                "differential_expression_threshold": 1,
+                "direction": "both",
+                "gene_sets_restring": ["Component", "Function", "KEGG", "Process"],
+                "organism": 9606,
+                "protein_df": "DifferentialExpressionTTest_1",
+            }
+        ),
+        call(
+            {
+                "colors": [],
+                "cutoff": 0.05,
+                "gene_sets": ["Process", "Component", "Function", "KEGG"],
+                "input_df_step_instance": "EnrichmentAnalysisGOAnalysisWithString_1",
+                "title": None,
+                "top_terms": 10,
+                "value": "p-value",
+            }
+        ),
     ]
 
     assert mock_method.call_count == 13
@@ -168,10 +222,20 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
         "FilterProteinsBySamplesMissing",
     ]
     assert mock_method.call_args_list == [
-        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
-        call({'feature_orientation': 'Columns (samples in rows, features in columns)',
-              'file_path': 'tests/metadata_cut_columns.csv'}),
-        call({'percentage': 0.5})
+        call(
+            {
+                "intensity_name": "iBAQ",
+                "map_to_uniprot": False,
+                "file_path": "tests/proteinGroups_small.txt",
+            }
+        ),
+        call(
+            {
+                "feature_orientation": "Columns (samples in rows, features in columns)",
+                "file_path": "tests/metadata_cut_columns.csv",
+            }
+        ),
+        call({"percentage": 0.5}),
     ]
     mock_plot.assert_not_called()
 
@@ -251,11 +315,13 @@ def test_serialize_workflow_graphs():
             assert _serialize_graphs(step["graphs"]) == serial_filter_graphs
 
 
-def test_integration_runner(metadata_path, ms_data_path, tests_folder_name, monkeypatch):
+def test_integration_runner(
+    metadata_path, ms_data_path, tests_folder_name, monkeypatch
+):
     name = tests_folder_name + "/test_runner_integration_" + random_string()
     runner = Runner(
         **{
-            "workflow": "standard",
+            "workflow": ".standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
             "peptides_path": None,
@@ -276,7 +342,7 @@ def test_integration_runner_no_plots(metadata_path, ms_data_path, tests_folder_n
     name = tests_folder_name + "/test_runner_integration" + random_string()
     runner = Runner(
         **{
-            "workflow": "standard",
+            "workflow": ".standard",
             "ms_data_path": f"{PROJECT_PATH}/{ms_data_path}",
             "meta_data_path": f"{PROJECT_PATH}/{metadata_path}",
             "peptides_path": None,

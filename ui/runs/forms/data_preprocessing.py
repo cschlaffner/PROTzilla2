@@ -57,7 +57,7 @@ class VisulaTransformations(Enum):
 
 class FilterProteinsBySamplesMissingForm(MethodForm):
     percentage = CustomFloatField(
-        label="Percentage of minimum non-missing samples per protein",
+        label="Percentage of minimum non-missing samples per protein (as a decimal)",
         min_value=0,
         max_value=1,
         step_size=0.1,
@@ -91,7 +91,7 @@ class FilterByProteinsCountPlotForm(MethodForm):
 
 class FilterSamplesByProteinsMissingForm(MethodForm):
     percentage = CustomFloatField(
-        label="Percentage of minimum non-missing proteins per sample",
+        label="Percentage of minimum non-missing proteins per sample (as a decimal)",
         min_value=0,
         max_value=1,
         step_size=0.1,
@@ -437,10 +437,17 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
         initial=ImputationByNormalDistributionSamplingStrategyType.per_protein,
     )
     down_shift = CustomNumberField(
-        label="Downshift", min_value=-10, max_value=10, initial=-1
+        label="Downshift of the mean (in standard deviations)",
+        min_value=-10,
+        max_value=10,
+        initial=-1,
     )
     scaling_factor = CustomFloatField(
-        label="Scaling factor", min_value=0, max_value=1, step_size=0.1, initial=0.5
+        label="Scaling factor for the new standard deviation",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.5,
     )
 
 
