@@ -1,6 +1,6 @@
 # Repository Coverage
 
-
+[Full report](https://htmlpreview.github.io/?https://github.com/cschlaffner/PROTzilla2/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 | Name                                                                |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
 |-------------------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
@@ -59,7 +59,7 @@
 | protzilla/workflow\_helper.py                                       |       65 |        0 |       36 |        0 |    100% |           |
 | runner\_cli.py                                                      |       21 |        5 |        2 |        1 |     74% | 55-58, 62 |
 | ui/\_\_init\_\_.py                                                  |        0 |        0 |        0 |        0 |    100% |           |
-| ui/\_\_main\_\_.py                                                  |       11 |       11 |        2 |        0 |      0% |      2-21 |
+| ui/\_\_main\_\_.py                                                  |       10 |       10 |        2 |        0 |      0% |      3-21 |
 | ui/main/\_\_init\_\_.py                                             |        0 |        0 |        0 |        0 |    100% |           |
 | ui/main/asgi.py                                                     |        4 |        4 |        0 |        0 |      0% |     10-16 |
 | ui/main/settings.py                                                 |       28 |        0 |        2 |        1 |     97% |    24->32 |
@@ -67,7 +67,7 @@
 | ui/main/urls.py                                                     |        4 |        4 |        0 |        0 |      0% |     16-21 |
 | ui/main/views.py                                                    |       76 |       76 |       32 |        0 |      0% |     1-115 |
 | ui/main/wsgi.py                                                     |        4 |        4 |        0 |        0 |      0% |     10-16 |
-| ui/manage.py                                                        |       14 |       14 |        2 |        0 |      0% |      2-24 |
+| ui/manage.py                                                        |       13 |       13 |        2 |        0 |      0% |      3-24 |
 | ui/runs/\_\_init\_\_.py                                             |        0 |        0 |        0 |        0 |    100% |           |
 | ui/runs/apps.py                                                     |        4 |        4 |        0 |        0 |      0% |       1-6 |
 | ui/runs/fields.py                                                   |      128 |      108 |       74 |        0 |     10% |35-46, 64-97, 122-132, 145-147, 172-183, 197-202, 223-303, 320-345 |
@@ -79,7 +79,7 @@
 | ui/runs/utilities/alert.py                                          |        2 |        1 |        0 |        0 |     50% |         2 |
 | ui/runs/views.py                                                    |      348 |      289 |      124 |        1 |     13% |59, 84-131, 173-189, 220-241, 261-407, 420-427, 441-444, 459-463, 478-480, 492-494, 509-518, 533-540, 555-563, 579-588, 606-615, 631-633, 646-650, 666-667, 714-716, 732-747, 755-785, 804-819, 825-877 |
 | ui/runs/views\_helper.py                                            |       70 |       20 |       28 |        4 |     67% |16->18, 22, 35, 38-44, 116-130, 145-146, 155-158 |
-|                                                           **TOTAL** | **4724** | **1285** | **1839** |  **254** | **70%** |           |
+|                                                           **TOTAL** | **4722** | **1283** | **1839** |  **254** | **70%** |           |
 
 
 ## Setup coverage badge
@@ -88,11 +88,22 @@ Below are examples of the badges you can use in your main branch `README` file.
 
 ### Direct image
 
-[![Coverage badge](https://github.com/cschlaffner/PROTzilla2/raw/python-coverage-comment-action-data/badge.svg)](https://github.com/cschlaffner/PROTzilla2/tree/python-coverage-comment-action-data)
+[![Coverage badge](https://raw.githubusercontent.com/cschlaffner/PROTzilla2/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/cschlaffner/PROTzilla2/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 This is the one to use if your repository is private or if you don't want to customize anything.
 
+### [Shields.io](https://shields.io) Json Endpoint
 
+[![Coverage badge](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/cschlaffner/PROTzilla2/python-coverage-comment-action-data/endpoint.json)](https://htmlpreview.github.io/?https://github.com/cschlaffner/PROTzilla2/blob/python-coverage-comment-action-data/htmlcov/index.html)
+
+Using this one will allow you to [customize](https://shields.io/endpoint) the look of your badge.
+It won't work with private repositories. It won't be refreshed more than once per five minutes.
+
+### [Shields.io](https://shields.io) Dynamic Badge
+
+[![Coverage badge](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.message&url=https%3A%2F%2Fraw.githubusercontent.com%2Fcschlaffner%2FPROTzilla2%2Fpython-coverage-comment-action-data%2Fendpoint.json)](https://htmlpreview.github.io/?https://github.com/cschlaffner/PROTzilla2/blob/python-coverage-comment-action-data/htmlcov/index.html)
+
+This one will always be the same color. It won't work for private repos. I'm not even sure why we included it.
 
 ## What is that?
 
