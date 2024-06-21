@@ -3,7 +3,7 @@ This documentation is meant to give new users an overview of the structure of PR
 # Concepts
 There are a few key concepts that one needs to understand to effectively use and communicate about PROTzilla. They are explained in the following paragraph.
 
-- **Workflow**: A workflow is a construct that specifies how data is being handled, what calculations are performed in what order and what graphics are created.  When providing the same data, a workflow will always result in the same results. All workflows are saved in their own `.json` files, located at `<path to PROTzilla>/user_data/workflows/<workflow name>`.
+- **Workflow**: A workflow is a construct that specifies how data is being handled, what calculations are performed in what order and what graphics are created.  When providing the same data, a workflow will always result in the same results. All workflows are saved in their own `.yaml` files, located at `<path to PROTzilla>/user_data/workflows/<workflow name>`.
 
 - **Run**: A run is the application of a workflow, the workflow on a given data set. In a run the workflow can be modified. It is for example possible to add additional preprocessing steps, remove other ones or apply different analysis methods. When all steps in a run are completed, this potentially modified workflow can be exported under a new name for later use.
 
