@@ -191,9 +191,15 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     found_ids_per_group = []
     # go through all groups and find the valid proteins
     # non uniprot ids are put into extracted_ids, so they can be mapped
+    extract_protein_id_regex = re.compile(r'\|([^|]+)\|')
+
+    # Function to extract protein IDs from the formatted string
+    def extract_protein_ids(protein_group_str):
+        return extract_protein_id_regex.findall(protein_group_str)
+
     for group in protein_groups:
         found_in_group = set()
-        for protein_id in group.split(";"):
+        for protein_id in extract_protein_ids(group) or group.split(";"):
             if not protein_id.startswith("ENSP") and (
                 match := uniprot_regex.search(protein_id)
             ):
