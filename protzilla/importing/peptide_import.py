@@ -47,9 +47,7 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
     )
 
     molten = molten.rename(columns={"Proteins": "Protein ID"})
-    ordered = molten[
-        ["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]
-    ]
+    ordered = molten[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
     ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
@@ -86,6 +84,7 @@ def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:
         "Modified sequence",
         "Missed cleavages",
         "PEP",
+        "Charge",
         "Raw file",
     ]
 

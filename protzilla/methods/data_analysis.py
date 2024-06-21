@@ -10,7 +10,6 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -19,6 +18,7 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from protzilla.data_analysis.spectrum_prediction import predict
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
@@ -629,17 +629,23 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         )
 
         if inputs["auto_select"]:
-            significant_proteins = (
-                steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
-            index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
-            most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
+            significant_proteins = steps.get_step_output(
+                DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]
+            )
+            index_of_most_significant_protein = significant_proteins[
+                "corrected_p_value"
+            ].idxmin()
+            most_significant_protein = significant_proteins.loc[
+                index_of_most_significant_protein
+            ]
             inputs["protein_id"] = [most_significant_protein["Protein ID"]]
-            self.messages.append({
-                "level": logging.INFO,
-                "msg":
-                    f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
-                    f"from {inputs['protein_list']}"
-            })
+            self.messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                    f"from {inputs['protein_list']}",
+                }
+            )
 
         return inputs
 
@@ -649,8 +655,8 @@ class PredictSpectra(DataAnalysisStep):
     operation = "spectrum_prediction"
     method_description = "Predict the MS/MS spectra of a list of peptides using different models. The models are trained on experimental data and predict the intensity of the fragment ions"
 
-    input_keys = ["peptide_df", "model_name"]
-    output_keys = ["predicted_spectra"]
+    input_keys = ["peptide_df", "model_name", "output_format"]
+    output_keys = []
 
     def method(self, inputs: dict) -> dict:
         return predict(**inputs)
