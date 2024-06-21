@@ -1,12 +1,15 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 from protzilla.data_analysis.differential_expression_helper import _map_log_base, apply_multiple_testing_correction
+from protzilla.utilities.transform_dfs import long_to_wide
 
 
 def mann_whitney_test_on_intensity_data(
-        df: pd.DataFrame,
+        intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
         grouping: str,
         group1: str,
@@ -15,8 +18,10 @@ def mann_whitney_test_on_intensity_data(
         alpha=0.05,
         multiple_testing_correction_method: str = "",
 ) -> dict:
+    wide_df = long_to_wide(intensity_df)
+
     outputs = mann_whitney_test_on_columns(
-        df=df,
+        df=wide_df,
         metadata_df=metadata_df,
         grouping=grouping,
         group1=group1,
@@ -26,11 +31,11 @@ def mann_whitney_test_on_intensity_data(
         multiple_testing_correction_method=multiple_testing_correction_method,
         columns_name="Protein ID",
     )
-    differentially_expressed_proteins_df = pd.merge(df, outputs["combined_df"], on="Protein ID", how="left")
+    differentially_expressed_proteins_df = pd.merge(intensity_df, outputs["differential_expressed_columns_df"], on="Protein ID", how="left")
     differentially_expressed_proteins_df = differentially_expressed_proteins_df.loc[
-        differentially_expressed_proteins_df["Protein ID"].isin(outputs["combined_df"]["Protein ID"])
+        differentially_expressed_proteins_df["Protein ID"].isin(outputs["differential_expressed_columns_df"]["Protein ID"])
     ]
-    significant_proteins_df = pd.merge(df, outputs["significant_columns_df"], on="Protein ID", how="left")
+    significant_proteins_df = pd.merge(intensity_df, outputs["significant_columns_df"], on="Protein ID", how="left")
     significant_proteins_df = significant_proteins_df.loc[
         significant_proteins_df["Protein ID"].isin(outputs["significant_columns_df"]["Protein ID"])
     ]
@@ -146,7 +151,7 @@ def mann_whitney_test_on_columns(
         combined_df["corrected_p_value"] <= corrected_alpha
         ]
 
-    messages = [dict(msg=f"Invalid columns: {invalid_columns}")] if invalid_columns else []
+    messages = [dict(level=logging.INFO, msg=f"Invalid columns: {invalid_columns}")] if invalid_columns else []
 
     return dict(
         differential_expressed_columns_df=combined_df,

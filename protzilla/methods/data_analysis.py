@@ -8,7 +8,8 @@ from protzilla.data_analysis.clustering import (
 )
 from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
-from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_columns
+from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_columns, \
+    mann_whitney_test_on_intensity_data
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
 from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, ptms_per_sample, \
@@ -100,8 +101,6 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         "t_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
-        "group1",
-        "group2",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -156,9 +155,43 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
 
 
-class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
+class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "differential_expression"
+    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+                          "The p-values are corrected for multiple testing.")
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "grouping",
+        "group1",
+        "group2",
+        "alpha",
+        "multiple_testing_correction_method",
+    ]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "log2_fold_change_df",
+        "corrected_alpha",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return mann_whitney_test_on_intensity_data(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        if steps.get_step_output(Step, "protein_df", inputs["intensity_df"]) is not None:
+            inputs["intensity_df"] = steps.get_step_output(Step, "protein_df", inputs["intensity_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
+        return inputs
+
+
+class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
+    display_name = "Mann-Whitney Test"
+    operation = "Peptide analysis"
     method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
                           "The p-values are corrected for multiple testing.")
 
@@ -184,7 +217,7 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
         return mann_whitney_test_on_columns(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["df"] = steps.get_step_output(Step, "ptm_df", inputs["df"])
+        inputs["df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
         inputs["columns_name"] = "PTM"
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
