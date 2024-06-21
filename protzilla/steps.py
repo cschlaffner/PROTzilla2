@@ -621,9 +621,17 @@ class StepManager:
 
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
+
+        if new_step_index == self.current_step_index:
+            return
+        assert new_step_index < len(self.all_steps)
+
         if new_step_index < self.current_step_index:
             self.current_step_index = new_step_index
-        elif new_step_index < len(self.all_steps) and not step.output.is_empty:
+        elif (
+            not step.output.is_empty
+            or not self.all_steps[new_step_index - 1].output.is_empty
+        ):
             self.current_step_index = new_step_index
         else:
             raise ValueError(
