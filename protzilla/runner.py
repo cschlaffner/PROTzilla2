@@ -92,7 +92,8 @@ class Runner:
             if not step.finished:
                 break
 
-            self.run.step_next()
+            if self.run.steps.current_step_index < len(self.run.steps.all_steps) - 1:
+                self.run.step_next()
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
@@ -123,6 +124,8 @@ class Runner:
 
     def _save_plots_html(self, step):
         for i, plot in enumerate(step.plots):
+            if isinstance(plot, bytes):
+                continue
             plot_path = f"{self.plots_path}/{self.run.steps.current_step_index}-{step.section}-{step.operation}-{step.display_name}-{i}.html"
             plot.write_html(plot_path)
 

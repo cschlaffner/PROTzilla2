@@ -5,6 +5,7 @@ import threading
 import traceback
 
 import protzilla.constants.paths as paths
+from protzilla.constants.protzilla_logging import logger
 from protzilla.steps import Messages, Output, Plots, Step
 from protzilla.utilities import format_trace
 
@@ -31,6 +32,8 @@ class Run:
         def __exit__(self, exc_type, exc_value, tb):
             if exc_type:
                 formatted_trace = format_trace(traceback.format_exception(exc_value))
+                # print the traceback to the console
+                logger.exception(exc_value)
                 if (
                     hasattr(self.run, "current_step")
                     and self.run.current_step is not None

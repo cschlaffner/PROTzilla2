@@ -122,6 +122,7 @@ def metadata_import_method_diann(
         return dict(
             messages=[dict(level=logging.ERROR, msg=msg)],
         )
+    meta_df.rename(columns={"sample name": "Sample"}, inplace=True)
 
     if file_path.startswith(
         f"{PROJECT_PATH}/tests/protzilla/importing/conversion_tmp_"
@@ -129,20 +130,26 @@ def metadata_import_method_diann(
         os.remove(file_path)
 
     if groupby_sample:
-        # we want to take the median of all MS runs (column "Sample" in the intensity df) for each Sample
-        # (column "sample name" in the metadata df)
+        # we want to take the median of all MS runs (column "Sample" in the protein df) for each Sample
+        # (column "Sample" in the metadata df)
+        protein_df.rename(columns={"Sample": "MS run"}, inplace=True)
         protein_df = pd.merge(
             protein_df,
-            meta_df[["MS run", "sample name"]],
-            left_on="Sample",
+            meta_df[["MS run", "Sample"]],
+            left_on="MS run",
             right_on="MS run",
             how="left",
         )
-        protein_df = protein_df.groupby(
-            ["Protein ID", "sample name"], as_index=False
-        ).median()
-        protein_df.rename(columns={"sample name": "Sample"}, inplace=True)
+        protein_df = (
+            protein_df.groupby(["Protein ID", "Sample"])["Intensity"]
+            .median()
+            .reset_index()
+        )
         return dict(protein_df=protein_df, metadata_df=meta_df)
+    else:
+        meta_df.rename(
+            columns={"MS run": "Sample", "Sample": "Sample Group"}, inplace=True
+        )
 
     return dict(protein_df=protein_df, metadata_df=meta_df)
 

@@ -12,6 +12,7 @@ import pandas as pd
 import plotly
 from PIL import Image
 
+from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities import format_trace
 
 
@@ -79,6 +80,7 @@ class Step:
 
             self.validate_outputs()
         except NotImplementedError as e:
+            logger.exception(e)
             self.messages.append(
                 dict(
                     level=logging.ERROR,
@@ -87,6 +89,7 @@ class Step:
                 )
             )
         except ValueError as e:
+            logger.exception(e)
             self.messages.append(
                 dict(
                     level=logging.ERROR,
@@ -95,21 +98,11 @@ class Step:
                 )
             )
         except TypeError as e:
+            logger.exception(e)
             self.messages.append(
                 dict(
                     level=logging.ERROR,
                     msg=f"Please check the implementation of this steps method class (especially the input_keys): {e}.",
-                    trace=format_trace(traceback.format_exception(e)),
-                )
-            )
-        except Exception as e:
-            self.messages.append(
-                dict(
-                    level=logging.ERROR,
-                    msg=(
-                        f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
-                        f"Please check your parameters or report a potential programming issue."
-                    ),
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
