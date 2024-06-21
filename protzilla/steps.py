@@ -623,8 +623,12 @@ class StepManager:
         new_step_index = self.all_steps.index(step)
         if new_step_index < self.current_step_index:
             self.current_step_index = new_step_index
+        elif new_step_index < len(self.all_steps) and not step.output.is_empty:
+            self.current_step_index = new_step_index
         else:
-            raise ValueError("Cannot go to a step that is after the current step")
+            raise ValueError(
+                f"Cannot go to a step that has no output yet: {step.display_name}. Please calculate the steps beforehand first."
+            )
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
