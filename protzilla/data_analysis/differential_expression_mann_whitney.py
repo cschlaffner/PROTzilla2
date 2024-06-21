@@ -50,6 +50,39 @@ def mann_whitney_test_on_intensity_data(
         messages=outputs["messages"],
     )
 
+def mann_whitney_test_on_ptm_data(
+        ptm_df: pd.DataFrame,
+        metadata_df: pd.DataFrame,
+        grouping: str,
+        group1: str,
+        group2: str,
+        log_base: str = None,
+        alpha=0.05,
+        multiple_testing_correction_method: str = "",
+) -> dict:
+    output = mann_whitney_test_on_columns(
+        df=ptm_df,
+        metadata_df=metadata_df,
+        grouping=grouping,
+        group1=group1,
+        group2=group2,
+        log_base=log_base,
+        alpha=alpha,
+        multiple_testing_correction_method=multiple_testing_correction_method,
+        columns_name="PTM",
+    )
+
+    return dict(
+        differentially_expressed_ptm_df=output["differential_expressed_columns_df"],
+        significant_ptm_df=output["significant_columns_df"],
+        corrected_p_values_df=output["corrected_p_values_df"],
+        u_statistic_df=output["u_statistic_df"],
+        log2_fold_change_df=output["log2_fold_change_df"],
+        corrected_alpha=output["corrected_alpha"],
+        messages=output["messages"],
+    )
+
+
 def mann_whitney_test_on_columns(
         df: pd.DataFrame,
         metadata_df: pd.DataFrame,

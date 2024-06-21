@@ -342,7 +342,7 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["df"].choices = fill_helper.to_choices(
+        self.fields["ptm_df"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
 
