@@ -21,7 +21,7 @@ from protzilla.data_analysis.plots import (
 from protzilla.data_analysis.power_analysis import sample_size_calculation
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.methods.data_preprocessing import TransformationLog
-from protzilla.steps import Plots, Step, StepManager
+from protzilla.steps import Plots, Step, StepManager, DisplayOutput
 
 
 class DataAnalysisStep(Step):
@@ -672,7 +672,6 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     output_keys = [
         "required_sample_size",
     ]
-
     def method(self, inputs: dict) -> dict:
         return sample_size_calculation(**inputs)
 

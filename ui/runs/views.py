@@ -121,6 +121,12 @@ def detail(request: HttpRequest, run_name: str):
         and Path(run.current_outputs["graph_path"]).exists()
     )
 
+    display_output_form = (
+        run.steps.current_step.display_output is not None
+        and not run.current_step.display_output.is_empty()
+    )
+    display_output_text = f"{run.current_step.display_output}"
+
     return render(
         request,
         "runs/details.html",
@@ -156,6 +162,8 @@ def detail(request: HttpRequest, run_name: str):
             method_form=method_form,
             is_form_dynamic=method_form.is_dynamic,
             plot_form=plot_form,
+            display_output=display_output_form,
+            display_output_result=display_output_text,
         ),
     )
 
