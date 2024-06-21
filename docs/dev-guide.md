@@ -5,48 +5,18 @@ This is a guide for developers starting to work on PROTzilla and will provide an
 ### Project Structure
 PROTzilla is structured as follows:
 - [PROTzilla2/protzilla](../protzilla) package: contains all methods to perform calculations and generate plots. It can be used without the UI. You can find more information about each method in the corresponding docstring.
--  [PROTzilla2/protzilla/constants/workflow_meta.json](../protzilla/constants/workflow_meta.json): contains the metadata of all available methods in PROTzilla. 
 - [PROTzilla2/run.py](../protzilla/run.py): The Run class oversees run management, calculations, workflow configuration, and history tracking, including result accumulation upon calling next.
-- [PROTzilla2/history.py](../protzilla/history.py): the History class stores the chosen method, parameters, plots, output dataframe and specific outputs of all already calculated steps.
 - [PROTzilla2/runner.py](../protzilla/runner.py): the runner is able to execute a given workflow without the the UI.
 - [PROTzilla2/ui](../ui): contains the Django apps main and runs, therefore all code that has to do with the frontend. 
 - [PROTzilla2/user_data](../user_data): contains all data produced by the user, including the user's workflows and the processed data and plots produced by a run. For each run a new folder is created
 
 
-### Concept of a Workflow and Workflow Structure
-A workflow serves as a blueprint for a run, containing all the necessary statistical methods, visualizations, and their respective parameters used to analyse protein data. This blueprints can be reused by scientists to get reproducible results. 
+### Concept of methods, calculation methods, steps, and forms
+Forms are the front-end part of calculations. The user sets the parameters, that should be used for the calculation, in the form, meaning that all the parameter fields are located in them. Dynamic updating also happens here.
+Steps are a base-class in the code, describing a part of the calculation pipeline. One step is equivalent to one calculation, for example is MSdata importing a step, then metadata importing another, and log transformation another. 
+Methods are different variants / ways of performing a step, like `DifferentialExpressionTTest`. Foe example,during the MSdata importing step, there is the MaxQuant variant, MSFragger variant and so on. Generally speaking, any given workflow only requires one method for each step, although there might be exceptions (like performing both a t-test as well as an anova analysis during the differential expression step.)
+Calculation methods are the actual python functions that receive the parameters and input data and return the result of the calculation, for example the `t_test(...)`. 
 
-A workflow in protzilla is organized in four **sections** "importing", "data_preprocessing", "data_analysis" and "data_integration". Each section is divided into **steps**, which are groups of similar **methods** that can be added to the workflow. Also, methods can have **parameters**.
-All implemented methods are listed in `protzilla/constants/workflow_meta.json` following the tree structure `section > step > method > parameter`.
-
-> [!NOTE]
-> remember the hierarchy `section > step > method > parameter`
-<!--how to create a workflow?-->
-
-### Run class
-On the class side, the Run deals with being able to continue runs and starting new ones.
-On the instance side, the Run deals with making calculations by calling methods that return a dataframe and other outputs in a dict (importing, data preprocessing) or just a dict of outputs (data analysis, data integration). It also creates plots that belong to another step (preprocessing) or are a step on their own (analysis, integration) and exports them.
-Workflow manipulation is also handled in the Run. The run class is responsible for knowing the configuration of the run's workflow and the current location.
-Each run has a History, which holds the previous results. When `next` is called, another step is added to the history.
-
-
-### History class
-The History is mainly responsible for knowing the chosen method, parameters, plots, output dataframe and specific outputs (e.g. dropouts or p-values) of all previous steps. Depending on the chosen storage mode, it returns the data from memory or disk when it is requested. It also holds the names users can attach to executed methods to use them in later calcuations.
-
-
-### How do the run, workflow, and history interact with one another?
-The directory `user_data/workflows` contains **workflow** templates. 
-They store the configuration of an analysis, which contains the order of steps and also their corresponding selected methods and parameters.
-A workflow can be shared among users for reproducible results. <br>
-When a user starts PROTzilla, they are asked to create a new **run** and select a workflow template.
-A Run object from `protzilla/run.py` will be created, and a new folder with the name of the run will be generated in `user_data/runs`.
-The selected workflow will be copied into the run directory and will be the `workflow_config` of this run. <br>
-The run will follow the steps listed in the `workflow_config` and selected methods and parameter values as default. 
-If no default methods or parameters are selected within `workflow_config`, default values from `workflow_meta.json` will be used. <br>
-The **history** contains the outputs of steps that have already been executed. If the user chooses to return to the previous step and presses the back button, the previous step will be loaded from history.
-
-> [!WARNING]
-> never delete the `hello123` run as for some reason the tests on github will fail then. We tried to identify the problem but our best solution was to just leave `hello123` where it was.
 
 ### Calculation methods
 The three folders below each represent a **section**. Each file in these folders represents a **step**. In a file there is a function for each method.
@@ -60,13 +30,6 @@ This folder contains the methods for filtering, imputation, normalisation, outli
 #### PROTzilla2/protzilla/data_analysis
 This folder contains methods that are used to analyse the outputs of the data preprocessing section and previous data analysis steps. Always using the previous output dataframe as input gets replaced by naming the steps that should be used and choosing the right named step as input. On this section the calculation and the plots be can separated from each other. In the case of the calculation methods, they return a dictionary including dataframes and other outputs. On the other hand, plot methods return a list of figures.
 
-
-
-### Workflow Meta File
-The workflow meta file contains all the needed metainformation for each of the implemented methods in PROTzilla. A method's position in the JSON hierarchy determines its location (`section > step > method`). Also other information such as the name, description and parameters of the method are specified on this file. It is a key file to then build PROTzilla's frontend. 
-
-#### Method parameters specification
-The parameters for each method can be specified in the form of a dict in the `protzilla/constants/workflow_meta.json` file. To each parameter a name, a type and a default are assigned. Then depending on the type of the parameter also other information needs to be specified in the workflow meta file, that will then affect how the input parameter fields in the frontend are built. 
 
 ### Why are there #TODOs with a number in the code?
 To-dos are small issues or suggestions listed in [the issues list with label "todo"](https://github.com/cschlaffner/PROTzilla2/issues?q=is%3Aissue+is%3Aopen+label%3Atodo).
