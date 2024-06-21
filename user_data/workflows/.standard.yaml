@@ -1,0 +1,115 @@
+df_mode: disk_memory
+steps:
+  - form_inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+    inputs: { }
+    instance_identifier: MaxQuantImport_1
+    type: MaxQuantImport
+  - form_inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
+    inputs: { }
+    instance_identifier: MetadataImport_1
+    type: MetadataImport
+  - form_inputs:
+      percentage: 0.5
+    inputs: { }
+    instance_identifier: FilterProteinsBySamplesMissing_1
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterProteinsBySamplesMissing
+  - form_inputs:
+      deviation_threshold: 2.0
+    inputs: { }
+    instance_identifier: FilterSamplesByProteinIntensitiesSum_1
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterSamplesByProteinIntensitiesSum
+  - form_inputs:
+      number_of_neighbours: 5
+    inputs: { }
+    instance_identifier: ImputationByKNN_1
+    plot_inputs:
+      graph_type: Boxplot
+      graph_type_quantities: Bar chart
+      group_by: None
+      visual_transformation: log10
+    type: ImputationByKNN
+  - form_inputs:
+      number_of_neighbors: 20
+    inputs: { }
+    instance_identifier: OutlierDetectionByLocalOutlierFactor_1
+    plot_inputs: { }
+    type: OutlierDetectionByLocalOutlierFactor
+  - form_inputs:
+      percentile: 0.5
+    inputs: { }
+    instance_identifier: NormalisationByMedian_1
+    plot_inputs:
+      graph_type: Boxplot
+      group_by: None
+      visual_transformation: log10
+    type: NormalisationByMedian
+  - form_inputs:
+      log_base: log2
+    inputs: { }
+    instance_identifier: TransformationLog_1
+    plot_inputs:
+      graph_type: Histogram
+      group_by: None
+    type: TransformationLog
+  - form_inputs:
+      input_df: TransformationLog_1
+      protein_group: P10636;P10636-9
+      similarity: 1
+      similarity_measure: euclidean distance
+    inputs: { }
+    instance_identifier: PlotProtQuant_1
+    type: PlotProtQuant
+  - form_inputs:
+      alpha: 0.05
+      group1: AD
+      group2: CTR
+      grouping: Group
+      multiple_testing_correction_method: Benjamini-Hochberg
+      protein_df: TransformationLog_1
+      ttest_type: Welch's t-Test
+    inputs: { }
+    instance_identifier: DifferentialExpressionTTest_1
+    type: DifferentialExpressionTTest
+  - form_inputs:
+      fc_threshold: 1
+      input_dict: DifferentialExpressionTTest_1
+      proteins_of_interest: [ ]
+    inputs: { }
+    instance_identifier: PlotVolcano_1
+    type: PlotVolcano
+  - form_inputs:
+      differential_expression_threshold: 1
+      direction: both
+      gene_sets_restring:
+        - Component
+        - Function
+        - KEGG
+        - Process
+      organism: 9606
+      protein_df: DifferentialExpressionTTest_1
+      background_path: null
+    inputs: { }
+    instance_identifier: EnrichmentAnalysisGOAnalysisWithString_1
+    type: EnrichmentAnalysisGOAnalysisWithString
+  - form_inputs:
+      colors: [ ]
+      cutoff: 0.05
+      gene_sets:
+        - Process
+        - Component
+        - Function
+        - KEGG
+      input_df_step_instance: EnrichmentAnalysisGOAnalysisWithString_1
+      top_terms: 10
+      value: p-value
+      title: null
+    inputs: { }
+    instance_identifier: PlotGOEnrichmentBarPlot_1
+    type: PlotGOEnrichmentBarPlot
