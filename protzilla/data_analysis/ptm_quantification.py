@@ -24,6 +24,12 @@ def flexiquant_lf(
     num_init: int = 50,
     mod_cutoff: float = 0.5,
 ) -> dict:
+    """
+    FLEXIQuant-LF is a method to quantify protein modification extent in label-free proteomics data.
+
+    Parts of the implementation have been adapted from https://github.com/SteenOmicsLab/FLEXIQuantLF.
+    """
+
     df = peptide_df[peptide_df["Protein ID"] == protein_id].pivot_table(
         index="Sample", columns="Sequence", values="Intensity", aggfunc="first"
     )
@@ -316,7 +322,9 @@ def calculate_confidence_band(
     matrix_distance_RL: pd.DataFrame,
     alpha: float,
 ):
-    """Calculates confidence bands arround the regression line"""
+    """
+    Calculates confidence bands arround the regression line.
+    """
 
     # calculate predicted intensity with Reference intensity of a peptide and slope of the sample (Y hat)
     Y_pred = slope * median_int
@@ -389,7 +397,9 @@ def create_regression_plots(
     rm_scores: pd.DataFrame,
     mod_cutoff: float,
 ):
-    """Creates a scatter plot with regression line and confidence bands"""
+    """
+    Creates a scatter plot with regression line and confidence bands.
+    """
 
     # create new figure with two subplots
     fig = plt.figure(figsize=(16, 9))
@@ -496,12 +506,7 @@ def create_regression_plots(
 
 def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
     """
-    Parameters:
-         df_distance: Pandas DataFrame containing the vertical distances to the regression line
-                      rows: samples, columns: peptides
-         median_int: Pandas Series containing the median intensities for each peptide of the reference samples
-    Returns:
-        Pandas DataFrame of same dimension as df_distance containing raw scores
+    Calculates raw scores for each sample based on the distance to the regression line.
     """
     # copy df_distance
     df_rs = df_distance.copy()
@@ -526,16 +531,10 @@ def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
     return df_rs
 
 
-def normalize_t3median(dataframe):
+def normalize_t3median(dataframe: pd.DataFrame):
     """
     Applies Top3 median normalization to dataframe
     Determines the median of the three highest values in each row and divides every value in the row by it
-
-    Parameter:
-        dataframe: Pandas dataframe of datatype float or integer
-
-    Returns:
-        normalized pandas dataframe of same dimensions as input dataframe
     """
     # copy dataframe
     dataframe_t3med = dataframe.copy()
