@@ -155,12 +155,8 @@ def t_test(
     for df in dataframes:
         intensity_df = pd.merge(intensity_df, df, on="Protein ID", how="left")
 
-    differentially_expressed_proteins = [
-        protein for protein, p in zip(valid_protein_groups, corrected_p_values)
-    ]
-
     differentially_expressed_proteins_df = intensity_df.loc[
-        intensity_df["Protein ID"].isin(differentially_expressed_proteins)
+        intensity_df["Protein ID"].isin(valid_protein_groups)
     ]
 
     significant_proteins_df = differentially_expressed_proteins_df[
@@ -178,6 +174,4 @@ def t_test(
         corrected_alpha=corrected_alpha,
         # filtered_proteins=filtered_proteins,
         messages=messages,
-        group1=group1,
-        group2=group2,
     )

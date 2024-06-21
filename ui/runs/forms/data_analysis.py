@@ -5,7 +5,7 @@ from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
-    DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein,
+    DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein, PTMsPerSample,
 )
 from protzilla.run import Run
 from protzilla.steps import Step
@@ -253,6 +253,54 @@ class DifferentialExpressionLinearModelForm(MethodForm):
         self.fields[
             "grouping"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+
+        # Set choices for group1 field based on selected grouping
+        self.fields["group1"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+        # Set choices for group2 field based on selected grouping and group1
+        if (
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+        ):
+            self.fields["group2"].choices = [
+                (el, el)
+                for el in run.steps.metadata_df[grouping].unique()
+                if el != self.data["group1"]
+            ]
+        else:
+            self.fields["group2"].choices = reversed(
+                fill_helper.to_choices(run.steps.metadata_df[grouping].unique())
+            )
+
+
+class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
+    is_dynamic = True
+
+    df = CustomChoiceField(
+        choices=[], label="Step to use data from"
+    )
+    multiple_testing_correction_method = CustomChoiceField(
+        choices=MultipleTestingCorrectionMethod,
+        label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+    )
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    group1 = CustomChoiceField(choices=[], label="Group 1")
+    group2 = CustomChoiceField(choices=[], label="Group 2")
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["df"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
+        )
+
+        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
