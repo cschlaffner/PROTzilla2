@@ -21,6 +21,13 @@ except ImportError:
     DEBUG_MODE = False
 
 
+@dataclass
+class FileOutput:
+    base_file_name: str
+    file_extension: str
+    content: str
+
+
 class ErrorHandler:
     def __enter__(self):
         return self
@@ -56,6 +63,17 @@ class YamlOperator:
                     file_path.parent.mkdir(parents=True)
             with open(file_path, "w") as file:
                 yaml.dump(data, file)
+
+
+class OutputFileOperator:
+    @staticmethod
+    def write(file_path: Path, data: bytes):
+        with ErrorHandler():
+            if file_path.exists():
+                logger.warning(f"File {file_path} already exists, overwriting")
+                file_path.unlink()
+            with open(file_path, "w") as file:
+                file.write(data)
 
 
 class DataFrameOperator:
@@ -102,6 +120,7 @@ class DiskOperator:
         self.workflow_name = workflow_name
         self.yaml_operator = YamlOperator()
         self.dataframe_operator = DataFrameOperator()
+        self.outputfile_operator = OutputFileOperator()
 
     def read_run(self, file: Path | None = None) -> StepManager:
         with ErrorHandler():
@@ -156,6 +175,7 @@ class DiskOperator:
                 for input_key, input_value in inputs:
                     if not (
                         isinstance(input_value, pd.DataFrame)
+                        or isinstance(input_value, FileOutput)
                         or utilities.check_is_path(input_value)
                     ):
                         inputs_to_write[input_key] = input_value
@@ -238,7 +258,11 @@ class DiskOperator:
         with ErrorHandler():
             step_output = {}
             for key, value in output.items():
-                if isinstance(value, str) and Path(value).exists():
+                if (
+                    isinstance(value, str)
+                    and Path(value).exists()
+                    and Path(value).suffix == ".csv"
+                ):
                     step_output[key] = self.dataframe_operator.read(value)
                 else:
                     step_output[key] = value
@@ -251,6 +275,13 @@ class DiskOperator:
                 if isinstance(value, pd.DataFrame):
                     file_path = self.dataframe_dir / f"{instance_identifier}_{key}.csv"
                     self.dataframe_operator.write(file_path, value)
+                    output_data[key] = str(file_path)
+                elif isinstance(value, FileOutput):
+                    file_path = (
+                        self.dataframe_dir
+                        / f"{value.base_file_name}.{value.file_extension}"
+                    )
+                    self.outputfile_operator.write(file_path, value.content)
                     output_data[key] = str(file_path)
                 else:
                     output_data[key] = value
