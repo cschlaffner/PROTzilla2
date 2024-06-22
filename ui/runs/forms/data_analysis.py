@@ -1,25 +1,24 @@
-import logging
 from enum import Enum, StrEnum
 
-from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
+    DataAnalysisStep,
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
     DimensionReductionUMAP,
-    DataAnalysisStep,
 )
+from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
+    CustomBooleanField,
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomBooleanField,
 )
 
 
@@ -917,6 +916,54 @@ class FLEXIQuantLFForm(MethodForm):
             run.steps.get_step_output(Step, "peptide_df", peptide_df_instance_id)[
                 "Protein ID"
             ].unique()
+        )
+
+
+class MultiFLEXLFForm(MethodForm):
+    peptide_df = CustomChoiceField(label="Peptide dataframe", choices=[])
+    reference_group = CustomChoiceField(label="Reference group", choices=[])
+    num_init = CustomNumberField(
+        label="Number of RANSAC initiations",
+        initial=30,
+        min_value=1,
+        max_value=60,
+        step_size=1,
+    )
+    mod_cutoff = CustomFloatField(
+        label="Modification cutoff", initial=0.5, min_value=0, max_value=1
+    )
+    imputation_cosine_similarity = CustomFloatField(
+        label="Minimal cosine similarity value for missing value imputation of RM scores for clustering",
+        initial=0.98,
+    )
+    colormap = CustomChoiceField(
+        label="Color map used for heatmap",
+        choices=[
+            (1, "red-white-blue"),
+            (2, "pink-white-green"),
+            (3, "purple-white-green"),
+            (4, "brown-white-bluegreen"),
+            (5, "orange-white-purple"),
+            (6, "red-white-grey"),
+            (7, "red-yellow-green"),
+            (8, "red-yellow-blue"),
+        ],
+    )
+    remove_outliers = CustomBooleanField(
+        label="Remove peptides with outlier intensities from RM score calculation",
+        required=False,
+        initial=True,
+    )
+    deseq2_normalization = CustomBooleanField(
+        label="Apply DESeq2 normalization to RM scores before clustering",
+        required=False,
+        initial=True,
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
+        self.fields["reference_group"].choices = fill_helper.to_choices(
+            run.steps.metadata_df["Group"].unique()
         )
 
 

@@ -10,7 +10,6 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -19,7 +18,9 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
-from protzilla.data_analysis.ptm_quantification import flexiquant_lf
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
+from protzilla.data_analysis.ptm_quantification.flexiquant import flexiquant_lf
+from protzilla.data_analysis.ptm_quantification.multiflex import multiflex_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -636,6 +637,45 @@ class FLEXIQuantLF(PlotStep):
         )
 
         inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class MultiFLEXLF(PlotStep):
+    display_name = "MultiFLEX-LF"
+    operation = "modification_quantification"
+    method_description = "Quantifies the extent of protein modifications in proteomics data by using robust linear regression to compare modified and unmodified peptide precursors and facilitates the analysis of modification dynamics and coregulated modifications across large datasets without the need for preselecting specific proteins."
+
+    input_keys = [
+        "peptide_df",
+        "metadata_df",
+        "reference_group",
+        "num_init",
+        "mod_cutoff",
+        "remove_outliers",
+        "imputation_cosine_similarity",
+        "deseq2_normalization",
+        "colormap",
+    ]
+
+    output_keys = [
+        "RM_scores_clustered",
+        "diff_modified",
+        "raw_scores",
+        "removed_peptides",
+        "RM_scores",
+        "sample_groups",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return multiflex_lf(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
 
 
 class SelectPeptidesForProtein(DataAnalysisStep):
