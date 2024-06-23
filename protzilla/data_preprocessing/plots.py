@@ -8,13 +8,13 @@ from plotly.subplots import make_subplots
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
 import protzilla.constants.colors as colorscheme
-from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE, PROTAN_DISCRETE_COLOR_SEQUENCE, DEUTAN_DISCRETE_COLOR_SEQUENCE, TRITAN_DISCRETE_COLOR_SEQUENCE, MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-from protzilla.steps import StepManager
+from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
 
 def create_pie_plot(
-    names_of_sectors: "list[str]",
-    values_of_sectors: "list[int]",
-    heading: str = "",
+        names_of_sectors: "list[str]",
+        values_of_sectors: "list[int]",
+        heading: str = "",
 ) -> Figure:
     """
     Function to create generic pie graph from data.
@@ -52,20 +52,18 @@ def create_pie_plot(
 
 
 def create_bar_plot(
-    names_of_sectors: "list[str]",
-    values_of_sectors: "list[int]",
-    heading: str = "",
-    #colors: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
-    y_title: str = "",
-    x_title: str = "",
+        names_of_sectors: "list[str]",
+        values_of_sectors: "list[int]",
+        heading: str = "",
+        y_title: str = "",
+        x_title: str = "",
 ) -> Figure:
     """
     Function to create generic bar graph from data.
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param color: Optional argument to specify the colour of the bar chart
-    :param names_of_sectors: Name of parts (so called sectors) or categories
+    :param names_of_sectors: Name of parts (so-called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
     :param y_title: Optional y-axis title.
@@ -102,15 +100,15 @@ def create_bar_plot(
 
 
 def create_box_plots(
-    dataframe_a: pd.DataFrame,
-    dataframe_b: pd.DataFrame,
-    name_a: str = "",
-    name_b: str = "",
-    heading: str = "",
-    y_title: str = "",
-    x_title: str = "",
-    group_by: str = "None",
-    visual_transformation: str = "linear",
+        dataframe_a: pd.DataFrame,
+        dataframe_b: pd.DataFrame,
+        name_a: str = "",
+        name_b: str = "",
+        heading: str = "",
+        y_title: str = "",
+        x_title: str = "",
+        group_by: str = "None",
+        visual_transformation: str = "linear",
 ) -> Figure:
     """
     A function to create a boxplot for visualisation
@@ -136,6 +134,8 @@ def create_box_plots(
     graph_type argument. Default is "None".
     :return: returns a boxplot of the data
     """
+    colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
     if group_by not in {"None", "Sample", "Protein ID"}:
         raise ValueError(
             f"""Group_by parameter  must be "None" or
@@ -148,13 +148,13 @@ def create_box_plots(
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
             x=dataframe_a[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+            marker_color=colors[0],
             name=name_a,
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
             x=dataframe_b[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+            marker_color=colors[1],
             name=name_b,
         )
         fig.add_trace(trace0, 1, 1)
@@ -165,12 +165,12 @@ def create_box_plots(
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+            marker_color=colors[0],
             name=name_a,
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+            marker_color=colors[1],
             name=name_b,
         )
         fig.add_trace(trace0, 1, 1)
@@ -201,15 +201,15 @@ def create_box_plots(
 
 
 def create_histograms(
-    dataframe_a: pd.DataFrame,
-    dataframe_b: pd.DataFrame,
-    name_a: str = "",
-    name_b: str = "",
-    heading: str = "",
-    y_title: str = "",
-    x_title: str = "",
-    visual_transformation: str = "linear",
-    overlay: bool = False,
+        dataframe_a: pd.DataFrame,
+        dataframe_b: pd.DataFrame,
+        name_a: str = "",
+        name_b: str = "",
+        heading: str = "",
+        y_title: str = "",
+        x_title: str = "",
+        visual_transformation: str = "linear",
+        overlay: bool = False,
 ) -> Figure:
     """
     A function to create a histogram for visualisation
@@ -232,6 +232,8 @@ def create_histograms(
 
     :return: returns a pie or bar chart of the data
     """
+    colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
     if visual_transformation not in {"linear", "log10"}:
         raise ValueError(
             f"""visual_transformation parameter  must be "linear" or
@@ -253,24 +255,24 @@ def create_histograms(
 
     number_of_bins = 100
     binsize_a = (
-        intensities_a.max(skipna=True) - intensities_a.min(skipna=True)
-    ) / number_of_bins
+                        intensities_a.max(skipna=True) - intensities_a.min(skipna=True)
+                ) / number_of_bins
     binsize_b = (
-        intensities_b.max(skipna=True) - intensities_b.min(skipna=True)
-    ) / number_of_bins
+                        intensities_b.max(skipna=True) - intensities_b.min(skipna=True)
+                ) / number_of_bins
 
     if overlay:
         binsize_a = binsize_b = max(binsize_a, binsize_b)
 
     trace0 = go.Histogram(
         x=intensities_a,
-        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+        marker_color=colors[0],
         name=name_a,
         xbins=dict(start=min_value, end=max_value, size=binsize_a),
     )
     trace1 = go.Histogram(
         x=intensities_b,
-        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+        marker_color=colors[1],
         name=name_b,
         xbins=dict(start=min_value, end=max_value, size=binsize_b),
     )
@@ -314,9 +316,9 @@ def create_histograms(
 
 
 def create_anomaly_score_bar_plot(
-    anomaly_df: pd.DataFrame,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+        anomaly_df: pd.DataFrame,
+        colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+        colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -369,10 +371,10 @@ def create_anomaly_score_bar_plot(
 
 
 def create_pca_2d_scatter_plot(
-    pca_df: pd.DataFrame,
-    explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+        pca_df: pd.DataFrame,
+        explained_variance_ratio: list,
+        colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+        colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -419,10 +421,10 @@ def create_pca_2d_scatter_plot(
 
 
 def create_pca_3d_scatter_plot(
-    pca_df: pd.DataFrame,
-    explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+        pca_df: pd.DataFrame,
+        explained_variance_ratio: list,
+        colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+        colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
