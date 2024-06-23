@@ -33,35 +33,17 @@ MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE = [
     "#D3D3D3"
 ]
 
-def get_color_from_run(steps: StepManager):
-    global PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    if steps.customising is not None:
-        if steps.customising.colors is not None:
-            if steps.customising.colors == "protan":
-                PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = PROTAN_DISCRETE_COLOR_SEQUENCE
-            elif steps.customising.colors == "deutan":
-                PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = DEUTAN_DISCRETE_COLOR_SEQUENCE
-            elif steps.customising.colors == "tritan":
-                PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = TRITAN_DISCRETE_COLOR_SEQUENCE
-            elif steps.customising.colors == "monochromatic":
-                PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-            else:
-                PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = PROTZILLA_DISCRETE_COLOR_SEQUENCE
-            return PROTZILLA_DISCRETE_COLOR_SEQUENCE
-    else:
-        return PROTZILLA_DISCRETE_COLOR_SEQUENCE
-#maybe no return value needed
-#put into dictionary
 
 def get_color_sequence(colors: str):
+    color_sequences = {
+        "protan": PROTAN_DISCRETE_COLOR_SEQUENCE,
+        "deutan": DEUTAN_DISCRETE_COLOR_SEQUENCE,
+        "tritan": TRITAN_DISCRETE_COLOR_SEQUENCE,
+        "monochromatic": MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
+    }
     global PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    if colors == "protan":
-        PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = PROTAN_DISCRETE_COLOR_SEQUENCE
-    elif colors == "deutan":
-        PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = DEUTAN_DISCRETE_COLOR_SEQUENCE
-    elif colors == "tritan":
-        PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = TRITAN_DISCRETE_COLOR_SEQUENCE
-    elif colors == "monochromatic":
-        PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE
-    else:
-        return PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
+    if colors in color_sequences:
+        PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = color_sequences[colors]
+
+

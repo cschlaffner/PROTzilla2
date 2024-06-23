@@ -14,7 +14,6 @@ from protzilla.data_preprocessing import (
 )
 from protzilla.steps import Plots, Step, StepManager
 from protzilla.utilities import format_trace
-from protzilla.methods.customising import CustomisingStep
 
 
 class DataPreprocessingStep(Step):
@@ -29,21 +28,14 @@ class DataPreprocessingStep(Step):
         self.plot_inputs: dict = {}
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
-        #print("in insert_dataframes steps are: ")
-        #print(steps)
-        #print(inputs)
         inputs["protein_df"] = steps.protein_df
-        #print(inputs)
-
         return inputs
 
-    def plot(self, steps: StepManager, inputs: dict = None):
+    def plot(self, inputs: dict = None):
         if inputs is None:
             inputs = self.plot_inputs
         else:
             self.plot_inputs = inputs.copy()
-        print("in plot steps are: ")
-        print(steps)
         inputs = self.insert_dataframes_for_plot(inputs)
         try:
             self.plots = Plots(self.plot_method(inputs))
@@ -78,17 +70,7 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
     input_keys = ["percentage", "protein_df"]
 
     def method(self, inputs):
-        #print("inputs")
         return filter_proteins.by_samples_missing(**inputs)
-
-    #def insert_dataframes_for_plot(self, steps: StepManager, inputs: dict) -> dict:
-        #print("steps are")
-        #print(steps)
-     #   inputs["colors"] = steps.getColors
-      #  print(inputs["colors"])
-       # inputs["method_inputs"] = self.inputs
-        #inputs["method_outputs"] = self.output
-        #return inputs
 
     def plot_method(self, inputs):
         return filter_proteins.by_samples_missing_plot(**inputs)
