@@ -694,4 +694,4 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
 
     def handle_outputs(self, outputs: dict):
         super().handle_outputs(outputs)
-        self.display_output["required_sample_size"] = outputs["required_sample_size"]
+        self.display_output["required_sample_size"] = f"Required Sample Size: {outputs['required_sample_size']}"
