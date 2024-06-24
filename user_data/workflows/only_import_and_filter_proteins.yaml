@@ -2,6 +2,7 @@ steps:
   - form_inputs:
       intensity_name: iBAQ
       map_to_uniprot: false
+      aggregation_method: Sum
     inputs: { }
     type: MaxQuantImport
   - form_inputs:
