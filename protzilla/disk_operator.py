@@ -89,8 +89,11 @@ class KEYS:
 
 def set_color(steps_run):
     color_value = steps_run['form_inputs']['colors']
-    if color_value:
+    if color_value and (color_value != "custom"):
         colors.get_color_sequence(color_value)
+    elif color_value == "custom":
+        custom_color_str = steps_run['form_inputs']['custom_colors']
+        colors.set_custom_sequence(custom_color_str)
 
 
 class DiskOperator:

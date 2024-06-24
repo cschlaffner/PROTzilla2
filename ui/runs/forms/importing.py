@@ -88,7 +88,6 @@ class MetadataColumnAssignmentForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        print("Calling fill_form")
         metadata = run.steps.get_step_output(
             ImportingStep, "metadata_df", include_current_step=True
         )

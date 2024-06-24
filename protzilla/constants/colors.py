@@ -1,11 +1,11 @@
-from protzilla.steps import StepManager
+import re
 
 PROTZILLA_DISCRETE_COLOR_SEQUENCE = [
     "#4A536A",
     "#87A8B9",
     "#CE5A5A",
     "#8E3325",
-    "#E2A46D",
+    "#E2A46D"
 ]
 
 PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = [
@@ -15,12 +15,12 @@ PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = [
 
 PROTAN_DISCRETE_COLOR_SEQUENCE = [
     "#3673c4",
-    "#e3a22a",
+    "#e3a22a"
 ]
 # justify how colors come about
 DEUTAN_DISCRETE_COLOR_SEQUENCE = [
     "#3673c4",
-    "#000000",
+    "#000000"
 ]
 
 TRITAN_DISCRETE_COLOR_SEQUENCE = [
@@ -47,3 +47,17 @@ def get_color_sequence(colors: str):
         PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = color_sequences[colors]
 
 
+def set_custom_sequence(custom_color_sequence: str):
+    global PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
+    if not (is_valid_hex_color_pair(custom_color_sequence)):
+        raise ValueError("Invalid hex color pair")
+
+    custom_color_list = custom_color_sequence.split(",")
+    PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE = custom_color_list
+
+
+def is_valid_hex_color_pair(s):
+    hex_color_pattern = r'#[0-9a-fA-F]{6}'
+    pattern = re.compile(f'^{hex_color_pattern}, {hex_color_pattern}$')
+    return bool(pattern.match(s))

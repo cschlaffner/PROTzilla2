@@ -1,13 +1,11 @@
-import protzilla.constants.colors as colorss
+import protzilla.constants.colors as color_constants
 
 
-def customise(colors: str) -> dict:
-    colorway = colors
-    print("************")
-    print(colors)
-    colorss.get_color_sequence(colorway)
-    return {'colors': colorway}
+def customise(colors: str, custom_colors: str) -> dict:
+    if colors != "custom":
+        color_constants.get_color_sequence(colors)
+    else:
+        color_constants.set_custom_sequence(custom_colors)
+    return {'colors': colors, 'custom_color_value': custom_colors}
 
-# todo: needs to be made shorter
 
-# def saveColorways(colors: dict):

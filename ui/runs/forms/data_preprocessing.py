@@ -79,11 +79,6 @@ class FilterProteinsBySamplesMissingPlotForm(MethodForm):
         label="Graph type",
         initial=BarAndPieChart.pie_chart,
     )
- #   color = CustomChoiceField(
- #       choices=ColorChoices,
- #       label="Color",
- #       initial=ColorChoices.standard,
- #   )
 
 
 class FilterByProteinsCountForm(MethodForm):

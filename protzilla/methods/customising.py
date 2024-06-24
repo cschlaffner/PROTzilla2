@@ -19,9 +19,13 @@ class ChangeColor(CustomisingStep):
     display_name = "Color"
     operation = "Color"
     method_description = "Change the colors of visualizations"
-    input_keys = ["colors"]
+    input_keys = ["colors", "custom_colors"]
     output_keys = ["colors"]
-    #todo: naming needs more creativity
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        if inputs["custom_colors"] == "":
+            inputs["custom_colors"] = None
+        return inputs
 
     def method(self, inputs):
         return customise(**inputs)
