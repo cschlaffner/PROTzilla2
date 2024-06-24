@@ -5,7 +5,7 @@ from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
-    DimensionReductionUMAP, DataAnalysisStep,
+    DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein,
 )
 from protzilla.run import Run
 from protzilla.steps import Step
@@ -17,7 +17,8 @@ from .custom_fields import (
     CustomChoiceField,
     CustomFloatField,
     CustomMultipleChoiceField,
-    CustomNumberField, CustomBooleanField,
+    CustomNumberField,
+    CustomBooleanField,
 )
 
 
@@ -221,8 +222,8 @@ class DifferentialExpressionTTestForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-                "group1" in self.data
-                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -262,8 +263,8 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 
         # Set choices for group2 field based on selected grouping and group1
         if (
-                "group1" in self.data
-                and self.data["group1"] in run.steps.metadata_df[grouping].unique()
+            "group1" in self.data
+            and self.data["group1"] in run.steps.metadata_df[grouping].unique()
         ):
             self.fields["group2"].choices = [
                 (el, el)
@@ -398,9 +399,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=0,
             )
             if (
-                    "similarity" not in self.data
-                    or float(self.data["similarity"]) < -1
-                    or float(self.data["similarity"]) > 1
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < -1
+                or float(self.data["similarity"]) > 1
             ):
                 self.data["similarity"] = 0
         else:
@@ -412,9 +413,9 @@ class PlotProtQuantForm(MethodForm):
                 initial=1,
             )
             if (
-                    "similarity" not in self.data
-                    or float(self.data["similarity"]) < 0
-                    or float(self.data["similarity"]) > 999
+                "similarity" not in self.data
+                or float(self.data["similarity"]) < 0
+                or float(self.data["similarity"]) > 999
             ):
                 self.data["similarity"] = 1
 
@@ -955,3 +956,44 @@ class SelectPeptidesForProteinForm(MethodForm):
         else:
             self.toggle_visibility("sort_proteins", False)
             self.toggle_visibility("protein_ids", False)
+
+
+class PTMsPerSampleForm(MethodForm):
+    peptide_df = CustomChoiceField(
+        choices=[],
+        label="Peptide dataframe containing the peptides of a single protein",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        single_protein_peptides = run.steps.get_instance_identifiers(
+            SelectPeptidesForProtein, "peptide_df"
+        )
+        self.fields["peptide_df"].choices = fill_helper.to_choices(single_protein_peptides)
+
+        self.fields["peptide_df"].choices = fill_helper.get_choices(
+            run, "peptide_df"
+        )
+
+        single_protein_peptides = run.steps.get_instance_identifiers(
+            SelectPeptidesForProtein, "peptide_df"
+        )
+        if single_protein_peptides:
+            self.fields["peptide_df"].initial = single_protein_peptides[0]
+
+
+class PTMsPerProteinAndSampleForm(MethodForm):
+    peptide_df = CustomChoiceField(
+        choices=[],
+        label="Peptide dataframe containing the peptides of a single protein",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(
+            run, "peptide_df"
+        )
+
+        single_protein_peptides = run.steps.get_instance_identifiers(
+            SelectPeptidesForProtein, "peptide_df"
+        )
+        if single_protein_peptides:
+            self.fields["peptide_df"].initial = single_protein_peptides[0]
