@@ -1,6 +1,8 @@
 import asyncio
 import json
 import logging
+import re
+from enum import StrEnum
 from typing import Optional
 
 import aiohttp
@@ -11,6 +13,27 @@ from tqdm import tqdm
 
 from protzilla.constants.protzilla_logging import logger
 from protzilla.disk_operator import FileOutput
+
+
+class FRAGMENTATION_TYPE(StrEnum):
+    HCD = "HCD"
+    CID = "CID"
+
+
+class DATA_KEYS(StrEnum):
+    PEPTIDE_SEQUENCE = "peptide_sequences"
+    PRECURSOR_CHARGES = "precursor_charges"
+    COLLISION_ENERGIES = "collision_energies"
+    FRAGMENTATION_TYPES = "fragmentation_types"
+
+
+class OUTPUT_KEYS(StrEnum):
+    MZ_VALUES = "mz"
+    INTENSITY_VALUES = "intensities"
+    ANNOTATIONS = "annotation"
+    FRAGMENT_TYPE = "fragment_type"
+    FRAGMENT_CHARGE = "fragment_charge"
+
 
 AVAILABLE_MODELS = {
     "PrositIntensityHCD": {
@@ -25,28 +48,47 @@ AVAILABLE_MODELS = {
         "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_CID/infer",
         "required_keys": ["peptide_sequences", "precursor_charges"],
     },
-    "PrositIntensityXL_CMS3": {
-        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_XL_CMS3/infer",
-        "required_keys": ["peptide_sequences", "precursor_charges"],
-    },
+    # "PrositIntensityXL_CMS3": {
+    #    "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_XL_CMS3/infer",
+    #    "required_keys": ["peptide_sequences", "precursor_charges"],
+    # },
     # "PrositIntensityXL_CMS2": {
     #     "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_XL_CMS2/infer",
     #     "required_keys": ["peptide_sequences", "precursor_charges"]
     # },
+    "PrositIntensityTimsTOF": {
+        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_timsTOF/infer",
+        "required_keys": [
+            "peptide_sequences",
+            "precursor_charges",
+            "collision_energies",
+        ],
+    },
+    "PrositIntensityTMT": {
+        "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_TMT/infer",
+        "required_keys": [
+            DATA_KEYS.PEPTIDE_SEQUENCE,
+            DATA_KEYS.PRECURSOR_CHARGES,
+            DATA_KEYS.COLLISION_ENERGIES,
+            DATA_KEYS.FRAGMENTATION_TYPES,
+        ],
+    },
 }
 
 AVAILABLE_FORMATS = ["msp", "csv"]
 
 
 class SpectrumPredictor:
-    def __init__(self, prediction_df: pd.DataFrame, dissociation_method: str = "HCD"):
-        self._verify_input(prediction_df)
+    def __init__(self, prediction_df: pd.DataFrame):
         self.prediction_df = prediction_df
-        self.dissociation_method = dissociation_method
 
+    # TODO this can be cleaned up, using the peptide_df directly
     @staticmethod
     def create_prediction_df(
-        peptide_sequences, charge: list[int] | range, nce: int = 30
+        peptide_sequences,
+        charge: list[int] | range,
+        nce: int = 30,
+        fragmentation_types: list[str] = None,
     ):
         # Create a dataframe with the peptide sequences
         prediction_df = pd.DataFrame(peptide_sequences, columns=["Sequence"])
@@ -59,6 +101,15 @@ class SpectrumPredictor:
                     ignore_index=True,
                 )
         prediction_df["NCE"] = nce
+        if fragmentation_types:
+            for ft in fragmentation_types:
+                prediction_df = pd.concat(
+                    [
+                        prediction_df,
+                        pd.DataFrame({"FragmentType": [ft] * len(prediction_df)}),
+                    ],
+                    ignore_index=True,
+                )
         prediction_df.drop_duplicates(inplace=True)
         return prediction_df
 
@@ -67,37 +118,51 @@ class SpectrumPredictor:
             "This method should be implemented in the child class"
         )
 
-    def _verify_input(self, prediction_df: pd.DataFrame | None = None):
-        if prediction_df is None:
-            prediction_df = self.prediction_df
-        # Check if the input dataframe has the required columns
-        if "Sequence" not in prediction_df.columns:
-            raise ValueError("The input dataframe should have a 'Sequence' column")
-        if "Charge" not in prediction_df.columns:
-            raise ValueError("The input dataframe should have a 'Charge' column")
-        if "NCE" not in prediction_df.columns:
-            raise ValueError("The input dataframe should have a 'nce' column")
+    def _verify_input(self, prediction_df: Optional[pd.DataFrame] = None):
+        raise NotImplementedError(
+            "This method should be implemented in the child class"
+        )
 
 
 class KoinaModel(SpectrumPredictor):
     def __init__(
         self,
-        prediction_df: pd.DataFrame,
         required_keys: list[str],
-        dissociation_method: str = "HCD",
-        url: str = None,
+        url: str,
+        prediction_df: Optional[pd.DataFrame] = None,
     ):
-        super().__init__(prediction_df, dissociation_method)
+        super().__init__(prediction_df)
         self.required_keys = required_keys
-        self.KOINA_URL = (
-            url
-            if url
-            else "https://koina.wilhelmlab.org/v2/models/Prosit_2020_intensity_HCD/infer"
-        )
+        self.KOINA_URL = url
+        if prediction_df is not None:
+            self._load_prediction_df(prediction_df)
+
+    def _load_prediction_df(self, prediction_df: pd.DataFrame):
+        self.prediction_df = prediction_df
         self.preprocess()
+        self._verify_input(prediction_df)
+
+    def _verify_input(self, prediction_df: Optional[pd.DataFrame] = None):
+        for key in self.required_keys:
+            if key not in prediction_df.columns:
+                raise ValueError(f"Required key '{key}' not found in input DataFrame.")
 
     def preprocess(self):
-        pass
+        self.prediction_df.rename(
+            columns={
+                "Sequence": DATA_KEYS.PEPTIDE_SEQUENCE,
+                "Charge": DATA_KEYS.PRECURSOR_CHARGES,
+                "NCE": DATA_KEYS.COLLISION_ENERGIES,
+                "FragmentationType": DATA_KEYS.FRAGMENTATION_TYPES,
+            },
+            inplace=True,
+        )
+        self.prediction_df = self.prediction_df[self.required_keys]
+        self.prediction_df = self.prediction_df[
+            self.prediction_df[DATA_KEYS.PRECURSOR_CHARGES] <= 5
+        ]
+
+    annotation_regex = re.compile(r"((y|b)\d+)\+(\d+)")
 
     def predict(self):
         predicted_spectra = []
@@ -122,34 +187,40 @@ class KoinaModel(SpectrumPredictor):
 
     def format_for_request(self, to_predict: pd.DataFrame) -> dict:
         inputs = []
-        if (
-            "peptide_sequences" in self.required_keys
-            and "Sequence" in to_predict.columns
-        ):
+        if DATA_KEYS.PEPTIDE_SEQUENCE in to_predict.columns:
             inputs.append(
                 {
-                    "name": "peptide_sequences",
+                    "name": str(DATA_KEYS.PEPTIDE_SEQUENCE),
                     "shape": [len(to_predict), 1],
                     "datatype": "BYTES",
-                    "data": to_predict["Sequence"].to_list(),
+                    "data": to_predict[DATA_KEYS.PEPTIDE_SEQUENCE].to_list(),
                 }
             )
-        if "precursor_charges" in self.required_keys and "Charge" in to_predict.columns:
+        if DATA_KEYS.PRECURSOR_CHARGES in to_predict.columns:
             inputs.append(
                 {
-                    "name": "precursor_charges",
+                    "name": str(DATA_KEYS.PRECURSOR_CHARGES),
                     "shape": [len(to_predict), 1],
                     "datatype": "INT32",
-                    "data": to_predict["Charge"].to_list(),
+                    "data": to_predict[DATA_KEYS.PRECURSOR_CHARGES].to_list(),
                 }
             )
-        if "collision_energies" in self.required_keys and "NCE" in to_predict.columns:
+        if DATA_KEYS.COLLISION_ENERGIES in to_predict.columns:
             inputs.append(
                 {
-                    "name": "collision_energies",
+                    "name": str(DATA_KEYS.COLLISION_ENERGIES),
                     "shape": [len(to_predict), 1],
                     "datatype": "FP32",
-                    "data": to_predict["NCE"].to_list(),
+                    "data": to_predict[DATA_KEYS.COLLISION_ENERGIES].to_list(),
+                }
+            )
+        if DATA_KEYS.FRAGMENTATION_TYPES in to_predict.columns:
+            inputs.append(
+                {
+                    "name": str(DATA_KEYS.FRAGMENTATION_TYPES),
+                    "shape": [len(to_predict), 1],
+                    "datatype": "BYTES",
+                    "data": to_predict[DATA_KEYS.FRAGMENTATION_TYPES].to_list(),
                 }
             )
         return json.dumps(
@@ -176,61 +247,51 @@ class KoinaModel(SpectrumPredictor):
 
     @staticmethod
     def process_response(request: pd.DataFrame, response: dict) -> pd.DataFrame:
-        mz_index, intensity_index, fragment_type_index = 1, 2, 0
-        shape_mz = response["outputs"][mz_index]["shape"]
-        shape_intensity = response["outputs"][intensity_index]["shape"]
-        shape_fragment_type = response["outputs"][fragment_type_index]["shape"]
-        mz_values = np.reshape(response["outputs"][mz_index]["data"], shape_mz)
-        intensity_values = np.reshape(
-            response["outputs"][intensity_index]["data"], shape_intensity
+        # convert the response to a DataFrame
+        results = {}
+        for output in response["outputs"]:
+            results[output["name"]] = np.reshape(output["data"], output["shape"])
+
+        # Prosit returns the annotations for charge and fragment type in a single string
+        def get_annotations(annotations):
+            if match := KoinaModel.annotation_regex.match(annotations):
+                return match.group(1), match.group(3)
+            return None, None
+
+        vectorized_extract_annotations = np.vectorize(get_annotations)
+        fragment_types, fragment_charges = vectorized_extract_annotations(
+            results.get(OUTPUT_KEYS.ANNOTATIONS)
         )
-        fragment_types = np.reshape(
-            response["outputs"][fragment_type_index]["data"], shape_fragment_type
-        )
-        # create Spectrum instances for each peptide
+        results[OUTPUT_KEYS.FRAGMENT_TYPE] = fragment_types
+        results[OUTPUT_KEYS.FRAGMENT_CHARGE] = fragment_charges
+
         spectra = []
         for i, (_, row) in enumerate(request.iterrows()):
             spectra.append(
                 Spectrum(
-                    row["Sequence"],
-                    row["Charge"],
-                    mz_values[i],
-                    intensity_values[i],
-                    annotations={"FragmentType": fragment_types[i]},
+                    row[DATA_KEYS.PEPTIDE_SEQUENCE],
+                    row[DATA_KEYS.PRECURSOR_CHARGES],
+                    results.get(OUTPUT_KEYS.MZ_VALUES)[i],
+                    results.get(OUTPUT_KEYS.INTENSITY_VALUES)[i],
+                    annotations={
+                        OUTPUT_KEYS.FRAGMENT_TYPE: results.get(
+                            OUTPUT_KEYS.FRAGMENT_TYPE
+                        )[i],
+                        OUTPUT_KEYS.FRAGMENT_CHARGE: results.get(
+                            OUTPUT_KEYS.FRAGMENT_CHARGE
+                        )[i],
+                    },
                 )
             )
         return spectra
 
 
-class PrositIntensityHCD(KoinaModel):
-    def preprocess(self):
-        self.prediction_df = self.prediction_df[self.prediction_df["Charge"] <= 5]
-
-
-class PrositIntensityCID(KoinaModel):
-    def preprocess(self):
-        self.prediction_df = self.prediction_df[self.prediction_df["Charge"] <= 5]
-
-
-class PrositIntensityXL_CMS3(KoinaModel):
-    pass
-
-
 class SpectrumPredictorFactory:
-    class_mapping = {
-        "PrositIntensityHCD": PrositIntensityHCD,
-        "PrositIntensityCID": PrositIntensityCID,
-        "PrositIntensityXL_CMS3": PrositIntensityXL_CMS3,
-    }
-
     @staticmethod
-    def create_predictor(model_name: str, prediction_df: pd.DataFrame):
+    def create_predictor(model_name: str) -> KoinaModel:
         if model_name not in AVAILABLE_MODELS:
             raise ValueError(f"Model '{model_name}' is not available.")
-
-        return SpectrumPredictorFactory.class_mapping[model_name](
-            prediction_df, **AVAILABLE_MODELS[model_name]
-        )
+        return KoinaModel(**AVAILABLE_MODELS[model_name])
 
 
 def predict(
@@ -239,17 +300,15 @@ def predict(
     output_format: str,
     csv_seperator: str = ",",
 ):
-    if "Charge" in peptide_df.columns:
-        prediction_df = (
-            peptide_df[["Sequence", "Charge"]].copy().drop_duplicates()[::10]
-        )
+    predictor = SpectrumPredictorFactory.create_predictor(model_name)
+    prediction_df = peptide_df[["Sequence", "Charge"]].copy().drop_duplicates()[::10]
+    # TODO how to extract that data from the input?
+    if DATA_KEYS.COLLISION_ENERGIES in predictor.required_keys:
         prediction_df["NCE"] = 30
-    else:
-        logging.warning("No charge column found, assuming charge 2")
-        prediction_df = SpectrumPredictor.create_prediction_df(
-            peptide_df["Sequence"], peptide_df["Charge"], 30
-        )
-    predictor = SpectrumPredictorFactory.create_predictor(model_name, prediction_df)
+    if DATA_KEYS.FRAGMENTATION_TYPES in predictor.required_keys:
+        prediction_df["FragmentationType"] = FRAGMENTATION_TYPE.HCD
+
+    predictor._load_prediction_df(prediction_df)
     predicted_spectra = predictor.predict()
     # merge df's into big df
     base_name = "predicted_spectra"
@@ -257,10 +316,11 @@ def predict(
         output = SpectrumExporter.export_to_csv(predicted_spectra, base_name)
     elif output_format == "msp":
         output = SpectrumExporter.export_to_msp(predicted_spectra, base_name)
-    elif output_format == "mgf":
-        output = SpectrumExporter.export_to_mgf(predicted_spectra, base_name)
     return {
         "predicted_spectra": output,
+        "predicted_spectra_df": pd.concat(
+            [spectrum.to_mergeable_df() for spectrum in predicted_spectra]
+        ),
         "messages": [
             {
                 "level": logging.INFO,
@@ -308,7 +368,9 @@ class Spectrum:
         self.spectrum = self.spectrum[self.spectrum["Intensity"] > 0]
 
     def to_mergeable_df(self):
-        return self.spectrum.assign(Sequence=self.peptide_sequence, Charge=self.charge)
+        return self.spectrum.assign(
+            Sequence=self.peptide_sequence, Charge=self.metadata["Charge"]
+        )
 
 
 class SpectrumExporter:
@@ -324,18 +386,7 @@ class SpectrumExporter:
                 "Num Peaks": len(spectrum.spectrum),
             }
             header = "\n".join([f"{k}: {v}" for k, v in header_dict.items()])
-            peaks = [
-                f"{mz}\t{intensity}"
-                for mz, intensity in spectrum.spectrum[["m/z", "Intensity"]].values
-            ]
-            if len(spectrum.spectrum.columns) > 2:
-                peaks = SpectrumExporter._annotate_peak_strs(
-                    peaks,
-                    [
-                        spectrum.spectrum[col].values
-                        for col in spectrum.spectrum.columns[2:]
-                    ],
-                )
+            peaks = SpectrumExporter._annotate_peak_strs_v2(spectrum.spectrum)
             peaks = "".join(peaks)
             lines.append(f"{header}\n{peaks}\n")
 
@@ -345,6 +396,46 @@ class SpectrumExporter:
         content = "\n".join(lines)
         logger.info("Export finished!")
         return FileOutput(base_file_name, "msp", content)
+
+    @staticmethod
+    def _annotate_peak_strs_v2(
+        spectrum_df: pd.DataFrame,
+        prefix='"',
+        seperator=" ",
+        suffix='"',
+        add_newline=True,
+    ):
+        peaks = [
+            f"{mz}\t{intensity}"
+            for mz, intensity in spectrum_df[["m/z", "Intensity"]].values
+        ]
+        annotations = [f"{prefix}" for _ in spectrum_df.values]
+        if len(spectrum_df.columns) > 2:
+            for column in spectrum_df.columns[2:]:
+                if column == OUTPUT_KEYS.FRAGMENT_CHARGE:
+                    annotations = [
+                        current_annotation_str[:-1] + f"^{fragment_charge}{seperator}"
+                        for current_annotation_str, fragment_charge in zip(
+                            annotations, spectrum_df[column]
+                        )
+                    ]
+                    continue
+
+                annotations = [
+                    current_annotation_str + str(annotation) + seperator
+                    for current_annotation_str, annotation in zip(
+                        annotations, spectrum_df[column]
+                    )
+                ]
+            annotations = [
+                current_annotation_str[:-1] for current_annotation_str in annotations
+            ]
+            peaks = [
+                f"{peak}\t{annotation}{suffix}\n"
+                for peak, annotation in zip(peaks, annotations)
+            ]
+
+        return peaks
 
     @staticmethod
     def _annotate_peak_strs(
@@ -357,6 +448,7 @@ class SpectrumExporter:
     ):
         combined_annotations = [prefix for _ in range(len(peaks))]
         for annotation in annotations:
+            # preprocess annotations
             combined_annotations = [
                 current_annotation_str + peak_annotation + seperator
                 for current_annotation_str, peak_annotation in zip(
@@ -379,8 +471,6 @@ class SpectrumExporter:
         if add_newline:
             new_peaks = [f"{peak}\n" for peak in new_peaks]
         return new_peaks
-
-        return
 
     @staticmethod
     def export_to_csv(
