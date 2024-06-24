@@ -35,9 +35,9 @@ class EmptyEnum(Enum):
 
 
 class AggregationMethods(Enum):
-    SUM = "Sum"
-    MEDIAN = "Median"
-    MEAN = "Mean"
+    sum = "Sum"
+    median = "Median"
+    mean = "Mean"
 
 
 class MaxQuantImportForm(MethodForm):

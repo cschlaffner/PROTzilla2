@@ -11,7 +11,7 @@ from protzilla.utilities import format_trace
 
 
 def max_quant_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="Sum"
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method: str ="Sum"
 ) -> dict:
     assert intensity_name in ["Intensity", "iBAQ", "LFQ intensity"]
     try:
@@ -42,7 +42,7 @@ def max_quant_import(
 
 
 def ms_fragger_import(
-    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method="Sum"
+    file_path: str, intensity_name: str, map_to_uniprot=False, aggregation_method: str ="Sum"
 ) -> dict:
     assert intensity_name in [
         "Intensity",
@@ -93,7 +93,7 @@ def ms_fragger_import(
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
-def diann_import(file_path, map_to_uniprot=False, aggregation_method="Sum") -> dict:
+def diann_import(file_path, map_to_uniprot=False, aggregation_method: str ="Sum") -> dict:
     try:
         df = pd.read_csv(
             file_path,
@@ -124,7 +124,7 @@ def diann_import(file_path, map_to_uniprot=False, aggregation_method="Sum") -> d
 
 
 def transform_and_clean(
-    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method="Sum"
+    df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method: str ="Sum"
 ) -> dict:
     """
     Transforms a dataframe that is read from a file in wide format into long format,
@@ -156,9 +156,9 @@ def transform_and_clean(
     df = df[has_valid_protein_id]
 
     # applies the selected aggregation to duplicate protein groups, NaN if all are NaN, aggregation of numbers otherwise
-    agg_methods = {"Sum": 'sum', "Median": 'median', "Mean": 'mean'}
-    agg_kwargs = {"Sum": {"min_count": 1}, "Median": {}, "Mean": {}}
-    df = df.groupby("Protein ID", as_index=False).agg(agg_methods[aggregation_method], **agg_kwargs[aggregation_method])
+    aggregation_method = aggregation_method.lower()
+    agg_kwargs = {"sum": {"min_count": 1}, "median": {}, "mean": {}}
+    df = df.groupby("Protein ID", as_index=False).agg(aggregation_method, **agg_kwargs[aggregation_method])
 
     df = df.assign(Gene=lambda _: np.nan)  # add deprecated genes column
 
@@ -198,8 +198,6 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     # go through all groups and find the valid proteins
     # non uniprot ids are put into extracted_ids, so they can be mapped
     for group in protein_groups:
-        if "A0A0C4DH41" in group:
-            print(group)
         found_in_group = []
         for protein_id in group.split(";"):
             if not protein_id.startswith("ENSP") and (
