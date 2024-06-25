@@ -659,7 +659,6 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
 
     input_keys = [
         "differentially_expressed_proteins_df",
-        "metadata_df",
         "selected_protein_group",
         "significant_proteins_df",
         "significant_proteins_only",
@@ -686,7 +685,6 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
             Step, "significant_proteins_df", inputs["input_dict"]
         )
 
-        inputs["metadata_df"] = steps.metadata_df
         inputs["alpha"] = step.inputs["alpha"]
         inputs["group1"] = step.inputs["group1"]
         inputs["group2"] = step.inputs["group2"]

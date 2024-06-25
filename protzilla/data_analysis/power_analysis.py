@@ -9,7 +9,6 @@ from statsmodels.stats.power import TTestIndPower
 
 def variance_protein_group_calculation(
     intensity_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
     protein_id: str,
     group1: str,
     group2: str,
@@ -19,7 +18,6 @@ def variance_protein_group_calculation(
     Function to calculate the variance of a protein group for the two classes and return the maximum variance.
 
     :param intensity_df: The dataframe containing the protein group intensities.
-    :param metadata_df: The dataframe containing the metadata.
     :param protein_id: The protein ID.
     :param group1: The name of the first group.
     :param group2: The name of the second group.
@@ -45,7 +43,6 @@ def sample_size_calculation(
     differentially_expressed_proteins_df: pd.DataFrame,
     significant_proteins_df: pd.DataFrame,
     significant_proteins_only: bool,
-    metadata_df: pd.DataFrame,
     fc_threshold: float,
     alpha: float,
     power: float,
@@ -74,7 +71,6 @@ def sample_size_calculation(
 
     variance_protein_group = variance_protein_group_calculation(
         intensity_df=differentially_expressed_proteins_df,
-        metadata_df=metadata_df,
         protein_id=protein_group,
         group1=group1,
         group2=group2,
