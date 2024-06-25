@@ -168,6 +168,4 @@ def linear_model(
         corrected_alpha=corrected_alpha,
         filtered_proteins=filtered_proteins,
         messages=messages,
-        group1=group1,
-        group2=group2,
     )

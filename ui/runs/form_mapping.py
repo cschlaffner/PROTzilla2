@@ -43,6 +43,8 @@ _forward_mapping = {
     data_analysis.DifferentialExpressionANOVA: data_analysis_forms.DifferentialExpressionANOVAForm,
     data_analysis.DifferentialExpressionTTest: data_analysis_forms.DifferentialExpressionTTestForm,
     data_analysis.DifferentialExpressionLinearModel: data_analysis_forms.DifferentialExpressionLinearModelForm,
+    data_analysis.DifferentialExpressionMannWhitneyOnPTM: data_analysis_forms.DifferentialExpressionMannWhitneyOnPTMForm,
+    data_analysis.DifferentialExpressionMannWhitneyOnIntensity: data_analysis_forms.DifferentialExpressionMannWhitneyOnIntensityForm,
     data_analysis.PlotVolcano: data_analysis_forms.PlotVolcanoForm,
     data_analysis.PlotScatterPlot: data_analysis_forms.PlotScatterPlotForm,
     data_analysis.PlotClustergram: data_analysis_forms.PlotClustergramForm,
