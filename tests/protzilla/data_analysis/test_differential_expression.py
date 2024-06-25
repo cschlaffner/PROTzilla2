@@ -69,9 +69,9 @@ def test_differential_expression_linear_model(
     test_alpha = 0.05
     test_fc_threshold = 0
 
-    current_out = linear_model(
-        test_intensity_df,
-        test_metadata_df,
+    current_input = dict(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
         grouping="Group",
         group1="Group1",
         group2="Group2",
@@ -79,13 +79,14 @@ def test_differential_expression_linear_model(
         alpha=test_alpha,
         log_base="log2",
     )
+    current_out = linear_model(**current_input)
 
     fig = create_volcano_plot(
         p_values=current_out["corrected_p_values_df"],
         log2_fc=current_out["log2_fold_change_df"],
         alpha=current_out["corrected_alpha"],
-        group1=current_out["group1"],
-        group2=current_out["group2"],
+        group1=current_input["group1"],
+        group2=current_input["group2"],
         fc_threshold=test_fc_threshold,
     )
 
@@ -117,9 +118,9 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
     test_alpha = 0.05
     test_fc_threshold = 0.9
 
-    current_out = t_test(
-        test_intensity_df,
-        test_metadata_df,
+    current_input = dict(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
         ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
@@ -128,14 +129,15 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
     )
+    current_out = t_test(**current_input)
 
     fig = create_volcano_plot(
         current_out["corrected_p_values_df"],
         current_out["log2_fold_change_df"],
         test_fc_threshold,
         current_out["corrected_alpha"],
-        current_out["group1"],
-        current_out["group2"],
+        current_input["group1"],
+        current_input["group2"],
     )
     if show_figures:
         fig.show()
@@ -173,9 +175,9 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
     test_alpha = 0.05
     test_fc_threshold = 0.9
 
-    current_out = t_test(
-        test_intensity_df,
-        test_metadata_df,
+    current_input = dict(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
         ttest_type="Welch's t-Test",
         grouping="Group",
         group1="Group1",
@@ -184,14 +186,15 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
         multiple_testing_correction_method="Benjamini-Hochberg",
         alpha=test_alpha,
     )
+    current_out = t_test(**current_input)
 
     fig = create_volcano_plot(
         current_out["corrected_p_values_df"],
         current_out["log2_fold_change_df"],
         test_fc_threshold,
         current_out["corrected_alpha"],
-        current_out["group1"],
-        current_out["group2"],
+        current_input["group1"],
+        current_input["group2"],
     )
     if show_figures:
         fig.show()

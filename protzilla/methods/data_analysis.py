@@ -138,8 +138,6 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         "log2_fold_change_df",
         "corrected_alpha",
         "filtered_proteins",
-        "group1",
-        "group2",
     ]
 
     def method(self, inputs: dict) -> dict:

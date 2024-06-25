@@ -6,7 +6,7 @@ from protzilla.data_analysis.plots import create_volcano_plot
 
 
 @pytest.fixture
-def ttest_output():
+def ttest_input():
     test_intensity_list = (
         ["Sample1", "Protein1", "Gene1", 18],
         ["Sample1", "Protein2", "Gene1", 16],
@@ -53,9 +53,9 @@ def ttest_output():
 
     test_alpha = 0.05
 
-    return t_test(
-        test_intensity_df,
-        test_metadata_df,
+    return dict(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
         ttest_type="Student's t-Test",
         grouping="Group",
         group1="Group1",
@@ -65,28 +65,33 @@ def ttest_output():
     )
 
 
-def test_plots_volcano_plot_no_annotation(ttest_output, show_figures):
+@pytest.fixture
+def ttest_output(ttest_input):
+    return t_test(**ttest_input)
+
+
+def test_plots_volcano_plot_no_annotation(ttest_input, ttest_output, show_figures):
     fig = create_volcano_plot(
         p_values=ttest_output["corrected_p_values_df"],
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=0,
         alpha=ttest_output["corrected_alpha"],
-        group1=ttest_output["group1"],
-        group2=ttest_output["group2"],
+        group1=ttest_input["group1"],
+        group2=ttest_input["group2"],
     )
     if show_figures:
         fig.show()
 
 
-def test_plots_volcano_plot_multiple_annotations(ttest_output, show_figures):
+def test_plots_volcano_plot_multiple_annotations(ttest_input, ttest_output, show_figures):
     fig = create_volcano_plot(
         p_values=ttest_output["corrected_p_values_df"],
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=0,
         alpha=0,
         proteins_of_interest=["Protein1", "Protein2"],
-        group1=ttest_output["group1"],
-        group2=ttest_output["group2"],
+        group1=ttest_input["group1"],
+        group2=ttest_input["group2"],
     )
     if show_figures:
         fig.show()
