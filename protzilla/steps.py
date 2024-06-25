@@ -260,6 +260,10 @@ class Messages:
     def clear(self):
         self.messages = []
 
+    @property
+    def empty(self) -> bool:
+        return len(self.messages) == 0
+
 
 class Plots:
     def __init__(self, plots: list | None = None):
