@@ -3,7 +3,8 @@ import pandas as pd
 import pytest
 
 from protzilla.data_analysis.differential_expression import anova, linear_model, t_test
-from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_intensity_data
+from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_intensity_data, \
+    mann_whitney_test_on_ptm_data
 from protzilla.data_analysis.plots import create_volcano_plot
 
 
@@ -63,8 +64,8 @@ def diff_expr_test_data():
 
 
 def test_differential_expression_linear_model(
-    diff_expr_test_data,
-    show_figures,
+        diff_expr_test_data,
+        show_figures,
 ):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
@@ -108,8 +109,8 @@ def test_differential_expression_linear_model(
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
     assert (
-        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-        == differentially_expressed_proteins
+            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+            == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
 
@@ -161,13 +162,13 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
 
     assert p_values_rounded == corrected_p_values
     assert (
-        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-        == differentially_expressed_proteins
+            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+            == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
     assert (
-        list(current_out["significant_proteins_df"]["Protein ID"].unique())
-        == significant_proteins
+            list(current_out["significant_proteins_df"]["Protein ID"].unique())
+            == significant_proteins
     )
 
 
@@ -218,13 +219,13 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
 
     assert p_values_rounded == corrected_p_values
     assert (
-        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-        == differentially_expressed_proteins
+            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+            == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
     assert (
-        list(current_out["significant_proteins_df"]["Protein ID"].unique())
-        == significant_proteins
+            list(current_out["significant_proteins_df"]["Protein ID"].unique())
+            == significant_proteins
     )
 
 
@@ -389,9 +390,10 @@ def test_differential_expression_anova(show_figures):
 
     assert assertion_p_values == p_values_rounded
 
-def test_differential_expression_mann_whitney_on_intensitys(
-    diff_expr_test_data,
-    show_figures,
+
+def test_differential_expression_mann_whitney_on_intensity(
+        diff_expr_test_data,
+        show_figures,
 ):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
@@ -443,3 +445,84 @@ def test_differential_expression_mann_whitney_on_intensitys(
     )
     assert current_out["corrected_alpha"] == test_alpha
 
+
+@pytest.fixture
+def ptm_test_data():
+    test_amount_list = (
+        ["Sample1",  1,  1, 10,   1, 100],
+        ["Sample2",  2,  2, 10,   1, 100],
+        ["Sample3",  3,  3, 10,   1, 100],
+        ["Sample4",  4,  4, 10,   1, 100],
+        ["Sample5",  5,  5, 10,   1, 100],
+        ["Sample6",  6,  3, 11, 111, 100],
+        ["Sample7",  7,  4, 12, 222, 100],
+        ["Sample8",  8,  5, 13, 333, 100],
+        ["Sample9",  9,  6, 14, 444, 100],
+        ["Sample10", 10, 7, 15, 555, 100],
+    )
+    test_amount_df = pd.DataFrame(
+        data=test_amount_list,
+        columns=["Sample", "Oxidation", "Acetyl", "GlyGly", "Phospho", "Unmodified"],
+    )
+
+    test_metadata_list = (
+        ["Sample1", "Group1"],
+        ["Sample2", "Group1"],
+        ["Sample3", "Group1"],
+        ["Sample4", "Group1"],
+        ["Sample5", "Group1"],
+        ["Sample6", "Group2"],
+        ["Sample7", "Group2"],
+        ["Sample8", "Group2"],
+        ["Sample9", "Group2"],
+        ["Sample10", "Group2"],
+    )
+    test_metadata_df = pd.DataFrame(
+        data=test_metadata_list,
+        columns=["Sample", "Group"],
+    )
+
+    return test_amount_df, test_metadata_df
+
+
+def test_differential_expression_mann_whitney_on_ptm(
+        ptm_test_data,
+        show_figures,
+):
+    test_amount_df, test_metadata_df = ptm_test_data
+    test_alpha = 0.05
+
+    current_input = dict(
+        ptm_df=test_amount_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+        p_value_calculation_method="auto",
+    )
+    current_out = mann_whitney_test_on_ptm_data(**current_input)
+
+    expected_corrected_p_values = [0.0132, 0.1423, 0.0132, 0.0132, 1.00000]
+    expected_u_statistics = [0.0, 4.5, 0.0, 0.0, 12.5]
+    expected_log2_fc = [1.415, 0.737, 0.3785, 8.3794, 0.0]
+
+    expected_significant_ptms = ["Oxidation", "GlyGly", "Phospho"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    u_statistics = current_out["u_statistic_df"]["u_statistic"]
+    log2_fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
+
+    assert p_values_rounded == expected_corrected_p_values
+    assert all(u_statistics == expected_u_statistics)
+    assert log2_fc_rounded == expected_log2_fc
+    assert (
+            list(current_out["significant_ptm_df"]["PTM"].unique())
+            == expected_significant_ptms
+    )
+    assert current_out["corrected_alpha"] == test_alpha
