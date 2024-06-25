@@ -228,7 +228,7 @@ def mann_whitney_test_on_columns(
     )
     u_statistic_df = pd.DataFrame(
         list(zip(valid_columns, u_statistics)),
-        columns=[columns_name, "t_statistic"],
+        columns=[columns_name, "u_statistic"],
     )
 
     combined_df = pd.DataFrame(
