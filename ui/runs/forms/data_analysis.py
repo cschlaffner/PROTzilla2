@@ -36,6 +36,12 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
+class PValueCalculationMethod(Enum):
+    auto = "Auto"
+    exact = "Exact"
+    asymptotic = "Asymptotic"
+
+
 class YesNo(Enum):
     yes = "Yes"
     no = "No"
@@ -336,6 +342,11 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
     )
     alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+    )
+    p_value_calculation_method = CustomChoiceField(
+        choices=PValueCalculationMethod,
+        label="P-value calculation method",
+        initial=PValueCalculationMethod.auto,
     )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")

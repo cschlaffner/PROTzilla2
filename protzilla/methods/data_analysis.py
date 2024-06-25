@@ -167,6 +167,7 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
         "group2",
         "alpha",
         "multiple_testing_correction_method",
+        "p_value_calculation_method",
     ]
     output_keys = [
         "differentially_expressed_proteins_df",
@@ -201,6 +202,7 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
         "group2",
         "alpha",
         "multiple_testing_correction_method",
+        "p_value_calculation_method",
     ]
     output_keys = [
         "differentially_expressed_ptm_df",
@@ -216,7 +218,6 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
         inputs["metadata_df"] = steps.metadata_df
-        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
 
 
