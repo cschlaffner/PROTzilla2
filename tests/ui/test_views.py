@@ -112,6 +112,7 @@ def test_step_finished(run_standard):
         "file_path": f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
         "intensity_name": "Intensity",
         "map_to_uniprot": False,
+        "aggregation_method": "Sum",
     }
     run_standard.step_calculate(parameters)
 

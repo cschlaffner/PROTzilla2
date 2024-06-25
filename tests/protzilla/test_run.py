@@ -50,6 +50,7 @@ class TestRun:
                 "file_path": maxquant_data_file,
                 "map_to_uniprot": False,
                 "intensity_name": "Intensity",
+                "aggregation_method": "Sum",
             }
         )
         assert run_empty.current_step.output["protein_df"] is not None
