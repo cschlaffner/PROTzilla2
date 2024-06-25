@@ -81,6 +81,9 @@ _forward_mapping_plots = {
     data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountPlotForm,
     data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingPlotForm,
     data_preprocessing.FilterSamplesByProteinIntensitiesSum: data_preprocessing_forms.FilterSamplesByProteinIntensitiesSumPlotForm,
+    data_preprocessing.OutlierDetectionByLocalOutlierFactor: data_preprocessing_forms.OutlierDetectionByLocalOutlierFactorPlotForm,
+    data_preprocessing.OutlierDetectionByIsolationForest: data_preprocessing_forms.OutlierDetectionByIsolationForestPlotForm,
+    data_preprocessing.OutlierDetectionByPCA: data_preprocessing_forms.OutlierDetectionByPCAPlotForm,
     data_preprocessing.TransformationLog: data_preprocessing_forms.TransformationLogPlotForm,
     data_preprocessing.NormalisationByZScore: data_preprocessing_forms.NormalisationByZscorePlotForm,
     data_preprocessing.NormalisationByTotalSum: data_preprocessing_forms.NormalisationByTotalSumPlotForm,
@@ -161,6 +164,12 @@ def get_filled_form_by_method(
     )
 
 
+def get_filled_plot_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
+    form_class = _get_plot_form_class_by_step(run.current_step)
+    return form_class(run=run, data=request.POST, files=request.FILES)
+
+
+# TODO accomodate the plot form
 def get_filled_form_by_request(request: HttpRequest, run: Run) -> MethodForm:
     form_class = _get_form_class_by_step(run.current_step)
     return form_class(run=run, data=request.POST, files=request.FILES)

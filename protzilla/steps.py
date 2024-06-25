@@ -661,7 +661,7 @@ class StepManager:
             index = self.current_step_index
         if index == len(self.all_steps) - 1:
             return
-        for step in self.all_steps[index + 1 :]:
+        for step in self.all_steps[index:]:
             step.output = Output()
             step.messages = Messages()
             step.plots = Plots()

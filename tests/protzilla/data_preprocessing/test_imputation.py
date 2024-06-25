@@ -165,6 +165,7 @@ def test_imputation_min_value_per_df(
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -200,6 +201,7 @@ def test_imputation_min_value_per_sample(
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -235,6 +237,7 @@ def test_imputation_min_value_per_protein(
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -270,6 +273,7 @@ def test_imputation_mean_per_protein(
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -303,6 +307,7 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()
@@ -345,6 +350,7 @@ def test_imputation_normal_distribution_sampling(show_figures, input_imputation_
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     if show_figures:
         fig1.show()

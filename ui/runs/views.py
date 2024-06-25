@@ -35,12 +35,13 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
     get_filled_form_by_method,
     get_filled_form_by_request,
+    get_filled_plot_form_by_request,
 )
 
 active_runs: dict[str, Run] = {}
@@ -284,13 +285,10 @@ def plot(request, run_name):
     :rtype: HttpResponse
     """
     run = active_runs[run_name]
-    parameters = parameters_from_post(request.POST)
 
-    if run.current_step.display_name == "plot":
-        del parameters["chosen_method"]
-        run.step_calculate(parameters)
-    else:
-        run.current_step.plot(parameters)
+    plot_form = get_filled_plot_form_by_request(request, run)
+    if plot_form.is_valid():
+        plot_form.submit(run)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
