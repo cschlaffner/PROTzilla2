@@ -209,13 +209,14 @@
                                         </div>
                                     </form>
                                 {% endif %}
-                            </div>
-                        {% endif %}
-                        {% if display_output %}
-                            <div>
-                                <label for="display_output"></label>
-                                <textarea class="form-control" id="display_output" rows="1" width="100%" style="resize: none" readonly>{{ display_output_result }}
-                                </textarea>
+                                {% if display_output %}
+                                    <div class="mb-5">
+                                        <label for="display_output"></label>
+                                            <textarea class="form-control display-output-textarea" id="display_output" rows="1"
+                                                      readonly>{{ display_output_result }}
+                                            </textarea>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endif %}
                     </div>

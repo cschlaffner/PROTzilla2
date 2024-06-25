@@ -125,7 +125,7 @@ def detail(request: HttpRequest, run_name: str):
         run.steps.current_step.display_output is not None
         and not run.current_step.display_output.is_empty()
     )
-    display_output_text = next(iter(run.current_step.display_output.display_output.values()))
+    display_output_text = next(iter(run.current_step.display_output.display_output.values()), None)
 
     return render(
         request,
