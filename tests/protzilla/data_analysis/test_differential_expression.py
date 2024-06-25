@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from protzilla.data_analysis.differential_expression import anova, linear_model, t_test
+from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_intensity_data
 from protzilla.data_analysis.plots import create_volcano_plot
 
 
@@ -387,3 +388,58 @@ def test_differential_expression_anova(show_figures):
     ]
 
     assert assertion_p_values == p_values_rounded
+
+def test_differential_expression_mann_whitney_on_intensitys(
+    diff_expr_test_data,
+    show_figures,
+):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+
+    current_input = dict(
+        intensity_df=test_intensity_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        group1="Group1",
+        group2="Group2",
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+        log_base="log2",
+        p_value_calculation_method="auto",
+    )
+    current_out = mann_whitney_test_on_intensity_data(**current_input)
+
+    fig = create_volcano_plot(
+        p_values=current_out["corrected_p_values_df"],
+        log2_fc=current_out["log2_fold_change_df"],
+        alpha=current_out["corrected_alpha"],
+        group1=current_input["group1"],
+        group2=current_input["group2"],
+        fc_threshold=0,
+    )
+
+    if show_figures:
+        fig.show()
+
+    expected_corrected_p_values = [0.2, 0.4916, 1.0, 0.2]
+    expected_u_statistics = [9.0, 7.0, 4.5, 9.0]
+    expected_log2_fc = [-10.1926, -1.0, 0.0, -5.0]
+    expected_differentially_expressed_proteins = ["Protein1", "Protein2", "Protein3", "Protein4"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    u_statistics = current_out["u_statistic_df"]["u_statistic"]
+    log2fc_rounded = [
+        round(x, 4) for x in current_out["log2_fold_change_df"]["log2_fold_change"]
+    ]
+
+    assert p_values_rounded == expected_corrected_p_values
+    assert all(u_statistics == expected_u_statistics)
+    assert log2fc_rounded == expected_log2_fc
+    assert (
+            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+            == expected_differentially_expressed_proteins
+    )
+    assert current_out["corrected_alpha"] == test_alpha
+
