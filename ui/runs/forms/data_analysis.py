@@ -36,6 +36,12 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
+class PValueCalculationMethod(Enum):
+    auto = "Auto"
+    exact = "Exact"
+    asymptotic = "Asymptotic"
+
+
 class YesNo(Enum):
     yes = "Yes"
     no = "No"
@@ -337,12 +343,17 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
     alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
     )
+    p_value_calculation_method = CustomChoiceField(
+        choices=PValueCalculationMethod,
+        label="P-value calculation method",
+        initial=PValueCalculationMethod.auto,
+    )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["df"].choices = fill_helper.to_choices(
+        self.fields["ptm_df"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
 
@@ -389,7 +400,7 @@ class PlotVolcanoForm(MethodForm):
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(
-                DifferentialExpressionTTest | DifferentialExpressionLinearModel,
+                DifferentialExpressionTTest | DifferentialExpressionLinearModel | DifferentialExpressionMannWhitneyOnIntensityForm,
                 "differentially_expressed_proteins_df",
             )
         )
