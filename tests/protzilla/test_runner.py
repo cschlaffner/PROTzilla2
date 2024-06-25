@@ -103,7 +103,7 @@ def test_runner_imports(
         'PlotGOEnrichmentBarPlot'
     ]
     expected_method_parameters = [
-        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
+        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'aggregation_mode': 'Sum', 'file_path': 'tests/proteinGroups_small_cut.txt'}),
         call({'feature_orientation': 'Columns (samples in rows, features in columns)', 'file_path': 'tests/metadata_cut_columns.csv'}),
         call({'percentage': 0.5}),
         call({'deviation_threshold': 2.0}),
@@ -168,7 +168,7 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
         "FilterProteinsBySamplesMissing",
     ]
     assert mock_method.call_args_list == [
-        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'file_path': 'tests/proteinGroups_small_cut.txt'}),
+        call({'intensity_name': 'iBAQ', 'map_to_uniprot': False, 'aggregation_method': 'Sum', 'file_path': 'tests/proteinGroups_small_cut.txt'}),
         call({'feature_orientation': 'Columns (samples in rows, features in columns)',
               'file_path': 'tests/metadata_cut_columns.csv'}),
         call({'percentage': 0.5})

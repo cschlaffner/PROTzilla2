@@ -8,9 +8,12 @@ from protzilla.data_analysis.clustering import (
 )
 from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
+from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_columns, \
+    mann_whitney_test_on_intensity_data
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, ptms_per_sample, \
+    ptms_per_protein_and_sample
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -99,8 +102,6 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         "t_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
-        "group1",
-        "group2",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -138,8 +139,6 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         "log2_fold_change_df",
         "corrected_alpha",
         "filtered_proteins",
-        "group1",
-        "group2",
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -153,6 +152,80 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 
     def plot(self, inputs):
         raise NotImplementedError("Plotting is not implemented yet for this step.")
+
+
+class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
+    display_name = "Mann-Whitney Test"
+    operation = "differential_expression"
+    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+                          "The p-values are corrected for multiple testing.")
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "grouping",
+        "group1",
+        "group2",
+        "alpha",
+        "multiple_testing_correction_method",
+    ]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "log2_fold_change_df",
+        "corrected_alpha",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return mann_whitney_test_on_intensity_data(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        if steps.get_step_output(Step, "protein_df", inputs["intensity_df"]) is not None:
+            inputs["intensity_df"] = steps.get_step_output(Step, "protein_df", inputs["intensity_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
+        return inputs
+
+
+class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
+    display_name = "Mann-Whitney Test"
+    operation = "Peptide analysis"
+    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+                          "The p-values are corrected for multiple testing.")
+
+    input_keys = [
+        "df",
+        "metadata_df",
+        "grouping",
+        "group1",
+        "group2",
+        "alpha",
+        "multiple_testing_correction_method",
+        "columns_name",
+    ]
+    output_keys = [
+        "differentially_expressed_ptm_df",
+        "significant_ptm_df",
+        "corrected_p_values_df",
+        "log2_fold_change_df",
+        "corrected_alpha",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return mann_whitney_test_on_columns(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
+        inputs["columns_name"] = "PTM"
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
+        return inputs
+
+    def handle_outputs(self, outputs: dict) -> None:
+        outputs["differentially_expressed_ptm_df"] = outputs.pop("differential_expressed_columns_df", None)
+        outputs["significant_ptm_df"] = outputs.pop("significant_columns_df", None)
+        super().handle_outputs(outputs)
 
 
 class PlotVolcano(PlotStep):
@@ -643,6 +716,51 @@ class SelectPeptidesForProtein(DataAnalysisStep):
 
         return inputs
 
+
+class PTMsPerSample(DataAnalysisStep):
+    display_name = "PTMs per Sample"
+    operation = "Peptide analysis"
+    method_description = ("Analyze the post-translational modifications (PTMs) of a single protein of interest. "
+                          "This function requires a peptide dataframe with PTM information.")
+
+    input_keys = [
+        "peptide_df",
+    ]
+    output_keys = [
+        "ptm_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return ptms_per_sample(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+        return inputs
+
+
+class PTMsProteinAndPerSample(DataAnalysisStep):
+    display_name = "PTMs per Sample and Protein"
+    operation = "Peptide analysis"
+    method_description = ("Analyze the post-translational modifications (PTMs) of all Proteins. "
+                          "This function requires a peptide dataframe with PTM information.")
+
+    input_keys = [
+        "peptide_df",
+    ]
+    output_keys = [
+        "ptm_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return ptms_per_protein_and_sample(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+        return inputs
 class PowerAnalysisPowerCalculation(DataAnalysisStep):
     display_name = "Power Calculation"
     operation = "Power Analysis"

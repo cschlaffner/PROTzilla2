@@ -69,6 +69,7 @@ def run_imported(run_name_and_cleanup, maxquant_data_file):
             "file_path": str(maxquant_data_file),
             "intensity_name": "iBAQ",
             "map_to_uniprot": False,
+            "aggregation_method": "Sum",
         }
     )
     yield run
@@ -148,11 +149,11 @@ def df_with_nan():
 def leftover_peptide_df():
     # sample, protein id, sequence, intensity, pep
     leftover_peptide_protein_list = (
-        ["Sample01", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample02", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample03", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 6923600.0, 0.037779],
-        ["Sample04", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample05", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 37440000.0, 0.037779],
+        ["Sample01", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample02", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample03", "Q13748", "EDLAALEK", 6923600.0, 0.037779],
+        ["Sample04", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample05", "Q13748", "EDLAALEK", 37440000.0, 0.037779],
     )
 
     peptide_df = pd.DataFrame(
@@ -199,6 +200,49 @@ def peptides_df():
         columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
     )
 
+    return df
+
+
+@pytest.fixture
+def evidence_peptide_df():
+    df = pd.DataFrame(
+        (
+            ["Sample1", "Protein1", "SEQA", 1000000, "Unmodified", "_SEQA_", 1, 0.00001, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQB", 2000000, "Unmodified", "_SEQB_", None, 0.00002, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQC", 3000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQC_", None, 0.00003, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQD", 4000000, "Acetyl (Protein N-term),Oxidation (M)", "_(Acetyl (Protein N-term))SE(Oxidation (M))QD_", None, 0.00004, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQE", 5000000, "Unmodified", "_SEQE_", None, 0.00005, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQF", 6000000, "Unmodified", "_SEQF_", None, 0.00006, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQG", 7000000, "Unmodified", "_SEQG_", None, 0.00007, "Raw_File_1"],
+            ["Sample1", "Protein4", "SEQH", 8000000, "Unmodified", "_SEQH_", None, 0.00008, "Raw_File_1"],
+            ["Sample1", "Protein5", "SEQI", 9000000, "Unmodified", "_SEQI_", None, 0.00009, "Raw_File_1"],
+            ["Sample2", "Protein1", "SEQJ", 10000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQJ_", None, 0.0001, "Raw_File_2"],
+            ["Sample2", "Protein2", "SEQK", 11000000, "Unmodified", "_SEQK_", None, 0.00011, "Raw_File_2"],
+            ["Sample2", "Protein3", "SEQL", 12000000, "Unmodified", "_SEQL_", None, 0.00012, "Raw_File_2"],
+            ["Sample2", "Protein4", "SEQM", 13000000, "Unmodified", "_SEQM_", None, 0.00013, "Raw_File_2"],
+            ["Sample2", "Protein5", "SEQN", 14000000, "Unmodified", "_SEQN_", None, 0.00014, "Raw_File_2"],
+            ["Sample3", "Protein1", "SEQO", 15000000, "Unmodified", "_SEQO_", None, 0.00015, "Raw_File_3"],
+            ["Sample3", "Protein2", "SEQP", 16000000, "Unmodified", "_SEQP_", None, 0.00016, "Raw_File_3"],
+            ["Sample3", "Protein3", "SEQQ", 17000000, "Unmodified", "_SEQQ_", None, 0.00017, "Raw_File_3"],
+            ["Sample3", "Protein4", "SEQR", 18000000, "Unmodified", "_SEQR_", None, 0.00018, "Raw_File_3"],
+            ["Sample3", "Protein5", "SEQS", 19000000, "Unmodified", "_SEQS_", None, 0.00019, "Raw_File_3"],
+            ["Sample4", "Protein1", "SEQT", 20000000, "Unmodified", "_SEQT_", None, 0.0002, "Raw_File_4"],
+            ["Sample4", "Protein2", "SEQU", 21000000, "Unmodified", "_SEQU_", None, 0.00021, "Raw_File_4"],
+            ["Sample4", "Protein3", "SEQV", 22000000, "Unmodified", "_SEQV_", None, 0.00022, "Raw_File_4"],
+            ["Sample4", "Protein4", "SEQW", 23000000, "Unmodified", "_SEQW_", None, 0.00023, "Raw_File_4"],
+        ),
+        columns=[
+            "Sample",
+            "Protein ID",
+            "Sequence",
+            "Intensity",
+            "Modifications",
+            "Modified sequence",
+            "Missed cleavages",
+            "PEP",
+            "Raw file",
+        ]
+    )
     return df
 
 
