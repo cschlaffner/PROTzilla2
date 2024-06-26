@@ -75,3 +75,10 @@ html, body {
 #gsea_enrichment_plot_img {
     width: 800px;
 }
+
+.display-output-textarea {
+    display: flex;
+    width: 100%;
+    height: auto;
+    resize: none;
+}

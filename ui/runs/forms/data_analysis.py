@@ -36,7 +36,7 @@ class MultipleTestingCorrectionMethod(Enum):
     bonferroni = "Bonferroni"
 
 
-class YesNo(Enum):
+class YesNo(StrEnum):
     yes = "Yes"
     no = "No"
 
@@ -142,7 +142,6 @@ class DimensionReductionMetric(Enum):
     manhattan = "manhattan"
     cosine = "cosine"
     havensine = "havensine"
-
 
 class DifferentialExpressionANOVAForm(MethodForm):
     is_dynamic = True
@@ -1091,3 +1090,92 @@ class PTMsPerProteinAndSampleForm(MethodForm):
         )
         if single_protein_peptides:
             self.fields["peptide_df"].initial = single_protein_peptides[0]
+class PowerAnalysisPowerCalculationForm(MethodForm):
+    t_test_results = CustomChoiceField(
+        choices=[],
+        label="T-test results",
+    )
+    #fill alpha dynamic from t-test
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.05,
+    )
+    def fill_form(self, run: Run) -> None:
+        self.fields["t_test_results"].choices = get_t_test_results(run)
+
+class PowerAnalysisSampleSizeCalculationForm(MethodForm):
+    is_dynamic = True
+
+    input_dict = CustomChoiceField(
+        choices=[],
+        label="Input data dict (generated e.g. by t-Test)",
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.05,
+    )
+    power = CustomFloatField(
+        label="Power",
+        min_value = 0,
+        max_value = 1,
+        step_size = 0.05,
+        initial = 0.8,
+    )
+    fc_threshold = CustomFloatField(
+        label="Log2 fold change threshold", min_value=0, initial=1
+    )
+    significant_proteins_only = CustomChoiceField(
+        choices=YesNo,
+        label="Select only significant proteins",
+        initial=YesNo.yes,
+    )
+    selected_protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group to calculate sample size for",
+    )
+
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_dict"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(
+                DifferentialExpressionTTest,
+                "differentially_expressed_proteins_df",
+            )
+        )
+
+        input_dict_instance_id = self.data.get(
+            "input_dict", self.fields["input_dict"].choices[0][0]
+        )
+
+        self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                Step, "differentially_expressed_proteins_df", input_dict_instance_id
+            )["Protein ID"].unique()
+        )
+
+        significant_proteins_only = self.data.get(
+            "significant_proteins_only", self.fields["significant_proteins_only"].choices[0][0]
+        )
+
+        if significant_proteins_only == YesNo.yes:
+            self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "significant_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
+        else:
+            self.fields["selected_protein_group"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "differentially_expressed_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
+
+        self.fields["alpha"].initial = run.steps.get_step_output(
+            Step, "corrected_alpha", input_dict_instance_id
+        )
