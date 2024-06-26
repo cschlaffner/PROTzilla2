@@ -52,13 +52,17 @@ def sample_size_calculation(
     intensity_name: str = None
 ) -> float:
     """
-    Function to calculate the required sample size for each significant protein to achieve the required power .
+    Function to calculate the required sample size for a selected protein to achieve the required power .
 
+    :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
     :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
-    :param alpha: The significance level.
+    :param significant_proteins_only: A boolean to display only significant proteins for selection to the user.
+    :param fc_threshold: The fold change threshold.
+    :param alpha: The significance level. The value for alpha is taken from the t-test by default.
     :param power: The power of the test.
     :param group1: The name of the first group.
     :param group2: The name of the second group.
+    :param selected_protein_group: The selected protein group for which the required sample size is to be calculated.
     :param intensity_name: The name of the column containing the protein group intensities.
     :return: The required sample size.
     """
