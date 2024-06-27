@@ -8,6 +8,7 @@ from typing import Optional
 import aiohttp
 import numpy as np
 import pandas as pd
+import plotly.express as px
 from pyteomics.mass import mass
 from tqdm import tqdm
 
@@ -492,16 +493,86 @@ class SpectrumExporter:
 
         output_df = pd.DataFrame()
         spectrum_dfs = []
+        fragment_pattern = re.compile(r"([yb])(\d+)")
         for spectrum in tqdm(spectra, desc="Preparing spectra"):
             spectrum_df = spectrum.spectrum
             spectrum_df["PrecursorMz"] = spectrum.peptide_mz
             spectrum_df["StrippedSequence"] = spectrum.peptide_sequence
             spectrum_df["PrecursorCharge"] = spectrum.metadata["Charge"]
+            spectrum_df["FragmentNumber"] = spectrum_df[
+                OUTPUT_KEYS.FRAGMENT_TYPE
+            ].apply(lambda x: fragment_pattern.match(x).group(2))
+            spectrum_df["FragmentType"] = spectrum_df[OUTPUT_KEYS.FRAGMENT_TYPE].apply(
+                lambda x: fragment_pattern.match(x).group(1)
+            )
             spectrum_df.rename(
                 columns={"m/z": "FragmentMz", "Intensity": "RelativeFragmentIntensity"},
                 inplace=True,
-            )  #
+            )
+
+            spectrum_df = spectrum_df[
+                [
+                    "PrecursorMz",
+                    "StrippedSequence",
+                    "FragmentMz",
+                    "PrecursorCharge",
+                    "FragmentNumber",
+                    "FragmentType",
+                    "RelativeFragmentIntensity",
+                ]
+            ]
             spectrum_dfs.append(spectrum_df)
         output_df = pd.concat(spectrum_dfs, ignore_index=True)
         content = output_df.to_csv(sep=seperator, index=False)
         return FileOutput(base_file_name, file_extension, content)
+
+
+def plot_spectrum(prediction_df: pd.DataFrame, peptide: str, charge: int):
+    threshold = 0.1
+    spectrum = prediction_df[
+        (prediction_df["Sequence"] == peptide) & (prediction_df["Charge"] == charge)
+    ]
+    mz_values = spectrum["m/z"].values
+    intensity_values = spectrum["Intensity"].values
+    fragment_types = spectrum["fragment_type"].values
+    fragment_charges = spectrum["fragment_charge"].values
+
+    # Plotting the peaks
+    color_list = [
+        "blue" if "b" in fragment_type else "red" for fragment_type in fragment_types
+    ]
+    fig = px.bar(
+        x=mz_values,
+        y=intensity_values,
+        color=color_list,
+        labels={"x": "m/z", "y": "Relative intensity"},
+        title=f"{peptide} ({charge}+)",
+    )
+    fig.update_traces(hovertemplate="m/z: %{x}<br>Intensity: %{y}")
+    fig.update_traces(width=3.0)
+
+    # Adding the annotations
+    for i, (fragment_type, fragment_charge) in enumerate(
+        zip(fragment_types, fragment_charges)
+    ):
+        if intensity_values[i] < threshold:
+            continue
+        fig.add_annotation(
+            x=mz_values[i],
+            y=intensity_values[i],
+            font=dict(color="blue" if "y" in fragment_type else "red"),
+            text=f"{fragment_type} ({fragment_charge}+)",
+            showarrow=False,
+            yshift=25,
+            textangle=-90,
+        )
+
+    # Updating the color legend to say "y" and "b" instead of "blue" and "red"
+    fig.for_each_trace(
+        lambda trace: trace.update(
+            name=trace.name.replace("blue", "b-ion").replace("red", "y-ion")
+        )
+    )
+    # Replace title of legend with "Fragment type"
+    fig.update_layout(legend_title_text="Fragment type")
+    return dict(plots=[fig])

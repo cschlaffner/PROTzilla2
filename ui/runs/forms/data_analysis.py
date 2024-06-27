@@ -324,7 +324,7 @@ class PlotScatterPlotForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.to_choices(
+        self.fields["prediction_df_step_instance"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(DimensionReductionUMAP, "embedded_data")
         )
 
@@ -371,12 +371,12 @@ class PlotProtQuantForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
-            run
-        )
+        self.fields[
+            "prediction_df_step_instance"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
 
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "input_df", self.fields["prediction_df_step_instance"].choices[0][0]
         )
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -860,9 +860,9 @@ class DimensionReductionUMAPForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_protein_df_steps(
-            run
-        )
+        self.fields[
+            "prediction_df_step_instance"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
 
 
 class ProteinGraphPeptidesToIsoformForm(MethodForm):
@@ -900,6 +900,53 @@ class PredictSpectraForm(MethodForm):
 
         self.fields["output_format"].choices = fill_helper.to_choices(
             spectrum_prediction.AVAILABLE_FORMATS
+        )
+
+
+class PlotPredictedSpectraForm(MethodForm):
+    prediction_df_step_instance = CustomChoiceField(
+        choices=[],
+        label="Choose the prediction dataframe",
+    )
+
+    peptide = CustomChoiceField(
+        choices=[],
+        label="Choose the peptide to plot",
+    )
+    charge = CustomChoiceField(
+        choices=[],
+        label="Choose the charge of the peptide",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["prediction_df_step_instance"].choices = fill_helper.get_choices(
+            run, "predicted_spectra_df", Step
+        )
+        prediction_df_instance = self.data.get(
+            "input_df", self.fields["prediction_df_step_instance"].choices[0][0]
+        )
+        if prediction_df_instance is None:
+            raise ValueError("No prediction dataframe found")
+
+        prediction_df = run.steps.get_step_output(
+            Step, "predicted_spectra_df", prediction_df_instance
+        )
+
+        self.fields["peptide"].choices = fill_helper.to_choices(
+            sorted(prediction_df["Sequence"].unique())
+        )
+
+        peptide_sequence = self.data.get(
+            "peptide", self.fields["peptide"].choices[0][0]
+        )
+
+        if peptide_sequence is None:
+            raise ValueError("No peptide found")
+
+        self.fields["charge"].choices = fill_helper.to_choices(
+            prediction_df[prediction_df["Sequence"] == peptide_sequence][
+                "Charge"
+            ].unique()
         )
 
 
