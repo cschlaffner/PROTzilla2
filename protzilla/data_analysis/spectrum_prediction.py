@@ -126,6 +126,9 @@ class SpectrumPredictor:
 
 
 class KoinaModel(SpectrumPredictor):
+    ptm_regex = re.compile(r"[\[\(]")
+    annotation_regex = re.compile(r"((y|b)\d+)\+(\d+)")
+
     def __init__(
         self,
         required_keys: list[str],
@@ -162,8 +165,12 @@ class KoinaModel(SpectrumPredictor):
         self.prediction_df = self.prediction_df[
             self.prediction_df[DATA_KEYS.PRECURSOR_CHARGES] <= 5
         ]
-
-    annotation_regex = re.compile(r"((y|b)\d+)\+(\d+)")
+        # filter all peptides which match a ptm
+        self.prediction_df = self.prediction_df[
+            ~self.prediction_df[DATA_KEYS.PEPTIDE_SEQUENCE].str.contains(
+                self.ptm_regex, regex=True
+            )
+        ]
 
     def predict(self):
         predicted_spectra = []
