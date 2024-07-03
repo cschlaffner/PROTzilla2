@@ -173,6 +173,7 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
@@ -208,6 +209,7 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
         "differentially_expressed_ptm_df",
         "significant_ptm_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
