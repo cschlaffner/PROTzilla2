@@ -51,9 +51,6 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
             value_name="Intensity",
         )
 
-        molten = molten.rename(columns={"Proteins": "Protein ID"})
-        ordered = molten[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
-
     else:
         final_df = df.rename(columns={"Proteins": "Protein ID"})
         ordered = final_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
