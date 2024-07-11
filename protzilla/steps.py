@@ -189,7 +189,7 @@ class Step:
         if required_keys is None:
             required_keys = self.output_keys
         for key in required_keys:
-            if key not in self.output:
+            if key not in self.output or self.output[key] is None:
                 if not soft_check:
                     raise ValueError(
                         f"Output validation failed: missing output {key} in outputs."

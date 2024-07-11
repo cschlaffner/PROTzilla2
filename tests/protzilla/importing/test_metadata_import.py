@@ -31,6 +31,7 @@ def test_metadata_import_diann(run_empty):
         {
             "file_path": f"{PROJECT_PATH}/tests/test_data/DIANN_data/20230605 24h prodi DMSO report.pg_matrix.tsv",
             "map_to_uniprot": "False",
+            "aggregation_method": "Sum",
         }
     )
     assert (

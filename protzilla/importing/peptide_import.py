@@ -24,7 +24,7 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
         "LFQ intensity" if intensity_name == "iBAQ" else intensity_name
     )
 
-    id_columns = ["Proteins", "Sequence", "Missed cleavages", "PEP"]
+    id_columns = ["Leading razor protein", "Sequence", "Missed cleavages", "PEP"]
     read = pd.read_csv(
         file_path,
         sep="\t",
@@ -58,6 +58,8 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
         final_df = df.rename(columns={"Proteins": "Protein ID"})
         ordered = final_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
 
+    molten = molten.rename(columns={"Leading razor protein": "Protein ID"})
+    ordered = molten[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
     ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
@@ -87,7 +89,7 @@ def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:
 
     id_columns = [
         "Experiment",
-        "Proteins",
+        "Leading razor protein",
         "Sequence",
         peptide_intensity_name,
         "Modifications",
@@ -107,7 +109,7 @@ def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:
 
     df = read[id_columns]
 
-    df = df.rename(columns={"Proteins": "Protein ID"})
+    df = df.rename(columns={"Leading razor protein": "Protein ID"})
     df = df.rename(columns={"Experiment": "Sample"})
 
     df.dropna(subset=["Protein ID"], inplace=True)

@@ -29,7 +29,7 @@ class MaxQuantImport(ImportingStep):
     operation = "msdataimport"
     method_description = "Import MaxQuant data"
 
-    input_keys = ["file_path", "map_to_uniprot", "intensity_name"]
+    input_keys = ["file_path", "map_to_uniprot", "intensity_name", "aggregation_method"]
     output_keys = ["protein_df"]
 
     def method(self, inputs):
@@ -41,7 +41,7 @@ class DiannImport(ImportingStep):
     operation = "msdataimport"
     method_description = "DIA-NN data import"
 
-    input_keys = ["file_path", "map_to_uniprot"]
+    input_keys = ["file_path", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
 
     def method(self, inputs):
@@ -53,7 +53,7 @@ class MsFraggerImport(ImportingStep):
     operation = "msdataimport"
     method_description = "MS Fragger data import"
 
-    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
+    input_keys = ["file_path", "intensity_name", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
 
     def method(self, inputs):

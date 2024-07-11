@@ -11,16 +11,16 @@ from protzilla.importing import peptide_import
 def peptide_df(intensity_name):
     # sample, protein id, sequence, intensity, pep
     peptide_protein_list = (
-        ["Sample01", "P46459;P46459-2", "AAQSTAMNR", 0.0013764],
-        ["Sample02", "P46459;P46459-2", "AAQSTAMNR", 0.0013764],
-        ["Sample03", "P46459;P46459-2", "AAQSTAMNR", 0.0013764],
-        ["Sample04", "P46459;P46459-2", "AAQSTAMNR", 0.0013764],
-        ["Sample05", "P46459;P46459-2", "AAQSTAMNR", 0.0013764],
-        ["Sample01", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 0.037779],
-        ["Sample02", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 0.037779],
-        ["Sample03", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 0.037779],
-        ["Sample04", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 0.037779],
-        ["Sample05", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 0.037779],
+        ["Sample01", "P46459", "AAQSTAMNR", 0.0013764],
+        ["Sample02", "P46459", "AAQSTAMNR", 0.0013764],
+        ["Sample03", "P46459", "AAQSTAMNR", 0.0013764],
+        ["Sample04", "P46459", "AAQSTAMNR", 0.0013764],
+        ["Sample05", "P46459", "AAQSTAMNR", 0.0013764],
+        ["Sample01", "Q13748", "EDLAALEK", 0.037779],
+        ["Sample02", "Q13748", "EDLAALEK", 0.037779],
+        ["Sample03", "Q13748", "EDLAALEK", 0.037779],
+        ["Sample04", "Q13748", "EDLAALEK", 0.037779],
+        ["Sample05", "Q13748", "EDLAALEK", 0.037779],
     )
 
     peptide_df = pd.DataFrame(
@@ -88,7 +88,7 @@ def evidence_df(intensity_name):
         ],
         [
             "CTR17_C2_INSOLUBLE_01",
-            "O75822;O75822-2;O75822-3",
+            "O75822-2",
             "AAAAAAAGDSDSWDADAFSVEDPVRK",
             13249000,
             "Acetyl (Protein N-term)",
