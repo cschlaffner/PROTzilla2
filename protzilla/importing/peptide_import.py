@@ -53,17 +53,13 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
 
         molten = molten.rename(columns={"Proteins": "Protein ID"})
         ordered = molten[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
-        ordered.dropna(subset=["Protein ID"], inplace=True)
-        ordered.sort_values(
-            by=["Sample", "Protein ID"], ignore_index=True, inplace=True
-        )
+
     else:
         final_df = df.rename(columns={"Proteins": "Protein ID"})
         ordered = final_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
-        ordered.dropna(subset=["Protein ID"], inplace=True)
-        ordered.sort_values(
-            by=["Sample", "Protein ID"], ignore_index=True, inplace=True
-        )
+
+    ordered.dropna(subset=["Protein ID"], inplace=True)
+    ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
 
     new_groups, filtered_proteins = clean_protein_groups(
         ordered["Protein ID"].tolist(), map_to_uniprot
