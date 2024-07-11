@@ -28,6 +28,13 @@ def flexiquant_lf(
     FLEXIQuant-LF is a method to quantify protein modification extent in label-free proteomics data.
 
     Parts of the implementation have been adapted from https://github.com/SteenOmicsLab/FLEXIQuantLF.
+
+    :param peptide_df: DataFrame containing peptide intensities.
+    :param metadata_df: DataFrame containing metadata.
+    :param reference_group: Name of the reference group.
+    :param protein_id: Protein ID that should be analysed.
+    :param num_init: Number of initializations for RANSAC regression.
+    :param mod_cutoff: RM score cutoff value for modified peptides.
     """
 
     df = peptide_df[peptide_df["Protein ID"] == protein_id].pivot_table(
@@ -324,6 +331,16 @@ def calculate_confidence_band(
 ):
     """
     Calculates confidence bands arround the regression line.
+
+    :param slope: Slope of the regression line.
+    :param median_int: Median intensity of the reference group.
+    :param dataframe_train: DataFrame containing the training data.
+    :param X: Array containing the reference intensities.
+    :param y: Series containing the sample intensities.
+    :param row: Series containing the sample intensities.
+    :param idx: Index of the sample.
+    :param matrix_distance_RL: DataFrame containing the distances to the regression line.
+    :param alpha: Alpha value for the confidence band.
     """
 
     # calculate predicted intensity with Reference intensity of a peptide and slope of the sample (Y hat)
@@ -399,6 +416,16 @@ def create_regression_plots(
 ):
     """
     Creates a scatter plot with regression line and confidence bands.
+
+    :param dataframe_train: DataFrame containing the training data.
+    :param idx: Index of the sample.
+    :param r2_score_model: R2 score of the model.
+    :param r2_score_data: R2 score of the data.
+    :param slope: Slope of the regression line.
+    :param alpha: Alpha value for the confidence band.
+    :param sample_column: Series containing the sample names.
+    :param rm_scores: DataFrame containing the RM scores.
+    :param mod_cutoff: RM score cutoff value for modified peptides.
     """
 
     # create new figure with two subplots
@@ -507,6 +534,9 @@ def create_regression_plots(
 def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
     """
     Calculates raw scores for each sample based on the distance to the regression line.
+
+    :param df_distance: DataFrame containing the distances to the regression line.
+    :param median_int: Median intensity of the reference group
     """
     # copy df_distance
     df_rs = df_distance.copy()
@@ -533,8 +563,10 @@ def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
 
 def normalize_t3median(dataframe: pd.DataFrame):
     """
-    Applies Top3 median normalization to dataframe
-    Determines the median of the three highest values in each row and divides every value in the row by it
+    Applies Top3 median normalization to dataframe.
+    Determines the median of the three highest values in each row and divides every value in the row by it.
+
+    :param dataframe: DataFrame containing the data to be normalized.
     """
     # copy dataframe
     dataframe_t3med = dataframe.copy()
@@ -556,6 +588,13 @@ def normalize_t3median(dataframe: pd.DataFrame):
 
 
 def scale_to_mod_cutoff(values: list[float], cutoff: float) -> list[float]:
+    """
+    Scales values to a cutoff value.
+
+    :param values: List of values to be scaled.
+    :param cutoff: Cutoff value.
+    """
+
     return [
         0.5 + (v - cutoff) * 0.5 / (1 - cutoff)
         if v >= 0.5
