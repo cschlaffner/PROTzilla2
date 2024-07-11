@@ -1,25 +1,24 @@
-import logging
 from enum import Enum, StrEnum
 
-from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
+    DataAnalysisStep,
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
     DimensionReductionUMAP,
-    DataAnalysisStep,
 )
+from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
+    CustomBooleanField,
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomBooleanField,
 )
 
 
@@ -166,12 +165,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -207,12 +206,12 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = (
-            fill_helper.get_choices_for_protein_df_steps(run)
-        )
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -251,9 +250,9 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["grouping"].choices = (
-            fill_helper.get_choices_for_metadata_non_sample_columns(run)
-        )
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -891,6 +890,7 @@ class FLEXIQuantLFForm(MethodForm):
     is_dynamic = True
 
     peptide_df = CustomChoiceField(label="Peptide dataframe", choices=[])
+    grouping_column = CustomChoiceField(label="Grouping column in metadata", choices=[])
     reference_group = CustomChoiceField(label="Reference group", choices=[])
     protein_id = CustomChoiceField(label="Protein ID", choices=[])
     num_init = CustomNumberField(
@@ -906,8 +906,16 @@ class FLEXIQuantLFForm(MethodForm):
 
     def fill_form(self, run: Run) -> None:
         self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
+        self.fields["grouping_column"].choices = fill_helper.to_choices(
+            run.steps.metadata_df.drop("Sample", axis=1).columns[1:]
+        )
+
+        chosen_grouping_column = self.data.get(
+            "grouping_column", self.fields["grouping_column"].choices[0][0]
+        )
+
         self.fields["reference_group"].choices = fill_helper.to_choices(
-            run.steps.metadata_df["Group"].unique()
+            run.steps.metadata_df[chosen_grouping_column].unique()
         )
         peptide_df_instance_id = self.data.get(
             "peptide_df", self.fields["peptide_df"].choices[0][0]

@@ -10,7 +10,6 @@ from protzilla.data_analysis.differential_expression_anova import anova
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -19,6 +18,7 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein
 from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
@@ -619,6 +619,7 @@ class FLEXIQuantLF(PlotStep):
         "protein_id",
         "num_init",
         "mod_cutoff",
+        "grouping_column",
     ]
     output_keys = [
         "raw_scores",

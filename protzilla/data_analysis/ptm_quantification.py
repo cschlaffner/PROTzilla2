@@ -21,6 +21,7 @@ def flexiquant_lf(
     metadata_df: pd.DataFrame,
     reference_group: str,
     protein_id: str,
+    grouping_column: str,
     num_init: int = 50,
     mod_cutoff: float = 0.5,
 ) -> dict:
@@ -44,17 +45,17 @@ def flexiquant_lf(
 
     df = pd.merge(
         left=df,
-        right=metadata_df[["Sample", "Group"]],
+        right=metadata_df[["Sample", grouping_column]],
         on="Sample",
         copy=False,
     )
 
-    if not "Group" in df:
+    if not grouping_column in df:
         return dict(
             messages=[
                 dict(
                     level=logging.ERROR,
-                    msg="No 'Group' column found in provided dataframe.",
+                    msg=f"No {grouping_column} column found in provided dataframe.",
                 )
             ]
         )
@@ -62,7 +63,7 @@ def flexiquant_lf(
     # delete columns where all entries are nan
     df.dropna(how="all", axis=1, inplace=True)
 
-    if reference_group not in df["Group"].unique():
+    if reference_group not in df[grouping_column].unique():
         return dict(
             messages=[
                 dict(
@@ -73,7 +74,7 @@ def flexiquant_lf(
         )
     else:
         # filter dataframe for controls
-        df_control = df[df["Group"] == reference_group]
+        df_control = df[df[grouping_column] == reference_group]
 
     # get modified peptides
     modified = []
@@ -86,9 +87,9 @@ def flexiquant_lf(
     df.drop(modified, inplace=True, axis=1)
 
     # delete Group column
-    group_column = df["Group"]
-    df_control.drop("Group", axis=1, inplace=True)
-    df.drop("Group", axis=1, inplace=True)
+    group_column = df[grouping_column]
+    df_control.drop(grouping_column, axis=1, inplace=True)
+    df.drop(grouping_column, axis=1, inplace=True)
 
     sample_column = df["Sample"]
 
@@ -261,9 +262,9 @@ def flexiquant_lf(
     df_RM["Reproducibility factor"] = reproducibility_list
 
     # add Group column again
-    df_raw_scores["Group"] = group_column
-    df_RM["Group"] = group_column
-    df_RM_mod["Group"] = group_column
+    df_raw_scores[grouping_column] = group_column
+    df_RM[grouping_column] = group_column
+    df_RM_mod[grouping_column] = group_column
 
     # add Sample column again
     df_raw_scores["Sample"] = sample_column
@@ -279,6 +280,7 @@ def flexiquant_lf(
                         sample_column,
                         df_RM[df_RM["Sample"] == sample].iloc[0],
                         mod_cutoff=mod_cutoff,
+                        grouping_column=grouping_column,
                     )
                 )
             )
@@ -413,6 +415,7 @@ def create_regression_plots(
     sample_column: pd.Series,
     rm_scores: pd.DataFrame,
     mod_cutoff: float,
+    grouping_column: str,
 ):
     """
     Creates a scatter plot with regression line and confidence bands.
@@ -426,6 +429,7 @@ def create_regression_plots(
     :param sample_column: Series containing the sample names.
     :param rm_scores: DataFrame containing the RM scores.
     :param mod_cutoff: RM score cutoff value for modified peptides.
+    :param grouping_column: Name of the grouping column.
     """
 
     # create new figure with two subplots
@@ -460,7 +464,14 @@ def create_regression_plots(
     plt.sca(ax1)
 
     rm_scores = rm_scores.drop(
-        ["Slope", "R2 model", "R2 data", "Reproducibility factor", "Group", "Sample"]
+        [
+            "Slope",
+            "R2 model",
+            "R2 data",
+            "Reproducibility factor",
+            grouping_column,
+            "Sample",
+        ]
     )
     # rm_scores.dropna(inplace=True)
     rm_scores.clip(0, 1, inplace=True)
