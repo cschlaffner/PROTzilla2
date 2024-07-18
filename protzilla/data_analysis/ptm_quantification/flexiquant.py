@@ -1,17 +1,11 @@
 import logging
 
-import matplotlib
 import pandas as pd
+import plotly.graph_objs as go
 from numpy import array, nan, sqrt, square
+from plotly.subplots import make_subplots
 from scipy.stats import f, median_abs_deviation
 from sklearn import linear_model
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
-from seaborn import distplot, diverging_palette, lineplot, scatterplot
-
-from protzilla.utilities.utilities import fig_to_base64
 
 CONFIDENCE_BAND_ALPHA = 0.3
 
@@ -298,17 +292,14 @@ def flexiquant_lf(
     for sample in sample_column:
         if sample in plot_dict:
             regression_plots.append(
-                fig_to_base64(
-                    create_regression_plots(
-                        *plot_dict[sample],
-                        sample_column,
-                        df_RM[df_RM["Sample"] == sample].iloc[0],
-                        mod_cutoff=mod_cutoff,
-                        grouping_column=grouping_column,
-                    )
+                create_regression_plots(
+                    *plot_dict[sample],
+                    sample_column,
+                    df_RM[df_RM["Sample"] == sample].iloc[0],
+                    mod_cutoff=mod_cutoff,
+                    grouping_column=grouping_column,
                 )
             )
-
     messages = []
     if len(regression_plots) == 0:
         messages.append(
@@ -442,7 +433,7 @@ def create_regression_plots(
     grouping_column: str,
 ):
     """
-    Creates a scatter plot with regression line and confidence bands.
+    Creates a scatter plot with regression line and confidence bands using Plotly.
 
     :param dataframe_train: DataFrame containing the training data.
     :param idx: Index of the sample.
@@ -456,37 +447,21 @@ def create_regression_plots(
     :param grouping_column: Name of the grouping column.
     """
 
-    # create new figure with two subplots
-    fig = plt.figure(figsize=(16, 9))
-    gs = gridspec.GridSpec(2, 1, height_ratios=[1, 6])
-    ax1 = plt.subplot(gs[1])
-    ax0 = plt.subplot(gs[0], sharex=ax1)
+    # Set up the Plotly figure with two subplots
+    fig = make_subplots(
+        rows=2, cols=1, row_heights=[0.1, 0.9], shared_xaxes=True, vertical_spacing=0.02
+    )
 
-    # set space between subplots
-    gs.update(hspace=0.05)
+    # Add histogram to the upper subplot
+    fig.add_trace(
+        go.Histogram(
+            x=dataframe_train["Reference intensity"], nbinsx=150, showlegend=False
+        ),
+        row=1,
+        col=1,
+    )
 
-    # plot histogram in upper subplot
-    plt.sca(ax0)
-
-    # add title
-    plt.title("RANSAC Linear Regression of Sample " + str(sample_column[idx]))
-
-    # plot histogram
-    distplot(a=dataframe_train["Reference intensity"], bins=150, kde=False)
-
-    # remove axis and tick labels
-    plt.xlabel("")
-    plt.tick_params(
-        axis="x",  # changes apply to the x-axis
-        which="both",  # both major and minor ticks are affected
-        bottom=True,  # ticks along the bottom edge are off
-        top=False,  # ticks along the top edge are off
-        labelbottom=False,
-    )  # labels along the bottom edge are off
-
-    # plot scatter plot
-    plt.sca(ax1)
-
+    # Processing RM scores and dataframe for plotting
     rm_scores = rm_scores.drop(
         [
             "Slope",
@@ -497,73 +472,128 @@ def create_regression_plots(
             "Sample",
         ]
     )
-    # rm_scores.dropna(inplace=True)
     rm_scores.clip(0, 1, inplace=True)
-
     rm_scores = rm_scores.to_frame(name="RM score")
-    # outliers in dataframe_train don't have an RM score
     rm_scores = dataframe_train.merge(
         rm_scores, left_index=True, right_index=True, how="left"
     )
     rm_scores.fillna(-1, inplace=True)
 
-    palette = diverging_palette(h_neg=0, h_pos=120, as_cmap=True, center="dark")
+    # Color mapping for scatter plot points
+    # This example assumes 'cmap' is a suitable function to map values to colors
+    colors = cmap(rm_scores["RM score"], mod_cutoff)
 
-    def cmap(values: list[float]):
-        nanIdx = set([i for i, x in enumerate(values) if x == -1])
-        return [
-            color if i not in nanIdx else [0.75, 0.75, 0.75, 1.0]
-            for i, color in enumerate(palette(values))
-        ]
+    # Create a list of hover text entries combining Sequence and RM score
+    hover_text = [
+        f"Sequence: {sequence}<br>RM Score: {rm_score_value}"
+        for sequence, rm_score_value in zip(rm_scores.index, rm_scores["RM score"])
+    ]
 
-    scatterplot(
-        x="Reference intensity",
-        y="Sample intensity",
-        data=dataframe_train,
-        hue=list(rm_scores.index),
-        palette=cmap(scale_to_mod_cutoff(list(rm_scores["RM score"]), mod_cutoff)),
+    # Define the scatter plot with the hover text
+    scatter = go.Scatter(
+        x=dataframe_train["Reference intensity"],
+        y=dataframe_train["Sample intensity"],
+        mode="markers",
+        marker=dict(color=colors),
+        name="Peptides",
+        text=hover_text,  # Set the hover text
+        hoverinfo="text",  # Use only text for the hover info
     )
+    fig.add_trace(scatter, row=2, col=1)
 
-    # draw regression line
-    line_label = "R2 model: " + str(r2_score_model) + "\nR2 data: " + str(r2_score_data)
+    # Add regression line
     max_int = dataframe_train["Reference intensity"].max()
     min_int = min(
         dataframe_train["Reference intensity"].min(),
         dataframe_train["Sample intensity"].min(),
     )
-    X = [min_int - 2, max_int]
-    y = [min_int - 2, slope * max_int]
-    plt.plot(X, y, color="darkblue", linestyle="-", label=line_label)
-
-    # draw confidence band
-    lineplot(
-        x="Reference intensity",
-        y="CB low",
-        data=dataframe_train,
-        color="darkgreen",
-        label="CB, alpha=" + str(alpha),
-    )
-    lineplot(
-        x="Reference intensity", y="CB high", data=dataframe_train, color="darkgreen"
+    x_line = [min_int - 2, max_int]
+    y_line = [min_int - 2, slope * max_int]
+    fig.add_trace(
+        go.Scatter(
+            x=x_line,
+            y=y_line,
+            mode="lines",
+            name=f"Regression Line \n(R2 model: {r2_score_model}, R2 data: {r2_score_data})",
+            line=dict(color="darkblue"),
+        ),
+        row=2,
+        col=1,
     )
 
-    # set line style of CB lines to dashed
-    for i in [len(ax1.lines) - 1, len(ax1.lines) - 2]:
-        ax1.lines[i].set_linestyle("--")
+    # Add sorted confidence bands
+    sorted_df = dataframe_train.sort_values(
+        "Reference intensity"
+    )  # Ensure data is sorted
+    fig.add_trace(
+        go.Scatter(
+            x=sorted_df["Reference intensity"],
+            y=sorted_df["CB low"],
+            mode="lines",
+            line=dict(dash="dash", color="darkgreen"),  # Optional: specify color
+            name="Confidence Band Low",
+        ),
+        row=2,
+        col=1,
+    )
 
-    # create legend if sample has 20 peptides or less otherwise don't create a legend
-    if len(dataframe_train) <= 20:
-        # set right x axis limit
-        plt.gca().set_xlim(right=1.4 * max_int)
-        plt.legend()
-    else:
-        plt.gca().get_legend().remove()
+    fig.add_trace(
+        go.Scatter(
+            x=sorted_df["Reference intensity"],
+            y=sorted_df["CB high"],
+            mode="lines",
+            line=dict(dash="dash", color="darkgreen"),  # Optional: specify color
+            name="Confidence Band High",
+        ),
+        row=2,
+        col=1,
+    )
 
-    # set y axis label
-    plt.ylabel("Intensity sample " + str(sample_column[idx]))
-    plt.xlabel("Reference intensity")
+    fig.update_xaxes(showline=True, linewidth=1, linecolor="black", mirror=True)
+    fig.update_yaxes(showline=True, linewidth=1, linecolor="black", mirror=True)
+
+    # Update axes and layout
+    fig.update_layout(
+        title=f"RANSAC Linear Regression of Sample {sample_column[idx]}",
+        xaxis2_title="Reference intensity",
+        yaxis2_title=f"Intensity sample {sample_column[idx]}",
+        showlegend=True,
+        plot_bgcolor="rgba(0, 0, 0, 0)",
+        legend=dict(yanchor="top", y=0.88, xanchor="left", x=0.01),
+        height=800,
+    )
 
     return fig
+
+
+def cmap(rm_scores, mod_cutoff):
+    """
+    Maps RM scores to colors using a diverging palette.
+
+    :param rm_scores: Pandas Series of RM scores.
+    :param mod_cutoff: Cutoff value to distinguish modified peptides.
+    :return: List of color codes corresponding to RM scores.
+    """
+    outlier_color = "gray"  # Color for outliers
+
+    # Apply cutoff for modified peptides (assumed mid-point like behavior)
+    colors = []
+    for score in rm_scores:
+        if score == -1:  # Outliers
+            colors.append(outlier_color)
+        elif score < mod_cutoff:
+            # Linear interpolation between low_color and middle_color
+            colors.append(
+                f"rgb({255 * (1 - score / mod_cutoff)}, {0}, {255 * score / mod_cutoff})"
+            )
+        else:
+            # Linear interpolation between middle_color and high_color
+            normalized_score = (score - mod_cutoff) / (1 - mod_cutoff)
+            colors.append(
+                f"rgb({0}, {255 * normalized_score}, {255 * (1 - normalized_score)})"
+            )
+
+    return colors
 
 
 def calc_raw_scores(df_distance: pd.DataFrame, median_int: pd.Series):
