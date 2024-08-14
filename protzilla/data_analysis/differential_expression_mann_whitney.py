@@ -22,16 +22,16 @@ def mann_whitney_test_on_intensity_data(
     """
     Perform Mann-Whitney U test on all proteins in the given intensity data frame.
 
-    @param intensity_df: A protein dataframe in typical PROTzilla long format.
-    @param metadata_df: The metadata data frame containing the grouping information.
-    @param grouping: The column name in the metadata data frame that contains the grouping information,
+    :param intensity_df: A protein dataframe in typical PROTzilla long format.
+    :param metadata_df: The metadata data frame containing the grouping information.
+    :param grouping: The column name in the metadata data frame that contains the grouping information,
         that should be used.
-    @param group1: The name of the first group for the Mann-Whitney U test.
-    @param group2: The name of the second group for the Mann-Whitney U test.
-    @param log_base: The base of the logarithm that was used to transform the data.
-    @param alpha: The significance level for the test.
-    @param multiple_testing_correction_method: The method for multiple testing correction.
-    @param p_value_calculation_method: The method for p-value calculation.
+    :param group1: The name of the first group for the Mann-Whitney U test.
+    :param group2: The name of the second group for the Mann-Whitney U test.
+    :param log_base: The base of the logarithm that was used to transform the data.
+    :param alpha: The significance level for the test.
+    :param multiple_testing_correction_method: The method for multiple testing correction.
+    :param p_value_calculation_method: The method for p-value calculation.
 
     :return: a dict containing
         - a df differentially_expressed_proteins_df in long format containing all test results
@@ -90,17 +90,17 @@ def mann_whitney_test_on_ptm_data(
     """
     Perform Mann-Whitney U test on all PTMs in the given PTM data frame.
 
-    @param ptm_df: The data frame containing the PTM data in columns and a
+    :param ptm_df: The data frame containing the PTM data in columns and a
         "Sample" column that can be mapped to the metadata, to assign the groups.
-    @param metadata_df: The metadata data frame containing the grouping information.
-    @param grouping: The column name in the metadata data frame that contains the grouping information,
+    :param metadata_df: The metadata data frame containing the grouping information.
+    :param grouping: The column name in the metadata data frame that contains the grouping information,
         that should be used.
-    @param group1: The name of the first group for the Mann-Whitney U test.
-    @param group2: The name of the second group for the Mann-Whitney U test.
-    @param log_base: The base of the logarithm that was used to transform the data.
-    @param alpha: The significance level for the test.
-    @param multiple_testing_correction_method: The method for multiple testing correction.
-    @param p_value_calculation_method: The method for p-value calculation.
+    :param group1: The name of the first group for the Mann-Whitney U test.
+    :param group2: The name of the second group for the Mann-Whitney U test.
+    :param log_base: The base of the logarithm that was used to transform the data.
+    :param alpha: The significance level for the test.
+    :param multiple_testing_correction_method: The method for multiple testing correction.
+    :param p_value_calculation_method: The method for p-value calculation.
 
     :return: a dict containing
         - a df differentially_expressed_ptm_df in wide format containing all test results
@@ -151,18 +151,18 @@ def mann_whitney_test_on_columns(
     """
     Perform Mann-Whitney U test on all columns of the data frame.
 
-    @param df: The data frame containing the data in columns and a
+    :param df: The data frame containing the data in columns and a
     "Sample" column that can be mapped to the metadata, to assign the groups.
-    @param metadata_df: The metadata data frame containing the grouping information.
-    @param grouping: The column name in the metadata data frame that contains the grouping information,
+    :param metadata_df: The metadata data frame containing the grouping information.
+    :param grouping: The column name in the metadata data frame that contains the grouping information,
     that should be used.
-    @param group1: The name of the first group for the Mann-Whitney U test.
-    @param group2: The name of the second group for the Mann-Whitney U test.
-    @param log_base: The base of the logarithm that was used to transform the data.
-    @param alpha: The significance level for the test.
-    @param multiple_testing_correction_method: The method for multiple testing correction.
-    @param columns_name: The semantics of the column names. This is used to name the columns in the output data frames.
-    @param p_value_calculation_method: The method for p-value calculation.
+    :param group1: The name of the first group for the Mann-Whitney U test.
+    :param group2: The name of the second group for the Mann-Whitney U test.
+    :param log_base: The base of the logarithm that was used to transform the data.
+    :param alpha: The significance level for the test.
+    :param multiple_testing_correction_method: The method for multiple testing correction.
+    :param columns_name: The semantics of the column names. This is used to name the columns in the output data frames.
+    :param p_value_calculation_method: The method for p-value calculation.
 
     :return: a dict containing
         - a df differentially_expressed_column_df in wide format containing the test results
