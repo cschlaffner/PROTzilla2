@@ -561,14 +561,14 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     )
     title = CustomCharField(label="Title of the plot (optional)", required=False)
 
-    colors = CustomMultipleChoiceField(
-        choices=[], label="Colors for the plot (optional)"
-    )  # TODO this should  not have to be set in fill_form
+    #colors = CustomMultipleChoiceField(
+    #    choices=[], label="Colors for the plot (optional)"
+    #)  # TODO this should  not have to be set in fill_form
 
     def fill_form(self, run: Run) -> None:
-        self.fields["colors"].choices = [
-            (v, k) for k, v, in mcolors.CSS4_COLORS.items()
-        ]
+        #self.fields["colors"].choices = [
+        #    (v, k) for k, v, in mcolors.CSS4_COLORS.items()
+        #]
 
         self.fields["input_df_step_instance"].choices = fill_helper.get_choices(
             run, "enrichment_df"

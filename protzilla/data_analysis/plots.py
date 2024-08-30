@@ -7,12 +7,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy import stats
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
-
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
+import protzilla.constants.colors as colorscheme
 from protzilla.utilities.clustergram import Clustergram
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide
+from protzilla.data_analysis.plots_helper import style_text, get_text_parameters, get_enhanced_reading_value
 
-colors = {
+
+background_colors = {
     "plot_bgcolor": "white",
     "gridcolor": "#F1F1F1",
     "linecolor": "#F1F1F1",
@@ -35,40 +36,74 @@ def scatter_plot(
 
     :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
+    data_colors = colorscheme.PROTZILLA_DISCRETE_COLOR_SEQUENCE
+    add_font_size, add_letter_spacing, add_word_spacing = get_text_parameters()
 
     intensity_df_wide = long_to_wide(input_df) if is_long_format(input_df) else input_df
     try:
         color_df = (
             pd.DataFrame() if not isinstance(color_df, pd.DataFrame) else color_df
         )
-
         if color_df.shape[1] > 1:
             raise ValueError("The color dataframe should have 1 dimension only")
+
+        if not color_df.empty and color_df[color_df.columns[0]].nunique() > 7:
+            raise ValueError("The column with color attributes should have 7 or fewer unique values. Please try with "
+                             "a different attribute")
 
         if intensity_df_wide.shape[1] == 2:
             intensity_df_wide = pd.concat([intensity_df_wide, color_df], axis=1)
             x_name, y_name = intensity_df_wide.columns[:2]
             color_name = color_df.columns[0] if not color_df.empty else None
-            fig = px.scatter(intensity_df_wide, x=x_name, y=y_name, color=color_name)
-            fig.update_traces(
-                marker=dict(color=colors["annotation_proteins_of_interest"])
+            fig = px.scatter(
+                intensity_df_wide, x=x_name, y=y_name, color=color_name, color_discrete_sequence=data_colors
             )
+
         elif intensity_df_wide.shape[1] == 3:
             intensity_df_wide = pd.concat([intensity_df_wide, color_df], axis=1)
             x_name, y_name, z_name = intensity_df_wide.columns[:3]
             color_name = color_df.columns[0] if not color_df.empty else None
             fig = px.scatter_3d(
-                intensity_df_wide, x=x_name, y=y_name, z=z_name, color=color_name
+                intensity_df_wide, x=x_name, y=y_name, z=z_name, color=color_name, color_discrete_sequence=data_colors
             )
-            fig.update_traces(marker_color=colors["annotation_proteins_of_interest"])
         else:
             raise ValueError(
                 "The dimensions of the DataFrame are either too high or too low."
             )
-        fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
-        fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
-        fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
+
+        title_text = style_text("Scatter Plot", add_letter_spacing, add_word_spacing)
+        x_title = style_text(x_name, add_letter_spacing, add_word_spacing)
+        y_title = style_text(y_name, add_letter_spacing, add_word_spacing)
+
+
+        fig.update_layout(
+            title={
+                "text": title_text,
+                "font": dict(size=16 + add_font_size, family="Arial"),
+                "y": 0.98,
+                "x": 0.5,
+                "xanchor": "center",
+                "yanchor": "top",
+            },
+            font=dict(size=14 + add_font_size, family="Arial"),
+            plot_bgcolor=background_colors["plot_bgcolor"]
+        )
+        fig.update_xaxes(title_text=x_title, gridcolor=background_colors["gridcolor"], linecolor=background_colors["linecolor"])
+        fig.update_yaxes(title_text=y_title, gridcolor=background_colors["gridcolor"], linecolor=background_colors["linecolor"])
+
+        if not color_df.empty:
+            fig.update_layout(
+                legend=dict(
+                    title=dict(
+                        text=style_text(color_name or "Legend", add_letter_spacing, add_word_spacing),
+                        font=dict(size=14 + add_font_size, family="Arial")
+                    ),
+                    font=dict(size=14 + add_font_size, family="Arial")
+                )
+            )
+
         return dict(plots=[fig])
+
     except ValueError as e:
         msg = ""
         if intensity_df_wide.shape[1] < 2:
@@ -83,6 +118,11 @@ def scatter_plot(
             )
         elif color_df.shape[1] != 1:
             msg = "The color dataframe should have 1 dimension only"
+
+        elif color_df[color_df.columns[0]].nunique() > 7:
+            msg = "The column with color attributes should have 7 or fewer unique values. Please try with a different " \
+                  "attribute"
+
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
 
 
@@ -109,8 +149,19 @@ def create_volcano_plot(
 
     :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
-
+    data_colors = colorscheme.PROTZILLA_DISCRETE_COLOR_SEQUENCE
+    enhanced_reading = get_enhanced_reading_value()
+    add_font_size, add_letter_spacing, add_word_spacing = get_text_parameters()
     plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
+
+    xlabel = f"log2(fc) ({group2} / {group1})"
+    ylabel = "-log10(p)"
+    title = "Volcano Plot"
+
+    xlabel = style_text(xlabel, add_letter_spacing, add_word_spacing)
+    ylabel = style_text(ylabel, add_letter_spacing, add_word_spacing)
+    title = style_text(title, add_letter_spacing, add_word_spacing)
+
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
         effect_size="log2_fold_change",
@@ -119,13 +170,15 @@ def create_volcano_plot(
         gene=None,
         genomewideline_value=-np.log10(alpha),
         effect_size_line=[-fc_threshold, fc_threshold],
-        xlabel=f"log2(fc) ({group2} / {group1})",
-        ylabel="-log10(p)",
-        title="Volcano Plot",
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
         annotation="Protein ID",
-        plot_bgcolor=colors["plot_bgcolor"],
-        xaxis_gridcolor=colors["gridcolor"],
-        yaxis_gridcolor=colors["gridcolor"],
+        plot_bgcolor=background_colors["plot_bgcolor"],
+        xaxis_gridcolor=background_colors["gridcolor"],
+        yaxis_gridcolor=background_colors["gridcolor"],
+        font_size=14 + add_font_size,
+        font=dict(family="Arial"),
     )
     if proteins_of_interest is None:
         proteins_of_interest = []
@@ -134,33 +187,36 @@ def create_volcano_plot(
 
     # annotate the proteins of interest permanently in the plot
     for protein in proteins_of_interest:
-        fig.add_annotation(
-            x=plot_df.loc[
-                plot_df["Protein ID"] == protein,
-                "log2_fold_change",
-            ].values[0],
-            y=-np.log10(
-                plot_df.loc[
-                    plot_df["Protein ID"] == protein,
-                    "corrected_p_value",
-                ].values[0]
-            ),
-            text=protein,
-            showarrow=True,
-            arrowhead=1,
-            font=dict(color=colors["annotation_text_color"]),
-            align="center",
-            arrowcolor=colors["annotation_proteins_of_interest"],
-            bgcolor=colors["annotation_proteins_of_interest"],
-            opacity=0.8,
-            ax=0,
-            ay=-20,
-        )
+        protein_data = plot_df.loc[plot_df["Protein ID"] == protein]
+        if not protein_data.empty:
+            fig.add_annotation(
+                x=protein_data["log2_fold_change"].values[0],
+                y=-np.log10(protein_data["corrected_p_value"].values[0]),
+                text=style_text(protein, add_letter_spacing, add_word_spacing) if enhanced_reading else protein,
+                showarrow=True,
+                arrowhead=1,
+                font=dict(color=background_colors["annotation_text_color"]),
+                align="center",
+                arrowcolor=background_colors["annotation_proteins_of_interest"],
+                bgcolor=background_colors["annotation_proteins_of_interest"],
+                opacity=0.8,
+                ax=0,
+                ay=-20,
+            )
+
+    significant_protein_color = data_colors[1]
+    not_significant_protein_color = data_colors[0]
+    if data_colors[1] in colorscheme.MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE:
+        significant_protein_color = data_colors[0]
+        not_significant_protein_color = data_colors[1]
 
     new_names = {
         "Point(s) of interest": "Significant Proteins",
         "Dataset": "Not Significant Proteins",
     }
+
+    if enhanced_reading:
+        new_names = {key: style_text(value, add_letter_spacing, add_word_spacing) for key, value in new_names.items()}
 
     fig.for_each_trace(
         lambda t: t.update(
@@ -169,13 +225,23 @@ def create_volcano_plot(
         )
     )
     fig.update_traces(
-        marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
-        selector=dict(name="Significant Proteins"),
+        marker=dict(color=significant_protein_color),
+        selector=dict(name=new_names["Point(s) of interest"]),
     )
     fig.update_traces(
-        marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
-        selector=dict(name="Not Significant Proteins"),
+        marker=dict(color=not_significant_protein_color),
+        selector=dict(name=new_names["Dataset"]),
     )
+    if enhanced_reading:
+        fig.update_layout(
+            legend=dict(
+                title=dict(
+                    text=style_text("Proteins", add_letter_spacing, add_word_spacing),
+                    font=dict(size=14 + add_font_size, family="Arial")
+                ),
+                font=dict(size=14 + add_font_size, family="Arial")
+            )
+        )
 
     return dict(plots=[fig])
 
@@ -292,9 +358,9 @@ def prot_quant_plot(
 ) -> dict:
     """
     A function to create a graph visualising protein quantifications across all samples
-    as a line diagram. It's possible to select one proteingroup that will be displayed in orange
-    and choose a similarity measurement with a similarity score to get all proteingroups
-    that are similar displayed in another color in this line diagram. All other proteingroups
+    as a line diagram. It's possible to select one protein group that will be displayed in orange
+    and choose a similarity measurement with a similarity score to get all protein groups
+    that are similar displayed in another color in this line diagram. All other protein groups
     are displayed in the background as a grey polygon.
 
     :param input_df: A dataframe in protzilla wide format, where each row
@@ -307,7 +373,9 @@ def prot_quant_plot(
 
     :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
-
+    data_colors = colorscheme.PROTZILLA_DISCRETE_COLOR_SEQUENCE
+    enhanced_reading = get_enhanced_reading_value()
+    add_font_size, add_letter_spacing, add_word_spacing = get_text_parameters()
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
 
     if protein_group not in wide_df.columns:
@@ -324,8 +392,8 @@ def prot_quant_plot(
     fig = go.Figure()
 
     color_mapping = {
-        "A": PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
-        "C": PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+        "A": data_colors[0],
+        "C": data_colors[3],
     }
 
     lower_upper_x = []
@@ -342,13 +410,17 @@ def prot_quant_plot(
         lower_upper_x.append(index)
         lower_upper_y.append(row.min())
 
+    intensity_range_name = "Intensity Range"
+    if enhanced_reading:
+        intensity_range_name = "<b>Intensity Range</b>"
+
     fig.add_trace(
         go.Scatter(
             x=lower_upper_x,
             y=lower_upper_y,
             fill="toself",
-            name="Intensity Range",
-            line=dict(color="silver"),
+            name=style_text(intensity_range_name, add_letter_spacing, add_word_spacing),
+            line=dict(color="lightgray"),
         )
     )
 
@@ -373,13 +445,15 @@ def prot_quant_plot(
                     similar_groups.append(group_to_compare)
 
     for group in similar_groups:
+        formatted_group_name = group[:15] + "..." if len(group) > 15 else group
+        formatted_group_name = style_text(formatted_group_name, add_letter_spacing, add_word_spacing)
         fig.add_trace(
             go.Scatter(
                 x=wide_df.index,
                 y=wide_df[group],
                 mode="lines",
-                name=group[:15] + "..." if len(group) > 15 else group,
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
+                name=formatted_group_name,
+                line=dict(color=data_colors[2]),
                 showlegend=len(similar_groups) <= 7,
             )
         )
@@ -390,23 +464,33 @@ def prot_quant_plot(
                 x=[None],
                 y=[None],
                 mode="lines",
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
-                name="Similar Protein Groups",
+                line=dict(color=data_colors[2]),
+                name=style_text("Similar Protein Groups", add_letter_spacing, add_word_spacing) if enhanced_reading else "Similar Protein Groups",
             )
         )
 
-    formatted_protein_name = (
-        protein_group[:15] + "..." if len(protein_group) > 15 else protein_group
-    )
+    formatted_protein_name = protein_group[:15] + "..." if len(protein_group) > 15 else protein_group
+    formatted_protein_name = style_text(formatted_protein_name, add_letter_spacing, add_word_spacing)
+
+    if data_colors[1] in colorscheme.MONOCHROMATIC_DISCRETE_COLOR_SEQUENCE:
+        line_type = "lines+markers"
+        color_mapping["A"] = data_colors[4]
+    else:
+        line_type = "lines"
+
     fig.add_trace(
         go.Scatter(
             x=wide_df.index,
             y=wide_df[protein_group],
-            mode="lines",
+            mode=line_type,
             name=formatted_protein_name,
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
+            line=dict(color=data_colors[1], width=3),
         )
     )
+    experimental_group_name = style_text("<b>Experimental Group</b>", add_letter_spacing,
+                                         add_word_spacing) if enhanced_reading else "Experimental Group"
+    control_group_name = style_text("<b>Control Group</b>", add_letter_spacing,
+                                    add_word_spacing) if enhanced_reading else "Control Group"
 
     fig.add_trace(
         go.Scatter(
@@ -414,7 +498,7 @@ def prot_quant_plot(
             y=[None],
             mode="markers",
             marker=dict(color=color_mapping.get("A")),
-            name="Experimental Group",
+            name=experimental_group_name,
         )
     )
 
@@ -424,20 +508,21 @@ def prot_quant_plot(
             y=[None],
             mode="markers",
             marker=dict(color=color_mapping.get("C")),
-            name="Control Group",
+            name=control_group_name,
         )
     )
 
     fig.update_layout(
-        title=f"Intensity of {formatted_protein_name} in all samples",
-        plot_bgcolor=colors["plot_bgcolor"],
-        xaxis_gridcolor=colors["gridcolor"],
-        yaxis_gridcolor=colors["gridcolor"],
-        xaxis_linecolor=colors["linecolor"],
-        yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Sample",
-        yaxis_title="Intensity",
-        legend_title="Legend",
+        title=style_text(f"<b>Intensity of {formatted_protein_name} in all samples</b>", add_letter_spacing, add_word_spacing),
+        plot_bgcolor=background_colors["plot_bgcolor"],
+        xaxis_gridcolor=background_colors["gridcolor"],
+        yaxis_gridcolor=background_colors["gridcolor"],
+        xaxis_linecolor=background_colors["linecolor"],
+        yaxis_linecolor=background_colors["linecolor"],
+        xaxis_title=style_text("Sample", add_letter_spacing, add_word_spacing) if enhanced_reading else "Sample",
+        yaxis_title=style_text("Intensity", add_letter_spacing, add_word_spacing) if enhanced_reading else "Intensity",
+        legend_title=style_text("Legend", add_letter_spacing, add_word_spacing) if enhanced_reading else "Legend",
+        font=dict(size=14 + add_font_size, family="Arial"),
         xaxis=dict(
             tickmode="array",
             tickangle=0,
@@ -447,6 +532,7 @@ def prot_quant_plot(
                 for label in wide_df.index
             ],
         ),
+
         autosize=True,
         margin=dict(l=100, r=300, t=100, b=100),
         legend=dict(
@@ -454,6 +540,7 @@ def prot_quant_plot(
             y=1,
             bgcolor="rgba(255, 255, 255, 0.5)",
             orientation="v",
+            font=dict(size=14 + add_font_size, family="Arial"),
         ),
     )
 

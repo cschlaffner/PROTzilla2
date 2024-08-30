@@ -2,7 +2,9 @@ import pandas as pd
 
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 from ..utilities.transform_dfs import long_to_wide
-
+from protzilla.customising.accessibility import color_choice_method
+from protzilla.steps import StepManager
+from protzilla.methods.customising import CustomisingStep  # replace with the actual import
 
 def by_samples_missing(
     protein_df: pd.DataFrame | None,

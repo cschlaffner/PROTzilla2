@@ -7,18 +7,64 @@ import pandas as pd
 from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import fig_to_base64
 
-from ..constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
+import protzilla.constants.text as text_constants
+import protzilla.constants.colors as colorscheme
+
+
+def style_text(text: str, letter_spacing: float, word_spacing: float) -> str:
+    """
+    Function to style text with letter spacing and word spacing.
+
+    :param text: The text to be styled.
+    :param letter_spacing: The amount of letter spacing.
+    :param word_spacing: The amount of word spacing.
+    :return: HTML formatted string with specified letter and word spacing.
+    """
+    return f'<span style="letter-spacing:{letter_spacing}pt;word-spacing:{word_spacing}pt;">{text}</span>'
+
+
+def get_text_parameters():
+    """
+        Retrieves text parameters from PROTZILLA_TEXT_PARAMETERS.
+    """
+    add_font_size = text_constants.PROTZILLA_TEXT_PARAMETERS["add_font_size"]
+    add_letter_spacing = text_constants.PROTZILLA_TEXT_PARAMETERS["add_letter_spacing"]
+    add_word_spacing = text_constants.PROTZILLA_TEXT_PARAMETERS["add_word_spacing"]
+    return add_font_size, add_letter_spacing, add_word_spacing
+
+
+def get_enhanced_reading_value():
+    """
+        Retrieves enhanced reading value from PROTZILLA_TEXT_PARAMETERS.
+    """
+    return text_constants.PROTZILLA_TEXT_PARAMETERS["enhanced_reading"]
+
+
+def add_spacing(text: str, letter_spacing: float, word_spacing: float) -> str:
+    """
+    Adds additional spacing to letters and words for the given text.
+
+    :param text: The text to which spacing should be added.
+    :param letter_spacing: The amount of spacing to add between letters.
+    :param word_spacing: The amount of spacing to add between words.
+    :return: The text with added spacing.
+    """
+    # Adding letter spacing by inserting additional spaces between each character
+    spaced_text = f" {' ' * int(letter_spacing)} ".join(text)
+    # Adding word spacing by replacing single spaces with more spaces
+    spaced_text = spaced_text.replace(' ', ' ' * int(word_spacing))
+    return spaced_text
 
 
 def GO_enrichment_bar_plot(
-    input_df,
-    top_terms,
-    cutoff,
-    value,
-    gene_sets=[],
-    title="",
-    colors=PROTZILLA_DISCRETE_COLOR_SEQUENCE,
-    figsize=None,
+        input_df,
+        top_terms,
+        cutoff,
+        value,
+        gene_sets=[],
+        title="",
+        colors=None,
+        figsize=None,
 ):
     """
     Create a bar plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -43,11 +89,15 @@ def GO_enrichment_bar_plot(
     :type colors: list, optional
     :param figsize: Size of the plot, defaults to None and is calculated dynamically if not provided.
     :type figsize: tuple, optional
+    :param enhanced_reading: Boolean to determine if the font size and spacing should be increased.
+    :type enhanced_reading: bool, optional
 
     :return: Base64 encoded image of the plot
     :rtype: bytes
     """
-
+    enhanced_reading = get_enhanced_reading_value()
+    add_font_size, add_letter_spacing, add_word_spacing = get_text_parameters()
+    font_color = "#2a3f5f"
     if input_df is None or len(input_df) == 0 or input_df.empty:
         msg = "No data to plot. Please check your input data or run enrichment again."
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
@@ -108,9 +158,10 @@ def GO_enrichment_bar_plot(
     elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
 
-
     if colors == "" or colors is None or len(colors) == 0:
-        colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE
+        colors = colorscheme.PROTZILLA_DISCRETE_COLOR_SEQUENCE
+        colors[1], colors[2] = colors[2], colors[1]
+
     size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(
@@ -123,6 +174,48 @@ def GO_enrichment_bar_plot(
             color=colors,
             title=title,
         )
+
+        ax.set_title(
+            ax.get_title(),
+            fontsize=14 + add_font_size,
+            fontfamily='Arial',
+            color=font_color
+        )
+        ax.set_xlabel(
+            ax.get_xlabel(),
+            fontsize=14 + add_font_size,
+            fontfamily='Arial',
+            color=font_color
+        )
+        ax.set_ylabel(
+            ax.get_ylabel(),
+            fontsize=14 + add_font_size,
+            fontfamily='Arial',
+            color=font_color
+        )
+
+        for label in ax.get_xticklabels():
+            label.set_fontsize(14 + add_font_size)
+            label.set_fontfamily('Arial')
+            label.set_color(font_color)
+
+        for label in ax.get_yticklabels():
+            label.set_fontsize(14 + add_font_size)
+            label.set_fontfamily('Arial')
+            label.set_color(font_color)
+
+        leg = ax.get_legend()
+        if leg:
+            leg.set_title(
+                "Legend",
+                prop={'size': 16 + add_font_size, 'family': 'Arial'}
+            )
+            leg.get_title().set_color(font_color)
+            for text in leg.get_texts():
+                text.set_fontsize(12 + add_font_size)
+                text.set_fontfamily('Arial')
+                text.set_color(font_color)
+
     except ValueError as e:
         msg = f"No data to plot when applying cutoff {cutoff}. Check your input data or choose a different cutoff."
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=str(e))])
@@ -130,16 +223,16 @@ def GO_enrichment_bar_plot(
 
 
 def GO_enrichment_dot_plot(
-    input_df,
-    top_terms,
-    cutoff,
-    gene_sets=[],
-    x_axis_type="Gene Sets",
-    title="",
-    rotate_x_labels=False,
-    show_ring=False,
-    dot_size=5,
-    figsize=None,
+        input_df,
+        top_terms,
+        cutoff,
+        gene_sets=[],
+        x_axis_type="Gene Sets",
+        title="",
+        rotate_x_labels=False,
+        show_ring=False,
+        dot_size=5,
+        figsize=None,
 ):
     """
     Creates a dot plot for the GO enrichment results. The plot is created using the gseapy library.
@@ -246,16 +339,16 @@ def GO_enrichment_dot_plot(
 
 
 def gsea_dot_plot(
-    input_df,
-    cutoff=0.05,
-    gene_sets=[],
-    dot_color_value="FDR q-val",
-    x_axis_value="NES",
-    title="",
-    show_ring=False,
-    dot_size=5,
-    remove_library_names=False,
-    figsize=None,
+        input_df,
+        cutoff=0.05,
+        gene_sets=[],
+        dot_color_value="FDR q-val",
+        x_axis_value="NES",
+        title="",
+        show_ring=False,
+        dot_size=5,
+        remove_library_names=False,
+        figsize=None,
 ):
     """
     Creates a dot plot from GSEA and pre-ranked GSEA results. The plot is created using the gseapy library.
@@ -335,12 +428,12 @@ def gsea_dot_plot(
 
 
 def gsea_enrichment_plot(
-    term_dict=None,
-    term_name=None,
-    ranking=None,
-    pos_pheno_label="",
-    neg_pheno_label="",
-    figsize=None,
+        term_dict=None,
+        term_name=None,
+        ranking=None,
+        pos_pheno_label="",
+        neg_pheno_label="",
+        figsize=None,
 ):
     """
     Creates a typical enrichment plot from GSEA or pre-ranked GSEA details. The plot is created using the gseapy library.
@@ -368,7 +461,7 @@ def gsea_enrichment_plot(
         msg = "Please input a term name."
         return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]
     if not (
-        isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)
+            isinstance(ranking, pd.DataFrame) or isinstance(ranking, pd.Series)
     ) or not (ranking.index.name == "Gene symbol" or ranking.index.name == "gene_name"):
         msg = "Please input a ranking output dataframe from GSEA or pre-ranked GSEA."
         return [dict(messages=[dict(level=logging.ERROR, msg=msg)])]

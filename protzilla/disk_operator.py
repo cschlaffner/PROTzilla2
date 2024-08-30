@@ -9,7 +9,7 @@ import yaml
 from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
-from protzilla.constants import paths
+from protzilla.constants import paths, colors, text
 from protzilla.constants.protzilla_logging import logger
 from protzilla.steps import Messages, Output, Plots, Step, StepManager
 
@@ -96,6 +96,21 @@ class KEYS:
     DF_MODE = "df_mode"
 
 
+def set_color(steps_run):
+    color_value = steps_run['form_inputs']['colors']
+    if color_value and (color_value != "custom"):
+        colors.get_color_sequence(color_value)
+    elif color_value == "custom":
+        custom_color_str = steps_run['form_inputs']['custom_colors']
+        colors.set_custom_sequence(custom_color_str)
+
+
+def set_text_parameters(steps_run):
+    enhanced_reading = steps_run['form_inputs']['enhanced_reading']
+    if enhanced_reading:
+        text.get_text_parameters(enhanced_reading)
+
+
 class DiskOperator:
     def __init__(self, run_name: str, workflow_name: str):
         self.run_name = run_name
@@ -110,6 +125,10 @@ class DiskOperator:
             step_manager.df_mode = run.get(KEYS.DF_MODE, "disk")
             for step_data in run[KEYS.STEPS]:
                 try:
+                    if 'form_inputs' in step_data and 'colors' in step_data['form_inputs']:
+                        set_color(step_data)
+                    if 'form_inputs' in step_data and 'enhanced_reading' in step_data['form_inputs']:
+                        set_text_parameters(step_data)
                     step = self._read_step(step_data, step_manager)
                 except Exception as e:
                     logger.error(f"Error reading step: {e}")
@@ -155,8 +174,8 @@ class DiskOperator:
                 inputs_to_write = {}
                 for input_key, input_value in inputs:
                     if not (
-                        isinstance(input_value, pd.DataFrame)
-                        or utilities.check_is_path(input_value)
+                            isinstance(input_value, pd.DataFrame)
+                            or utilities.check_is_path(input_value)
                     ):
                         inputs_to_write[input_key] = input_value
 
@@ -271,7 +290,7 @@ class DiskOperator:
                 file_path = self.plot_dir / f"{instance_identifier}_plot{i}.json"
                 self.plot_dir.mkdir(parents=True, exist_ok=True)
                 if not isinstance(
-                    plot, bytes
+                        plot, bytes
                 ):  # TODO the data integration plots are of type byte, and therefore cannot be written using this methodology
                     write_json(plot, file_path)
                     plot.write_image(str(file_path).replace(".json", ".png"))

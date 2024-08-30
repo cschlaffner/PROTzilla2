@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import protzilla.constants.text as text_constants
 
 
 def generate_tics(lower_bound, upper_bound, log: bool):
@@ -45,3 +46,45 @@ def millify(n) -> str:
     )
 
     return "{:.0f}{}".format(n / 10 ** (3 * millidx), millnames[millidx])
+
+def style_text(text: str, letter_spacing: float, word_spacing: float) -> str:
+    """
+    Function to style text with letter spacing and word spacing.
+
+    :param text: The text to be styled.
+    :param letter_spacing: The amount of letter spacing.
+    :param word_spacing: The amount of word spacing.
+    :return: HTML formatted string with specified letter and word spacing.
+    """
+    return f'<span style="letter-spacing:{letter_spacing}pt;word-spacing:{word_spacing}pt;">{text}</span>'
+
+
+def add_spacing(text: str, letter_spacing: float, word_spacing: float) -> str:
+    """
+    Adds additional spacing to letters and words for the given text.
+
+    :param text: The text to which spacing should be added.
+    :param letter_spacing: The amount of spacing to add between letters.
+    :param word_spacing: The amount of spacing to add between words.
+    :return: The text with added spacing.
+    """
+    # Adding letter spacing by inserting additional spaces between each character
+    spaced_text = f" {' ' * int(letter_spacing)} ".join(text)
+    # Adding word spacing by replacing single spaces with more spaces
+    #spaced_text = spaced_text.replace(' ', ' ' * int(word_spacing))
+    return spaced_text
+
+def get_text_parameters():
+    """
+        Retrieves text parameters from PROTZILLA_TEXT_PARAMETERS.
+    """
+    add_font_size = text_constants.PROTZILLA_TEXT_PARAMETERS["add_font_size"]
+    add_letter_spacing = text_constants.PROTZILLA_TEXT_PARAMETERS["add_letter_spacing"]
+    add_word_spacing = text_constants.PROTZILLA_TEXT_PARAMETERS["add_word_spacing"]
+    return add_font_size, add_letter_spacing, add_word_spacing
+
+def get_enhanced_reading_value():
+    """
+        Retrieves enhanced reading value from PROTZILLA_TEXT_PARAMETERS.
+    """
+    return text_constants.PROTZILLA_TEXT_PARAMETERS["enhanced_reading"]

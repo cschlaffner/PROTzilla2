@@ -419,7 +419,7 @@ class PlotScatterPlotForm(MethodForm):
     )
     color_df = CustomChoiceField(
         choices=[],
-        label="Choose dataframe to be used for coloring",
+        label="Choose column in metadata to be used for coloring",
         required=False,
     )
 
@@ -429,7 +429,7 @@ class PlotScatterPlotForm(MethodForm):
         )
 
         self.fields["color_df"].choices = fill_helper.to_choices(
-            run.steps.get_instance_identifiers(Step, "color_df"), required=False
+            run.steps.metadata_df, required=False
         )
 
 
@@ -443,7 +443,7 @@ class PlotClustergramForm(MethodForm):
         label="Choose dataframe to be used for coloring",
         required=False,
     )
-    flip_axis = CustomChoiceField(
+    flip_axes = CustomChoiceField(
         choices=YesNo,
         label="Flip axis",
         initial=YesNo.no,
