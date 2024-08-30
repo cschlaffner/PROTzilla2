@@ -1,23 +1,22 @@
 import logging
 import time
-from collections import Counter
 from copy import copy
-from math import sqrt
+from math import ceil, sqrt
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.colors import Normalize
 from numpy import arange, array, flip, nan, ones
 from plotly.figure_factory import create_dendrogram
-from plotly.graph_objects import Heatmap
+from plotly.graph_objects import Heatmap, Histogram
 from plotly.subplots import make_subplots
 from pydeseq2.preprocessing import deseq2_norm
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import cdist
-from seaborn import color_palette, histplot
 
 from protzilla.data_analysis.ptm_quantification.flexiquant import flexiquant_lf
-from protzilla.utilities.utilities import fig_to_base64
+
+plt.switch_backend("Agg")
 
 
 def multiflex_lf(
@@ -101,7 +100,13 @@ def multiflex_lf(
 
     for protein in list_proteins:
         flexi_result = flexiquant_lf(
-            peptide_df, metadata_df, reference_group, protein, num_init, mod_cutoff
+            peptide_df=peptide_df,
+            metadata_df=metadata_df,
+            reference_group=reference_group,
+            protein_id=protein,
+            num_init=num_init,
+            mod_cutoff=mod_cutoff,
+            grouping_column="Group",
         )
 
         if any(
@@ -197,9 +202,7 @@ def multiflex_lf(
     list_groups = list(set(df_RM_scores.columns.get_level_values("Group")))
     list_groups.sort()
 
-    rm_score_dist_plots = fig_to_base64(
-        create_RM_score_distribution_plots(df_RM_scores, list_groups)
-    )
+    rm_score_dist_plots = create_RM_score_distribution_plots(df_RM_scores, list_groups)
 
     # define the colormap for the heatmap as specified by the user
     if colormap == 1:
@@ -344,10 +347,8 @@ def multiflex_lf(
         removed_peptides = removed_peptides.append(removed)
         removed = pd.DataFrame()
 
-        rm_score_dist_plots = fig_to_base64(
-            create_RM_score_distribution_plots(
-                df_RM_scores_all_proteins_reduced, list_groups
-            )
+        rm_score_dist_plots = create_RM_score_distribution_plots(
+            df_RM_scores_all_proteins_reduced, list_groups
         )
 
     if len(removed_peptides) > 0:
@@ -405,74 +406,134 @@ def multiflex_lf(
     )
 
 
+# def create_RM_score_distribution_plots(df_RM_scores, list_groups):
+#     """
+#     Constructs a figure of distribution plots of the RM scores. For every group a seperate plot is created
+#     with the different samples in different colors.
+#     """
+
+#     # initialize the figure with a size that accounts for 7ptx7pt plots of every sample group
+#     fig_size = sqrt(len(list_groups))
+
+#     if fig_size % 1 != 0:
+#         fig_size = int(int(fig_size) + 1)
+#     else:
+#         fig_size = int(fig_size)
+
+#     fig = plt.figure(figsize=(7 * fig_size, 7 * fig_size))
+
+#     # list of colors for the color coding of the different samples in one group
+#     colors_list = color_palette(
+#         "husl",
+#         Counter(df_RM_scores.columns.get_level_values("Group")).most_common(1)[0][1],
+#     )  # int(df_group_all_prots.shape[1]/2)
+
+#     # create the distribution plots for every group and apply kernel density estimation if possible
+#     i = 1
+#     for group in list_groups:
+#         df_group = df_RM_scores[group]
+
+#         ax = fig.add_subplot(fig_size, fig_size, i)
+
+#         try:
+#             histplot(
+#                 df_group,
+#                 ax=ax,
+#                 kde=True,
+#                 stat="count",
+#                 bins=30,
+#                 palette=colors_list[: df_group.shape[1]],
+#                 edgecolor=None,
+#             )
+#         except:
+#             histplot(
+#                 df_group,
+#                 ax=ax,
+#                 kde=False,
+#                 stat="count",
+#                 bins=30,
+#                 palette=colors_list[: df_group.shape[1]],
+#                 edgecolor=None,
+#             )
+
+#         plt.xticks(fontsize=8)
+#         plt.yticks(fontsize=8)
+#         plt.xlim(0, 3)
+#         plt.title("Group: " + group, fontsize=16)
+#         plt.xlabel("RM score")
+
+#         # show sample legend if group contains 10 samples or less
+#         if df_group.shape[1] > 10:
+#             plt.legend([], [], frameon=False)
+
+#         plt.tight_layout(h_pad=2)
+
+#         i += 1
+
+#     fig.suptitle("Distribution of RM scores of FLEXIQuant-LF ", fontsize=20)
+#     plt.subplots_adjust(top=0.90)
+
+#     plt.close()
+
+#     return fig
+
+
 def create_RM_score_distribution_plots(df_RM_scores, list_groups):
     """
-    Constructs a figure of distribution plots of the RM scores. For every group a seperate plot is created
-    with the different samples in different colors.
+    Constructs a figure of distribution plots of the RM scores. For every group, a separate plot is created
+    with the different samples in different colors using Plotly.
     """
 
-    # initialize the figure with a size that accounts for 7ptx7pt plots of every sample group
-    fig_size = sqrt(len(list_groups))
+    # Calculate number of subplots needed based on the number of groups
+    num_plots = len(list_groups)
+    rows = ceil(sqrt(num_plots))
+    cols = ceil(num_plots / rows)
 
-    if fig_size % 1 != 0:
-        fig_size = int(int(fig_size) + 1)
-    else:
-        fig_size = int(fig_size)
+    # Create a subplot figure with defined rows and columns
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=list_groups)
 
-    fig = plt.figure(figsize=(7 * fig_size, 7 * fig_size))
-
-    # list of colors for the color coding of the different samples in one group
-    colors_list = color_palette(
-        "husl",
-        Counter(df_RM_scores.columns.get_level_values("Group")).most_common(1)[0][1],
-    )  # int(df_group_all_prots.shape[1]/2)
-
-    # create the distribution plots for every group and apply kernel density estimation if possible
-    i = 1
-    for group in list_groups:
+    # Adding plots to the figure
+    subplot_idx = 1
+    for i, group in enumerate(list_groups):
         df_group = df_RM_scores[group]
-
-        ax = fig.add_subplot(fig_size, fig_size, i)
-
-        try:
-            histplot(
-                df_group,
-                ax=ax,
-                kde=True,
-                stat="count",
-                bins=30,
-                palette=colors_list[: df_group.shape[1]],
-                edgecolor=None,
-            )
-        except:
-            histplot(
-                df_group,
-                ax=ax,
-                kde=False,
-                stat="count",
-                bins=30,
-                palette=colors_list[: df_group.shape[1]],
-                edgecolor=None,
+        for col in df_group.columns:
+            fig.add_trace(
+                Histogram(
+                    x=df_group[col],
+                    name=col,  # using column name as legend entry
+                    opacity=0.75,  # setting opacity to see overlapping histograms
+                    nbinsx=30,  # number of bins
+                    showlegend=(
+                        df_group.shape[1] <= 10
+                    ),  # show legend only if <= 10 samples
+                ),
+                row=(subplot_idx - 1) // cols + 1,
+                col=(subplot_idx - 1) % cols + 1,
             )
 
-        plt.xticks(fontsize=8)
-        plt.yticks(fontsize=8)
-        plt.xlim(0, 3)
-        plt.title("Group: " + group, fontsize=16)
-        plt.xlabel("RM score")
+        # Update axes and layout for this subplot
+        fig.update_xaxes(
+            title_text="RM score",
+            row=(subplot_idx - 1) // cols + 1,
+            col=(subplot_idx - 1) % cols + 1,
+        )
+        fig.update_yaxes(
+            title_text="Count",
+            row=(subplot_idx - 1) // cols + 1,
+            col=(subplot_idx - 1) % cols + 1,
+        )
 
-        # show sample legend if group contains 10 samples or less
-        if df_group.shape[1] > 10:
-            plt.legend([], [], frameon=False)
+        subplot_idx += 1
 
-        plt.tight_layout(h_pad=2)
-
-        i += 1
-
-    fig.suptitle("Distribution of RM scores of FLEXIQuant-LF ", fontsize=20)
-    plt.subplots_adjust(top=0.90)
-
-    plt.close()
+    # Set overall figure layout
+    fig.update_layout(
+        title_text="Distribution of RM scores of FLEXIQuant-LF",
+        autosize=True,
+        height=400 * rows,
+        showlegend=True,
+        legend_title_text="Sample Legend",
+        hovermode="closest",
+    )
 
     return fig
 

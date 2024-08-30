@@ -64,7 +64,7 @@ _forward_mapping = {
     data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
     data_analysis.FLEXIQuantLF: data_analysis_forms.FLEXIQuantLFForm,
     data_analysis.MultiFLEXLF: data_analysis_forms.MultiFLEXLFForm,
-    data_analysis.FLEXIQuantLFValidator: data_analysis_forms.FLEXIQuantLFValidatorForm,
+    data_analysis.ModSourceIdentifier: data_analysis_forms.FLEXIQuantLFValidatorForm,
     data_analysis.PTMsPerSample: data_analysis_forms.PTMsPerSampleForm,
     data_analysis.PTMsProteinAndPerSample: data_analysis_forms.PTMsPerProteinAndSampleForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,

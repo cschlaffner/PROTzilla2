@@ -771,8 +771,8 @@ class MultiFLEXLF(PlotStep):
         return inputs
 
 
-class FLEXIQuantLFValidator(DataAnalysisStep):
-    display_name = "FLEXIQuant-LF Validator"
+class ModSourceIdentifier(DataAnalysisStep):
+    display_name = "Modification Source Identifier"
     operation = "modification_quantification"
     method_description = "Calculates how good FLEXIQuant-LF was able to identify PTMs in the data. This works only if modifications are known in data."
 

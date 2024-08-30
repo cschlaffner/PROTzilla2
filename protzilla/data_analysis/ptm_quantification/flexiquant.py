@@ -35,7 +35,9 @@ def flexiquant_lf(
 
     df = peptide_df.copy()
 
-    df.drop(columns=["Missed cleavages", "PEP", "Raw file"], inplace=True)
+    df.drop(
+        columns=["Missed cleavages", "PEP", "Raw file"], inplace=True, errors="ignore"
+    )
 
     # remove modified peptides
     if "Modifications" in df.columns:
@@ -584,13 +586,13 @@ def cmap(rm_scores, mod_cutoff):
         elif score < mod_cutoff:
             # Linear interpolation between low_color and middle_color
             colors.append(
-                f"rgb({255 * (1 - score / mod_cutoff)}, {0}, {255 * score / mod_cutoff})"
+                f"rgb({round(255 * (1 - score / mod_cutoff))}, {0}, {round(255 * score / mod_cutoff)})"
             )
         else:
             # Linear interpolation between middle_color and high_color
             normalized_score = (score - mod_cutoff) / (1 - mod_cutoff)
             colors.append(
-                f"rgb({0}, {255 * normalized_score}, {255 * (1 - normalized_score)})"
+                f"rgb({0}, {round(255 * normalized_score)}, {round(255 * (1 - normalized_score))})"
             )
 
     return colors

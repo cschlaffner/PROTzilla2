@@ -996,7 +996,7 @@ class FLEXIQuantLFForm(MethodForm):
     protein_id = CustomChoiceField(label="Protein ID", choices=[])
     num_init = CustomNumberField(
         label="Number of RANSAC initiations",
-        initial=30,
+        initial=50,
         min_value=1,
         max_value=60,
         step_size=1,
@@ -1031,27 +1031,28 @@ class FLEXIQuantLFForm(MethodForm):
             ].unique()
         )
 
-        modifications: list = (
-            run.steps.get_step_output(Step, "peptide_df", peptide_df_instance_id)[
-                "Modifications"
+        peptide_df = run.steps.get_step_output(
+            Step, "peptide_df", peptide_df_instance_id
+        )
+
+        if "Modifications" in peptide_df.columns:
+            modifications: list = peptide_df["Modifications"].unique().tolist()
+
+            modifications.remove("Unmodified")
+            modifications = [
+                part for string in modifications for part in string.split(",")
             ]
-            .unique()
-            .tolist()
-        )
+            modifications = [
+                "".join([char for char in input_string if not char.isdigit()])
+                for input_string in modifications
+            ]
+            modifications = [s.strip() for s in modifications]
+            modifications = list(set(modifications))
+            modifications.sort()
 
-        modifications.remove("Unmodified")
-        modifications = [part for string in modifications for part in string.split(",")]
-        modifications = [
-            "".join([char for char in input_string if not char.isdigit()])
-            for input_string in modifications
-        ]
-        modifications = [s.strip() for s in modifications]
-        modifications = list(set(modifications))
-        modifications.sort()
-
-        self.fields["included_modifications"].choices = fill_helper.to_choices(
-            modifications
-        )
+            self.fields["included_modifications"].choices = fill_helper.to_choices(
+                modifications
+            )
 
 
 class MultiFLEXLFForm(MethodForm):
