@@ -881,6 +881,7 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
             "required_sample_size"
         ] = f"Required Sample Size: {outputs['required_sample_size']}"
 
+
 class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
     display_name = "Sample Size Calculation for all Proteins"
     operation = "Power Analysis"
@@ -903,7 +904,7 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
     output_keys = [
         "required_sample_size_for_all_proteins",
         "differentially_expressed_proteins_df",
-        "sample_size_dataframe"
+        "sample_size_dataframe",
     ]
 
     def method(self, inputs: dict) -> dict:

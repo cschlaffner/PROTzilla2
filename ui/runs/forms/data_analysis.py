@@ -1259,6 +1259,7 @@ class PowerAnalysisSampleSizeCalculationForm(MethodForm):
             Step, "corrected_alpha", input_dict_instance_id
         )
 
+
 class PowerAnalysisSampleSizeCalculationForAllProteinsForm(MethodForm):
     is_dynamic = True
 
@@ -1301,13 +1302,13 @@ class PowerAnalysisSampleSizeCalculationForAllProteinsForm(MethodForm):
         label="Protein groups to calculate sample size for",
     )
 
-   #def __init__(self, *args, **kwargs):
+    # def __init__(self, *args, **kwargs):
     #    super().__init__(*args, **kwargs)
-     #   select_all_proteins = self.data.get("select_all_proteins", True)
-      #  if select_all_proteins == False:
-       #     self.toggle_visibility("selected_protein_groups", True)
-       # else:
-        #    self.toggle_visibility("selected_protein_groups", False)"""
+    #   select_all_proteins = self.data.get("select_all_proteins", True)
+    #  if select_all_proteins == False:
+    #     self.toggle_visibility("selected_protein_groups", True)
+    # else:
+    #    self.toggle_visibility("selected_protein_groups", False)"""
 
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(

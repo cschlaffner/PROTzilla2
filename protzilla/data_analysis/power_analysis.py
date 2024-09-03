@@ -228,21 +228,21 @@ def power_calculation(
 
     return dict(power=power)
 
-def sample_size_calculation_for_all_proteins(
-        differentially_expressed_proteins_df: pd.DataFrame,
-        significant_proteins_df: pd.DataFrame,
-        significant_proteins_only: str,
-        metadata_df: pd.DataFrame,
-        fc_threshold: float,
-        alpha: float,
-        power: float,
-        group1: str,
-        group2: str,
-        individual_column: str,
-        select_all_proteins: bool,
-        selected_protein_groups: list,
-        intensity_name: str = None,
 
+def sample_size_calculation_for_all_proteins(
+    differentially_expressed_proteins_df: pd.DataFrame,
+    significant_proteins_df: pd.DataFrame,
+    significant_proteins_only: str,
+    metadata_df: pd.DataFrame,
+    fc_threshold: float,
+    alpha: float,
+    power: float,
+    group1: str,
+    group2: str,
+    individual_column: str,
+    select_all_proteins: bool,
+    selected_protein_groups: list,
+    intensity_name: str = None,
 ) -> dict:
     """
     Function to calculate the required sample size for all proteins in the dataset to achieve the required power.
@@ -262,9 +262,11 @@ def sample_size_calculation_for_all_proteins(
     :param selected_protein_groups: A list of selected protein groups, if not all proteins should be considered.
     :param intensity_name: The name of the column containing the protein group intensities.
     """
-    if select_all_proteins and significant_proteins_only == 'No':
-        protein_groups_for_calculation = differentially_expressed_proteins_df["Protein ID"].unique()
-    elif select_all_proteins and significant_proteins_only == 'Yes':
+    if select_all_proteins and significant_proteins_only == "No":
+        protein_groups_for_calculation = differentially_expressed_proteins_df[
+            "Protein ID"
+        ].unique()
+    elif select_all_proteins and significant_proteins_only == "Yes":
         protein_groups_for_calculation = significant_proteins_df["Protein ID"].unique()
     else:
         protein_groups_for_calculation = selected_protein_groups
@@ -293,19 +295,21 @@ def sample_size_calculation_for_all_proteins(
     violin_plot_args = dict(
         meanline_visible=True,
         box_visible=True,
-        scalemode='width',
-        spanmode='hard',
-        span=[0, required_sample_size_for_all_proteins]
+        scalemode="width",
+        spanmode="hard",
+        span=[0, required_sample_size_for_all_proteins],
     )
 
     fig = go.Figure()
 
-    fig.add_trace(go.Violin(
-        x=['Protein group'] * len(required_sample_sizes),
-        y=required_sample_sizes,
-        line_color='red',
-        **violin_plot_args
-    ))
+    fig.add_trace(
+        go.Violin(
+            x=["Protein group"] * len(required_sample_sizes),
+            y=required_sample_sizes,
+            line_color="red",
+            **violin_plot_args
+        )
+    )
     sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
     sample_size_dataframe["Sample Size"] = required_sample_sizes
 
@@ -314,10 +318,11 @@ def sample_size_calculation_for_all_proteins(
         sample_size_dataframe,
         on="Protein ID",
     )
-        #merge["Sample Size"] = required_sample_sizes
+    # merge["Sample Size"] = required_sample_sizes
 
-    return dict(required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
-                plots=[fig],
-                differentially_expressed_proteins_df=differentially_expressed_proteins_df,
-                sample_size_dataframe=sample_size_dataframe,
-                )
+    return dict(
+        required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
+        plots=[fig],
+        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        sample_size_dataframe=sample_size_dataframe,
+    )
