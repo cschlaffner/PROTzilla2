@@ -5,7 +5,9 @@ import pandas as pd
 from scipy import stats
 import plotly.express as px
 import plotly.graph_objs as go
+import protzilla.constants.colors as colorscheme
 
+from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 from protzilla.utilities import default_intensity_column
 
 
@@ -294,23 +296,32 @@ def sample_size_calculation_for_all_proteins(
 
         required_sample_size_for_all_proteins = max(required_sample_sizes)
 
+    colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
     violin_plot_args = dict(
         meanline_visible=True,
         box_visible=True,
         scalemode='width',
         spanmode='hard',
         span=[0, required_sample_size_for_all_proteins],
+        fillcolor='rgba(0,0,0,0)'
     )
 
     fig = go.Figure()
 
     fig.add_trace(
         go.Violin(
-            x=["Protein group"] * len(required_sample_sizes),
+            x=["Protein Groups"] * len(required_sample_sizes),
             y=required_sample_sizes,
-            line_color="red",
+            line_color=colors[1],
             **violin_plot_args
         )
+    )
+    fig.update_layout(
+        title="Distribution of Required Sample Sizes for All Proteins",
+        xaxis_title="Protein Groups",
+        yaxis_title="Required Sample Size",
+        showlegend=False,
     )
     """sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
     sample_size_dataframe["Sample Size"] = required_sample_sizes
