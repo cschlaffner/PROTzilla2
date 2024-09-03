@@ -25,7 +25,7 @@ class ImportingStep(Step):
 
 
 class MaxQuantImport(ImportingStep):
-    display_name = "MaxQuant Protein Groups"
+    display_name = "MaxQuant Protein Groups Import"
     operation = "Protein Data Import"
     method_description = "Import the protein groups file form output of MaxQuant"
 
@@ -37,7 +37,7 @@ class MaxQuantImport(ImportingStep):
 
 
 class DiannImport(ImportingStep):
-    display_name = "DIA-NN"
+    display_name = "DIA-NN Import"
     operation = "Protein Data Import"
     method_description = "DIA-NN data import"
 
@@ -49,7 +49,7 @@ class DiannImport(ImportingStep):
 
 
 class MsFraggerImport(ImportingStep):
-    display_name = "MS Fragger Combined Protein"
+    display_name = "MS Fragger Combined Protein Import"
     operation = "Protein Data Import"
     method_description = "Import the combined_protein.tsv file form output of MS Fragger"
 
@@ -119,7 +119,7 @@ class MetadataColumnAssignment(ImportingStep):
 
 
 class PeptideImport(ImportingStep):
-    display_name = "MaxQuant Peptide import"
+    display_name = "MaxQuant Peptide Import"
     operation = "peptide_import"
     method_description = "Import peptide data"
 
@@ -131,7 +131,7 @@ class PeptideImport(ImportingStep):
 
 
 class EvidenceImport(ImportingStep):
-    display_name = "MaxQuant Evidence import"
+    display_name = "MaxQuant Evidence Import"
     operation = "peptide_import"
     method_description = "Import an evidence file"
 
