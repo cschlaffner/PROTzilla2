@@ -261,6 +261,8 @@ def sample_size_calculation_for_all_proteins(
     :param select_all_proteins: A boolean indicating whether all proteins should be considered.
     :param selected_protein_groups: A list of selected protein groups, if not all proteins should be considered.
     :param intensity_name: The name of the column containing the protein group intensities.
+
+    :return:
     """
     if select_all_proteins and significant_proteins_only == "No":
         protein_groups_for_calculation = differentially_expressed_proteins_df[
@@ -290,13 +292,13 @@ def sample_size_calculation_for_all_proteins(
 
         required_sample_sizes.append(required_sample_size)
 
-    required_sample_size_for_all_proteins = max(required_sample_sizes)
+        required_sample_size_for_all_proteins = max(required_sample_sizes)
 
     violin_plot_args = dict(
         meanline_visible=True,
         box_visible=True,
-        scalemode="width",
-        spanmode="hard",
+        scalemode='width',
+        spanmode='hard',
         span=[0, required_sample_size_for_all_proteins],
     )
 
@@ -310,19 +312,19 @@ def sample_size_calculation_for_all_proteins(
             **violin_plot_args
         )
     )
-    sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
+    """sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
     sample_size_dataframe["Sample Size"] = required_sample_sizes
 
     differentially_expressed_proteins_df = pd.merge(
         differentially_expressed_proteins_df,
         sample_size_dataframe,
         on="Protein ID",
-    )
-    # merge["Sample Size"] = required_sample_sizes
+    )"""
+
 
     return dict(
         required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
         plots=[fig],
-        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
-        sample_size_dataframe=sample_size_dataframe,
+        #differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        #sample_size_dataframe=sample_size_dataframe,
     )
