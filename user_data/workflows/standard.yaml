@@ -64,6 +64,9 @@ steps:
   - form_inputs: { }
     inputs: { }
     type: PowerAnalysisPowerCalculation
+  - form_inputs: {}
+    inputs: { }
+    type: PowerAnalysisSampleSizeCalculationForAllProteins
   - form_inputs:
       fc_threshold: 1
     inputs: { }

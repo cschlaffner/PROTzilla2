@@ -3,6 +3,8 @@ import math
 import numpy as np
 import pandas as pd
 from scipy import stats
+import plotly.express as px
+import plotly.graph_objs as go
 
 from protzilla.utilities import default_intensity_column
 
@@ -56,16 +58,21 @@ def sample_size_calculation(
     intensity_name: str = None,
 ) -> dict:
     """
-    Function to calculate the required sample size for a selected protein to achieve the required power .
+    Function to calculate the required sample size for a selected protein to achieve the desired statistical power.
+    If metadata_df contains a column that identifies individuals, the function first calculates the mean intensity for
+    each individual (based on replicates) within the dataset. These individual means are used to determine the variance
+    for the sample size calculation formula.
 
     :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
     :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
+    :param metadata_df: The dataframe containing the clinical data.
     :param fc_threshold: The fold change threshold.
     :param alpha: The significance level. The value for alpha is taken from the t-test by default.
     :param power: The power of the test.
     :param group1: The name of the first group.
     :param group2: The name of the second group.
     :param selected_protein_group: The selected protein group for which the required sample size is to be calculated.
+    :param individual_column: The name of the column in metadata_df containing the individual ID.
     :param intensity_name: The name of the column containing the protein group intensities.
     :return: The required sample size.
     """
@@ -135,14 +142,21 @@ def power_calculation(
 ) -> dict:
     """
     Function to calculate the power of the t-test for a selected protein group.
+    If metadata_df contains a column that identifies individuals, the function first calculates the mean intensity for
+    each individual (based on replicates) within the dataset. These individual means are used to determine the variance
+    for the power calculation formula.
+    If both groups have different numbers of samples, the sample size for the power formula is calculated according
+    to the equation 2.3.1 from Cohen 1988, Statistical Power Analysis for the Behavioral Sciences.
 
     :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
     :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
+    :param metadata_df: The dataframe containing the clinical data.
     :param alpha: The significance level. The value for alpha is taken from the t-test by default.
     :param fc_threshold: The fold change threshold.
     :param group1: The name of the first group.
     :param group2: The name of the second group.
     :param selected_protein_group: The selected protein group for which the power is to be calculated.
+    :param individual_column: The name of the column in metadata_df containing the individual ID.
     :param intensity_name: The name of the column containing the protein group intensities.
     :return: The power of the test.
     """
@@ -213,3 +227,97 @@ def power_calculation(
     power = float(round(stats.norm.cdf(z_beta), 2))
 
     return dict(power=power)
+
+def sample_size_calculation_for_all_proteins(
+        differentially_expressed_proteins_df: pd.DataFrame,
+        significant_proteins_df: pd.DataFrame,
+        significant_proteins_only: str,
+        metadata_df: pd.DataFrame,
+        fc_threshold: float,
+        alpha: float,
+        power: float,
+        group1: str,
+        group2: str,
+        individual_column: str,
+        select_all_proteins: bool,
+        selected_protein_groups: list,
+        intensity_name: str = None,
+
+) -> dict:
+    """
+    Function to calculate the required sample size for all proteins in the dataset to achieve the required power.
+    Variance estimation ...
+
+    :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
+    :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
+    :param significant_proteins_only: A boolean indicating whether only significant proteins should be considered.
+    :param metadata_df: The dataframe containing the clinical data.
+    :param fc_threshold: The fold change threshold.
+    :param alpha: The significance level. The value for alpha is taken from the t-test by default.
+    :param power: The power of the test.
+    :param group1: The name of the first group.
+    :param group2: The name of the second group.
+    :param individual_column: The name of the column in metadata_df containing the individual ID.
+    :param select_all_proteins: A boolean indicating whether all proteins should be considered.
+    :param selected_protein_groups: A list of selected protein groups, if not all proteins should be considered.
+    :param intensity_name: The name of the column containing the protein group intensities.
+    """
+    if select_all_proteins and significant_proteins_only == 'No':
+        protein_groups_for_calculation = differentially_expressed_proteins_df["Protein ID"].unique()
+    elif select_all_proteins and significant_proteins_only == 'Yes':
+        protein_groups_for_calculation = significant_proteins_df["Protein ID"].unique()
+    else:
+        protein_groups_for_calculation = selected_protein_groups
+
+    required_sample_sizes = []
+
+    for protein_group in protein_groups_for_calculation:
+        required_sample_size = sample_size_calculation(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            metadata_df=metadata_df,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            power=power,
+            group1=group1,
+            group2=group2,
+            selected_protein_group=protein_group,
+            individual_column=individual_column,
+            intensity_name=intensity_name,
+        )["required_sample_size"]
+
+        required_sample_sizes.append(required_sample_size)
+
+    required_sample_size_for_all_proteins = max(required_sample_sizes)
+
+    violin_plot_args = dict(
+        meanline_visible=True,
+        box_visible=True,
+        scalemode='width',
+        spanmode='hard',
+        span=[0, required_sample_size_for_all_proteins]
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Violin(
+        x=['Protein group'] * len(required_sample_sizes),
+        y=required_sample_sizes,
+        line_color='red',
+        **violin_plot_args
+    ))
+    sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
+    sample_size_dataframe["Sample Size"] = required_sample_sizes
+
+    differentially_expressed_proteins_df = pd.merge(
+        differentially_expressed_proteins_df,
+        sample_size_dataframe,
+        on="Protein ID",
+    )
+        #merge["Sample Size"] = required_sample_sizes
+
+    return dict(required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
+                plots=[fig],
+                differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+                sample_size_dataframe=sample_size_dataframe,
+                )

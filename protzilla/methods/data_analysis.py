@@ -24,6 +24,7 @@ from protzilla.data_analysis.plots import (
 from protzilla.data_analysis.power_analysis import (
     power_calculation,
     sample_size_calculation,
+    sample_size_calculation_for_all_proteins,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
@@ -801,7 +802,6 @@ class PowerAnalysisPowerCalculation(DataAnalysisStep):
         "significant_proteins_df",
         "differentially_expressed_proteins_df",
         "selected_protein_group",
-        "significant_proteins_df",
         "fc_threshold",
         "alpha",
         "group1",
@@ -880,3 +880,53 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         self.display_output[
             "required_sample_size"
         ] = f"Required Sample Size: {outputs['required_sample_size']}"
+
+class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
+    display_name = "Sample Size Calculation for all Proteins"
+    operation = "Power Analysis"
+    method_description = "Calculates sample size for all proteins"
+
+    input_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "significant_proteins_only",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "power",
+        "individual_column",
+        "metadata_df",
+        "select_all_proteins",
+        "selected_protein_groups",
+    ]
+    output_keys = [
+        "required_sample_size_for_all_proteins",
+        "differentially_expressed_proteins_df",
+        "sample_size_dataframe"
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return sample_size_calculation_for_all_proteins(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output[
+            "required_sample_size_for_all_proteins"
+        ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
