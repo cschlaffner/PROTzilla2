@@ -288,6 +288,9 @@ class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
 class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
+    method_description = ("Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
+                          "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
+                          "can define a fold change threshold and an alpha level to highlight significant items.")
     input_keys = [
         "p_values",
         "fc_threshold",
