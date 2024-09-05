@@ -304,14 +304,13 @@ def sample_size_calculation_for_all_proteins(
         scalemode='width',
         spanmode='hard',
         span=[0, required_sample_size_for_all_proteins],
-        fillcolor='rgba(0,0,0,0)'
     )
 
     fig = go.Figure()
 
     fig.add_trace(
         go.Violin(
-            x=["Protein Groups"] * len(required_sample_sizes),
+            x=[""] * len(required_sample_sizes),
             y=required_sample_sizes,
             line_color=colors[1],
             **violin_plot_args
@@ -319,7 +318,6 @@ def sample_size_calculation_for_all_proteins(
     )
     fig.update_layout(
         title="Distribution of Required Sample Sizes for All Proteins",
-        xaxis_title="Protein Groups",
         yaxis_title="Required Sample Size",
         showlegend=False,
     )
