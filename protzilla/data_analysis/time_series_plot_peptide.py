@@ -24,7 +24,7 @@ def time_series_plot_peptide(
 ) -> dict:
     """
     A function to create a graph visualising protein quantifications across all samples
-    as a line diagram using retention time. It's possible to select one proteingroup
+    as a line diagram using time. It's possible to select one proteingroup
     that will be displayed in orange and choose a similarity measurement with a similarity score
     to get all proteingroups that are similar displayed in another color in this line diagram.
     All other proteingroups are displayed in the background as a grey polygon.

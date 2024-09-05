@@ -804,7 +804,7 @@ class TimeSeriesLinearRegression(PlotStep):
                                     "The p-values are corrected for multiple testing.")
 
     input_keys = [
-        "input_df",
+        "intensity_df",
         "metadata_df",
         "time_column_name",
         "protein_group",
@@ -820,7 +820,7 @@ class TimeSeriesLinearRegression(PlotStep):
         return time_series_linear_regression(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(Step, "peptide_df", inputs["input_df"])
+        inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
@@ -831,7 +831,7 @@ class TimeSeriesRANSACRegression(PlotStep):
     method_description = " Perform RANSAC regression on the time series data for a given protein group."
 
     input_keys = [
-        "input_df",
+        "intensity_df",
         "metadata_df",
         "time_column_name",
         "protein_group",
@@ -849,7 +849,7 @@ class TimeSeriesRANSACRegression(PlotStep):
         return time_series_ransac_regression(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(Step, "peptide_df", inputs["input_df"])
+        inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
@@ -860,9 +860,8 @@ class TimeSeriesADFullerTest(DataAnalysisStep):
     method_description = "Perform Augmented Dickey-Fuller test on the time series data for a given protein group."
 
     input_keys = [
-        "input_df",
+        "intensity_df",
         "metadata_df",
-        "time_column_name",
         "protein_group",
         "alpha",
     ]
@@ -877,7 +876,7 @@ class TimeSeriesADFullerTest(DataAnalysisStep):
         return adfuller_test(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(Step, "peptide_df", inputs["input_df"])
+        inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
@@ -890,7 +889,7 @@ class TimeSeriesAutoARIMA(PlotStep):
     )
 
     input_keys = [
-        "input_df",
+        "intensity_df",
         "metadata_df",
         "time_column_name",
         "protein_group",
@@ -908,7 +907,7 @@ class TimeSeriesAutoARIMA(PlotStep):
         return time_series_auto_arima(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(Step, "peptide_df", inputs["input_df"])
+        inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
@@ -921,7 +920,7 @@ class TimeSeriesARIMA(PlotStep):
     )
 
     input_keys = [
-        "input_df",
+        "intensity_df",
         "metadata_df",
         "time_column_name",
         "protein_group",
@@ -945,7 +944,7 @@ class TimeSeriesARIMA(PlotStep):
         return time_series_arima(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(Step, "peptide_df", inputs["input_df"])
+        inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 

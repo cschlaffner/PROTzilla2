@@ -1236,9 +1236,9 @@ class PTMsPerProteinAndSampleForm(MethodForm):
 
 class TimeSeriesLinearRegressionForm(MethodForm):
     is_dynamic = True
-    input_df = CustomChoiceField(
+    intensity_df = CustomChoiceField(
         choices=[],
-        label="Peptide dataframe",
+        label="Intensity dataframe",
     )
     time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
@@ -1261,11 +1261,11 @@ class TimeSeriesLinearRegressionForm(MethodForm):
 
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_peptide_df_steps(
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
             run
         )
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
             "time_column_name"
@@ -1278,7 +1278,7 @@ class TimeSeriesLinearRegressionForm(MethodForm):
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="peptide_df",
+                output_key="protein_df",
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
@@ -1286,9 +1286,9 @@ class TimeSeriesLinearRegressionForm(MethodForm):
 
 class TimeSeriesRANSACRegressionForm(MethodForm):
     is_dynamic = True
-    input_df = CustomChoiceField(
+    intensity_df = CustomChoiceField(
         choices=[],
-        label="Peptide dataframe",
+        label="Intensity dataframe",
     )
     time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
@@ -1329,13 +1329,12 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
 
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_peptide_df_steps(
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
             run
         )
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
-
         self.fields[
             "time_column_name"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
@@ -1347,7 +1346,7 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="peptide_df",
+                output_key="protein_df",
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
@@ -1367,11 +1366,10 @@ class TimeSeriesADFullerTestForm(MethodForm):
              "JASA. Journal of the American Statistical Association. 74. 10.2307/2286348. "
         ),
     )
-    input_df = CustomChoiceField(
+    intensity_df = CustomChoiceField(
         choices=[],
-        label="Peptide dataframe",
+        label="Intensity dataframe",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: which column from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the ADFuller test on",
@@ -1384,25 +1382,19 @@ class TimeSeriesADFullerTestForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_peptide_df_steps(
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
             run
         )
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
-
-        self.fields[
-            "time_column_name"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
-
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="peptide_df",
+                output_key="protein_df",
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
-
 
 class TimeSeriesAutoARIMAForm(MethodForm):
     is_dynamic = True
@@ -1411,9 +1403,9 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         text=(
         ),
     )
-    input_df = CustomChoiceField(
+    intensity_df = CustomChoiceField(
         choices=[],
-        label="Peptide dataframe",
+        label="Intensity dataframe",
     )
     time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
@@ -1447,13 +1439,12 @@ class TimeSeriesAutoARIMAForm(MethodForm):
 
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_peptide_df_steps(
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
             run
         )
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
-
         self.fields[
             "time_column_name"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
@@ -1465,7 +1456,7 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="peptide_df",
+                output_key="protein_df",
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
@@ -1480,9 +1471,9 @@ class TimeSeriesARIMAForm(MethodForm):
         ),
     )
     """
-    input_df = CustomChoiceField(
+    intensity_df = CustomChoiceField(
         choices=[],
-        label="Peptide dataframe",
+        label="Intensity dataframe",
     )
     time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
@@ -1556,13 +1547,12 @@ class TimeSeriesARIMAForm(MethodForm):
 
 
     def fill_form(self, run: Run) -> None:
-        self.fields["input_df"].choices = fill_helper.get_choices_for_peptide_df_steps(
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
             run
         )
         input_df_instance_id = self.data.get(
-            "input_df", self.fields["input_df"].choices[0][0]
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
-
         self.fields[
             "time_column_name"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
@@ -1574,7 +1564,7 @@ class TimeSeriesARIMAForm(MethodForm):
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
-                output_key="peptide_df",
+                output_key="protein_df",
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )

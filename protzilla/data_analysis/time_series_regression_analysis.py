@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from protzilla.data_analysis.time_series_helper import convert_time_to_hours
+from protzilla.utilities import default_intensity_column
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 from sklearn.linear_model import LinearRegression, RANSACRegressor
@@ -25,7 +26,7 @@ colors = {
 
 
 def time_series_linear_regression(
-        input_df: pd.DataFrame,
+        intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
         time_column_name: str,
         protein_group: str,
@@ -35,7 +36,7 @@ def time_series_linear_regression(
 ):
     """
     Perform linear regression on the time series data for a given protein group.
-    :param input_df: Peptide dataframe which contains the intensity of each sample
+    :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
     :param time_column_name: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
@@ -49,33 +50,33 @@ def time_series_linear_regression(
     if train_size < 0 or train_size > 1:
         raise ValueError("Test size should be between 0 and 1")
 
-    input_df = input_df[input_df['Protein ID'] == protein_group]
-
-    input_df = pd.merge(
-        left=input_df,
+    intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
+    intensity_column_name = default_intensity_column(intensity_df)
+    intensity_df = pd.merge(
+        left=intensity_df,
         right=metadata_df,
         on="Sample",
         copy=False,
     )
 
-    input_df[time_column_name] = input_df[time_column_name].apply(convert_time_to_hours)
-    input_df = input_df.interpolate(method='linear', axis=0)
+    intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
+    intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
-    input_df = input_df.sample(frac=1, random_state = 42).reset_index(drop=True)
+    intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
-    X = input_df[[time_column_name]]
-    y = input_df["Intensity"]
+    X = intensity_df[[time_column_name]]
+    y = intensity_df[intensity_column_name]
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
 
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in input_df.columns:
-        groups = input_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
+        groups = intensity_df[grouping_column_name].unique()
         for group in groups:
-            group_df = input_df[input_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column_name] == group]
             X_group = group_df[[time_column_name]]
-            y_group = group_df["Intensity"]
+            y_group = group_df[intensity_column_name]
 
             X_train, X_test, y_train, y_test = train_test_split(X_group, y_group, train_size=train_size, shuffle=False)
             model = LinearRegression()
@@ -94,7 +95,7 @@ def time_series_linear_regression(
             plot_df = pd.concat([train_df, test_df])
 
             color = PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index % len(PROTZILLA_DISCRETE_COLOR_SEQUENCE)]
-            color_index += 3
+            color_index += 5
 
             fig.add_trace(go.Scatter(
                 x=plot_df[time_column_name],
@@ -150,7 +151,7 @@ def time_series_linear_regression(
             y=plot_df['Predicted'],
             mode='lines',
             name='Predicted Intensity',
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2])
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[5])
         ), row=1, col=1)
 
         scores.append({
@@ -211,7 +212,7 @@ def time_series_linear_regression(
 
 
 def time_series_ransac_regression(
-        input_df: pd.DataFrame,
+        intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
         time_column_name: str,
         protein_group: str,
@@ -224,7 +225,7 @@ def time_series_ransac_regression(
 ):
     """
     Perform RANSAC regression on the time series data for a given protein group.
-    :param input_df: Peptide dataframe which contains the intensity of each sample
+    :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
     :param time_column_name: The name of the column containing the time values
     :param max_trials: The maximum number of iterations to perform
@@ -242,33 +243,34 @@ def time_series_ransac_regression(
     if train_size < 0 or train_size > 1:
         raise ValueError("Test size should be between 0 and 1")
 
-    input_df = input_df[input_df['Protein ID'] == protein_group]
+    intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
+    intensity_column_name = default_intensity_column(intensity_df)
 
-    input_df = pd.merge(
-        left=input_df,
+    intensity_df = pd.merge(
+        left=intensity_df,
         right=metadata_df,
         on="Sample",
         copy=False,
     )
 
-    input_df[time_column_name] = input_df[time_column_name].apply(convert_time_to_hours)
-    input_df = input_df.interpolate(method='linear', axis=0)
+    intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
+    intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
-    input_df = input_df.sample(frac=1, random_state = 42).reset_index(drop=True)
+    intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
-    X = input_df[[time_column_name]]
-    y = input_df["Intensity"]
+    X = intensity_df[[time_column_name]]
+    y = intensity_df[intensity_column_name]
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
 
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in input_df.columns:
-        groups = input_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
+        groups = intensity_df[grouping_column_name].unique()
         for group in groups:
-            group_df = input_df[input_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column_name] == group]
             X_group = group_df[[time_column_name]]
-            y_group = group_df["Intensity"]
+            y_group = group_df[intensity_column_name]
 
             X_train, X_test, y_train, y_test = train_test_split(X_group, y_group, train_size=train_size, shuffle=False)
             model = RANSACRegressor(max_trials = max_trials, stop_probability = stop_probability, loss = loss, base_estimator=LinearRegression())
@@ -304,7 +306,7 @@ def time_series_ransac_regression(
                 y=plot_df['Predicted'],
                 mode='lines',
                 name='Predicted Intensity',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 1])
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
@@ -312,10 +314,10 @@ def time_series_ransac_regression(
                 y=plot_df[plot_df['Inlier'] == False]['Intensity'],
                 mode='markers',
                 name='Outliers',
-                marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
+                marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
             ), row=1, col=1)
 
-            color_index += 3
+            color_index += 5
 
             scores.append({
                 'group': group,
@@ -368,7 +370,7 @@ def time_series_ransac_regression(
             y=plot_df[plot_df['Inlier'] == False]['Intensity'],
             mode='markers',
             name='Outliers',
-            marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2])
+            marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
         ), row=1, col=1)
 
         scores.append({
@@ -429,14 +431,14 @@ def time_series_ransac_regression(
 
 
 def adfuller_test(
-    input_df: pd.DataFrame,
+    intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     protein_group: str,
     alpha: float = 0.05,
 ) -> dict:
     """
     Perform the Augmented Dickey-Fuller test to check for stationarity in a time series.
-    :param input_df: The dataframe containing the time series data.
+    :param intensity_df: The dataframe containing the time series data.
     :param metadata_df: The dataframe containing the metadata.
     :param protein_group: The protein group to perform the test on.
     :param alpha: The significance level for the test (default is 0.05).
@@ -450,19 +452,20 @@ def adfuller_test(
     """
 
     messages = []
-    input_df = input_df[input_df['Protein ID'] == protein_group]
+    intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
+    intensity_column_name = default_intensity_column(intensity_df)
 
-    input_df = pd.merge(
-        left=input_df,
+    intensity_df = pd.merge(
+        left=intensity_df,
         right=metadata_df,
         on="Sample",
         copy=False,
     )
 
-    input_df = input_df["Intensity"].dropna()
+    intensity_df = intensity_df[intensity_column_name].dropna()
 
     # Perform the ADF test
-    result = adfuller(input_df)
+    result = adfuller(intensity_df)
     test_statistic = result[0]
     p_value = result[1]
     critical_values = result[4]
@@ -496,7 +499,7 @@ def adfuller_test(
 
 
 def time_series_auto_arima(
-    input_df: pd.DataFrame,
+    intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     time_column_name: str,
     protein_group: str,
@@ -508,7 +511,7 @@ def time_series_auto_arima(
 ) -> dict:
     """
     Perform an automatic ARIMA model selection on the time series data for a given protein group.
-    :param input_df: Peptide dataframe which contains the intensity of each sample
+    :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
     :param time_column_name: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
@@ -530,11 +533,12 @@ def time_series_auto_arima(
     else:
         seasonal = False
 
-    input_df = input_df[input_df['Protein ID'] == protein_group]
-    input_df = input_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
+    intensity_df = intensity_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    intensity_column_name = default_intensity_column(intensity_df)
 
-    input_df = pd.merge(
-        left=input_df,
+    intensity_df = pd.merge(
+        left=intensity_df,
         right=metadata_df,
         on="Sample",
         copy=False,
@@ -543,19 +547,19 @@ def time_series_auto_arima(
     fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in input_df.columns:
-        groups = input_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
+        groups = intensity_df[grouping_column_name].unique()
         for group in groups:
-            group_df = input_df[input_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column_name] == group]
 
-            group_df[time_column_name] = group_df[time_column_name].apply(convert_time_to_hours)
+            group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
             group_df = group_df.interpolate(method='linear', axis=0)
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
 
-            train_df = train_df.set_index(time_column_name)["Intensity"]
-            test_df = test_df.set_index(time_column_name)["Intensity"]
+            train_df = train_df.set_index(time_column_name)[intensity_column_name]
+            test_df = test_df.set_index(time_column_name)[intensity_column_name]
 
             # Fit the ARIMA model
             model = auto_arima(
@@ -593,7 +597,7 @@ def time_series_auto_arima(
                 y=forecast,
                 mode='markers',
                 name='Predicted Intensity',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
@@ -601,10 +605,10 @@ def time_series_auto_arima(
                 y = forecast_plot,
                 mode = 'lines',
                 name = 'Mean Predicted Intensity',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
             ), row=1, col=1)
 
-            color_index += 3
+            color_index += 5
 
             scores.append({
                 'group': group,
@@ -615,14 +619,14 @@ def time_series_auto_arima(
             })
 
     else:
-        input_df[time_column_name] = input_df[time_column_name].apply(convert_time_to_hours)
-        input_df = input_df.interpolate(method='linear', axis=0)
+        intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
+        intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
-        train_size = int(len(input_df) * train_size)
-        train_df, test_df = input_df[:train_size], input_df[train_size:]
+        train_size = int(len(intensity_df) * train_size)
+        train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 
-        train_df = train_df.set_index(time_column_name)["Intensity"]
-        test_df = test_df.set_index(time_column_name)["Intensity"]
+        train_df = train_df.set_index(time_column_name)[intensity_column_name]
+        test_df = test_df.set_index(time_column_name)[intensity_column_name]
 
         # Fit the ARIMA model
         model = auto_arima(
@@ -729,7 +733,7 @@ def time_series_auto_arima(
 
 
 def time_series_arima(
-    input_df: pd.DataFrame,
+    intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
     time_column_name: str,
     protein_group: str,
@@ -748,7 +752,7 @@ def time_series_arima(
 
     """
     Perform ARIMA model selection on the time series data for a given protein group.
-    :param input_df: Peptide dataframe which contains the intensity of each sample
+    :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
     :param time_column_name: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
@@ -772,27 +776,28 @@ def time_series_arima(
     if train_size < 0 or train_size > 1:
         raise ValueError("Train size should be between 0 and 1")
 
-    input_df = input_df[input_df['Protein ID'] == protein_group]
-    input_df = input_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
+    intensity_df = intensity_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    intensity_column_name = default_intensity_column(intensity_df)
 
-    input_df = pd.merge(left=input_df, right=metadata_df, on="Sample", copy=False)
+    intensity_df = pd.merge(left=intensity_df, right=metadata_df, on="Sample", copy=False)
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in input_df.columns:
-        groups = input_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
+        groups = intensity_df[grouping_column_name].unique()
         for group in groups:
-            group_df = input_df[input_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column_name] == group]
 
-            group_df[time_column_name] = group_df[time_column_name].apply(convert_time_to_hours)
+            group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
             group_df = group_df.interpolate(method='linear', axis=0)
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
 
-            train_df = train_df.set_index(time_column_name)["Intensity"]
-            test_df = test_df.set_index(time_column_name)["Intensity"]
+            train_df = train_df.set_index(time_column_name)[intensity_column_name]
+            test_df = test_df.set_index(time_column_name)[intensity_column_name]
 
             if seasonal == "Yes":
                 model = ARIMA(
@@ -843,7 +848,7 @@ def time_series_arima(
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
             ), row=1, col=1)
 
-            color_index += 3
+            color_index += 5
 
             scores.append({
                 'group': group,
@@ -854,14 +859,14 @@ def time_series_arima(
             })
 
     else:
-        input_df[time_column_name] = input_df[time_column_name].apply(convert_time_to_hours)
-        input_df = input_df.interpolate(method='linear', axis=0)
+        intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
+        intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
-        train_size = int(len(input_df) * train_size)
-        train_df, test_df = input_df[:train_size], input_df[train_size:]
+        train_size = int(len(intensity_df) * train_size)
+        train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 
-        train_df = train_df.set_index(time_column_name)["Intensity"]
-        test_df = test_df.set_index(time_column_name)["Intensity"]
+        train_df = train_df.set_index(time_column_name)[intensity_column_name]
+        test_df = test_df.set_index(time_column_name)[intensity_column_name]
 
         if seasonal == "Yes":
             model = ARIMA(
@@ -906,7 +911,7 @@ def time_series_arima(
             y=forecast_plot,
             mode='lines',
             name='Mean Predicted Intensity',
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[4])
         ), row=1, col=1)
 
         scores.append({
