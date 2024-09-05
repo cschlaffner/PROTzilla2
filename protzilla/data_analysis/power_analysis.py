@@ -298,24 +298,19 @@ def sample_size_calculation_for_all_proteins(
 
     colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
-    violin_plot_args = dict(
-        meanline_visible=True,
-        box_visible=True,
-        scalemode='width',
-        spanmode='hard',
-        span=[0, required_sample_size_for_all_proteins],
-    )
-
-    fig = go.Figure()
-
-    fig.add_trace(
+    fig = go.Figure(
         go.Violin(
-            x=[""] * len(required_sample_sizes),
+            name="" * len(required_sample_sizes),
             y=required_sample_sizes,
             line_color=colors[1],
-            **violin_plot_args
+            meanline_visible=True,
+            box_visible=True,
+            scalemode="width",
+            spanmode="hard",
+            span=[0, required_sample_size_for_all_proteins],
         )
     )
+
     fig.update_layout(
         title="Distribution of Required Sample Sizes for All Proteins",
         yaxis_title="Required Sample Size",
@@ -330,10 +325,9 @@ def sample_size_calculation_for_all_proteins(
         on="Protein ID",
     )"""
 
-
     return dict(
         required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
         plots=[fig],
-        #differentially_expressed_proteins_df=differentially_expressed_proteins_df,
-        #sample_size_dataframe=sample_size_dataframe,
+        # differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        # sample_size_dataframe=sample_size_dataframe,
     )
