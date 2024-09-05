@@ -903,8 +903,9 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
     ]
     output_keys = [
         "required_sample_size_for_all_proteins",
-        #"differentially_expressed_proteins_df",
-        #"sample_size_dataframe",
+        "differentially_expressed_proteins_df",
+        "sample_size_dataframe",
+        "significant_proteins_df",
     ]
 
     def method(self, inputs: dict) -> dict:

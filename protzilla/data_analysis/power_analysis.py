@@ -316,18 +316,34 @@ def sample_size_calculation_for_all_proteins(
         yaxis_title="Required Sample Size",
         showlegend=False,
     )
-    """sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
+    sample_size_dataframe = pd.DataFrame(protein_groups_for_calculation)
+    sample_size_dataframe.columns = ["Protein ID"]
     sample_size_dataframe["Sample Size"] = required_sample_sizes
 
-    differentially_expressed_proteins_df = pd.merge(
+    if select_all_proteins and significant_proteins_only == "No":
+        differentially_expressed_proteins_df = pd.merge(
         differentially_expressed_proteins_df,
         sample_size_dataframe,
         on="Protein ID",
-    )"""
+    )
+    elif select_all_proteins and significant_proteins_only == "Yes":
+        significant_proteins_df = pd.merge(
+        significant_proteins_df,
+        sample_size_dataframe,
+        on="Protein ID",
+    )
+    else:
+        sample_size_dataframe = pd.merge(
+        sample_size_dataframe,
+        sample_size_dataframe,
+        on="Protein ID",
+    )
+
 
     return dict(
         required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
         plots=[fig],
-        # differentially_expressed_proteins_df=differentially_expressed_proteins_df,
-        # sample_size_dataframe=sample_size_dataframe,
+        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        significant_proteins_df=significant_proteins_df,
+        sample_size_dataframe=sample_size_dataframe,
     )
