@@ -1302,13 +1302,89 @@ class PowerAnalysisSampleSizeCalculationForAllProteinsForm(MethodForm):
         label="Protein groups to calculate sample size for",
     )
 
-    # def __init__(self, *args, **kwargs):
-    #    super().__init__(*args, **kwargs)
-    #   select_all_proteins = self.data.get("select_all_proteins", True)
-    #  if select_all_proteins == False:
-    #     self.toggle_visibility("selected_protein_groups", True)
-    # else:
-    #    self.toggle_visibility("selected_protein_groups", False)"""
+    def fill_form(self, run: Run) -> None:
+        self.fields["input_dict"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(
+                DifferentialExpressionTTest,
+                "differentially_expressed_proteins_df",
+            )
+        )
+        input_dict_instance_id = self.data.get(
+            "input_dict", self.fields["input_dict"].choices[0][0]
+        )
+        self.fields["alpha"].initial = run.steps.get_step_output(
+            Step, "corrected_alpha", input_dict_instance_id
+        )
+        self.fields["individual_column"].choices = [
+            ("None", "None")
+        ] + fill_helper.get_choices_for_metadata_all_columns(run)
+        individual_column = self.data.get("individual_column", "None")
+        self.fields["individual_column"].initial = individual_column
+
+        significant_proteins_only = self.data.get(
+            "significant_proteins_only",
+            self.fields["significant_proteins_only"].choices[0][0],
+        )
+
+        if significant_proteins_only == YesNo.yes:
+            self.fields["selected_protein_groups"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "significant_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
+        else:
+            self.fields["selected_protein_groups"].choices = fill_helper.to_choices(
+                run.steps.get_step_output(
+                    Step, "differentially_expressed_proteins_df", input_dict_instance_id
+                )["Protein ID"].unique()
+            )
+        if not self.data:
+            select_all_proteins = True
+        else:
+            if "select_all_proteins" in self.data:
+                select_all_proteins = True
+            else:
+                select_all_proteins = False
+
+        if select_all_proteins == False:
+            self.toggle_visibility("selected_protein_groups", True)
+        else:
+            self.toggle_visibility("selected_protein_groups", False)
+
+class PowerAnalysisPowerCalculationForAllProteinsForm(MethodForm):
+    is_dynamic = True
+
+    input_dict = CustomChoiceField(
+        choices=[],
+        label="Input data dict (generated e.g. by t-Test)",
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.05,
+        initial=0.05,
+    )
+    fc_threshold = CustomFloatField(
+        label="Log2 fold change threshold", min_value=0, initial=1
+    )
+    individual_column = CustomChoiceField(
+        choices=[],
+        label="Column name for individuals in metadata, if it exists (mean value will be calculated per individual)",
+    )
+    significant_proteins_only = CustomChoiceField(
+        choices=YesNo,
+        label="Select only significant proteins",
+        initial=YesNo.yes,
+    )
+    select_all_proteins = CustomBooleanField(
+        label="Select all proteins",
+        initial=True,
+    )
+    selected_protein_groups = CustomMultipleChoiceField(
+        choices=[],
+        label="Protein groups to calculate sample size for",
+    )
 
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(

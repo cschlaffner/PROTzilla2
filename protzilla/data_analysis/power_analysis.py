@@ -248,7 +248,6 @@ def sample_size_calculation_for_all_proteins(
 ) -> dict:
     """
     Function to calculate the required sample size for all proteins in the dataset to achieve the required power.
-    Variance estimation ...
 
     :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
     :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
@@ -265,7 +264,13 @@ def sample_size_calculation_for_all_proteins(
     :param intensity_name: The name of the column containing the protein group intensities.
 
     :return:
+        - required_sample_size_for_all_proteins: The maximum required sample size for all proteins.
+        - a violin plot showing the distribution of required sample sizes for all proteins.
+        - a df differentially_expressed_proteins_df from t-test output with added sample size column.
+        - a df significant_proteins_df from t-test output with added sample size column.
+        - a df sample_size_dataframe containing the sample sizes for all proteins.
     """
+
     if select_all_proteins and significant_proteins_only == "No":
         protein_groups_for_calculation = differentially_expressed_proteins_df[
             "Protein ID"
@@ -332,13 +337,6 @@ def sample_size_calculation_for_all_proteins(
         sample_size_dataframe,
         on="Protein ID",
     )
-    else:
-        sample_size_dataframe = pd.merge(
-        sample_size_dataframe,
-        sample_size_dataframe,
-        on="Protein ID",
-    )
-
 
     return dict(
         required_sample_size_for_all_proteins=required_sample_size_for_all_proteins,
@@ -346,4 +344,114 @@ def sample_size_calculation_for_all_proteins(
         differentially_expressed_proteins_df=differentially_expressed_proteins_df,
         significant_proteins_df=significant_proteins_df,
         sample_size_dataframe=sample_size_dataframe,
+    )
+
+def power_calculation_for_all_proteins(
+    differentially_expressed_proteins_df: pd.DataFrame,
+    significant_proteins_df: pd.DataFrame,
+    significant_proteins_only: str,
+    metadata_df: pd.DataFrame,
+    fc_threshold: float,
+    alpha: float,
+    group1: str,
+    group2: str,
+    individual_column: str,
+    select_all_proteins: bool,
+    selected_protein_groups: list,
+    intensity_name: str = None,
+) -> dict:
+    """
+    Function to calculate the power of the t-test for all proteins in the dataset.
+
+    :param differentially_expressed_proteins_df: The dataframe containing the differentially expressed proteins from t-test output.
+    :param significant_proteins_df: The dataframe containing the significant proteins from t-test output.
+    :param significant_proteins_only: A boolean indicating whether only significant proteins should be considered.
+    :param metadata_df: The dataframe containing the clinical data.
+    :param fc_threshold: The fold change threshold.
+    :param alpha: The significance level. The value for alpha is taken from the t-test by default.
+    :param group1: The name of the first group.
+    :param group2: The name of the second group.
+    :param individual_column: The name of the column in metadata_df containing the individual ID.
+    :param select_all_proteins: A boolean indicating whether all proteins should be considered.
+    :param selected_protein_groups: A list of selected protein groups, if not all proteins should be considered.
+    :param intensity_name: The name of the column containing the protein group intensities.
+
+    :return:
+        - power_for_all_proteins: The minimum power of all proteins.
+        - a df differentially_expressed_proteins_df from t-test output with added power column.
+        - a df significant_proteins_df from t-test output with added power column.
+        - a df power_dataframe containing the power for all proteins.
+    """
+    if select_all_proteins and significant_proteins_only == "No":
+        protein_groups_for_calculation = differentially_expressed_proteins_df[
+            "Protein ID"
+        ].unique()
+    elif select_all_proteins and significant_proteins_only == "Yes":
+        protein_groups_for_calculation = significant_proteins_df["Protein ID"].unique()
+    else:
+        protein_groups_for_calculation = selected_protein_groups
+
+    power_list = []
+
+    for protein_group in protein_groups_for_calculation:
+        power = power_calculation(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            metadata_df=metadata_df,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            group1=group1,
+            group2=group2,
+            selected_protein_group=protein_group,
+            individual_column=individual_column,
+            intensity_name=intensity_name,
+        )["power"]
+
+        power_list.append(power)
+
+        power_for_all_proteins = min(power_list)
+
+    colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+
+    fig = go.Figure(
+        go.Violin(
+            name="" * len(power_list),
+            y=power_list,
+            line_color=colors[1],
+            meanline_visible=True,
+            box_visible=True,
+            scalemode="width",
+            spanmode="hard",
+            span=[power_for_all_proteins, 1],
+        )
+    )
+
+    fig.update_layout(
+        title="Distribution of Power for All Proteins",
+        yaxis_title="Power",
+        showlegend=False,
+    )
+    power_dataframe = pd.DataFrame(protein_groups_for_calculation)
+    power_dataframe.columns = ["Protein ID"]
+    power_dataframe["Power"] = power_list
+
+    if select_all_proteins and significant_proteins_only == "No":
+        differentially_expressed_proteins_df = pd.merge(
+        differentially_expressed_proteins_df,
+        power_dataframe,
+        on="Protein ID",
+    )
+    elif select_all_proteins and significant_proteins_only == "Yes":
+        significant_proteins_df = pd.merge(
+        significant_proteins_df,
+        power_dataframe,
+        on="Protein ID",
+    )
+
+    return dict(
+        power_for_all_proteins=power_for_all_proteins,
+        plots=[fig],
+        differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+        significant_proteins_df=significant_proteins_df,
+        power_dataframe=power_dataframe,
     )

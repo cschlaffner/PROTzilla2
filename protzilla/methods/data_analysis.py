@@ -25,6 +25,7 @@ from protzilla.data_analysis.power_analysis import (
     power_calculation,
     sample_size_calculation,
     sample_size_calculation_for_all_proteins,
+    power_calculation_for_all_proteins,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
@@ -932,3 +933,53 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
         self.display_output[
             "required_sample_size_for_all_proteins"
         ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
+
+class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
+    display_name = "Power Calculation for all Proteins"
+    operation = "Power Analysis"
+    method_description = "Calculates power for all proteins"
+
+    input_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "significant_proteins_only",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "individual_column",
+        "metadata_df",
+        "select_all_proteins",
+        "selected_protein_groups",
+    ]
+    output_keys = [
+        "power_for_all_proteins",
+        "differentially_expressed_proteins_df",
+        "power_dataframe",
+        "significant_proteins_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return power_calculation_for_all_proteins(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output[
+            "power_for_all_proteins"
+        ] = f"Power for all Proteins: {outputs['power_for_all_proteins']}"
