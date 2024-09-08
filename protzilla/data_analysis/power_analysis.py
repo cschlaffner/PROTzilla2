@@ -313,6 +313,7 @@ def sample_size_calculation_for_all_proteins(
             scalemode="width",
             spanmode="hard",
             span=[0, required_sample_size_for_all_proteins],
+            hoverinfo="y",
         )
     )
 
@@ -423,6 +424,7 @@ def power_calculation_for_all_proteins(
             scalemode="width",
             spanmode="hard",
             span=[power_for_all_proteins, 1],
+            hoverinfo="y"
         )
     )
 
