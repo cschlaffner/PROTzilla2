@@ -43,12 +43,12 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
         pd.concat([id_df, intensity_df], axis=1),
         id_vars=id_columns,
         var_name="Sample",
-        value_name="Intensity",
+        value_name=peptide_intensity_name,
     )
 
     molten = molten.rename(columns={"Proteins": "Protein ID"})
     ordered = molten[
-        ["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]
+        ["Sample", "Protein ID", "Sequence", peptide_intensity_name, "PEP"]
     ]
     ordered.dropna(subset=["Protein ID"], inplace=True)
     ordered.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
