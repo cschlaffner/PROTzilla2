@@ -15,9 +15,10 @@ colors = {
     "annotation_proteins_of_interest": "#4A536A",
 }
 
-def time_series_plot_peptide(
-    input_df: pd.DataFrame,
+def time_quant_plot(
+    intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
+    time_column_name: str,
     protein_group: str,
     similarity: float = 1.0,
     similarity_measure: str = "euclidean distance",
@@ -29,9 +30,10 @@ def time_series_plot_peptide(
     to get all proteingroups that are similar displayed in another color in this line diagram.
     All other proteingroups are displayed in the background as a grey polygon.
 
-    :param input_df: A dataframe in protzilla wide format, where each row
+    :param intensity_df: A dataframe in protzilla wide format, where each row
         represents a sample and each column represents a feature.
     :param metadata_df: A dataframe containing the metadata of the samples.
+    :param time_column_name: The name of the column in the metadata_df that contains the time information.
     :param protein_group: Protein IDs as the columnheader of the dataframe
     :param similarity_measure: method to compare the chosen proteingroup with all others. The two
         methods are "cosine similarity" and "euclidean distance".
@@ -40,15 +42,15 @@ def time_series_plot_peptide(
     :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
 
-    input_df = pd.merge(
-        left=input_df,
-        right=metadata_df[["Sample", "Time"]],
+    intensity_df = pd.merge(
+        left=intensity_df,
+        right=metadata_df[["Sample", time_column_name]],
         on="Sample",
         copy=False,
     )
 
-    wide_df = input_df.interpolate(method='linear', axis=0)
-    wide_df = long_to_wide_time(wide_df) if is_long_format(wide_df) else  wide_df
+    wide_df = intensity_df.interpolate(method='linear', axis=0)
+    wide_df = long_to_wide_time(wide_df, time_column_name=time_column_name) if is_long_format(wide_df, time_column_name=time_column_name) else  wide_df
 
 
     if protein_group not in wide_df.columns:
@@ -164,14 +166,14 @@ def time_series_plot_peptide(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Time",
+        xaxis_title=time_column_name,
         yaxis_title="Intensity",
         legend_title="Legend",
         xaxis=dict(
             tickmode="array",
             tickangle=0,
             tickvals=wide_df.index,
-            ticktext=[wide_df["Time"].unique() for wide_df["Time"] in wide_df.index],
+            ticktext=[wide_df[time_column_name].unique() for wide_df[time_column_name] in wide_df.index],
         ),
         autosize=True,
         margin=dict(l=100, r=300, t=100, b=100),

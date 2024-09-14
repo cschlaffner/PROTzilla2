@@ -12,6 +12,7 @@ def long_to_wide(intensity_df: pd.DataFrame, value_name: str | None = None):
     :param intensity_df: the dataframe that should be transformed into
         long format
         :type intensity_df: pd.DataFrame
+    :param value_name: the name of the column in the metadata_df that contains the intensity information.
 
     :return: returns dataframe in wide format suitable for use by
         packages such as sklearn
@@ -23,7 +24,7 @@ def long_to_wide(intensity_df: pd.DataFrame, value_name: str | None = None):
     )
 
 
-def long_to_wide_time(intensity_df: pd.DataFrame, value_name: str = None):
+def long_to_wide_time(intensity_df: pd.DataFrame, value_name: str = None, time_column_name: str = None):
     """
     This function transforms the dataframe to a wide format that
     can be more easily handled by packages such as sklearn.
@@ -32,16 +33,18 @@ def long_to_wide_time(intensity_df: pd.DataFrame, value_name: str = None):
     :param intensity_df: the dataframe that should be transformed into
         long format
         :type intensity_df: pd.DataFrame
+    :param value_name: the name of the column in the metadata_df that contains the intensity information.
+    :param time_column_name: the name of the column in the metadata_df that contains the time information.
 
     :return: returns dataframe in wide format suitable for use by
         packages such as sklearn
     :rtype: pd.DataFrame
     """
-    if intensity_df.duplicated(subset=["Time", "Protein ID"]).any():
-        intensity_df = intensity_df.groupby(["Time", "Protein ID"]).mean().reset_index()
+    if intensity_df.duplicated(subset=[time_column_name, "Protein ID"]).any():
+        intensity_df = intensity_df.groupby([time_column_name, "Protein ID"]).mean().reset_index()
     values_name = default_intensity_column(intensity_df) if value_name is None else value_name
     intensity_df = pd.pivot(
-        intensity_df, index="Time", columns="Protein ID", values=values_name
+        intensity_df, index=time_column_name, columns="Protein ID", values=values_name
     )
     intensity_df = intensity_df.fillna(intensity_df.mean())
     return intensity_df
@@ -81,17 +84,16 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     return intensity_df
 
 
-def is_long_format(df: pd.DataFrame):
+def is_long_format(df: pd.DataFrame, time_column_name: str = None):
     required_columns = {"Sample", "Protein ID"}
-    additional_columns = {"Gene", "Time"}
+    additional_columns = {"Gene", time_column_name}
     return required_columns.issubset(df.columns) and any(col in df.columns for col in additional_columns)
 
 
 def is_intensity_df(df: pd.DataFrame):
     """
     Checks if the dataframe is an intensity dataframe.
-    An intensity dataframe should have the columns "Sample", "Protein ID" and
-    and intensity column.
+    An intensity dataframe should have the columns "Sample", "Protein ID" and intensity column.
 
     :param df: the dataframe that should be checked
     :type df: pd.DataFrame
