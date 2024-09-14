@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.time_series_plot_peptide import time_series_plot_peptide
+from protzilla.data_analysis.time_series_plots import time_quant_plot
 
 
 @pytest.fixture
@@ -56,7 +56,7 @@ def time_series_test_data():
 
 def test_time_series_plot(show_figures, time_series_test_data):
     test_intensity, test_metadata = time_series_test_data
-    outputs = time_series_plot_peptide(test_intensity, test_metadata, "Protein1")
+    outputs = time_quant_plot(test_intensity, test_metadata, "Protein1")
     assert "plots" in outputs
     fig = outputs["plots"][0]
     if show_figures:
@@ -66,11 +66,11 @@ def test_time_series_plot(show_figures, time_series_test_data):
 def test_time_series_plot_invalid_euclidean_similarity(time_series_test_data):
     test_intensity, test_metadata = time_series_test_data
     with pytest.raises(ValueError):
-        time_series_plot_peptide(test_intensity, test_metadata, "Protein1", similarity=-1, similarity_measure="euclidean distance")
+        time_quant_plot(test_intensity, test_metadata, "Protein1", similarity=-1, similarity_measure="euclidean distance")
     return
 
 def test_time_series_plot_invalid_cosine_similarity(time_series_test_data):
     test_intensity, test_metadata = time_series_test_data
     with pytest.raises(ValueError):
-        time_series_plot_peptide(test_intensity, test_metadata, "Protein1", similarity=2, similarity_measure="cosine similarity")
+        time_quant_plot(test_intensity, test_metadata, "Protein1", similarity=2, similarity_measure="cosine similarity")
     return
