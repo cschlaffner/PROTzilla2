@@ -28,7 +28,7 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
-from protzilla.data_analysis.time_series_plot_peptide import time_series_plot_peptide
+from protzilla.data_analysis.time_series_plots import time_quant_plot
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
     filter_peptides_of_protein,
@@ -342,27 +342,6 @@ class PlotProtQuant(PlotStep):
         inputs["input_df"] = steps.get_step_output(
             Step, "protein_df", inputs["input_df"]
         )
-        return inputs
-
-class PlotTimeSeriesPeptide(PlotStep):
-    display_name = "Time Quantification Plot For Peptide"
-    operation = "plot"
-    method_description = (
-        "Creates a line chart for intensity across Time for protein groups"
-    )
-
-    input_keys = ["input_df", "metadata_df", "protein_group", "similarity_measure", "similarity"]
-    output_keys = []
-
-    def method(self, inputs: dict) -> dict:
-        return time_series_plot_peptide(**inputs)
-
-
-    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["input_df"] = steps.get_step_output(
-            Step, "peptide_df", inputs["input_df"]
-        )
-        inputs["metadata_df"] = steps.metadata_df
         return inputs
 
 
@@ -793,6 +772,33 @@ class SelectPeptidesForProtein(DataAnalysisStep):
                 }
             )
 
+        return inputs
+
+
+class PlotTimeQuant(PlotStep):
+    display_name = "Time Quantification Plot For Protein"
+    operation = "Time series analysis"
+    method_description = (
+        "Creates a line chart for intensity across Time for protein groups"
+    )
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column_name",
+        "protein_group",
+        "similarity_measure",
+        "similarity"
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return time_quant_plot(**inputs)
+
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
         return inputs
 
 

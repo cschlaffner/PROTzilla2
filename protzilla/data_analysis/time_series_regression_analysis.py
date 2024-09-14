@@ -60,7 +60,6 @@ def time_series_linear_regression(
     )
 
     intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-    intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
@@ -90,8 +89,8 @@ def time_series_linear_regression(
             train_r2 = r2_score(y_train, y_pred_train)
             test_r2 = r2_score(y_test, y_pred_test)
 
-            train_df = pd.DataFrame({'Time': X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-            test_df = pd.DataFrame({'Time': X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+            test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
             plot_df = pd.concat([train_df, test_df])
 
             color = PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index % len(PROTZILLA_DISCRETE_COLOR_SEQUENCE)]
@@ -134,8 +133,11 @@ def time_series_linear_regression(
         train_r2 = r2_score(y_train, y_pred_train)
         test_r2 = r2_score(y_test, y_pred_test)
 
-        train_df = pd.DataFrame({'Time': X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-        test_df = pd.DataFrame({'Time': X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+        train_df = pd.DataFrame(
+            {time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train,
+             'Type': 'Train'})
+        test_df = pd.DataFrame(
+            {time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
         plot_df = pd.concat([train_df, test_df])
 
         fig.add_trace(go.Scatter(
@@ -186,7 +188,7 @@ def time_series_linear_regression(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Time",
+        xaxis_title=time_column_name,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -254,7 +256,6 @@ def time_series_ransac_regression(
     )
 
     intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-    intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
@@ -286,31 +287,31 @@ def time_series_ransac_regression(
             train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
             test_r2 = r2_score(y_test, y_pred_test)
 
-            train_df = pd.DataFrame({'Time': X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-            test_df = pd.DataFrame({'Time': X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+            test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
             train_df['Inlier'] = inlier_mask
             test_df['Inlier'] = False
             plot_df = pd.concat([train_df, test_df])
 
             # Add main plot traces
             fig.add_trace(go.Scatter(
-                x=plot_df['Time'],
+                x=plot_df[time_column_name],
                 y=plot_df['Intensity'],
                 mode='markers',
-                name='Actual Intensity',
+                name=f'Actual Intensity ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
-                x=plot_df['Time'],
+                x=plot_df[time_column_name],
                 y=plot_df['Predicted'],
                 mode='lines',
-                name='Predicted Intensity',
+                name=f'Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
-                x=plot_df[plot_df['Inlier'] == False]['Time'],
+                x=plot_df[plot_df['Inlier'] == False][time_column_name],
                 y=plot_df[plot_df['Inlier'] == False]['Intensity'],
                 mode='markers',
                 name='Outliers',
@@ -342,15 +343,15 @@ def time_series_ransac_regression(
         train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
         test_r2 = r2_score(y_test, y_pred_test)
 
-        train_df = pd.DataFrame({'Time': X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-        test_df = pd.DataFrame({'Time': X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+        train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+        test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
         train_df['Inlier'] = inlier_mask
         test_df['Inlier'] = False
         plot_df = pd.concat([train_df, test_df])
 
         # Add main plot traces
         fig.add_trace(go.Scatter(
-            x=plot_df['Time'],
+            x=plot_df[time_column_name],
             y=plot_df['Intensity'],
             mode='markers',
             name='Actual Intensity',
@@ -358,7 +359,7 @@ def time_series_ransac_regression(
         ), row=1, col=1)
 
         fig.add_trace(go.Scatter(
-            x=plot_df['Time'],
+            x=plot_df[time_column_name],
             y=plot_df['Predicted'],
             mode='lines',
             name='Predicted Intensity',
@@ -366,7 +367,7 @@ def time_series_ransac_regression(
         ), row=1, col=1)
 
         fig.add_trace(go.Scatter(
-            x=plot_df[plot_df['Inlier'] == False]['Time'],
+            x=plot_df[plot_df['Inlier'] == False][time_column_name],
             y=plot_df[plot_df['Inlier'] == False]['Intensity'],
             mode='markers',
             name='Outliers',
@@ -405,7 +406,7 @@ def time_series_ransac_regression(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Time",
+        xaxis_title=time_column_name,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -553,7 +554,6 @@ def time_series_auto_arima(
             group_df = intensity_df[intensity_df[grouping_column_name] == group]
 
             group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
-            group_df = group_df.interpolate(method='linear', axis=0)
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
@@ -574,6 +574,24 @@ def time_series_auto_arima(
 
             # Forecast the test set
             forecast = model.predict(n_periods=test_df.shape[0])
+            parameters = model.get_params()
+            aa_order = parameters['order']
+            aa_seasonal_order = parameters['seasonal_order']
+            messages = []
+
+            messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Auto Arima Order (p,d,q): {aa_order}.",
+                }
+            )
+            if seasonal:
+                messages.append(
+                    {
+                        "level": logging.INFO,
+                        "msg": f"Auto Arima Seasonal Order (P,D,Q,s): {aa_seasonal_order}.",
+                    }
+                )
 
             test_rmse = np.sqrt(mean_squared_error(test_df, forecast))
             test_r2 = r2_score(test_df, forecast)
@@ -588,7 +606,7 @@ def time_series_auto_arima(
                 x=test_df.index,
                 y=test_df,
                 mode='markers',
-                name='Actual Intensity',
+                name=f'Actual Intensity ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
             ), row=1, col=1)
 
@@ -596,7 +614,7 @@ def time_series_auto_arima(
                 x=test_df.index,
                 y=forecast,
                 mode='markers',
-                name='Predicted Intensity',
+                name=f'Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
             ), row=1, col=1)
 
@@ -604,7 +622,7 @@ def time_series_auto_arima(
                 x = forecast_plot.index,
                 y = forecast_plot,
                 mode = 'lines',
-                name = 'Mean Predicted Intensity',
+                name = f'Mean Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
             ), row=1, col=1)
 
@@ -620,7 +638,6 @@ def time_series_auto_arima(
 
     else:
         intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-        intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
@@ -641,6 +658,25 @@ def time_series_auto_arima(
 
         # Forecast the test set
         forecast = model.predict(n_periods=test_df.shape[0])
+        parameters = model.get_params()
+
+        aa_order = parameters['order']
+        aa_seasonal_order = parameters['seasonal_order']
+        messages = []
+
+        messages.append(
+            {
+                "level": logging.INFO,
+                "msg": f"Auto Arima Order (p,d,q): {aa_order}.",
+            }
+        )
+        if seasonal:
+            messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Auto Arima Seasonal Order (P,D,Q,s): {aa_seasonal_order}.",
+                }
+            )
 
         test_rmse = np.sqrt(mean_squared_error(test_df, forecast))
         test_r2 = r2_score(test_df, forecast)
@@ -707,7 +743,7 @@ def time_series_auto_arima(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Time",
+        xaxis_title=time_column_name,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -724,7 +760,6 @@ def time_series_auto_arima(
     fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
 
     fig.update_annotations(font_size=12)
-
 
     return dict(
         scores=scores,
@@ -791,7 +826,6 @@ def time_series_arima(
             group_df = intensity_df[intensity_df[grouping_column_name] == group]
 
             group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
-            group_df = group_df.interpolate(method='linear', axis=0)
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
@@ -828,7 +862,7 @@ def time_series_arima(
                 x=test_df.index,
                 y=test_df,
                 mode='markers',
-                name='Actual Intensity',
+                name=f'Actual Intensity ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
             ), row=1, col=1)
 
@@ -836,7 +870,7 @@ def time_series_arima(
                 x=forecast_plot.index,
                 y=forecast_plot,
                 mode='markers',
-                name='Predicted Intensity',
+                name= f'Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
             ), row=1, col=1)
 
@@ -844,7 +878,7 @@ def time_series_arima(
                 x = forecast_mean_plot.index,
                 y = forecast_mean_plot,
                 mode = 'lines',
-                name = 'Mean Predicted Intensity',
+                name = f'Mean Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
             ), row=1, col=1)
 
@@ -860,7 +894,6 @@ def time_series_arima(
 
     else:
         intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-        intensity_df = intensity_df.interpolate(method='linear', axis=0)
 
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
@@ -945,7 +978,7 @@ def time_series_arima(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title="Time",
+        xaxis_title=time_column_name,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
