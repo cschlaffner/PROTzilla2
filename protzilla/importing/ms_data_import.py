@@ -123,6 +123,79 @@ def diann_import(file_path, map_to_uniprot=False, aggregation_method: str ="Sum"
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
+def tmt_data_import(
+        file_path: str, intensity_name: str = "Reporter intensity", map_to_uniprot=False,
+        aggregation_method: str = "Sum"
+) -> dict:
+    try:
+        # Read the file
+        df = pd.read_csv(
+            file_path,
+            sep="\t",
+            low_memory=False,
+            na_values=["", 0],
+            keep_default_na=True,
+        )
+
+        # Debug step: Print the column names to check the actual names in the data
+        print("Columns in the file:", df.columns.tolist())
+
+        # Try to handle different possible names for the 'Protein ID' column
+        protein_column = None
+        possible_names = ["Majority protein IDs"]
+
+        for name in possible_names:
+            if name in df.columns:
+                protein_column = name
+                break
+
+        if protein_column is None:
+            raise KeyError("No valid 'Protein ID' or equivalent column found in the data.")
+
+        df = df.rename(columns={protein_column: "Protein ID"})
+
+        # Extract protein or gene identifiers
+        protein_groups = df["Protein ID"]
+
+        # Drop columns that are not relevant
+        columns_to_drop = [
+            "Combined Spectral Count",
+            "Combined Unique Spectral Count",
+            "Combined Total Spectral Count",
+        ]
+        existing_columns = set(df.columns)
+        columns_to_drop_existing = [col for col in columns_to_drop if col in existing_columns]
+        df = df.drop(columns=columns_to_drop_existing)
+        print("Columns after dropping irrelevant ones:", df.columns.tolist())
+
+        # Use regex to find columns matching the TMT pattern with visits for both NP and T1D samples
+        intensity_columns = df.filter(
+            regex=f"{intensity_name} \\d+ (NP\\d{{2}}|TD\\d{{2}})", axis=1
+        )
+
+        # Debug step: Print the intensity columns that were matched
+        print("Matched intensity columns:", intensity_columns.columns.tolist())
+
+        # Rename columns to the format 'NPXX_1' or 'T1DXX_1'
+        intensity_columns.columns = [
+            re.sub(f"{intensity_name} (\\d+) (NP\\d{{2}}|TD\\d{{2}})",
+                   lambda m: f"{m.group(2)}_{int(m.group(1)) + 1}", col) for col in intensity_columns.columns
+        ]
+
+        # Debug step: Print the renamed intensity columns
+        print("Renamed intensity columns:", intensity_columns.columns.tolist())
+        # Add back the protein identifiers to the dataframe
+        intensity_columns = intensity_columns.assign(**{"Protein ID": protein_groups})
+
+        # Apply transformation, clean-up, or aggregation (depending on your logic)
+        return transform_and_clean(intensity_columns, intensity_name, map_to_uniprot, aggregation_method)
+
+    except Exception as e:
+        msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid TMT data file."
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
+
+
+
 def transform_and_clean(
     df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method: str ="Sum"
 ) -> dict:

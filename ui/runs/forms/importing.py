@@ -75,6 +75,24 @@ class MSFraggerImportForm(MethodForm):
         choices=AggregationMethods, label="Aggregation method", initial="Sum"
     )
 
+class TMTImportForm(MethodForm):
+    file_path = CustomFileField(label="TMT intensities file")
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods, label="Aggregation method", initial="Sum"
+    )
+
+class DiannImportForm(MethodForm):
+    file_path = CustomFileField(label="DIA-NN intensities file:")
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods, label="Aggregation method", initial="Sum"
+    )
+
 
 class MetadataImportForm(MethodForm):
     file_path = CustomFileField(label="Metadata file")
