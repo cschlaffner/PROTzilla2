@@ -1258,12 +1258,12 @@ class TimeSeriesLinearRegressionForm(MethodForm):
         step_size=0.1,
         initial=0.8
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
     grouping = CustomChoiceField(
         choices= TimeSeriesGrouping,
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
+    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1288,6 +1288,9 @@ class TimeSeriesLinearRegressionForm(MethodForm):
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column_name", False)
 
 
 class TimeSeriesRANSACRegressionForm(MethodForm):
@@ -1326,12 +1329,12 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
         step_size=0.1,
         initial=0.8
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
     grouping = CustomChoiceField(
         choices= TimeSeriesGrouping,
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
+    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1356,22 +1359,13 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column_name", False)
 
 
 class TimeSeriesADFullerTestForm(MethodForm):
     is_dynamic = True
-    test_info = TextDisplayField(
-        label="Information about the Augmented Dickey-Fuller test",
-        text=(
-            "The Augmented Dickey-Fuller test is a type of statistical test called a unit root test. The test "
-             "determines how strongly a time series is defined by a trend. The null hypothesis of the test is that the "
-             "time series can be represented by a unit root, which implies that the time series is not stationary. "
-             "The alternative hypothesis is that the time series is stationary. If the p-value is less than the "
-             "significance level, the null hypothesis can be rejected and the time series is considered stationary.<br>"
-             "Dickey, D. & Fuller, Wayne. (1979). Distribution of the Estimators for Autoregressive Time Series With a Unit Root."
-             "JASA. Journal of the American Statistical Association. 74. 10.2307/2286348. "
-        ),
-    )
     intensity_df = CustomChoiceField(
         choices=[],
         label="Intensity dataframe",
@@ -1404,11 +1398,6 @@ class TimeSeriesADFullerTestForm(MethodForm):
 
 class TimeSeriesAutoARIMAForm(MethodForm):
     is_dynamic = True
-    model_info = TextDisplayField(
-        label="Citation for AutoARIMA model",
-        text=(
-        ),
-    )
     intensity_df = CustomChoiceField(
         choices=[],
         label="Intensity dataframe",
@@ -1436,12 +1425,12 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         step_size=0.1,
         initial=0.8,
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
     grouping = CustomChoiceField(
         choices= TimeSeriesGrouping,
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
+    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1466,17 +1455,13 @@ class TimeSeriesAutoARIMAForm(MethodForm):
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column_name", False)
 
 
 class TimeSeriesARIMAForm(MethodForm):
     is_dynamic = True
-    """
-    model_info = TextDisplayField(
-        label="Citation for ARIMA model",
-        text=(
-        ),
-    )
-    """
     intensity_df = CustomChoiceField(
         choices=[],
         label="Intensity dataframe",
@@ -1544,12 +1529,12 @@ class TimeSeriesARIMAForm(MethodForm):
         step_size=0.1,
         initial=0.8,
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
     grouping = CustomChoiceField(
         choices= TimeSeriesGrouping,
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
+    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1574,6 +1559,9 @@ class TimeSeriesARIMAForm(MethodForm):
                 instance_identifier=input_df_instance_id,
             )["Protein ID"].unique()
         )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column_name", False)
         seasonal = self.data.get("seasonal")
         if seasonal == "No":
             self.toggle_visibility("P", False)

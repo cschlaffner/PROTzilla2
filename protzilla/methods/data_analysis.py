@@ -815,8 +815,8 @@ class TimeSeriesLinearRegression(PlotStep):
         "time_column_name",
         "protein_group",
         "train_size",
-        "grouping_column_name",
         "grouping",
+        "grouping_column_name",
     ]
     output_keys = [
         "scores",
@@ -845,8 +845,8 @@ class TimeSeriesRANSACRegression(PlotStep):
         "stop_probability",
         "loss",
         "train_size",
-        "grouping_column_name",
         "grouping",
+        "grouping_column_name",
     ]
     output_keys = [
         "scores",
@@ -863,7 +863,15 @@ class TimeSeriesRANSACRegression(PlotStep):
 class TimeSeriesADFullerTest(DataAnalysisStep):
     display_name = "Augmented Dickey-Fuller Test"
     operation = "Time series analysis"
-    method_description = "Perform Augmented Dickey-Fuller test on the time series data for a given protein group."
+    method_description = (
+        "The Augmented Dickey-Fuller test is a type of statistical test called a unit root test. The test "
+        "determines how strongly a time series is defined by a trend. The null hypothesis of the test is that the "
+         "time series can be represented by a unit root, which implies that the time series is not stationary. "
+         "The alternative hypothesis is that the time series is stationary. If the p-value is less than the "
+          "significance level, the null hypothesis can be rejected and the time series is considered stationary."
+          "Dickey, D. & Fuller, Wayne. (1979). Distribution of the Estimators for Autoregressive Time Series With a Unit Root. "
+          "JASA. Journal of the American Statistical Association. 74. 10.2307/2286348. "
+    )
 
     input_keys = [
         "intensity_df",
@@ -902,8 +910,8 @@ class TimeSeriesAutoARIMA(PlotStep):
         "seasonal",
         "m",
         "train_size",
-        "grouping_column_name",
         "grouping",
+        "grouping_column_name",
     ]
     output_keys = [
         "scores",
@@ -939,8 +947,8 @@ class TimeSeriesARIMA(PlotStep):
         "Q",
         "s",
         "train_size",
-        "grouping_column_name",
         "grouping",
+        "grouping_column_name",
     ]
     output_keys = [
         "scores",

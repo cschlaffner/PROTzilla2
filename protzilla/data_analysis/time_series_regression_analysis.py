@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from protzilla.data_analysis.time_series_helper import convert_time_to_hours
+#from protzilla.data_analysis.time_series_helper import convert_time_to_hours
 from protzilla.utilities import default_intensity_column
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
@@ -29,10 +29,10 @@ def time_series_linear_regression(
         intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
         time_column_name: str,
-        protein_group: str,
         train_size: float,
+        protein_group: str,
+        grouping: str,
         grouping_column_name: str,
-        grouping: str = None,
 ):
     """
     Perform linear regression on the time series data for a given protein group.
@@ -58,8 +58,6 @@ def time_series_linear_regression(
         on="Sample",
         copy=False,
     )
-
-    intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
@@ -222,8 +220,8 @@ def time_series_ransac_regression(
         stop_probability: float,
         loss: str,
         train_size: float,
-        grouping_column_name: str,
         grouping: str,
+        grouping_column_name: str,
 ):
     """
     Perform RANSAC regression on the time series data for a given protein group.
@@ -254,8 +252,6 @@ def time_series_ransac_regression(
         on="Sample",
         copy=False,
     )
-
-    intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
@@ -298,7 +294,7 @@ def time_series_ransac_regression(
                 x=plot_df[time_column_name],
                 y=plot_df['Intensity'],
                 mode='markers',
-                name=f'Actual Intensity ({group})',
+                name=f'Inliers ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
             ), row=1, col=1)
 
@@ -354,7 +350,7 @@ def time_series_ransac_regression(
             x=plot_df[time_column_name],
             y=plot_df['Intensity'],
             mode='markers',
-            name='Actual Intensity',
+            name='Inliers',
             marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
         ), row=1, col=1)
 
@@ -507,8 +503,8 @@ def time_series_auto_arima(
     seasonal: str,
     m: int,
     train_size: float,
-    grouping_column_name: str,
     grouping: str,
+    grouping_column_name: str,
 ) -> dict:
     """
     Perform an automatic ARIMA model selection on the time series data for a given protein group.
@@ -526,6 +522,7 @@ def time_series_auto_arima(
     """
 
     color_index = 0
+    messages = []
 
     if train_size < 0 or train_size > 1:
         raise ValueError("Train size should be between 0 and 1")
@@ -553,8 +550,6 @@ def time_series_auto_arima(
         for group in groups:
             group_df = intensity_df[intensity_df[grouping_column_name] == group]
 
-            group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
-
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
 
@@ -575,23 +570,6 @@ def time_series_auto_arima(
             # Forecast the test set
             forecast = model.predict(n_periods=test_df.shape[0])
             parameters = model.get_params()
-            aa_order = parameters['order']
-            aa_seasonal_order = parameters['seasonal_order']
-            messages = []
-
-            messages.append(
-                {
-                    "level": logging.INFO,
-                    "msg": f"Auto Arima Order (p,d,q): {aa_order}.",
-                }
-            )
-            if seasonal:
-                messages.append(
-                    {
-                        "level": logging.INFO,
-                        "msg": f"Auto Arima Seasonal Order (P,D,Q,s): {aa_seasonal_order}.",
-                    }
-                )
 
             test_rmse = np.sqrt(mean_squared_error(test_df, forecast))
             test_r2 = r2_score(test_df, forecast)
@@ -635,10 +613,24 @@ def time_series_auto_arima(
                 'train_r2_score': train_r2,
                 'test_r2_score': test_r2,
             })
+        aa_order = parameters['order']
+        aa_seasonal_order = parameters['seasonal_order']
+
+        messages.append(
+            {
+                "level": logging.INFO,
+                "msg": f"Auto Arima Order (p,d,q): {aa_order}.",
+            }
+        )
+        if seasonal:
+            messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Auto Arima Seasonal Order (P,D,Q,s): {aa_seasonal_order}.",
+                }
+            )
 
     else:
-        intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 
@@ -662,7 +654,6 @@ def time_series_auto_arima(
 
         aa_order = parameters['order']
         aa_seasonal_order = parameters['seasonal_order']
-        messages = []
 
         messages.append(
             {
@@ -764,6 +755,7 @@ def time_series_auto_arima(
     return dict(
         scores=scores,
         plots=[fig],
+        messages=messages,
     )
 
 
@@ -781,8 +773,8 @@ def time_series_arima(
     Q: int,
     s: int,
     train_size: float,
-    grouping_column_name: str,
     grouping: str,
+    grouping_column_name: str,
 ) -> dict:
 
     """
@@ -824,8 +816,6 @@ def time_series_arima(
         groups = intensity_df[grouping_column_name].unique()
         for group in groups:
             group_df = intensity_df[intensity_df[grouping_column_name] == group]
-
-            group_df[time_column_name] = group_df[str(time_column_name)].apply(convert_time_to_hours)
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
@@ -893,8 +883,6 @@ def time_series_arima(
             })
 
     else:
-        intensity_df[time_column_name] = intensity_df[str(time_column_name)].apply(convert_time_to_hours)
-
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 

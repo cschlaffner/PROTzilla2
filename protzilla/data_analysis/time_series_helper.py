@@ -7,6 +7,9 @@ def convert_time_to_hours(time_str):
 
     :return: Number of hours since midnight as a float
     """
+
+    """
     time_obj = datetime.strptime(time_str, '%H:%M:%S')
     hours_since_midnight = time_obj.hour + time_obj.minute / 60 + time_obj.second / 3600
-    return hours_since_midnight
+    """
+    return time_str
