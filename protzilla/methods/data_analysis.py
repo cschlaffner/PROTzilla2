@@ -785,7 +785,7 @@ class PlotTimeQuant(PlotStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
-        "time_column_name",
+        "time_column",
         "protein_group",
         "similarity_measure",
         "similarity"
@@ -812,11 +812,11 @@ class TimeSeriesLinearRegression(PlotStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
-        "time_column_name",
+        "time_column",
         "protein_group",
         "train_size",
         "grouping",
-        "grouping_column_name",
+        "grouping_column",
     ]
     output_keys = [
         "scores",
@@ -839,14 +839,14 @@ class TimeSeriesRANSACRegression(PlotStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
-        "time_column_name",
+        "time_column",
         "protein_group",
         "max_trials",
         "stop_probability",
         "loss",
         "train_size",
         "grouping",
-        "grouping_column_name",
+        "grouping_column",
     ]
     output_keys = [
         "scores",
@@ -905,13 +905,13 @@ class TimeSeriesAutoARIMA(PlotStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
-        "time_column_name",
+        "time_column",
         "protein_group",
         "seasonal",
         "m",
         "train_size",
         "grouping",
-        "grouping_column_name",
+        "grouping_column",
     ]
     output_keys = [
         "scores",
@@ -936,7 +936,7 @@ class TimeSeriesARIMA(PlotStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
-        "time_column_name",
+        "time_column",
         "protein_group",
         "seasonal",
         "p",
@@ -948,7 +948,7 @@ class TimeSeriesARIMA(PlotStep):
         "s",
         "train_size",
         "grouping",
-        "grouping_column_name",
+        "grouping_column",
     ]
     output_keys = [
         "scores",

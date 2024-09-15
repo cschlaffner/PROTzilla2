@@ -28,20 +28,20 @@ colors = {
 def time_series_linear_regression(
         intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
-        time_column_name: str,
+        time_column: str,
         train_size: float,
         protein_group: str,
         grouping: str,
-        grouping_column_name: str,
+        grouping_column: str,
 ):
     """
     Perform linear regression on the time series data for a given protein group.
     :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
-    :param time_column_name: The name of the column containing the time values
+    :param time_column: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
     :param train_size: The proportion of the dataset to include in the test split
-    :param grouping_column_name: The name of the column containing the grouping information
+    :param grouping_column: The name of the column containing the grouping information
     :param grouping: Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
@@ -61,18 +61,18 @@ def time_series_linear_regression(
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
-    X = intensity_df[[time_column_name]]
+    X = intensity_df[[time_column]]
     y = intensity_df[intensity_column_name]
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
 
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
-        groups = intensity_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column in intensity_df.columns:
+        groups = intensity_df[grouping_column].unique()
         for group in groups:
-            group_df = intensity_df[intensity_df[grouping_column_name] == group]
-            X_group = group_df[[time_column_name]]
+            group_df = intensity_df[intensity_df[grouping_column] == group]
+            X_group = group_df[[time_column]]
             y_group = group_df[intensity_column_name]
 
             X_train, X_test, y_train, y_test = train_test_split(X_group, y_group, train_size=train_size, shuffle=False)
@@ -87,15 +87,15 @@ def time_series_linear_regression(
             train_r2 = r2_score(y_train, y_pred_train)
             test_r2 = r2_score(y_test, y_pred_test)
 
-            train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-            test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            train_df = pd.DataFrame({time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+            test_df = pd.DataFrame({time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
             plot_df = pd.concat([train_df, test_df])
 
             color = PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index % len(PROTZILLA_DISCRETE_COLOR_SEQUENCE)]
             color_index += 5
 
             fig.add_trace(go.Scatter(
-                x=plot_df[time_column_name],
+                x=plot_df[time_column],
                 y=plot_df['Intensity'],
                 mode='markers',
                 name=f'Actual Intensity ({group})',
@@ -103,7 +103,7 @@ def time_series_linear_regression(
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
-                x=plot_df[time_column_name],
+                x=plot_df[time_column],
                 y=plot_df['Predicted'],
                 mode='lines',
                 name=f'Predicted Intensity ({group})',
@@ -132,14 +132,14 @@ def time_series_linear_regression(
         test_r2 = r2_score(y_test, y_pred_test)
 
         train_df = pd.DataFrame(
-            {time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train,
+            {time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train,
              'Type': 'Train'})
         test_df = pd.DataFrame(
-            {time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            {time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
         plot_df = pd.concat([train_df, test_df])
 
         fig.add_trace(go.Scatter(
-            x=plot_df[time_column_name],
+            x=plot_df[time_column],
             y=plot_df['Intensity'],
             mode='markers',
             name='Actual Intensity',
@@ -147,7 +147,7 @@ def time_series_linear_regression(
         ), row=1, col=1)
 
         fig.add_trace(go.Scatter(
-            x=plot_df[time_column_name],
+            x=plot_df[time_column],
             y=plot_df['Predicted'],
             mode='lines',
             name='Predicted Intensity',
@@ -186,7 +186,7 @@ def time_series_linear_regression(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title=time_column_name,
+        xaxis_title=time_column,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -214,26 +214,26 @@ def time_series_linear_regression(
 def time_series_ransac_regression(
         intensity_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
-        time_column_name: str,
+        time_column: str,
         protein_group: str,
         max_trials: int,
         stop_probability: float,
         loss: str,
         train_size: float,
         grouping: str,
-        grouping_column_name: str,
+        grouping_column: str,
 ):
     """
     Perform RANSAC regression on the time series data for a given protein group.
     :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
-    :param time_column_name: The name of the column containing the time values
+    :param time_column: The name of the column containing the time values
     :param max_trials: The maximum number of iterations to perform
     :param stop_probability: The probability to stop the RANSAC algorithm
     :param loss: The loss function to use
     :param protein_group: Protein group to perform the analysis on
     :param train_size: The proportion of the dataset to include in the test split
-    :param grouping_column_name: The name of the column containing the grouping information
+    :param grouping_column: The name of the column containing the grouping information
     :param grouping: Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
@@ -255,18 +255,18 @@ def time_series_ransac_regression(
 
     intensity_df = intensity_df.sample(frac=1, random_state = 42).reset_index(drop=True)
 
-    X = intensity_df[[time_column_name]]
+    X = intensity_df[[time_column]]
     y = intensity_df[intensity_column_name]
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
 
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
-        groups = intensity_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column in intensity_df.columns:
+        groups = intensity_df[grouping_column].unique()
         for group in groups:
-            group_df = intensity_df[intensity_df[grouping_column_name] == group]
-            X_group = group_df[[time_column_name]]
+            group_df = intensity_df[intensity_df[grouping_column] == group]
+            X_group = group_df[[time_column]]
             y_group = group_df[intensity_column_name]
 
             X_train, X_test, y_train, y_test = train_test_split(X_group, y_group, train_size=train_size, shuffle=False)
@@ -283,15 +283,15 @@ def time_series_ransac_regression(
             train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
             test_r2 = r2_score(y_test, y_pred_test)
 
-            train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-            test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            train_df = pd.DataFrame({time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+            test_df = pd.DataFrame({time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
             train_df['Inlier'] = inlier_mask
             test_df['Inlier'] = False
             plot_df = pd.concat([train_df, test_df])
 
             # Add main plot traces
             fig.add_trace(go.Scatter(
-                x=plot_df[time_column_name],
+                x=plot_df[time_column],
                 y=plot_df['Intensity'],
                 mode='markers',
                 name=f'Inliers ({group})',
@@ -299,7 +299,7 @@ def time_series_ransac_regression(
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
-                x=plot_df[time_column_name],
+                x=plot_df[time_column],
                 y=plot_df['Predicted'],
                 mode='lines',
                 name=f'Predicted Intensity ({group})',
@@ -307,7 +307,7 @@ def time_series_ransac_regression(
             ), row=1, col=1)
 
             fig.add_trace(go.Scatter(
-                x=plot_df[plot_df['Inlier'] == False][time_column_name],
+                x=plot_df[plot_df['Inlier'] == False][time_column],
                 y=plot_df[plot_df['Inlier'] == False]['Intensity'],
                 mode='markers',
                 name='Outliers',
@@ -339,15 +339,15 @@ def time_series_ransac_regression(
         train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
         test_r2 = r2_score(y_test, y_pred_test)
 
-        train_df = pd.DataFrame({time_column_name: X_train[time_column_name], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-        test_df = pd.DataFrame({time_column_name: X_test[time_column_name], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+        train_df = pd.DataFrame({time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+        test_df = pd.DataFrame({time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
         train_df['Inlier'] = inlier_mask
         test_df['Inlier'] = False
         plot_df = pd.concat([train_df, test_df])
 
         # Add main plot traces
         fig.add_trace(go.Scatter(
-            x=plot_df[time_column_name],
+            x=plot_df[time_column],
             y=plot_df['Intensity'],
             mode='markers',
             name='Inliers',
@@ -355,7 +355,7 @@ def time_series_ransac_regression(
         ), row=1, col=1)
 
         fig.add_trace(go.Scatter(
-            x=plot_df[time_column_name],
+            x=plot_df[time_column],
             y=plot_df['Predicted'],
             mode='lines',
             name='Predicted Intensity',
@@ -363,7 +363,7 @@ def time_series_ransac_regression(
         ), row=1, col=1)
 
         fig.add_trace(go.Scatter(
-            x=plot_df[plot_df['Inlier'] == False][time_column_name],
+            x=plot_df[plot_df['Inlier'] == False][time_column],
             y=plot_df[plot_df['Inlier'] == False]['Intensity'],
             mode='markers',
             name='Outliers',
@@ -402,7 +402,7 @@ def time_series_ransac_regression(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title=time_column_name,
+        xaxis_title=time_column,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -498,24 +498,24 @@ def adfuller_test(
 def time_series_auto_arima(
     intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
-    time_column_name: str,
+    time_column: str,
     protein_group: str,
     seasonal: str,
     m: int,
     train_size: float,
     grouping: str,
-    grouping_column_name: str,
+    grouping_column: str,
 ) -> dict:
     """
     Perform an automatic ARIMA model selection on the time series data for a given protein group.
     :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
-    :param time_column_name: The name of the column containing the time values
+    :param time_column: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
     :param seasonal: Whether the ARIMA model should be seasonal
     :param m: The number of time steps for a single seasonal period (ignored if seasonal=False)
     :param train_size: The proportion of the dataset to include in the test split
-    :param grouping_column_name: The name of the column containing the grouping information
+    :param grouping_column: The name of the column containing the grouping information
     :param grouping: Whether to group the data by the 'Group' column
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
@@ -545,16 +545,16 @@ def time_series_auto_arima(
     fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
-        groups = intensity_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column in intensity_df.columns:
+        groups = intensity_df[grouping_column].unique()
         for group in groups:
-            group_df = intensity_df[intensity_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column] == group]
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
 
-            train_df = train_df.set_index(time_column_name)[intensity_column_name]
-            test_df = test_df.set_index(time_column_name)[intensity_column_name]
+            train_df = train_df.set_index(time_column)[intensity_column_name]
+            test_df = test_df.set_index(time_column)[intensity_column_name]
 
             # Fit the ARIMA model
             model = auto_arima(
@@ -634,8 +634,8 @@ def time_series_auto_arima(
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 
-        train_df = train_df.set_index(time_column_name)[intensity_column_name]
-        test_df = test_df.set_index(time_column_name)[intensity_column_name]
+        train_df = train_df.set_index(time_column)[intensity_column_name]
+        test_df = test_df.set_index(time_column)[intensity_column_name]
 
         # Fit the ARIMA model
         model = auto_arima(
@@ -734,7 +734,7 @@ def time_series_auto_arima(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title=time_column_name,
+        xaxis_title=time_column,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
@@ -762,7 +762,7 @@ def time_series_auto_arima(
 def time_series_arima(
     intensity_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
-    time_column_name: str,
+    time_column: str,
     protein_group: str,
     seasonal: str,
     p: int,
@@ -774,14 +774,14 @@ def time_series_arima(
     s: int,
     train_size: float,
     grouping: str,
-    grouping_column_name: str,
+    grouping_column: str,
 ) -> dict:
 
     """
     Perform ARIMA model selection on the time series data for a given protein group.
     :param intensity_df: Peptide dataframe which contains the intensity of each sample
     :param metadata_df: Metadata dataframe which contains the timestamps
-    :param time_column_name: The name of the column containing the time values
+    :param time_column: The name of the column containing the time values
     :param protein_group: Protein group to perform the analysis on
     :param seasonal: Whether the ARIMA model should be seasonal
     :param p: ARIMA p parameter
@@ -792,7 +792,7 @@ def time_series_arima(
     :param Q: ARIMA seasonal Q parameter
     :param s: ARIMA seasonal s parameter
     :param train_size: The proportion of the dataset to include in the test split
-    :param grouping_column_name: The name of the column containing the grouping information
+    :param grouping_column: The name of the column containing the grouping information
     :param grouping: Whether to group the data by the 'Group' column
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
@@ -812,16 +812,16 @@ def time_series_arima(
     fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
     scores = []
 
-    if grouping == "With Grouping" and grouping_column_name in intensity_df.columns:
-        groups = intensity_df[grouping_column_name].unique()
+    if grouping == "With Grouping" and grouping_column in intensity_df.columns:
+        groups = intensity_df[grouping_column].unique()
         for group in groups:
-            group_df = intensity_df[intensity_df[grouping_column_name] == group]
+            group_df = intensity_df[intensity_df[grouping_column] == group]
 
             train_df_size = int(len(group_df) * train_size)
             train_df, test_df = group_df[:train_df_size], group_df[train_df_size:]
 
-            train_df = train_df.set_index(time_column_name)[intensity_column_name]
-            test_df = test_df.set_index(time_column_name)[intensity_column_name]
+            train_df = train_df.set_index(time_column)[intensity_column_name]
+            test_df = test_df.set_index(time_column)[intensity_column_name]
 
             if seasonal == "Yes":
                 model = ARIMA(
@@ -886,8 +886,8 @@ def time_series_arima(
         train_size = int(len(intensity_df) * train_size)
         train_df, test_df = intensity_df[:train_size], intensity_df[train_size:]
 
-        train_df = train_df.set_index(time_column_name)[intensity_column_name]
-        test_df = test_df.set_index(time_column_name)[intensity_column_name]
+        train_df = train_df.set_index(time_column)[intensity_column_name]
+        test_df = test_df.set_index(time_column)[intensity_column_name]
 
         if seasonal == "Yes":
             model = ARIMA(
@@ -966,7 +966,7 @@ def time_series_arima(
         yaxis_gridcolor=colors["gridcolor"],
         xaxis_linecolor=colors["linecolor"],
         yaxis_linecolor=colors["linecolor"],
-        xaxis_title=time_column_name,
+        xaxis_title=time_column,
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,

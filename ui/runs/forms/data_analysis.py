@@ -1170,7 +1170,7 @@ class PlotTimeQuantForm(MethodForm):
         choices=[],
         label="Choose dataframe to be plotted",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: choose highlighted protein group",
@@ -1193,7 +1193,7 @@ class PlotTimeQuantForm(MethodForm):
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
-            "time_column_name"
+            "time_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -1246,7 +1246,7 @@ class TimeSeriesLinearRegressionForm(MethodForm):
         choices=[],
         label="Intensity dataframe",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the linear regression on",
@@ -1263,7 +1263,7 @@ class TimeSeriesLinearRegressionForm(MethodForm):
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1274,11 +1274,11 @@ class TimeSeriesLinearRegressionForm(MethodForm):
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
-            "time_column_name"
+            "time_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields[
-            "grouping_column_name"
+            "grouping_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -1290,7 +1290,7 @@ class TimeSeriesLinearRegressionForm(MethodForm):
         )
         grouping = self.data.get("grouping")
         if grouping == "Without Grouping":
-            self.toggle_visibility("grouping_column_name", False)
+            self.toggle_visibility("grouping_column", False)
 
 
 class TimeSeriesRANSACRegressionForm(MethodForm):
@@ -1299,7 +1299,7 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
         choices=[],
         label="Intensity dataframe",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the RANSAC regression on",
@@ -1334,7 +1334,7 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1345,11 +1345,11 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
-            "time_column_name"
+            "time_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields[
-            "grouping_column_name"
+            "grouping_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -1361,7 +1361,7 @@ class TimeSeriesRANSACRegressionForm(MethodForm):
         )
         grouping = self.data.get("grouping")
         if grouping == "Without Grouping":
-            self.toggle_visibility("grouping_column_name", False)
+            self.toggle_visibility("grouping_column", False)
 
 
 class TimeSeriesADFullerTestForm(MethodForm):
@@ -1402,7 +1402,7 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         choices=[],
         label="Intensity dataframe",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the AutoARIMA on",
@@ -1430,7 +1430,7 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1441,11 +1441,11 @@ class TimeSeriesAutoARIMAForm(MethodForm):
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
-            "time_column_name"
+            "time_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields[
-            "grouping_column_name"
+            "grouping_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -1457,7 +1457,7 @@ class TimeSeriesAutoARIMAForm(MethodForm):
         )
         grouping = self.data.get("grouping")
         if grouping == "Without Grouping":
-            self.toggle_visibility("grouping_column_name", False)
+            self.toggle_visibility("grouping_column", False)
 
 
 class TimeSeriesARIMAForm(MethodForm):
@@ -1466,7 +1466,7 @@ class TimeSeriesARIMAForm(MethodForm):
         choices=[],
         label="Intensity dataframe",
     )
-    time_column_name = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the AutoARIMA on",
@@ -1534,7 +1534,7 @@ class TimeSeriesARIMAForm(MethodForm):
         label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
         initial=TimeSeriesGrouping.with_grouping
     )
-    grouping_column_name = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
 
 
     def fill_form(self, run: Run) -> None:
@@ -1545,11 +1545,11 @@ class TimeSeriesARIMAForm(MethodForm):
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
         self.fields[
-            "time_column_name"
+            "time_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields[
-            "grouping_column_name"
+            "grouping_column"
         ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         self.fields["protein_group"].choices = fill_helper.to_choices(
@@ -1561,7 +1561,7 @@ class TimeSeriesARIMAForm(MethodForm):
         )
         grouping = self.data.get("grouping")
         if grouping == "Without Grouping":
-            self.toggle_visibility("grouping_column_name", False)
+            self.toggle_visibility("grouping_column", False)
         seasonal = self.data.get("seasonal")
         if seasonal == "No":
             self.toggle_visibility("P", False)
