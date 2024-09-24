@@ -4,9 +4,9 @@ from scipy import stats
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 
 from protzilla.utilities.transform_dfs import is_long_format, long_to_wide_time
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
 # Define color constants
-PROTZILLA_DISCRETE_COLOR_SEQUENCE = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#19D3F3", "#E763FA", "#FECB52", "#FFA15A", "#FF6692", "#B6E880"]
 colors = {
     "plot_bgcolor": "white",
     "gridcolor": "#F1F1F1",
@@ -68,7 +68,7 @@ def time_quant_plot(
 
     color_mapping = {
         "A": PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
-        "C": PROTZILLA_DISCRETE_COLOR_SEQUENCE[1],
+        "C": PROTZILLA_DISCRETE_COLOR_SEQUENCE[4],
     }
 
     lower_upper_x = []
@@ -122,7 +122,7 @@ def time_quant_plot(
                 y=wide_df[group],
                 mode="lines",
                 name=group[:15] + "..." if len(group) > 15 else group,
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[9]),
                 showlegend=len(similar_groups) <= 7,
             )
         )
@@ -133,7 +133,7 @@ def time_quant_plot(
                 x=[None],
                 y=[None],
                 mode="lines",
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[1]),
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[9]),
                 name="Similar Protein Groups",
             )
         )
@@ -147,7 +147,7 @@ def time_quant_plot(
             y=wide_df[protein_group],
             mode="lines",
             name=formatted_protein_name,
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[4]),
         )
     )
     fig.add_trace(
@@ -155,7 +155,7 @@ def time_quant_plot(
             x=[None],
             y=[None],
             mode="markers",
-            marker=dict(color=color_mapping.get("A")),
+            marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
             name="Intensity",
         )
     )

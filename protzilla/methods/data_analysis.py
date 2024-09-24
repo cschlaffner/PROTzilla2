@@ -876,6 +876,7 @@ class TimeSeriesADFullerTest(DataAnalysisStep):
     input_keys = [
         "intensity_df",
         "metadata_df",
+        "time_column",
         "protein_group",
         "alpha",
     ]

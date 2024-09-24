@@ -1,18 +1,12 @@
 df_mode: disk_memory
 steps:
 - form_inputs:
-    aggregation_method: Median
-    intensity_name: Intensity
+    aggregation_mode: Sum
+    intensity_name: iBAQ
     map_to_uniprot: false
   inputs: {}
   instance_identifier: MaxQuantImport_1
   type: MaxQuantImport
-- form_inputs:
-    intensity_name: Intensity
-    map_to_uniprot: false
-  inputs: {}
-  instance_identifier: EvidenceImport_1
-  type: EvidenceImport
 - form_inputs:
     feature_orientation: Columns (samples in rows, features in columns)
   inputs: {}
@@ -49,15 +43,6 @@ steps:
   plot_inputs: {}
   type: OutlierDetectionByLocalOutlierFactor
 - form_inputs:
-    percentile: 0.5
-  inputs: {}
-  instance_identifier: NormalisationByMedian_1
-  plot_inputs:
-    graph_type: Boxplot
-    group_by: None
-    visual_transformation: log10
-  type: NormalisationByMedian
-- form_inputs:
     log_base: log2
   inputs: {}
   instance_identifier: TransformationLog_1
@@ -66,24 +51,27 @@ steps:
     group_by: None
   type: TransformationLog
 - form_inputs:
-    input_df: TransformationLog_1
-    protein_group: D3YYU8
-    similarity: 1
-    similarity_measure: euclidean distance
+    percentile: 0.5
   inputs: {}
-  instance_identifier: PlotTimeSeries_1
-  type: PlotTimeSeriesPeptide
-- form_inputs:
-    input_df: TransformationLog_1
-    protein_group: D3YYU8
-    test_size: 0.2
+  instance_identifier: NormalisationByMedian_1
+  plot_inputs:
+    graph_type: Boxplot
+    group_by: None
+    visual_transformation: log10
+  type: NormalisationByMedian
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: PlotTimeQuant_1
+  type: PlotTimeQuant
+- form_inputs: {}
   inputs: {}
   instance_identifier: TimeSeriesLinearRegression_1
   type: TimeSeriesLinearRegression
-- form_inputs:
-    input_df: TransformationLog_1
-    protein_group: D3YYU8
-    test_size: 0.2
+- form_inputs: {}
   inputs: {}
-  instance_identifier: TimeSeriesRANSACRegression_1
-  type: TimeSeriesRANSACRegression
+  instance_identifier: TimeSeriesADFullerTest_1
+  type: TimeSeriesADFullerTest
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: TimeSeriesAutoARIMA_1
+  type: TimeSeriesAutoARIMA

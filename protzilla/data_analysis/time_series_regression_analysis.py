@@ -46,6 +46,7 @@ def time_series_linear_regression(
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
     """
+    messages = []
     color_index = 0
     if train_size < 0 or train_size > 1:
         raise ValueError("Test size should be between 0 and 1")
@@ -64,7 +65,7 @@ def time_series_linear_regression(
     X = intensity_df[[time_column]]
     y = intensity_df[intensity_column_name]
 
-    fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
+    fig = go.Figure()
 
     scores = []
 
@@ -100,7 +101,8 @@ def time_series_linear_regression(
                 mode='markers',
                 name=f'Actual Intensity ({group})',
                 marker=dict(color=color)
-            ), row=1, col=1)
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x=plot_df[time_column],
@@ -108,7 +110,8 @@ def time_series_linear_regression(
                 mode='lines',
                 name=f'Predicted Intensity ({group})',
                 line=dict(color=color)
-            ), row=1, col=1)
+                )
+            )
 
             scores.append({
                 'group': group,
@@ -144,7 +147,8 @@ def time_series_linear_regression(
             mode='markers',
             name='Actual Intensity',
             marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
-        ), row=1, col=1)
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=plot_df[time_column],
@@ -152,7 +156,8 @@ def time_series_linear_regression(
             mode='lines',
             name='Predicted Intensity',
             line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[5])
-        ), row=1, col=1)
+            )
+        )
 
         scores.append({
             'group': 'Overall',
@@ -170,15 +175,6 @@ def time_series_linear_regression(
         for res in scores
     ])
 
-    fig.add_trace(go.Scatter(
-        x=[0],
-        y=[0.25],
-        text=[annotation_text],
-        mode='text',
-        textfont=dict(size=12),
-        showlegend=False
-    ), row=1, col=2)
-
     fig.update_layout(
         title=f"Intensity over Time for {protein_group}",
         plot_bgcolor=colors["plot_bgcolor"],
@@ -190,24 +186,26 @@ def time_series_linear_regression(
         yaxis_title="Intensity",
         legend_title="Legend",
         autosize=True,
-        margin=dict(l=100, r=100, t=100, b=50),
+        margin=dict(l=100, r=300, t=100, b=100),
         legend=dict(
-            yanchor="top",
-            y=0.95,
-            xanchor="right",
-            x=0.8
+            y=1.05,
+            x=1,
+            bgcolor = "rgba(255, 255, 255, 0.5)",
+            orientation = "v",
         )
     )
 
-    # Hide x-axis of the annotation subplot
-    fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-    fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-
-    fig.update_annotations(font_size=12)
+    messages.append(
+        {
+            "level": logging.INFO,
+            "msg": annotation_text,
+        }
+    )
 
     return dict(
         scores=scores,
         plots=[fig],
+        messages=messages,
     )
 
 
@@ -238,7 +236,7 @@ def time_series_ransac_regression(
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
     """
-
+    messages = []
     color_index = 0
     if train_size < 0 or train_size > 1:
         raise ValueError("Test size should be between 0 and 1")
@@ -258,7 +256,7 @@ def time_series_ransac_regression(
     X = intensity_df[[time_column]]
     y = intensity_df[intensity_column_name]
 
-    fig = make_subplots(rows=1, cols=2, column_widths=[0.75, 0.25], vertical_spacing=0.025)
+    fig = go.Figure()
 
     scores = []
 
@@ -273,30 +271,38 @@ def time_series_ransac_regression(
             model = RANSACRegressor(max_trials = max_trials, stop_probability = stop_probability, loss = loss, base_estimator=LinearRegression())
             model.fit(X_train, y_train)
 
-            inlier_mask = model.inlier_mask_
-
             y_pred_train = model.predict(X_train)
             y_pred_test = model.predict(X_test)
 
-            train_rmse = np.sqrt(mean_squared_error(y_train[inlier_mask], y_pred_train[inlier_mask]))
-            test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
-            train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
-            test_r2 = r2_score(y_test, y_pred_test)
+            inlier_mask_train = model.inlier_mask_
 
-            train_df = pd.DataFrame({time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-            test_df = pd.DataFrame({time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
-            train_df['Inlier'] = inlier_mask
-            test_df['Inlier'] = False
+            # Predict the inliers for the test set
+            test_inlier_mask = model.predict(
+                X_test) == y_pred_test
+
+            train_rmse = np.sqrt(mean_squared_error(y_train[inlier_mask_train], y_pred_train[inlier_mask_train]))
+            test_rmse = np.sqrt(mean_squared_error(y_test[test_inlier_mask], y_pred_test[test_inlier_mask]))
+            train_r2 = r2_score(y_train[inlier_mask_train], y_pred_train[inlier_mask_train])
+            test_r2 = r2_score(y_test[test_inlier_mask], y_pred_test[test_inlier_mask])
+
+            # Prepare DataFrames for plotting
+            train_df = pd.DataFrame(
+                {time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+            test_df = pd.DataFrame(
+                {time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+            train_df['Inlier'] = inlier_mask_train
+            test_df['Inlier'] = test_inlier_mask
             plot_df = pd.concat([train_df, test_df])
 
             # Add main plot traces
             fig.add_trace(go.Scatter(
-                x=plot_df[time_column],
-                y=plot_df['Intensity'],
+                x=plot_df[plot_df['Inlier'] == True][time_column],
+                y=plot_df[plot_df['Inlier'] == True]['Intensity'],
                 mode='markers',
                 name=f'Inliers ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
-            ), row=1, col=1)
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x=plot_df[time_column],
@@ -304,7 +310,8 @@ def time_series_ransac_regression(
                 mode='lines',
                 name=f'Predicted Intensity ({group})',
                 line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
-            ), row=1, col=1)
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x=plot_df[plot_df['Inlier'] == False][time_column],
@@ -312,7 +319,8 @@ def time_series_ransac_regression(
                 mode='markers',
                 name='Outliers',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
-            ), row=1, col=1)
+                )
+            )
 
             color_index += 5
 
@@ -329,30 +337,38 @@ def time_series_ransac_regression(
         model = RANSACRegressor(base_estimator=LinearRegression())
         model.fit(X_train, y_train)
 
-        inlier_mask = model.inlier_mask_
 
         y_pred_train = model.predict(X_train)
         y_pred_test = model.predict(X_test)
 
-        train_rmse = np.sqrt(mean_squared_error(y_train[inlier_mask], y_pred_train[inlier_mask]))
-        test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
-        train_r2 = r2_score(y_train[inlier_mask], y_pred_train[inlier_mask])
-        test_r2 = r2_score(y_test, y_pred_test)
+        inlier_mask_train = model.inlier_mask_
 
-        train_df = pd.DataFrame({time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
-        test_df = pd.DataFrame({time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
-        train_df['Inlier'] = inlier_mask
-        test_df['Inlier'] = False
+        # Predict the inliers for the test set
+        test_inlier_mask = model.predict(X_test) == y_pred_test
+
+        train_rmse = np.sqrt(mean_squared_error(y_train[inlier_mask_train], y_pred_train[inlier_mask_train]))
+        test_rmse = np.sqrt(mean_squared_error(y_test[test_inlier_mask], y_pred_test[test_inlier_mask]))
+        train_r2 = r2_score(y_train[inlier_mask_train], y_pred_train[inlier_mask_train])
+        test_r2 = r2_score(y_test[test_inlier_mask], y_pred_test[test_inlier_mask])
+
+        # Prepare DataFrames for plotting
+        train_df = pd.DataFrame(
+            {time_column: X_train[time_column], 'Intensity': y_train, 'Predicted': y_pred_train, 'Type': 'Train'})
+        test_df = pd.DataFrame(
+            {time_column: X_test[time_column], 'Intensity': y_test, 'Predicted': y_pred_test, 'Type': 'Test'})
+        train_df['Inlier'] = inlier_mask_train
+        test_df['Inlier'] = test_inlier_mask
         plot_df = pd.concat([train_df, test_df])
 
         # Add main plot traces
         fig.add_trace(go.Scatter(
-            x=plot_df[time_column],
-            y=plot_df['Intensity'],
+            x=plot_df[plot_df['Inlier'] == True][time_column],
+            y=plot_df[plot_df['Inlier'] == True]['Intensity'],
             mode='markers',
             name='Inliers',
             marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
-        ), row=1, col=1)
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=plot_df[time_column],
@@ -360,7 +376,8 @@ def time_series_ransac_regression(
             mode='lines',
             name='Predicted Intensity',
             line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
-        ), row=1, col=1)
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=plot_df[plot_df['Inlier'] == False][time_column],
@@ -368,7 +385,8 @@ def time_series_ransac_regression(
             mode='markers',
             name='Outliers',
             marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
-        ), row=1, col=1)
+            )
+        )
 
         scores.append({
             'group': 'Overall',
@@ -386,15 +404,6 @@ def time_series_ransac_regression(
         for res in scores
     ])
 
-    fig.add_trace(go.Scatter(
-        x=[0],
-        y=[0.25],
-        text=[annotation_text],
-        mode='text',
-        textfont=dict(size=12),
-        showlegend=False
-    ), row=1, col=2)
-
     fig.update_layout(
         title=f"Intensity over Time for {protein_group}",
         plot_bgcolor=colors["plot_bgcolor"],
@@ -408,36 +417,40 @@ def time_series_ransac_regression(
         autosize=True,
         margin=dict(l=100, r=100, t=100, b=50),
         legend=dict(
-            yanchor="top",
-            y=0.95,
-            xanchor="right",
-            x=0.8
-        )
+            x=1.05,
+            y=1,
+            bgcolor="rgba(255, 255, 255, 0.5)",
+            orientation="v",
+        ),
     )
 
-    # Hide x-axis of the annotation subplot
-    fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-    fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-
-    fig.update_annotations(font_size=12)
+    messages.append(
+        {
+            "level": logging.INFO,
+            "msg": annotation_text,
+        }
+    )
 
     return dict(
         scores=scores,
         plots=[fig],
+        messages=messages
     )
 
 
 def adfuller_test(
-    intensity_df: pd.DataFrame,
-    metadata_df: pd.DataFrame,
-    protein_group: str,
-    alpha: float = 0.05,
+        intensity_df: pd.DataFrame,
+        metadata_df: pd.DataFrame,
+        time_column: str,
+        protein_group: str,
+        alpha: float = 0.05,
 ) -> dict:
     """
     Perform the Augmented Dickey-Fuller test to check for stationarity in a time series.
     :param intensity_df: The dataframe containing the time series data.
     :param metadata_df: The dataframe containing the metadata.
     :param protein_group: The protein group to perform the test on.
+    :param time_column: The column representing time (e.g., 'visit', 'timepoint').
     :param alpha: The significance level for the test (default is 0.05).
 
     :return: A dictionary containing:
@@ -449,20 +462,27 @@ def adfuller_test(
     """
 
     messages = []
+    # Filter for the specific protein group
     intensity_df = intensity_df[intensity_df['Protein ID'] == protein_group]
     intensity_column_name = default_intensity_column(intensity_df)
 
-    intensity_df = pd.merge(
-        left=intensity_df,
-        right=metadata_df,
+    # Merge with metadata to include time information
+    merged_df = pd.merge(
+        left=intensity_df[["Sample", intensity_column_name]],
+        right=metadata_df[["Sample", time_column]],
         on="Sample",
         copy=False,
     )
 
-    intensity_df = intensity_df[intensity_column_name].dropna()
+    # Sort the data by time to ensure it is treated as a time series
+    merged_df = merged_df.sort_values(by=time_column)
+    grouped_df = merged_df.groupby(time_column)[intensity_column_name].mean().reset_index()
+
+    # Extract the time series (after aggregation)
+    time_series = grouped_df[intensity_column_name].dropna()
 
     # Perform the ADF test
-    result = adfuller(intensity_df)
+    result = adfuller(time_series)
     test_statistic = result[0]
     p_value = result[1]
     critical_values = result[4]
@@ -521,8 +541,8 @@ def time_series_auto_arima(
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
     """
 
-    color_index = 0
     messages = []
+    color_index = 0
 
     if train_size < 0 or train_size > 1:
         raise ValueError("Train size should be between 0 and 1")
@@ -542,7 +562,7 @@ def time_series_auto_arima(
         copy=False,
     )
 
-    fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
+    fig = go.Figure()
     scores = []
 
     if grouping == "With Grouping" and grouping_column in intensity_df.columns:
@@ -586,23 +606,26 @@ def time_series_auto_arima(
                 mode='markers',
                 name=f'Actual Intensity ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
-            ), row=1, col=1)
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x=test_df.index,
                 y=forecast,
                 mode='markers',
                 name=f'Predicted Intensity ({group})',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
-            ), row=1, col=1)
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x = forecast_plot.index,
                 y = forecast_plot,
                 mode = 'lines',
                 name = f'Mean Predicted Intensity ({group})',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 3])
-            ), row=1, col=1)
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
+                )
+            )
 
             color_index += 5
 
@@ -683,24 +706,27 @@ def time_series_auto_arima(
             y=test_df,
             mode='markers',
             name='Actual Intensity',
-            marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
-        ), row=1, col=1)
+           marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=test_df.index,
             y=forecast,
             mode='markers',
             name='Predicted Intensity',
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2])
-        ), row=1, col=1)
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=forecast_plot.index,
             y=forecast_plot,
             mode='lines',
             name='Mean Predicted Intensity',
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
-        ), row=1, col=1)
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[4])
+            )
+        )
 
         scores.append({
             'group': 'Overall',
@@ -718,14 +744,6 @@ def time_series_auto_arima(
         for res in scores
     ])
 
-    fig.add_trace(go.Scatter(
-        x=[0],
-        y=[0.25],
-        text=[annotation_text],
-        mode='text',
-        textfont=dict(size=12),
-        showlegend=False
-    ), row=1, col=2)
 
     fig.update_layout(
         title=f"Intensity over Time for {protein_group}",
@@ -740,17 +758,19 @@ def time_series_auto_arima(
         autosize=True,
         margin=dict(l=100, r=100, t=100, b=50),
         legend=dict(
-            yanchor="top",
-            y=0.95,
-            xanchor="right",
-            x=0.775
-        )
+            x=1.05,
+            y=1,
+            bgcolor="rgba(255, 255, 255, 0.5)",
+            orientation="v",
+        ),
     )
 
-    fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-    fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-
-    fig.update_annotations(font_size=12)
+    messages.append(
+        {
+            "level": logging.INFO,
+            "msg": annotation_text,
+        }
+    )
 
     return dict(
         scores=scores,
@@ -797,7 +817,7 @@ def time_series_arima(
 
     :return: A dictionary containing the root mean squared error and r2 score for the training and test sets
     """
-
+    messages = []
     color_index = 0
 
     if train_size < 0 or train_size > 1:
@@ -809,7 +829,7 @@ def time_series_arima(
 
     intensity_df = pd.merge(left=intensity_df, right=metadata_df, on="Sample", copy=False)
 
-    fig = make_subplots(rows=1, cols=2, column_widths=[0.7, 0.3])
+    fig = go.Figure()
     scores = []
 
     if grouping == "With Grouping" and grouping_column in intensity_df.columns:
@@ -854,23 +874,26 @@ def time_series_arima(
                 mode='markers',
                 name=f'Actual Intensity ({group})',
                 marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index])
-            ), row=1, col=1)
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x=forecast_plot.index,
                 y=forecast_plot,
                 mode='markers',
                 name= f'Predicted Intensity ({group})',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
-            ), row=1, col=1)
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
+                )
+            )
 
             fig.add_trace(go.Scatter(
                 x = forecast_mean_plot.index,
                 y = forecast_mean_plot,
                 mode = 'lines',
                 name = f'Mean Predicted Intensity ({group})',
-                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 2])
-            ), row=1, col=1)
+                line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[color_index + 4])
+                )
+            )
 
             color_index += 5
 
@@ -917,15 +940,17 @@ def time_series_arima(
             mode='markers',
             name='Actual Intensity',
             marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0])
-        ), row=1, col=1)
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=test_df.index,
             y=forecast,
             mode='markers',
             name='Predicted Intensity',
-            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2])
-        ), row=1, col=1)
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[3])
+            )
+        )
 
         fig.add_trace(go.Scatter(
             x=forecast_plot.index,
@@ -933,7 +958,8 @@ def time_series_arima(
             mode='lines',
             name='Mean Predicted Intensity',
             line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[4])
-        ), row=1, col=1)
+            )
+        )
 
         scores.append({
             'group': 'Overall',
@@ -950,15 +976,6 @@ def time_series_arima(
         for res in scores
     ])
 
-    fig.add_trace(go.Scatter(
-        x=[0],
-        y=[0.25],
-        text=[annotation_text],
-        mode='text',
-        textfont=dict(size=12),
-        showlegend=False
-    ), row=1, col=2)
-
     fig.update_layout(
         title=f"Intensity over Time for {protein_group}",
         plot_bgcolor=colors["plot_bgcolor"],
@@ -972,19 +989,22 @@ def time_series_arima(
         autosize=True,
         margin=dict(l=100, r=100, t=100, b=50),
         legend=dict(
-            yanchor="top",
-            y=0.95,
-            xanchor="right",
-            x=0.775
-        )
+            x=1.05,
+            y=1,
+            bgcolor="rgba(255, 255, 255, 0.5)",
+            orientation="v",
+        ),
     )
 
-    fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-    fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, row=1, col=2)
-
-    fig.update_annotations(font_size=12)
+    messages.append(
+        {
+            "level": logging.INFO,
+            "msg": annotation_text,
+        }
+    )
 
     return dict(
         scores=scores,
         plots=[fig],
+        messages=messages,
     )

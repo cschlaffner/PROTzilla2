@@ -1370,6 +1370,7 @@ class TimeSeriesADFullerTestForm(MethodForm):
         choices=[],
         label="Intensity dataframe",
     )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
     protein_group = CustomChoiceField(
         choices=[],
         label="Protein group: which protein group to perform the ADFuller test on",
@@ -1388,6 +1389,9 @@ class TimeSeriesADFullerTestForm(MethodForm):
         input_df_instance_id = self.data.get(
             "intensity_df", self.fields["intensity_df"].choices[0][0]
         )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         self.fields["protein_group"].choices = fill_helper.to_choices(
             run.steps.get_step_output(
                 step_type=Step,
