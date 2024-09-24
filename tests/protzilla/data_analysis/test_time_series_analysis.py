@@ -211,7 +211,7 @@ def test_ransac_regression_outputs(time_series_test_data):
 
 def test_adfuller_test(time_series_test_data):
     test_intensity, test_metadata = time_series_test_data
-    outputs = adfuller_test(test_intensity, test_metadata, "Protein1")
+    outputs = adfuller_test(test_intensity, test_metadata, "Time", "Protein1")
 
     assert "test_statistic" in outputs
     assert "p_value" in outputs
