@@ -1,11 +1,18 @@
 import logging
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.graph_objs as go
+from matplotlib.colors import rgb2hex
 from numpy import array, nan, sqrt, square
 from plotly.subplots import make_subplots
 from scipy.stats import f, median_abs_deviation
 from sklearn import linear_model
+
+from protzilla.constants.colors import (
+    PROTZILLA_CONTINUOUS_COLOR_SEQUENCE,
+    PROTZILLA_DISCRETE_COLOR_SEQUENCE,
+)
 
 CONFIDENCE_BAND_ALPHA = 0.3
 
@@ -457,7 +464,10 @@ def create_regression_plots(
     # Add histogram to the upper subplot
     fig.add_trace(
         go.Histogram(
-            x=dataframe_train["Reference intensity"], nbinsx=150, showlegend=False
+            x=dataframe_train["Reference intensity"],
+            nbinsx=150,
+            showlegend=False,
+            marker_color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0],
         ),
         row=1,
         col=1,
@@ -482,7 +492,6 @@ def create_regression_plots(
     rm_scores.fillna(-1, inplace=True)
 
     # Color mapping for scatter plot points
-    # This example assumes 'cmap' is a suitable function to map values to colors
     colors = cmap(rm_scores["RM score"], mod_cutoff)
 
     # Create a list of hover text entries combining Sequence and RM score
@@ -517,7 +526,7 @@ def create_regression_plots(
             y=y_line,
             mode="lines",
             name=f"Regression Line \n(R2 model: {r2_score_model}, R2 data: {r2_score_data})",
-            line=dict(color="darkblue"),
+            line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
         ),
         row=2,
         col=1,
@@ -532,7 +541,7 @@ def create_regression_plots(
             x=sorted_df["Reference intensity"],
             y=sorted_df["CB low"],
             mode="lines",
-            line=dict(dash="dash", color="darkgreen"),  # Optional: specify color
+            line=dict(dash="dash", color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
             name="Confidence Band Low",
         ),
         row=2,
@@ -544,8 +553,40 @@ def create_regression_plots(
             x=sorted_df["Reference intensity"],
             y=sorted_df["CB high"],
             mode="lines",
-            line=dict(dash="dash", color="darkgreen"),  # Optional: specify color
+            line=dict(dash="dash", color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
             name="Confidence Band High",
+        ),
+        row=2,
+        col=1,
+    )
+
+    # Convert matplotlib colormap to Plotly colorscale
+    colors_plt_prot = [
+        PROTZILLA_CONTINUOUS_COLOR_SEQUENCE(k)
+        for k in range(PROTZILLA_CONTINUOUS_COLOR_SEQUENCE.N)
+    ]
+    plotly_colorscale = [
+        [
+            i / (len(colors_plt_prot) - 1),
+            f"rgb({int(c[0]*255)}, {int(c[1]*255)}, {int(c[2]*255)})",
+        ]
+        for i, c in enumerate(colors_plt_prot)
+    ]
+
+    # add color bar
+    fig.add_trace(
+        go.Scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker=dict(
+                colorscale=plotly_colorscale,
+                showscale=True,
+                colorbar=dict(title="RM Score"),
+                cmin=0,
+                cmax=1,
+            ),
+            showlegend=False,
         ),
         row=2,
         col=1,
@@ -578,22 +619,24 @@ def cmap(rm_scores, mod_cutoff):
     """
     outlier_color = "gray"  # Color for outliers
 
-    # Apply cutoff for modified peptides (assumed mid-point like behavior)
+    min_score = 0
+    max_score = 2 * mod_cutoff
+
+    # Prepare to normalize the scores to [0, 1] for color mapping
+    norm = plt.Normalize(min_score, max_score)
+
     colors = []
     for score in rm_scores:
         if score == -1:  # Outliers
             colors.append(outlier_color)
-        elif score < mod_cutoff:
-            # Linear interpolation between low_color and middle_color
-            colors.append(
-                f"rgb({round(255 * (1 - score / mod_cutoff))}, {0}, {round(255 * score / mod_cutoff)})"
-            )
         else:
-            # Linear interpolation between middle_color and high_color
-            normalized_score = (score - mod_cutoff) / (1 - mod_cutoff)
-            colors.append(
-                f"rgb({0}, {round(255 * normalized_score)}, {round(255 * (1 - normalized_score))})"
-            )
+            # Normalize the score to fit into the colormap range
+            normalized_score = norm(score)
+            # Use the colormap to assign a color based on the normalized score
+            rgb = PROTZILLA_CONTINUOUS_COLOR_SEQUENCE(
+                normalized_score
+            )  # returns RGBA, we only take RGB part
+            colors.append(rgb2hex(rgb[:3]))
 
     return colors
 

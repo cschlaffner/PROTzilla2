@@ -14,6 +14,7 @@ from pydeseq2.preprocessing import deseq2_norm
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import cdist
 
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 from protzilla.data_analysis.ptm_quantification.flexiquant import flexiquant_lf
 
 plt.switch_backend("Agg")
@@ -500,9 +501,14 @@ def create_RM_score_distribution_plots(df_RM_scores, list_groups):
             fig.add_trace(
                 Histogram(
                     x=df_group[col],
-                    name=col,  # using column name as legend entry
-                    opacity=0.75,  # setting opacity to see overlapping histograms
+                    name=col,
                     nbinsx=30,  # number of bins
+                    marker=dict(
+                        color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[
+                            df_group.columns.get_loc(col)
+                            % len(PROTZILLA_DISCRETE_COLOR_SEQUENCE)
+                        ]
+                    ),
                     showlegend=(
                         df_group.shape[1] <= 10
                     ),  # show legend only if <= 10 samples
@@ -533,6 +539,7 @@ def create_RM_score_distribution_plots(df_RM_scores, list_groups):
         showlegend=True,
         legend_title_text="Sample Legend",
         hovermode="closest",
+        plot_bgcolor="rgba(0, 0, 0, 0.05)",
     )
 
     return fig

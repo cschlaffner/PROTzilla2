@@ -129,9 +129,11 @@ class DifferentialExpressionTTest(DataAnalysisStep):
 class DifferentialExpressionLinearModel(DataAnalysisStep):
     display_name = "Linear Model"
     operation = "differential_expression"
-    method_description = "A function to fit a linear model using ordinary least squares for each protein. The linear " \
-                         "model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and " \
-                         "group2 X=1. The p-values are corrected for multiple testing."
+    method_description = (
+        "A function to fit a linear model using ordinary least squares for each protein. The linear "
+        "model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and "
+        "group2 X=1. The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "intensity_df",
@@ -288,8 +290,10 @@ class PlotVolcano(PlotStep):
 class PlotScatterPlot(PlotStep):
     display_name = "Scatter Plot"
     operation = "plot"
-    method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run " \
-                         "first, as the input dataframe should contain only 2 or 3 columns."
+    method_description = (
+        "Creates a scatter plot from data. This requires a dimension reduction method to be run "
+        "first, as the input dataframe should contain only 2 or 3 columns."
+    )
 
     input_keys = [
         "input_df",
@@ -306,7 +310,9 @@ class PlotScatterPlot(PlotStep):
             Step, "embedded_data", inputs["input_df"]
         )
         if inputs.get("color_df"):
-            inputs["color_df"] = steps.metadata_df[[inputs["color_df"]]].reindex(steps.metadata_df.index)
+            inputs["color_df"] = steps.metadata_df[[inputs["color_df"]]].reindex(
+                steps.metadata_df.index
+            )
         return inputs
 
 
@@ -778,7 +784,7 @@ class MultiFLEXLF(PlotStep):
 class ModSourceIdentifier(DataAnalysisStep):
     display_name = "Modification Source Identifier"
     operation = "modification_quantification"
-    method_description = "Calculates how good FLEXIQuant-LF was able to identify PTMs in the data. This works only if modifications are known in data."
+    method_description = "Compares results of FLEXIQuant-LF against post-translational modifications found in the provided data. This works only if the data contains information about modifications."
 
     input_keys = [
         "peptide_df",
