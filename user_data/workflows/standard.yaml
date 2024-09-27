@@ -36,6 +36,13 @@ steps:
     plot_inputs: { }
     type: OutlierDetectionByLocalOutlierFactor
   - form_inputs:
+      log_base: log2
+    inputs: { }
+    plot_inputs:
+      graph_type: Histogram
+      group_by: None
+    type: TransformationLog
+  - form_inputs:
       percentile: 0.5
     inputs: { }
     plot_inputs:
@@ -43,13 +50,6 @@ steps:
       group_by: None
       visual_transformation: log10
     type: NormalisationByMedian
-  - form_inputs:
-      log_base: log2
-    inputs: { }
-    plot_inputs:
-      graph_type: Histogram
-      group_by: None
-    type: TransformationLog
   - form_inputs:
       similarity_measure: euclidean distance
     inputs: { }

@@ -9,6 +9,7 @@ from protzilla.importing.ms_data_import import (
     diann_import,
     max_quant_import,
     ms_fragger_import,
+    tmt_data_import,
 )
 from protzilla.importing.peptide_import import peptide_import, evidence_import
 from protzilla.steps import Step, StepManager
@@ -60,6 +61,17 @@ class MsFraggerImport(ImportingStep):
         return ms_fragger_import(**inputs)
 
 
+class TMTImport(ImportingStep):
+    display_name = "TMT"
+    operation = "msdataimport"
+    method_description = "TMT data import"
+    input_keys = ["file_path", "map_to_uniprot", "aggregation_method"]
+    output_keys = ["protein_df"]
+
+    def method(self, inputs):
+        return tmt_data_import(**inputs)
+
+
 class MetadataImport(ImportingStep):
     display_name = "Metadata import"
     operation = "metadataimport"
@@ -96,7 +108,8 @@ class MetadataColumnAssignment(ImportingStep):
     display_name = "Metadata column assignment"
     operation = "metadataimport"
     method_description = (
-        "Assign columns to metadata categories, repeatable for each category"
+        "Protzilla uses a unique metadata column name to identify certain features in the metadata. "
+        "This step assigns the metadata columns to the correct feature."
     )
 
     input_keys = [

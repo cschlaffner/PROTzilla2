@@ -469,7 +469,6 @@ class FilterPeptidesByPEPThresholdForm(MethodForm):
     threshold = CustomFloatField(
         label="Threshold value for PEP", min_value=0, initial=0
     )
-    peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
 
 
 class FilterPeptidesByPEPThresholdPlotForm(MethodForm):

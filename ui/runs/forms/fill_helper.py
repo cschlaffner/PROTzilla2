@@ -14,6 +14,10 @@ def get_choices_for_protein_df_steps(run: Run) -> list[tuple[str, str]]:
     return reversed(to_choices(run.steps.get_instance_identifiers(Step, "protein_df")))
 
 
+def get_choices_for_peptide_df_steps(run: Run) -> list[tuple[str, str]]:
+    return reversed(to_choices(run.steps.get_instance_identifiers(Step, "peptide_df")))
+
+
 def get_choices(
     run: Run, output_key: str, step_type: type[Step] = Step
 ) -> list[tuple[str, str]]:

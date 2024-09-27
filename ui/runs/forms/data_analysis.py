@@ -21,6 +21,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
+    TextDisplayField
 )
 
 
@@ -150,6 +151,14 @@ class DimensionReductionMetric(Enum):
     manhattan = "manhattan"
     cosine = "cosine"
     havensine = "havensine"
+
+class TimeSeriesGrouping(Enum):
+    with_grouping = "With Grouping"
+    without_grouping = "Without Grouping"
+
+class TimeSeriesRANSACLoss(Enum):
+    absolute_error = "absolute_error"
+    squared_error = "squared_error"
 
 
 class DifferentialExpressionANOVAForm(MethodForm):
@@ -1152,3 +1161,414 @@ class PTMsPerProteinAndSampleForm(MethodForm):
         )
         if single_protein_peptides:
             self.fields["peptide_df"].initial = single_protein_peptides[0]
+
+
+class PlotTimeQuantForm(MethodForm):
+    is_dynamic = True
+
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Choose dataframe to be plotted",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: choose highlighted protein group",
+    )
+    similarity_measure = CustomChoiceField(
+        choices=SimilarityMeasure,
+        label="Similarity Measurement: choose how to compare protein groups",
+        initial=SimilarityMeasure.euclidean_distance,
+    )
+    similarity = CustomNumberField(
+        label="Similarity", min_value=-1, max_value=999, step_size=1, initial=1
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+
+        similarity_measure = self.data.get(
+            "similarity_measure", self.fields["similarity_measure"].choices[0][0]
+        )
+        self.data = self.data.copy()
+        if similarity_measure == SimilarityMeasure.cosine_similarity:
+            self.fields["similarity"] = CustomFloatField(
+                label="Cosine Similarity",
+                min_value=-1,
+                max_value=1,
+                step_size=0.1,
+                initial=0,
+            )
+            if (
+                    "similarity" not in self.data
+                    or float(self.data["similarity"]) < -1
+                    or float(self.data["similarity"]) > 1
+            ):
+                self.data["similarity"] = 0
+        else:
+            self.fields["similarity"] = CustomNumberField(
+                label="Euclidean Distance",
+                min_value=0,
+                max_value=999,
+                step_size=1,
+                initial=1,
+            )
+            if (
+                    "similarity" not in self.data
+                    or float(self.data["similarity"]) < 0
+                    or float(self.data["similarity"]) > 999
+            ):
+                self.data["similarity"] = 1
+
+
+
+
+class TimeSeriesLinearRegressionForm(MethodForm):
+    is_dynamic = True
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Intensity dataframe",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: which protein group to perform the linear regression on",
+    )
+    train_size = CustomFloatField(
+        label="Train size: proportion of the dataset to include in the test split",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.8
+    )
+    grouping = CustomChoiceField(
+        choices= TimeSeriesGrouping,
+        label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
+        initial=TimeSeriesGrouping.with_grouping
+    )
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields[
+            "grouping_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column", False)
+
+
+class TimeSeriesRANSACRegressionForm(MethodForm):
+    is_dynamic = True
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Intensity dataframe",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: which protein group to perform the RANSAC regression on",
+    )
+    max_trials = CustomNumberField(
+        label="Max trials: the maximum number of iterations for random sample selection",
+        min_value=1,
+        step_size=1,
+        initial=100,
+    )
+    stop_probability = CustomFloatField(
+        label="Stop Probability: the probability that the algorithm stops after a certain number of iterations if at least one outlier-free set of the training data is sampled",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.99
+    )
+    loss = CustomChoiceField(
+        choices= TimeSeriesRANSACLoss,
+        label="Loss function: the loss function to be used for fitting the linear model",
+        initial=TimeSeriesRANSACLoss.absolute_error,
+    )
+    train_size = CustomFloatField(
+        label="Train size: proportion of the dataset to include in the test split",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.8
+    )
+    grouping = CustomChoiceField(
+        choices= TimeSeriesGrouping,
+        label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
+        initial=TimeSeriesGrouping.with_grouping
+    )
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields[
+            "grouping_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column", False)
+
+
+class TimeSeriesADFullerTestForm(MethodForm):
+    is_dynamic = True
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Intensity dataframe",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: which protein group to perform the ADFuller test on",
+    )
+    alpha = CustomFloatField(
+        label="Significance level",
+        min_value=0,
+        max_value=1,
+        initial=0.05
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+
+class TimeSeriesAutoARIMAForm(MethodForm):
+    is_dynamic = True
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Intensity dataframe",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: which protein group to perform the AutoARIMA on",
+    )
+    seasonal = CustomChoiceField(
+        choices=YesNo,
+        label="Seasonal: Whether the ARIMA model should be seasonal",
+        initial=YesNo.no
+    )
+    m = CustomNumberField(
+        label = "The number of time steps for a single seasonal period (ignored if seasonal=No)",
+        min_value=1,
+        step_size=1,
+        initial=1,
+    )
+    train_size = CustomFloatField(
+        label="Train size: proportion of the dataset to include in the test split",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.8,
+    )
+    grouping = CustomChoiceField(
+        choices= TimeSeriesGrouping,
+        label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
+        initial=TimeSeriesGrouping.with_grouping
+    )
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields[
+            "grouping_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column", False)
+
+
+class TimeSeriesARIMAForm(MethodForm):
+    is_dynamic = True
+    intensity_df = CustomChoiceField(
+        choices=[],
+        label="Intensity dataframe",
+    )
+    time_column = CustomChoiceField(choices=[], label="Time: The column name from metadata that represents time")
+    protein_group = CustomChoiceField(
+        choices=[],
+        label="Protein group: which protein group to perform the AutoARIMA on",
+    )
+    seasonal = CustomChoiceField(
+        choices=YesNo,
+        label="Seasonal: Whether the ARIMA model should be seasonal",
+        initial=YesNo.no
+    )
+    p = CustomNumberField(
+        label = "Autoregressive Order: The number of lag observations included in the model",
+        min_value=0,
+        step_size=1,
+        initial=1,
+    )
+    d = CustomNumberField(
+        label = "Differencing Order: The number of times that the raw observations are differenced",
+        min_value=0,
+        step_size=1,
+        initial=1,
+    )
+    q = CustomNumberField(
+        label = "Moving Average Order: The size of the moving average window",
+        min_value=0,
+        step_size=1,
+        initial=1,
+    )
+    P = CustomNumberField(
+        label = "Seasonal Autoregressive Order: The number of seasonal lag observations included in the model",
+        min_value=0,
+        step_size=1,
+        initial=0,
+        required=False
+    )
+    D = CustomNumberField(
+        label = "Seasonal Differencing Order: The number of times that the seasonal observations are differenced",
+        min_value=0,
+        step_size=1,
+        initial=0,
+        required=False
+    )
+    Q = CustomNumberField(
+        label = "Seasonal Moving Average Order: The size of the seasonal moving average window",
+        min_value=0,
+        step_size=1,
+        initial=0,
+        required=False
+    )
+    s = CustomNumberField(
+        label = "Seasonal Period: The number of periods for a single seasonal cycle",
+        min_value=0,
+        step_size=1,
+        initial=0,
+        required=False
+    )
+    train_size = CustomFloatField(
+        label="Train size: proportion of the dataset to include in the test split",
+        min_value=0,
+        max_value=1,
+        step_size=0.1,
+        initial=0.8,
+    )
+    grouping = CustomChoiceField(
+        choices= TimeSeriesGrouping,
+        label="Option to select whether regression should be performed on the entire dataset or separately on the control and experimental groups",
+        initial=TimeSeriesGrouping.with_grouping
+    )
+    grouping_column = CustomChoiceField(choices=[], label="Grouping from metadata: The column name from metadata that represents the grouping")
+
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["intensity_df"].choices = fill_helper.get_choices_for_protein_df_steps(
+            run
+        )
+        input_df_instance_id = self.data.get(
+            "intensity_df", self.fields["intensity_df"].choices[0][0]
+        )
+        self.fields[
+            "time_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields[
+            "grouping_column"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+
+        self.fields["protein_group"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(
+                step_type=Step,
+                output_key="protein_df",
+                instance_identifier=input_df_instance_id,
+            )["Protein ID"].unique()
+        )
+        grouping = self.data.get("grouping")
+        if grouping == "Without Grouping":
+            self.toggle_visibility("grouping_column", False)
+        seasonal = self.data.get("seasonal")
+        if seasonal == "No":
+            self.toggle_visibility("P", False)
+            self.toggle_visibility("D", False)
+            self.toggle_visibility("Q", False)
+            self.toggle_visibility("s", False)

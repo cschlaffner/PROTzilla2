@@ -36,6 +36,7 @@ class Step:
         self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
+        self.display_output: DisplayOutput = DisplayOutput()
         self.instance_identifier = instance_identifier
 
         if self.instance_identifier is None:
@@ -309,6 +310,27 @@ class Plots:
                 elif format_ in ["png", "jpg"]:
                     exports.append(BytesIO(base64.b64decode(plot)))
         return exports
+
+class DisplayOutput:
+
+    def __init__(self, display_output: dict = None):
+        if display_output is None:
+            display_output = {}
+        self.display_output = display_output
+    def __iter__(self):
+        return iter(self.display_output)
+    def __repr__(self):
+        return f"DisplayOutput: {self.display_output}"
+    def __contains__(self, key):
+        return key in self.display_output
+    def __getitem__(self, key):
+        return self.display_output[key]
+    def __setitem__(self, key, value):
+        self.display_output[key] = value
+    def is_empty(self) -> bool:
+        return len(self.display_output) == 0
+
+
 
 
 class StepManager:

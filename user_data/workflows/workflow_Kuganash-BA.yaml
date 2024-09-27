@@ -1,0 +1,77 @@
+df_mode: disk_memory
+steps:
+- form_inputs:
+    aggregation_mode: Sum
+    intensity_name: iBAQ
+    map_to_uniprot: false
+  inputs: {}
+  instance_identifier: MaxQuantImport_1
+  type: MaxQuantImport
+- form_inputs:
+    feature_orientation: Columns (samples in rows, features in columns)
+  inputs: {}
+  instance_identifier: MetadataImport_1
+  type: MetadataImport
+- form_inputs:
+    percentage: 0.5
+  inputs: {}
+  instance_identifier: FilterProteinsBySamplesMissing_1
+  plot_inputs:
+    graph_type: Bar chart
+  type: FilterProteinsBySamplesMissing
+- form_inputs:
+    deviation_threshold: 2.0
+  inputs: {}
+  instance_identifier: FilterSamplesByProteinIntensitiesSum_1
+  plot_inputs:
+    graph_type: Bar chart
+  type: FilterSamplesByProteinIntensitiesSum
+- form_inputs:
+    number_of_neighbours: 5
+  inputs: {}
+  instance_identifier: ImputationByKNN_1
+  plot_inputs:
+    graph_type: Boxplot
+    graph_type_quantities: Bar chart
+    group_by: None
+    visual_transformation: log10
+  type: ImputationByKNN
+- form_inputs:
+    number_of_neighbors: 20
+  inputs: {}
+  instance_identifier: OutlierDetectionByLocalOutlierFactor_1
+  plot_inputs: {}
+  type: OutlierDetectionByLocalOutlierFactor
+- form_inputs:
+    log_base: log2
+  inputs: {}
+  instance_identifier: TransformationLog_1
+  plot_inputs:
+    graph_type: Histogram
+    group_by: None
+  type: TransformationLog
+- form_inputs:
+    percentile: 0.5
+  inputs: {}
+  instance_identifier: NormalisationByMedian_1
+  plot_inputs:
+    graph_type: Boxplot
+    group_by: None
+    visual_transformation: log10
+  type: NormalisationByMedian
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: PlotTimeQuant_1
+  type: PlotTimeQuant
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: TimeSeriesLinearRegression_1
+  type: TimeSeriesLinearRegression
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: TimeSeriesADFullerTest_1
+  type: TimeSeriesADFullerTest
+- form_inputs: {}
+  inputs: {}
+  instance_identifier: TimeSeriesAutoARIMA_1
+  type: TimeSeriesAutoARIMA

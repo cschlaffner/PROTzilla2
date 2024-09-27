@@ -12,6 +12,7 @@ def long_to_wide(intensity_df: pd.DataFrame, value_name: str | None = None):
     :param intensity_df: the dataframe that should be transformed into
         long format
         :type intensity_df: pd.DataFrame
+    :param value_name: the name of the column in the metadata_df that contains the intensity information.
 
     :return: returns dataframe in wide format suitable for use by
         packages such as sklearn
@@ -22,6 +23,31 @@ def long_to_wide(intensity_df: pd.DataFrame, value_name: str | None = None):
         intensity_df, index="Sample", columns="Protein ID", values=values_name
     )
 
+
+def long_to_wide_time(intensity_df: pd.DataFrame, value_name: str = None, time_column: str = None):
+    """
+    This function transforms the dataframe to a wide format that
+    can be more easily handled by packages such as sklearn.
+    Each sample gets one row with all observations as columns.
+
+    :param intensity_df: the dataframe that should be transformed into
+        long format
+        :type intensity_df: pd.DataFrame
+    :param value_name: the name of the column in the metadata_df that contains the intensity information.
+    :param time_column: the name of the column in the metadata_df that contains the time information.
+
+    :return: returns dataframe in wide format suitable for use by
+        packages such as sklearn
+    :rtype: pd.DataFrame
+    """
+    if intensity_df.duplicated(subset=[time_column, "Protein ID"]).any():
+        intensity_df = intensity_df.groupby([time_column, "Protein ID"]).mean().reset_index()
+    values_name = default_intensity_column(intensity_df) if value_name is None else value_name
+    intensity_df = pd.pivot(
+        intensity_df, index=time_column, columns="Protein ID", values=values_name
+    )
+    intensity_df = intensity_df.fillna(intensity_df.mean())
+    return intensity_df
 
 def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     """
@@ -58,15 +84,16 @@ def wide_to_long(wide_df: pd.DataFrame, original_long_df: pd.DataFrame):
     return intensity_df
 
 
-def is_long_format(df: pd.DataFrame):
-    return set(df.columns[:3]) == {"Sample", "Protein ID", "Gene"}
+def is_long_format(df: pd.DataFrame, time_column: str = None):
+    required_columns = {"Sample", "Protein ID"}
+    additional_columns = {"Gene", time_column}
+    return required_columns.issubset(df.columns) and any(col in df.columns for col in additional_columns)
 
 
 def is_intensity_df(df: pd.DataFrame):
     """
     Checks if the dataframe is an intensity dataframe.
-    An intensity dataframe should have the columns "Sample", "Protein ID" and
-    and intensity column.
+    An intensity dataframe should have the columns "Sample", "Protein ID" and intensity column.
 
     :param df: the dataframe that should be checked
     :type df: pd.DataFrame

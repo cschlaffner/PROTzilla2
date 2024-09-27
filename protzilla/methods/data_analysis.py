@@ -12,6 +12,15 @@ from protzilla.data_analysis.differential_expression_mann_whitney import (
     mann_whitney_test_on_intensity_data, mann_whitney_test_on_ptm_data)
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
+from protzilla.data_analysis.time_series_regression_analysis import (
+    time_series_linear_regression,
+    time_series_ransac_regression,
+     adfuller_test,
+    time_series_auto_arima,
+    time_series_arima,
+)
+from protzilla.data_analysis.ptm_analysis import filter_peptides_of_protein, ptms_per_sample, \
+    ptms_per_protein_and_sample
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -19,6 +28,7 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
+from protzilla.data_analysis.time_series_plots import time_quant_plot
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
     filter_peptides_of_protein,
@@ -765,6 +775,195 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         return inputs
 
 
+class PlotTimeQuant(PlotStep):
+    display_name = "Time Quantification Plot For Protein"
+    operation = "Time series analysis"
+    method_description = (
+        "Creates a line chart for intensity across Time for protein groups"
+    )
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "similarity_measure",
+        "similarity"
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return time_quant_plot(**inputs)
+
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class TimeSeriesLinearRegression(PlotStep):
+    display_name = "Linear Regression"
+    operation = "Time series analysis"
+    method_description = ("A function to fit a linear model using ordinary least squares for each protein. "
+                                    "The linear model fits the protein intensities on Y axis and the Time on X. "
+                                    "The p-values are corrected for multiple testing.")
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "train_size",
+        "grouping",
+        "grouping_column",
+    ]
+    output_keys = [
+        "scores",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return time_series_linear_regression(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class TimeSeriesRANSACRegression(PlotStep):
+    display_name = "RANSAC Regression"
+    operation = "Time series analysis"
+    method_description = " Perform RANSAC regression on the time series data for a given protein group."
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "max_trials",
+        "stop_probability",
+        "loss",
+        "train_size",
+        "grouping",
+        "grouping_column",
+    ]
+    output_keys = [
+        "scores",
+    ]
+    def method(self, inputs: dict) -> dict:
+        return time_series_ransac_regression(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class TimeSeriesADFullerTest(DataAnalysisStep):
+    display_name = "Augmented Dickey-Fuller Test"
+    operation = "Time series analysis"
+    method_description = (
+        "The Augmented Dickey-Fuller test is a type of statistical test called a unit root test. The test "
+        "determines how strongly a time series is defined by a trend. The null hypothesis of the test is that the "
+         "time series can be represented by a unit root, which implies that the time series is not stationary. "
+         "The alternative hypothesis is that the time series is stationary. If the p-value is less than the "
+          "significance level, the null hypothesis can be rejected and the time series is considered stationary."
+          "Dickey, D. & Fuller, Wayne. (1979). Distribution of the Estimators for Autoregressive Time Series With a Unit Root. "
+          "JASA. Journal of the American Statistical Association. 74. 10.2307/2286348. "
+    )
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "alpha",
+    ]
+    output_keys = [
+        "test_statistic",
+        "p_value",
+        "critical_values",
+        "is_stationary",
+     ]
+
+    def method(self, inputs: dict) -> dict:
+        return adfuller_test(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class TimeSeriesAutoARIMA(PlotStep):
+    display_name = "Auto ARIMA (AutoRegressive Integrated Moving Average)"
+    operation = "Time series analysis"
+    method_description = (
+        "Perform Auto ARIMA on the time series data for a given protein group."
+    )
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "seasonal",
+        "m",
+        "train_size",
+        "grouping",
+        "grouping_column",
+    ]
+    output_keys = [
+        "scores",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return time_series_auto_arima(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class TimeSeriesARIMA(PlotStep):
+    display_name = "ARIMA (AutoRegressive Integrated Moving Average)"
+    operation = "Time series analysis"
+    method_description = (
+        "Perform ARIMA on the time series data for a given protein group."
+    )
+
+    input_keys = [
+        "intensity_df",
+        "metadata_df",
+        "time_column",
+        "protein_group",
+        "seasonal",
+        "p",
+        "d",
+        "q",
+        "P",
+        "D",
+        "Q",
+        "s",
+        "train_size",
+        "grouping",
+        "grouping_column",
+    ]
+    output_keys = [
+        "scores",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return time_series_arima(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["intensity_df"] = steps.protein_df
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
 class PTMsPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample"
     operation = "Peptide analysis"
@@ -813,3 +1012,4 @@ class PTMsProteinAndPerSample(DataAnalysisStep):
             Step, "peptide_df", inputs["peptide_df"]
         )
         return inputs
+

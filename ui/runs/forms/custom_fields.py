@@ -1,6 +1,8 @@
+import json
 import logging
 from enum import Enum
 
+import django.forms as forms
 from django.forms import (
     BooleanField,
     CharField,
@@ -126,3 +128,32 @@ class CustomFloatField(FloatField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.widget.attrs.update({"class": "form-control mb-2"})
+
+
+from django import forms
+from django.utils.safestring import mark_safe
+
+
+class TextDisplayWidget(forms.Widget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs.update()
+
+    def render(self, name, value, attrs=None, renderer=None):
+        display_text = self.attrs.get("data-display-text", "")
+        return mark_safe(f"<div class=form-control mb-2>{display_text}</div>")
+
+
+class TextDisplayField(forms.Field):
+    widget = TextDisplayWidget
+
+    def __init__(self, *args, **kwargs):
+        self.text = kwargs.pop("text", "")
+        kwargs["required"] = False
+        super().__init__(*args, **kwargs)
+        self.update_text()
+
+    def update_text(self, text=None):
+        if text is not None:
+            self.text = text
+        self.widget.attrs["data-display-text"] = self.text

@@ -329,8 +329,8 @@ class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
     operation = "filter_peptides"
     method_description = "Filter by PEP-threshold"
 
-    input_keys = ["protein_df", "peptide_df", "threshold"]
-    output_keys = ["protein_df", "peptide_df", "filtered_peptides"]
+    input_keys = ["peptide_df", "threshold"]
+    output_keys = ["peptide_df", "filtered_peptides"]
 
     def method(self, inputs):
         return peptide_filter.by_pep_value(**inputs)
