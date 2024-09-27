@@ -150,15 +150,6 @@ def time_quant_plot(
             line=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[4]),
         )
     )
-    fig.add_trace(
-        go.Scatter(
-            x=[None],
-            y=[None],
-            mode="markers",
-            marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
-            name="Intensity",
-        )
-    )
     fig.update_layout(
         title=f"Time Series of {formatted_protein_name} in all samples",
         plot_bgcolor=colors["plot_bgcolor"],

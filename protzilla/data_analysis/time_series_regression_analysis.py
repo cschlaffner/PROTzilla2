@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-#from protzilla.data_analysis.time_series_helper import convert_time_to_hours
 from protzilla.utilities import default_intensity_column
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
 
@@ -14,7 +13,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.stattools import adfuller
 from pmdarima import auto_arima
-from plotly.subplots import make_subplots
 
 colors = {
     "plot_bgcolor": "white",
