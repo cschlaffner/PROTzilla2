@@ -1383,7 +1383,7 @@ class PowerAnalysisPowerCalculationForAllProteinsForm(MethodForm):
     )
     selected_protein_groups = CustomMultipleChoiceField(
         choices=[],
-        label="Protein groups to calculate sample size for",
+        label="Protein groups to calculate power for",
     )
 
     def fill_form(self, run: Run) -> None:

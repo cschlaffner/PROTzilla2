@@ -103,7 +103,6 @@ def sample_size_calculation(
             metadata_df[["Sample", individual_column]],
             on="Sample",
         )
-        # filtered_protein_group_df.join(metadata_df[["Sample", individual_column]].set_index("Sample"), on="Sample")
 
         filtered_protein_group_df = (
             filtered_protein_group_merged_df.groupby(
@@ -183,7 +182,6 @@ def power_calculation(
             metadata_df[["Sample", individual_column]],
             on="Sample",
         )
-        # filtered_protein_group_df.join(metadata_df[["Sample", individual_column]].set_index("Sample"), on="Sample")
 
         filtered_protein_group_df = (
             filtered_protein_group_merged_df.groupby(
@@ -203,17 +201,6 @@ def power_calculation(
         group2=group2,
         intensity_name=intensity_name,
     )
-
-    """
-    filtered_df = differentially_expressed_proteins_df[differentially_expressed_proteins_df["Protein ID"] == protein_group]
-    filtered_df["Person"] = filtered_df["Sample"].apply(
-        lambda x: x[:7])
-
-    variance = filtered_df.groupby(['Person', 'Group'])['Normalised iBAQ'].var().reset_index()
-
-    filtered_df["Measurement"] = filtered_df["Sample"].apply(
-        lambda x: int(x[-2:]))
-    """
 
     group_count_df = filtered_protein_group_df.groupby(["Group", "Protein ID"])[
         "Sample"
