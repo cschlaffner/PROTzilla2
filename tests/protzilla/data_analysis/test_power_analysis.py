@@ -9,7 +9,7 @@ from protzilla.data_analysis.power_analysis import (
     sample_size_calculation,
     variance_protein_group_calculation_max,
 )
-from protzilla.data_analysis.power_analysis_validation import (
+from tests.protzilla.data_analysis.power_analysis_validation import (
     check_sample_size_calculation_with_libfunc,
     check_sample_size_calculation_implemented,
     check_sample_size_calculation_implemented_without_log,
@@ -91,6 +91,7 @@ def test_sample_size_calculation(power_test_data, diff_expr_test_data):
     print(required_sample_size)
     required_sample_size_int = next(iter(required_sample_size.values()), None)
     assert required_sample_size_int == 63
+
 
 def test_power_calculation(power_test_data, diff_expr_test_data):
     test_alpha = 0.05

@@ -855,6 +855,7 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     ]
     output_keys = [
         "required_sample_size",
+        "variance_protein_group", #TODO: remove this line before merging into main
     ]
 
     def method(self, inputs: dict) -> dict:

@@ -126,7 +126,8 @@ def sample_size_calculation(
     required_sample_size = math.ceil(required_sample_size)
     print(required_sample_size)
 
-    return dict(required_sample_size=required_sample_size)
+    return dict(required_sample_size=required_sample_size,
+                variance_protein_group=variance_protein_group) #TODO: remove this line before merging into main
 
 
 def power_calculation(
@@ -217,7 +218,6 @@ def power_calculation(
 
     return dict(power=power)
 
-
 def sample_size_calculation_for_all_proteins(
     differentially_expressed_proteins_df: pd.DataFrame,
     significant_proteins_df: pd.DataFrame,
@@ -287,6 +287,56 @@ def sample_size_calculation_for_all_proteins(
         required_sample_sizes.append(required_sample_size)
 
         required_sample_size_for_all_proteins = max(required_sample_sizes)
+
+    #TODO: remove before merging into main
+    required_sample_size_above_threshold = []
+
+    for protein_group in protein_groups_for_calculation:
+        required_sample_size = sample_size_calculation(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            metadata_df=metadata_df,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            power=power,
+            group1=group1,
+            group2=group2,
+            selected_protein_group=protein_group,
+            individual_column=individual_column,
+            intensity_name=intensity_name,
+        )["required_sample_size"]
+
+        if required_sample_size > 44:
+            required_sample_size_above_threshold.append({"Protein ID": protein_group, "Required Sample Size": required_sample_size})
+
+    num_proteins_above_threshold = len(required_sample_size_above_threshold)
+    print(num_proteins_above_threshold)
+    num_required_sample_sizes = len(required_sample_sizes)
+    print(num_required_sample_sizes)
+
+
+    variance_protein_group_all = []
+    for protein_group in protein_groups_for_calculation:
+        variance_protein_group = sample_size_calculation(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            metadata_df=metadata_df,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            power=power,
+            group1=group1,
+            group2=group2,
+            selected_protein_group=protein_group,
+            individual_column=individual_column,
+            intensity_name=intensity_name,
+        )["variance_protein_group"]
+
+        variance_protein_group_all.append(variance_protein_group)
+
+    variance_mean = np.mean(variance_protein_group_all)
+    print(variance_mean)
+
+    #end of lines that should be removed before merging
 
     colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
@@ -398,6 +448,29 @@ def power_calculation_for_all_proteins(
         power_list.append(power)
 
         power_for_all_proteins = min(power_list)
+
+    power_below_threshold = []
+    for protein_group in protein_groups_for_calculation:
+        power = power_calculation(
+            differentially_expressed_proteins_df=differentially_expressed_proteins_df,
+            significant_proteins_df=significant_proteins_df,
+            metadata_df=metadata_df,
+            fc_threshold=fc_threshold,
+            alpha=alpha,
+            group1=group1,
+            group2=group2,
+            selected_protein_group=protein_group,
+            individual_column=individual_column,
+            intensity_name=intensity_name,
+        )["power"]
+        power_list.append({"Protein ID": protein_group, "Power": power})
+        if power < 0.8:
+            power_below_threshold.append({"Protein ID": protein_group, "Power": power})
+    num_proteins_below_threshold = len(power_below_threshold)
+    print(num_proteins_below_threshold)
+    num_power_list = len(power_list)
+    print(num_power_list)
+
 
     colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
