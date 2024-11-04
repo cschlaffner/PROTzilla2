@@ -11,8 +11,8 @@ from protzilla.data_analysis.power_analysis import (
 )
 from tests.protzilla.data_analysis.power_analysis_validation import (
     check_sample_size_calculation_with_libfunc,
-    check_sample_size_calculation_implemented,
-    check_sample_size_calculation_implemented_without_log,
+    check_sample_size_calculation_protzilla,
+    check_sample_size_calculation_protzilla_without_log,
 )
 from test_differential_expression import diff_expr_test_data
 
@@ -24,7 +24,7 @@ def power_test_data():
         ["Sample1", "Protein2", "Gene1", 16, "Group1"],
         ["Sample1", "Protein3", "Gene1", 1, "Group1"],
         ["Sample1", "Protein4", "Gene1", 14, "Group1"],
-        ["Sample2", "Protein1", "Gene1", 20, "Group1"],
+        ["Sample2", "Protein1", "Gene1", 19, "Group1"],
         ["Sample2", "Protein2", "Gene1", 15, "Group1"],
         ["Sample2", "Protein3", "Gene1", 2, "Group1"],
         ["Sample2", "Protein4", "Gene1", 15, "Group1"],
@@ -32,18 +32,101 @@ def power_test_data():
         ["Sample3", "Protein2", "Gene1", 14, "Group1"],
         ["Sample3", "Protein3", "Gene1", 3, "Group1"],
         ["Sample3", "Protein4", "Gene1", 16, "Group1"],
-        ["Sample4", "Protein1", "Gene1", 8, "Group2"],
-        ["Sample4", "Protein2", "Gene1", 15, "Group2"],
-        ["Sample4", "Protein3", "Gene1", 1, "Group2"],
-        ["Sample4", "Protein4", "Gene1", 9, "Group2"],
-        ["Sample5", "Protein1", "Gene1", 10, "Group2"],
-        ["Sample5", "Protein2", "Gene1", 14, "Group2"],
-        ["Sample5", "Protein3", "Gene1", 2, "Group2"],
-        ["Sample5", "Protein4", "Gene1", 10, "Group2"],
-        ["Sample6", "Protein1", "Gene1", 12, "Group2"],
-        ["Sample6", "Protein2", "Gene1", 13, "Group2"],
-        ["Sample6", "Protein3", "Gene1", 3, "Group2"],
-        ["Sample6", "Protein4", "Gene1", 11, "Group2"],
+        ["Sample4", "Protein1", "Gene1", 16, "Group1"],
+        ["Sample4", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample4", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample4", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample5", "Protein1", "Gene1", 24, "Group1"],
+        ["Sample5", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample5", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample5", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample6", "Protein1", "Gene1", 21, "Group1"],
+        ["Sample6", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample6", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample6", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample7", "Protein1", "Gene1", 8, "Group2"],
+        ["Sample7", "Protein2", "Gene1", 15, "Group2"],
+        ["Sample7", "Protein3", "Gene1", 1, "Group2"],
+        ["Sample7", "Protein4", "Gene1", 9, "Group2"],
+        ["Sample8", "Protein1", "Gene1", 9, "Group2"],
+        ["Sample8", "Protein2", "Gene1", 14, "Group2"],
+        ["Sample8", "Protein3", "Gene1", 2, "Group2"],
+        ["Sample8", "Protein4", "Gene1", 10, "Group2"],
+        ["Sample9", "Protein1", "Gene1", 12, "Group2"],
+        ["Sample9", "Protein2", "Gene1", 13, "Group2"],
+        ["Sample9", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample9", "Protein4", "Gene1", 11, "Group2"],
+        ["Sample10", "Protein1", "Gene1", 6, "Group2"],
+        ["Sample10", "Protein2", "Gene1", 13, "Group2"],
+        ["Sample10", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample10", "Protein4", "Gene1", 11, "Group2"],
+        ["Sample11", "Protein1", "Gene1", 14, "Group2"],
+        ["Sample11", "Protein2", "Gene1", 13, "Group2"],
+        ["Sample11", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample11", "Protein4", "Gene1", 11, "Group2"],
+        ["Sample12", "Protein1", "Gene1", 11, "Group2"],
+        ["Sample12", "Protein2", "Gene1", 13, "Group2"],
+        ["Sample12", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample12", "Protein4", "Gene1", 11, "Group2"],
+    )
+
+    test_differentially_expressed_proteins_df = pd.DataFrame(
+        data=test_differentially_expressed_proteins_list,
+        columns=["Sample", "Protein ID", "Gene", "Normalised iBAQ", "Group"],
+    )
+    return test_differentially_expressed_proteins_df
+
+@pytest.fixture
+def power_test_data_intensity_values():
+    test_differentially_expressed_proteins_list = (
+        ["Sample1", "Protein1", "Gene1", -1.56714, "Group1"],
+        ["Sample1", "Protein2", "Gene1", 16, "Group1"],
+        ["Sample1", "Protein3", "Gene1", 1, "Group1"],
+        ["Sample1", "Protein4", "Gene1", 14, "Group1"],
+        ["Sample2", "Protein1", "Gene1", -0.37691, "Group1"],
+        ["Sample2", "Protein2", "Gene1", 15, "Group1"],
+        ["Sample2", "Protein3", "Gene1", 2, "Group1"],
+        ["Sample2", "Protein4", "Gene1", 15, "Group1"],
+        ["Sample3", "Protein1", "Gene1", 0.38817, "Group1"],
+        ["Sample3", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample3", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample3", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample4", "Protein1", "Gene1", 1.6, "Group1"],
+        ["Sample4", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample4", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample4", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample5", "Protein1", "Gene1", 1.9, "Group1"],
+        ["Sample5", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample5", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample5", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample6", "Protein1", "Gene1", -0.07, "Group1"],
+        ["Sample6", "Protein2", "Gene1", 14, "Group1"],
+        ["Sample6", "Protein3", "Gene1", 3, "Group1"],
+        ["Sample6", "Protein4", "Gene1", 16, "Group1"],
+        ["Sample7", "Protein1", "Gene1", 0.9819, "Group2"],
+        ["Sample7", "Protein2", "Gene1", 15, "Group2"],
+        ["Sample7", "Protein3", "Gene1", 1, "Group2"],
+        ["Sample7", "Protein4", "Gene1", 9, "Group2"],
+        ["Sample8", "Protein1", "Gene1", -0.26, "Group2"],
+        ["Sample8", "Protein2", "Gene1", 13, "Group2"],
+        ["Sample8", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample8", "Protein4", "Gene1", 11, "Group2"],
+        ["Sample9", "Protein1", "Gene1", 1.116, "Group2"],
+        ["Sample9", "Protein2", "Gene1", 14, "Group2"],
+        ["Sample9", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample9", "Protein4", "Gene1", 16, "Group2"],
+        ["Sample10", "Protein1", "Gene1", 0.81, "Group2"],
+        ["Sample10", "Protein2", "Gene1", 14, "Group2"],
+        ["Sample10", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample10", "Protein4", "Gene1", 16, "Group2"],
+        ["Sample11", "Protein1", "Gene1", 1.336, "Group2"],
+        ["Sample11", "Protein2", "Gene1", 14, "Group2"],
+        ["Sample11", "Protein3", "Gene1", 3, "Group2"],
+        ["Sample11", "Protein4", "Gene1", 16, "Group2"],
+        ["Sample12", "Protein1", "Gene1", 1.81, "Group2"],
+        ["Sample12", "Protein2", "Gene1", 14, "Group2"],
+        ["Sample12", "Protein3", "Gene1", 2, "Group2"],
+        ["Sample12", "Protein4", "Gene1", 10, "Group2"],
     )
 
     test_differentially_expressed_proteins_df = pd.DataFrame(
@@ -116,6 +199,49 @@ def test_power_calculation(power_test_data, diff_expr_test_data):
     power_int = next(iter(power.values()), None)
     assert power_int == 0.09
 
+#TODO: The following tests has been used for thesis calculations. Should not be merged to dev branch.
+
+def test_check_sample_size_calculation_with_libfun_intensity_values(power_test_data_intensity_values):
+    test_alpha = 0.05
+    test_power = 0.8
+    test_fc_threshold = 5
+    test_selected_protein_group = "Protein1"
+
+    required_sample_size = check_sample_size_calculation_with_libfunc(
+        differentially_expressed_proteins_df=power_test_data_intensity_values,
+        significant_proteins_df=power_test_data_intensity_values,
+        fc_threshold=test_fc_threshold,
+        power=test_power,
+        alpha=test_alpha,
+        group1="Group1",
+        group2="Group2",
+        selected_protein_group=test_selected_protein_group,
+        intensity_name=None,
+    )
+    print(required_sample_size)
+    required_sample_size_int = next(iter(required_sample_size.values()), None)
+    assert required_sample_size_int == 63
+
+def test_check_sample_size_calculation_protzilla_intensity_values(power_test_data_intensity_values):
+    test_alpha = 0.05
+    test_power = 0.8
+    test_fc_threshold = 1
+    test_selected_protein_group = "Protein1"
+
+    required_sample_size = check_sample_size_calculation_protzilla(
+        differentially_expressed_proteins_df=power_test_data_intensity_values,
+        significant_proteins_df=power_test_data_intensity_values,
+        fc_threshold=test_fc_threshold,
+        power=test_power,
+        alpha=test_alpha,
+        group1="Group1",
+        group2="Group2",
+        selected_protein_group=test_selected_protein_group,
+        intensity_name=None,
+    )
+    print(required_sample_size)
+    required_sample_size_int = next(iter(required_sample_size.values()), None)
+    assert required_sample_size_int == 1
 
 def test_check_sample_size_calculation_with_libfun(power_test_data):
     test_alpha = 0.05
@@ -132,15 +258,13 @@ def test_check_sample_size_calculation_with_libfun(power_test_data):
         group1="Group1",
         group2="Group2",
         selected_protein_group=test_selected_protein_group,
-        significant_proteins_only=False,
         intensity_name=None,
     )
     print(required_sample_size)
     required_sample_size_int = next(iter(required_sample_size.values()), None)
     assert required_sample_size_int == 63
 
-
-def test_check_sample_size_calculation_impl(power_test_data):
+def test_check_sample_size_calculation_protzilla(power_test_data):
     test_alpha = 0.05
     test_power = 0.8
     power_test_data_log2 = power_test_data.copy()
@@ -150,7 +274,7 @@ def test_check_sample_size_calculation_impl(power_test_data):
     fc_threshold = 1
     test_selected_protein_group = "Protein1"
 
-    required_sample_size = check_sample_size_calculation_implemented(
+    required_sample_size = check_sample_size_calculation_protzilla(
         differentially_expressed_proteins_df=power_test_data_log2,
         significant_proteins_df=power_test_data,
         fc_threshold=fc_threshold,
@@ -159,7 +283,6 @@ def test_check_sample_size_calculation_impl(power_test_data):
         group1="Group1",
         group2="Group2",
         selected_protein_group=test_selected_protein_group,
-        significant_proteins_only=False,
         intensity_name=None,
     )
     print(required_sample_size)
@@ -167,13 +290,13 @@ def test_check_sample_size_calculation_impl(power_test_data):
     assert required_sample_size_int == 1
 
 
-def test_check_sample_size_calculation_implemented_without_log(power_test_data):
+def test_check_sample_size_calculation_protzilla_without_log(power_test_data):
     test_alpha = 0.05
     test_power = 0.8
     test_fc_threshold = 5
     test_selected_protein_group = "Protein1"
 
-    required_sample_size = check_sample_size_calculation_implemented_without_log(
+    required_sample_size = check_sample_size_calculation_protzilla_without_log(
         differentially_expressed_proteins_df=power_test_data,
         significant_proteins_df=power_test_data,
         fc_threshold=test_fc_threshold,
@@ -182,7 +305,6 @@ def test_check_sample_size_calculation_implemented_without_log(power_test_data):
         group1="Group1",
         group2="Group2",
         selected_protein_group=test_selected_protein_group,
-        significant_proteins_only=False,
         intensity_name=None,
     )
     print(required_sample_size)

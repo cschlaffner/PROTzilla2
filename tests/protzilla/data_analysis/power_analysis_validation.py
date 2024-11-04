@@ -75,7 +75,7 @@ def check_sample_size_calculation_with_libfunc(
     # impl: required_sample_size = 0.814; fc_threshold = 1.014; variance = 0.0534
 
 
-def check_sample_size_calculation_implemented(
+def check_sample_size_calculation_protzilla(
     differentially_expressed_proteins_df: pd.DataFrame,
     significant_proteins_df: pd.DataFrame,
     fc_threshold: float,
@@ -134,7 +134,7 @@ def check_sample_size_calculation_implemented(
     return dict(required_sample_size=required_sample_size)
 
 
-def check_sample_size_calculation_implemented_without_log(
+def check_sample_size_calculation_protzilla_without_log(
     differentially_expressed_proteins_df: pd.DataFrame,
     significant_proteins_df: pd.DataFrame,
     fc_threshold: float,
