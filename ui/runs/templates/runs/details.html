@@ -24,8 +24,8 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="wrapper">
+    
+<div class="wrapper">
         {# include sidebar #}
         <nav id="sidebar" class="border border-end-0 border-top-0 border-bottom-0">
             {{ sidebar }}
@@ -141,7 +141,7 @@
                                         {% endfor %}
                                     </div>
                                     <input type="submit" id="calculate_parameters_submit" value="Calculate"
-                                           class="btn btn-red">
+                                           class="btn btn-red calculateSpinner">
                                 </form>
                             </div>
                             <div class="col">
@@ -174,8 +174,10 @@
                                             {% endfor %}
                                         </div>
                                         <div class="form-group">
-                                            <input type="submit" value="Calculate" id="calculate_parameters_submit"
-                                                   class="btn btn-red mr-auto">
+                                            <button type="submit" id="calculate_parameters_submit"
+                                                   class="btn btn-red mr-auto calculateSpinner">
+                                                Calculate
+                                            </button>
                                             {% if section == "data_preprocessing" %}
                                                 <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">Plot</a>
                                             {% endif %}
