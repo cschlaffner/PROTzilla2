@@ -18,7 +18,8 @@ from django.http import (
 from django.shortcuts import render
 from django.urls import reverse
 
-from protzilla.run import Run, get_available_run_names
+from protzilla.run import Run, get_available_run_names 
+from protzilla.run_v2 import delete_run_folder
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
@@ -229,6 +230,25 @@ def continue_(request: HttpRequest):
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
+def delete_(request: HttpRequest):
+    """
+    Continues an existing run. The user is redirected to the detail page of the run and
+    can resume working on the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
+    run_name = request.POST["run_name"]
+    if run_name in active_runs:
+        del active_runs[run_name]
+    
+    delete_run_folder(run_name)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
 
 def next_(request, run_name):
     """
@@ -247,7 +267,7 @@ def next_(request, run_name):
     run = active_runs[run_name]
     name = request.POST.get("name", None)
     if name:
-        run.steps.name_current_step_instance(name)
+        run.steps.name_current_step_instance(name) 
     run.step_next()
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
