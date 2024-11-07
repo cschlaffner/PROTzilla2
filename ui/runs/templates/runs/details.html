@@ -32,11 +32,30 @@
         </nav>
 
         <div id="content">
-            <div class="header justify-content-end d-flex" id="header-content">
-                <button type="button" id="sidebarCollapse" class="btn btn-blue p-1 d-inline">
-                    <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="22" height="22"
-                         id="header_toggle">
-                </button>
+
+            <div class="header border border-end-0 border-start-0">
+                <div class="row">
+                    <div class="d-flex col">
+                        {% if plot_form %}
+                            <input type="button" id="calculate_parameters_submit_plot_form" value="Calculate" class="btn btn-red">
+                        {% else %}
+                            <input type="button" id="calculate_parameters_submit_form" value="Calculate" class="btn btn-red mr-auto">
+                        {% endif %}
+                    </div>
+                    <div class="justify-content-end d-flex col">
+                        {% if show_back %}
+                        <a href="{% url 'runs:back' run_name %}" id="backButton"
+                            class="btn btn-grey mr-auto">Back</a>
+                        {% endif %}
+
+                        <button id="btn_next" class="btn btn-red" {% if not results_exist or last_step %} disabled {% endif%}>Next</button>
+
+                        <button type="input" id="sidebarCollapse" class="btn btn-blue p-1 d-inline" style="margin-left: 5px" >
+                            <img src="{% static 'img/menu_icon.svg' %}" alt="toggle sidebar" width="22" height="22"
+                                id="header_toggle">
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div id="main-content">
@@ -159,7 +178,7 @@
                         {% else %}
                             <div class="col-7">
                                 {% if step != "plot" %}
-                                    <form action="{% url 'runs:detail' run_name %}" method="post"
+                                    <form action="{% url 'runs:detail' run_name %}" id="calc_from_method" method="post"
                                           enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="mb-2">

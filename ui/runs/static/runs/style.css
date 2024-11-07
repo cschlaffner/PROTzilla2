@@ -15,7 +15,7 @@ html, body {
 
 #content {
     order: 1;
-    padding: 20px;
+    padding: 0 20px;
     flex-grow: 1;
 }
 
@@ -48,8 +48,8 @@ html, body {
 }
 
 #sidebarCollapse {
-    width: 35px;
-    height: 35px;
+    width: 24;
+    aspect-ratio: 1;
 }
 
 #header_toggle {
@@ -74,4 +74,20 @@ html, body {
 
 #gsea_enrichment_plot_img {
     width: 800px;
+}
+
+.my-4 {
+    z-index: 1;
+}
+
+.header {
+    position: sticky;
+    top: 49.5px;
+    padding-left: 8%;
+    padding-right: 8%;
+    padding-top: 18.5px;
+    padding-bottom: 18.5px;
+    margin-bottom: 10px;
+    background-color: rgb(255, 255, 255);
+    z-index: 2;
 }

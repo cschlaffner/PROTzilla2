@@ -32,4 +32,17 @@ $(document).ready(function () {
         let id = $(this).attr("id");
         $('#chosen-' + id).text(this.files[0].name);
     });
+
+    // control calculate buttons in header
+    $('#calculate_parameters_submit_plot_form').click(function() {
+        $("#calc_form").submit();
+    });
+    $('#calculate_parameters_submit_form').click(function() {
+        $("#calc_from_method").submit();
+    });
+
+    // control back / next buttons in header
+    $('#btn_next').click(function() {
+        $("#runs_next").submit();
+    });
 });
