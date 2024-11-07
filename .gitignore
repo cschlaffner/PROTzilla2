@@ -1,11 +1,11 @@
 .DS_Store
 .idea/
 user_data/runs/*
+user_data/workflows/workflow_Test.yaml
 user_data/external_data/*
 user_data/debug/*
 ui/static/admin/*
 ui/uploads/*
-userdata/workflows/workflow_Test.yaml
 .vscode/*
 .flake8
 
