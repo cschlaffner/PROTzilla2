@@ -232,12 +232,12 @@ def continue_(request: HttpRequest):
 
 def delete_(request: HttpRequest):
     """
-    Continues an existing run. The user is redirected to the detail page of the run and
-    can resume working on the run.
+    Deletes an existing run. The user is redirected to the index page.
 
     :param request: the request object
     :type request: HttpRequest
 
+    
     :return: the rendered details page of the run
     :rtype: HttpResponse
     """
