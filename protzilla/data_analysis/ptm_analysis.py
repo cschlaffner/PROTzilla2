@@ -47,6 +47,8 @@ def ptms_per_sample(peptide_df: pd.DataFrame) -> dict:
 
     modification_df = aggregate_ptms(peptide_df, ["Sample"])
 
+    modification_df["Total Amount of Peptides"] = peptide_df.groupby("Sample").size().reset_index()[0]
+
     return dict(ptm_df=modification_df)
 
 
