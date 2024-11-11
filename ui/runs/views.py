@@ -1,3 +1,4 @@
+import os
 import io
 import tempfile
 import traceback
@@ -17,6 +18,7 @@ from django.http import (
 )
 from django.shortcuts import render
 from django.urls import reverse
+from django.conf import settings
 
 from protzilla.run import Run, get_available_run_names
 from protzilla.run_helper import log_messages
@@ -386,6 +388,14 @@ def export_workflow(request: HttpRequest, run_name: str):
     run = active_runs[run_name]
     requested_workflow_name = request.POST["name"]
     run._workflow_export(requested_workflow_name)
+    display_message(
+        {
+            "level": 20,
+            "msg": f"Workflow '{requested_workflow_name}' was exported successfully.<br>You can view it here: {os.path.join(settings.BASE_DIR, 'user_data', 'workflows')}",
+        },
+        request,
+    )
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
