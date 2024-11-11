@@ -93,7 +93,8 @@ def create_volcano_plot(
     alpha: float,
     group1: str,
     group2: str,
-    proteins_of_interest: list | None = None,
+    item_type: str = "Protein ID",
+    items_of_interest: list | None = None,
 ) -> dict:
     """
     Function to create a volcano plot from p values and log2 fold change with the
@@ -105,12 +106,13 @@ def create_volcano_plot(
     :param alpha: the alpha value for the significance line
     :param group1: the name of the first group
     :param group2: the name of the second group
-    :param proteins_of_interest: the proteins that should be annotated in the plot
+    :param item_type: in ["Protein", "PTM"] the type of the items in the data
+    :param items_of_interest: the items that should be annotated in the plot
 
     :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
     """
 
-    plot_df = p_values.join(log2_fc.set_index("Protein ID"), on="Protein ID")
+    plot_df = p_values.join(log2_fc.set_index(item_type), on=item_type)
     fig = dashbio.VolcanoPlot(
         dataframe=plot_df,
         effect_size="log2_fold_change",
@@ -122,30 +124,30 @@ def create_volcano_plot(
         xlabel=f"log2(fc) ({group2} / {group1})",
         ylabel="-log10(p)",
         title="Volcano Plot",
-        annotation="Protein ID",
+        annotation=item_type,
         plot_bgcolor=colors["plot_bgcolor"],
         xaxis_gridcolor=colors["gridcolor"],
         yaxis_gridcolor=colors["gridcolor"],
     )
-    if proteins_of_interest is None:
-        proteins_of_interest = []
-    elif not isinstance(proteins_of_interest, list):
-        proteins_of_interest = [proteins_of_interest]
+    if items_of_interest is None:
+        items_of_interest = []
+    elif not isinstance(items_of_interest, list):
+        items_of_interest = [items_of_interest]
 
-    # annotate the proteins of interest permanently in the plot
-    for protein in proteins_of_interest:
+    # annotate the items of interest permanently in the plot
+    for item in items_of_interest:
         fig.add_annotation(
             x=plot_df.loc[
-                plot_df["Protein ID"] == protein,
+                plot_df[item_type] == item,
                 "log2_fold_change",
             ].values[0],
             y=-np.log10(
                 plot_df.loc[
-                    plot_df["Protein ID"] == protein,
+                    plot_df[item_type] == item,
                     "corrected_p_value",
                 ].values[0]
             ),
-            text=protein,
+            text=item,
             showarrow=True,
             arrowhead=1,
             font=dict(color=colors["annotation_text_color"]),
@@ -158,8 +160,8 @@ def create_volcano_plot(
         )
 
     new_names = {
-        "Point(s) of interest": "Significant Proteins",
-        "Dataset": "Not Significant Proteins",
+        "Point(s) of interest": f"Significant {item_type}s",
+        "Dataset": f"Not Significant {item_type}s",
     }
 
     fig.for_each_trace(
@@ -170,11 +172,11 @@ def create_volcano_plot(
     )
     fig.update_traces(
         marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[2]),
-        selector=dict(name="Significant Proteins"),
+        selector=dict(name=f"Significant {item_type}s"),
     )
     fig.update_traces(
         marker=dict(color=PROTZILLA_DISCRETE_COLOR_SEQUENCE[0]),
-        selector=dict(name="Not Significant Proteins"),
+        selector=dict(name=f"Not Significant {item_type}s"),
     )
 
     return dict(plots=[fig])

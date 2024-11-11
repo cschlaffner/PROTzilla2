@@ -34,30 +34,53 @@ class EmptyEnum(Enum):
     pass
 
 
+class AggregationMethods(Enum):
+    sum = "Sum"
+    median = "Median"
+    mean = "Mean"
+
+
 class MaxQuantImportForm(MethodForm):
-    file_path = CustomFileField(label="MaxQuant intensities file")
+    file_path = CustomFileField(label="MaxQuant intensities file (proteinGroups.txt)")
     intensity_name = CustomChoiceField(
         choices=IntensityType, label="Intensity parameter"
     )
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
     )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods,
+        label="Aggregation method used to aggregate duplicate values for protein groups",
+        initial="Sum",
+    )
 
 
 class DiannImportForm(MethodForm):
-    file_path = CustomFileField(label="DIA-NN intensities file:")
+    file_path = CustomFileField(label="DIA-NN intensities file (*.pg_matrix.tsv)")
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods,
+        label="Aggregation method used to aggregate duplicate values for protein groups",
+        initial="Sum",
     )
 
 
 class MSFraggerImportForm(MethodForm):
-    file_path = CustomFileField(label="MSFragger intensities file")
+    file_path = CustomFileField(
+        label="MSFragger intensities file (combined_proteins.tsv)"
+    )
     intensity_name = CustomChoiceField(
         choices=IntensityNameType, label="intensity name"
     )
     map_to_uniprot = CustomBooleanField(
         label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods,
+        label="Aggregation method used to aggregate duplicate values for protein groups",
+        initial="Sum",
     )
 
 

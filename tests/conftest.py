@@ -69,6 +69,7 @@ def run_imported(run_name_and_cleanup, maxquant_data_file):
             "file_path": str(maxquant_data_file),
             "intensity_name": "iBAQ",
             "map_to_uniprot": False,
+            "aggregation_method": "Sum",
         }
     )
     yield run
@@ -148,11 +149,11 @@ def df_with_nan():
 def leftover_peptide_df():
     # sample, protein id, sequence, intensity, pep
     leftover_peptide_protein_list = (
-        ["Sample01", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample02", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample03", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 6923600.0, 0.037779],
-        ["Sample04", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", np.NAN, 0.037779],
-        ["Sample05", "Q13748;Q6PEY2;Q9NY65;Q9NY65-2", "EDLAALEK", 37440000.0, 0.037779],
+        ["Sample01", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample02", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample03", "Q13748", "EDLAALEK", 6923600.0, 0.037779],
+        ["Sample04", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample05", "Q13748", "EDLAALEK", 37440000.0, 0.037779],
     )
 
     peptide_df = pd.DataFrame(
@@ -213,6 +214,7 @@ def evidence_peptide_df():
             ["Sample1", "Protein3", "SEQE", 5000000, "Unmodified", "_SEQE_", None, 0.00005, "Raw_File_1"],
             ["Sample1", "Protein3", "SEQF", 6000000, "Unmodified", "_SEQF_", None, 0.00006, "Raw_File_1"],
             ["Sample1", "Protein3", "SEQG", 7000000, "Unmodified", "_SEQG_", None, 0.00007, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQGG", 7000000, "Unmodified", "_SEQGG_", None, 0.00007, "Raw_File_1"],
             ["Sample1", "Protein4", "SEQH", 8000000, "Unmodified", "_SEQH_", None, 0.00008, "Raw_File_1"],
             ["Sample1", "Protein5", "SEQI", 9000000, "Unmodified", "_SEQI_", None, 0.00009, "Raw_File_1"],
             ["Sample2", "Protein1", "SEQJ", 10000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQJ_", None, 0.0001, "Raw_File_2"],

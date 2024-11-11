@@ -8,7 +8,7 @@ import re
 from protzilla.utilities.transform_dfs import long_to_wide
 
 
-def filter_peptides_of_protein(
+def select_peptides_of_protein(
         peptide_df: pd.DataFrame, protein_ids: list[str],
 ) -> dict:
     """
