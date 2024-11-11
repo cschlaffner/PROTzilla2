@@ -45,7 +45,7 @@ def mann_whitney_test_on_intensity_data(
             (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha)
         - a list messages (optional), containing messages for the user
     """
-    wide_df = long_to_wide(intensity_df)
+    wide_df = long_to_wide(protein_df)
 
     outputs = mann_whitney_test_on_columns(
         df=wide_df,
