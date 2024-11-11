@@ -1185,7 +1185,7 @@ class PTMsPerSampleForm(MethodForm):
     def fill_form(self, run: Run) -> None:
         self.fields["peptide_df"].choices = fill_helper.get_choices(
             run, "peptide_df"
-        )[::-1]
+        )
 
         single_protein_peptides = run.steps.get_instance_identifiers(
             SelectPeptidesForProtein, "peptide_df"
@@ -1201,7 +1201,7 @@ class PTMsPerProteinAndSampleForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")[::-1]
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
 
         single_protein_peptides = run.steps.get_instance_identifiers(
             SelectPeptidesForProtein, "peptide_df"
