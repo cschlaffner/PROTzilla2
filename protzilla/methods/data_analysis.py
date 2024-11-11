@@ -188,8 +188,8 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
         return mann_whitney_test_on_intensity_data(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        if steps.get_step_output(Step, "protein_df", inputs["intensity_df"]) is not None:
-            inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["intensity_df"])
+        if steps.get_step_output(Step, "protein_df", inputs["protein_df"]) is not None:
+            inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
