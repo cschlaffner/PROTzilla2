@@ -93,7 +93,7 @@ def create_volcano_plot(
     alpha: float,
     group1: str,
     group2: str,
-    item_type: str = "Protein",
+    item_type: str = "Protein ID",
     items_of_interest: list | None = None,
 ) -> dict:
     """
