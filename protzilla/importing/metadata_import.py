@@ -68,7 +68,7 @@ def metadata_import_method(
         messages.append(
             {
                 "level": logging.INFO,
-                "msg": "The imported dataframe indicates an incorrent orientation. Consider viewing the table to ensure the orientation is correct.",
+                "msg": "The imported dataframe indicates an incorrect orientation. Consider viewing the table to ensure the orientation is correct.",
             }
         )
 

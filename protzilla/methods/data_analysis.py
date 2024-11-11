@@ -24,6 +24,12 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
+from protzilla.data_analysis.ptm_analysis import (
+    select_peptides_of_protein,
+    ptms_per_protein_and_sample,
+    ptms_per_sample,
+)
+from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -175,6 +181,7 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
@@ -210,12 +217,44 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
         "differentially_expressed_ptm_df",
         "significant_ptm_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
 
     def method(self, inputs: dict) -> dict:
         return mann_whitney_test_on_ptm_data(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
+    display_name = "Kruskal-Wallis Test"
+    operation = "differential_expression"
+    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+                          "The p-values are corrected for multiple testing.")
+
+    input_keys = [
+        "protein_df",
+        "metadata_df",
+        "grouping",
+        "selected_groups",
+        "alpha",
+        "log_base",
+        "multiple_testing_correction_method",
+    ]
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "corrected_alpha",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return kruskal_wallis_test_on_intensity_data(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
@@ -746,6 +785,38 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         return inputs
 
 
+class FLEXIQuantLF(PlotStep):
+    display_name = "FLEXIQuant-LF"
+    operation = "modification_quantification"
+    method_description = "FLEXIQuant-LF is an unbiased, label-free computational tool to indirectly detect modified peptides and to quantify the degree of modification based solely on the unmodified peptide species."
+
+    input_keys = [
+        "peptide_df",
+        "metadata_df",
+        "reference_group",
+        "protein_id",
+        "num_init",
+        "mod_cutoff",
+        "grouping_column",
+    ]
+    output_keys = [
+        "raw_scores",
+        "RM_scores",
+        "diff_modified",
+        "removed_peptides",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return flexiquant_lf(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+
+        inputs["metadata_df"] = steps.metadata_df
+
+
 class SelectPeptidesForProtein(DataAnalysisStep):
     display_name = "Select Peptides of Protein"
     operation = "Peptide analysis"
@@ -766,6 +837,8 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         inputs["peptide_df"] = steps.get_step_output(
             Step, "peptide_df", inputs["peptide_df"]
         )
+
+        inputs["metadata_df"] = steps.metadata_df
 
         if inputs["auto_select"]:
             significant_proteins = (

@@ -26,7 +26,7 @@ Once the script has done most of its work, something along the lines of `Startin
 
 ## Start-Guide - a little more technical
 > [!NOTE]
-> For further information on how to contribute on PROTzilla read our [dev-guide](./docs/dev-guide.md).
+> For further information on how to contribute on PROTzilla read our [dev-guide](https://github.com/cschlaffner/PROTzilla2/wiki).
 
 PROTzilla2 uses Python 3.11 and conda to manage the environment and pip for installing packages.
 
