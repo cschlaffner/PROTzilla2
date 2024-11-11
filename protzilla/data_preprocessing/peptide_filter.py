@@ -4,7 +4,7 @@ from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 
 
 def by_pep_value(
-    protein_df: pd.DataFrame, peptide_df: pd.DataFrame, threshold: float
+    peptide_df: pd.DataFrame, threshold: float
 ) -> dict:
     """
     This function filters out all peptides with a PEP value (assigned to all samples
@@ -30,7 +30,6 @@ def by_pep_value(
     filtered_peptides_list = filtered_peptides["Sequence"].unique().tolist()
 
     return dict(
-        protein_df=protein_df,
         peptide_df=peptide_df,
         filtered_peptides=filtered_peptides_list,
     )

@@ -1,0 +1,27 @@
+steps:
+  - form_inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+    inputs: { }
+    type: MaxQuantImport
+  - form_inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
+    inputs: { }
+    type: MetadataImport
+  - form_inputs:
+      percentage: 0.5
+    inputs: { }
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterProteinsBySamplesMissing
+  - form_inputs:
+      alpha: 0.05
+    inputs: { }
+    type: DifferentialExpressionTTest
+  - form_inputs:
+      differential_expression_threshold: 1
+      direction: both
+      gene_sets_restring: [ ]
+      organism: 9606
+    inputs: { }
+    type: EnrichmentAnalysisGOAnalysisWithString

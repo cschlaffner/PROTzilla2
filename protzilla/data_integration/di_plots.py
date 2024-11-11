@@ -75,6 +75,9 @@ def GO_enrichment_bar_plot(
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
     if not isinstance(gene_sets, list):
         gene_sets = [gene_sets]
+    if value not in ["fdr", "p-value"]:
+        msg = "Invalid value. Value must be either 'fdr' or 'p-value'."
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # remove all Gene_sets that are not in categories
     df = input_df[input_df["Gene_set"].isin(gene_sets)]
@@ -104,6 +107,7 @@ def GO_enrichment_bar_plot(
 
     elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
+
 
     if colors == "" or colors is None or len(colors) == 0:
         colors = PROTZILLA_DISCRETE_COLOR_SEQUENCE

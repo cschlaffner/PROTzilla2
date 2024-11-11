@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -12,6 +13,13 @@ from protzilla.constants import paths
 from protzilla.constants.protzilla_logging import logger
 from protzilla.steps import Messages, Output, Plots, Step, StepManager
 
+try:
+    from django.conf import settings
+
+    DEBUG_MODE = settings.DEBUG
+except ImportError:
+    DEBUG_MODE = False
+
 
 class ErrorHandler:
     def __enter__(self):
@@ -23,9 +31,10 @@ class ErrorHandler:
                 logger.error(f"File not found: {exc_val}")
             elif issubclass(exc_type, PermissionError):
                 logger.error(f"Permission denied: {exc_val}")
-            else:
-                logger.error("An error occurred", exc_info=(exc_type, exc_val, exc_tb))
-        return False
+            if DEBUG_MODE:
+                traceback.print_exception(exc_type, exc_val, exc_tb)
+            return False
+        return True
 
 
 class YamlOperator:
@@ -100,17 +109,28 @@ class DiskOperator:
             step_manager = StepManager()
             step_manager.df_mode = run.get(KEYS.DF_MODE, "disk")
             for step_data in run[KEYS.STEPS]:
-                step = self._read_step(step_data, step_manager)
+                try:
+                    step = self._read_step(step_data, step_manager)
+                except Exception as e:
+                    logger.error(f"Error reading step: {e}")
+                    continue
                 step_manager.add_step(step)
-            step_manager.current_step_index = run.get(KEYS.CURRENT_STEP_INDEX, 0)
+
+            # this expression ensures that the current step index is within the bounds of the steps list, and at least 0
+            step_manager.current_step_index = max(
+                0,
+                min(
+                    run.get(KEYS.CURRENT_STEP_INDEX, 0), len(step_manager.all_steps) - 1
+                ),
+            )
             return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
         with ErrorHandler():
             if not self.run_dir.exists():
-                self.run_dir.mkdir(parents=True)
+                self.run_dir.mkdir(parents=True, exist_ok=True)
             if not self.dataframe_dir.exists():
-                self.dataframe_dir.mkdir(parents=True)
+                self.dataframe_dir.mkdir(parents=True, exist_ok=True)
             self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
@@ -170,6 +190,8 @@ class DiskOperator:
     def clear_upload_dir(self) -> None:
         # TODO in general our way of handling file uploads is kind of non-straightforward, maybe we should switch
         # to directly using the FileUpload provided by Django instead of the work-around with the path of the upload as a str
+        if not paths.UPLOAD_PATH.exists():
+            return
         with ErrorHandler():
             upload_dir = paths.UPLOAD_PATH
             for file in upload_dir.iterdir():

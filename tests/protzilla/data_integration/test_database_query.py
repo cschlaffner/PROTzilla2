@@ -11,27 +11,27 @@ from protzilla.data_integration.database_query import (
 @patch("protzilla.data_integration.database_query.uniprot_to_genes")
 def test_uniprot_groups_to_genes(mock_uniprot_to_genes):
     mock_uniprot_to_genes.return_value = dict(a="ABS", b="HKL", c="NNF"), ["d"]
-    gene_to_protein_groups, protein_group_to_genes, filtered = uniprot_groups_to_genes(
+    gene_mapping_df, filtered = uniprot_groups_to_genes(
         ["a;b;c", "a-1;b-1_4", "c;d", "d-4;d-8"], ["db_name"], use_biomart=False
-    )
-    assert filtered == ["d-4;d-8"]
-    expected_gene_map = {
-        "ABS": ["a;b;c", "a-1;b-1_4"],
-        "HKL": ["a;b;c", "a-1;b-1_4"],
-        "NNF": ["a;b;c", "c;d"],
+    ).values()
+    assert set(filtered) == {"d-4;d-8"}
+    assert gene_mapping_df["Protein ID"].to_dict() == {
+        0: "a;b;c",
+        1: "a;b;c",
+        2: "a;b;c",
+        3: "a-1;b-1_4",
+        4: "a-1;b-1_4",
+        5: "c;d",
     }
-    assert set(gene_to_protein_groups.keys()) == set(expected_gene_map.keys())
-    for key in gene_to_protein_groups:
-        assert set(gene_to_protein_groups[key]) == set(expected_gene_map[key])
-
-    expected_group_map = {
-        "a-1;b-1_4": ["ABS", "HKL"],
-        "a;b;c": ["ABS", "NNF", "HKL"],
-        "c;d": ["NNF"],
+    assert set(gene_mapping_df["Gene"].to_list()) == {
+        "ABS",
+        "NNF",
+        "HKL",
+        "ABS",
+        "HKL",
+        "NNF",
     }
-    assert set(protein_group_to_genes.keys()) == set(expected_group_map.keys())
-    for key in protein_group_to_genes:
-        assert set(protein_group_to_genes[key]) == set(expected_group_map[key])
+    assert set(gene_mapping_df["Protein ID"].to_list()) == {"a;b;c", "a-1;b-1_4", "c;d"}
 
 
 @patch("protzilla.data_integration.database_query.biomart_query")

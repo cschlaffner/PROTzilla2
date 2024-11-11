@@ -1,0 +1,17 @@
+steps:
+  - form_inputs:
+      intensity_name: iBAQ
+      map_to_uniprot: false
+      aggregation_method: Sum
+    inputs: { }
+    type: MaxQuantImport
+  - form_inputs:
+      feature_orientation: Columns (samples in rows, features in columns)
+    inputs: { }
+    type: MetadataImport
+  - form_inputs:
+      percentage: 0.5
+    inputs: { }
+    plot_inputs:
+      graph_type: Bar chart
+    type: FilterProteinsBySamplesMissing

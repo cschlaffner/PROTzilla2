@@ -18,8 +18,8 @@ from django.http import (
 from django.shortcuts import render
 from django.urls import reverse
 
+from protzilla.run import Run, get_available_run_names
 from protzilla.run_helper import log_messages
-from protzilla.run_v2 import Run, get_available_run_names
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
 from protzilla.utilities.utilities import (
@@ -242,6 +242,8 @@ def next_(request, run_name):
     :return: the rendered detail page of the run with the next step/method
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     name = request.POST.get("name", None)
     if name:
@@ -263,6 +265,8 @@ def back(request, run_name):
     :return: the rendered detail page of the run with the previous step/method
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     run.step_previous()
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -283,6 +287,8 @@ def plot(request, run_name):
     :return: the rendered detail page of the run, now with the plot
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     parameters = parameters_from_post(request.POST)
 
@@ -353,6 +359,8 @@ def add(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run, new method visible in sidebar
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     method = dict(request.POST)["method"][0]
 
@@ -373,6 +381,8 @@ def export_workflow(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     requested_workflow_name = request.POST["name"]
     run._workflow_export(requested_workflow_name)
@@ -392,7 +402,8 @@ def download_plots(request: HttpRequest, run_name: str):
     :return: a FileResponse with the plots
     :rtype: FileResponse
     """
-
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     format_ = request.GET["format"]
     index = run.steps.current_step_index
@@ -428,6 +439,8 @@ def delete_step(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run, deleted method no longer visible in sidebar
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -447,6 +460,8 @@ def navigate(request, run_name: str):
 
     :return: the rendered detail page of the run with the specified step/method
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -460,6 +475,8 @@ def navigate(request, run_name: str):
 
 
 def tables_content(request, run_name, index, key):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     # TODO this will change with df_mode implementation
     if index < len(run.steps.previous_steps):
@@ -585,6 +602,8 @@ def fill_form(request: HttpRequest, run_name: str):
     :return: the filled form
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     method_form = get_filled_form_by_request(request, run)
     form_html = ""
@@ -607,6 +626,8 @@ def add_name(request, run_name):
     :return: the rendered detail page of the run
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))

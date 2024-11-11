@@ -1,7 +1,8 @@
 import base64
 import io
-import json
 import logging
+import time
+import uuid
 from pathlib import Path
 from shutil import rmtree
 
@@ -10,7 +11,10 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from ..protzilla.constants.paths import PROJECT_PATH, RUNS_PATH
+from protzilla.methods.importing import MaxQuantImport
+from protzilla.run import Run
+
+from ..protzilla.constants.paths import RUNS_PATH, TEST_DATA_PATH
 from ..protzilla.utilities import random_string
 
 
@@ -23,27 +27,66 @@ def pytest_addoption(parser):
     )
 
 
+@pytest.fixture(scope="function")
+def run_name_and_cleanup():
+    # Generate a unique run name
+    run_name = f"test_run_{uuid.uuid4()}"
+    run_path = Path(RUNS_PATH) / run_name
+
+    # Yield the run name to the test or fixture that uses this fixture
+    yield run_name
+
+    # After the test or fixture that uses this fixture is done, remove the directory
+    while run_path.exists():
+        time.sleep(1)
+        rmtree(run_path)
+
+
+@pytest.fixture
+def maxquant_data_file():
+    return str((Path(TEST_DATA_PATH) / "data_import" / "maxquant_small.tsv").absolute())
+
+
+@pytest.fixture(scope="function")
+def run_standard(run_name_and_cleanup):
+    run_name = run_name_and_cleanup
+    yield Run(run_name=run_name, workflow_name="standard", df_mode="memory")
+
+
+@pytest.fixture(scope="function")
+def run_empty(run_name_and_cleanup):
+    run_name = run_name_and_cleanup
+    yield Run(run_name=run_name, workflow_name="test-run-empty", df_mode="memory")
+
+
+@pytest.fixture(scope="function")
+def run_imported(run_name_and_cleanup, maxquant_data_file):
+    run_name = run_name_and_cleanup
+    run = Run(run_name=run_name, workflow_name="test-run-empty", df_mode="memory")
+    run.step_add(MaxQuantImport())
+    run.step_calculate(
+        {
+            "file_path": str(maxquant_data_file),
+            "intensity_name": "iBAQ",
+            "map_to_uniprot": False,
+            "aggregation_method": "Sum",
+        }
+    )
+    yield run
+
+
 @pytest.fixture(scope="session")
 def show_figures(request):
     return request.config.getoption("--show-figures")
 
 
 @pytest.fixture(scope="session")
-def workflow_meta():
-    with open(f"{PROJECT_PATH}/protzilla/constants/workflow_meta.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture(scope="session")
 def tests_folder_name():
-    return f"tests_{random_string()}"
-
-
-@pytest.fixture(scope="session", autouse=True)
-def run_test_folder(tests_folder_name):
-    Path(f"{RUNS_PATH}/{tests_folder_name}").mkdir()
-    yield
-    rmtree(Path(f"{RUNS_PATH}/{tests_folder_name}"))
+    name = f"tests_{random_string()}"
+    yield name
+    while Path(f"{RUNS_PATH}/{name}").exists():
+        time.sleep(1)
+        rmtree(Path(f"{RUNS_PATH}/{name}"))
 
 
 @pytest.fixture
@@ -84,20 +127,6 @@ def debug_logger():
 
 
 @pytest.fixture
-def example_workflow_short():
-    with open(
-        f"{PROJECT_PATH}/tests/test_workflows/example_workflow_short.json", "r"
-    ) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def example_workflow():
-    with open(f"{PROJECT_PATH}/tests/test_workflows/example_workflow.json", "r") as f:
-        return json.load(f)
-
-
-@pytest.fixture
 def df_with_nan():
     list_nan = (
         ["Sample1", "Protein1", "Gene1", 18],
@@ -114,6 +143,108 @@ def df_with_nan():
     )
 
     return df_with_nan
+
+
+@pytest.fixture
+def leftover_peptide_df():
+    # sample, protein id, sequence, intensity, pep
+    leftover_peptide_protein_list = (
+        ["Sample01", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample02", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample03", "Q13748", "EDLAALEK", 6923600.0, 0.037779],
+        ["Sample04", "Q13748", "EDLAALEK", np.NAN, 0.037779],
+        ["Sample05", "Q13748", "EDLAALEK", 37440000.0, 0.037779],
+    )
+
+    peptide_df = pd.DataFrame(
+        data=leftover_peptide_protein_list,
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+    )
+    peptide_df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    return peptide_df
+
+
+@pytest.fixture
+def filtered_peptides_list():
+    return ["AAQSTAMNR"]
+
+
+@pytest.fixture
+def peptides_df():
+    df = pd.DataFrame(
+        (
+            ["Sample1", "Protein1", "SEQA", 1000000, 0.00001],
+            ["Sample1", "Protein2", "SEQB", 2000000, 0.00002],
+            ["Sample1", "Protein2", "SEQC", 3000000, 0.00003],
+            ["Sample1", "Protein2", "SEQD", 4000000, 0.00004],
+            ["Sample1", "Protein3", "SEQE", 5000000, 0.00005],
+            ["Sample1", "Protein3", "SEQF", 6000000, 0.00006],
+            ["Sample1", "Protein3", "SEQG", 7000000, 0.00007],
+            ["Sample1", "Protein4", "SEQH", 8000000, 0.00008],
+            ["Sample1", "Protein5", "SEQI", 9000000, 0.00009],
+            ["Sample2", "Protein1", "SEQJ", 10000000, 0.0001],
+            ["Sample2", "Protein2", "SEQK", 11000000, 0.00011],
+            ["Sample2", "Protein3", "SEQL", 12000000, 0.00012],
+            ["Sample2", "Protein4", "SEQM", 13000000, 0.00013],
+            ["Sample2", "Protein5", "SEQN", 14000000, 0.00014],
+            ["Sample3", "Protein1", "SEQO", 15000000, 0.00015],
+            ["Sample3", "Protein2", "SEQP", 16000000, 0.00016],
+            ["Sample3", "Protein3", "SEQQ", 17000000, 0.00017],
+            ["Sample3", "Protein4", "SEQR", 18000000, 0.00018],
+            ["Sample3", "Protein5", "SEQS", 19000000, 0.00019],
+            ["Sample4", "Protein1", "SEQT", 20000000, 0.0002],
+            ["Sample4", "Protein2", "SEQU", 21000000, 0.00021],
+            ["Sample4", "Protein3", "SEQV", 22000000, 0.00022],
+            ["Sample4", "Protein4", "SEQW", 23000000, 0.00023],
+        ),
+        columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+    )
+
+    return df
+
+
+@pytest.fixture
+def evidence_peptide_df():
+    df = pd.DataFrame(
+        (
+            ["Sample1", "Protein1", "SEQA", 1000000, "Unmodified", "_SEQA_", 1, 0.00001, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQB", 2000000, "Unmodified", "_SEQB_", None, 0.00002, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQC", 3000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQC_", None, 0.00003, "Raw_File_1"],
+            ["Sample1", "Protein2", "SEQD", 4000000, "Acetyl (Protein N-term),Oxidation (M)", "_(Acetyl (Protein N-term))SE(Oxidation (M))QD_", None, 0.00004, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQE", 5000000, "Unmodified", "_SEQE_", None, 0.00005, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQF", 6000000, "Unmodified", "_SEQF_", None, 0.00006, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQG", 7000000, "Unmodified", "_SEQG_", None, 0.00007, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQGG", 7000000, "Unmodified", "_SEQGG_", None, 0.00007, "Raw_File_1"],
+            ["Sample1", "Protein4", "SEQH", 8000000, "Unmodified", "_SEQH_", None, 0.00008, "Raw_File_1"],
+            ["Sample1", "Protein5", "SEQI", 9000000, "Unmodified", "_SEQI_", None, 0.00009, "Raw_File_1"],
+            ["Sample2", "Protein1", "SEQJ", 10000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQJ_", None, 0.0001, "Raw_File_2"],
+            ["Sample2", "Protein2", "SEQK", 11000000, "Unmodified", "_SEQK_", None, 0.00011, "Raw_File_2"],
+            ["Sample2", "Protein3", "SEQL", 12000000, "Unmodified", "_SEQL_", None, 0.00012, "Raw_File_2"],
+            ["Sample2", "Protein4", "SEQM", 13000000, "Unmodified", "_SEQM_", None, 0.00013, "Raw_File_2"],
+            ["Sample2", "Protein5", "SEQN", 14000000, "Unmodified", "_SEQN_", None, 0.00014, "Raw_File_2"],
+            ["Sample3", "Protein1", "SEQO", 15000000, "Unmodified", "_SEQO_", None, 0.00015, "Raw_File_3"],
+            ["Sample3", "Protein2", "SEQP", 16000000, "Unmodified", "_SEQP_", None, 0.00016, "Raw_File_3"],
+            ["Sample3", "Protein3", "SEQQ", 17000000, "Unmodified", "_SEQQ_", None, 0.00017, "Raw_File_3"],
+            ["Sample3", "Protein4", "SEQR", 18000000, "Unmodified", "_SEQR_", None, 0.00018, "Raw_File_3"],
+            ["Sample3", "Protein5", "SEQS", 19000000, "Unmodified", "_SEQS_", None, 0.00019, "Raw_File_3"],
+            ["Sample4", "Protein1", "SEQT", 20000000, "Unmodified", "_SEQT_", None, 0.0002, "Raw_File_4"],
+            ["Sample4", "Protein2", "SEQU", 21000000, "Unmodified", "_SEQU_", None, 0.00021, "Raw_File_4"],
+            ["Sample4", "Protein3", "SEQV", 22000000, "Unmodified", "_SEQV_", None, 0.00022, "Raw_File_4"],
+            ["Sample4", "Protein4", "SEQW", 23000000, "Unmodified", "_SEQW_", None, 0.00023, "Raw_File_4"],
+        ),
+        columns=[
+            "Sample",
+            "Protein ID",
+            "Sequence",
+            "Intensity",
+            "Modifications",
+            "Modified sequence",
+            "Missed cleavages",
+            "PEP",
+            "Raw file",
+        ]
+    )
+    return df
 
 
 class Helpers:

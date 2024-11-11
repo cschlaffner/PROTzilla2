@@ -71,9 +71,10 @@ def create_ranked_df(
     return ranked_df
 
 
+# TODO we need to adjust the method to use the gene_mapping_df
 def gsea_preranked(
     protein_df,
-    gene_mapping,
+    gene_mapping_df,
     ranking_column=None,
     ranking_direction="ascending",
     gene_sets_path=None,
@@ -99,8 +100,8 @@ def gsea_preranked(
 
     :param protein_df: dataframe with protein IDs and ranking values
     :type protein_df: pd.DataFrame
-    :param gene_mapping: result of a gene mapping step
-    :type gene_mapping: dict[str, dict]
+    :param gene_mapping_df: dataframe with protein IDs and gene symbols
+    :type gene_mapping_df: pandas.DataFrame
     :param ranking_column: column name of ranking column in protein_df
     :type ranking_column: str
     :param ranking_direction: direction of ranking for sorting, either ascending or descending
@@ -164,8 +165,12 @@ def gsea_preranked(
 
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
-    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    protein_group_to_genes = (
+        gene_mapping_df.groupby("Protein ID")["Gene"].apply(list).to_dict()
+    )
+    gene_to_protein_groups = (
+        gene_mapping_df.groupby("Gene")["Protein ID"].apply(list).to_dict()
+    )
     filtered_groups = list(set(protein_groups) - set(protein_group_to_genes.keys()))
 
     if not gene_to_protein_groups:
@@ -276,7 +281,7 @@ def gsea(
     protein_df,
     metadata_df,
     grouping,
-    gene_mapping,
+    gene_mapping_df,
     group1=None,
     group2=None,
     gene_sets_path=None,
@@ -302,8 +307,8 @@ def gsea(
     :type protein_df: pd.DataFrame
     :param metadata_df: dataframe with metadata
     :type metadata_df: pd.DataFrame
-    :param gene_mapping: result of a gene mapping step
-    :type gene_mapping: dict[str, dict]
+    :param gene_mapping_df: dataframe with protein IDs and gene symbols
+    :type gene_mapping_df: pd.DataFrame
     :param grouping: column name in metadata_df to group samples by
     :type grouping: str
     :param group1: name of group 1
@@ -379,7 +384,7 @@ def gsea(
         and (protein_df[intensity_name] < 0).any()
     ):
         msg = "Negative values in the dataframe. Please use a different ranking method."
-        return dict(messages=[dict(level=l<ogging.ERROR, msg=msg)])
+        return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     if gene_sets_path:
         gene_sets = read_protein_or_gene_sets_file(gene_sets_path)
@@ -402,8 +407,12 @@ def gsea(
     samples = protein_df["Sample"].unique().tolist()
     protein_groups = protein_df["Protein ID"].unique().tolist()
 
-    protein_group_to_genes = gene_mapping.get("protein_group_to_genes", {})
-    gene_to_protein_groups = gene_mapping.get("gene_to_protein_groups", {})
+    protein_group_to_genes = (
+        gene_mapping_df.groupby("Protein ID")["Gene"].apply(list).to_dict()
+    )
+    gene_to_protein_groups = (
+        gene_mapping_df.groupby("Gene")["Protein ID"].apply(list).to_dict()
+    )
     filtered_groups = list(set(protein_groups) - set(protein_group_to_genes.keys()))
 
     if not gene_to_protein_groups:

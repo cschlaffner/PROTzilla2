@@ -69,6 +69,7 @@ class Step:
         self.form_inputs = self.inputs.copy()
 
         try:
+            self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
 
@@ -141,7 +142,6 @@ class Step:
         :param outputs: A dictionary received after the calculation
         :return: None
         """
-        self.messages.clear()
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
@@ -189,7 +189,7 @@ class Step:
         if required_keys is None:
             required_keys = self.output_keys
         for key in required_keys:
-            if key not in self.output:
+            if key not in self.output or self.output[key] is None:
                 if not soft_check:
                     raise ValueError(
                         f"Output validation failed: missing output {key} in outputs."
@@ -244,6 +244,9 @@ class Messages:
 
     def __iter__(self):
         return iter(self.messages)
+
+    def __getitem__(self, key):
+        return self.messages[key]
 
     def __repr__(self):
         return f"Messages: {[message['message'] for message in self.messages]}"
@@ -350,17 +353,20 @@ class StepManager:
         )
 
     def get_instance_identifiers(
-        self, step_type: type[Step], output_key: str = None
+        self, step_type: type[Step], output_key: str | list[str] = None
     ) -> list[str]:
+        if isinstance(output_key, str):
+            output_key = [output_key]
+
         instance_identifiers = [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
-            and (output_key is None or output_key in step.output)
+            and (output_key is None or all(k in step.output for k in output_key))
         ]
         if not instance_identifiers:
             logging.warning(
-                f"No instance identifiers found for {step_type} and output_key {output_key}"
+                f"No instance identifiers found with step type {step_type} and output_key{'s' if len(output_key) > 1 else ''} {output_key}"
             )
         return instance_identifiers
 
@@ -545,7 +551,9 @@ class StepManager:
             if section not in self.sections:
                 raise ValueError(f"Unknown section {section}")
             if step_index >= len(self.sections[section]):
-                raise ValueError(f"Step index {step_index} out of bounds for section {section}")
+                raise ValueError(
+                    f"Step index {step_index} out of bounds for section {section}"
+                )
 
             step = self.all_steps_in_section(section)[step_index]
 

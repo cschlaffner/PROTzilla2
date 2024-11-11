@@ -8,7 +8,7 @@ import ui.runs.forms.data_analysis as data_analysis_forms
 import ui.runs.forms.data_integration as data_integration_forms
 import ui.runs.forms.data_preprocessing as data_preprocessing_forms
 import ui.runs.forms.importing as importing_forms
-from protzilla.run_v2 import Run
+from protzilla.run import Run
 from protzilla.steps import Step
 
 from .forms.base import MethodForm
@@ -43,6 +43,10 @@ _forward_mapping = {
     data_analysis.DifferentialExpressionANOVA: data_analysis_forms.DifferentialExpressionANOVAForm,
     data_analysis.DifferentialExpressionTTest: data_analysis_forms.DifferentialExpressionTTestForm,
     data_analysis.DifferentialExpressionLinearModel: data_analysis_forms.DifferentialExpressionLinearModelForm,
+    data_analysis.DifferentialExpressionMannWhitneyOnIntensity: data_analysis_forms.DifferentialExpressionMannWhitneyOnIntensityForm,
+    data_analysis.DifferentialExpressionMannWhitneyOnPTM: data_analysis_forms.DifferentialExpressionMannWhitneyOnPTMForm,
+    data_analysis.DifferentialExpressionKruskalWallisOnIntensity: data_analysis_forms.DifferentialExpressionKruskalWallisOnIntensityForm,
+    data_analysis.DifferentialExpressionKruskalWallisOnPTM: data_analysis_forms.DifferentialExpressionKruskalWallisOnPTMForm,
     data_analysis.PlotVolcano: data_analysis_forms.PlotVolcanoForm,
     data_analysis.PlotScatterPlot: data_analysis_forms.PlotScatterPlotForm,
     data_analysis.PlotClustergram: data_analysis_forms.PlotClustergramForm,
@@ -59,6 +63,10 @@ _forward_mapping = {
     data_analysis.DimensionReductionUMAP: data_analysis_forms.DimensionReductionUMAPForm,
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
+    data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,
+    data_analysis.FLEXIQuantLF: data_analysis_forms.FLEXIQuantLFForm,
+    data_analysis.PTMsPerSample: data_analysis_forms.PTMsPerSampleForm,
+    data_analysis.PTMsProteinAndPerSample: data_analysis_forms.PTMsPerProteinAndSampleForm,
     data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSampleForms,
     data_integration.EnrichmentAnalysisGOAnalysisWithString: data_integration_forms.EnrichmentAnalysisGOAnalysisWithStringForm,
     data_integration.EnrichmentAnalysisGOAnalysisWithEnrichr: data_integration_forms.EnrichmentAnalysisGOAnalysisWithEnrichrForm,
