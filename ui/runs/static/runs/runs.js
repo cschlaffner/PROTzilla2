@@ -32,4 +32,14 @@ $(document).ready(function () {
         let id = $(this).attr("id");
         $('#chosen-' + id).text(this.files[0].name);
     });
+
+
+    // calculate button spinner
+    $('.calculateSpinner').on('click', function() {        
+        // Change button content to show 'Calculating...' with a spinner
+        $(this).html(`
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Calculating...
+        `);
+    });
 });

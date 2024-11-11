@@ -1,18 +1,21 @@
-import logging
 from enum import Enum, StrEnum
 
-from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.methods.data_analysis import (
+    DataAnalysisStep,
     DifferentialExpressionLinearModel,
     DifferentialExpressionTTest,
-    DimensionReductionUMAP, DataAnalysisStep, SelectPeptidesForProtein, PTMsPerSample,
+    DimensionReductionUMAP,
+    PTMsPerSample,
+    SelectPeptidesForProtein,
 )
+from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.run import Run
 from protzilla.steps import Step
 
 from . import fill_helper
 from .base import MethodForm
 from .custom_fields import (
+    CustomBooleanField,
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
@@ -332,9 +335,7 @@ class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
 class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
     is_dynamic = True
 
-    ptm_df = CustomChoiceField(
-        choices=[], label="Step to use ptm data from"
-    )
+    ptm_df = CustomChoiceField(choices=[], label="Step to use ptm data from")
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
@@ -1052,6 +1053,48 @@ class ProteinGraphVariationGraphForm(MethodForm):
     # TODO: workflow_meta line 2291 - 2295
 
 
+class FLEXIQuantLFForm(MethodForm):
+    is_dynamic = True
+
+    peptide_df = CustomChoiceField(label="Peptide dataframe", choices=[])
+    grouping_column = CustomChoiceField(label="Grouping column in metadata", choices=[])
+    reference_group = CustomChoiceField(label="Reference group", choices=[])
+    protein_id = CustomChoiceField(label="Protein ID", choices=[])
+    num_init = CustomNumberField(
+        label="Number of RANSAC initiations",
+        initial=30,
+        min_value=1,
+        max_value=60,
+        step_size=1,
+    )
+    mod_cutoff = CustomFloatField(
+        label="Modification cutoff", initial=0.5, min_value=0, max_value=1
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
+        self.fields["grouping_column"].choices = fill_helper.to_choices(
+            run.steps.metadata_df.drop("Sample", axis=1).columns[1:]
+        )
+
+        chosen_grouping_column = self.data.get(
+            "grouping_column", self.fields["grouping_column"].choices[0][0]
+        )
+
+        self.fields["reference_group"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[chosen_grouping_column].unique()
+        )
+        peptide_df_instance_id = self.data.get(
+            "peptide_df", self.fields["peptide_df"].choices[0][0]
+        )
+
+        self.fields["protein_id"].choices = fill_helper.to_choices(
+            run.steps.get_step_output(Step, "peptide_df", peptide_df_instance_id)[
+                "Protein ID"
+            ].unique()
+        )
+
+
 class SelectPeptidesForProteinForm(MethodForm):
     is_dynamic = True
 
@@ -1154,9 +1197,7 @@ class PTMsPerProteinAndSampleForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["peptide_df"].choices = fill_helper.get_choices(
-            run, "peptide_df"
-        )
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
 
         single_protein_peptides = run.steps.get_instance_identifiers(
             SelectPeptidesForProtein, "peptide_df"

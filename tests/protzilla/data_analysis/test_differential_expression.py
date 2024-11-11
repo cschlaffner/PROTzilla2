@@ -72,8 +72,8 @@ def diff_expr_test_data():
 
 
 def test_differential_expression_linear_model(
-        diff_expr_test_data,
-        show_figures,
+    diff_expr_test_data,
+    show_figures,
 ):
     test_intensity_df, test_metadata_df = diff_expr_test_data
     test_alpha = 0.05
@@ -117,8 +117,8 @@ def test_differential_expression_linear_model(
     assert p_values_rounded == corrected_p_values
     assert log2fc_rounded == log2_fc
     assert (
-            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-            == differentially_expressed_proteins
+        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+        == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
 
@@ -170,13 +170,13 @@ def test_differential_expression_student_t_test(diff_expr_test_data, show_figure
 
     assert p_values_rounded == corrected_p_values
     assert (
-            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-            == differentially_expressed_proteins
+        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+        == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
     assert (
-            list(current_out["significant_proteins_df"]["Protein ID"].unique())
-            == significant_proteins
+        list(current_out["significant_proteins_df"]["Protein ID"].unique())
+        == significant_proteins
     )
 
 
@@ -227,13 +227,13 @@ def test_differential_expression_welch_t_test(diff_expr_test_data, show_figures)
 
     assert p_values_rounded == corrected_p_values
     assert (
-            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
-            == differentially_expressed_proteins
+        list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+        == differentially_expressed_proteins
     )
     assert current_out["corrected_alpha"] == test_alpha
     assert (
-            list(current_out["significant_proteins_df"]["Protein ID"].unique())
-            == significant_proteins
+        list(current_out["significant_proteins_df"]["Protein ID"].unique())
+        == significant_proteins
     )
 
 
