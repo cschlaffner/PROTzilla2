@@ -15,7 +15,8 @@ html, body {
 
 #content {
     order: 1;
-    padding: 0 20px;
+    padding: 20px;
+    padding-bottom: 100px;
     flex-grow: 1;
 }
 
@@ -48,8 +49,8 @@ html, body {
 }
 
 #sidebarCollapse {
-    width: 24;
-    aspect-ratio: 1;
+    width: 35px;
+    height: 35px;
 }
 
 #header_toggle {
@@ -76,18 +77,15 @@ html, body {
     width: 800px;
 }
 
-.my-4 {
-    z-index: 1;
-}
-
 .header {
     position: sticky;
-    top: 49.5px;
-    padding-left: 8%;
-    padding-right: 8%;
-    padding-top: 18.5px;
-    padding-bottom: 18.5px;
-    margin-bottom: 10px;
+    top: 80px;
+}
+
+.footer {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 8%;
+    margin: 10px 0;
     background-color: rgb(255, 255, 255);
-    z-index: 2;
 }

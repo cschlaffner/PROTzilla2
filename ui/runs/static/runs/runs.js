@@ -40,9 +40,4 @@ $(document).ready(function () {
     $('#calculate_parameters_submit_form').click(function() {
         $("#calc_from_method").submit();
     });
-
-    // control back / next buttons in header
-    $('#btn_next').click(function() {
-        $("#runs_next").submit();
-    });
 });
