@@ -34,12 +34,12 @@ $(document).ready(function () {
     });
 
 
-    // calculate button spinner
-    $('.calculateSpinner').on('click', function() {        
-        // Change button content to show 'Calculating...' with a spinner
-        $(this).html(`
+    // show loading spinner on calculate button
+    $('#calculateForm').on('submit', function() {        
+        $('#calculate_parameters_submit').html(`
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Calculating...
         `);
+        $('#calculate_parameters_submit').prop('disabled', true);
     });
 });
