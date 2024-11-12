@@ -566,10 +566,6 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     )  # TODO this should  not have to be set in fill_form
 
     def fill_form(self, run: Run) -> None:
-        self.fields["colors"].choices = [
-            (v, k) for k, v, in mcolors.CSS4_COLORS.items()
-        ]
-
         self.fields["input_df_step_instance"].choices = fill_helper.get_choices(
             run, "enrichment_df"
         )
@@ -579,6 +575,11 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
                     Step, "enrichment_df", self.get_field("input_df_step_instance")
                 )["Gene_set"].unique()
             )
+        
+        colors = list(mcolors.TABLEAU_COLORS.items())[:len(self.fields["gene_sets"].choices)]
+        self.fields["colors"].choices = [
+            (v, k[4:]) for k, v, in colors
+        ]
 
     @property
     def is_dynamic(self) -> bool:
