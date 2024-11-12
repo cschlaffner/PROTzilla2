@@ -4,12 +4,13 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from protzilla.data_analysis.differential_expression_helper import _map_log_base, apply_multiple_testing_correction
+from protzilla.data_analysis.differential_expression_helper import _map_log_base, apply_multiple_testing_correction, \
+    merge_differential_expression_and_significant_df, normalize_ptm_df
 from protzilla.utilities.transform_dfs import long_to_wide
 
 
 def mann_whitney_test_on_intensity_data(
-        intensity_df: pd.DataFrame,
+        protein_df: pd.DataFrame,
         metadata_df: pd.DataFrame,
         grouping: str,
         group1: str,
@@ -22,7 +23,7 @@ def mann_whitney_test_on_intensity_data(
     """
     Perform Mann-Whitney U test on all proteins in the given intensity data frame.
 
-    :param intensity_df: A protein dataframe in typical PROTzilla long format.
+    :param protein_df: A protein dataframe in typical PROTzilla long format.
     :param metadata_df: The metadata data frame containing the grouping information.
     :param grouping: The column name in the metadata data frame that contains the grouping information,
         that should be used.
@@ -44,7 +45,7 @@ def mann_whitney_test_on_intensity_data(
             (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha)
         - a list messages (optional), containing messages for the user
     """
-    wide_df = long_to_wide(intensity_df)
+    wide_df = long_to_wide(protein_df)
 
     outputs = mann_whitney_test_on_columns(
         df=wide_df,
@@ -58,11 +59,11 @@ def mann_whitney_test_on_intensity_data(
         columns_name="Protein ID",
         p_value_calculation_method=p_value_calculation_method
     )
-    differentially_expressed_proteins_df = pd.merge(intensity_df, outputs["differential_expressed_columns_df"], on="Protein ID", how="left")
+    differentially_expressed_proteins_df = pd.merge(protein_df, outputs["differential_expressed_columns_df"], on="Protein ID", how="left")
     differentially_expressed_proteins_df = differentially_expressed_proteins_df.loc[
         differentially_expressed_proteins_df["Protein ID"].isin(outputs["differential_expressed_columns_df"]["Protein ID"])
     ]
-    significant_proteins_df = pd.merge(intensity_df, outputs["significant_columns_df"], on="Protein ID", how="left")
+    significant_proteins_df = pd.merge(protein_df, outputs["significant_columns_df"], on="Protein ID", how="left")
     significant_proteins_df = significant_proteins_df.loc[
         significant_proteins_df["Protein ID"].isin(outputs["significant_columns_df"]["Protein ID"])
     ]
@@ -76,6 +77,7 @@ def mann_whitney_test_on_intensity_data(
         corrected_alpha=outputs["corrected_alpha"],
         messages=outputs["messages"],
     )
+
 
 def mann_whitney_test_on_ptm_data(
         ptm_df: pd.DataFrame,
@@ -97,7 +99,6 @@ def mann_whitney_test_on_ptm_data(
         that should be used.
     :param group1: The name of the first group for the Mann-Whitney U test.
     :param group2: The name of the second group for the Mann-Whitney U test.
-    :param log_base: The base of the logarithm that was used to transform the data.
     :param alpha: The significance level for the test.
     :param multiple_testing_correction_method: The method for multiple testing correction.
     :param p_value_calculation_method: The method for p-value calculation.
@@ -108,12 +109,15 @@ def mann_whitney_test_on_ptm_data(
             that are significant after multiple testing correction
         - a df corrected_p_values, containing the p_values after application of multiple testing correction,
         - a df log2_fold_change, containing the log2 fold changes per column,
-        - a df t_statistic_df, containing the t-statistic per protein,
+        - a df u_statistic_df, containing the t-statistic per protein,
         - a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
         - a list messages, containing messages for the user
     """
+
+    normalized_ptm_df = normalize_ptm_df(ptm_df)
+
     output = mann_whitney_test_on_columns(
-        df=ptm_df,
+        df=normalized_ptm_df,
         metadata_df=metadata_df,
         grouping=grouping,
         group1=group1,
@@ -170,7 +174,7 @@ def mann_whitney_test_on_columns(
             that are significant after multiple testing correction
         - a df corrected_p_values, containing the p_values after application of multiple testing correction,
         - a df log2_fold_change, containing the log2 fold changes per column,
-        - a df t_statistic_df, containing the t-statistic per protein,
+        - a df u_statistic_df, containing the t-statistic per protein,
         - a float corrected_alpha, containing the alpha value after application of multiple testing correction (depending on the selected multiple testing correction method corrected_alpha may be equal to alpha),
         - a list messages, containing messages for the user
     """
@@ -193,7 +197,8 @@ def mann_whitney_test_on_columns(
     for column in data_columns:
         group1_data = df_with_groups[df_with_groups[grouping] == group1][column]
         group2_data = df_with_groups[df_with_groups[grouping] == group2][column]
-        u_statistic, p_value = stats.mannwhitneyu(group1_data, group2_data, alternative="two-sided", method=p_value_calculation_method)
+        u_statistic, p_value = (
+            stats.mannwhitneyu(group1_data, group2_data, alternative="two-sided", method=p_value_calculation_method))
 
         if not np.isnan(p_value):
             log2_fold_change = (

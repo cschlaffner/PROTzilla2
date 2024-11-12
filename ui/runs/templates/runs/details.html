@@ -24,8 +24,8 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="wrapper">
+    
+<div class="wrapper">
         {# include sidebar #}
         <nav id="sidebar" class="border border-end-0 border-top-0 border-bottom-0">
             {{ sidebar }}
@@ -246,9 +246,15 @@
                     <div class="d-flex col-auto flex-column justify-content-end">
             
                         {% if plot_form %}
-                            <input type="button" id="calculate_parameters_submit_form_plot" value="Calculate" class="btn btn-red mr-auto">
+                            <button type="submit" id="calculate_parameters_submit_form_plot"
+                                class="btn btn-red calculateSpinner mr-auto">
+                                Calculate
+                            </button>
                         {% else %}
-                            <input type="button" id="calculate_parameters_submit_form" value="Calculate" class="btn btn-red mr-auto">
+                            <button type="submit" id="calculate_parameters_submit_form"
+                                class="btn btn-red mr-auto calculateSpinner">
+                                Calculate
+                            </button>
                         {% endif %}
                     </div>
 
@@ -287,8 +293,9 @@
                                             </div>
                                         </div>
                                         {% endif %}
-                                        <button class="btn btn-red"  {% if not results_exist or last_step %} disabled {% endif %}>Next
-                                        </button>
+                                        {% if not last_step %}
+                                          <button class="btn btn-red" {% if not results_exist %} disabled {% endif %} >Next</button>
+                                        {% endif %}
                                     </div>
                                 </form>
                             </div>
