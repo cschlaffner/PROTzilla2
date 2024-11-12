@@ -35,9 +35,9 @@ $(document).ready(function () {
 
     // control calculate buttons in footer
     $('#calculate_parameters_submit_form_plot').click(function() {
-        $("#calc_form").submit();
+        $("#calc_form_plot").submit();
     });
     $('#calculate_parameters_submit_form').click(function() {
-        $("#calc_from_method").submit();
+        $("#calc_form_method").submit();
     });
 });

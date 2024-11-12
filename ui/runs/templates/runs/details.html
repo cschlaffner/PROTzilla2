@@ -124,7 +124,7 @@
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_form %}
                             <div class="col">
-                                <form action="{% url 'runs:detail' run_name %}" id="calc_form" method="post"
+                                <form action="{% url 'runs:detail' run_name %}" id="calc_form_plot" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div class="mb-1">
@@ -155,7 +155,7 @@
                         {% else %}
                             <div class="col-7">
                                 {% if step != "plot" %}
-                                    <form action="{% url 'runs:detail' run_name %}" id="calc_from_method" method="post"
+                                    <form action="{% url 'runs:detail' run_name %}" id="calc_form_method" method="post"
                                           enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="mb-2">
