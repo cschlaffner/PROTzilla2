@@ -245,7 +245,19 @@ def delete_(request: HttpRequest):
     if run_name in active_runs:
         del active_runs[run_name]
     
-    delete_run_folder(run_name)
+    try: 
+        delete_run_folder(run_name)
+    except Exception as e:
+        display_message(
+            {
+                "level": 40,
+                "msg": f"Couldn't delete the run '{run_name}' . Please check the permissions for this file or try running Protzilla as administrator.",
+                "trace": format_trace(traceback.format_exception(e)),
+            },
+            request,
+        )
+        traceback.print_exc()
+        return HttpResponseRedirect(reverse("runs:index"))
 
     return HttpResponseRedirect(reverse("runs:index"))
 

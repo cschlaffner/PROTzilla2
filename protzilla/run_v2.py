@@ -22,10 +22,11 @@ def get_available_run_names() -> list[str]:
     ]
 
 def delete_run_folder(run_name) -> None:
-    path = os.path.join(paths.RUNS_PATH, "test")
+    path = os.path.join(paths.RUNS_PATH, run_name)
 
     if os.path.isdir(path):
         shutil.rmtree(path)
+
 
 class Run:
     class ErrorHandlingContextManager:
