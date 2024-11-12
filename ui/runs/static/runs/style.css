@@ -29,6 +29,7 @@ html, body {
     order: 2;
     flex-basis: 300px;
     max-width: 400px;
+    min-height: calc(100vh - 60px);
     flex-grow: 1;
     transition: 100ms;
 }

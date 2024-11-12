@@ -33,8 +33,8 @@ $(document).ready(function () {
         $('#chosen-' + id).text(this.files[0].name);
     });
 
-    // control calculate buttons in header
-    $('#calculate_parameters_submit_plot_form').click(function() {
+    // control calculate buttons in footer
+    $('#calculate_parameters_submit_form_plot').click(function() {
         $("#calc_form").submit();
     });
     $('#calculate_parameters_submit_form').click(function() {
