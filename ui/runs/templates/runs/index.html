@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" id="contain">
-  <div class="col" id="row">
+  <div class="col">
     {% if messages %}
       <div class="messages">
           {% for message in messages %}
@@ -22,7 +22,7 @@
       </div>
       <br>
     {% endif %}
-  <div class="row" id="row">
+  <div class="row">
     <div class="col mx-4">
       <form action="{% url 'runs:create' %}" method="post">
         {% csrf_token %}
