@@ -8,13 +8,12 @@ import plotly.express as px
 import plotly.graph_objs as go
 
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+from protzilla.constants.ms_constants import DataKeys, FragmentationType
 from protzilla.data_analysis.spectrum_prediction.spectrum import (
     SpectrumExporter,
     SpectrumPredictorFactory,
 )
 from protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils import (
-    DataKeys,
-    FragmentationType,
     GenericTextSeparator,
     OutputFormats,
     PredictionModels,
@@ -98,7 +97,7 @@ def predict(
         "messages": [
             {
                 "level": logging.INFO,
-                "msg": f"Successfully predicted {len(predicted_spectra)} spectra. The output can be found at {output_dir if output_dir else 'the dataframe folder of the run'}.",
+                "msg": f"Successfully predicted {len(predicted_spectra)} spectra.\nThe output can be found at {output_dir / output.filename if output_dir else 'the dataframe folder of the run'}",
             }
         ],
     }
@@ -107,8 +106,8 @@ def predict(
 def plot_spectrum(
     metadata_df: pd.DataFrame,
     peaks_df: pd.DataFrame,
-    peptide: str,
-    charge: int,
+    peptide_sequences: str,
+    precursor_charges: int,
     annotation_threshold: float,
 ):
     """
@@ -116,8 +115,8 @@ def plot_spectrum(
     The metadata and peaks dataframes can be joined via the index, a unique identifier for each spectrum.
     :param metadata_df: the dataframe containing the metadata of the spectra, like sequence, charge, etc.
     :param peaks_df: the dataframe containing the peaks of the spectra
-    :param peptide: the peptide sequence for which to plot the spectrum
-    :param charge: the charge of the precursor ion for which to plot the spectrum
+    :param peptide_sequences: the peptide sequence for which to plot the spectrum
+    :param precursor_charges: the charge of the precursor ion for which to plot the spectrum
     :param annotation_threshold: the threshold for the intensity of the peaks to be annotated
     :return: a dictionary containing the plot and a message
     """
@@ -125,9 +124,13 @@ def plot_spectrum(
 
     # Get the unique_id for the specified peptide and charge
     unique_id = metadata_df[
-        (metadata_df[DataKeys.PEPTIDE_SEQUENCE] == peptide)
-        & (metadata_df[DataKeys.PRECURSOR_CHARGE] == charge)
+        (metadata_df[DataKeys.PEPTIDE_SEQUENCE] == peptide_sequences)
+        & (metadata_df[DataKeys.PRECURSOR_CHARGE] == precursor_charges)
     ].index
+
+    assert (
+        len(unique_id) == 1
+    ), f"Expected exactly one unique_id, but got {len(unique_id)}: {unique_id}"
 
     # Filter the peaks_df for the specific spectrum
     spectrum = peaks_df.loc[unique_id]
@@ -157,7 +160,7 @@ def plot_spectrum(
         hover_data=[DataKeys.FRAGMENT_TYPE, DataKeys.FRAGMENT_CHARGE],
         color="fragment_ion",
         color_discrete_map={ion_types[0]: ion_color[0], ion_types[1]: ion_color[1]},
-        title=f"{peptide} ({charge}+)",
+        title=f"{peptide_sequences} ({precursor_charges}+)",
     )
 
     # Updating the layout
@@ -185,7 +188,7 @@ def plot_spectrum(
             linecolor="grey",
         ),
     )
-    fig.update_traces(width=3.0)
+    fig.update_traces(width=8.0)
 
     # Adding the annotations
     for _, row in plot_df.iterrows():
@@ -220,11 +223,11 @@ def plot_spectrum(
         messages=[
             {
                 "level": logging.INFO,
-                "msg": f"Successfully plotted the spectrum for {peptide} ({charge}+). Tip: You can zoom in by selecting an area on the plot.",
+                "msg": f"Successfully plotted the spectrum for {peptide_sequences} ({precursor_charges}+). Tip: You can zoom in by selecting an area on the plot.",
             }
         ],
     )
-    to_be_returned[f"spectrum_{peptide}_{charge}"] = plot_df
+    to_be_returned[f"spectrum_{peptide_sequences}_{precursor_charges}"] = plot_df
     return to_be_returned
 
 
@@ -232,14 +235,14 @@ def plot_mirror_spectrum(
     metadata_df: pd.DataFrame,
     peaks_df: pd.DataFrame,
     plot_df: pd.DataFrame,
-    peptide: str,
-    charge: int,
+    peptide_sequences: str,
+    precursor_charges: int,
     annotation_threshold: float,
 ):
     # Get the unique_id for the specified peptide and charge
     unique_id = metadata_df[
-        (metadata_df["peptide_sequences"] == peptide)
-        & (metadata_df["precursor_charges"] == charge)
+        (metadata_df[DataKeys.PEPTIDE_SEQUENCE] == peptide_sequences)
+        & (metadata_df[DataKeys.PRECURSOR_CHARGE] == precursor_charges)
     ].index
 
     # Filter the peaks_df for the specific spectrum
@@ -256,9 +259,18 @@ def plot_mirror_spectrum(
     upper_plot_df["fragment_ion"] = upper_plot_df["fragment_type"].str[0]
 
     cosine_similarity = advanced_cosine_similarity(
-        upper_plot_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]],
-        plot_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]],
-        0.1,
+        plot_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]].sort_values(
+            DataKeys.INTENSITY
+        ),
+        upper_plot_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]].sort_values(
+            DataKeys.INTENSITY
+        ),
+        0.05,
+    )
+
+    # normalize the experimental spectrum intensities after the cosine similarity calculation
+    plot_df[DataKeys.INTENSITY] = (
+        plot_df[DataKeys.INTENSITY] / plot_df[DataKeys.INTENSITY].max()
     )
 
     ion_color = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
@@ -268,7 +280,7 @@ def plot_mirror_spectrum(
             f"Expected exactly two fragment types, but got {len(ion_types)}: {ion_types}"
         )
 
-    title = f"{peptide} ({charge}+) - Mirror spectrum (Cosine similarity: {cosine_similarity:.2f})"
+    title = f"{peptide_sequences} ({precursor_charges}+) - Mirror spectrum (Cosine similarity: {cosine_similarity:.4f})"
 
     # Create a single plot
     fig = go.Figure()
@@ -283,10 +295,10 @@ def plot_mirror_spectrum(
                 name=f"{ion_type}-ion (theoretical)",
                 marker_color=ion_color[list(ion_types).index(ion_type)],
                 hovertemplate="m/z: %{x}<br>Intensity: %{y}<br>Fragment: %{text}",
-                text=df_ion["fragment_type"]
-                + " ("
-                + df_ion["fragment_charge"].astype(str)
-                + "+)",
+                # text=df_ion["fragment_type"]
+                # + " ("
+                # + df_ion["fragment_charge"].astype(str)
+                # + "+)",
             )
         )
 
@@ -310,7 +322,7 @@ def plot_mirror_spectrum(
                 y=row["intensity"],
                 text=f"{row['fragment_type']} ({row['fragment_charge']}+)",
                 showarrow=False,
-                yshift=30,
+                yshift=25,
                 textangle=-90,
                 font=dict(
                     color=ion_color[list(ion_types).index(row["fragment_ion"])],
@@ -323,27 +335,40 @@ def plot_mirror_spectrum(
         barmode="overlay",
         legend_title_text="Fragment type",
         showlegend=True,
-        height=600,
+        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="left", x=0),
         yaxis=dict(
             title="Relative intensity",
-            range=[-1.2, 1.2],  # Set y-axis range from -1 to 1
+            range=[-1.2, 1.4],  # Set y-axis range from -1 to 1
             tickvals=[-1, -0.5, 0, 0.5, 1],
             ticktext=["1.0", "0.5", "0.0", "0.5", "1.0"],
         ),
+        xaxis=dict(
+            title="m/z",
+            range=[0, 1800],
+            tickmode="linear",
+            ticks="outside",
+            tick0=0,
+            ticklabelstep=2,
+            tickangle=-45,
+            dtick=50,
+            showline=True,
+            linewidth=1,
+            linecolor="grey",
+        ),
     )
 
-    fig.update_traces(width=3)
+    fig.update_traces(width=7.0)
 
     to_be_returned = dict(
         plots=[fig],
         messages=[
             {
                 "level": logging.INFO,
-                "msg": f"Successfully plotted the mirror spectrum for {peptide} ({charge}+). Tip: You can zoom in by selecting an area on the plot.",
+                "msg": f"Successfully plotted the mirror spectrum for {peptide_sequences} ({precursor_charges}+). Tip: You can zoom in by selecting an area on the plot.",
             }
         ],
     )
-    to_be_returned[f"spectrum_{peptide}_{charge}"] = plot_df
+    to_be_returned[f"spectrum_{peptide_sequences}_{precursor_charges}"] = plot_df
     return to_be_returned
 
 
@@ -361,6 +386,14 @@ def advanced_cosine_similarity(
     """
     original_experimental_peaks_df = experimental_peaks_df.copy()
     original_predicted_peaks_df = predicted_peaks_df.copy()
+    original_experimental_peaks_df[DataKeys.INTENSITY] = (
+        original_experimental_peaks_df[DataKeys.INTENSITY]
+        / original_experimental_peaks_df[DataKeys.INTENSITY].max()
+    )
+    experimental_peaks_df[DataKeys.INTENSITY] = (
+        experimental_peaks_df[DataKeys.INTENSITY]
+        / experimental_peaks_df[DataKeys.INTENSITY].max()
+    )
     matches = []
     unmatched_experimental_peaks = []
     unmatched_theoretical_peaks = []
@@ -425,23 +458,42 @@ def advanced_cosine_similarity(
 
 
 def compare_single_spectrum(args, experimental_df, predicted_df):
-    peptide_sequence, precursor_charge, experiment_name, spectrum_ref, exp_df = args
+    (
+        peptide_sequence,
+        precursor_charge,
+        collision_energy,
+        experiment_name,
+        spectrum_ref,
+    ) = args
     print(
         f"Comparing {peptide_sequence} ({precursor_charge}+) with {experiment_name} and spectrum {spectrum_ref}."
     )
-    pred_df = predicted_df[
+    filtered_experimental_df = experimental_df[
+        (experimental_df[DataKeys.PEPTIDE_SEQUENCE] == peptide_sequence)
+        & (experimental_df[DataKeys.PRECURSOR_CHARGE] == precursor_charge)
+        & (experimental_df["experiment"] == experiment_name)
+        & (experimental_df["spectra_ref"] == spectrum_ref)
+    ]
+
+    filtered_predicted_df = predicted_df[
         (predicted_df[DataKeys.PEPTIDE_SEQUENCE] == peptide_sequence)
         & (predicted_df[DataKeys.PRECURSOR_CHARGE] == precursor_charge)
+        & (predicted_df[DataKeys.COLLISION_ENERGY] == collision_energy)
     ]
     similarity = advanced_cosine_similarity(
-        exp_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]],
-        pred_df.reset_index()[[DataKeys.MZ, DataKeys.INTENSITY]],
+        filtered_experimental_df.reset_index()[
+            [DataKeys.MZ, DataKeys.INTENSITY]
+        ].sort_values(DataKeys.INTENSITY),
+        filtered_predicted_df.reset_index()[
+            [DataKeys.MZ, DataKeys.INTENSITY]
+        ].sort_values(DataKeys.INTENSITY),
         0.05,
     )
-    modifications = exp_df["modifications"].unique()[0]
+    modifications = filtered_experimental_df["modifications"].unique()[0]
     return {
         "peptide_sequence": peptide_sequence,
         "precursor_charge": precursor_charge,
+        "collision_energy": collision_energy,
         "experiment": experiment_name,
         "spectrum_ref": spectrum_ref,
         "similarity": similarity,
@@ -452,9 +504,19 @@ def compare_single_spectrum(args, experimental_df, predicted_df):
 def compare_experimental_with_predicted_spectra(
     experimental_df: pd.DataFrame, predicted_df: pd.DataFrame, threads: int = 16
 ):
+    """
+    Compares the experimental spectra with the predicted spectra using the cosine similarity. The load is distributed
+    over the specified number of threads. At last, the cosine similarities across the experiment and the predictions is
+     plotted in a violin plot.
+    :param experimental_df: dataframe containing the experimental spectra (peptide sequences, precursor charges, m/z values, intensities, etc.)
+    :param predicted_df: dataframe containing the predicted spectra (peptide sequences, precursor charges, m/z values, intensities, etc.)
+    :param threads: the number of threads to use for the comparison
+    :return:
+    """
     if threads is None:
         threads = cpu_count()
 
+    # Replace J with L in the peptide sequences. Look up "Amino acid code J L" for more information.
     predicted_df[DataKeys.PEPTIDE_SEQUENCE] = predicted_df[
         DataKeys.PEPTIDE_SEQUENCE
     ].str.replace("J", "L")
@@ -468,18 +530,22 @@ def compare_experimental_with_predicted_spectra(
     ):
         if peptide_sequence not in predicted_df[DataKeys.PEPTIDE_SEQUENCE].values:
             continue
-        for (experiment_name, spectrum_ref), exp_df in exp_group.groupby(
-            ["experiment", "spectra_ref"]
-        ):
-            comparison_args.append(
-                (
-                    peptide_sequence,
-                    precursor_charge,
-                    experiment_name,
-                    spectrum_ref,
-                    exp_df,
+        for collision_energy, _ in predicted_df[
+            (predicted_df[DataKeys.PEPTIDE_SEQUENCE] == peptide_sequence)
+            & (predicted_df[DataKeys.PRECURSOR_CHARGE] == precursor_charge)
+        ].groupby(DataKeys.COLLISION_ENERGY):
+            for (experiment_name, spectrum_ref), _ in exp_group.groupby(
+                ["experiment", "spectra_ref"]
+            ):
+                comparison_args.append(
+                    (
+                        peptide_sequence,
+                        precursor_charge,
+                        collision_energy,
+                        experiment_name,
+                        spectrum_ref,
+                    )
                 )
-            )
 
     with Pool(threads) as pool:
         compare_func = partial(
@@ -503,44 +569,101 @@ def compare_experimental_with_predicted_spectra(
     with_modifications_name = "Experimental spectra with modifications"
     fig = go.Figure()
 
-    # Violin plot for spectra with modifications (left side)
-    fig.add_trace(
-        go.Violin(
-            x=["Comparison"] * len(result_df[result_df["modifications"] != ""]),
-            y=result_df[result_df["modifications"] != ""]["similarity"],
-            legendgroup=with_modifications_name,
-            scalegroup=with_modifications_name,
-            name=with_modifications_name,
-            side="negative",
-            line_color="red",
-            **violin_plot_args,
+    for collision_energy, group in result_df.groupby("collision_energy"):
+        # Violin plot for spectra with modifications (left side)
+        comparison_name = f"NCE: {collision_energy}"
+        fig.add_trace(
+            go.Violin(
+                x=[comparison_name]
+                * len(
+                    result_df[
+                        (result_df["modifications"] != "")
+                        & (result_df["collision_energy"] == collision_energy)
+                    ]
+                ),
+                y=result_df[
+                    (result_df["modifications"] != "")
+                    & (result_df["collision_energy"] == collision_energy)
+                ]["similarity"],
+                legendgroup=with_modifications_name,
+                scalegroup=with_modifications_name,
+                name=with_modifications_name,
+                side="negative",
+                line_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+                **violin_plot_args,
+            )
         )
-    )
 
-    # Violin plot for spectra without modifications (right side)
-    fig.add_trace(
-        go.Violin(
-            x=["Comparison"] * len(result_df[result_df["modifications"] == ""]),
-            y=result_df[result_df["modifications"] == ""]["similarity"],
-            legendgroup=no_modifications_name,
-            scalegroup=no_modifications_name,
-            name=no_modifications_name,
-            side="positive",
-            line_color="blue",
-            **violin_plot_args,
+        # Violin plot for spectra without modifications (right side)
+        fig.add_trace(
+            go.Violin(
+                x=[comparison_name]
+                * len(
+                    result_df[
+                        (result_df["modifications"] == "")
+                        & (result_df["collision_energy"] == collision_energy)
+                    ]
+                ),
+                y=result_df[
+                    (result_df["modifications"] == "")
+                    & (result_df["collision_energy"] == collision_energy)
+                ]["similarity"],
+                legendgroup=no_modifications_name,
+                scalegroup=no_modifications_name,
+                name=no_modifications_name,
+                side="positive",
+                line_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+                **violin_plot_args,
+            )
         )
-    )
 
+    rotated_legend_annotations = [
+        dict(
+            textangle=-90,
+            x=1.03,
+            y=0,
+            xref="paper",
+            yref="paper",
+            xanchor="left",
+            yanchor="bottom",  # Anchor at the right and bottom
+            text=no_modifications_name,
+            showarrow=False,
+            font=dict(color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0], size=13),
+        ),
+        dict(
+            textangle=-90,
+            x=1.0,
+            y=0,
+            xref="paper",
+            yref="paper",
+            xanchor="left",
+            yanchor="bottom",  # Anchor at the right and bottom
+            text=with_modifications_name,
+            showarrow=False,
+            font=dict(color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1], size=13),
+        ),
+        dict(
+            textangle=-90,
+            x=-0.15,
+            y=-0.25,
+            xref="paper",
+            yref="paper",
+            xanchor="left",
+            yanchor="bottom",  # Anchor at the right and bottom
+            text="Distribution of similarities between experimental and predicted spectra",
+            showarrow=False,
+            font=dict(size=15),
+        ),
+    ]
     # Update layout
     fig.update_layout(
-        title="Distribution of similarities between experimental and predicted spectra",
+        title="",
         xaxis_title="",
         yaxis_title="Adapted Cosine Similarity",
         violinmode="overlay",
         violingap=0,
-        width=900,  # Set the width of the plot
-        height=600,  # Set the height of the plot
         yaxis=dict(
+            tickangle=-90,
             gridcolor="rgba(0,0,0,0.1)",
             gridwidth=1,
             zeroline=True,
@@ -548,12 +671,14 @@ def compare_experimental_with_predicted_spectra(
             zerolinewidth=1,
             range=[-1.1, 1.1],
         ),
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        xaxis=dict(tickangle=-90),
+        showlegend=False,  # TODO reset
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=0),
+        annotations=rotated_legend_annotations,
     )
 
     # Remove x-axis ticks and labels
-    fig.update_xaxes(showticklabels=False, ticks="")
+    # fig.update_xaxes(showticklabels=False, ticks="")
 
     return {
         "plots": [fig],

@@ -3,9 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils import (
-    DataKeys,
-)
+from protzilla.constants.ms_constants import DataKeys
 from protzilla.importing.ms_data_import import clean_protein_groups
 
 

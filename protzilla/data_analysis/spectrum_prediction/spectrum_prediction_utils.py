@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from protzilla.constants.ms_constants import DataKeys
 from ui.runs.forms.fill_helper import enclose_links_in_html
 
 
@@ -17,28 +18,6 @@ def format_citation(model_name):
 def calculate_peptide_mass(peptide_mz: float, charge: int) -> float:
     proton_mass = 1.007276466812
     return (peptide_mz * charge) - (proton_mass * charge)
-
-
-class FragmentationType(StrEnum):
-    """The different types of mass spectrometry fragmentation that are supported."""
-
-    HCD = "HCD"
-    CID = "CID"
-
-
-class DataKeys(StrEnum):
-    """Commonly used column names and keys in the dataframes."""
-
-    PEPTIDE_SEQUENCE = "peptide_sequences"
-    PRECURSOR_CHARGE = "precursor_charges"
-    PRECURSOR_MZ = "precursor_m/z"
-    MZ = "m/z"
-    COLLISION_ENERGY = "collision_energies"
-    FRAGMENTATION_TYPE = "fragmentation_types"
-    # These are used for the peaks
-    INTENSITY = "intensity"
-    FRAGMENT_TYPE = "fragment_type"
-    FRAGMENT_CHARGE = "fragment_charge"
 
 
 class GenericTextKeys(StrEnum):
@@ -90,6 +69,7 @@ class PredictionModels(StrEnum):
     PROSITINTENSITYCID = "PrositIntensityCID"
     PROSITINTENSITYTIMSTOF = "PrositIntensityTimsTOF"
     PROSITINTENSITYTMT = "PrositIntensityTMT"
+    UNISPEC = "UniSpec"
 
 
 PredictionModelMetadata = {
@@ -113,7 +93,7 @@ PredictionModelMetadata = {
             DataKeys.PEPTIDE_SEQUENCE,
             DataKeys.PRECURSOR_CHARGE,
         ],
-    },
+    },  # mean 0.306 median 0.382
     PredictionModels.PROSITINTENSITYTIMSTOF: {
         "url": "https://koina.wilhelmlab.org/v2/models/Prosit_2023_intensity_timsTOF/infer",
         "citation": "C., Gabriel, W., Laukens, K. et al. Nat Commun 15, 3956 (2024).",

@@ -6,5 +6,9 @@ steps:
     type: EvidenceImport
   - form_inputs: { }
     inputs: { }
-    instance_identifier: PredictSpectra_1
-    type: PredictSpectra
+    instance_identifier: PredictSpectrum_1
+    type: PredictSpectrum
+  - form_inputs: { }
+    inputs: { }
+    instance_identifier: PlotPredictedSpectrum_1
+    type: PlotPredictedSpectrum

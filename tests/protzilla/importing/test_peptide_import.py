@@ -4,10 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from protzilla.constants.ms_constants import DataKeys
 from protzilla.constants.paths import TEST_DATA_PATH
-from protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils import (
-    DataKeys,
-)
 from protzilla.importing import peptide_import
 
 

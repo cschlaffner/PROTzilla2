@@ -1,5 +1,6 @@
 import logging
 
+import protzilla.constants.ms_constants
 from protzilla.data_analysis.classification import random_forest, svm
 from protzilla.data_analysis.clustering import (
     expectation_maximisation,
@@ -779,7 +780,7 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         return inputs
 
 
-class PredictSpectra(DataAnalysisStep):
+class PredictSpectrum(DataAnalysisStep):
     display_name = "Predict spectra with various models"
     operation = "spectrum_prediction"
     method_description = "Predict the MS/MS spectra of a list of peptides using different models. The models are trained on experimental data and predict the intensity of the fragment ions"
@@ -809,16 +810,16 @@ class PredictSpectra(DataAnalysisStep):
         return inputs
 
 
-class PlotPredictedSpectra(PlotStep):
-    display_name = "Predicted Spetrum Plot"
+class PlotPredictedSpectrum(PlotStep):
+    display_name = "Predicted Spectrum Plot"
     operation = "plot"
     method_description = "Plot the predicted spectrum of a peptide"
 
     input_keys = [
         "metadata_df",
         "peaks_df",
-        "peptide",
-        "charge",
+        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+        protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
         "annotation_threshold",
     ]
     output_keys = []
@@ -837,12 +838,14 @@ class PlotPredictedSpectra(PlotStep):
             "predicted_spectra_peaks",
             instance_identifier=inputs["prediction_df_step_instance"],
         )
-        inputs["charge"] = int(inputs["charge"])
+        inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE] = int(
+            inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+        )
         return inputs
 
 
 class PlotMirrorSpectrum(PlotStep):
-    display_name = "Predicted Spetrum Mirror Plot"
+    display_name = "Predicted Spectrum Mirror Plot"
     operation = "plot"
     method_description = "Plot the predicted spectrum of a peptide"
 
@@ -850,8 +853,8 @@ class PlotMirrorSpectrum(PlotStep):
         "metadata_df",
         "peaks_df",
         "plot_df",
-        "peptide",
-        "charge",
+        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+        protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
         "annotation_threshold",
     ]
     output_keys = []
@@ -860,8 +863,6 @@ class PlotMirrorSpectrum(PlotStep):
         return plot_mirror_spectrum(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
-
         inputs["metadata_df"] = steps.get_step_output(
             Step,
             "predicted_spectra_metadata",
@@ -872,16 +873,27 @@ class PlotMirrorSpectrum(PlotStep):
             "predicted_spectra_peaks",
             instance_identifier=inputs["prediction_df_step_instance"],
         )
-        inputs["charge"] = int(inputs["charge"])
+        inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE] = int(
+            inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+        )
 
         extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
             drop=True
         )
         spectrum = extracted_spectrum_df[
-            (extracted_spectrum_df[spu.DataKeys.PEPTIDE_SEQUENCE] == inputs["peptide"])
+            (
+                extracted_spectrum_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ]
+                == inputs[protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE]
+            )
             & (
-                extracted_spectrum_df[spu.DataKeys.PRECURSOR_CHARGE]
-                == int(inputs["charge"])
+                extracted_spectrum_df[
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                ]
+                == int(
+                    inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+                )
             )
             & (extracted_spectrum_df["experiment"] == inputs["experiment_name"])
             & (
@@ -889,11 +901,6 @@ class PlotMirrorSpectrum(PlotStep):
                 == inputs["experiment_spectrum_name"]
             )
         ]
-
-        # normalize the intensity
-        spectrum[spu.DataKeys.INTENSITY] = (
-            spectrum[spu.DataKeys.INTENSITY] / spectrum[spu.DataKeys.INTENSITY].max()
-        )
 
         inputs["plot_df"] = spectrum
 
@@ -919,7 +926,7 @@ class CompareExperimentalWithPredictedSpectra(PlotStep):
         return compare_experimental_with_predicted_spectra(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
+        pass
 
         metadata_df = steps.get_step_output(
             Step,
@@ -932,11 +939,6 @@ class CompareExperimentalWithPredictedSpectra(PlotStep):
         inputs["predicted_df"] = metadata_df.merge(peaks_df, on="unique_id")
         extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
             drop=True
-        )
-        # normalize the intensity
-        extracted_spectrum_df[spu.DataKeys.INTENSITY] = (
-            extracted_spectrum_df[spu.DataKeys.INTENSITY]
-            / extracted_spectrum_df[spu.DataKeys.INTENSITY].max()
         )
         inputs["experimental_df"] = extracted_spectrum_df
 

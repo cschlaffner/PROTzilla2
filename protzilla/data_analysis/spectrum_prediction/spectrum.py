@@ -11,10 +11,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from protzilla.constants.ms_constants import DataKeys
 from protzilla.constants.protzilla_logging import logger
 from protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils import (
     CSV_COLUMNS,
-    DataKeys,
     GenericTextKeys,
     OutputKeys,
     PredictionModelMetadata,
@@ -35,6 +35,14 @@ class Spectrum:
         annotations: Optional[dict] = None,
         sanitize: bool = True,
     ):
+        """
+        Create a new Spectrum object.
+        :param peptide_sequence: the peptide sequence of the precursor peptide of the spectrum
+        :param charge: the charge of the peptide precursor
+        :param metadata: dictionary containing spectrum metadata, e.g. collision energy, fragmentation type
+        :param annotations: a dictionary containing additional peak annotations
+        :param sanitize: if True, the spectrum will be sanitized by removing duplicates and negative intensities
+        """
         self.peptide_sequence = peptide_sequence
         self.peptide_mz = peptide_mz
         self.precursor_charge = charge
@@ -57,6 +65,8 @@ class Spectrum:
         return f"{self.peptide_sequence}: {self.precursor_charge}, {self.spectrum.shape[0]} peaks"
 
     def _sanitize_spectrum(self):
+        """Remove duplicates and invalid / dropped peaks from the spectrum.
+        Negative intensities are removed."""
         self.spectrum = self.spectrum.drop_duplicates(subset=DataKeys.MZ)
         self.spectrum = self.spectrum[self.spectrum[DataKeys.INTENSITY] > 0]
 
@@ -138,7 +148,7 @@ class SpectrumPredictor:
 
 class KoinaModel(SpectrumPredictor):
     ptm_regex = re.compile(r"[\[\(]")
-    FRAGMENT_ANNOTATION_PATTERN = re.compile(r"((y|b)\d+)\+(\d+)")
+    FRAGMENT_ANNOTATION_PATTERN = re.compile(r"([a-zA-Z]\d+)\+(\d+)")
 
     def __init__(
         self,
@@ -156,8 +166,7 @@ class KoinaModel(SpectrumPredictor):
         self.prediction_df = prediction_df
         self.preprocess()
         self.verify_dataframe()
-        # TODO remove
-        self.prediction_df = self.prediction_df[:16000]
+        return self.prediction_df
 
     def verify_dataframe(self, prediction_df: Optional[pd.DataFrame] = None):
         if prediction_df is None:
@@ -169,7 +178,9 @@ class KoinaModel(SpectrumPredictor):
     def preprocess(self):
         self.prediction_df = (
             self.prediction_df[self.required_keys + [DataKeys.PRECURSOR_MZ]]
-            .drop_duplicates()
+            .drop_duplicates(
+                subset=[DataKeys.PEPTIDE_SEQUENCE, DataKeys.PRECURSOR_CHARGE]
+            )
             .reset_index(drop=True)
         )
 
@@ -192,20 +203,6 @@ class KoinaModel(SpectrumPredictor):
             )
         ]
 
-    # def predict(self):
-    #     predicted_spectra = []
-    #     slice_indices = self.slice_dataframe()
-    #     formatted_data = self.format_dataframes(slice_indices)
-    #     response_data = asyncio.run(self.make_request(formatted_data, slice_indices))
-    #     for response, indices in tqdm(
-    #         response_data,
-    #         desc="Processing predictions",
-    #         total=len(response_data),
-    #     ):
-    #         predicted_spectra.extend(
-    #             self.process_response(self.prediction_df.loc[indices], response)
-    #         )
-    #     return predicted_spectra
     def predict(self):
         predicted_spectra = []
         slice_indices = self.slice_dataframe()
@@ -288,6 +285,16 @@ class KoinaModel(SpectrumPredictor):
                     "data": to_predict[DataKeys.FRAGMENTATION_TYPE].to_list(),
                 }
             )
+
+        if DataKeys.INSTRUMENT_TYPE in to_predict.columns:
+            inputs.append(
+                {
+                    "name": str(DataKeys.INSTRUMENT_TYPE),
+                    "shape": [len(to_predict), 1],
+                    "datatype": "BYTES",
+                    "data": to_predict[DataKeys.INSTRUMENT_TYPE].to_list(),
+                }
+            )
         return {"id": "0", "inputs": inputs}
 
     async def make_request(
@@ -327,14 +334,6 @@ class KoinaModel(SpectrumPredictor):
                 else:
                     responses.append((await response.json(), indices))
         return responses
-
-    # @staticmethod
-    # def process_response(request: pd.DataFrame, response: dict) -> list[Spectrum]:
-    #     prepared_data = KoinaModel.prepare_data(response)
-    #     return [
-    #         KoinaModel.create_spectrum(row, prepared_data, i)
-    #         for i, (_, row) in enumerate(request.iterrows())
-    #     ]
 
     @staticmethod
     def process_response_batch(request: pd.DataFrame, response: dict) -> List[Spectrum]:
@@ -396,7 +395,7 @@ class KoinaModel(SpectrumPredictor):
     def extract_fragment_information(fragment_annotations: np.array):
         def extract_annotation_information(annotation_str: str):
             if match := KoinaModel.FRAGMENT_ANNOTATION_PATTERN.match(annotation_str):
-                return match.group(1), match.group(3)
+                return match.group(1), match.group(2)
             return None, None
 
         vectorized_annotation_extraction = np.vectorize(extract_annotation_information)
@@ -431,6 +430,7 @@ class SpectrumExporter:
     msp_metadata_mapping = {
         DataKeys.PRECURSOR_CHARGE: "Charge",
         DataKeys.PRECURSOR_MZ: "Parent",
+        DataKeys.COLLISION_ENERGY: "Collision Energy",
     }
 
     @staticmethod

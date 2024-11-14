@@ -2,6 +2,7 @@ from enum import Enum, StrEnum
 
 import pandas as pd
 
+import protzilla.constants.ms_constants
 import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
 from protzilla.methods.data_analysis import (
     DataAnalysisStep,
@@ -1032,7 +1033,7 @@ class FLEXIQuantLFForm(MethodForm):
         )
 
 
-class PredictSpectraForm(MethodForm):
+class PredictSpectrumForm(MethodForm):
     is_dynamic = True
     model_name = CustomChoiceField(
         choices=fill_helper.to_choices(spu.PredictionModels),
@@ -1054,7 +1055,9 @@ class PredictSpectraForm(MethodForm):
     )
     fragmentation_type = CustomChoiceField(
         label="Fragmentation type",
-        choices=fill_helper.to_choices(spu.FragmentationType),
+        choices=fill_helper.to_choices(
+            protzilla.constants.ms_constants.FragmentationType
+        ),
     )
     column_seperator = CustomChoiceField(
         label="Output file column seperator",
@@ -1081,7 +1084,7 @@ class PredictSpectraForm(MethodForm):
         self.toggle_visibility("column_seperator", show_column_seperator)
 
 
-class PlotPredictedSpectraForm(MethodForm):
+class PlotPredictedSpectrumForm(MethodForm):
     is_dynamic = True
     import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
 
@@ -1090,11 +1093,11 @@ class PlotPredictedSpectraForm(MethodForm):
         label="Choose the prediction dataframe",
     )
 
-    peptide = CustomChoiceField(
+    peptide_sequences = CustomChoiceField(
         choices=[],
         label="Choose the peptide to plot",
     )
-    charge = CustomChoiceField(
+    precursor_charges = CustomChoiceField(
         choices=[],
         label="Choose the charge of the peptide",
     )
@@ -1123,21 +1126,35 @@ class PlotPredictedSpectraForm(MethodForm):
             prediction_df_instance,
         )
 
-        self.fields["peptide"].choices = fill_helper.to_choices(
-            sorted(prediction_df[spu.DataKeys.PEPTIDE_SEQUENCE].unique())
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        ].choices = fill_helper.to_choices(
+            sorted(
+                prediction_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ].unique()
+            )
         )
 
         peptide_sequence = self.data.get(
-            "peptide", self.fields["peptide"].choices[0][0]
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+            self.fields[
+                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+            ].choices[0][0],
         )
 
         if peptide_sequence is None:
             raise ValueError("No peptide found")
 
-        self.fields["charge"].choices = fill_helper.to_choices(
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+        ].choices = fill_helper.to_choices(
             prediction_df[
-                prediction_df[spu.DataKeys.PEPTIDE_SEQUENCE] == peptide_sequence
-            ][spu.DataKeys.PRECURSOR_CHARGE].unique()
+                prediction_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ]
+                == peptide_sequence
+            ][protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE].unique()
         )
 
 
@@ -1152,12 +1169,12 @@ class PlotMirrorSpectrumForm(MethodForm):
         label="Choose the prediction dataframe",
     )
 
-    peptide = CustomChoiceField(
+    peptide_sequences = CustomChoiceField(
         choices=[],
         label="Choose the peptide",
     )
 
-    charge = CustomChoiceField(
+    precursor_charges = CustomChoiceField(
         choices=[],
         label="Choose the charge",
     )
@@ -1202,40 +1219,67 @@ class PlotMirrorSpectrumForm(MethodForm):
         # Find common peptides and charges
         common_peptide_charges = pd.merge(
             prediction_df[
-                [spu.DataKeys.PEPTIDE_SEQUENCE, spu.DataKeys.PRECURSOR_CHARGE]
+                [
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+                ]
             ],
             extracted_spectrum_df[
-                [spu.DataKeys.PEPTIDE_SEQUENCE, spu.DataKeys.PRECURSOR_CHARGE]
+                [
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+                ]
             ],
-            on=[spu.DataKeys.PEPTIDE_SEQUENCE, spu.DataKeys.PRECURSOR_CHARGE],
+            on=[
+                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+            ],
         ).drop_duplicates()
 
         # Populate peptide choices
-        self.fields["peptide"].choices = fill_helper.to_choices(
-            sorted(common_peptide_charges[spu.DataKeys.PEPTIDE_SEQUENCE].unique())
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        ].choices = fill_helper.to_choices(
+            sorted(
+                common_peptide_charges[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ].unique()
+            )
         )
 
-        selected_peptide = self.get_field("peptide")
+        selected_peptide = self.get_field(
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        )
         if selected_peptide:
             # Populate charge choices based on selected peptide
-            self.fields["charge"].choices = fill_helper.to_choices(
+            self.fields[
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+            ].choices = fill_helper.to_choices(
                 common_peptide_charges[
-                    common_peptide_charges[spu.DataKeys.PEPTIDE_SEQUENCE]
+                    common_peptide_charges[
+                        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                    ]
                     == selected_peptide
-                ][spu.DataKeys.PRECURSOR_CHARGE].unique()
+                ][protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE].unique()
             )
 
-            selected_charge = self.get_field("charge")
+            selected_charge = self.get_field(
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+            )
             if selected_charge:
                 # Populate experiment_name choices
                 self.fields["experiment_name"].choices = fill_helper.to_choices(
                     extracted_spectrum_df[
                         (
-                            extracted_spectrum_df[spu.DataKeys.PEPTIDE_SEQUENCE]
+                            extracted_spectrum_df[
+                                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                            ]
                             == selected_peptide
                         )
                         & (
-                            extracted_spectrum_df[spu.DataKeys.PRECURSOR_CHARGE]
+                            extracted_spectrum_df[
+                                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                            ]
                             == int(selected_charge)
                         )
                     ]["experiment"].unique()
@@ -1249,11 +1293,15 @@ class PlotMirrorSpectrumForm(MethodForm):
                     ].choices = fill_helper.to_choices(
                         extracted_spectrum_df[
                             (
-                                extracted_spectrum_df[spu.DataKeys.PEPTIDE_SEQUENCE]
+                                extracted_spectrum_df[
+                                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                                ]
                                 == selected_peptide
                             )
                             & (
-                                extracted_spectrum_df[spu.DataKeys.PRECURSOR_CHARGE]
+                                extracted_spectrum_df[
+                                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                                ]
                                 == int(selected_charge)
                             )
                             & (
@@ -1266,10 +1314,8 @@ class PlotMirrorSpectrumForm(MethodForm):
 
 class CompareExperimentalWithPredictedSpectraForm(MethodForm):
     """
-    This does not have any parameters. In methods/data_analysis.py, the
+    This does not have any parameters.
     """
-
-    import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
 
 
 class SelectPeptidesForProteinForm(MethodForm):

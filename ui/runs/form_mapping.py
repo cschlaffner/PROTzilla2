@@ -61,9 +61,9 @@ _forward_mapping = {
     data_analysis.DimensionReductionUMAP: data_analysis_forms.DimensionReductionUMAPForm,
     data_analysis.ProteinGraphPeptidesToIsoform: data_analysis_forms.ProteinGraphPeptidesToIsoformForm,
     data_analysis.ProteinGraphVariationGraph: data_analysis_forms.ProteinGraphVariationGraphForm,
-    data_analysis.PredictSpectra: data_analysis_forms.PredictSpectraForm,
-    data_analysis.PlotPredictedSpectra: data_analysis_forms.PlotPredictedSpectraForm,
-    # These are not implemented generally enough yet
+    data_analysis.PredictSpectrum: data_analysis_forms.PredictSpectrumForm,
+    data_analysis.PlotPredictedSpectrum: data_analysis_forms.PlotPredictedSpectrumForm,
+    # Part of a previous bachelor's thesis. Currently, there is no way to import raw experimental MS data, so they are not used as of yet.
     # data_analysis.PlotMirrorSpectrum: data_analysis_forms.PlotMirrorSpectrumForm,
     # data_analysis.CompareExperimentalWithPredictedSpectra: data_analysis_forms.CompareExperimentalWithPredictedSpectraForm,
     data_analysis.SelectPeptidesForProtein: data_analysis_forms.SelectPeptidesForProteinForm,

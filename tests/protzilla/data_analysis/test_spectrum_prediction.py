@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from protzilla.constants.ms_constants import DataKeys, FragmentationType
 from protzilla.constants.paths import PEPTIDE_TEST_DATA_PATH
 from protzilla.data_analysis.spectrum_prediction.spectrum import (
     KoinaModel,
@@ -12,14 +13,12 @@ from protzilla.data_analysis.spectrum_prediction.spectrum import (
 )
 from protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils import (
     CSV_COLUMNS,
-    DataKeys,
-    FragmentationType,
     OutputFormats,
     OutputKeys,
     PredictionModelMetadata,
     PredictionModels,
 )
-from protzilla.methods.data_analysis import PredictSpectra
+from protzilla.methods.data_analysis import PredictSpectrum
 from protzilla.methods.importing import EvidenceImport
 
 evidence_small = Path(PEPTIDE_TEST_DATA_PATH) / "evidence_100.txt"
@@ -41,7 +40,7 @@ def spectrum_prediction_run(run_imported):
         "peptide_df" in run.current_outputs
         and not run.current_outputs["peptide_df"].empty
     )
-    run.step_add(PredictSpectra())
+    run.step_add(PredictSpectrum())
     run.step_next()
     return run
 
