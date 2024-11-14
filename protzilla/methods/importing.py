@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from protzilla.importing.fasta_import import fasta_import
 from protzilla.importing.metadata_import import (
     metadata_column_assignment,
     metadata_import_method,
@@ -10,7 +11,7 @@ from protzilla.importing.ms_data_import import (
     max_quant_import,
     ms_fragger_import,
 )
-from protzilla.importing.peptide_import import peptide_import, evidence_import
+from protzilla.importing.peptide_import import evidence_import, peptide_import
 from protzilla.steps import Step, StepManager
 
 
@@ -51,7 +52,9 @@ class DiannImport(ImportingStep):
 class MsFraggerImport(ImportingStep):
     display_name = "MS Fragger Combined Protein Import"
     operation = "Protein Data Import"
-    method_description = "Import the combined_protein.tsv file form output of MS Fragger"
+    method_description = (
+        "Import the combined_protein.tsv file form output of MS Fragger"
+    )
 
     input_keys = ["file_path", "intensity_name", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
@@ -140,3 +143,15 @@ class EvidenceImport(ImportingStep):
 
     def method(self, inputs):
         return evidence_import(**inputs)
+
+
+class FastaImport(ImportingStep):
+    display_name = "Fasta Protein Sequence Import"
+    operation = "fasta_import"
+    method_description = "Import a fasta file containing protein sequences."
+
+    input_keys = ["file_path"]
+    output_keys = ["fasta_df"]
+
+    def method(self, inputs):
+        return fasta_import(**inputs)
