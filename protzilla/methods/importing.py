@@ -25,9 +25,9 @@ class ImportingStep(Step):
 
 
 class MaxQuantImport(ImportingStep):
-    display_name = "MaxQuant"
-    operation = "msdataimport"
-    method_description = "Import MaxQuant data"
+    display_name = "MaxQuant Protein Groups Import"
+    operation = "Protein Data Import"
+    method_description = "Import the protein groups file form output of MaxQuant"
 
     input_keys = ["file_path", "map_to_uniprot", "intensity_name", "aggregation_method"]
     output_keys = ["protein_df"]
@@ -37,8 +37,8 @@ class MaxQuantImport(ImportingStep):
 
 
 class DiannImport(ImportingStep):
-    display_name = "DIA-NN"
-    operation = "msdataimport"
+    display_name = "DIA-NN Import"
+    operation = "Protein Data Import"
     method_description = "DIA-NN data import"
 
     input_keys = ["file_path", "map_to_uniprot", "aggregation_method"]
@@ -49,9 +49,9 @@ class DiannImport(ImportingStep):
 
 
 class MsFraggerImport(ImportingStep):
-    display_name = "MS Fragger"
-    operation = "msdataimport"
-    method_description = "MS Fragger data import"
+    display_name = "MS Fragger Combined Protein Import"
+    operation = "Protein Data Import"
+    method_description = "Import the combined_protein.tsv file form output of MS Fragger"
 
     input_keys = ["file_path", "intensity_name", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
@@ -61,7 +61,7 @@ class MsFraggerImport(ImportingStep):
 
 
 class MetadataImport(ImportingStep):
-    display_name = "Metadata import"
+    display_name = "Metadata Import"
     operation = "metadataimport"
     method_description = "Import metadata"
 
@@ -77,7 +77,7 @@ class MetadataImport(ImportingStep):
 
 
 class MetadataImportMethodDiann(ImportingStep):
-    display_name = "Metadata import DIA-NN"
+    display_name = "DIA-NN Metadata Import"
     operation = "metadataimport"
     method_description = "Import metadata for run relationships of DIA-NN"
 
@@ -119,7 +119,7 @@ class MetadataColumnAssignment(ImportingStep):
 
 
 class PeptideImport(ImportingStep):
-    display_name = "Peptide import"
+    display_name = "MaxQuant Peptide Import"
     operation = "peptide_import"
     method_description = "Import peptide data"
 
@@ -131,7 +131,7 @@ class PeptideImport(ImportingStep):
 
 
 class EvidenceImport(ImportingStep):
-    display_name = "Evidence import"
+    display_name = "MaxQuant Evidence Import"
     operation = "peptide_import"
     method_description = "Import an evidence file"
 

@@ -89,7 +89,7 @@ def test_plots_volcano_plot_multiple_annotations(ttest_input, ttest_output, show
         log2_fc=ttest_output["log2_fold_change_df"],
         fc_threshold=0,
         alpha=0,
-        proteins_of_interest=["Protein1", "Protein2"],
+        items_of_interest=["Protein1", "Protein2"],
         group1=ttest_input["group1"],
         group2=ttest_input["group2"],
     )

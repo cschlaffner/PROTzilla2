@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" id="contain">
-  <div class="col" id="row">
+  <div class="col">
     {% if messages %}
       <div class="messages">
           {% for message in messages %}
@@ -21,49 +21,62 @@
       </div>
       <br>
     {% endif %}
+  <div class="row">
+    <div class="col mx-4">
+      <form action="{% url 'runs:create' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Work on a new run:</h3>
+          <input name="run_name" id="run_name" placeholder="Add run name" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label for="workflow_config_name">With workflow:</label>
+          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
+            {% for name in available_workflows %}
+            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label for="df_mode">Memory mode:</label>
+          <select name="df_mode" id="df_mode" class="form-select">
+            <option value="disk_memory" selected >standard</option>
+            <option value="disk">low memory</option>
+          </select>
+        </div>
+        <input type="submit" value="Create" class="btn btn-red">
+      </form>
+    </div>
 
-    <div class="row">
-      <div class="col mx-4">
-        <form action="{% url 'runs:create' %}" method="post">
-          {% csrf_token %}
-          <div class="mb-2">
-            <h3>Work on a new run:</h3>
-            <input name="run_name" id="run_name" placeholder="Add run name" class="form-control" required />
-          </div>
-          <div class="mb-2">
-            <label for="workflow_config_name">With workflow:</label>
-            <select name="workflow_config_name" id="workflow_config_name" class="form-select">
-              {% for name in available_workflows %}
-              <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-2">
-            <label for="df_mode">Memory mode:</label>
-            <select name="df_mode" id="df_mode" class="form-select">
-              <option value="disk_memory" selected >standard</option>
-              <option value="disk">low memory</option>
-            </select>
-          </div>
-          <input type="submit" value="Create" class="btn btn-red">
-        </form>
-      </div>
+    <div class="col mx-4">
+      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Continue an existing run:</h3>
+          <select name="run_name" id="run_name_option" class="form-select">
+            {% for name in available_runs %}
+            <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Continue" class="btn btn-red">
+      </form>
+    <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
+    </div>
 
-      <div class="col mx-4">
-        <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
-          {% csrf_token %}
-          <div class="mb-2">
-            <h3>Continue an existing run:</h3>
-            <select name="run_name" id="run_name_option" class="form-select">
-              {% for name in available_runs %}
-              <option value="{{ name }}">{{ name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <input type="submit" value="Continue" class="btn btn-red">
-        </form>
-      <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
-      </div>
+    <div class="col mx-4">
+      <form class="mb-5" action="{% url 'runs:delete' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Delete an existing run:</h3>
+          <select name="run_name" id="run_name_option" class="form-select">
+            {% for name in available_runs %}
+            <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="Delete" class="btn btn-red">
+      </form>
     </div>
   </div>
 </div>

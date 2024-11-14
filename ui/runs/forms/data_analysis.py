@@ -6,8 +6,6 @@ import protzilla.constants.ms_constants
 import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
 from protzilla.methods.data_analysis import (
     DataAnalysisStep,
-    DifferentialExpressionLinearModel,
-    DifferentialExpressionTTest,
     DimensionReductionUMAP,
     PTMsPerSample,
     SelectPeptidesForProtein,
@@ -168,8 +166,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
-    alpha = CustomNumberField(
-        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
@@ -206,7 +208,7 @@ class DifferentialExpressionTTestForm(MethodForm):
         label="Error rate (alpha)",
         min_value=0,
         max_value=1,
-        step_size=0.05,
+        step_size=0.01,
         initial=0.05,
     )
     # log_base = CustomChoiceField(
@@ -256,7 +258,11 @@ class DifferentialExpressionLinearModelForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
@@ -293,16 +299,18 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
     is_dynamic = True
 
-    intensity_df = CustomChoiceField(
-        choices=[], label="Step to use intensity data from"
-    )
+    protein_df = CustomChoiceField(choices=[], label="Step to use protein data from")
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
@@ -310,7 +318,7 @@ class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
 
     def fill_form(self, run: Run) -> None:
         self.fields[
-            "intensity_df"
+            "protein_df"
         ].choices = fill_helper.get_choices_for_protein_df_steps(run)
 
         self.fields[
@@ -350,7 +358,11 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     p_value_calculation_method = CustomChoiceField(
         choices=PValueCalculationMethod,
@@ -393,6 +405,77 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
             )
 
 
+class DifferentialExpressionKruskalWallisOnIntensityForm(MethodForm):
+    is_dynamic = True
+
+    protein_df = CustomChoiceField(choices=[], label="Step to use protein data from")
+    multiple_testing_correction_method = CustomChoiceField(
+        choices=MultipleTestingCorrectionMethod,
+        label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
+    )
+
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    selected_groups = CustomMultipleChoiceField(
+        choices=[], label="Select groups to perform Kruskal-Wallis Test on"
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+        self.fields["selected_groups"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+
+class DifferentialExpressionKruskalWallisOnPTMForm(MethodForm):
+    is_dynamic = True
+
+    ptm_df = CustomChoiceField(choices=[], label="Step to use ptm data from")
+    multiple_testing_correction_method = CustomChoiceField(
+        choices=MultipleTestingCorrectionMethod,
+        label="Multiple testing correction",
+        initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
+    )
+    alpha = CustomFloatField(
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
+    )
+
+    grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
+    selected_groups = CustomMultipleChoiceField(
+        choices=[], label="Select groups to perform Kruskal-Wallis Test on"
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["ptm_df"].choices = fill_helper.to_choices(
+            run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
+        )
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+        self.fields["selected_groups"].choices = fill_helper.to_choices(
+            run.steps.metadata_df[grouping].unique()
+        )
+
+
 class PlotVolcanoForm(MethodForm):
     is_dynamic = True
 
@@ -403,16 +486,16 @@ class PlotVolcanoForm(MethodForm):
     fc_threshold = CustomNumberField(
         label="Log2 fold change threshold", min_value=0, initial=0
     )
-    proteins_of_interest = CustomMultipleChoiceField(
+    items_of_interest = CustomMultipleChoiceField(
         choices=[],
-        label="Proteins of interest (will be highlighted)",
+        label="Items of interest (will be highlighted)",
     )
 
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(
-                DifferentialExpressionTTest | DifferentialExpressionLinearModel | DifferentialExpressionMannWhitneyOnIntensityForm,
-                "differentially_expressed_proteins_df",
+                Step,
+                ["corrected_p_values_df", "log2_fold_change_df"],
             )
         )
 
@@ -420,11 +503,21 @@ class PlotVolcanoForm(MethodForm):
             "input_dict", self.fields["input_dict"].choices[0][0]
         )
 
-        proteins = run.steps.get_step_output(
+        items_of_interest = []
+        step_output = run.steps.get_step_output(
             Step, "differentially_expressed_proteins_df", input_dict_instance_id
-        )["Protein ID"].unique()
+        )
+        if step_output is not None:
+            items_of_interest = step_output["Protein ID"].unique()
+        step_output = run.steps.get_step_output(
+            Step, "differentially_expressed_ptm_df", input_dict_instance_id
+        )
+        if step_output is not None:
+            items_of_interest = step_output["PTM"].unique()
 
-        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
+        self.fields["items_of_interest"].choices = fill_helper.to_choices(
+            items_of_interest
+        )
 
 
 class PlotScatterPlotForm(MethodForm):
@@ -1412,13 +1505,6 @@ class PTMsPerSampleForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        single_protein_peptides = run.steps.get_instance_identifiers(
-            SelectPeptidesForProtein, "peptide_df"
-        )
-        self.fields["peptide_df"].choices = fill_helper.to_choices(
-            single_protein_peptides
-        )
-
         self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
 
         single_protein_peptides = run.steps.get_instance_identifiers(

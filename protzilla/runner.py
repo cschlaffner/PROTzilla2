@@ -96,7 +96,7 @@ class Runner:
         self.run._run_write()
 
     def _insert_commandline_inputs(self, step):
-        if step.operation == "msdataimport":
+        if step.operation == "Protein Data Import":
             step.form_inputs["file_path"] = self.ms_data_path
 
         elif step.operation == "metadataimport":

@@ -32,4 +32,22 @@ $(document).ready(function () {
         let id = $(this).attr("id");
         $('#chosen-' + id).text(this.files[0].name);
     });
+
+
+    // control calculate buttons in footer
+    $('#calculate_parameters_submit_form_plot').click(function() {
+        $("#calc_form_plot").submit();
+    });
+    $('#calculate_parameters_submit_form').click(function() {
+        $("#calc_form_method").submit();
+    });
+
+    // calculate button spinner
+    $('.calculateSpinner').on('click', function() {        
+        // Change button content to show 'Calculating...' with a spinner
+        $(this).html(`
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Calculating...
+        `);
+    });
 });
