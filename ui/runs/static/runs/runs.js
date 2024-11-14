@@ -50,4 +50,33 @@ $(document).ready(function () {
             Calculating...
         `);
     });
+
+    // Function to save the current state of the accordion in localStorage
+    function saveAccordionState() {
+        const panels = [];
+        $(".collapse").each(function () {
+            if ($(this).hasClass("show")) {
+                panels.push(this.id);
+            }
+        });
+        localStorage.setItem("accordionState", JSON.stringify(panels));
+    }
+
+    // Function to load the accordion state from localStorage
+    function loadAccordionState() {
+        const panels = JSON.parse(localStorage.getItem("accordionState")) || [];
+        panels.forEach(function (panelId) {
+            const panel = $("#" + panelId);
+            if (panel.length) {
+                panel.addClass("show");
+            }
+        });
+    }
+
+    // Load accordion state on page load
+    loadAccordionState();
+
+    // Set up event listeners for accordion panels to save state on show/hide
+    $(".collapse").on("shown.bs.collapse", saveAccordionState);
+    $(".collapse").on("hidden.bs.collapse", saveAccordionState);
 });

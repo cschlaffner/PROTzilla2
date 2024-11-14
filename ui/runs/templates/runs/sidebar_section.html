@@ -13,7 +13,7 @@
 <div>
     {% for step in section.steps %}
         <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %} d-flex align-items-center">
-            <form action="{% url 'runs:navigate' run_name %}" method="post">
+            <form action="{% url 'runs:navigate' run_name %}" method="post" class="ms-auto">
                 {% csrf_token %}
                 <input type="hidden" name="section_name" value="{{ section.id }}">
                 <input type="hidden" name="index" value="{{ step.index }}">
@@ -28,14 +28,16 @@
                     {% csrf_token %}
                     <input type="hidden" name="index" value="{{ step.index }}">
                     <input type="hidden" name="section" value="{{ step.section }}">
-                    <button class="removeBtn btn d-flex justify-content-center align-items-end mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
-                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                    </svg></button>
+                    <button class="removeBtn btn d-flex justify-content-center align-items-end mt-1">                    
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash removeIcon">
+                            <path d="M5.5 5.5v7h1v-7h-1zm3 0v7h1v-7h-1z"/>
+                            <path d="M11 1.5H5l-.5.5H3.5A.5.5 0 0 0 3 2.5v1a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H11.5l-.5-.5zm-7 1h6l.5.5h-7l.5-.5zm1.25 3v7A.75.75 0 0 0 7 13.75h2A.75.75 0 0 0 9.75 12v-7H5.25z"/>
+                        </svg>
+                    </button>
                 </form>
             {% endif %}
 
-        </div>
+        </div>  
     {% endfor %}
 </div>
 

@@ -33,8 +33,10 @@
                         {{ section.name }}
                     </div>
                 </div>
+                <!-- <div id="collapse_{{ section.id }}"
+                     class="collapse{% if section.selected %} show {% endif %}"> -->
                 <div id="collapse_{{ section.id }}"
-                     class="collapse{% if section.selected %} show {% endif %}">
+                     class="collapse">
                     <div class="card-body my-2">
                         {% include "runs/sidebar_section.html" with section=section run_name=run_name %}
                     </div>
