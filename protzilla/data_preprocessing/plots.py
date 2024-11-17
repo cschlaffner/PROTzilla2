@@ -10,7 +10,6 @@ from protzilla.utilities import default_intensity_column
 from protzilla.utilities.plot_template import *
 from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
-
 def create_pie_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
@@ -34,10 +33,7 @@ def create_pie_plot(
         values=values_of_sectors
     )
 
-    fig.update_layout(
-        title={"text": f"<b>{heading}</b>"},
-        template="plotly_protzilla"
-    )
+    fig.update_layout(title={"text": f"<b>{heading}</b>"})
     fig.update_traces(hovertemplate="%{label} <br>Amount: %{value}")
     return fig
 
@@ -69,10 +65,7 @@ def create_bar_plot(
         color_discrete_map="identity"
     )
 
-    fig.update_layout(
-        title={"text": f"<b>{heading}</b>"},
-        template="plotly_protzilla"
-    )
+    fig.update_layout(title={"text": f"<b>{heading}</b>"})
     fig.update_xaxes(title=x_title)
     fig.update_yaxes(title=y_title)
     return fig
@@ -153,10 +146,7 @@ def create_box_plots(
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
 
-    fig.update_layout(
-        title={"text": f"<b>{heading}</b>"},
-        template="plotly_protzilla"
-    )
+    fig.update_layout(title={"text": f"<b>{heading}</b>"})
     fig.update_xaxes(title=x_title)
     fig.update_yaxes(
         title=y_title,
@@ -259,10 +249,7 @@ def create_histograms(
         if visual_transformation == "log10":
             fig.update_layout(xaxis=generate_tics(0, max_value, True))
 
-    fig.update_layout(
-        title={"text": f"<b>{heading}</b>"},
-        template="plotly_protzilla"
-    )
+    fig.update_layout(title={"text": f"<b>{heading}</b>"})
     fig.update_xaxes(title=x_title)
     fig.update_yaxes(
         title=y_title,
@@ -311,7 +298,6 @@ def create_anomaly_score_bar_plot(
         },
     )
     fig.update_coloraxes(showscale=False)
-    fig.update_layout(template="plotly_protzilla")
     fig.update_xaxes(
         categoryorder="category ascending",
         visible=False,
@@ -360,7 +346,6 @@ def create_pca_2d_scatter_plot(
     )
     e_variance_0 = round(explained_variance_ratio[0], 4) * 100
     e_variance_1 = round(explained_variance_ratio[1], 4) * 100
-    fig.update_layout(template="plotly_protzilla")
     fig.update_xaxes(
         showticklabels=False,
         title=f"Principal Component 1 ({e_variance_0:.2f} %)"
@@ -412,7 +397,6 @@ def create_pca_3d_scatter_plot(
     z_percent = round(explained_variance_ratio[2], 4) * 100
 
     fig.update_layout(
-        template="plotly_protzilla",
         scene={
             "xaxis": {
                 "title": f"Principal Component 1 ({x_percent:.2f} %)",
