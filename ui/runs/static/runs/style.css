@@ -16,6 +16,7 @@ html, body {
 #content {
     order: 1;
     padding: 20px;
+    padding-bottom: 0px;
     flex-grow: 1;
 }
 
@@ -28,7 +29,7 @@ html, body {
     order: 2;
     flex-basis: 300px;
     max-width: 400px;
-    min-height: 100vh;
+    min-height: calc(100vh - 60px);
     flex-grow: 1;
     transition: 100ms;
 }
@@ -74,4 +75,17 @@ html, body {
 
 #gsea_enrichment_plot_img {
     width: 800px;
+}
+
+.header {
+    position: sticky;
+    top: 80px;
+}
+
+.footer {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 8%;
+    margin-top: 10px;
+    background-color: rgb(255, 255, 255);
 }

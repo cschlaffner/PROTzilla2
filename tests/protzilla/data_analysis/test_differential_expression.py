@@ -1,10 +1,18 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from protzilla.data_analysis.differential_expression import anova, linear_model, t_test
-from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_intensity_data, \
-    mann_whitney_test_on_ptm_data
+from protzilla.data_analysis.differential_expression import (
+    anova,
+    linear_model,
+    t_test,
+    mann_whitney_test_on_intensity_data,
+    mann_whitney_test_on_ptm_data,
+    kruskal_wallis_test_on_intensity_data,
+    kruskal_wallis_test_on_ptm_data
+)
 from protzilla.data_analysis.plots import create_volcano_plot
 
 
@@ -399,7 +407,7 @@ def test_differential_expression_mann_whitney_on_intensity(
     test_alpha = 0.05
 
     current_input = dict(
-        intensity_df=test_intensity_df,
+        protein_df=test_intensity_df,
         metadata_df=test_metadata_df,
         grouping="Group",
         group1="Group1",
@@ -446,23 +454,108 @@ def test_differential_expression_mann_whitney_on_intensity(
     assert current_out["corrected_alpha"] == test_alpha
 
 
+def test_differential_expression_kruskal_wallis_on_intensity_three_groups(
+        diff_expr_test_data,
+        show_figures,
+):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+
+    current_input = dict(
+        protein_df=test_intensity_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        selected_groups=["Group1", "Group2", "Group3"],
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+        log_base="log2",
+    )
+    current_out = kruskal_wallis_test_on_intensity_data(**current_input)
+
+    expected_corrected_p_values = [0.175, 0.33, 0.5712, 0.175]
+
+    expected_h_statistics = [4.963, 2.7925, 1.12, 4.8727]
+    expected_differentially_expressed_proteins = ["Protein1", "Protein2", "Protein3", "Protein4"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    h_statistics_rounded = [
+        round(x, 4) for x in current_out["h_statistic_df"]["h_statistic"]
+    ]
+
+    assert p_values_rounded == expected_corrected_p_values
+    assert h_statistics_rounded == expected_h_statistics
+    assert (
+            list(current_out["differentially_expressed_proteins_df"]["Protein ID"].unique())
+            == expected_differentially_expressed_proteins
+    )
+    assert current_out["corrected_alpha"] == test_alpha
+
+
+def test_differential_expression_kruskal_wallis_on_intensity_group_handling(
+        diff_expr_test_data,
+        show_figures,
+):
+    test_intensity_df, test_metadata_df = diff_expr_test_data
+    test_alpha = 0.05
+
+    current_input = dict(
+        protein_df=test_intensity_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        selected_groups=["Group1", "wrong_group"],
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+        log_base="log2",
+    )
+    current_out = kruskal_wallis_test_on_intensity_data(**current_input)
+
+    assert "messages" in current_out
+    assert any(
+        message["level"] == logging.WARNING and
+        "Group \'wrong_group\' were not found in metadata" in message["msg"]
+
+        for message in current_out["messages"]
+    )
+    assert any(
+        message["level"] == logging.WARNING and
+        "Auto-selected the groups \'Group1\', \'Group2\', \'Group3\'" in message["msg"]
+
+        for message in current_out["messages"]
+    )
+
+    expected_corrected_p_values = [0.175, 0.33, 0.5712, 0.175]
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    assert p_values_rounded == expected_corrected_p_values
+
+
 @pytest.fixture
 def ptm_test_data():
     test_amount_list = (
-        ["Sample1",  1,  1, 10,   1, 100],
-        ["Sample2",  2,  2, 10,   1, 100],
-        ["Sample3",  3,  3, 10,   1, 100],
-        ["Sample4",  4,  4, 10,   1, 100],
-        ["Sample5",  5,  5, 10,   1, 100],
-        ["Sample6",  6,  3, 11, 111, 100],
-        ["Sample7",  7,  4, 12, 222, 100],
-        ["Sample8",  8,  5, 13, 333, 100],
-        ["Sample9",  9,  6, 14, 444, 100],
-        ["Sample10", 10, 7, 15, 555, 100],
+        ["Sample1", 1, 1, 10, 1, 100, 100],
+        ["Sample2", 2, 2, 10, 1, 100, 100],
+        ["Sample3", 3, 3, 10, 1, 100, 100],
+        ["Sample4", 4, 4, 10, 1, 100, 100],
+        ["Sample5", 5, 5, 10, 1, 100, 100],
+        ["Sample6", 6, 3, 11, 111, 100, 100],
+        ["Sample7", 7, 4, 12, 222, 100, 100],
+        ["Sample8", 8, 5, 13, 333, 100, 100],
+        ["Sample9", 9, 6, 14, 444, 100, 100],
+        ["Sample10", 10, 7, 15, 555, 100, 100],
+        ["Sample11", 11, 5, 16, 1111, 100, 100],
+        ["Sample12", 12, 6, 17, 2222, 100, 100],
+        ["Sample13", 13, 7, 18, 3333, 100, 100],
+        ["Sample14", 14, 8, 19, 4444, 100, 100],
+        ["Sample15", 15, 9, 20, 5555, 100, 100],
+
+
     )
     test_amount_df = pd.DataFrame(
         data=test_amount_list,
-        columns=["Sample", "Oxidation", "Acetyl", "GlyGly", "Phospho", "Unmodified"],
+        columns=["Sample", "Oxidation", "Acetyl", "GlyGly", "Phospho", "Unmodified", "Total Amount of Peptides"],
     )
 
     test_metadata_list = (
@@ -476,6 +569,11 @@ def ptm_test_data():
         ["Sample8", "Group2"],
         ["Sample9", "Group2"],
         ["Sample10", "Group2"],
+        ["Sample11", "Group3"],
+        ["Sample12", "Group3"],
+        ["Sample13", "Group3"],
+        ["Sample14", "Group3"],
+        ["Sample15", "Group3"],
     )
     test_metadata_df = pd.DataFrame(
         data=test_metadata_list,
@@ -521,6 +619,43 @@ def test_differential_expression_mann_whitney_on_ptm(
     assert p_values_rounded == expected_corrected_p_values
     assert all(u_statistics == expected_u_statistics)
     assert log2_fc_rounded == expected_log2_fc
+    assert (
+            list(current_out["significant_ptm_df"]["PTM"].unique())
+            == expected_significant_ptms
+    )
+    assert current_out["corrected_alpha"] == test_alpha
+
+
+def test_differential_expression_kruskal_wallis_on_ptm(
+        ptm_test_data,
+        show_figures,
+):
+    test_amount_df, test_metadata_df = ptm_test_data
+    test_alpha = 0.05
+
+    current_input = dict(
+        ptm_df=test_amount_df,
+        metadata_df=test_metadata_df,
+        grouping="Group",
+        selected_groups=["Group1", "Group2", "Group3"],
+        multiple_testing_correction_method="Benjamini-Hochberg",
+        alpha=test_alpha,
+    )
+    current_out = kruskal_wallis_test_on_ptm_data(**current_input)
+
+    expected_corrected_p_values = [0.0026, 0.0173, 0.0026, 0.0026]
+    expected_h_statistics = [12.5, 8.1159, 12.963, 12.963]
+    expected_significant_ptms = ["Oxidation", "Acetyl", "GlyGly", "Phospho"]
+
+    p_values_rounded = [
+        round(x, 4) for x in current_out["corrected_p_values_df"]["corrected_p_value"]
+    ]
+    h_statistics_rounded = [
+        round(x, 4) for x in current_out["h_statistic_df"]["h_statistic"]
+    ]
+
+    assert p_values_rounded == expected_corrected_p_values
+    assert h_statistics_rounded == expected_h_statistics
     assert (
             list(current_out["significant_ptm_df"]["PTM"].unique())
             == expected_significant_ptms

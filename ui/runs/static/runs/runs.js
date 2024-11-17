@@ -33,6 +33,10 @@ $(document).ready(function () {
         $('#chosen-' + id).text(this.files[0].name);
     });
 
+    // control calculate calculate button in footer
+    $('#calculate_parameters_submit').click(function() {
+        $("#calculateForm").submit();
+    });
 
     // show loading spinner on calculate button
     $('#calculateForm').on('submit', function() {        

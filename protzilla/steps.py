@@ -353,17 +353,20 @@ class StepManager:
         )
 
     def get_instance_identifiers(
-        self, step_type: type[Step], output_key: str = None
+        self, step_type: type[Step], output_key: str | list[str] = None
     ) -> list[str]:
+        if isinstance(output_key, str):
+            output_key = [output_key]
+
         instance_identifiers = [
             step.instance_identifier
             for step in self.all_steps
             if isinstance(step, step_type)
-            and (output_key is None or output_key in step.output)
+            and (output_key is None or all(k in step.output for k in output_key))
         ]
         if not instance_identifiers:
             logging.warning(
-                f"No instance identifiers found for {step_type} and output_key {output_key}"
+                f"No instance identifiers found with step type {step_type} and output_key{'s' if len(output_key) > 1 else ''} {output_key}"
             )
         return instance_identifiers
 
