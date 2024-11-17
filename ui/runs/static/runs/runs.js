@@ -33,17 +33,24 @@ $(document).ready(function () {
         $('#chosen-' + id).text(this.files[0].name);
     });
 
-    // control calculate calculate button in footer
-    $('#calculate_parameters_submit').click(function() {
-        $("#calculateForm").submit();
-    });
+    // control calculate button in footer
+    var calculateButton = $('#calculate_parameters_submit');
 
-    // show loading spinner on calculate button
-    $('#calculateForm').on('submit', function() {        
-        $('#calculate_parameters_submit').html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Calculating...
-        `);
-        $('#calculate_parameters_submit').prop('disabled', true);
+    calculateButton.click(function() {
+        var form = $("#calculateForm")[0];
+
+        if (form.checkValidity()) {
+            form.submit();
+
+            // show loading spinner on calculate button
+            calculateButton.html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Calculating...
+            `);
+            calculateButton.prop('disabled', true);
+
+        } else {
+            form.reportValidity();
+        }
     });
 });
