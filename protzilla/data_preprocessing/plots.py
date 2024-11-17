@@ -411,17 +411,21 @@ def create_pca_3d_scatter_plot(
     y_percent = round(explained_variance_ratio[1], 4) * 100
     z_percent = round(explained_variance_ratio[2], 4) * 100
 
-    fig.update_layout(template="plotly_protzilla")
-    fig.update_xaxes(
-        title=f"Principal Component 1 ({x_percent:.2f} %)",
-        showticklabels=False
-    )
-    fig.update_yaxes(
-        title=f"Principal Component 2 ({y_percent:.2f} %)",
-        showticklabels=False
-    )
-    fig.update_zaxes(
-        title=f"Principal Component 3 ({z_percent:.2f} %)",
-        showticklabels=False
+    fig.update_layout(
+        template="plotly_protzilla",
+        scene={
+            "xaxis": {
+                "title": f"Principal Component 1 ({x_percent:.2f} %)",
+                "showticklabels": False
+            },
+            "yaxis": {
+                "title": f"Principal Component 2 ({y_percent:.2f} %)",
+                "showticklabels": False
+            },
+            "zaxis": {
+                "title": f"Principal Component 3 ({z_percent:.2f} %)",
+                "showticklabels": False
+            }
+        }
     )
     return fig
