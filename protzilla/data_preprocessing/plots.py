@@ -7,8 +7,8 @@ from plotly.subplots import make_subplots
 
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
-
-from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+from protzilla.utilities.plot_template import *
+from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 
 
 def create_pie_plot(
@@ -21,7 +21,6 @@ def create_pie_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param color: Optional argument to specify the colour of the pie chart
     :param names_of_sectors: Name of parts (so-called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
@@ -32,20 +31,12 @@ def create_pie_plot(
 
     fig = px.pie(
         names=names_of_sectors,
-        values=values_of_sectors,
-        color_discrete_sequence=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+        values=values_of_sectors
     )
 
     fig.update_layout(
-        title={
-            "text": f"<b>{heading}</b>",
-            "font": dict(size=16),
-            "y": 0.98,
-            "x": 0.5,
-            "xanchor": "center",
-            "yanchor": "top",
-        },
-        font=dict(size=14, family="Arial"),
+        title={"text": f"<b>{heading}</b>"},
+        template="plotly_protzilla"
     )
     fig.update_traces(hovertemplate="%{label} <br>Amount: %{value}")
     return fig
@@ -55,7 +46,6 @@ def create_bar_plot(
     names_of_sectors: "list[str]",
     values_of_sectors: "list[int]",
     heading: str = "",
-    colour: "list[str]" = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
     y_title: str = "",
     x_title: str = "",
 ) -> Figure:
@@ -64,7 +54,6 @@ def create_bar_plot(
     Especially helpful for visualisation of basic parts of
     a whole.
 
-    :param color: Optional argument to specify the colour of the bar chart
     :param names_of_sectors: Name of parts (so called sectors) or categories
     :param values_of_sectors: Corresponding values for sectors
     :param heading: Header for the graph - for example the topic
@@ -76,28 +65,16 @@ def create_bar_plot(
     fig = px.bar(
         x=names_of_sectors,
         y=values_of_sectors,
-        color=colour[: len(values_of_sectors)],
-        color_discrete_map="identity",
+        color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+        color_discrete_map="identity"
     )
 
     fig.update_layout(
-        xaxis_title=x_title,
-        yaxis_title=y_title,
-        plot_bgcolor="white",
-        yaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
+        title={"text": f"<b>{heading}</b>"},
+        template="plotly_protzilla"
     )
-
-    fig.update_layout(
-        title={
-            "text": f"<b>{heading}</b>",
-            "font": dict(size=16),
-            "y": 0.98,
-            "x": 0.5,
-            "xanchor": "center",
-            "yanchor": "top",
-        },
-        font=dict(size=14, family="Arial"),
-    )
+    fig.update_xaxes(title=x_title)
+    fig.update_yaxes(title=y_title)
     return fig
 
 
@@ -149,13 +126,13 @@ def create_box_plots(
             y=dataframe_a[intensity_name_a],
             x=dataframe_a[group_by],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
-            name=name_a,
+            name=name_a
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
             x=dataframe_b[group_by],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-            name=name_b,
+            name=name_b
         )
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
@@ -166,37 +143,27 @@ def create_box_plots(
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
-            name=name_a,
+            name=name_a
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
             marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-            name=name_b,
+            name=name_b
         )
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
 
     fig.update_layout(
-        xaxis_title=x_title,
-        yaxis_title=y_title,
-        xaxis2_title=x_title,
-        yaxis2_title=y_title,
-        font=dict(size=14, family="Arial"),
-        plot_bgcolor="white",
-        yaxis1={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
-        yaxis2={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
-        title={
-            "text": f"<b>{heading}</b>",
-            "font": dict(size=16),
-            "y": 0.98,
-            "x": 0.5,
-            "xanchor": "center",
-            "yanchor": "top",
-        },
+        title={"text": f"<b>{heading}</b>"},
+        template="plotly_protzilla"
+    )
+    fig.update_xaxes(title=x_title)
+    fig.update_yaxes(
+        title=y_title,
+        rangemode="tozero"
     )
     if visual_transformation == "log10":
         fig.update_yaxes(type="log")
-    fig.update_yaxes(rangemode="tozero")
     return fig
 
 
@@ -278,7 +245,6 @@ def create_histograms(
         fig = make_subplots(rows=1, cols=2)
         fig.add_trace(trace0, 1, 1)
         fig.add_trace(trace1, 1, 2)
-        fig.update_layout(xaxis2_title=x_title, yaxis2_title=y_title)
         if visual_transformation == "log10":
             fig.update_layout(
                 xaxis=generate_tics(0, max_value, True),
@@ -294,22 +260,14 @@ def create_histograms(
             fig.update_layout(xaxis=generate_tics(0, max_value, True))
 
     fig.update_layout(
-        xaxis_title=x_title,
-        yaxis_title=y_title,
-        font=dict(size=14, family="Arial"),
-        plot_bgcolor="white",
-        yaxis1={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
-        yaxis2={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
-        title={
-            "text": f"<b>{heading}</b>",
-            "font": dict(size=16),
-            "y": 0.98,
-            "x": 0.5,
-            "xanchor": "center",
-            "yanchor": "top",
-        },
+        title={"text": f"<b>{heading}</b>"},
+        template="plotly_protzilla"
     )
-    fig.update_yaxes(rangemode="tozero")
+    fig.update_xaxes(title=x_title)
+    fig.update_yaxes(
+        title=y_title,
+        rangemode="tozero"
+    )
     return fig
 
 
@@ -353,18 +311,16 @@ def create_anomaly_score_bar_plot(
         },
     )
     fig.update_coloraxes(showscale=False)
-    fig.update_layout(xaxis={"categoryorder": "category ascending"})
-    fig.update_layout(
-        yaxis={
-            "visible": True,
-            "showticklabels": True,
-            "gridcolor": "lightgrey",
-        },
-        xaxis={"visible": False, "showticklabels": False},
-        font=dict(size=18, family="Arial"),
-        plot_bgcolor="white",
+    fig.update_layout(template="plotly_protzilla")
+    fig.update_xaxes(
+        categoryorder="category ascending",
+        visible=False,
+        showticklabels=False
     )
-
+    fig.update_yaxes(
+        visible=True,
+        showticklabels=True
+    )
     return fig
 
 
@@ -404,17 +360,15 @@ def create_pca_2d_scatter_plot(
     )
     e_variance_0 = round(explained_variance_ratio[0], 4) * 100
     e_variance_1 = round(explained_variance_ratio[1], 4) * 100
-    fig.update_layout(
-        xaxis_title=f"Principal Component 1 ({e_variance_0:.2f} %)",
-        yaxis_title=f"Principal Component 2 ({e_variance_1:.2f} %)",
-        font=dict(size=14, family="Arial"),
-        plot_bgcolor="white",
-        yaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
-        xaxis={"gridcolor": "lightgrey", "zerolinecolor": "lightgrey"},
+    fig.update_layout(template="plotly_protzilla")
+    fig.update_xaxes(
+        showticklabels=False,
+        title=f"Principal Component 1 ({e_variance_0:.2f} %)"
     )
-    fig.update_xaxes(showticklabels=False)
-    fig.update_yaxes(showticklabels=False)
-
+    fig.update_yaxes(
+        showticklabels=False,
+        title=f"Principal Component 2 ({e_variance_1:.2f} %)"
+    )
     return fig
 
 
@@ -457,17 +411,17 @@ def create_pca_3d_scatter_plot(
     y_percent = round(explained_variance_ratio[1], 4) * 100
     z_percent = round(explained_variance_ratio[2], 4) * 100
 
-    fig.update_layout(
-        scene=dict(
-            xaxis_title=(f"Principal Component 1 ({x_percent:.2f} %)"),
-            yaxis_title=(f"Principal Component 2 ({y_percent:.2f} %)"),
-            zaxis_title=(f"Principal Component 3 ({z_percent:.2f} %)"),
-            xaxis=dict(showticklabels=False),
-            yaxis=dict(showticklabels=False),
-            zaxis=dict(showticklabels=False),
-        ),
-        font=dict(size=14, family="Arial"),
-        plot_bgcolor="white",
+    fig.update_layout(template="plotly_protzilla")
+    fig.update_xaxes(
+        title=f"Principal Component 1 ({x_percent:.2f} %)",
+        showticklabels=False
     )
-
+    fig.update_yaxes(
+        title=f"Principal Component 2 ({y_percent:.2f} %)",
+        showticklabels=False
+    )
+    fig.update_zaxes(
+        title=f"Principal Component 3 ({z_percent:.2f} %)",
+        showticklabels=False
+    )
     return fig
