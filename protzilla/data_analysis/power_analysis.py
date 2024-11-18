@@ -449,6 +449,7 @@ def power_calculation_for_all_proteins(
 
         power_for_all_proteins = min(power_list)
 
+    """
     power_below_threshold = []
     for protein_group in protein_groups_for_calculation:
         power = power_calculation(
@@ -470,7 +471,7 @@ def power_calculation_for_all_proteins(
     print(num_proteins_below_threshold)
     num_power_list = len(power_list)
     print(num_power_list)
-
+    """
 
     colors = colorscheme.PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
 

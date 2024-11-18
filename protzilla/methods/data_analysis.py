@@ -885,9 +885,9 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
 
 
 class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
-    display_name = "Sample Size Calculation for all Proteins"
+    display_name = "Sample Size Calculation for All Proteins"
     operation = "Power Analysis"
-    method_description = "Calculates sample size for all proteins"
+    method_description = "Calculates sample size for a selected group of proteins and returns the maximum required sample size."
 
     input_keys = [
         "differentially_expressed_proteins_df",
@@ -936,9 +936,9 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
         ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
 
 class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
-    display_name = "Power Calculation for all Proteins"
+    display_name = "Power Calculation for All Proteins"
     operation = "Power Analysis"
-    method_description = "Calculates power for all proteins"
+    method_description = "Calculates power for a selected group of proteins and returns the minimum power."
 
     input_keys = [
         "differentially_expressed_proteins_df",
