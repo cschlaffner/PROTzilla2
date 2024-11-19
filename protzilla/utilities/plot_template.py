@@ -24,7 +24,11 @@ layout = go.Layout(
     yaxis={
         "gridcolor": "lightgrey",
         "zerolinecolor": "lightgrey"
-    }
+    },
+    modebar={
+        "remove": ["autoScale2d", "lasso", "lasso2d", "toImage", "select2d"],
+    },
+    dragmode="pan"
 )
 pio.templates["plotly_protzilla"] = go.layout.Template(layout=layout)
 pio.templates.default = "plotly_protzilla"
