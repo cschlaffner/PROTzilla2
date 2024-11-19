@@ -1,7 +1,7 @@
 import plotly.io as pio
 import plotly.graph_objects as go
 
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+from protzilla.constants.colors import *
 
 
 layout = go.Layout(
@@ -19,7 +19,7 @@ layout = go.Layout(
         "size": 14,
         "family": "Arial"
     },
-    colorway= PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+    colorway=[PROTZILLA_PRIMARY_COLOR, PROTZILLA_SECONDARY_COLOR],
     plot_bgcolor="white",
     yaxis={
         "gridcolor": "lightgrey",

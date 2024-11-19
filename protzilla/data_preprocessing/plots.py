@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
 from protzilla.utilities.plot_template import *
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+from protzilla.constants.colors import *
 
 def create_pie_plot(
     names_of_sectors: "list[str]",
@@ -61,7 +61,7 @@ def create_bar_plot(
     fig = px.bar(
         x=names_of_sectors,
         y=values_of_sectors,
-        color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE,
+        color=[PROTZILLA_PRIMARY_COLOR, PROTZILLA_SECONDARY_COLOR],
         color_discrete_map="identity"
     )
 
@@ -118,13 +118,13 @@ def create_box_plots(
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
             x=dataframe_a[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+            marker_color=PROTZILLA_PRIMARY_COLOR,
             name=name_a
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
             x=dataframe_b[group_by],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+            marker_color=PROTZILLA_SECONDARY_COLOR,
             name=name_b
         )
         fig.add_trace(trace0, 1, 1)
@@ -135,12 +135,12 @@ def create_box_plots(
         fig = make_subplots(rows=1, cols=2)
         trace0 = go.Box(
             y=dataframe_a[intensity_name_a],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+            marker_color=PROTZILLA_PRIMARY_COLOR,
             name=name_a
         )
         trace1 = go.Box(
             y=dataframe_b[intensity_name_b],
-            marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+            marker_color=PROTZILLA_SECONDARY_COLOR,
             name=name_b
         )
         fig.add_trace(trace0, 1, 1)
@@ -221,13 +221,13 @@ def create_histograms(
 
     trace0 = go.Histogram(
         x=intensities_a,
-        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+        marker_color=PROTZILLA_PRIMARY_COLOR,
         name=name_a,
         xbins=dict(start=min_value, end=max_value, size=binsize_a),
     )
     trace1 = go.Histogram(
         x=intensities_b,
-        marker_color=PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
+        marker_color=PROTZILLA_SECONDARY_COLOR,
         name=name_b,
         xbins=dict(start=min_value, end=max_value, size=binsize_b),
     )
@@ -260,8 +260,8 @@ def create_histograms(
 
 def create_anomaly_score_bar_plot(
     anomaly_df: pd.DataFrame,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    colour_outlier: str = PROTZILLA_SECONDARY_COLOR,
+    colour_non_outlier: str = PROTZILLA_PRIMARY_COLOR,
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -270,10 +270,9 @@ def create_anomaly_score_bar_plot(
     :param anomaly_df: pandas Dataframe that contains the anomaly score for each\
     sample, including outliers and on-outliers samples
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    Default: PROTZILLA_SECONDARY_COLOR
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+    non-outliers. Default: PROTZILLA_PRIMARY_COLOR
     :return: returns a plotly Figure object
     """
 
@@ -313,8 +312,8 @@ def create_anomaly_score_bar_plot(
 def create_pca_2d_scatter_plot(
     pca_df: pd.DataFrame,
     explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    colour_outlier: str = PROTZILLA_SECONDARY_COLOR,
+    colour_non_outlier: str = PROTZILLA_PRIMARY_COLOR,
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -326,10 +325,9 @@ def create_pca_2d_scatter_plot(
     :param explained_variance_ratio: a list that contains the\
     explained variation for each component
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    Default: PROTZILLA_SECONDARY_COLOR
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+    non-outliers. Default: PROTZILLA_PRIMARY_COLOR
 
     :return: returns a plotly Figure object
     """
@@ -360,8 +358,8 @@ def create_pca_2d_scatter_plot(
 def create_pca_3d_scatter_plot(
     pca_df: pd.DataFrame,
     explained_variance_ratio: list,
-    colour_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[1],
-    colour_non_outlier: str = PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE[0],
+    colour_outlier: str = PROTZILLA_SECONDARY_COLOR,
+    colour_non_outlier: str = PROTZILLA_PRIMARY_COLOR,
 ) -> Figure:
     """
     This function creates a graph visualising the outlier
@@ -373,10 +371,9 @@ def create_pca_3d_scatter_plot(
     :param explained_variance_ratio: a list that contains the\
     explained variation for each component
     :param colour_outlier: hex code for colour depicting the outliers.
-    Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE outlier colour
+    Default: PROTZILLA_SECONDARY_COLOR
     :param colour_non_outlier: hex code for colour depicting the
-    non-outliers. Default: PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
-    non-outlier colour
+    non-outliers. Default: PROTZILLA_PRIMARY_COLOR
 
     :return: returns a plotly Figure object
     """
