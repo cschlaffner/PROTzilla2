@@ -51,7 +51,7 @@ $(document).ready(function () {
         `);
     });
 
-    // Function to save the current state of the accordion in localStorage
+    // save current state of accordion in localStorage
     function saveAccordionState() {
         const panels = [];
         $(".collapse").each(function () {
@@ -62,7 +62,7 @@ $(document).ready(function () {
         localStorage.setItem("accordionState", JSON.stringify(panels));
     }
 
-    // Function to load the accordion state from localStorage
+    // load accordion state from localStorage
     function loadAccordionState() {
         const panels = JSON.parse(localStorage.getItem("accordionState")) || [];
         panels.forEach(function (panelId) {
@@ -73,10 +73,9 @@ $(document).ready(function () {
         });
     }
 
-    // Load accordion state on page load
     loadAccordionState();
 
-    // Set up event listeners for accordion panels to save state on show/hide
+    // event listeners save collapse state on show/hide to local storage
     $(".collapse").on("shown.bs.collapse", saveAccordionState);
     $(".collapse").on("hidden.bs.collapse", saveAccordionState);
 });
