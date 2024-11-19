@@ -520,7 +520,7 @@ class PlotClustergramForm(MethodForm):
         label="Choose dataframe to be used for coloring",
         required=False,
     )
-    flip_axis = CustomChoiceField(
+    flip_axes = CustomChoiceField(
         choices=YesNo,
         label="Flip axis",
         initial=YesNo.no,
