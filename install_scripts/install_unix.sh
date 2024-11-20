@@ -2,32 +2,47 @@
 
 ENV_NAME="protzilla"
 CONDA_URL="https://repo.anaconda.com/miniconda/"
-MACOS_MINICONDA="Miniconda3-latest-MacOSX-x86_64.sh"
-LINUX_MINICONDA="Miniconda3-latest-Linux-x86_64.sh"
+MINICONDA_PREFIX="Miniconda3-latest-"
+
 URL_TO_USE=""
-VERSION_TO_USE=""
+SCRIPT_NAME=""
+OS_TO_USE=""
+ARCHITECTURE_TO_USE=""
+
+# check the processor architecture
+if [ "$(uname -m)" == "x86_64" ]; then
+  ARCHITECTURE_TO_USE="x86_64"
+elif [ "$(uname -m)" == "arm64" ]; then
+  ARCHITECTURE_TO_USE="arm64"
+else
+  echo "Architecture not supported."
+  exit 1
+fi
 
 # check if the script is running on macos or linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  URL_TO_USE=$CONDA_URL$LINUX_MINICONDA
-  VERSION_TO_USE=$LINUX_MINICONDA
+  OS_TO_USE="Linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  URL_TO_USE=$CONDA_URL$MACOS_MINICONDA
-  VERSION_TO_USE=$MACOS_MINICONDA
+  OS_TO_USE="MacOSX"
 else
   echo "OS not supported, use the install_windows.sh script (to be written)."
   exit 1
 fi
 
+SCRIPT_NAME="$MINICONDA_PREFIX$OS_TO_USE-$ARCHITECTURE_TO_USE.sh"
+URL_TO_USE="$CONDA_URL$SCRIPT_NAME"
+echo "Downloading $URL_TO_USE"
+
 # Check if some sort of conda is already installed
-if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/miniconda" ] || [ -d "$HOME/anaconda3" ] || [ -d "$HOME/anaconda" ]; then
+if [ -d "$HOME/miniconda3" ] || [ -d "$HOME/miniconda" ] || [ -d "$HOME/anaconda3" ] || [ -d "$HOME/anaconda" ] || command -v conda >/dev/null 2>&1; then
+
   echo "Miniconda or Anaconda are already installed."
   conda init bash
 else
   echo "Installing Miniconda..."
   echo "$URL_TO_USE"
   curl -O $URL_TO_USE
-  bash $VERSION_TO_USE -p "$HOME"/miniconda
+  bash $SCRIPT_NAME -p "$HOME"/miniconda
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
   conda config --set auto_activate_base false
