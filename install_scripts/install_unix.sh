@@ -14,6 +14,8 @@ if [ "$(uname -m)" == "x86_64" ]; then
   ARCHITECTURE_TO_USE="x86_64"
 elif [ "$(uname -m)" == "arm64" ]; then
   ARCHITECTURE_TO_USE="arm64"
+elif [ "$(uname -m)" == "aarch64" ]; then
+  ARCHITECTURE_TO_USE="aarch64"
 else
   echo "Architecture not supported."
   exit 1
