@@ -21,38 +21,6 @@ $(document).ready(function () {
         }
     });
 
-    /*// control each step-adding section visibility
-    let addStepsState = JSON.parse(sessionStorage.getItem("addStepsState")) || {};
-    // hide add-step section per default
-    $('id^="add_steps_div_"]').each(function() {
-        let section = $(this);
-        let sectionId = section.id; 
-
-        // Get the collapse state for this section from the stored addStepsState
-        let isCollapsed = addStepsState[sectionId] === 'collapsed';
-
-        // Set the initial visibility based on the state
-        if (isCollapsed) {
-            section.removeClass('show');
-            section.find('.toggleChevronAddStep').removeClass('rotate-icon');
-        } else {
-            section.addClass('show');
-            section.find('.toggleChevronAddStep').addClass('rotate-icon');
-        }
-
-        // Attach click event to toggle button
-        section.find('.toggleChevronAddStep').on('click', function() {
-            $(this).toggleClass('rotate-icon');
-            let currentlyCollapsed = $(this).attr('aria-expanded') === 'false';
-
-            // Update the addStepsState object with the new state for this section
-            addStepsState[sectionId] = currentlyCollapsed ? 'collapsed' : 'expanded';
-
-            // Save the updated state object to sessionStorage
-            sessionStorage.setItem("addStepsState", JSON.stringify(addStepsState));
-        });
-    });*/
-
     // control sidebar visibility
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
@@ -104,59 +72,30 @@ $(document).ready(function () {
         });
     }
 
-    /*function loadAccordionState() {
-        const panels = JSON.parse(localStorage.getItem("accordionState")) || [];
+    function updateAccordionIcons() {
         $(".collapse").each(function () {
             const panel = $(this);
             const button = document.querySelector(`[data-bs-target="#${panel.attr("id")}"]`);
-            if (panel.length) {
-                panel.addClass("show"); 
-                if (panels.includes(panel.attr("id"))) {
-                    // Expand the panel
-                    if (button) {
-                        const icon = button.id === 'sidebar-accordion'
-                            ? button.querySelectorAll('svg')[1] // second svg to skip section icon
-                            : button.querySelector('svg');
-                        if (icon) icon.classList.add("rotate-icon");
-                    }
+            if (button) {
+                const icon = button.id === 'sidebar-accordion'
+                    ? button.querySelectorAll('svg')[1] // second svg to skip section icon
+                    : button.querySelector('svg');
+                if (panel.hasClass("show")) {
+                    if (icon) icon.classList.add("rotate-icon");
                 } else {
-                    //panel.removeClass("show"); // Collapse the panel
-                    if (button) {
-                        const icon = button.id === 'sidebar-accordion'
-                            ? button.querySelectorAll('svg')[1]
-                            : button.querySelector('svg');
-                        if (icon) icon.classList.remove("rotate-icon");
-                    }
+                    if (icon) icon.classList.remove("rotate-icon");
                 }
             }
         });
-    }*/
+    }
         
-
     loadAccordionState();
+    updateAccordionIcons();
 
     // event listeners save collapse state on show/hide to local storage
-    $(".collapse").on("shown.bs.collapse", saveAccordionState);
     $(".collapse").on("hidden.bs.collapse", saveAccordionState);
-
-    // event listeners for all add-steps buttons to handle drop-down arrow
-    document.querySelectorAll('#add-steps-button, #sidebar-accordion').forEach(button => {
-        const targetId = button.getAttribute('data-bs-target');
-        const targetElement = document.querySelector(targetId);
-
-        // Listen for collapse events
-        targetElement.addEventListener('show.bs.collapse', () => {
-            const icon = button.id === 'sidebar-accordion' 
-                ? button.querySelectorAll('svg')[1] // second svg to skip section icon
-                : button.querySelector('svg');
-            icon.classList.add('rotate-icon');
-        });
-    
-        targetElement.addEventListener('hide.bs.collapse', () => {
-            const icon = button.id === 'sidebar-accordion' 
-                ? button.querySelectorAll('svg')[1] // second svg to skip section icon
-                : button.querySelector('svg');
-            icon.classList.remove('rotate-icon');
-        });
+    $(".collapse").on("shown.bs.collapse hidden.bs.collapse", function () {
+        saveAccordionState(); // Save the current state to sessionStorage
+        updateAccordionIcons(); // Update icons after state change
     });
 });
