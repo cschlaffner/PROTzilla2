@@ -51,6 +51,7 @@ def test_create_box_plots(
         name_b="After Transformation",
         heading="Distribution of Protein Intensities",
         group_by="None",
+        proteins_of_interest=[],
     )
     if show_figures:
         fig.show()
@@ -120,6 +121,7 @@ def test_build_box_hist_plot(
         "Bar chart",
         "Sample",
         "linear",
+        [],
     )
     fig3, fig4 = imputation._build_box_hist_plot(
         input_imputation_df,
@@ -128,6 +130,7 @@ def test_build_box_hist_plot(
         "Pie chart",
         "Protein ID",
         "linear",
+        [],
     )
 
     if show_figures:

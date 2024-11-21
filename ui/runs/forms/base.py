@@ -98,3 +98,15 @@ class MethodForm(Form):
                 self.fields[field_name] = field
                 self.cleaned_data[field_name] = None
         run.step_calculate(self.cleaned_data)
+
+
+class PlotForm(MethodForm):
+    def __init__(self, run: Run, *args, **kwargs) -> None:
+        super().__init__(run, *args, **kwargs)
+
+    def submit(self, run: Run) -> None:
+        for field_name, field in self.initial_fields.items():
+            if field_name not in self.fields:
+                self.fields[field_name] = field
+                self.cleaned_data[field_name] = None
+        run.current_step.plot(self.cleaned_data)

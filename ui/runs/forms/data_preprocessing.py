@@ -1,10 +1,14 @@
 from enum import Enum
 
-from .base import MethodForm
+from protzilla.run_v2 import Run
+
+from . import fill_helper
+from .base import MethodForm, PlotForm
 from .custom_fields import (
     CustomCharField,
     CustomChoiceField,
     CustomFloatField,
+    CustomMultipleChoiceField,
     CustomNumberField,
 )
 
@@ -65,7 +69,7 @@ class FilterProteinsBySamplesMissingForm(MethodForm):
     )
 
 
-class FilterProteinsBySamplesMissingPlotForm(MethodForm):
+class FilterProteinsBySamplesMissingPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -81,7 +85,7 @@ class FilterByProteinsCountForm(MethodForm):
     )
 
 
-class FilterByProteinsCountPlotForm(MethodForm):
+class FilterByProteinsCountPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -99,7 +103,7 @@ class FilterSamplesByProteinsMissingForm(MethodForm):
     )
 
 
-class FilterSamplesByProteinsMissingPlotForm(MethodForm):
+class FilterSamplesByProteinsMissingPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -115,7 +119,7 @@ class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
     )
 
 
-class FilterSamplesByProteinIntensitiesSumPlotForm(MethodForm):
+class FilterSamplesByProteinIntensitiesSumPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -138,6 +142,10 @@ class OutlierDetectionByPCAForm(MethodForm):
     )
 
 
+class OutlierDetectionByPCAPlotForm(PlotForm):
+    pass
+
+
 class OutlierDetectionByIsolationForestForm(MethodForm):
     n_estimators = CustomNumberField(
         label="Number of estimators",
@@ -145,6 +153,10 @@ class OutlierDetectionByIsolationForestForm(MethodForm):
         step_size=1,
         initial=100,
     )
+
+
+class OutlierDetectionByIsolationForestPlotForm(PlotForm):
+    pass
 
 
 class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
@@ -156,6 +168,10 @@ class OutlierDetectionByLocalOutlierFactorForm(MethodForm):
     )
 
 
+class OutlierDetectionByLocalOutlierFactorPlotForm(PlotForm):
+    pass
+
+
 class TransformationLogForm(MethodForm):
     log_base = CustomChoiceField(
         choices=LogTransformationBaseType,
@@ -164,7 +180,7 @@ class TransformationLogForm(MethodForm):
     )
 
 
-class TransformationLogPlotForm(MethodForm):
+class TransformationLogPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -173,13 +189,22 @@ class TransformationLogPlotForm(MethodForm):
     group_by = CustomChoiceField(
         choices=GroupBy, label="Group by", initial=GroupBy.no_grouping
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class NormalisationByZScoreForm(MethodForm):
     pass
 
 
-class NormalisationByZscorePlotForm(MethodForm):
+class NormalisationByZscorePlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -193,13 +218,22 @@ class NormalisationByZscorePlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class NormalisationByTotalSumForm(MethodForm):
     pass
 
 
-class NormalisationByTotalSumPlotForm(MethodForm):
+class NormalisationByTotalSumPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -213,6 +247,15 @@ class NormalisationByTotalSumPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class NormalisationByMedianForm(MethodForm):
@@ -225,7 +268,7 @@ class NormalisationByMedianForm(MethodForm):
     )
 
 
-class NormalisationByMedianPlotForm(MethodForm):
+class NormalisationByMedianPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -239,6 +282,15 @@ class NormalisationByMedianPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class NormalisationByReferenceProteinForms(MethodForm):
@@ -256,7 +308,7 @@ class NormalisationByReferenceProteinForms(MethodForm):
     )
 
 
-class NormalisationByReferenceProteinPlotForm(MethodForm):
+class NormalisationByReferenceProteinPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -270,6 +322,15 @@ class NormalisationByReferenceProteinPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class ImputationByMinPerDatasetForm(MethodForm):
@@ -285,7 +346,7 @@ class ImputationByMinPerDatasetForm(MethodForm):
     )
 
 
-class ImputationByMinPerDatasetPlotForm(MethodForm):
+class ImputationByMinPerDatasetPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -299,11 +360,20 @@ class ImputationByMinPerDatasetPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class ImputationByMinPerProteinForm(MethodForm):
@@ -319,7 +389,7 @@ class ImputationByMinPerProteinForm(MethodForm):
     )
 
 
-class ImputationByMinPerProteinPlotForm(MethodForm):
+class ImputationByMinPerProteinPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -333,12 +403,20 @@ class ImputationByMinPerProteinPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
 
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 class ImputationByMinPerSampleForms(MethodForm):
     shrinking_value = CustomFloatField(
@@ -350,7 +428,7 @@ class ImputationByMinPerSampleForms(MethodForm):
     )
 
 
-class ImputationByMinPerSamplePlotForm(MethodForm):
+class ImputationByMinPerSamplePlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -364,11 +442,20 @@ class ImputationByMinPerSamplePlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class SimpleImputationPerProteinForm(MethodForm):
@@ -379,7 +466,7 @@ class SimpleImputationPerProteinForm(MethodForm):
     )
 
 
-class SimpleImputationPerProteinPlotForm(MethodForm):
+class SimpleImputationPerProteinPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -393,11 +480,20 @@ class SimpleImputationPerProteinPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class ImputationByKNNForms(MethodForm):
@@ -409,7 +505,7 @@ class ImputationByKNNForms(MethodForm):
     )
 
 
-class ImputationByKNNPlotForm(MethodForm):
+class ImputationByKNNPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -423,11 +519,20 @@ class ImputationByKNNPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
+
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 
 class ImputationByNormalDistributionSamplingForm(MethodForm):
@@ -444,7 +549,7 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
     )
 
 
-class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
+class ImputationByNormalDistributionSamplingPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -458,12 +563,24 @@ class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
         label="Visual transformation",
         initial=VisualTrasformations.log10,
     )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (will be highlighted)",
+    )
+    proteins_of_interest = CustomMultipleChoiceField(
+        choices=[],
+        label="Proteins of interest (By default all proteins are selected)",
+    )
     graph_type_quantities = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type - quantity of imputed values",
         initial=BarAndPieChart.pie_chart,
     )
 
+    def fill_form(self, run: Run) -> None:
+        proteins = run.steps.protein_df["Protein ID"].unique()
+
+        self.fields["proteins_of_interest"].choices = fill_helper.to_choices(proteins)
 
 class FilterPeptidesByPEPThresholdForm(MethodForm):
     threshold = CustomFloatField(
@@ -472,7 +589,7 @@ class FilterPeptidesByPEPThresholdForm(MethodForm):
     peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
 
 
-class FilterPeptidesByPEPThresholdPlotForm(MethodForm):
+class FilterPeptidesByPEPThresholdPlotForm(PlotForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
