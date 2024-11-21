@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("create", views.create, name="create"),
     path("continue", views.continue_, name="continue"),
+    path("delete", views.delete_, name="delete"),
     path("detail/<str:run_name>", views.detail, name="detail"),
     path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),
