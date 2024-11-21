@@ -8,7 +8,7 @@ from django.forms import (
     DecimalField,
     FileField,
     FloatField,
-    MultipleChoiceField,
+    MultipleChoiceField
 )
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
@@ -86,6 +86,60 @@ class CustomMultipleChoiceField(MultipleChoiceField):
 
     def clean(self, value: list[str] | None):
         return [el for el in value if el != "hidden"] if value else None
+
+class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
+    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
+        if isinstance(choices, list):
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
+        else:
+            super().__init__(
+                choices=[(el.value, el.value) for el in choices],
+                initial=initial,
+                *args,
+                **kwargs,
+            )
+        self.widget = CustomCheckboxSelectMultipleWidget()
+        self.widget.attrs.update({"class": "form-select mb-2"})
+
+    def clean(self, value: list[str] | None):
+        return [el for el in value if el != "hidden"] if value else None
+
+# Widget
+class CustomCheckboxSelectMultipleWidget(SelectMultiple):
+    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+        output = []
+        value = value or []
+
+        output.append('<div class="checkbox-container border p-3 rounded">')
+
+        for i, (option_value, option_label) in enumerate(self.choices):
+            output.append('<div class="d-flex" style="align-items: center">')
+            checkbox_id = f"{attrs['id']}_{i}" if attrs and 'id' in attrs else f"{name}_{i}"
+            is_checked = 'checked="checked"' if option_value in value else ""
+            output.append(format_html(
+                '<div class="checkbox-item px-2">'
+                '  <input type="checkbox" id="{id}" name="{name}" value="{value}" {checked}>'
+                '  <label for="{id}">{label}</label>'
+                '</div>',
+                id=checkbox_id, name=name, value=option_value, checked=is_checked, label=option_label
+            ))
+            output.append(format_html(
+                '<div class="color-select ms-auto px-2" id="color_select_{checkbox_id} style="display: inline-block;">'
+                '  <select name="color_{checkbox_id}" id="color_{checkbox_id}" class="form-select">'
+                '    <option value="red">Red</option>'
+                '    <option value="blue">Blue</option>'
+                '  </select>'
+                '</div>',
+                checkbox_id=checkbox_id
+            ))
+            output.append('</div>') 
+
+        output.append('</div>') 
+
+        return mark_safe("\n".join(output))
+
+
+
 
 
 class CustomFileField(FileField):
