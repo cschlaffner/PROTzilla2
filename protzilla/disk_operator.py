@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+import pickle
 from plotly.io import read_json, write_json
 
 import protzilla.utilities as utilities
@@ -36,6 +37,25 @@ class ErrorHandler:
             return False
         return True
 
+class PickleOperator:
+    @staticmethod
+    def read(file_path: Path):
+        with ErrorHandler():
+            with open(file_path, "rb") as file:
+                logger.info(f"Reading pickle from {file_path}")
+                return pickle.load(file)
+
+    @staticmethod
+    def write(file_path: Path, data):
+        with ErrorHandler():
+            if not file_path.exists():
+                if not file_path.parent.exists():
+                    logger.info(
+                        f"Parent directory {file_path.parent} did not exist and was created"
+                    )
+                    file_path.parent.mkdir(parents=True)
+            with open(file_path, "wb") as file:
+                pickle.dump(data, file)
 
 class YamlOperator:
     @staticmethod
