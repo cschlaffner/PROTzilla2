@@ -17,7 +17,7 @@ def get_available_run_names() -> list[str]:
         return []
     return [
         directory.name
-        for directory in paths.RUNS_PATH.iterdir()
+        for directory in paths.RUNS_PATH.iterdir()  #not sorted the same for different os?
         if not directory.name.startswith(".")
     ]
 
