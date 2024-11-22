@@ -22,7 +22,7 @@ from django.conf import settings
 
 from protzilla.filter import filter_runs
 from protzilla.run import Run, get_available_run_names 
-from protzilla.run_v2 import delete_run_folder
+from protzilla.run_v2 import delete_run_folder, get_available_runs
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
@@ -193,12 +193,17 @@ def filtered_index(request: HttpRequest, filter: list[str], index_error: bool = 
     :return: the rendered index page
     :rtype: HttpResponse
     """
+    runs, runs_favourite = get_available_runs()
+    filtered_runs = filter_runs(runs, filter)
+    filtered_runs_favourite = filter_runs(runs_favourite, filter) 
     return render(
         request,
         "runs/index.html",
         context={
             "available_workflows": get_available_workflow_names(),
-            "available_runs": filter_runs(get_available_run_names(), filter),
+            #"available_runs": filter_runs(get_available_runs(), filter), #this version is probably worse cause get_available_runs returns two things, why should filter expect two things in one param
+            "available_runs" : filtered_runs,
+            "available_runs_favourite": filtered_runs_favourite,
         },
     )
 
