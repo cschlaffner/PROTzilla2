@@ -20,6 +20,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
+from protzilla.filter import filter_runs
 from protzilla.run import Run, get_available_run_names 
 from protzilla.run_v2 import delete_run_folder
 from protzilla.run_helper import log_messages
@@ -179,6 +180,25 @@ def index(request: HttpRequest, index_error: bool = False):
         context={
             "available_workflows": get_available_workflow_names(),
             "available_runs": get_available_run_names(),
+        },
+    )
+
+def filtered_index(request: HttpRequest, filter: list[str], index_error: bool = False): #should replace index completely, but is currently a different method for unforeseen dependencies on normal index
+    """
+    Renders the main index page of the PROTzilla application.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page
+    :rtype: HttpResponse
+    """
+    return render(
+        request,
+        "runs/index.html",
+        context={
+            "available_workflows": get_available_workflow_names(),
+            "available_runs": filter_runs(get_available_run_names(), filter),
         },
     )
 
