@@ -84,6 +84,7 @@ RUN_FILE = "run.yaml"
 class KEYS:
     # We add this here to avoid typos and signal to the developer that accessing the keys should be done through this class only
     CURRENT_STEP_INDEX = "current_step_index"
+    FAVOURITE = "favourite" #might cause problems because of backwards-compatibility
     STEPS = "steps"
     STEP_OUTPUTS = "output"
     STEP_FORM_INPUTS = "form_inputs"
@@ -123,6 +124,7 @@ class DiskOperator:
                     run.get(KEYS.CURRENT_STEP_INDEX, 0), len(step_manager.all_steps) - 1
                 ),
             )
+            step_manager.favourite = run.get(KEYS.FAVOURITE, False) #might cause problems because of backwards-compatibility
             return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
@@ -134,6 +136,7 @@ class DiskOperator:
             self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
+            run[KEYS.FAVOURITE] = step_manager.favourite #might cause problems because of backwards-compatibility
             run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:

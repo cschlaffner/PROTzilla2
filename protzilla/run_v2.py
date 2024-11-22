@@ -6,6 +6,7 @@ import traceback
 
 import os
 import shutil
+import datetime
 
 import protzilla.constants.paths as paths
 from protzilla.steps import Messages, Output, Plots, Step
@@ -20,6 +21,40 @@ def get_available_run_names() -> list[str]:
         for directory in paths.RUNS_PATH.iterdir()  #not sorted the same for different os?
         if not directory.name.startswith(".")
     ]
+
+def get_available_runs() -> list[dict[str, str | list[str]]]:
+    if not paths.RUNS_PATH.exists():
+        return []
+    runs = []
+    runs_favourited = []
+
+    for directory in paths.RUNS_PATH.iterdir():
+        creation_time = directory.stat().st_ctime
+        modification_time = directory.stat().st_mtime
+        
+        from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
+
+        disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
+        directory_path = os.path.join(paths.RUNS_PATH, directory.name)
+        yaml_path = os.path.join(directory_path, "run.yaml")
+        step_manager = disk_operator.read_run(yaml_path)
+        steps = step_manager.all_steps()
+        step_names = []
+        for step in steps:
+            step_names.append(step.display_name)
+
+        run = { 
+            "run_name": directory.name,
+            "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"),
+            "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
+            "run_steps" : step_names
+            }
+        
+        if step_manager.favourite: 
+            runs_favourited.append(run)
+        else:
+            runs.append(run)
+    return runs, runs_favourited
 
 def delete_run_folder(run_name) -> None:
     path = os.path.join(paths.RUNS_PATH, run_name)
