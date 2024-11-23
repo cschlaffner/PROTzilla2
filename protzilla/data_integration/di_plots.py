@@ -7,7 +7,7 @@ import pandas as pd
 from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import fig_to_base64
 
-from ..constants.colors import *
+from protzilla.constants.colors import PLOT_COLOR_SEQUENCE
 
 
 def GO_enrichment_bar_plot(
@@ -17,7 +17,7 @@ def GO_enrichment_bar_plot(
     value,
     gene_sets=[],
     title="",
-    colors=PROTZILLA_COLOR_SEQUENCE,
+    colors=PLOT_COLOR_SEQUENCE,
     figsize=None,
 ):
     """
@@ -110,7 +110,7 @@ def GO_enrichment_bar_plot(
 
 
     if colors == "" or colors is None or len(colors) == 0:
-        colors = PROTZILLA_COLOR_SEQUENCE
+        colors = PLOT_COLOR_SEQUENCE
     size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(

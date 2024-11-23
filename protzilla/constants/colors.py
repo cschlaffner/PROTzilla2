@@ -1,9 +1,14 @@
-PROTZILLA_COLOR_SEQUENCE = [
+PLOT_COLOR_SEQUENCE = [
     "#4A536A",
-    "#87A8B9",
     "#CE5A5A",
+    "#87A8B9",
     "#8E3325",
     "#E2A46D",
 ]
-PROTZILLA_PRIMARY_COLOR = PROTZILLA_COLOR_SEQUENCE[0]
-PROTZILLA_SECONDARY_COLOR = PROTZILLA_COLOR_SEQUENCE[2]
+"""List of colors to use in plots."""
+
+PLOT_PRIMARY_COLOR = PLOT_COLOR_SEQUENCE[0]
+"""First color in list. Conventionally used for visualizing outliers."""
+
+PLOT_SECONDARY_COLOR = PLOT_COLOR_SEQUENCE[1]
+"""Second color in list."""
