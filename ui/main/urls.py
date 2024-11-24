@@ -20,6 +20,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index),
+    path("settings", views.settings, name="settings"),
     path("runs/", include("runs.urls")),
     path("databases", views.databases, name="databases"),
     path("databases/upload", views.database_upload, name="database_upload"),

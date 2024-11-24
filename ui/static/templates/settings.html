@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{# params: sections #}
+
+{% block css %}
+<style>
+    .wrapper {
+        display: flex;
+        width: 100%;
+        align-items: stretch;
+    }
+    .sidebar {
+        width: 350px;
+        height: 100vh;
+    }
+    .content {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+    <!-- sidebar -->
+    <div class="sidebar">
+        <div class="container container-fixed-width" style="width: 500px; max-width: 100%;">
+            {% for section in sections %}
+                <div class="card-header d-flex btn p-3 align-items-start bg-white border-bottom" style="cursor: pointer">
+                    {% if section.id == 'general' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="#4A536A" class="bi bi-gear-fill" viewBox="0 0 16 16">
+                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                        </svg>
+                    {% elif section.id == 'exporting_plots' %}
+                        <img src="{% static 'img/download-file-icon.svg' %}" width="20" height="20" class="me-1">
+                    {% endif %}
+                    
+                    <div class="ms-3">
+                        {{ section.name }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- content -->
+    <div class="content border-start">
+        <div class="centered">
+            <p>All settings of a section will appear here.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
