@@ -8,11 +8,13 @@ from django.forms import (
     DecimalField,
     FileField,
     FloatField,
-    MultipleChoiceField
+    MultipleChoiceField,
+    Select
 )
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
+from django.template.loader import render_to_string
 
 # Custom widgets
 
@@ -98,7 +100,13 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
                 *args,
                 **kwargs,
             )
-        self.widget = CustomCheckboxSelectMultipleWidget()
+
+        self.color_selectors = {
+            choice_value: CustomColorSelectField()
+            for choice_value, _ in self.choices
+        }
+
+        self.widget = CustomCheckboxSelectMultipleWidget(color_selectors=self.color_selectors)
         self.widget.attrs.update({"class": "form-select mb-2"})
 
     def clean(self, value: list[str] | None):
@@ -106,37 +114,56 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
 
 # Widget
 class CustomCheckboxSelectMultipleWidget(SelectMultiple):
+    def __init__(self, *args, color_selectors=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.color_selectors = color_selectors or {}
+
     def render(self, name, value, attrs=None, renderer=None) -> SafeText:
-        output = []
+        output = ['<div class="checkbox-container border p-3 rounded">']
         value = value or []
 
-        output.append('<div class="checkbox-container border p-3 rounded">')
+        if self.color_selectors == {}:
+            self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
 
         for i, (option_value, option_label) in enumerate(self.choices):
-            output.append('<div class="d-flex" style="align-items: center">')
-            checkbox_id = f"{attrs['id']}_{i}" if attrs and 'id' in attrs else f"{name}_{i}"
-            is_checked = 'checked="checked"' if option_value in value else ""
-            output.append(format_html(
-                '<div class="checkbox-item px-2">'
-                '  <input type="checkbox" id="{id}" name="{name}" value="{value}" {checked}>'
-                '  <label for="{id}">{label}</label>'
-                '</div>',
-                id=checkbox_id, name=name, value=option_value, checked=is_checked, label=option_label
-            ))
-            output.append(format_html(
-                '<div class="color-select ms-auto px-2" id="color_select_{checkbox_id} style="display: inline-block;">'
-                '  <select name="color_{checkbox_id}" id="color_{checkbox_id}" class="form-select">'
-                '    <option value="red">Red</option>'
-                '    <option value="blue">Blue</option>'
-                '  </select>'
-                '</div>',
-                checkbox_id=checkbox_id
-            ))
-            output.append('</div>') 
+            id = f"{name}_{option_label}"
 
+            color_selector = self.color_selectors.get(option_value, CustomColorSelectField())
+
+            output.append(
+                render_to_string(
+                    "runs/field_component_color_selection.html",
+                    context=dict(
+                        id=f"{id}_checkbox",
+                        option_label=option_label,
+                        option_value=option_value,
+                        name=name,
+                        color_selector_render=color_selector.widget.render(name, f"{id}_color_selector" )
+                        ),
+                    ),
+                )
+            
         output.append('</div>') 
-
         return mark_safe("\n".join(output))
+    
+class CustomColorSelectField(ChoiceField):
+    def __init__(self, choice_value=None, *args, **kwargs):
+        kwargs["widget"] = CustomColorSelectWidget()
+        super().__init__(*args, **kwargs)
+        self.widget = CustomColorSelectWidget(choice_value=choice_value)
+
+class CustomColorSelectWidget(Select):
+    def __init__(self, choice_value=None, *args, **kwargs):
+        options = kwargs.pop("options", [
+            (f"color_{choice_value}_red", "Red"),
+            (f"color_{choice_value}_blue", "Blue"),
+        ])
+        super().__init__(*args, choices=options, **kwargs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        attrs = attrs or {}
+        attrs["class"] = "form-select"
+        return super().render(name, value, attrs=attrs, renderer=renderer)
 
 
 
