@@ -24,14 +24,15 @@
 
             {% if not step.selected and not step.finished %}
                 {# button to remove step from workflow #}
-                <form action="{% url 'runs:delete_step' run_name %}" method="post">
+                <form action="{% url 'runs:delete_step' run_name %}" method="post" class="ms-auto">
                     {% csrf_token %}
                     <input type="hidden" name="index" value="{{ step.index }}">
                     <input type="hidden" name="section" value="{{ step.section }}">
-                    <button class="removeBtn btn d-flex justify-content-center align-items-end mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
-                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                    </svg></button>
+                    <button class="removeBtn btn d-flex justify-content-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                          </svg>
+                    </button>                    
                 </form>
             {% endif %}
 
@@ -42,9 +43,12 @@
 {% if section.finished %}
     <p class="pb-2"><i class="text-muted">Go back to this section to add more steps</i></p>
 {% else %}
-    <button class="btn btn-blue full_width mt-2 mb-2" type="button" data-bs-toggle="collapse"
+    <button id="add-steps-button" class="btn btn-blue full_width mt-2 mb-2 d-flex align-items-center" type="button" data-bs-toggle="collapse"
             data-bs-target="#add_steps_div_{{ section.id }}">
-        + add steps
+        <span class="d-flex justify-content-center flex-grow-1"> + add steps</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-down ms-auto" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67"/>
+          </svg>
     </button>
 
     <div id="add_steps_div_{{ section.id }}" class="collapse">

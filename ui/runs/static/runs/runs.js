@@ -21,7 +21,6 @@ $(document).ready(function () {
         }
     });
 
-
     // control sidebar visibility
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
@@ -52,5 +51,54 @@ $(document).ready(function () {
         } else {
             form.reportValidity();
         }
+    });
+
+    // save current state of accordion in sessionStorage
+    function saveAccordionState() {
+        const panels = [];
+        $(".collapse").each(function () {
+            if ($(this).hasClass("show")) {
+                panels.push(this.id);
+            }
+        });
+        sessionStorage.setItem("accordionState", JSON.stringify(panels));
+    }
+
+    // load accordion state from sessionStorage
+    function loadAccordionState() {
+        const panels = JSON.parse(sessionStorage.getItem("accordionState")) || [];
+        panels.forEach(function (panelId) {
+            const panel = $("#" + panelId);
+            if (panel.length) {
+                panel.addClass("show");
+            }
+        });
+    }
+
+    function updateAccordionIcons() {
+        $(".collapse").each(function () {
+            const panel = $(this);
+            const button = document.querySelector(`[data-bs-target="#${panel.attr("id")}"]`);
+            if (button) {
+                const icon = button.id === 'sidebar-accordion'
+                    ? button.querySelectorAll('svg')[1] // second svg to skip section icon
+                    : button.querySelector('svg');
+                if (panel.hasClass("show")) {
+                    if (icon) icon.classList.add("rotate-icon");
+                } else {
+                    if (icon) icon.classList.remove("rotate-icon");
+                }
+            }
+        });
+    }
+        
+    loadAccordionState();
+    updateAccordionIcons();
+
+    // event listeners save collapse state on show/hide to local storage
+    $(".collapse").on("hidden.bs.collapse", saveAccordionState);
+    $(".collapse").on("shown.bs.collapse hidden.bs.collapse", function () {
+        saveAccordionState(); // Save the current state to sessionStorage
+        updateAccordionIcons(); // Update icons after state change
     });
 });

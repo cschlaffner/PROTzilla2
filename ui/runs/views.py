@@ -1,4 +1,3 @@
-import os
 import io
 import tempfile
 import traceback
@@ -32,6 +31,7 @@ from protzilla.utilities.utilities import (
     name_to_title,
 )
 from protzilla.workflow import get_available_workflow_names
+from protzilla.constants.paths import WORKFLOWS_PATH
 from ui.runs.fields import (
     make_displayed_history,
     make_method_dropdown,
@@ -423,7 +423,7 @@ def export_workflow(request: HttpRequest, run_name: str):
     display_message(
         {
             "level": 20,
-            "msg": f"Workflow '{requested_workflow_name}' was exported successfully.<br>You can view it here: {os.path.join(settings.BASE_DIR, 'user_data', 'workflows')}",
+            "msg": f"Workflow '{requested_workflow_name}' was exported successfully.<br>You can view the file at {WORKFLOWS_PATH}.",
         },
         request,
     )
