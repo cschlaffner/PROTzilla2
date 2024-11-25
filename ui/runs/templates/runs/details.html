@@ -149,7 +149,10 @@
                                             {{ plot_form }}
                                         </div>
                                     </fieldset>
-                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                    <button type="submit" id="plot_parameters_submit"
+                                        class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                        Plot
+                                    </button>
                                 </form>
                             </div>
                         {% else %}
@@ -171,7 +174,10 @@
                                         </div>
                                         <div class="form-group">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">Plot</a>
+                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
+                                                    class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                                    Plot
+                                                </a>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
@@ -198,8 +204,8 @@
                                             {% endfor %}
                                         </div>
                                         <div class="form-group">
-                                            <input type="submit" id="plot_parameters_submit" value="Plot"
-                                                   class="btn btn-grey">
+                                            <button type="submit" id="plot_parameters_submit"
+                                                   class="btn btn-grey">Plot</button>
                                         </div>
                                     </form>
                                 {% endif %}
