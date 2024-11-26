@@ -20,7 +20,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
-from ui.runs.filter import filter_runs #
+from ui.runs.filter import filter_runs #prob should put this file somewhere else.
+import protzilla.constants.paths as paths
 from protzilla.run import Run, get_available_run_names 
 from protzilla.run_v2 import delete_run_folder, get_available_runs
 from protzilla.run_helper import log_messages
@@ -193,6 +194,8 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     :return: the rendered index page
     :rtype: HttpResponse
     """
+    if request.POST["filter"]:
+        filter = request.POST["filter"]
     #filter = request.POST["filter"]
     filter = {} #nur zum testen
     runs, runs_favourite = get_available_runs()
@@ -219,6 +222,11 @@ def favourite(request: HttpRequest):
     disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     yaml_path = os.path.join(directory_path, "run.yaml")
+    step_manager = disk_operator.read_run(yaml_path)
+    step_manager.favourite = favourite_status
+    disk_operator.change_favourite_run(step_manager)
+
+    return HttpResponseRedirect(reverse("runs:index"))
 
 
 def create(request: HttpRequest):
