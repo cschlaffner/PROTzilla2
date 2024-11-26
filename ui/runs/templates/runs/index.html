@@ -61,25 +61,31 @@
           <div class="dropdown">
 
             <button class="form-select" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-              <span id="selectedRun">{{available_runs|first}}</span>
+              <span id="selectedRun">{{ available_runs.0.run_name }}</span>
             </button>
 
             <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton" style="max-height: 200px; overflow-y: auto;">
-              {% for name in available_runs %}
+              <!--{% for name in available_runs %}
               <li class="dropdown-item d-flex justify-content-between" onclick="selectRun('{{name}}')">
                 <span>{{ name }}</span>
                 <button type="button" class="btn btn-red" onclick="deleteRun('{{name}}')">Delete</button>
+              </li>
+              {% endfor %}-->
+              {% for run in available_runs %}
+              <li class="dropdown-item d-flex justify-content-between" onclick="selectRun('{{run.run_name}}')">
+                <span>{{ run.run_name }}</span>
+                <button type="button" class="btn btn-red" onclick="deleteRun('{{run.run_name}}')">Delete</button>
               </li>
               {% endfor %}
             </ul>
           </div>
         </div>
-        <input type="hidden" name="run_name" id="run_name_id" value="{{available_runs|first}}">
+        <input type="hidden" name="run_name" id="run_name_id" value="{{available_runs.0.run_name}}">
         <input type="submit" value="Continue" class="btn btn-red">
       </form>
       <form id="delete_run" class="mb-5" action="{% url 'runs:delete' %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="delete_run_name" id="delete_run_name_id" value="{{available_runs|first}}">
+        <input type="hidden" name="delete_run_name" id="delete_run_name_id" value="{{available_runs.0.run_name}}">
       </form>
       <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
     </div>

@@ -39,14 +39,14 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
         directory_path = os.path.join(paths.RUNS_PATH, name)
         yaml_path = os.path.join(directory_path, "run.yaml")
         step_manager = disk_operator.read_run(yaml_path)
-        steps = step_manager.all_steps()
+        steps = step_manager.all_steps
         step_names = []
         for step in steps:
             step_names.append(step.display_name)
 
         run = { 
             "run_name": name,
-            "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"),
+            "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"), #TODO: reutrn the pure datetime, convert in html)
             "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
             "memory_mode": step_manager.df_mode,
             "run_steps" : step_names

@@ -5,6 +5,7 @@ from . import views
 app_name = "runs"
 urlpatterns = [
     path("", views.index, name="index"),
+#    path("filter", views.filtered_index, name="filter"),
     path("create", views.create, name="create"),
     path("continue", views.continue_, name="continue"),
     path("delete", views.delete_, name="delete"),

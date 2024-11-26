@@ -164,7 +164,7 @@ def detail(request: HttpRequest, run_name: str):
     )
 
 
-def index(request: HttpRequest, index_error: bool = False):
+#def index(request: HttpRequest, index_error: bool = False):
     """
     Renders the main index page of the PROTzilla application.
 
@@ -183,7 +183,7 @@ def index(request: HttpRequest, index_error: bool = False):
         },
     )
 
-def filtered_index(request: HttpRequest, filter: list[str], index_error: bool = False): #should replace index completely, but is currently a different method for unforeseen dependencies on normal index
+def index(request: HttpRequest, index_error: bool = False): #should replace index completely, but is currently a different method for unforeseen dependencies on normal index
     """
     Renders the main index page of the PROTzilla application.
 
@@ -193,6 +193,8 @@ def filtered_index(request: HttpRequest, filter: list[str], index_error: bool = 
     :return: the rendered index page
     :rtype: HttpResponse
     """
+    #filter = request.POST["filter"]
+    filter = {} #nur zum testen
     runs, runs_favourite = get_available_runs()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
