@@ -29,13 +29,14 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
     runs_favourited = []
 
     for directory in paths.RUNS_PATH.iterdir():
+        name = directory.name
         creation_time = directory.stat().st_ctime
         modification_time = directory.stat().st_mtime
         
         from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
         disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
-        directory_path = os.path.join(paths.RUNS_PATH, directory.name)
+        directory_path = os.path.join(paths.RUNS_PATH, name)
         yaml_path = os.path.join(directory_path, "run.yaml")
         step_manager = disk_operator.read_run(yaml_path)
         steps = step_manager.all_steps()
@@ -44,7 +45,7 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
             step_names.append(step.display_name)
 
         run = { 
-            "run_name": directory.name,
+            "run_name": name,
             "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"),
             "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
             "run_steps" : step_names
