@@ -1,3 +1,4 @@
+from docutils.nodes import title
 from tqdm import tqdm
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.disk_operator import PickleOperator
@@ -28,10 +29,10 @@ def build_kmer_dictionary(protein_dictionary: dict[str, str], k: int = 5) -> dic
 
 def match_peptide_to_protein_ids(
     peptide_sequence: str, protein_kmer_dictionary : dict[str, list[tuple[str, int]]], protein_dictionary: dict[str, str]
-) -> list[tuple[str, int]]:
+) -> list[tuple[str, int, int]]:
     """
     Matches a peptide sequence to a dictionary of kmers in protein sequences.
-    Returns a list of protein ids that could be matches
+    Returns a list of tuples containing the protein ID and the start, end location of the peptide in the protein sequence.
     """
     # convert the peptide sequence to a list of kmers
     k = 5
@@ -45,21 +46,22 @@ def match_peptide_to_protein_ids(
     # determine the protein ids that are common to both lists, check if the peptide is in the protein sequence at that
     # location and return the protein ids and the start location
     hits = []
-    for protein_id, start_location in first_kmer_matches:
-        expected_end_location = start_location + len(peptide_sequence) - k
-        for _, end_location in last_kmer_matches:
+    for protein_id, start_first_kmer in first_kmer_matches:
+        expected_start_last_kmer = start_first_kmer + len(peptide_sequence) - k
+        for _, start_last_kmer in last_kmer_matches:
             if protein_id != _:
                 continue
-            if end_location != expected_end_location:
+            if start_last_kmer != expected_start_last_kmer:
                 continue
             protein_sequence = protein_dictionary[protein_id]
-            subsequence = protein_sequence[start_location:end_location + k]
+            end_last_kmer = start_first_kmer + len(peptide_sequence)
+            subsequence = protein_sequence[start_first_kmer:end_last_kmer]
             if subsequence != peptide_sequence:
                 continue
             assert len(subsequence) == len(peptide_sequence), f"Lengths do not match: {len(subsequence)} != {len(peptide_sequence)}"
             assert subsequence in peptide_sequence, f"Subsequence not in peptide sequence:\nA: {subsequence}\nB: {peptide_sequence}"
             assert peptide_sequence in protein_sequence, f"Peptide not in protein sequence: {peptide_sequence} not in {protein_sequence}"
-            hits.append((protein_id, start_location))
+            hits.append((protein_id, start_first_kmer, end_last_kmer))
     return hits
 
 
@@ -76,31 +78,70 @@ def plot_protein_coverage(
 
     protein_sequence = protein_dict[protein_id]
     protein_sequence_length = len(protein_sequence)
-    coverage = []
+    peptide_matches = []
 
     for peptide_sequence in tqdm(peptide_df['Sequence'].unique(), desc="Matching peptides to protein", unit_scale=True, unit="peptide"):
-        hits = match_peptide_to_protein_ids(peptide_sequence=peptide_sequence, protein_kmer_dictionary=kmer_dict, protein_dictionary=protein_dict)
-        for protein, start_location in hits:
-            # we are only interested in the provided protein id, everything else is ignored
-            if protein != protein_id:
+        protein_hits = match_peptide_to_protein_ids(peptide_sequence=peptide_sequence, protein_kmer_dictionary=kmer_dict, protein_dictionary=protein_dict)
+        for prot_id, start_location_on_protein, end_location_on_protein in protein_hits:
+            # we are only interested in the provided protein id, everything else is discarded
+            if prot_id != protein_id:
                 continue
-            # add the peptide sequence and location to the coverage list
-            coverage.append((peptide_sequence, start_location))
+            # add the peptide sequence and location to the peptide matches pertaining to the protein id
+            peptide_matches.append((peptide_sequence, start_location_on_protein, end_location_on_protein))
 
-    x_labels = [f"{i} ({protein_sequence[i - 1]})" for i in amino_acid_positions]
-    fig = go.Figure()
+    # now that all the matches have been determined with their start and end on the protein sequence, we need to find
+    # an optimal solution for the location of their rectangles in the plot without overlap while minimizing the
+    # required number of rows (vertical space)
+    rows_of_peptide_matches = distribute_to_rows(peptide_matches)
 
-    # Add bars for coverage values
-    fig.add_trace(
-        go.Bar(x=x_labels, y=coverage, name="Coverage", marker=dict(color="skyblue"))
-    )
+    x_labels = [f"{i} ({protein_sequence[i - 1]})" for i in range(1, protein_sequence_length + 1)]
+    fig = go.Figure(data=go.Bar(x=x_labels, y=[1] * protein_sequence_length,
+                                name="Protein Sequence", marker=dict(color="lightgray")), )
+    for row_index, row in enumerate(rows_of_peptide_matches):
+        for start_location_on_protein, end_location_on_protein, peptide_sequence in row:
+            print(f"Peptide: {peptide_sequence}, start: {start_location_on_protein}, end: {end_location_on_protein}")
+            # add a rectangle for each peptide
+            fig.add_shape(
+                type="rect",
+                x0=start_location_on_protein,
+                y0=row_index+1 + 0.1,
+                x1=end_location_on_protein,
+                y1=row_index+ 2 - 0.1,
+                fillcolor="blue",
+                opacity=0.5,
+                layer="above",
+            )
+            # add invisible plotly object to the rectangle to show the peptide sequence when hovered over
+            fig.add_trace(go.Scatter(
+                x=[x_labels[(start_location_on_protein + end_location_on_protein) // 2]],
+                y=[row_index + 1.5],
+                text=[f"{peptide_sequence}<br>({start_location_on_protein}-{end_location_on_protein})"],
+                mode="markers",
+                marker=dict(opacity=0, size=20),  # make marker invisible
+                hoverinfo="text",
+                hovertemplate="%{text}<extra></extra>",
+                showlegend=False,
+            ))
 
-    # Customize layout
     fig.update_layout(
-        title="Protein Coverage",
-        xaxis_title="Amino Acid",
-        yaxis_title="Coverage Value",
-        xaxis=dict(tickmode="linear"),
-        bargap=0.1,  # Adjust space between bars if needed
+        title=f"Protein Coverage of {protein_id}",
+        xaxis_title="Protein Sequence",
+        yaxis=dict(visible=False, range=[0, 1+len(rows_of_peptide_matches)+1], title=""),
+        showlegend=False,
     )
+
     return dict(plots=[fig])
+
+
+def distribute_to_rows(coverage):
+    coverage.sort(key=lambda x: x[1])
+    rows = []
+    for peptide_sequence, start_location, end_location in coverage:
+        # find the first row that does not overlap with the current peptide
+        for row in rows:
+            if row[-1][1] <= start_location:
+                row.append((start_location, end_location, peptide_sequence))
+                break
+        else:
+            rows.append([(start_location, end_location, peptide_sequence)])
+    return rows
