@@ -48,6 +48,7 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
             "run_name": name,
             "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"),
             "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
+            "memory_mode": step_manager.df_mode,
             "run_steps" : step_names
             }
         
