@@ -20,7 +20,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
-from protzilla.filter import filter_runs
+from ui.runs.filter import filter_runs #
 from protzilla.run import Run, get_available_run_names 
 from protzilla.run_v2 import delete_run_folder, get_available_runs
 from protzilla.run_helper import log_messages
