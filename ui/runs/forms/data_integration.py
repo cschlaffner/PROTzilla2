@@ -22,8 +22,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomCheckboxMultipleChoiceField,
-    CustomColorSelectField
+    CustomCheckboxMultipleChoiceField
 )
 
 PROTEIN_DF = "protein_df"
@@ -541,8 +540,7 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     input_df_step_instance = CustomChoiceField(
         choices=[], label="Choose dataframe to be plotted"
     )
-    gene_sets2 = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
-    gene_sets = CustomCheckboxMultipleChoiceField(choices=[], label="Sets to be plotted 2")
+    gene_sets = CustomCheckboxMultipleChoiceField(choices=[], colors=[(color, color) for color in PLOT_COLOR_SEQUENCE], label="Sets to be plotted")
     value = CustomChoiceField(
         choices=GOEnrichmentBarPlotValue,
         label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
@@ -564,46 +562,17 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     )
     title = CustomCharField(label="Title of the plot (optional)", required=False)
 
-    colors = CustomMultipleChoiceField(
-        choices=[], label="Colors for the plot (optional)"
-    )  # TODO this should  not have to be set in fill_form
-
     def fill_form(self, run: Run) -> None:
         self.fields["input_df_step_instance"].choices = fill_helper.get_choices(
             run, "enrichment_df"
         )
         if self.get_field("input_df_step_instance"):
-            gene_set_choices = fill_helper.to_choices(
+            # self.fields["gene_sets"].colors = [(color, color) for color in PLOT_COLOR_SEQUENCE] 
+            self.fields["gene_sets"].choices = fill_helper.to_choices(
                 run.steps.get_step_output(
                     Step, "enrichment_df", self.get_field("input_df_step_instance")
                 )["Gene_set"].unique()
             )
-            
-            # Setze die choices und aktualisiere die ColorSelectors
-            gene_sets_field = self.fields["gene_sets"]
-            gene_sets_field.choices = gene_set_choices
-            
-            # Erstelle die entsprechenden ColorSelectors für die neuen Choices
-            gene_sets_field.color_selectors = {
-                choice_value: CustomColorSelectField(choice_value=choice_value)
-                for choice_value, _ in gene_set_choices
-            }
-
-
-            
-            # Aktualisiere das Widget mit den neuen ColorSelectors
-            gene_sets_field.widget.color_selectors = gene_sets_field.color_selectors
-
-            self.fields["gene_sets2"].choices = fill_helper.to_choices(
-                run.steps.get_step_output(
-                    Step, "enrichment_df", self.get_field("input_df_step_instance")
-                )["Gene_set"].unique()
-            )
-        
-        colors = list(mcolors.TABLEAU_COLORS.items())[:len(self.fields["gene_sets"].choices)]
-        self.fields["colors"].choices = [
-            (v, k[4:]) for k, v, in colors
-        ]
 
     @property
     def is_dynamic(self) -> bool:

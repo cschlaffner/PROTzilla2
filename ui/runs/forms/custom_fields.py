@@ -8,8 +8,7 @@ from django.forms import (
     DecimalField,
     FileField,
     FloatField,
-    MultipleChoiceField,
-    Select
+    MultipleChoiceField
 )
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
@@ -90,7 +89,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         return [el for el in value if el != "hidden"] if value else None
 
 class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
-    def __init__(self, choices: Enum | list, initial=None, *args, **kwargs):
+    def __init__(self, choices: Enum | list, colors: Enum | list, initial=None, *args, **kwargs):
         if isinstance(choices, list):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
@@ -100,10 +99,8 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
                 *args,
                 **kwargs,
             )
-
-        self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
-
-        self.widget = CustomCheckboxSelectMultipleWidget(color_selectors=self.color_selectors)
+        self.widget = CustomCheckboxSelectMultipleWidget()
+        self.widget.colors = colors
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
@@ -111,100 +108,36 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
         if not value:
             return None
         
-        self.color_selectors = self.widget.get_color_selectors()
-        
-        data = {}
-        components = []
+        gen_sets = []
         colors = {}
         for element in value:
-            if element[:6] == "color_":
-                tmp = element.split('_')
-                colors[tmp[1]] = tmp[2]
+            if element.startswith("color_"):
+                _,gen_set,color = element.split('_', 2)
+                colors[gen_set] = color
             else:
-                components.append(element)
+                gen_sets.append(element)
 
-        for element in components:
-            if element != "hidden":
-                data[element] = colors[element]
-                # data[element] = "grey"
-
-                # color_field = self.color_selectors.get(element)
-                # if color_field:
-                #     color_name = f"{element}_color_selector"
-                #     selected_color = color_field.widget.attrs.get("value", "grey");
-                #     data[element] = selected_color
-        return dict(sorted(data.items()))
+        return {gen_set: colors.get(gen_set) for gen_set in sorted(gen_sets) if gen_set in colors}
+    
 
 # Widget
 class CustomCheckboxSelectMultipleWidget(SelectMultiple):
-    def __init__(self, *args, color_selectors, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.color_selectors = {}
+        self.colors = []
+        # self.colors = [(v, k[4:]) for k, v, in list(mcolors.TABLEAU_COLORS.items())]
 
     def render(self, name, value, attrs=None, renderer=None) -> SafeText:
-        output = ['<div class="checkbox-container border p-3 rounded">']
-        value = value or []
-
-        # if self.color_selectors == {}:
-        #     self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
-
-        color_selectors = self.color_selectors
-
-        for i, (option_value, option_label) in enumerate(self.choices):
-            id = f"{name}_{option_label}"
-
-            # color_selector = self.color_selectors.get(option_value)
-            color_selector = color_selectors.get(option_value)
-
-            output.append(
-                render_to_string(
-                    "runs/field_component_color_selection.html",
-                    context=dict(
-                        id=f"{id}_checkbox",
-                        option_label=option_label,
-                        option_value=option_value,
-                        name=name,
-                        color_selector_name=f"color_{option_value}",
-                        color_selector_render=color_selector.widget.render(f"{name}", f"{id}_color_selector" )
-                        ),
-                    ),
-                )
-            
-        output.append('</div>') 
-        return mark_safe("\n".join(output))
-    
-    def get_color_selectors(self):
-        if not self.color_selectors:
-            self.color_selectors = {
-                choice_value: CustomColorSelectField(choice_value=choice_value)
-                for choice_value, _ in self.choices
-            }
-        return self.color_selectors
-    
-class CustomColorSelectField(ChoiceField):
-    def __init__(self, choice_value=None, *args, **kwargs):
-        kwargs["widget"] = CustomColorSelectWidget()
-        super().__init__(*args, **kwargs)
-        self.widget = CustomColorSelectWidget(choice_value=choice_value)
-
-    def clean(self, value: list[str] | None):
-        return value
-
-class CustomColorSelectWidget(Select):
-    def __init__(self, choice_value=None, *args, **kwargs):
-        options = kwargs.pop("options", [
-            (f"color_{choice_value}_red", "Red"),
-            (f"color_{choice_value}_blue", "Blue"),
-        ])
-        super().__init__(*args, choices=options, **kwargs)
-
-    def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        attrs["class"] = "form-select"
-        return super().render(name, value, attrs=attrs, renderer=renderer)
-
-
-
+        return mark_safe(
+            render_to_string(
+                "runs/field_component_color_selection.html",
+                context={
+                    "name": name,
+                    "choices": self.choices,
+                    "colors": self.colors,
+                    }
+            )
+        )
 
 
 class CustomFileField(FileField):

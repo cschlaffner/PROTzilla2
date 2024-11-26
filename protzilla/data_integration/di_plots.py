@@ -17,7 +17,6 @@ def GO_enrichment_bar_plot(
     value,
     gene_sets={},
     title="",
-    colors=PLOT_COLOR_SEQUENCE,
     figsize=None,
 ):
     """

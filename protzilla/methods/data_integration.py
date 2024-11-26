@@ -234,7 +234,6 @@ class PlotGOEnrichmentBarPlot(PlotStep):
         "top_terms",
         "cutoff",
         "title",
-        "colors",
         "figsize",
     ]
     # TODO: input figsize optional?
