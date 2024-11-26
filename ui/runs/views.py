@@ -209,16 +209,16 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
         },
     )
 
-#def favourite(request: HttpRequest):
+def favourite(request: HttpRequest):
 
     run_name = request.POST["favourite_run_name"]
     favourite_status = request.POST["favourite_status"]
 
     from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
-        disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
-        directory_path = os.path.join(paths.RUNS_PATH, run_name)
-        yaml_path = os.path.join(directory_path, "run.yaml")
+    disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    yaml_path = os.path.join(directory_path, "run.yaml")
 
 
 def create(request: HttpRequest):
