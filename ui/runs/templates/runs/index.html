@@ -5,6 +5,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
 {% endblock %}
 
+{% block js %}
+    <script type="text/javascript" src="{% static 'runs/index.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container d-flex align-items-center justify-content-center" id="contain">
   <div class="col">
@@ -48,36 +52,38 @@
       </form>
     </div>
 
+    <!-- CONTINUE DROPDOWN MENU-->
     <div class="col mx-4">
       <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
           <h3>Continue an existing run:</h3>
-          <select name="run_name" id="run_name_option" class="form-select">
-            {% for name in available_runs %}
-            <option value="{{ name }}">{{ name }}</option>
-            {% endfor %}
-          </select>
+          <div class="dropdown">
+
+            <button class="form-select" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              <span id="selectedRun">{{available_runs|first}}</span>
+            </button>
+
+            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton" style="max-height: 200px; overflow-y: auto;">
+              {% for name in available_runs %}
+              <li class="dropdown-item d-flex justify-content-between" onclick="selectRun('{{name}}')">
+                <span>{{ name }}</span>
+                <button type="button" class="btn btn-red" onclick="deleteRun('{{name}}')">Delete</button>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
+        <input type="hidden" name="run_name" id="run_name_id" value="{{available_runs|first}}">
         <input type="submit" value="Continue" class="btn btn-red">
       </form>
-    <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
-    </div>
-
-    <div class="col mx-4">
-      <form class="mb-5" action="{% url 'runs:delete' %}" method="post">
+      <form id="delete_run" class="mb-5" action="{% url 'runs:delete' %}" method="post">
         {% csrf_token %}
-        <div class="mb-2">
-          <h3>Delete an existing run:</h3>
-          <select name="run_name" id="run_name_option" class="form-select">
-            {% for name in available_runs %}
-            <option value="{{ name }}">{{ name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <input type="submit" value="Delete" class="btn btn-red">
+        <input type="hidden" name="delete_run_name" id="delete_run_name_id" value="{{available_runs|first}}">
       </form>
+      <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
     </div>
+    
   </div>
 </div>
 

@@ -268,7 +268,7 @@ def delete_(request: HttpRequest):
     :return: the rendered details page of the run
     :rtype: HttpResponse
     """
-    run_name = request.POST["run_name"]
+    run_name = request.POST["delete_run_name"]
     if run_name in active_runs:
         del active_runs[run_name]
     
