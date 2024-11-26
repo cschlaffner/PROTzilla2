@@ -29,6 +29,8 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
     runs_favourited = []
 
     for directory in paths.RUNS_PATH.iterdir():
+        if directory.name.startswith("."):
+            continue
         name = directory.name
         creation_time = directory.stat().st_ctime
         modification_time = directory.stat().st_mtime

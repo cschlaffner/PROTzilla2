@@ -136,12 +136,20 @@ class DiskOperator:
             self.clean_dataframes_dir(step_manager)
             run = {}
             run[KEYS.CURRENT_STEP_INDEX] = step_manager.current_step_index
-            run[KEYS.FAVOURITE] = step_manager.favourite #might cause problems because of backwards-compatibility
             run[KEYS.DF_MODE] = step_manager.df_mode
             run[KEYS.STEPS] = []
             for step in step_manager.all_steps:
                 run[KEYS.STEPS].append(self._write_step(step))
             self.yaml_operator.write(self.run_file, run)
+
+    def change_favourite_run(self, step_manager: StepManager) -> None:
+        with ErrorHandler():
+            if not self.run_dir.exists():
+                self.run_dir.mkdir(parents=True, exist_ok=True)
+            run = {}
+            run[KEYS.FAVOURITE] = step_manager.favourite
+            self.yaml_operator.write(self.run_file, run)
+
 
     def read_workflow(self) -> StepManager:
         return self.read_run(self.workflow_file)
