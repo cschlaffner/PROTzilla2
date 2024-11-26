@@ -3,6 +3,7 @@ import io
 import tempfile
 import traceback
 import zipfile
+import json
 from pathlib import Path
 
 import networkx as nx
@@ -194,10 +195,13 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     :return: the rendered index page
     :rtype: HttpResponse
     """
-    if request.POST["filter"]:
-        filter = request.POST["filter"]
+    filterbing = request.POST.get("filter", "{}")
+    filter = json.loads(filterbing)
+    print(filterbing)
+    print(filter)
+    print(filter.get("x"))
     #filter = request.POST["filter"]
-    filter = {} #nur zum testen
+    #filter = {} #nur zum testen
     runs, runs_favourite = get_available_runs()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
