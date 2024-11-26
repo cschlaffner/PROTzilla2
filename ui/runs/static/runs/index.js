@@ -8,6 +8,12 @@ function deleteRun(runName){
     document.getElementById('delete_run').submit();
 };
 
+function toggleFavouriteRun(runName, favouriteStatus){
+    document.getElementById('favourites_run_name_id').value = runName;
+    document.getElementById('favourites_run_status_id').value = favouriteStatus;
+    document.getElementById('change_favourite').submit();
+};
+
 function toggleIcon(button) {
     const starIcon = `
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">

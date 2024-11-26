@@ -9,6 +9,7 @@ urlpatterns = [
     path("create", views.create, name="create"), #create, continue and delete paths should be in main/urls.py, also change index.html accordingly
     path("continue", views.continue_, name="continue"),
     path("delete", views.delete_, name="delete"),
+    path("toggle_favourite", views.favourite, name="toggle_favourite"),
     path("detail/<str:run_name>", views.detail, name="detail"),
     path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),

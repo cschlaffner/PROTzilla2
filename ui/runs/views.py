@@ -219,16 +219,20 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
 def favourite(request: HttpRequest):
 
     run_name = request.POST["favourite_run_name"]
-    favourite_status = request.POST["favourite_status"]
+    favourite_status = request.POST["favourite_run_status"]
+    if favourite_status == "False":
+        favourite_status = False
+    else:
+        favourite_status = True
 
     from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
-    disk_operator = DiskOperator("dummy_run_name", "dummy_workflow_name")
+    disk_operator = DiskOperator(run_name, "dummy_workflow_name")
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     yaml_path = os.path.join(directory_path, "run.yaml")
     step_manager = disk_operator.read_run(yaml_path)
-    step_manager.favourite = favourite_status
-    disk_operator.change_favourite_run(step_manager)
+    step_manager.favourite = not favourite_status
+    disk_operator.write_run(step_manager)
 
     return HttpResponseRedirect(reverse("runs:index"))
 
