@@ -101,34 +101,60 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
                 **kwargs,
             )
 
-        self.color_selectors = {
-            choice_value: CustomColorSelectField()
-            for choice_value, _ in self.choices
-        }
+        self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
 
         self.widget = CustomCheckboxSelectMultipleWidget(color_selectors=self.color_selectors)
         self.widget.attrs.update({"class": "form-select mb-2"})
 
+
     def clean(self, value: list[str] | None):
-        return [el for el in value if el != "hidden"] if value else None
+        if not value:
+            return None
+        
+        self.color_selectors = self.widget.get_color_selectors()
+        
+        data = {}
+        components = []
+        colors = {}
+        for element in value:
+            if element[:6] == "color_":
+                tmp = element.split('_')
+                colors[tmp[1]] = tmp[2]
+            else:
+                components.append(element)
+
+        for element in components:
+            if element != "hidden":
+                data[element] = colors[element]
+                # data[element] = "grey"
+
+                # color_field = self.color_selectors.get(element)
+                # if color_field:
+                #     color_name = f"{element}_color_selector"
+                #     selected_color = color_field.widget.attrs.get("value", "grey");
+                #     data[element] = selected_color
+        return dict(sorted(data.items()))
 
 # Widget
 class CustomCheckboxSelectMultipleWidget(SelectMultiple):
-    def __init__(self, *args, color_selectors=None, **kwargs):
+    def __init__(self, *args, color_selectors, **kwargs):
         super().__init__(*args, **kwargs)
-        self.color_selectors = color_selectors or {}
+        self.color_selectors = {}
 
     def render(self, name, value, attrs=None, renderer=None) -> SafeText:
         output = ['<div class="checkbox-container border p-3 rounded">']
         value = value or []
 
-        if self.color_selectors == {}:
-            self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
+        # if self.color_selectors == {}:
+        #     self.color_selectors = { choice_value: CustomColorSelectField(choice_value=choice_value) for choice_value, _ in self.choices }
+
+        color_selectors = self.color_selectors
 
         for i, (option_value, option_label) in enumerate(self.choices):
             id = f"{name}_{option_label}"
 
-            color_selector = self.color_selectors.get(option_value, CustomColorSelectField())
+            # color_selector = self.color_selectors.get(option_value)
+            color_selector = color_selectors.get(option_value)
 
             output.append(
                 render_to_string(
@@ -138,7 +164,8 @@ class CustomCheckboxSelectMultipleWidget(SelectMultiple):
                         option_label=option_label,
                         option_value=option_value,
                         name=name,
-                        color_selector_render=color_selector.widget.render(name, f"{id}_color_selector" )
+                        color_selector_name=f"color_{option_value}",
+                        color_selector_render=color_selector.widget.render(f"{name}", f"{id}_color_selector" )
                         ),
                     ),
                 )
@@ -146,11 +173,22 @@ class CustomCheckboxSelectMultipleWidget(SelectMultiple):
         output.append('</div>') 
         return mark_safe("\n".join(output))
     
+    def get_color_selectors(self):
+        if not self.color_selectors:
+            self.color_selectors = {
+                choice_value: CustomColorSelectField(choice_value=choice_value)
+                for choice_value, _ in self.choices
+            }
+        return self.color_selectors
+    
 class CustomColorSelectField(ChoiceField):
     def __init__(self, choice_value=None, *args, **kwargs):
         kwargs["widget"] = CustomColorSelectWidget()
         super().__init__(*args, **kwargs)
         self.widget = CustomColorSelectWidget(choice_value=choice_value)
+
+    def clean(self, value: list[str] | None):
+        return value
 
 class CustomColorSelectWidget(Select):
     def __init__(self, choice_value=None, *args, **kwargs):

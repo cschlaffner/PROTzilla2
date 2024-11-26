@@ -22,7 +22,8 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomCheckboxMultipleChoiceField
+    CustomCheckboxMultipleChoiceField,
+    CustomColorSelectField
 )
 
 PROTEIN_DF = "protein_df"
@@ -572,11 +573,27 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
             run, "enrichment_df"
         )
         if self.get_field("input_df_step_instance"):
-            self.fields["gene_sets"].choices = fill_helper.to_choices(
+            gene_set_choices = fill_helper.to_choices(
                 run.steps.get_step_output(
                     Step, "enrichment_df", self.get_field("input_df_step_instance")
                 )["Gene_set"].unique()
             )
+            
+            # Setze die choices und aktualisiere die ColorSelectors
+            gene_sets_field = self.fields["gene_sets"]
+            gene_sets_field.choices = gene_set_choices
+            
+            # Erstelle die entsprechenden ColorSelectors für die neuen Choices
+            gene_sets_field.color_selectors = {
+                choice_value: CustomColorSelectField(choice_value=choice_value)
+                for choice_value, _ in gene_set_choices
+            }
+
+
+            
+            # Aktualisiere das Widget mit den neuen ColorSelectors
+            gene_sets_field.widget.color_selectors = gene_sets_field.color_selectors
+
             self.fields["gene_sets2"].choices = fill_helper.to_choices(
                 run.steps.get_step_output(
                     Step, "enrichment_df", self.get_field("input_df_step_instance")
