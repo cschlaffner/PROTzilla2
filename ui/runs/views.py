@@ -202,6 +202,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     print(filter.get("x"))
     #filter = request.POST["filter"]
     #filter = {} #nur zum testen
+    filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite = get_available_runs()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
