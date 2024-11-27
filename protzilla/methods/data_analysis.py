@@ -792,6 +792,7 @@ class PlotProteinCoverage(PlotStep):
         "protein_id",
         "fasta_df",
         "peptide_df",
+        "samples"
     ]
     output_keys = []
 

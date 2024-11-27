@@ -1103,6 +1103,11 @@ class PlotProteinCoverageForm(MethodForm):
         choices=[],
         label="Protein ID",
     )
+    samples = CustomMultipleChoiceField(
+        choices=[],
+        label="Samples",
+    )
+
 
     def fill_form(self, run: Run) -> None:
         self.fields["peptide_df_instance"].choices = fill_helper.get_choices(
@@ -1124,8 +1129,11 @@ class PlotProteinCoverageForm(MethodForm):
             Step, "fasta_df", fasta_df_instance_id
         )["Protein ID"].unique()
         peptide_df_protein_ids = peptide_df["Protein ID"].unique()
-        common_protein_ids = list(set(fasta_protein_ids) & set(peptide_df_protein_ids))
+        common_protein_ids = sorted(list(set(fasta_protein_ids) & set(peptide_df_protein_ids)))
         self.fields["protein_id"].choices = fill_helper.to_choices(common_protein_ids)
+
+        peptide_df_samples = peptide_df["Sample"].unique()
+        self.fields["samples"].choices = fill_helper.to_choices(peptide_df_samples)
 
 
 class FLEXIQuantLFForm(MethodForm):
