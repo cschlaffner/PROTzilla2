@@ -38,4 +38,5 @@ urlpatterns = [
         views.download_table,
         name="download_table",
     ),
+    path("<str:run_name>/display_not_calculated", views.display_not_calculated, name="display_not_calculated"),
 ]

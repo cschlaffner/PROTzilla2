@@ -146,6 +146,11 @@ class Run:
 
     @error_handling
     @auto_save
+    def update_inputs(self, inputs: dict) -> None:
+        self.steps.current_step.updateInputs(inputs)
+
+    @error_handling
+    @auto_save
     def step_plot(self, inputs: dict | None = None) -> None:
         self.steps.current_step.plot(inputs)
 

@@ -7,6 +7,7 @@ import traceback
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 import plotly
@@ -29,6 +30,7 @@ class Step:
     method_description: str = None
     input_keys: list[str] = []
     output_keys: list[str] = []
+    calculation_status: Literal["complete","outdated","incomplete"] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
@@ -54,6 +56,11 @@ class Step:
             and self.output == other.output
         )
 
+    def updateInputs(self, inputs: dict) -> None:
+        if inputs:
+            self.inputs = inputs.copy()
+        self.form_inputs = self.inputs.copy()
+
     def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
@@ -63,10 +70,7 @@ class Step:
         :return: None
         """
         steps._clear_future_steps()
-
-        if inputs:
-            self.inputs = inputs.copy()
-        self.form_inputs = self.inputs.copy()
+        self.updateInputs(inputs)
 
         try:
             self.messages.clear()
@@ -113,6 +117,7 @@ class Step:
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
+        self.calculation_status = "complete"
 
     def method(self, **kwargs) -> dict:
         raise NotImplementedError("This method must be implemented in a subclass.")
@@ -198,16 +203,18 @@ class Step:
                     return False
         return True
 
-    @property
-    def finished(self) -> bool:
-        """
-        Return whether the step has valid outputs and is therefore considered finished.
-        Plot steps without required outputs are considered finished if they have plots.
-        :return: True if the step is finished, False otherwise
-        """
-        if len(self.output_keys) == 0:
-            return not self.plots.empty
-        return self.validate_outputs(soft_check=True)
+    #@property
+    #def calculation_status(self) -> Literal["done","outdated","missing_inputs"]:
+    #    if ()
+    # def finished(self) -> bool:
+    #     """
+    #     Return whether the step has valid outputs and is therefore considered finished.
+    #     Plot steps without required outputs are considered finished if they have plots.
+    #     :return: True if the step is finished, False otherwise
+    #     """
+    #     if len(self.output_keys) == 0:
+    #         return not self.plots.empty
+    #     return self.validate_outputs(soft_check=True)
 
 
 class Output:
@@ -512,7 +519,7 @@ class StepManager:
         if self.current_section == "data_preprocessing":
             return (
                 self.current_step.output
-                if self.current_step.finished
+                if self.current_step.calculation_status!="incomplete"
                 else self.previous_steps[-1].output
             )
         return self.data_preprocessing[-1].output
@@ -621,10 +628,13 @@ class StepManager:
 
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
-        if new_step_index < self.current_step_index:
-            self.current_step_index = new_step_index
-        else:
-            raise ValueError("Cannot go to a step that is after the current step")
+        #if new_step_index < self.current_step_index:
+        self.current_step_index = new_step_index
+        # else:
+        #     step.calculate(self, step.form_inputs)
+        #     self.next_step()
+        #     self.goto_step(step_index, section)
+            #raise ValueError("Cannot go to a step that is after the current step")
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """

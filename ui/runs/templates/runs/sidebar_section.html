@@ -1,4 +1,4 @@
-{# params: run_name section{id, name, finished, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, method_name}} #}
+{# params: run_name section{id, finished, name, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, index_global, method_name, circle_color}} #}
 
 {% block js %}
     <script>
@@ -34,6 +34,9 @@
                     </svg></button>
                 </form>
             {% endif %}
+            <svg xmlns="http://www.w3.org/2000/svg" id="forfun" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
+                <circle id="myCircle_{{ step.index_global }}" fill="{{step.circle_color}}" cx="8" cy="8" r="8"/>
+            </svg>
 
         </div>
     {% endfor %}

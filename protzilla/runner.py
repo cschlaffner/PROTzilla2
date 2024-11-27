@@ -89,7 +89,7 @@ class Runner:
             log_messages(self.run.current_messages)
             self.run.current_messages.clear()
 
-            if not step.finished:
+            if step.calculation_status!="complete":
                 break
 
             self.run.step_next()

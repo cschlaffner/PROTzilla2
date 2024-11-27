@@ -139,12 +139,12 @@ def detail(request: HttpRequest, run_name: str):
                 type(run.current_step).__name__,
             ),
             name_field=make_name_field(
-                run.current_step.finished, run, False
+                run.current_step.calculation_status!="incomplete", run, False
             ),  # TODO end_of_run
             current_plots=current_plots,
-            results_exist=run.current_step.finished,
+            results_exist=run.current_step.calculation_status!="incomplete",
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=run.current_step.finished,
+            show_plot_button=run.current_step.calculation_status!="incomplete",
             # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
@@ -156,6 +156,7 @@ def detail(request: HttpRequest, run_name: str):
             method_form=method_form,
             is_form_dynamic=method_form.is_dynamic,
             plot_form=plot_form,
+            current_step_index=run.steps.current_step_index,
         ),
     )
 
@@ -649,3 +650,15 @@ def download_table(request, run_name, index, key):
     csv_bytes = buffer.getvalue()
 
     return FileResponse(csv_bytes, content_type="text/csv")
+
+def display_not_calculated(request: HttpRequest, run_name:str):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
+    run: Run = active_runs[run_name]
+    if (run.current_step.calculation_status == "complete"):
+        run.current_step.calculation_status = "outdated"
+    method_form = get_filled_form_by_request(
+            request, run
+        )
+    method_form.update_form(run)
+    return(HttpResponse(run.current_step.calculation_status))
