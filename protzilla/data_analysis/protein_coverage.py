@@ -8,9 +8,9 @@ import pandas as pd
 from numpy import log2
 import plotly.graph_objects as go
 
+
 @dataclass(unsafe_hash=True)
 class PeptideMatch:
-
     peptide_sequence: str
     start_location_on_protein: int
     end_location_on_protein: int
@@ -71,7 +71,7 @@ def match_peptide_to_protein_ids(
            and protein_dictionary[protein_id][
                start_first_kmer:start_first_kmer + len(peptide_sequence)] == peptide_sequence
     ]
-    hits = list(set(hits)) # remove duplicates
+    hits = list(set(hits))  # remove duplicates
     # Just sanity checks
     for hit in hits:
         subsequence = protein_dictionary[hit.protein_id][hit.start_location_on_protein:hit.end_location_on_protein]
@@ -99,9 +99,8 @@ def plot_protein_coverage(
     kmer_dict = build_kmer_dictionary(protein_dict, k=5)
 
     protein_sequence = protein_dict[protein_id]
-    protein_sequence_length = len(protein_sequence)
     peptide_matches = []
-    coverage = [0] * protein_sequence_length
+    coverage = [0] * len(protein_sequence)
 
     for sample, peptide_sequence, intensity in tqdm(
             reduced_peptide_df[['Sample', 'Sequence', 'Intensity']].drop_duplicates().itertuples(index=False),
@@ -122,16 +121,23 @@ def plot_protein_coverage(
                              sample=sample)
             )
             # update the coverage of the protein sequence
-            coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein] = \
-                [coverage + 1 for coverage in coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein]]
+            increment_coverage(coverage, protein_hit)
 
     if len(peptide_matches) == 0:
         raise ValueError(f"No peptides matched for protein {protein_id}")
+
     # now that all the matches have been determined with their start and end on the protein sequence, we need to find
     # an optimal solution for the location of their rectangles in the plot without overlap while minimizing the
     # required number of rows (vertical space)
     rows = distribute_to_rows(peptide_matches)
 
+    fig = _build_coverage_plot(coverage, peptide_matches, protein_id, protein_sequence, rows)
+
+    return dict(plots=[fig])
+
+
+def _build_coverage_plot(coverage: list[int], peptide_matches: list[PeptideMatch], protein_id: str,
+                         protein_sequence: str, rows: dict[str, list[list[PeptideMatch]]]) -> go.Figure:
     x_labels = [f"{amino_acid} - {amino_acid_index} " for amino_acid_index, amino_acid in enumerate(protein_sequence)]
     max_coverage_in_sequence = max(coverage)
     max_intensity = max([peptide_match.intensity for peptide_match in peptide_matches])
@@ -139,7 +145,6 @@ def plot_protein_coverage(
     hover_text = [f"Position: {i}<br>Amino acid: {amino_acid}<br>Coverage: {coverage}"
                   for i, (coverage, amino_acid) in
                   enumerate(zip(normalized_coverage, protein_sequence))]
-
     fig = go.Figure(data=go.Bar(x=x_labels,
                                 y=normalized_coverage,
                                 marker=dict(
@@ -152,23 +157,8 @@ def plot_protein_coverage(
                                 hoverinfo="text",
                                 showlegend=False,
                                 name="Coverage (normalized to max in Protein Sequence)"))
-
-    # Keep track of the current row position across all samples
     current_row = 1
-
-    # Iterate through samples and their rows in order
     for sample_idx, (sample, sample_rows) in enumerate(rows.items()):
-        # Add a sample label
-        fig.add_annotation(
-            x=-0.1,  # slightly to the left of the plot
-            y=current_row + len(sample_rows) / 2,
-            text=sample,
-            showarrow=False,
-            textangle=-90,
-            xref='paper',
-            yref='y'
-        )
-
         for row_index, row in enumerate(sample_rows):
             for peptide_match in row:
                 # add a rectangle for each peptide
@@ -215,7 +205,6 @@ def plot_protein_coverage(
                     dash="solid",
                 )
             )
-
     fig.update_layout(
         title=f"Protein Coverage of {protein_id}",
         xaxis_title="Protein Sequence",
@@ -223,8 +212,13 @@ def plot_protein_coverage(
         showlegend=False,
         bargap=0
     )
+    return fig
 
-    return dict(plots=[fig])
+
+def increment_coverage(coverage: list[int], protein_hit: ProteinHit) -> None:
+    coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein] = \
+        [coverage + 1 for coverage in
+         coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein]]
 
 
 def distribute_to_rows(peptide_matches: list[PeptideMatch]) -> dict[list[list[PeptideMatch]]]:
@@ -233,7 +227,7 @@ def distribute_to_rows(peptide_matches: list[PeptideMatch]) -> dict[list[list[Pe
     Greedy algorithm (see Interval Scheduling Problem).
     """
     peptide_matches.sort(key=lambda peptide_match: peptide_match.start_location_on_protein)
-    rows = {sample : [] for sample in set([peptide_match.sample for peptide_match in peptide_matches])}
+    rows = {sample: [] for sample in set([peptide_match.sample for peptide_match in peptide_matches])}
     for peptide_match in peptide_matches:
         # find the first row that does not overlap with the current peptide
         for row in rows[peptide_match.sample]:
