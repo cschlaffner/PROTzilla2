@@ -18,6 +18,12 @@ class PeptideMatch:
     sample: str = ""
 
 
+@dataclass(unsafe_hash=True)
+class ProteinHit:
+    protein_id: str
+    start_location_on_protein: int
+    end_location_on_protein: int
+
 
 def build_kmer_dictionary(protein_dictionary: dict[str, str], k: int = 5) -> dict[str, list[tuple[str, int]]]:
     """
@@ -46,40 +52,34 @@ def build_kmer_dictionary(protein_dictionary: dict[str, str], k: int = 5) -> dic
 def match_peptide_to_protein_ids(
         peptide_sequence: str, protein_kmer_dictionary: dict[str, list[tuple[str, int]]],
         protein_dictionary: dict[str, str]
-) -> list[tuple[str, int, int]]:
+) -> list[ProteinHit]:
     """
     Matches a peptide sequence to a dictionary of kmers in protein sequences.
     Returns a list of tuples containing the protein ID and the start, end location of the peptide in the protein sequence.
     """
-    # convert the peptide sequence to a list of kmers
     k = 5
-    kmers = [peptide_sequence[i: i + k] for i in range(len(peptide_sequence) - k + 1)]
-    # for now, we only do exact matches, so only the first and last kmer of the peptide are needed
-    first_kmer = kmers[0]
-    last_kmer = kmers[-1]
+    peptide_kmers = [peptide_sequence[i: i + k] for i in range(len(peptide_sequence) - k + 1)]
+    first_kmer, last_kmer = peptide_kmers[0], peptide_kmers[-1]
     # match the kmers
     first_kmer_matches = protein_kmer_dictionary.get(first_kmer, [])
     last_kmer_matches = protein_kmer_dictionary.get(last_kmer, [])
-    # determine the protein ids that are common to both lists, check if the peptide is in the protein sequence at that
-    # location and return the protein ids and the start location
-    hits = []
-    for protein_id, start_first_kmer in first_kmer_matches:
-        expected_start_last_kmer = start_first_kmer + len(peptide_sequence) - k
-        for _, start_last_kmer in last_kmer_matches:
-            if protein_id != _:
-                continue
-            if start_last_kmer != expected_start_last_kmer:
-                continue
-            protein_sequence = protein_dictionary[protein_id]
-            end_last_kmer = start_first_kmer + len(peptide_sequence)
-            subsequence = protein_sequence[start_first_kmer:end_last_kmer]
-            if subsequence != peptide_sequence:
-                continue
-            assert len(subsequence) == len(
-                peptide_sequence), f"Lengths do not match: {len(subsequence)} != {len(peptide_sequence)}"
-            assert subsequence in peptide_sequence, f"Subsequence not in peptide sequence:\nA: {subsequence}\nB: {peptide_sequence}"
-            assert peptide_sequence in protein_sequence, f"Peptide not in protein sequence: {peptide_sequence} not in {protein_sequence}"
-            hits.append((protein_id, start_first_kmer, end_last_kmer))
+    hits = [
+        ProteinHit(protein_id, start_first_kmer, start_first_kmer + len(peptide_sequence))
+        for protein_id, start_first_kmer in first_kmer_matches
+        for _, start_last_kmer in last_kmer_matches
+        if protein_id == _ and start_last_kmer == start_first_kmer + len(peptide_sequence) - k
+           and protein_dictionary[protein_id][
+               start_first_kmer:start_first_kmer + len(peptide_sequence)] == peptide_sequence
+    ]
+    hits = list(set(hits)) # remove duplicates
+    # Just sanity checks
+    for hit in hits:
+        subsequence = protein_dictionary[hit.protein_id][hit.start_location_on_protein:hit.end_location_on_protein]
+        assert len(subsequence) == len(
+            peptide_sequence), f"Lengths do not match: {len(subsequence)} != {len(peptide_sequence)}"
+        assert subsequence in peptide_sequence, f"Subsequence not in peptide sequence:\nA: {subsequence}\nB: {peptide_sequence}"
+        assert peptide_sequence in protein_dictionary[
+            hit.protein_id], f"Peptide not in protein sequence: {peptide_sequence} not in {protein_dictionary[protein_id]}"
     return hits
 
 
@@ -90,8 +90,9 @@ def plot_protein_coverage(
     Plots the coverage of a protein sequence by peptides.
     """
     # generate the protein kmer dictionary
-    if samples is None:
-        samples = []
+    if samples is None or samples == []:
+        raise ValueError("No samples provided.")
+
     reduced_peptide_df = peptide_df[peptide_df["Sample"].isin(samples) & peptide_df['Intensity'] > 0]
 
     protein_dict = dict(zip(fasta_df["Protein ID"], fasta_df["Protein Sequence"]))
@@ -107,22 +108,22 @@ def plot_protein_coverage(
             desc="Matching peptides to protein", unit_scale=True,
             unit="peptide"):
         protein_hits = match_peptide_to_protein_ids(peptide_sequence=peptide_sequence,
-                                                    protein_kmer_dictionary=kmer_dict, protein_dictionary=protein_dict)
-        for prot_id, start_location_on_protein, end_location_on_protein in protein_hits:
-            # we are only interested in the provided protein id, everything else is discarded
-            if prot_id != protein_id:
-                continue
+                                                    protein_kmer_dictionary=kmer_dict,
+                                                    protein_dictionary=protein_dict)
+        # we only care about the hits pertaining to the argument-supplied protein id
+        protein_hits = filter(lambda x: x.protein_id == protein_id, protein_hits)
+        for protein_hit in protein_hits:
             # add the peptide sequence and location to the peptide matches pertaining to the protein id
             peptide_matches.append(
                 PeptideMatch(peptide_sequence=peptide_sequence,
-                             start_location_on_protein=start_location_on_protein,
-                             end_location_on_protein=end_location_on_protein,
+                             start_location_on_protein=protein_hit.start_location_on_protein,
+                             end_location_on_protein=protein_hit.end_location_on_protein,
                              intensity=log2(intensity),
                              sample=sample)
             )
             # update the coverage of the protein sequence
-            coverage[start_location_on_protein:end_location_on_protein] = \
-                [coverage + 1 for coverage in coverage[start_location_on_protein:end_location_on_protein]]
+            coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein] = \
+                [coverage + 1 for coverage in coverage[protein_hit.start_location_on_protein:protein_hit.end_location_on_protein]]
 
     if len(peptide_matches) == 0:
         raise ValueError(f"No peptides matched for protein {protein_id}")
@@ -131,7 +132,7 @@ def plot_protein_coverage(
     # required number of rows (vertical space)
     rows = distribute_to_rows(peptide_matches)
 
-    x_labels = [f"{amino_acid_index} ({amino_acid})" for amino_acid_index, amino_acid in enumerate(protein_sequence)]
+    x_labels = [f"{amino_acid} - {amino_acid_index} " for amino_acid_index, amino_acid in enumerate(protein_sequence)]
     max_coverage_in_sequence = max(coverage)
     max_intensity = max([peptide_match.intensity for peptide_match in peptide_matches])
     normalized_coverage = [value / max_coverage_in_sequence for value in coverage]
@@ -179,7 +180,7 @@ def plot_protein_coverage(
                     # the coordinates need to be a bit offset, as otherwise the rectangles would start in the middle of the bars
                     x0=x0 - 0.5, y0=y0,
                     x1=x1 - 0.5, y1=y1,
-                    fillcolor=f"rgba({int(255 * (1 - normalized_intensity))}, 0, {int(255 * normalized_intensity)}, 0.5)",
+                    fillcolor=f"rgba({int(255 * (normalized_intensity))}, 0, 0, 1)",
                     opacity=0.5,
                     layer="above",
                 )
