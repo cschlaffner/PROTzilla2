@@ -8,45 +8,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from protzilla.constants.paths import EXTERNAL_DATA_PATH, SETTINGS_PATH
+from protzilla.constants.paths import EXTERNAL_DATA_PATH
 from protzilla.data_integration.database_query import uniprot_columns, uniprot_databases
-from protzilla.disk_operator import YamlOperator
-from ui.main.user_settings_forms import ExportingPlotsSettingsForm
 
 database_metadata_path = EXTERNAL_DATA_PATH / "internal" / "metadata" / "uniprot.json"
-user_settings_path = SETTINGS_PATH / "user_settings.yaml"
-
 
 def index(request):
     return redirect("/runs/")
-
-
-def settings(request):
-    op = YamlOperator()
-    sections = op.read(user_settings_path)
-    for item in sections:
-        if isinstance(item, dict) and item.get("selected") is True:
-            selected_section=item.get("id")
-
-    if selected_section == "general":
-        title="General Settings"
-        description="General settings relating to the PROTzilla application can be adjusted here."    
-        settings_form=""
-    elif selected_section == "exporting_plots":
-        title="Configurations for Exporting Plots"
-        description="Configurations for plots and diagrams can be stored here. This information is automatically applied to all plot downloads."
-        settings_form=ExportingPlotsSettingsForm
-
-    return render(
-        request,
-        "settings.html",
-        context=dict(
-            sections=sections,
-            title=title,
-            description=description,
-            settings_form=settings_form
-        )
-    )
 
 
 def databases(request):

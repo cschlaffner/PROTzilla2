@@ -1,0 +1,23 @@
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+.sidebar {
+    width: 320px;
+    height: 100vh;
+}
+.selected {
+    background-color: #E8EDF3 !important;
+}
+.btn-section {
+    background-color: white;
+    width: 300px !important;
+    height: 60px;
+    align-items: center;
+}
+.content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}

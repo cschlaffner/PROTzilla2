@@ -1,0 +1,35 @@
+  
+{% extends 'base.html' %}
+{% load static %}
+{# params: sidebar, settings_form #}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block title %}
+    <title>PROTzilla - Settings</title>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        {{ sidebar|safe }}
+        <div class="content border-start">
+            <div justify-content-center d-flex>
+                <h3>Configurations for Exporting Plots</h3>
+                <div class="row mb-3" id="description">Configurations for plots and diagrams can be stored here. This information is automatically applied to all plot downloads.</div>
+                <div class="mb-2" id="settings-form">
+                    {% for field in settings_form %}
+                        <div class="fieldWrapper">
+                            {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
