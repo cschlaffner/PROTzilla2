@@ -8,7 +8,9 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10") -> dict:
+def by_log(
+    protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10"
+) -> dict:
     """
     This function log-transforms intensity, while ignoring and dropping negative or 0 intensity values.
     Supports log-transformation to the base of 2 or 10.
@@ -34,24 +36,29 @@ def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="
     transformed_df.reset_index(drop=True, inplace=True)
 
     if transformed_peptide_df is not None:
-        zero_intensity_peptide_index = transformed_peptide_df[transformed_peptide_df["Intensity"] <= 0].index
-        untransformable_peptide_data_df = transformed_peptide_df.loc[zero_intensity_peptide_index]
+        zero_intensity_peptide_index = transformed_peptide_df[
+            transformed_peptide_df["Intensity"] <= 0
+        ].index
+        untransformable_peptide_data_df = transformed_peptide_df.loc[
+            zero_intensity_peptide_index
+        ]
         transformed_peptide_df.drop(zero_intensity_peptide_index, inplace=True)
         transformed_peptide_df.reset_index(drop=True, inplace=True)
         if not untransformable_peptide_data_df.empty:
-            msg.append(dict(
-                msg=f"Warning: {len(untransformable_peptide_data_df)} data points of peptide data with zero or negative intensity values were found and will be dropped. "
-                f"Please adapt your preprocessing pipeline if this is unexpected.",
-                level=logging.WARNING
+            msg.append(
+                dict(
+                    msg=f"Warning: {len(untransformable_peptide_data_df)} data points of peptide data with zero or negative intensity values were found and will be dropped. "
+                    f"Please adapt your preprocessing pipeline if this is unexpected.",
+                    level=logging.WARNING,
+                )
             )
-        )
-
 
     if not untransformable_data_df.empty:
-        msg.append(dict(
-            msg=f"Warning: {len(untransformable_data_df)} data points of {len(untransformable_data_df['Protein ID'])} distinct protein groups with zero or negative intensity values were found and will be dropped. "
-            f"Please adapt your preprocessing pipeline if this is unexpected.",
-            level=logging.WARNING
+        msg.append(
+            dict(
+                msg=f"Warning: {len(untransformable_data_df)} data points of {len(untransformable_data_df['Protein ID'])} distinct protein groups with zero or negative intensity values were found and will be dropped. "
+                f"Please adapt your preprocessing pipeline if this is unexpected.",
+                level=logging.WARNING,
             )
         )
 
@@ -69,7 +76,9 @@ def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="
             )
     else:
         raise ValueError("Unknown log_base. Known log methods are 'log2' and 'log10'.")
-    return dict(protein_df=transformed_df, peptide_df=transformed_peptide_df, messages=msg)
+    return dict(
+        protein_df=transformed_df, peptide_df=transformed_peptide_df, messages=msg
+    )
 
 
 def by_log_plot(method_inputs, method_outputs, graph_type, group_by):
