@@ -124,7 +124,7 @@
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_form %}
                             <div class="col">
-                                <form action="{% url 'runs:detail' run_name %}" id="calc_form_plot" method="post"
+                                <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div class="mb-1">
@@ -155,7 +155,7 @@
                         {% else %}
                             <div class="col-7">
                                 {% if step != "plot" %}
-                                    <form action="{% url 'runs:detail' run_name %}" id="calc_form_method" method="post"
+                                    <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
                                           enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="mb-2">
@@ -244,20 +244,11 @@
             <div class="footer border-top pt-3">
                 <div class="row align-items-center">
                     <div class="d-flex col-auto flex-column justify-content-end">
-            
-                        {% if plot_form %}
-                            <button type="submit" id="calculate_parameters_submit_form_plot"
-                                class="btn btn-red calculateSpinner mr-auto">
-                                Calculate
-                            </button>
-                        {% else %}
-                            <button type="submit" id="calculate_parameters_submit_form"
-                                class="btn btn-red mr-auto calculateSpinner">
-                                Calculate
-                            </button>
-                        {% endif %}
+                        <button id="calculate_parameters_submit" type="submit"
+                            class="btn btn-red calculateSpinner mr-auto">
+                            Calculate
+                        </button>
                     </div>
-
                     <div class="justify-content-end d-flex col flex-column">
                         <div class="justify-content-end d-flex">
                         {% if results_exist %}

@@ -4,7 +4,7 @@ import gseapy
 import matplotlib.colors as mcolors
 import restring
 
-from protzilla.constants.colors import PROTZILLA_DISCRETE_COLOR_SEQUENCE
+from protzilla.constants.colors import PLOT_COLOR_SEQUENCE
 from protzilla.data_integration.database_query import (
     biomart_database,
     uniprot_databases,
@@ -95,7 +95,7 @@ class GSEADotPlotXAxisValue(Enum):
 
 
 class PlotColors(Enum):
-    PROTzilla_default = PROTZILLA_DISCRETE_COLOR_SEQUENCE
+    PROTzilla_default = PLOT_COLOR_SEQUENCE
 
 
 class EmptyEnum(Enum):
