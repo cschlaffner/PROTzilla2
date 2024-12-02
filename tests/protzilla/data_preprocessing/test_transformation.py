@@ -256,16 +256,26 @@ def test_log_by_0_transformation():
     method_outputs = by_log(df, None, log_base="log2")
     assert method_outputs["protein_df"].empty, "The protein DataFrame should be empty."
 
-def test_log2_transformation_with_negative_values(
-    log2_transformation_df, peptides_df
-):
+
+def test_log2_transformation_with_negative_values(log2_transformation_df, peptides_df):
     # Add negative values to the DataFrame with concat
     log2_transformation_df = pd.concat(
-        [log2_transformation_df, pd.DataFrame([["Sample5", "Protein5", "Gene5", -2]], columns=log2_transformation_df.columns)]
+        [
+            log2_transformation_df,
+            pd.DataFrame(
+                [["Sample5", "Protein5", "Gene5", -2]],
+                columns=log2_transformation_df.columns,
+            ),
+        ]
     )
     peptides_df = pd.concat(
-        [peptides_df, pd.DataFrame([["Sample5", "Protein1", "Peptide5", -2, 0.037779]],
-        columns = ["Sample", "Protein ID", "Sequence", "Intensity", "PEP"])]
+        [
+            peptides_df,
+            pd.DataFrame(
+                [["Sample5", "Protein1", "Peptide5", -2, 0.037779]],
+                columns=["Sample", "Protein ID", "Sequence", "Intensity", "PEP"],
+            ),
+        ]
     )
 
     method_inputs = {
@@ -279,5 +289,9 @@ def test_log2_transformation_with_negative_values(
     result_peptide_df = method_outputs["peptide_df"]
 
     # Check that negative values are removed
-    assert not (result_df["Intensity"] < 0).any(), "Negative values were not removed from the protein DataFrame"
-    assert not (result_peptide_df["Intensity"] < 0).any(), "Negative values were not removed from the peptide DataFrame"
+    assert not (
+        result_df["Intensity"] < 0
+    ).any(), "Negative values were not removed from the protein DataFrame"
+    assert not (
+        result_peptide_df["Intensity"] < 0
+    ).any(), "Negative values were not removed from the peptide DataFrame"
