@@ -10,9 +10,8 @@ from protzilla.utilities import default_intensity_column
 
 def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10") -> dict:
     """
-    This function log-transforms intensity
-    DataFrames. Supports log-transformation to the base
-    of 2 or 10.
+    This function log-transforms intensity, while ignoring and dropping negative or 0 intensity values.
+    Supports log-transformation to the base of 2 or 10.
 
     :param protein_df: a protein data frame in long format
     :type protein_df: pd.DataFrame
