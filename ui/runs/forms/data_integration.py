@@ -22,7 +22,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomCheckboxMultipleChoiceField
+    CustomCheckboxMultipleChoiceField,
 )
 
 PROTEIN_DF = "protein_df"
@@ -540,7 +540,8 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     input_df_step_instance = CustomChoiceField(
         choices=[], label="Choose dataframe to be plotted"
     )
-    gene_sets = CustomCheckboxMultipleChoiceField(choices=[], colors=[(color, color) for color in PLOT_COLOR_SEQUENCE], label="Sets to be plotted")
+    # TODO: update PLOT_COLOR_SEQUENCE (color, color) for color in PLOT_COLOR_SEQUENCE
+    gene_sets = CustomCheckboxMultipleChoiceField(choices=[], colors=[(v, k[4:]) for k, v, in list(mcolors.TABLEAU_COLORS.items())], label="Sets to be plotted")
     value = CustomChoiceField(
         choices=GOEnrichmentBarPlotValue,
         label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
@@ -567,7 +568,6 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
             run, "enrichment_df"
         )
         if self.get_field("input_df_step_instance"):
-            # self.fields["gene_sets"].colors = [(color, color) for color in PLOT_COLOR_SEQUENCE] 
             self.fields["gene_sets"].choices = fill_helper.to_choices(
                 run.steps.get_step_output(
                     Step, "enrichment_df", self.get_field("input_df_step_instance")

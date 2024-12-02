@@ -8,7 +8,7 @@ from django.forms import (
     DecimalField,
     FileField,
     FloatField,
-    MultipleChoiceField
+    MultipleChoiceField,
 )
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
@@ -110,6 +110,8 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
         
         gen_sets = []
         colors = {}
+        result = {}
+        
         for element in value:
             if element.startswith("color_"):
                 _,gen_set,color = element.split('_', 2)
@@ -117,7 +119,11 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
             else:
                 gen_sets.append(element)
 
-        return {gen_set: colors.get(gen_set) for gen_set in sorted(gen_sets) if gen_set in colors}
+        for gen_set in sorted(gen_sets):
+            if gen_set in colors:
+                result[gen_set] = colors[gen_set]
+
+        return result
     
 
 # Widget
@@ -125,7 +131,6 @@ class CustomCheckboxSelectMultipleWidget(SelectMultiple):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.colors = []
-        # self.colors = [(v, k[4:]) for k, v, in list(mcolors.TABLEAU_COLORS.items())]
 
     def render(self, name, value, attrs=None, renderer=None) -> SafeText:
         return mark_safe(
@@ -135,6 +140,7 @@ class CustomCheckboxSelectMultipleWidget(SelectMultiple):
                     "name": name,
                     "choices": self.choices,
                     "colors": self.colors,
+                    "values": value,
                     }
             )
         )

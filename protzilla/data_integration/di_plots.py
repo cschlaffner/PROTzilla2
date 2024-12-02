@@ -72,15 +72,13 @@ def GO_enrichment_bar_plot(
     if not gene_sets:
         msg = "Please select at least one category to plot."
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
-    if not isinstance(gene_sets, dict):
-        gene_sets = [gene_sets]
     if value not in ["fdr", "p-value"]:
         msg = "Invalid value. Value must be either 'fdr' or 'p-value'."
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # remove all Gene_sets that are not in categories
-    categories = gene_sets.keys()
-    df = input_df[input_df["Gene_set"].isin(categories)]
+    selected_gene_sets = gene_sets.keys()
+    df = input_df[input_df["Gene_set"].isin(selected_gene_sets)]
 
     if value == "fdr":  # only available for restring result
         if restring_input:
@@ -108,10 +106,8 @@ def GO_enrichment_bar_plot(
     elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
 
-
-    # if colors == "" or colors is None or len(colors) == 0:
-    #     colors = PLOT_COLOR_SEQUENCE
     colors = gene_sets.values()
+
     size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(
