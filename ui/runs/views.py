@@ -197,12 +197,10 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     """
     filterbing = request.POST.get("filter", "{}")
     filter = json.loads(filterbing)
-    print(filterbing)
-    print(filter)
-    print(filter.get("x"))
-    #filter = request.POST["filter"]
-    #filter = {} #nur zum testen
-    filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
+    print(filterbing, type(filterbing))
+    print(filter, type(filter))
+    #print(filter["name"])
+    #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite = get_available_runs()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
@@ -211,7 +209,6 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
         "runs/index.html",
         context={
             "available_workflows": get_available_workflow_names(),
-            #"available_runs": filter_runs(get_available_runs(), filter), #this version is probably worse cause get_available_runs returns two things, why should filter expect two things in one param
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
         },
@@ -234,6 +231,24 @@ def favourite(request: HttpRequest):
     step_manager = disk_operator.read_run(yaml_path)
     step_manager.favourite = not favourite_status
     disk_operator.write_run(step_manager)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+def tag(request: HttpRequest):
+
+    run_name = request.POST["favourite_run_name"]
+    run_tag = request.POST["tag"]
+
+    from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
+
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    metadata = yaml_operator.read(metadata_yaml_path)
+    tags = metadata.get("tags")
+    tags.append(run_tag)
+    yaml_operator.read(metadata_yaml_path, tags)
 
     return HttpResponseRedirect(reverse("runs:index"))
 

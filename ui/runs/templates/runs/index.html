@@ -123,7 +123,7 @@
   </div>
   <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="filter" value='{"x": "y"}'>
+    <input type="hidden" name="filter" value='{"name": "i", "steps": "", "memory_mode": "disk_memory"}'>
     <input type="submit" value="Filter" class="btn btn-red">
   </form>
 </div>

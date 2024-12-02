@@ -35,16 +35,23 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
         creation_time = directory.stat().st_ctime
         modification_time = directory.stat().st_mtime
         
-        from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
+        from protzilla.disk_operator import DiskOperator, YamlOperator # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
         disk_operator = DiskOperator(name, "dummy_workflow_name")
         directory_path = os.path.join(paths.RUNS_PATH, name)
-        yaml_path = os.path.join(directory_path, "run.yaml")
-        step_manager = disk_operator.read_run(yaml_path)
+        run_yaml_path = os.path.join(directory_path, "run.yaml")
+        step_manager = disk_operator.read_run(run_yaml_path)
         steps = step_manager.all_steps
         step_names = []
         for step in steps:
             step_names.append(step.display_name)
+
+        tags = []
+        metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+        if os.path.isfile(metadata_yaml_path):
+            yaml_operator = YamlOperator()
+            metadata = yaml_operator.read(metadata_yaml_path)
+            tags = metadata.get("tags")
 
         run = { 
             "run_name": name,
@@ -52,7 +59,8 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
             "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
             "memory_mode": step_manager.df_mode,
             "run_steps" : step_names,
-            "favourite_status" : step_manager.favourite
+            "favourite_status" : step_manager.favourite,
+            "run_tags": tags
             }
         
         if step_manager.favourite: 
