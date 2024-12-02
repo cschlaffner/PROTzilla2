@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 import logging
 
 import numpy as np
