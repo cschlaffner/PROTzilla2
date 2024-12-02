@@ -126,13 +126,19 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
         return result
     
 
-# Widget
 class CustomCheckboxSelectMultipleWidget(SelectMultiple):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.colors = []
 
     def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+        if isinstance(value, dict):
+            reformat_value = []
+            for gen_set, color in value.items():
+                reformat_value.append(gen_set)
+                reformat_value.append(f"color_{gen_set}_{color}")
+            value = reformat_value
+
         return mark_safe(
             render_to_string(
                 "runs/field_component_color_selection.html",

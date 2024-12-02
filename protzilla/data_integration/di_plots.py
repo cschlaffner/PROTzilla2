@@ -77,8 +77,7 @@ def GO_enrichment_bar_plot(
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
 
     # remove all Gene_sets that are not in categories
-    selected_gene_sets = gene_sets.keys()
-    df = input_df[input_df["Gene_set"].isin(selected_gene_sets)]
+    df = input_df[input_df["Gene_set"].isin(gene_sets)]
 
     if value == "fdr":  # only available for restring result
         if restring_input:
