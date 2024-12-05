@@ -204,15 +204,20 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     runs, runs_favourite = get_available_runs()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
+    all_available_runs = filtered_runs_favourite + filtered_runs
     return render(
         request,
         "runs/index.html",
         context={
             "available_workflows": get_available_workflow_names(),
+            #"available_runs": filter_runs(get_available_runs(), filter), #this version is probably worse cause get_available_runs returns two things, why should filter expect two things in one param
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
+            "all_available_runs": all_available_runs,
         },
     )
+    
+
 
 def favourite(request: HttpRequest):
 
