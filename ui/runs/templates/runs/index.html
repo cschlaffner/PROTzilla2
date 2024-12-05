@@ -53,7 +53,7 @@
       </form>
     </div>
 
-    <!-- CONTINUE DROPDOWN MENU-->
+    <!-- CONTINUE MENU-->
     <div class="col-7 mx-5">
       <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
@@ -61,18 +61,21 @@
           <h3>Continue an existing run:
             <span id="selectedRun">{{ available_runs.0.run_name }}</span>
           </h3>
-          <!-- <div class=" d-flex justify-content-between">
-            <span style="width: 12.5%"><b>Favorite</b></span>
-            <span style="width: 30%"><b>Name</b></span>
-            <span style="width: 15%"><b>Creation date</b></span>
-            <span style="width: 15%"><b>Modification date</b></span>
-            <span style="width: 15%"><b>Memory Mode</b></span>
-            <span style="width: 12.5%"></span>
-          </div> -->
+          
+          <!-- Header Section -->
+        <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
+          <li class="d-flex justify-content-between" style="font-weight: bold; border-bottom: 1px solid #ccc; padding: 5px 0;">
+              <span style="width: 8%"></span>
+              <span style="width: 32%">Name</span>
+              <span style="width: 18%">Created</span>
+              <span style="width: 18%">Last modified</span>
+              <span style="width: 24%">Memory mode</span>
+            </li>
+        </ul>
 
+        <!-- Run selection -->
           <ul class="w-100" aria-labelledby="dropdownMenuButton" style="max-height: 200px; overflow-y: scroll !important; padding:0;">
             {% for run in all_available_runs %}
-            <hr style="margin: 5px 0px;">
             <li class="d-flex justify-content-between" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}')">
               <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}', '{{run.favourite_status}}')">
                 {% if run.favourite_status == False %}
@@ -95,6 +98,7 @@
                 </svg>
               </button>
             </li>
+            <hr style="margin: 5px 0px;">
             {% endfor %}
           </ul>
             
@@ -117,7 +121,7 @@
   </div>
   <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="filter" value='{"x": "y"}'>
+    <input type="hidden" name="filter" value='{"name": "i", "steps": "", "memory_mode": "disk_memory"}'>
     <input type="submit" value="Filter" class="btn btn-red">
   </form>
 </div>
