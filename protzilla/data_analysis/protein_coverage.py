@@ -2,11 +2,15 @@ from colour import color_scale
 from docutils.nodes import title
 from tqdm import tqdm
 from protzilla.constants.paths import EXTERNAL_DATA_PATH
+from protzilla.data_analysis.differential_expression_mann_whitney import mann_whitney_test_on_intensity_data
 from protzilla.disk_operator import PickleOperator
 from dataclasses import dataclass
 import pandas as pd
 from numpy import log2
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+# import StrEnum
+from enum import StrEnum
 
 
 @dataclass(unsafe_hash=True)
@@ -23,6 +27,11 @@ class ProteinHit:
     protein_id: str
     start_location_on_protein: int
     end_location_on_protein: int
+
+class IntensityNormalization(StrEnum):
+    min_max_scaling = "min_max_scaling"
+    none = "none"
+
 
 
 def build_kmer_dictionary(protein_dictionary: dict[str, str], k: int = 5) -> dict[str, list[tuple[str, int]]]:
@@ -131,9 +140,64 @@ def plot_protein_coverage(
     # required number of rows (vertical space)
     rows = distribute_to_rows(peptide_matches)
 
-    fig = _build_coverage_plot(coverage, peptide_matches, protein_id, protein_sequence, rows)
+    fig = _new_build_coverage_plot(coverage, peptide_matches, protein_id, protein_sequence, rows)
 
     return dict(plots=[fig])
+
+def _new_build_coverage_plot(
+        coverage: list[int], peptide_matches: list[PeptideMatch], protein_id: str, protein_sequence: str,
+        rows: dict[str, list[list[PeptideMatch]]], intensity_normalization: IntensityNormalization = IntensityNormalization.min_max_scaling
+) -> go.Figure:
+    # one row for each sample + two row for the protein sequence (on top and on the bottom)
+    number_of_subplots = len(rows) + 1
+    protein_sequence_labels = [f"{amino_acid} - {amino_acid_index} " for amino_acid_index, amino_acid in enumerate(protein_sequence)]
+    fig = make_subplots(rows=number_of_subplots, cols=1, shared_xaxes=True, vertical_spacing=0.2, subplot_titles=list(rows.keys()) + [f"Sequencing depth of {protein_id}"])
+    # Sequencing depth bar chart
+    fig.add_trace(go.Bar(x=protein_sequence_labels, y=coverage, showlegend=False), row=number_of_subplots, col=1)
+    # Peptides
+    for subplot_row_index, (sample, rows) in enumerate(rows.items()):
+        # Intensity scaling for the current sample
+        current_row_intensities = [peptide_match.intensity for row in rows for peptide_match in row]
+        max_intensity, min_intensity = max(current_row_intensities), min(current_row_intensities)
+        def scale_intensity(intensity: float) -> float:
+            if intensity_normalization == IntensityNormalization.min_max_scaling:
+                return (intensity - min_intensity) / (max_intensity - min_intensity)
+            else:
+                return intensity
+
+        for row_index, row in enumerate(rows):
+            for peptide_match in row:
+                x0, x1 = peptide_match.start_location_on_protein, peptide_match.end_location_on_protein
+                y0, y1 = row_index, row_index + 1
+                # add the rectangles
+                fig.add_shape(
+                    type="rect",
+                    x0=x0 - 0.5, y0=y0,
+                    x1=x1 - 0.5, y1=y1,
+                    fillcolor=f"rgba({int(255 * scale_intensity(peptide_match.intensity))}, 0, 0, 1)",
+                    opacity=0.5,
+                    layer="above",
+                    row=subplot_row_index + 1, col=1
+                )
+                # add invisible plotly object to the rectangle to show the peptide sequence when hovered over
+                fig.add_trace(go.Scatter(
+                    x=protein_sequence_labels[
+                      peptide_match.start_location_on_protein:peptide_match.end_location_on_protein + 1],
+                    y=[(y0 + y1) / 2] * len(peptide_match.peptide_sequence),
+                    text=[f"Sample: {sample}<br>Peptide: {peptide_match.peptide_sequence}<br>"
+                          f"({peptide_match.start_location_on_protein}-{peptide_match.end_location_on_protein})<br>"
+                          f"Intensity: {peptide_match.intensity}"] * len(peptide_match.peptide_sequence),
+                    mode="markers",
+                    marker=dict(opacity=0, size=15),  # make marker invisible
+                    hoverinfo="text",
+                    hovertemplate="%{text}<extra></extra>",
+                    showlegend=False,
+                ), row=subplot_row_index + 1, col=1)
+
+        fig.update_yaxes(range=[0, len(rows)], showticklabels=False, row=subplot_row_index + 1, col=1)
+        fig.update_xaxes(showticklabels=False, row=subplot_row_index + 1, col=1)
+
+    return fig
 
 
 def _build_coverage_plot(coverage: list[int], peptide_matches: list[PeptideMatch], protein_id: str,
@@ -148,8 +212,6 @@ def _build_coverage_plot(coverage: list[int], peptide_matches: list[PeptideMatch
     fig = go.Figure(data=go.Bar(x=x_labels,
                                 y=normalized_coverage,
                                 marker=dict(
-                                    color=normalized_coverage,
-                                    colorscale='Bluered',
                                     colorbar=dict(title="Coverage<br>(normalized)"),
                                     line=dict(width=0)
                                 ),
@@ -210,7 +272,7 @@ def _build_coverage_plot(coverage: list[int], peptide_matches: list[PeptideMatch
         xaxis_title="Protein Sequence",
         yaxis=dict(visible=False, range=[0, 1 + current_row], title=""),
         showlegend=False,
-        bargap=0
+        bargap=0.2
     )
     return fig
 
@@ -237,3 +299,4 @@ def distribute_to_rows(peptide_matches: list[PeptideMatch]) -> dict[list[list[Pe
         else:
             rows[peptide_match.sample].append([(peptide_match)])
     return rows
+
