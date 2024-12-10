@@ -6,6 +6,7 @@ app_name = "runs"
 urlpatterns = [
     path("", views.index, name="index"),
 #    path("filter", views.filtered_index, name="filter"),
+    path("create_run_menu", views.create_run_menu, name="create_run_menu"),
     path("create", views.create, name="create"), #create, continue and delete paths should be in main/urls.py, also change index.html accordingly
     path("continue", views.continue_, name="continue"),
     path("delete", views.delete_, name="delete"),

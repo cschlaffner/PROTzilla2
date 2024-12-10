@@ -25,3 +25,4 @@ function toggleFavouriteRun(runName, favouriteStatus){
   document.getElementById('favourites_run_status_id').value = favouriteStatus;
   document.getElementById('change_favourite').submit();
 };
+

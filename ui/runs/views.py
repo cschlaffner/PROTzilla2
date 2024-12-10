@@ -209,7 +209,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
         request,
         "runs/index.html",
         context={
-            "available_workflows": get_available_workflow_names(),
+            #"available_workflows": get_available_workflow_names(),
             #"available_runs": filter_runs(get_available_runs(), filter), #this version is probably worse cause get_available_runs returns two things, why should filter expect two things in one param
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
@@ -256,6 +256,26 @@ def tag(request: HttpRequest):
     yaml_operator.read(metadata_yaml_path, tags)
 
     return HttpResponseRedirect(reverse("runs:index"))
+
+def create_run_menu(request: HttpRequest):
+    """
+    Continues an existing run. The user is redirected to the detail page of the run and
+    can resume working on the run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
+
+    return render(
+        request,
+        "runs/create_run_menu.html",
+        context={
+            "available_workflows": get_available_workflow_names(),
+        },
+        )
 
 
 def create(request: HttpRequest):
@@ -324,6 +344,14 @@ def delete_(request: HttpRequest):
     
     try: 
         delete_run_folder(run_name)
+        display_message(
+            {
+                "level": 40,
+                "msg": f"Couldn't delete the run '{run_name}' . Please check the permissions for this file or try running Protzilla as administrator.",
+                "trace": "hihihihihhahahaho",
+            },
+            request,
+        )
     except Exception as e:
         display_message(
             {
