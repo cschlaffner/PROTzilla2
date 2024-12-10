@@ -68,6 +68,9 @@ def detail(request: HttpRequest, run_name: str):
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
 
+    request.session['last_view'] = "runs:detail"
+    request.session['run_name'] = run_name
+
     # section, step, method = run.current_run_location()
     # end_of_run = not step
 
@@ -173,6 +176,9 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+
+    request.session['last_view'] = "runs:index"
+
     return render(
         request,
         "runs/index.html",

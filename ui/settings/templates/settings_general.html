@@ -14,21 +14,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="wrapper">
-    {{ sidebar|safe }}
-    <div class="content border-start">
-        <div justify-content-center d-flex>
-            <h3>General Settings</h3>
-            <div class="row mb-3" id="description">General settings relating to the PROTzilla application can be adjusted here.</div>
-            <div class="mb-2" id="settings-form">
-                {% for field in settings_form %}
-                    <div class="fieldWrapper">
-                        {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                        {{ field }}
-                    </div>
-                {% endfor %}
+    <div class="wrapper">
+        {{ sidebar|safe }}
+        <div class="content border-start">
+            <div justify-content-center d-flex>
+                <h3>General Settings</h3>
+                <div class="row mb-3" id="description">General settings relating to the PROTzilla application can be adjusted here.</div>
+                <div class="mb-2" id="settings-form">
+                    {% for field in settings_form %}
+                        <div class="fieldWrapper">
+                            {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
+        {% block footer %}
+            {% include "settings_footer.html" %}
+        {% endblock %} 
     </div>
-</div>
-{% endblock %}
+{% endblock %} 

@@ -2,7 +2,7 @@ import pandas
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 from django.template.loader import render_to_string
 
 from protzilla.constants.paths import EXTERNAL_DATA_PATH, SETTINGS_PATH
@@ -30,9 +30,9 @@ def get_user_settings():
 
 
 def settings_general(request):
-    settings_form=""
-    sections=get_user_settings()
-    sidebar=make_sidebar(request, sections, "general")
+    settings_form = ""
+    sections = get_user_settings()
+    sidebar = make_sidebar(request, sections, "general")
     return render(
         request,
         "settings_general.html",
@@ -44,9 +44,9 @@ def settings_general(request):
 
 
 def settings_plots(request):
-    settings_form=ExportingPlotsSettingsForm
-    sections=get_user_settings()
-    sidebar=make_sidebar(request, sections, "plots")
+    settings_form = ExportingPlotsSettingsForm
+    sections = get_user_settings()
+    sidebar = make_sidebar(request, sections, "plots")
     return render(
         request,
         "settings_plots.html",
@@ -55,3 +55,15 @@ def settings_plots(request):
             settings_form=settings_form
         )
     )
+
+
+def last_view(request):
+    view_name = request.session['last_view']
+    run_name = request.session['run_name']
+    try:
+        if view_name=="runs:detail":
+            return HttpResponseRedirect(reverse(view_name, args=(run_name,)))
+        else:
+            return HttpResponseRedirect(reverse(view_name))
+    except NoReverseMatch:
+        return HttpResponseRedirect(reverse("runs:index"))
