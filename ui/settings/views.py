@@ -59,9 +59,9 @@ def settings_plots(request):
 
 def last_view(request):
     view_name = request.session['last_view']
-    run_name = request.session['run_name']
     try:
         if view_name=="runs:detail":
+            run_name = request.session['run_name']
             return HttpResponseRedirect(reverse(view_name, args=(run_name,)))
         else:
             return HttpResponseRedirect(reverse(view_name))

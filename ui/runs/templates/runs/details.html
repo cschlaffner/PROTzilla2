@@ -278,11 +278,11 @@
                                                             Do you want to proceed?
                                                             <hr>
                                                             <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
-                                                            <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <button id="cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
                                         {% endif %}
                                         {% if not last_step %}
                                           <button class="btn btn-red" {% if not results_exist %} disabled {% endif %} >Next</button>
