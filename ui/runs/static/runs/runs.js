@@ -54,11 +54,12 @@ $(document).ready(function () {
                 
             }
         });
+    });
       // control calculate button in footer
     var calculateButton = $('#calculate_parameters_submit');
 
     calculateButton.click(function() {
-        var form = $("#calculateForm")[0];
+        var form = $(".calc_form")[0];
 
         if (form.checkValidity()) {
             form.submit();
