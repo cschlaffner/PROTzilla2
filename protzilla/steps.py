@@ -69,18 +69,21 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        steps._clear_future_steps()
-        self.updateInputs(inputs)
-
+        stepIndex = steps.all_steps.index(self)
+        previousStep = steps.all_steps[stepIndex-1]
+        print(self, previousStep)
+        if (previousStep.calculation_status == "outdated" ):
+            previousStep.calculate(steps,inputs)
+        #steps._clear_future_steps()
+        if (steps.current_step_index == stepIndex):
+            self.updateInputs(inputs)
         try:
             self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
-
             output_dict = self.method(self.inputs)
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
-
             self.validate_outputs()
         except NotImplementedError as e:
             self.messages.append(
@@ -471,10 +474,23 @@ class StepManager:
             return self.sections[section]
         else:
             raise ValueError(f"Unknown section {section}")
+    
+    def set_steps_outdated(self) -> None:
+        print("steps",self.following_steps)
+        count=0
+        for step in self.following_steps:
+            if (step.calculation_status == "complete"):
+                step.calculation_status = "outdated"
+                count+=1
+        return count
 
     @property
     def previous_steps(self) -> list[Step]:
         return self.all_steps[: self.current_step_index]
+    
+    @property
+    def following_steps(self) -> list[Step]:
+        return self.all_steps[self.current_step_index :]
 
     @property
     def current_step(self) -> Step:
@@ -628,13 +644,14 @@ class StepManager:
 
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
+        #if (step.calculation_status != "incomplete"):
         #if new_step_index < self.current_step_index:
         self.current_step_index = new_step_index
-        # else:
+        #else:
         #     step.calculate(self, step.form_inputs)
         #     self.next_step()
         #     self.goto_step(step_index, section)
-            #raise ValueError("Cannot go to a step that is after the current step")
+        #    raise ValueError("Cannot go to a step that is after the current step")
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
@@ -675,3 +692,6 @@ class StepManager:
             step.output = Output()
             step.messages = Messages()
             step.plots = Plots()
+
+    # def _calculate_previous_steps(self, steps: StepManager, index: int) -> None:
+    #     for step in 

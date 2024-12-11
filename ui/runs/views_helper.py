@@ -62,7 +62,7 @@ def get_displayed_steps(
                     "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
-                    "circle_color": ("red" if step.calculation_status=="incomplete" else ("green" if step.calculation_status=="complete" else "yellow")),
+                    "calculation_icon_path": "img/" + step.calculation_status + "_icon.svg"
                 }
             )
 

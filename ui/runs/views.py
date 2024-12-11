@@ -651,14 +651,15 @@ def download_table(request, run_name, index, key):
 
     return FileResponse(csv_bytes, content_type="text/csv")
 
-def display_not_calculated(request: HttpRequest, run_name:str):
+def update_form(request: HttpRequest, run_name:str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
+    count=0
     if (run.current_step.calculation_status == "complete"):
-        run.current_step.calculation_status = "outdated"
+        count = run.step_set_outdated()
     method_form = get_filled_form_by_request(
             request, run
         )
     method_form.update_form(run)
-    return(HttpResponse(run.current_step.calculation_status))
+    return(JsonResponse({"status":run.current_step.calculation_status, "count":count}))

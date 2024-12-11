@@ -1,4 +1,5 @@
-{# params: run_name section{id, finished, name, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, index_global, method_name, circle_color}} #}
+{% load static %}
+{# params: run_name section{id, finished, name, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, index_global, method_name, calculation_icon_path}} #}
 
 {% block js %}
     <script>
@@ -34,9 +35,13 @@
                     </svg></button>
                 </form>
             {% endif %}
-            <svg xmlns="http://www.w3.org/2000/svg" id="forfun" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
+            <div id="calculationIcon_{{ step.index_global }}">
+                <img src="{% static step.calculation_icon_path %}" width="25" height="25">
+            </div>
+            
+            <!-- <svg xmlns="http://www.w3.org/2000/svg" id="forfun" width="16" height="16" fill="grey" class="bi bi-x removeIcon">
                 <circle id="myCircle_{{ step.index_global }}" fill="{{step.circle_color}}" cx="8" cy="8" r="8"/>
-            </svg>
+            </svg> -->
 
         </div>
     {% endfor %}

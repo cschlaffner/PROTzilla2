@@ -168,6 +168,10 @@ class Run:
         self.steps.goto_step(step_index, section)
 
     @error_handling
+    def step_set_outdated(self) -> int:
+        return self.steps.set_steps_outdated()
+
+    @error_handling
     @auto_save
     def step_change_method(self, new_method: str) -> None:
         self.steps.change_method(new_method)

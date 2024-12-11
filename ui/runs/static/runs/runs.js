@@ -34,21 +34,24 @@ $(document).ready(function () {
     });
 
     //save forms on change
-    $('.form').on( "change", function() {
+    $('.calc_form').on( "change", function() {
         var triggeredForm = $(this);
         var formId = triggeredForm.attr('id');
-        var index = formId.split("_").pop();
-        console.log(formId,index)
+        var index = Number(formId.split("_").pop());
         
         $.ajax({
-            url: `/runs/${run_name}/display_not_calculated`,  // The URL for the Django view
+            url: `/runs/${run_name}/update_form`,  // The URL for the Django view
             type: 'POST',
             headers: {
                 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()  // CSRF token for security
             },
             data: $(this).serialize(),
             success: function(response) {
-                $(`#myCircle_${index}`).attr("fill", response === "incomplete" ? "red" : (response === "complete" ? "green":"yellow"));
+                for (let i=0; i<response.count; i++) {
+                    console.log("gg")
+                    $(`#calculationIcon_${index+i} img`).attr('src', `${staticUrl}${response.status}_icon.svg`);
+                }
+                
             }
         });
     });

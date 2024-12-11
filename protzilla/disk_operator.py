@@ -93,7 +93,7 @@ class KEYS:
     STEP_PLOTS = "plots"
     STEP_INSTANCE_IDENTIFIER = "instance_identifier"
     STEP_TYPE = "type"
-    STEP_IS_CALCULATED = "is_calculated"
+    STEP_CALCULATION_STATUS = "calculation_status"
     DF_MODE = "df_mode"
 
 
@@ -214,7 +214,7 @@ class DiskOperator:
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
             step.form_inputs = step_data.get(KEYS.STEP_FORM_INPUTS, {})
-            #step.calculated = step_data.get(KEYS.STEP_IS_CALCULATED,{})
+            step.calculation_status = step_data.get(KEYS.STEP_CALCULATION_STATUS,"incomplete")
             return step
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
@@ -234,7 +234,7 @@ class DiskOperator:
                     instance_identifier=step.instance_identifier, output=step.output
                 )
                 step_data[KEYS.STEP_MESSAGES] = step.messages.messages
-                #step_data[KEYS.STEP_IS_CALCULATED] = step.calculated
+                step_data[KEYS.STEP_CALCULATION_STATUS] = step.calculation_status
             return step_data
 
     def _read_outputs(self, output: dict) -> Output:

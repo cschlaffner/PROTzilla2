@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{% static 'runs/runs.js' %}"></script>
     <script>
         var run_name = "{{ run_name }}";
+        const staticUrl = "{% static 'img/' %}";
     </script>
     <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
     {# TODO 129 Better buttons for analysis and importing #}
@@ -128,7 +129,7 @@
                         {# if there are plot parameters, display method and plot parameters next to each other #}
                         {% if plot_form %}
                             <div class="col">
-                                <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="form" method="post"
+                                <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="calc_form" method="post"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div class="mb-1">
@@ -161,7 +162,7 @@
                         {% else %}
                             <div class="col-7">
                                 {% if step != "plot" %}
-                                    <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="form" method="post"
+                                    <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="calc_form" method="post"
                                           enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="mb-2">
