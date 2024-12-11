@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 user_data/runs/*
+user_data/workflows/*
 user_data/external_data/*
 user_data/debug/*
 ui/static/admin/*

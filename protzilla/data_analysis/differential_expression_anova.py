@@ -9,7 +9,7 @@ from protzilla.utilities import default_intensity_column, exists_message
 from .differential_expression_helper import (
     INVALID_PROTEINGROUP_DATA_MSG,
     _map_log_base,
-    apply_multiple_testing_correction,
+    apply_multiple_testing_correction, preprocess_grouping,
 )
 
 
@@ -57,30 +57,7 @@ def anova(
             - a df filtered_proteins, containing the filtered out proteins (due to missing values or identical values),
     """
 
-    assert grouping in metadata_df.columns, f"{grouping} not found in metadata_df"
-    messages = []
-    # Check if the selected groups are present in the metadata_df
-
-    # Select all groups if none or less than two were selected
-    if not selected_groups or isinstance(selected_groups, str):
-        selected_groups = metadata_df[grouping].unique()
-        selected_groups_str = "".join([" " + str(group) for group in selected_groups])
-        messages.append(
-            {
-                "level": logging.INFO,
-                "msg": f"Auto-selected the groups {selected_groups_str} for comparison because none or only one group was selected.",
-            }
-        )
-    elif len(selected_groups) >= 2:
-        for group in selected_groups:
-            if group not in metadata_df[grouping].unique():
-                messages.append(
-                    {
-                        "level": logging.ERROR,
-                        "msg": f"Group {group} not found in metadata_df.",
-                    }
-                )
-                return {"messages": messages}
+    selected_groups, messages = preprocess_grouping(metadata_df, grouping, selected_groups)
 
     # Merge the intensity and metadata dataframes in order to assign to each Sample
     # their corresponding group

@@ -214,6 +214,7 @@ def evidence_peptide_df():
             ["Sample1", "Protein3", "SEQE", 5000000, "Unmodified", "_SEQE_", None, 0.00005, "Raw_File_1"],
             ["Sample1", "Protein3", "SEQF", 6000000, "Unmodified", "_SEQF_", None, 0.00006, "Raw_File_1"],
             ["Sample1", "Protein3", "SEQG", 7000000, "Unmodified", "_SEQG_", None, 0.00007, "Raw_File_1"],
+            ["Sample1", "Protein3", "SEQGG", 7000000, "Unmodified", "_SEQGG_", None, 0.00007, "Raw_File_1"],
             ["Sample1", "Protein4", "SEQH", 8000000, "Unmodified", "_SEQH_", None, 0.00008, "Raw_File_1"],
             ["Sample1", "Protein5", "SEQI", 9000000, "Unmodified", "_SEQI_", None, 0.00009, "Raw_File_1"],
             ["Sample2", "Protein1", "SEQJ", 10000000, "Acetyl (Protein N-term)", "_(Acetyl (Protein N-term))SEQJ_", None, 0.0001, "Raw_File_2"],

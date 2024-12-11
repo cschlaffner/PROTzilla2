@@ -27,8 +27,8 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="wrapper">
+    
+<div class="wrapper">
         {# include sidebar #}
         <nav id="sidebar" class="border border-end-0 border-top-0 border-bottom-0">
             {{ sidebar }}
@@ -43,8 +43,6 @@
             </div>
 
             <div id="main-content">
-                
-                
                 {# show history #}
                 {% if displayed_history %}
                     <div class="row d-flex justify-content-between align-items-center">
@@ -143,8 +141,6 @@
                                             </div>
                                         {% endfor %}
                                     </div>
-                                    <input type="submit" id="calculate_parameters_submit" value="Calculate"
-                                           class="btn btn-red">
                                 </form>
                             </div>
                             <div class="col">
@@ -156,7 +152,10 @@
                                             {{ plot_form }}
                                         </div>
                                     </fieldset>
-                                    <input type="submit" id="plot_parameters_submit" value="Plot" class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                    <button type="submit" id="plot_parameters_submit"
+                                        class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                        Plot
+                                    </button>
                                 </form>
                             </div>
                         {% else %}
@@ -177,10 +176,11 @@
                                             {% endfor %}
                                         </div>
                                         <div class="form-group">
-                                            <input type="submit" value="Calculate" id="calculate_parameters_submit"
-                                                   class="btn btn-red mr-auto">
                                             {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit" class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">Plot</a>
+                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
+                                                    class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                                    Plot
+                                                </a>
                                             {% endif %}
                                             {% if show_table %}
                                                 <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
@@ -207,8 +207,8 @@
                                             {% endfor %}
                                         </div>
                                         <div class="form-group">
-                                            <input type="submit" id="plot_parameters_submit" value="Plot"
-                                                   class="btn btn-grey">
+                                            <button type="submit" id="plot_parameters_submit"
+                                                   class="btn btn-grey">Plot</button>
                                         </div>
                                     </form>
                                 {% endif %}
@@ -246,44 +246,59 @@
                             </form>
                         {% endif %}
                     </div>
-                    <div class="col">
-                        {# navigation between steps #}
+                    
+                </div>
+            </div>
+
+            <div class="footer border-top pt-3">
+                <div class="row align-items-center">
+                    <div class="d-flex col-auto flex-column justify-content-end">
+                        <button id="calculate_parameters_submit" type="submit"
+                            class="btn btn-red calculateSpinner mr-auto">
+                            Calculate
+                        </button>
+                    </div>
+                    <div class="justify-content-end d-flex col flex-column">
                         <div class="justify-content-end d-flex">
-                            {% if results_exist %}
-                                <div class="col-5 mb-2">
-                                    <div class="form-group mb-0">
-                                        {{ name_field }}
-                                    </div>
+                        {% if results_exist %}
+                            <div class="col-5 mb-2">
+                                <div class="form-group mb-0">
+                                    {{ name_field }}
                                 </div>
-                            {% endif %}
+                            </div>
+                        {% endif %}
                         </div>
-                        <div class="justify-content-end d-flex">
-                            <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    {% if show_back %}
-                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-grey mr-auto">Back</a>
-                                        <div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true" style="display: none;" >
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
+                        <div class="col">
+                            {# navigation between steps #}
+                            <div class="justify-content-end d-flex">
+                                <form action="{% url 'runs:next' run_name %}" method="post" id="runs_next">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        {% if show_back %}
+                                            <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-grey mr-auto">Back</a>
+                                            <div class="modal fade" id="calculationInProgressModal" tabindex="-1" role="dialog" aria-labelledby="calculationInProgressModalLabel" aria-hidden="true" style="display: none;" >
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="calculationInProgressModalLabel">Do you want back?</h5>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Going a step back during calculation may lead to unforseen behavior and loss in data.
+                                                            Do you want to proceed?
+                                                            <hr>
+                                                            <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
+                                                            <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        Going a step back during calculation may lead to unforseen behavior and loss in data.
-                                                        Do you want to proceed?
-                                                        <hr>
-                                                        <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
-                                                        <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                                 </div>
                                             </div>
                                         </div>
+                                        {% endif %}
+                                        {% if not last_step %}
+                                          <button class="btn btn-red" {% if not results_exist %} disabled {% endif %} >Next</button>
+                                        {% endif %}
                                     </div>
-                                    {% endif %}
-                                    <button class="btn btn-red"  {% if not results_exist or last_step %} disabled {% endif %}>Next
-                                    </button>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

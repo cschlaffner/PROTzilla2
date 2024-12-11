@@ -240,7 +240,7 @@ def by_pca(
             peptide_df=peptide_df,
             outlier_list=outlier_list,
             pca_df=df_transformed_pca_data,
-            explained_variance_ratio=list(pca_model.explained_variance_ratio_),
+            explained_variance_ratio=(pca_model.explained_variance_ratio_).tolist(),
             number_of_components=number_of_components,
         )
     except ValueError as e:

@@ -8,7 +8,7 @@ import re
 from protzilla.utilities.transform_dfs import long_to_wide
 
 
-def filter_peptides_of_protein(
+def select_peptides_of_protein(
         peptide_df: pd.DataFrame, protein_ids: list[str],
 ) -> dict:
     """
@@ -45,23 +45,9 @@ def ptms_per_sample(peptide_df: pd.DataFrame) -> dict:
     with the cells containing the amount of the PTM in the sample
     """
 
-    modification_df = peptide_df[["Sample", "Modifications"]]
+    modification_df = aggregate_ptms(peptide_df, ["Sample"])
 
-    modification_df = pd.concat(
-        [modification_df["Sample"],
-         (modification_df['Modifications'].str.get_dummies(sep=","))], axis=1)
-
-    for column, data in modification_df.iteritems():
-        amount, name = from_string(column)
-        if amount > 1:
-            modification_df[column] = modification_df[column].multiply(amount)
-            modification_df = modification_df.rename(columns={column: name})
-
-    modification_df = modification_df.groupby(["Sample"]).sum()
-
-    modification_df = modification_df.groupby(modification_df.columns, axis=1).sum()
-
-    modification_df = modification_df.reset_index()
+    modification_df["Total Amount of Peptides"] = peptide_df.groupby("Sample").size().reset_index()[0]
 
     return dict(ptm_df=modification_df)
 
@@ -77,23 +63,7 @@ def ptms_per_protein_and_sample(peptide_df: pd.DataFrame) -> dict:
     their amount in the protein and sample
     """
 
-    modification_df = peptide_df[["Sample", "Protein ID", "Modifications"]]
-
-    modification_df = modification_df[["Sample", "Protein ID"]].join(
-        modification_df['Modifications'].str.get_dummies(sep=",")
-    )
-
-    for column, data in modification_df.iteritems():
-        amount, name = from_string(column)
-        if amount > 1:
-            modification_df[column] = modification_df[column].multiply(amount)
-            modification_df = modification_df.rename(columns={column: name})
-
-    modification_df = modification_df.groupby(["Sample", "Protein ID"]).sum()
-
-    modification_df = modification_df.groupby(modification_df.columns, axis=1).sum()
-
-    modification_df = modification_df.reset_index()
+    modification_df = aggregate_ptms(peptide_df, ["Sample", "Protein ID"])
 
     modi = (
         modification_df.drop(["Sample", "Protein ID"], axis=1).apply(lambda x: ('(' + x.astype(str) + ') ' + x.name + ", ")))
@@ -107,6 +77,27 @@ def ptms_per_protein_and_sample(peptide_df: pd.DataFrame) -> dict:
     modification_df = long_to_wide(modification_df, "Modifications").fillna("").reset_index()
 
     return dict(ptm_df=modification_df)
+
+
+def aggregate_ptms(peptide_df: pd.DataFrame, group_by: list[str]):
+
+    modification_df = pd.concat(
+        [peptide_df[group_by],
+         (peptide_df['Modifications'].str.get_dummies(sep=","))], axis=1)
+
+    for column, data in modification_df.iteritems():
+        amount, name = from_string(column)
+        if amount > 1:
+            modification_df[column] = modification_df[column].multiply(amount)
+            modification_df = modification_df.rename(columns={column: name})
+
+    modification_df = modification_df.groupby(group_by).sum()
+
+    modification_df = modification_df.groupby(modification_df.columns, axis=1).sum()
+
+    modification_df = modification_df.reset_index()
+
+    return modification_df
 
 
 def from_string(mod_string: str) -> tuple[int, str]:
