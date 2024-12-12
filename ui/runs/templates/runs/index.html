@@ -9,7 +9,6 @@
 
 {% block js %}
     <script type="text/javascript" src="{% static 'runs/index.js' %}"></script>
-
 {% endblock %}
 
 {% block content %}
@@ -48,18 +47,31 @@
           
           <!-- Header Section -->
         <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
-          <li class="d-flex justify-content-between" style="font-weight: bold; border-bottom: 1px solid #ccc; padding: 5px 0;">
-              <span style="width: 8%"></span>
-              <span style="width: 32%">Name</span>
-              <span style="width: 18%">Created</span>
-              <span style="width: 18%">Last modified</span>
-              <span style="width: 24%">Memory mode</span>
+          <li class="d-flex justify-content-between" style="font-weight: bold;">
+              <span>
+                <button type="button" class="btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ded704" class="bi bi-star-fill" viewBox="0 0 16 16">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.314-.16-.888.282-.95l4.898-.696 2.197-4.482c.197-.4.73-.4.927 0l2.197 4.482 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.444-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                  </svg>
+                </button>
+              </span>
+              <span style="width: 30%" class="center">Name</span>
+              <span style="width: 15%">Created</span>
+              <span style="width: 15%">Last modified</span>
+              <span style="width: 15%">Memory mode</span>
+              <button type="button" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                  <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                </svg>
+              </button>
+
             </li>
         </ul>
 
         <!-- Run selection -->
           <ul class="w-100" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
             {% for run in all_available_runs %}
+            <hr style="margin: 5px 0px;">
             <li class="d-flex justify-content-between" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}')">
               <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}', '{{run.favourite_status}}')">
                 {% if run.favourite_status == False %}
@@ -76,13 +88,12 @@
               <span style="width: 15%">{{ run.creation_date }}</span>
               <span style="width: 15%">{{ run.modification_date }}</span>
               <span style="width: 15%">{{ run.memory_mode }}</span>
-              <button type="button" class="btn btn-red" onclick="deleteRun('{{run.run_name}}')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+              <button type="button" class="delete-btn btn btn-grey" onclick="deleteRun('{{run.run_name}}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                   <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                 </svg>
               </button>
             </li>
-            <hr style="margin: 5px 0px;">
             {% endfor %}
           </ul>
             
@@ -134,7 +145,7 @@
 
         </div>
         <input type="hidden" name="filter" value='{"name": "i", "steps": "", "memory_mode": "disk_memory"}'>
-        <input type="submit" value="Apply filters" class="btn btn-red">
+        <input type="submit" value="Apply filters" class="btn btn-grey">
       </form>
     </div>
   </div>
@@ -168,43 +179,43 @@
 <script>
   // Initialize the Multi Selects
   new MultiSelect('#dynamic', {
-      data: [
-          {
-              value: 'opt1',
-              text: 'Option 1'
-          },
-          {
-              value: 'opt2',
-              html: '<strong>Option 2 with HTML!</strong>'
-          },
-          {
-              value: 'opt3',
-              text: 'Option 3',
-              selected: true
-          },
-          {
-              value: 'opt4',
-              text: 'Option 4'
-          },
-          {
-              value: 'opt5',
-              text: 'Option 5'
-          }
-      ],
-      placeholder: 'Select an option',
-      search: true,
-      selectAll: true,
-      listAll: false,
-      max: 2,
-      onChange: function(value, text, element) {
-          console.log('Change:', value, text, element);
-      },
-      onSelect: function(value, text, element) {
-          console.log('Selected:', value, text, element);
-      },
-      onUnselect: function(value, text, element) {
-          console.log('Unselected:', value, text, element);
-      }
+    data: [
+        {
+            value: 'opt1',
+            text: 'Option 1'
+        },
+        {
+            value: 'opt2',
+            html: '<strong>Option 2 with HTML!</strong>'
+        },
+        {
+            value: 'opt3',
+            text: 'Option 3',
+            selected: true
+        },
+        {
+            value: 'opt4',
+            text: 'Option 4'
+        },
+        {
+            value: 'opt5',
+            text: 'Option 5'
+        }
+    ],
+    placeholder: 'Select an option',
+    search: true,
+    selectAll: true,
+    listAll: false,
+    max: 2,
+    onChange: function(value, text, element) {
+        console.log('Change:', value, text, element);
+    },
+    onSelect: function(value, text, element) {
+        console.log('Selected:', value, text, element);
+    },
+    onUnselect: function(value, text, element) {
+        console.log('Unselected:', value, text, element);
+    }
   });
-  </script>
+</script>
 {% endblock %}
