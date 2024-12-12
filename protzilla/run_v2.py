@@ -22,12 +22,12 @@ def get_available_run_names() -> list[str]:
         if not directory.name.startswith(".")
     ]
 
-def get_available_runs() -> list[dict[str, str | list[str]]]:
+def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict[str, str | list[str]]], set[str]]:
     if not paths.RUNS_PATH.exists():
         return []
     runs = []
     runs_favourited = []
-
+    all_tags = {}
     for directory in paths.RUNS_PATH.iterdir():
         if directory.name.startswith("."):
             continue
@@ -52,6 +52,9 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
             yaml_operator = YamlOperator()
             metadata = yaml_operator.read(metadata_yaml_path)
             tags = metadata.get("tags")
+        
+        for tag  in tags:
+            all_tags.add(tag)
 
         run = { 
             "run_name": name,
@@ -67,7 +70,7 @@ def get_available_runs() -> list[dict[str, str | list[str]]]:
             runs_favourited.append(run)
         else:
             runs.append(run)
-    return runs, runs_favourited
+    return (runs, runs_favourited, all_tags)
 
 def delete_run_folder(run_name) -> None:
     path = os.path.join(paths.RUNS_PATH, run_name)

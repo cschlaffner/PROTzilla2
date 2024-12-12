@@ -24,7 +24,7 @@ from django.conf import settings
 from ui.runs.filter import filter_runs #prob should put this file somewhere else.
 import protzilla.constants.paths as paths
 from protzilla.run import Run, get_available_run_names 
-from protzilla.run_v2 import delete_run_folder, get_available_runs
+from protzilla.run_v2 import delete_run_folder, get_available_runinfo
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
@@ -202,7 +202,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     print(get_all_possible_step_names())
     #print(filter["name"])
     #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
-    runs, runs_favourite = get_available_runs()
+    runs, runs_favourite, all_tags = get_available_runinfo()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
     all_available_runs = filtered_runs_favourite + filtered_runs
@@ -216,7 +216,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
             "available_runs_favourite": filtered_runs_favourite,
             "all_available_runs": all_available_runs,
             "all_possible_step_names": get_all_possible_step_names(),
-            "all_tags": [],
+            "all_tags": all_tags,
         },
     )
     
@@ -242,9 +242,9 @@ def favourite(request: HttpRequest):
 
     return HttpResponseRedirect(reverse("runs:index"))
 
-def tag(request: HttpRequest):
+def add_tag(request: HttpRequest):
 
-    run_name = request.POST["favourite_run_name"]
+    run_name = request.POST["run_name"]
     run_tag = request.POST["tag"]
 
     from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
@@ -256,7 +256,34 @@ def tag(request: HttpRequest):
     metadata = yaml_operator.read(metadata_yaml_path)
     tags = metadata.get("tags")
     tags.append(run_tag)
-    yaml_operator.read(metadata_yaml_path, tags)
+    yaml_operator.write(metadata_yaml_path, tags)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+def delete_tag(request: HttpRequest):
+    """
+    Deletes a specific tag from a run
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
+
+    run_name = request.POST["run_name"]
+    run_tag = request.POST["tag"]
+
+    from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
+
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    metadata = yaml_operator.read(metadata_yaml_path)
+    tags = metadata.get("tags")
+    tags.remove(run_tag)
+    yaml_operator.write(metadata_yaml_path, tags)
 
     return HttpResponseRedirect(reverse("runs:index"))
 

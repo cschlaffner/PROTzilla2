@@ -57,6 +57,20 @@ function toggleFavouriteRun(runName, favouriteStatus){
   document.getElementById('change_favourite').submit();
 };
 
+function addTag(runName, tagName){
+
+  document.getElementById('run_name_id').value = runName;
+  document.getElementById('tag_name_id').value = tagName;
+  document.getElementById('add_tag').submit();
+};
+
+function deleteTag(runName, tagName){
+
+  document.getElementById('run_name_id').value = runName;
+  document.getElementById('tag_name_id').value = tagName;
+  document.getElementById('delete_tag').submit();
+};
+
 function toggleDetails(element) {
   document.querySelectorAll('.list-item.expanded').forEach(item => {
     if (item !== element) {

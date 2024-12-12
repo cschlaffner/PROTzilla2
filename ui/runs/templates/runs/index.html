@@ -122,6 +122,16 @@
         <input type="hidden" name="favourite_run_name" id="favourites_run_name_id" value="{{available_runs.0.run_name}}">
         <input type="hidden" name="favourite_run_status" id="favourites_run_status_id" value="{{available_runs.0.favourite_status}}">
       </form>
+      <form id="add_tag" class="mb-5" action="{% url 'runs:add_tag' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="tag_name" id="tag_name_id" value="">
+        <input type="hidden" name="run_name" id="run_name_id" value="">
+      </form>
+      <form id="delete_tag" class="mb-5" action="{% url 'runs:delete_tag' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="tag_name" id="tag_name_id" value="">
+        <input type="hidden" name="run_name" id="run_name_id" value="">
+      </form>
     </div>
     <div class="col-2">
       <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
@@ -131,24 +141,20 @@
           <input name="run_name" id="run_name" placeholder="Name contains:" class="form-control">
         </div>
         <div class="mb-2">
-          <form>
             <label for="steps">With steps:</label>
             <select id="steps" name="steps" data-placeholder="Select step(s)" multiple data-multi-select>
                 {% for step in all_possible_step_names %}
                 <option value="{{ step }}">{{ step }}</option>
                 {% endfor %}  
             </select>
-          </form>
         </div>
         <div class="mb-2">
-          <form>
-            <label for="tags">With steps:</label>
+            <label for="tags">With tags:</label>
             <select id="tags" name="tags" data-placeholder="Select tag(s)" multiple data-multi-select>
                 {% for tag in all_tags %}
                 <option value="{{ tag }}">{{ tag }}</option>
                 {% endfor %}  
             </select>
-          </form>
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>
