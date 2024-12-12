@@ -41,6 +41,15 @@ def convert_str_if_possible(s):
             return numbers
         return s
 
+def get_all_possible_step_names():
+    step_classes = form_map._forward_mapping.keys()
+    step_names = []
+    for step in step_classes:
+        step_names.append(
+            step
+        )
+    return step_names
+
 
 def get_displayed_steps(
     steps: StepManager,

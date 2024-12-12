@@ -108,20 +108,24 @@
           <input name="run_name" id="run_name" placeholder="Name contains:" class="form-control">
         </div>
         <div class="mb-2">
-          <label for="workflow_config_name">With steps:</label>
-          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
-            {% for name in available_workflows %}
-            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
-            {% endfor %}
-          </select>
+          <form>
+            <label for="steps">With steps:</label>
+            <select id="steps" name="steps" data-placeholder="Select step(s)" multiple data-multi-select>
+                {% for step in all_possible_step_names %}
+                <option value="{{ step }}">{{ step }}</option>
+                {% endfor %}  
+            </select>
+          </form>
         </div>
         <div class="mb-2">
-          <label for="workflow_config_name">With tags:</label>
-          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
-            {% for name in available_workflows %}
-            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
-            {% endfor %}
-          </select>
+          <form>
+            <label for="tags">With steps:</label>
+            <select id="tags" name="tags" data-placeholder="Select tag(s)" multiple data-multi-select>
+                {% for tag in all_tags %}
+                <option value="{{ tag }}">{{ tag }}</option>
+                {% endfor %}  
+            </select>
+          </form>
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>

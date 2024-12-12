@@ -41,7 +41,7 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_all_possible_step_names
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
@@ -199,6 +199,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     filter = json.loads(filterbing)
     print(filterbing, type(filterbing))
     print(filter, type(filter))
+    print(get_all_possible_step_names())
     #print(filter["name"])
     #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite = get_available_runs()
@@ -214,6 +215,8 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
             "all_available_runs": all_available_runs,
+            "all_possible_step_names": get_all_possible_step_names(),
+            "all_tags": [],
         },
     )
     
