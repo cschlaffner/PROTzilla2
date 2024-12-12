@@ -45,7 +45,7 @@
             <span id="selectedRun">{{ all_available_runs.0.run_name }}</span>
           </h3>
           
-          <!-- Header Section -->
+        <!-- Header Section -->
         <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
           <li class="d-flex justify-content-between" style="font-weight: bold;">
               <span>
@@ -71,7 +71,11 @@
         <!-- Run selection -->
           <ul class="w-100" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
             {% for run in all_available_runs %}
-            <hr style="margin: 5px 0px;">
+            {% if forloop.counter == 1 %}
+              <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
+            {% else %}
+              <hr style="margin: 5px 0px;">
+            {% endif %}
             <li class="d-flex justify-content-between" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}')">
               <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}', '{{run.favourite_status}}')">
                 {% if run.favourite_status == False %}

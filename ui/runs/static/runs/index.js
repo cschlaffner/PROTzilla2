@@ -33,14 +33,8 @@ function selectRun(runName, runId, numberOfRuns){
   for (let i = 1; i <= numberOfRuns; i++) {
       let run = document.getElementById('run-' + i);
       if (i == runId) {
-          if (run.style.backgroundColor == 'rgb(232, 237, 243)') {
-            run.style.backgroundColor = 'white';
-          }
-          else {
-            run.style.backgroundColor = 'rgb(232, 237, 243)';
-            run.style.borderRadius = '10px';
-          }
-          
+        run.style.backgroundColor = 'rgb(232, 237, 243)';
+        run.style.borderRadius = '10px';
       }
       else {
           run.style.backgroundColor = 'white';

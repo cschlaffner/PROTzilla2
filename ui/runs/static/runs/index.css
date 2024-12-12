@@ -2,3 +2,28 @@
     height:-100vh;
 
 }
+
+/* === RUN SELECTION === */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  height: 40px; 
+  padding: 0 10px;
+}
+
+.header-list li{
+  margin-top: 20px;
+}
+
+/* Continue btn postioning */
+
+input[value="Continue"] {
+  margin-top: 20px;
+  float: right;
+}
