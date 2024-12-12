@@ -58,9 +58,8 @@ function toggleFavouriteRun(runName, favouriteStatus){
 };
 
 function addTag(runName){
-  tagName = "Janneessss";
   document.getElementById('add_tag_run_name_id').value = runName;
-  document.getElementById('add_tag_name_id').value = tagName;
+  document.getElementById('add_tag_name_id').value = document.getElementById('tag_name_id').value;
   document.getElementById('add_tag').submit();
 };
 

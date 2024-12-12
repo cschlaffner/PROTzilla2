@@ -105,6 +105,7 @@
                   {% for tag in run.run_tags %}
                     <span class="tag btn-orange">{{ tag }}</span>
                   {% endfor %}
+                  <input name="tag_name" id="tag_name_id" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
                   <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')"></button>
                 </div>
                 <p style="margin: 5px 0;">Description: </p>
