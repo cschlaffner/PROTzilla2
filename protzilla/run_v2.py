@@ -27,7 +27,7 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
         return []
     runs = []
     runs_favourited = []
-    all_tags = {}
+    all_tags = set()
     for directory in paths.RUNS_PATH.iterdir():
         if directory.name.startswith("."):
             continue

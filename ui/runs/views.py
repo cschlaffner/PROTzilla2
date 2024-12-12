@@ -263,7 +263,7 @@ def add_tag(request: HttpRequest):
         tags = metadata.get("tags")
     tags.append(run_tag)
     metadata["tags"]= tags
-    yaml_operator.write(metadata_yaml_path, metadata)
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))
 
