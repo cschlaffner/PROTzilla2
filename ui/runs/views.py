@@ -254,6 +254,7 @@ def add_tag(request: HttpRequest):
 
     yaml_operator = YamlOperator()
     tags = []
+    metadata = {}
     if not os.path.exists(metadata_yaml_path):
         with open(metadata_yaml_path, 'w') as file:
             pass
@@ -261,7 +262,8 @@ def add_tag(request: HttpRequest):
         metadata = yaml_operator.read(metadata_yaml_path)
         tags = metadata.get("tags")
     tags.append(run_tag)
-    yaml_operator.write(metadata_yaml_path, tags)
+    metadata["tags"]= tags
+    yaml_operator.write(metadata_yaml_path, metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))
 
