@@ -57,3 +57,22 @@ function toggleFavouriteRun(runName, favouriteStatus){
   document.getElementById('change_favourite').submit();
 };
 
+function toggleDetails(element) {
+  document.querySelectorAll('.list-item.expanded').forEach(item => {
+    if (item !== element) {
+      item.classList.remove('expanded');
+      item.querySelector('.details').style.display = 'none';
+    }
+  });
+
+  const details = element.querySelector('.details');
+  if (element.classList.contains('expanded')) {
+    element.classList.remove('expanded');
+    details.style.display = 'none';
+    element.style.height = "40px";
+  } else {
+    element.classList.add('expanded');
+    details.style.display = 'block';
+    element.style.height = "250px";
+  }
+}
