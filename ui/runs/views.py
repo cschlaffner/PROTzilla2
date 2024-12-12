@@ -244,8 +244,8 @@ def favourite(request: HttpRequest):
 
 def add_tag(request: HttpRequest):
 
-    run_name = request.POST["run_name"]
-    run_tag = request.POST["tag"]
+    run_tag = request.POST["add_tag_name"]
+    run_name = request.POST["add_tag_run_name"]
 
     from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
@@ -271,8 +271,8 @@ def delete_tag(request: HttpRequest):
     :rtype: HttpResponse
     """
 
-    run_name = request.POST["run_name"]
-    run_tag = request.POST["tag"]
+    run_name = request.POST["delete_tag_run_name"]
+    run_tag = request.POST["delete_tag_name"]
 
     from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 

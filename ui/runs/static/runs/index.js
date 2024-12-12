@@ -57,17 +57,17 @@ function toggleFavouriteRun(runName, favouriteStatus){
   document.getElementById('change_favourite').submit();
 };
 
-function addTag(runName, tagName){
-
-  document.getElementById('run_name_id').value = runName;
-  document.getElementById('tag_name_id').value = tagName;
+function addTag(runName){
+  tagName = "Janneessss";
+  document.getElementById('add_tag_run_name_id').value = runName;
+  document.getElementById('add_tag_name_id').value = tagName;
   document.getElementById('add_tag').submit();
 };
 
 function deleteTag(runName, tagName){
 
-  document.getElementById('run_name_id').value = runName;
-  document.getElementById('tag_name_id').value = tagName;
+  document.getElementById('delete_tag_run_name_id').value = runName;
+  document.getElementById('delete_tag_name_id').value = tagName;
   document.getElementById('delete_tag').submit();
 };
 

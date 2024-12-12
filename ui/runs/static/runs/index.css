@@ -70,3 +70,22 @@ input[value="Continue"] {
   margin-bottom: 10px;
   padding-bottom: 10px;
 }
+
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.tag {
+  display: inline-block;
+  position: relative;
+  border-radius: 5px;
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+

@@ -100,8 +100,13 @@
                 </button>
               </div>
               <div class="details">
-                <!-- Zusätzliche Informationen -->
-                <span>Tags: {{run.tags}}</span>
+                <span>Tags:</span>
+                <div class="tags">
+                  {% for tag in run.run_tags %}
+                    <span class="tag btn-orange">{{ tag }}</span>
+                  {% endfor %}
+                  <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')"></button>
+                </div>
                 <p style="margin: 5px 0;">Description: </p>
                 <input type="submit" value="Continue" class="btn btn-red">
               </div>
@@ -124,13 +129,13 @@
       </form>
       <form id="add_tag" class="mb-5" action="{% url 'runs:add_tag' %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="tag_name" id="tag_name_id" value="">
-        <input type="hidden" name="run_name" id="run_name_id" value="">
+        <input type="hidden" name="add_tag_name" id="add_tag_name_id" value="">
+        <input type="hidden" name="add_tag_run_name" id="add_tag_run_name_id" value="">
       </form>
       <form id="delete_tag" class="mb-5" action="{% url 'runs:delete_tag' %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="tag_name" id="tag_name_id" value="">
-        <input type="hidden" name="run_name" id="run_name_id" value="">
+        <input type="hidden" name="delete_tag_name" id="delete_tag_name_id" value="">
+        <input type="hidden" name="delete_tag_run_name" id="delete_tag_run_name_id" value="">
       </form>
     </div>
     <div class="col-2">
