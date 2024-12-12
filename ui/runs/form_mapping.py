@@ -104,6 +104,7 @@ _forward_mapping_plots = {
 _reverse_mapping = {v: k for k, v in _forward_mapping.items()}
 
 
+# all methods of all steps saved as: dict[section][operation][name] : class
 def generate_hierarchical_dict() -> dict[str, dict[str, dict[str, type[Step]]]]:
     # Initialize an empty dictionary
     hierarchical_dict = {}

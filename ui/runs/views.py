@@ -77,13 +77,12 @@ def detail(request: HttpRequest, run_name: str):
         )  # TODO maybe not do this as it is done after the calculation
         if method_form.is_valid():
             method_form.submit(run)
-        plot_form = get_empty_plot_form_by_method(run.current_step, run)
         # in case the fill_form now would change it
         method_form.fill_form(run)
     else:
         method_form = get_filled_form_by_method(run.current_step, run)
-        plot_form = get_empty_plot_form_by_method(run.current_step, run)
-
+    
+    plot_form = get_empty_plot_form_by_method(run.current_step, run)
     description = run.current_step.method_description
 
     log_messages(run.current_step.messages)
@@ -327,10 +326,9 @@ def plot(request, run_name):
     parameters = parameters_from_post(request.POST)
 
     if run.current_step.display_name == "plot":
-        del parameters["chosen_method"]
         run.step_calculate(parameters)
     else:
-        run.current_step.plot(parameters)
+        run.step_plot(parameters)
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
