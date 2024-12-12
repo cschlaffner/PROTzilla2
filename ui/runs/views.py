@@ -253,8 +253,13 @@ def add_tag(request: HttpRequest):
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
 
     yaml_operator = YamlOperator()
-    metadata = yaml_operator.read(metadata_yaml_path)
-    tags = metadata.get("tags")
+    tags = []
+    if not os.path.exists(metadata_yaml_path):
+        with open(metadata_yaml_path, 'w') as file:
+            pass
+    else:
+        metadata = yaml_operator.read(metadata_yaml_path)
+        tags = metadata.get("tags")
     tags.append(run_tag)
     yaml_operator.write(metadata_yaml_path, tags)
 
