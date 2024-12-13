@@ -326,6 +326,7 @@ def plot(request, run_name):
     parameters = parameters_from_post(request.POST)
 
     if run.current_step.display_name == "plot":
+
         run.step_calculate(parameters)
     else:
         run.step_plot(parameters)

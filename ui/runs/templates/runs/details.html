@@ -115,98 +115,68 @@
                 {% endif %}
 
                 {# show current step #}
-                <div class="row justify-content-center d-flex">
+                 <div class="row justify-content-center d-flex">
                     <h3>{{ display_name }}</h3>
                     <div class="row mb-3" id="description">{{ description }}</div>
-                    {# if there are plot parameters, display method and plot parameters next to each other #}
-                    {% if plot_form %}
-                        <div class="col">
+                    
+                    {# calculateForm #}
+                    <div class="col">
+                        {% if step != "plot" %} 
                             <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
-                                    enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <div class="mb-1">
-                                    {{ method_dropdown }}
-                                </div>
-                                <div class="mb-2" id="method-form">
-                                    {% for field in method_form %}
-                                        <div class="fieldWrapper">
-                                            {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                            {{ field }}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </form>
-                        </div>
-                        <div class="col">
+                                enctype="multipart/form-data"> 
+                        {% else %}
                             <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                    enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <fieldset id="plotfields">
-                                    <div id="plot_parameters" class="mb-2">
-                                        {{ plot_form }}
+                            enctype="multipart/form-data">
+                        {% endif %}
+
+                            {% csrf_token %}
+                            <div class="mb-1">
+                                {{ method_dropdown }}
+                            </div>
+                            <div class="mb-2" id="method-form">
+                                {% for field in method_form %}
+                                    <div class="fieldWrapper">
+                                        {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                        {{ field }}
                                     </div>
-                                </fieldset>
-                                <button type="submit" id="plot_parameters_submit"
-                                    class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                    Plot
-                                </button>
-                            </form>
-                        </div>
-                    {% else %}
-                        <div class="col-7">
-                            {% if step != "plot" %}
-                                <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
-                                        enctype="multipart/form-data">
-                                    {% csrf_token %}
-                                    <div class="mb-2">
-                                        {{ method_dropdown }}
-                                    </div>
-                                    <div class="mb-2" id="method-form">
-                                        {% for field in method_form %}
-                                            <div class="fieldWrapper">
-                                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                                {{ field }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="form-group">
-                                        {% if section == "data_preprocessing" %}
-                                            <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
-                                                class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                                Plot
-                                            </a>
-                                        {% endif %}
-                                        {% if show_table %}
-                                            <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
-                                                target="_blank"
-                                                class="col btn btn-grey me-2">View table</a>
-                                        {% endif %}
-                                        {% if show_protein_graph %}
-                                            <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
-                                                class="btn btn-grey" target="_blank">View Protein Graph</a>
-                                        {% endif %}
-                                    </div>
-                                </form>
-                            {% else %}
-                                <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                        enctype="multipart/form-data">
-                                    {% csrf_token %}
-                                    {{ method_dropdown }}
-                                    <div class="mb-2" id="method-form">
-                                        {% for field in method_form %}
-                                            <div class="fieldWrapper">
-                                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                                {{ field }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" id="plot_parameters_submit"
-                                                class="btn btn-grey">Plot</button>
-                                    </div>
-                                </form>
-                            {% endif %}
-                        </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                {% if section == "data_preprocessing" and not plot_form %}
+                                    <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
+                                        class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                        Plot
+                                    </a>
+                                {% endif %}
+                                {% if show_table %}
+                                    <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
+                                        target="_blank"
+                                        class="col btn btn-grey me-2">View table</a>
+                                {% endif %}
+                                {% if show_protein_graph %}
+                                    <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
+                                        class="btn btn-grey" target="_blank">View Protein Graph</a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                     
+                    {% if plot_form %}
+                    <div class="col">
+                        <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
+                                enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <fieldset id="plotfields">
+                                <div id="plot_parameters" class="mb-2">
+                                    {{ plot_form }}
+                                </div>
+                            </fieldset>
+                            <button type="submit" id="plot_parameters_submit"
+                                class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
+                                Plot
+                            </button>
+                        </form>
+                    </div>
                     {% endif %}
                 </div>
 
