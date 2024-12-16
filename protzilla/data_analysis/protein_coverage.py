@@ -6,7 +6,11 @@ from protzilla.data_analysis.differential_expression_mann_whitney import (
     mann_whitney_test_on_intensity_data,
 )
 from protzilla.disk_operator import PickleOperator
-from protzilla.constants.colors import PLOT_PRIMARY_COLOR
+from protzilla.constants.colors import (
+    PLOT_PRIMARY_COLOR,
+    PLOT_COLOR_SEQUENCE,
+    interpolate_color,
+)
 from dataclasses import dataclass
 import pandas as pd
 from numpy import log2
@@ -15,6 +19,8 @@ from plotly.subplots import make_subplots
 
 # import StrEnum
 from enum import StrEnum
+
+INTENSITY_COLORS = ["#FFFFFF", PLOT_COLOR_SEQUENCE[3]]
 
 
 @dataclass(unsafe_hash=True)
@@ -205,18 +211,12 @@ def _new_build_coverage_plot(
     intensity_normalization: IntensityNormalization = IntensityNormalization.min_max_scaling,
 ) -> go.Figure:
     # one row for each sample + two row for the protein sequence (on top and on the bottom)
-    number_of_subplots = len(rows_by_sample.keys()) + len(coverages_by_sample.keys())
+    number_of_subplots = len(rows_by_sample.keys())
     protein_sequence_labels = [
         f"{amino_acid} - {amino_acid_index} "
         for amino_acid_index, amino_acid in enumerate(protein_sequence)
     ]
-    subplot_titles = zip(
-        [f"Peptides of {sample}" for sample in rows_by_sample.keys()],  # str_a
-        [
-            f"Sequencing depth of {sample}" for sample in coverages_by_sample.keys()
-        ],  # str_b
-    )  # now is (str_a, str_b), (str_a, str_b), ..., so we need to flatten it
-    subplot_titles = [title for titles in subplot_titles for title in titles]
+    subplot_titles = [f"Peptides of {sample}" for sample in rows_by_sample.keys()]
     max_coverage_value = get_max_coverage(coverages_by_sample)
 
     fig = make_subplots(
@@ -225,57 +225,80 @@ def _new_build_coverage_plot(
         shared_xaxes=True,
         vertical_spacing=0.1,
         subplot_titles=subplot_titles,
+        specs=[[{"secondary_y": True}] for _ in range(number_of_subplots)],
     )
     # Peptides
-    for sample_index, sample_name in enumerate(rows_by_sample.keys()):
-        peptide_subplot_rows = rows_by_sample[sample_name]
-        peptides_subplot_index = (2 * sample_index) + 1
+    for sample_index, sample_name in enumerate(rows_by_sample.keys(), start=1):
+        peptide_rows = rows_by_sample[sample_name]
+        sample_subplot_index = sample_index
         coverage = coverages_by_sample[sample_name]
-        coverage_subplot_index = (2 * sample_index) + 2
 
         add_sequence_depth_to_plot(
             fig,
             coverage,
-            coverage_subplot_index,
+            sample_subplot_index,
             max_coverage_value,
             protein_sequence_labels,
         )
 
         # Peptide plot
-        # Intensity scaling for the current sample
-        current_row_intensities = [
-            peptide_match.intensity
-            for row in peptide_subplot_rows
-            for peptide_match in row
+        current_sample_intensities = [
+            peptide_match.intensity for row in peptide_rows for peptide_match in row
         ]
-        max_intensity, min_intensity = max(current_row_intensities), min(
-            current_row_intensities
+        max_intensity, min_intensity = max(current_sample_intensities), min(
+            current_sample_intensities
         )
         scale_intensity = lambda intensity: (intensity - min_intensity) / (
             max_intensity - min_intensity
         )
-        for row_index, row in enumerate(peptide_subplot_rows):
+        for row_index, row in enumerate(peptide_rows):
             for peptide_match in row:
-                normalized_intensity = scale_intensity(peptide_match.intensity)
                 add_peptide_to_plot(
-                    fig,
-                    normalized_intensity,
-                    peptide_match,
-                    peptides_subplot_index,
-                    protein_sequence_labels,
-                    row_index,
+                    fig=fig,
+                    normalized_intensity=scale_intensity(peptide_match.intensity),
+                    peptide_match=peptide_match,
+                    peptides_subplot_index=sample_subplot_index,
+                    protein_sequence_labels=protein_sequence_labels,
+                    row_index=row_index,
+                    offset=max_coverage_value,
+                    color_a=INTENSITY_COLORS[0],
+                    color_b=INTENSITY_COLORS[1],
                 )
 
         fig.update_yaxes(
-            range=[0, len(peptide_subplot_rows)],
+            range=[0, len(peptide_rows) + max_coverage_value],
             showticklabels=False,
             showgrid=False,
-            row=peptides_subplot_index,
+            row=sample_subplot_index,
             col=1,
         )
         fig.update_xaxes(
-            showticklabels=False, showgrid=False, row=peptides_subplot_index, col=1
+            showticklabels=False, showgrid=False, row=sample_subplot_index, col=1
         )
+    # Color legend trace
+    color_scale = [[0, INTENSITY_COLORS[0]], [1, INTENSITY_COLORS[1]]]
+    color_legend_trace = go.Scatter(
+        x=[None],
+        y=[None],
+        mode="markers",
+        marker=dict(
+            colorscale=color_scale,
+            showscale=True,
+            cmin=0,
+            cmax=1,
+            colorbar=dict(
+                title="Intensity of peptide",
+                x=1.0,  # Move further outside the plot
+                len=0.9,  # Increase length of colorbar (70% of subplot height)
+                thickness=30,  # Increase thickness of colorbar
+                titleside="right",  # Move title to the right side of the bar
+            ),
+            size=10,
+        ),
+        showlegend=False,
+    )
+
+    fig.add_trace(color_legend_trace, row=number_of_subplots, col=1)
 
     return fig
 
@@ -292,9 +315,11 @@ def add_sequence_depth_to_plot(
         y=coverage,
         showlegend=False,
         marker=dict(color=PLOT_PRIMARY_COLOR),
+        # hovering should give the amino acid, the position and the coverage
+        hoverinfo="text",
+        hovertemplate="%{x}: %{y}<extra></extra>",
     )
     fig.add_trace(go.Bar(**SEQUENCE_DEPTH_BAR_CHART), row=coverage_subplot_index, col=1)
-    fig.update_yaxes(range=[0, max_coverage_value], row=coverage_subplot_index, col=1)
 
 
 def add_peptide_to_plot(
@@ -304,20 +329,25 @@ def add_peptide_to_plot(
     peptides_subplot_index: int,
     protein_sequence_labels: list[str],
     row_index: int,
+    offset: int,
+    color_a: str = "#FFFFFF",
+    color_b: str = PLOT_COLOR_SEQUENCE[3],
 ) -> None:
     x0, x1 = (
         peptide_match.start_location_on_protein,
         peptide_match.end_location_on_protein,
     )
-    y0, y1 = row_index, row_index + 1
+    y0, y1 = row_index + offset, row_index + offset + 1
+    # interpolate between the two colors
+    color = interpolate_color(color_a, color_b, normalized_intensity)
     PEPTIDE_SHAPE = dict(
         type="rect",
         x0=x0 - 0.5,
         y0=y0,
         x1=x1 - 0.5,
         y1=y1,
-        fillcolor=f"rgba({int(255 * normalized_intensity)}, 0, 0, 1)",
-        opacity=0.5,
+        fillcolor=color,
+        line_color=color,
         layer="above",
     )
     fig.add_shape(**PEPTIDE_SHAPE, row=peptides_subplot_index, col=1)
