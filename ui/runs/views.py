@@ -205,7 +205,7 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
         "tags": filter_tags,
         "memory_mode": filter_df_mode,
     }
-    
+
     #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite, all_tags = get_available_runinfo()
     filtered_runs = filter_runs(runs, filter)
@@ -295,7 +295,8 @@ def delete_tag(request: HttpRequest):
     metadata = yaml_operator.read(metadata_yaml_path)
     tags = metadata.get("tags")
     tags.remove(run_tag)
-    yaml_operator.write(metadata_yaml_path, tags)
+    metadata["tags"] = tags
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))
 

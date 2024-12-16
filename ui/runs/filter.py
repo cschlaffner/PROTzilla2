@@ -17,6 +17,6 @@ def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]: #to be imple
         runs = filter_for_steps(runs, filters["steps"])
     if filters["tags"]:
         runs = filter_for_tags(runs, filters["tags"])
-
-    runs = filter_for_memory_mode(runs, filters["memory_mode"])
+    if filters["memory_mode"]:
+        runs = filter_for_memory_mode(runs, filters["memory_mode"])
     return runs
