@@ -11,12 +11,12 @@ def filter_for_memory_mode(runs, memory_mode) -> list[dict[str, str | list[str]]
     return [run for run in runs if run["memory_mode"] == memory_mode]
 
 def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]: #to be implemented
-    if "name" in filters:
+    if filters["name"]:
         runs = filter_for_name(runs, filters["name"])
-    if "steps" in filters:
+    if filters["steps"]:
         runs = filter_for_steps(runs, filters["steps"])
-    if "tags" in filters:
+    if filters["tags"]:
         runs = filter_for_tags(runs, filters["tags"])
-    if "memory_mode" in filters:
-        runs = filter_for_memory_mode(runs, filters["memory_mode"])
+
+    runs = filter_for_memory_mode(runs, filters["memory_mode"])
     return runs

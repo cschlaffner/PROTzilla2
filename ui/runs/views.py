@@ -195,12 +195,17 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     :return: the rendered index page
     :rtype: HttpResponse
     """
-    filterbing = request.POST.get("filter", "{}")
-    filter = json.loads(filterbing)
-    print(filterbing, type(filterbing))
-    print(filter, type(filter))
-    print(get_all_possible_step_names())
-    #print(filter["name"])
+    filter_run_name = request.POST.get("search_run_name", "")
+    filter_steps = request.POST.getlist("search_steps[]", []) #not search_steps beacuse the multi-select overrides the way the values are stored in the <select> element.
+    filter_tags = request.POST.getlist("search_tags[]", [])
+    filter_df_mode = request.POST.get("df_mode") #no alternative specified when empty because it has a default setting in the html file
+    filter = {
+        "name": filter_run_name,
+        "steps": filter_steps,
+        "tags": filter_tags,
+        "memory_mode": filter_df_mode,
+    }
+    
     #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite, all_tags = get_available_runinfo()
     filtered_runs = filter_runs(runs, filter)

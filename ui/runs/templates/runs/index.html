@@ -105,7 +105,7 @@
                   {% for tag in run.run_tags %}
                     <span class="tag btn-orange">{{ tag }}</span>
                   {% endfor %}
-                  <input name="tag_name" id="tag_name_id" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
+                  <input type="text" name="tag_name" id="tag_name_id" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
                   <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')"></button>
                 </div>
                 <p style="margin: 5px 0;">Description: </p>
@@ -144,11 +144,11 @@
         {% csrf_token %}
         <div class="mb-2">
           <h3>Select filters:</h3>
-          <input name="run_name" id="run_name" placeholder="Name contains:" class="form-control">
+          <input name="search_run_name" id="search_run_name" placeholder="Name contains:" class="form-control">
         </div>
         <div class="mb-2">
             <label for="steps">With steps:</label>
-            <select id="steps" name="steps" data-placeholder="Select step(s)" multiple data-multi-select>
+            <select id="search_steps" name="search_steps" data-placeholder="Select step(s)" multiple data-multi-select>
                 {% for step in all_possible_step_names %}
                 <option value="{{ step }}">{{ step }}</option>
                 {% endfor %}  
@@ -156,7 +156,7 @@
         </div>
         <div class="mb-2">
             <label for="tags">With tags:</label>
-            <select id="tags" name="tags" data-placeholder="Select tag(s)" multiple data-multi-select>
+            <select id="search_tags" name="search_tags" data-placeholder="Select tag(s)" multiple data-multi-select>
                 {% for tag in all_tags %}
                 <option value="{{ tag }}">{{ tag }}</option>
                 {% endfor %}  
@@ -164,7 +164,7 @@
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>
-          <select name="df_mode" id="df_mode" class="form-select">
+          <select name="df_mode" id="df_mode_id" class="form-select">
             <option value="disk_memory" selected >standard</option>
             <option value="disk">low memory</option>
           </select>
@@ -172,7 +172,6 @@
         <div class="mb-2">
 
         </div>
-        <input type="hidden" name="filter" value='{"name": "i", "steps": "", "memory_mode": "disk_memory"}'>
         <input type="submit" value="Apply filters" class="btn btn-grey">
       </form>
     </div>
