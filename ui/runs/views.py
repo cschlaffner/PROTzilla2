@@ -251,6 +251,7 @@ def add_tag(request: HttpRequest):
 
     run_tag = request.POST["add_tag_name"]
     run_name = request.POST["add_tag_run_name"]
+    print(run_tag)
 
     from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
@@ -258,16 +259,20 @@ def add_tag(request: HttpRequest):
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
 
     yaml_operator = YamlOperator()
-    tags = []
+    tags = set()
     metadata = {}
     if not os.path.exists(metadata_yaml_path):
         with open(metadata_yaml_path, 'w') as file:
             pass
     else:
         metadata = yaml_operator.read(metadata_yaml_path)
-        tags = metadata.get("tags")
-    tags.append(run_tag)
+        tags_from_metadata = metadata.get("tags")
+        tags.update(tags_from_metadata)
+        print(tags)
+    tags.add(run_tag)
+    print(tags)
     metadata["tags"]= tags
+    print(metadata)
     yaml_operator.write(Path(metadata_yaml_path), metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))

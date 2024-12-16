@@ -110,7 +110,7 @@
                       </svg>
                     </button>
                   {% endfor %}
-                  <input type="text" name="tag_name" id="tag_name_id" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
+                  <input type="text" name="tag_name" id="tag_name_id_{{run.run_name}}" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
                   <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')"></button>
                 </div>
                 <p style="margin: 5px 0;">Description: </p>

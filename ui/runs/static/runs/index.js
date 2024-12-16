@@ -59,7 +59,8 @@ function toggleFavouriteRun(runName, favouriteStatus){
 
 function addTag(runName){
   document.getElementById('add_tag_run_name_id').value = runName;
-  document.getElementById('add_tag_name_id').value = document.getElementById('tag_name_id').value;
+  console.log(runName);
+  document.getElementById('add_tag_name_id').value = document.getElementById('tag_name_id_' + runName).value;
   document.getElementById('add_tag').submit();
 };
 
