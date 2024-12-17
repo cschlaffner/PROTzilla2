@@ -21,11 +21,9 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
-from ui.runs.filter import filter_runs #prob should put this file somewhere else. maybe views_helper?
 import protzilla.constants.paths as paths
-from protzilla.run import Run, get_available_run_names 
+from protzilla.run import Run, delete_run_folder, get_available_runinfo 
 from protzilla.disk_operator import DiskOperator, YamlOperator
-from protzilla.run_v2 import delete_run_folder, get_available_runinfo
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
@@ -42,7 +40,7 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_all_possible_step_names
+from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_all_possible_step_names, filter_runs
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
