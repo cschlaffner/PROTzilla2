@@ -175,12 +175,12 @@ class DifferentialExpressionANOVAForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -216,12 +216,12 @@ class DifferentialExpressionTTestForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -264,9 +264,9 @@ class DifferentialExpressionLinearModelForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -312,13 +312,13 @@ class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
 
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -373,9 +373,9 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
 
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -423,13 +423,13 @@ class DifferentialExpressionKruskalWallisOnIntensityForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields[
-            "protein_df"
-        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields["protein_df"].choices = (
+            fill_helper.get_choices_for_protein_df_steps(run)
+        )
 
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -462,9 +462,9 @@ class DifferentialExpressionKruskalWallisOnPTMForm(MethodForm):
         self.fields["ptm_df"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
-        self.fields[
-            "grouping"
-        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        )
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -1091,6 +1091,9 @@ class ProteinGraphVariationGraphForm(MethodForm):
 
 
 class PlotProteinCoverageForm(MethodForm):
+    from protzilla.data_analysis.protein_coverage import AggregationMethod
+
+    is_dynamic = True
     peptide_df_instance = CustomChoiceField(
         choices=[],
         label="Step to use peptide data from",
@@ -1103,11 +1106,19 @@ class PlotProteinCoverageForm(MethodForm):
         choices=[],
         label="Protein ID",
     )
-    samples = CustomMultipleChoiceField(
+    grouping = CustomChoiceField(
         choices=[],
-        label="Samples",
+        label="Grouping from metadata",
     )
-
+    selected_groups = CustomMultipleChoiceField(
+        choices=[],
+        label="Select groups / samples to plot",
+    )
+    aggregation_method = CustomChoiceField(
+        choices=fill_helper.to_choices(AggregationMethod),
+        label="Aggregation method",
+        initial=AggregationMethod.median,
+    )
 
     def fill_form(self, run: Run) -> None:
         self.fields["peptide_df_instance"].choices = fill_helper.get_choices(
@@ -1129,11 +1140,28 @@ class PlotProteinCoverageForm(MethodForm):
             Step, "fasta_df", fasta_df_instance_id
         )["Protein ID"].unique()
         peptide_df_protein_ids = peptide_df["Protein ID"].unique()
-        common_protein_ids = sorted(list(set(fasta_protein_ids) & set(peptide_df_protein_ids)))
+        common_protein_ids = sorted(
+            list(set(fasta_protein_ids) & set(peptide_df_protein_ids))
+        )
         self.fields["protein_id"].choices = fill_helper.to_choices(common_protein_ids)
 
-        peptide_df_samples = peptide_df["Sample"].unique()
-        self.fields["samples"].choices = fill_helper.to_choices(peptide_df_samples)
+        # Grouping
+        self.fields["grouping"].choices = (
+            fill_helper.get_choices_for_metadata_non_sample_columns(run)
+            + [("Sample", "Sample")]
+        )
+
+        grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
+        if grouping == "Sample":
+            self.fields["selected_groups"].choices = fill_helper.to_choices(
+                peptide_df["Sample"].unique()
+            )
+        else:
+            self.fields["selected_groups"].choices = fill_helper.to_choices(
+                run.steps.metadata_df[grouping].unique()
+            )
+        # if grouping is not Sample, show the aggregation method option
+        self.toggle_visibility("aggregation_method", grouping != "Sample")
 
 
 class FLEXIQuantLFForm(MethodForm):

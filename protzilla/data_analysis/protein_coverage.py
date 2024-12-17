@@ -16,11 +16,23 @@ import pandas as pd
 from numpy import log2
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from protzilla.constants.protzilla_logging import logger
 
 # import StrEnum
 from enum import StrEnum
 
 INTENSITY_COLORS = ["#FFFFFF", PLOT_COLOR_SEQUENCE[3]]
+SEQUENCE_DEPTH_PEPTIDE_SPACING = 1
+
+
+class IntensityNormalization(StrEnum):
+    min_max_scaling = "min_max_scaling"
+    none = "none"
+
+
+class AggregationMethod(StrEnum):
+    median = "median"
+    mean = "mean"
 
 
 @dataclass(unsafe_hash=True)
@@ -29,7 +41,7 @@ class PeptideMatch:
     start_location_on_protein: int
     end_location_on_protein: int
     intensity: float = 0.0
-    sample: str = ""
+    metadata_group: str = ""
 
 
 @dataclass(unsafe_hash=True)
@@ -85,6 +97,8 @@ def match_peptide_to_protein_ids(
     Returns a list of tuples containing the protein ID and the start, end location of the peptide in the protein
     sequence.
     """
+    if len(peptide_sequence) == 0:
+        raise ValueError("Peptide sequence is empty.")
     k = 5
     peptide_kmers = [
         peptide_sequence[i : i + k] for i in range(len(peptide_sequence) - k + 1)
@@ -107,6 +121,7 @@ def match_peptide_to_protein_ids(
         == peptide_sequence
     ]
     hits = list(set(hits))  # remove duplicates
+
     # Just sanity checks
     for hit in hits:
         subsequence = protein_dictionary[hit.protein_id][
@@ -129,19 +144,27 @@ def match_peptide_to_protein_ids(
 def plot_protein_coverage(
     fasta_df: pd.DataFrame,
     peptide_df: pd.DataFrame,
+    metadata_df: pd.DataFrame,
     protein_id: str,
-    samples: list[str] = None,
+    grouping: str,
+    selected_groups: list[str] = None,
+    aggregation_method: AggregationMethod = AggregationMethod.median,
 ) -> None:
     """
     Plots the coverage of a protein sequence by peptides.
     """
     # generate the protein kmer dictionary
-    if samples is None or samples == []:
+    if selected_groups is None or selected_groups == []:
         raise ValueError("No samples provided.")
 
+    # add group information to the peptide dataframe
+    peptide_df = peptide_df.merge(metadata_df, on="Sample")
+
     reduced_peptide_df = peptide_df[
-        peptide_df["Sample"].isin(samples) & peptide_df["Intensity"] > 0
+        peptide_df[grouping].isin(selected_groups) & peptide_df["Intensity"] > 0
     ]
+    if len(reduced_peptide_df) == 0:
+        raise ValueError("No peptides found for the samples provided.")
 
     protein_sequence_dict = dict(
         zip(fasta_df["Protein ID"], fasta_df["Protein Sequence"])
@@ -150,16 +173,22 @@ def plot_protein_coverage(
 
     protein_sequence = protein_sequence_dict[protein_id]
     peptide_matches = []
-    coverage_by_sample = {sample: [0] * len(protein_sequence) for sample in samples}
+    coverage_by_group_name = {
+        sample: [0] * len(protein_sequence) for sample in selected_groups
+    }
 
-    for sample_name, peptide_sequence, intensity in tqdm(
-        reduced_peptide_df[["Sample", "Sequence", "Intensity"]]
+    for (group_name, peptide_sequence), row in tqdm(
+        reduced_peptide_df[[grouping, "Sequence", "Intensity"]]
         .drop_duplicates()
-        .itertuples(index=False),
+        .groupby([grouping, "Sequence"]),
         desc="Matching peptides to protein",
         unit_scale=True,
         unit="peptide",
     ):
+        sample = extract_peptide_from_slice(row, aggregation_method)
+        if sample.empty:
+            continue
+        intensity = sample["Intensity"].values[0]
         protein_hits = match_peptide_to_protein_ids(
             peptide_sequence=peptide_sequence,
             protein_kmer_dictionary=sequence_kmer_dict,
@@ -177,11 +206,11 @@ def plot_protein_coverage(
                     start_location_on_protein=protein_hit.start_location_on_protein,
                     end_location_on_protein=protein_hit.end_location_on_protein,
                     intensity=log2(intensity),
-                    sample=sample_name,
+                    metadata_group=group_name,
                 )
             )
             # update the coverage of the protein sequence
-            increment_coverage(coverage_by_sample[sample_name], protein_hit)
+            increment_coverage(coverage_by_group_name[group_name], protein_hit)
 
     if len(peptide_matches) == 0:
         raise ValueError(f"No peptides matched for protein {protein_id}")
@@ -189,35 +218,38 @@ def plot_protein_coverage(
     # now that all the matches have been determined with their start and end on the protein sequence, we need to find
     # an optimal solution for the location of their rectangles in the plot without overlap while minimizing the
     # required number of rows (vertical space)
-    rows_by_sample = distribute_to_rows(peptide_matches)
+    rows_by_group_name = distribute_to_rows(peptide_matches)
 
-    fig = _new_build_coverage_plot(
-        coverage_by_sample,
-        peptide_matches,
-        protein_id,
-        protein_sequence,
-        rows_by_sample,
+    fig = build_coverage_plot(
+        coverages_by_group_name=coverage_by_group_name,
+        peptide_matches=peptide_matches,
+        protein_id=protein_id,
+        protein_sequence=protein_sequence,
+        rows_by_group_name=rows_by_group_name,
+        grouping=grouping,
     )
 
     return dict(plots=[fig])
 
 
-def _new_build_coverage_plot(
-    coverages_by_sample: list[int],
+def build_coverage_plot(
+    coverages_by_group_name: list[int],
     peptide_matches: list[PeptideMatch],
     protein_id: str,
     protein_sequence: str,
-    rows_by_sample: dict[str, list[list[PeptideMatch]]],
+    rows_by_group_name: dict[str, list[list[PeptideMatch]]],
     intensity_normalization: IntensityNormalization = IntensityNormalization.min_max_scaling,
+    grouping: str = "",
 ) -> go.Figure:
-    # one row for each sample + two row for the protein sequence (on top and on the bottom)
-    number_of_subplots = len(rows_by_sample.keys())
+    number_of_subplots = len(rows_by_group_name.keys())
     protein_sequence_labels = [
         f"{amino_acid} - {amino_acid_index} "
         for amino_acid_index, amino_acid in enumerate(protein_sequence)
     ]
-    subplot_titles = [f"Peptides of {sample}" for sample in rows_by_sample.keys()]
-    max_coverage_value = get_max_coverage(coverages_by_sample)
+    subplot_titles = [
+        f"Peptides of {group_name}" for group_name in rows_by_group_name.keys()
+    ]
+    max_coverage_value = get_max_coverage(coverages_by_group_name)
 
     fig = make_subplots(
         rows=number_of_subplots,
@@ -228,25 +260,23 @@ def _new_build_coverage_plot(
         specs=[[{"secondary_y": True}] for _ in range(number_of_subplots)],
     )
     # Peptides
-    for sample_index, sample_name in enumerate(rows_by_sample.keys(), start=1):
-        peptide_rows = rows_by_sample[sample_name]
-        sample_subplot_index = sample_index
-        coverage = coverages_by_sample[sample_name]
+    for group_index, group_name in enumerate(rows_by_group_name.keys(), start=1):
+        peptide_rows = rows_by_group_name[group_name]
+        coverage = coverages_by_group_name[group_name]
 
         add_sequence_depth_to_plot(
-            fig,
-            coverage,
-            sample_subplot_index,
-            max_coverage_value,
-            protein_sequence_labels,
+            fig=fig,
+            coverage=coverage,
+            group_subplot_index=group_index,
+            protein_sequence_labels=protein_sequence_labels,
         )
 
         # Peptide plot
-        current_sample_intensities = [
+        current_group_intensities = [
             peptide_match.intensity for row in peptide_rows for peptide_match in row
         ]
-        max_intensity, min_intensity = max(current_sample_intensities), min(
-            current_sample_intensities
+        max_intensity, min_intensity = max(current_group_intensities), min(
+            current_group_intensities
         )
         scale_intensity = lambda intensity: (intensity - min_intensity) / (
             max_intensity - min_intensity
@@ -257,25 +287,35 @@ def _new_build_coverage_plot(
                     fig=fig,
                     normalized_intensity=scale_intensity(peptide_match.intensity),
                     peptide_match=peptide_match,
-                    peptides_subplot_index=sample_subplot_index,
+                    group_subplot_index=group_index,
                     protein_sequence_labels=protein_sequence_labels,
                     row_index=row_index,
-                    offset=max_coverage_value,
+                    offset=max_coverage_value + SEQUENCE_DEPTH_PEPTIDE_SPACING,
                     color_a=INTENSITY_COLORS[0],
                     color_b=INTENSITY_COLORS[1],
+                    grouping=grouping,
                 )
 
+        fig.update_layout(hovermode="closest")
         fig.update_yaxes(
-            range=[0, len(peptide_rows) + max_coverage_value],
+            range=[
+                0,
+                len(peptide_rows) + max_coverage_value + SEQUENCE_DEPTH_PEPTIDE_SPACING,
+            ],
             showticklabels=False,
             showgrid=False,
-            row=sample_subplot_index,
+            row=group_index,
             col=1,
         )
-        fig.update_xaxes(
-            showticklabels=False, showgrid=False, row=sample_subplot_index, col=1
-        )
-    # Color legend trace
+        fig.update_xaxes(showticklabels=False, showgrid=False, row=group_index, col=1)
+    fig.update_xaxes(showticklabels=True, row=number_of_subplots, col=1)
+
+    add_intensity_legend(fig)
+
+    return fig
+
+
+def add_intensity_legend(fig):
     color_scale = [[0, INTENSITY_COLORS[0]], [1, INTENSITY_COLORS[1]]]
     color_legend_trace = go.Scatter(
         x=[None],
@@ -297,17 +337,13 @@ def _new_build_coverage_plot(
         ),
         showlegend=False,
     )
-
-    fig.add_trace(color_legend_trace, row=number_of_subplots, col=1)
-
-    return fig
+    fig.add_trace(color_legend_trace, row=1, col=1)
 
 
 def add_sequence_depth_to_plot(
     fig: go.Figure,
     coverage: list[int],
-    coverage_subplot_index: int,
-    max_coverage_value: int,
+    group_subplot_index: int,
     protein_sequence_labels: list[str],
 ) -> None:
     SEQUENCE_DEPTH_BAR_CHART = dict(
@@ -315,23 +351,24 @@ def add_sequence_depth_to_plot(
         y=coverage,
         showlegend=False,
         marker=dict(color=PLOT_PRIMARY_COLOR),
-        # hovering should give the amino acid, the position and the coverage
-        hoverinfo="text",
-        hovertemplate="%{x}: %{y}<extra></extra>",
+        # add hover text
+        hoverinfo="y",
+        hovertemplate="Sequencing depth at %{x}: %{y}",
     )
-    fig.add_trace(go.Bar(**SEQUENCE_DEPTH_BAR_CHART), row=coverage_subplot_index, col=1)
+    fig.add_trace(go.Bar(**SEQUENCE_DEPTH_BAR_CHART), row=group_subplot_index, col=1)
 
 
 def add_peptide_to_plot(
     fig: go.Figure,
     normalized_intensity: float,
     peptide_match: PeptideMatch,
-    peptides_subplot_index: int,
+    group_subplot_index: int,
     protein_sequence_labels: list[str],
     row_index: int,
     offset: int,
     color_a: str = "#FFFFFF",
     color_b: str = PLOT_COLOR_SEQUENCE[3],
+    grouping: str = "",
 ) -> None:
     x0, x1 = (
         peptide_match.start_location_on_protein,
@@ -350,7 +387,7 @@ def add_peptide_to_plot(
         line_color=color,
         layer="above",
     )
-    fig.add_shape(**PEPTIDE_SHAPE, row=peptides_subplot_index, col=1)
+    fig.add_shape(**PEPTIDE_SHAPE, row=group_subplot_index, col=1)
     # add invisible plotly object to the rectangle to show the peptide sequence when hovered over
     fig.add_trace(
         go.Scatter(
@@ -360,7 +397,7 @@ def add_peptide_to_plot(
             ],
             y=[(y0 + y1) / 2] * len(peptide_match.peptide_sequence),
             text=[
-                f"Sample: {peptide_match.sample}<br>Peptide: {peptide_match.peptide_sequence}<br>"
+                f"{grouping}: {peptide_match.metadata_group}<br>Peptide: {peptide_match.peptide_sequence}<br>"
                 f"({peptide_match.start_location_on_protein}-{peptide_match.end_location_on_protein})<br>"
                 f"Intensity: {peptide_match.intensity}"
             ]
@@ -371,7 +408,7 @@ def add_peptide_to_plot(
             hovertemplate="%{text}<extra></extra>",
             showlegend=False,
         ),
-        row=peptides_subplot_index,
+        row=group_subplot_index,
         col=1,
     )
 
@@ -387,6 +424,25 @@ def increment_coverage(coverage: list[int], protein_hit: ProteinHit) -> None:
     ]
 
 
+def extract_peptide_from_slice(
+    slice_df: pd.DataFrame,
+    aggregation_strategy: AggregationMethod = AggregationMethod.median,
+) -> pd.DataFrame:
+    """
+    Given multiple peptide datapoints, return a single peptide datapoint with the intensity value extracted from the
+    slice of the peptide data.
+    """
+    if len(slice_df) == 1:
+        return slice_df
+    if aggregation_strategy == AggregationMethod.median:
+        slice_df = slice_df.groupby("Sequence").median()
+    elif aggregation_strategy == AggregationMethod.mean:
+        slice_df = slice_df.groupby("Sequence").mean()
+    else:
+        raise ValueError(f"Unknown strategy: {aggregation_strategy}")
+    return slice_df
+
+
 def distribute_to_rows(
     peptide_matches: list[PeptideMatch],
 ) -> dict[list[list[PeptideMatch]]]:
@@ -398,12 +454,14 @@ def distribute_to_rows(
         key=lambda peptide_match: peptide_match.start_location_on_protein
     )
     rows = {
-        sample: []
-        for sample in set([peptide_match.sample for peptide_match in peptide_matches])
+        group_name: []
+        for group_name in set(
+            [peptide_match.metadata_group for peptide_match in peptide_matches]
+        )
     }
     for peptide_match in peptide_matches:
         # find the first row that does not overlap with the current peptide
-        for row in rows[peptide_match.sample]:
+        for row in rows[peptide_match.metadata_group]:
             if (
                 row[-1].end_location_on_protein
                 < peptide_match.start_location_on_protein
@@ -411,7 +469,7 @@ def distribute_to_rows(
                 row.append((peptide_match))
                 break
         else:
-            rows[peptide_match.sample].append([(peptide_match)])
+            rows[peptide_match.metadata_group].append([(peptide_match)])
     return rows
 
 

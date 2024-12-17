@@ -791,8 +791,11 @@ class PlotProteinCoverage(PlotStep):
     input_keys = [
         "protein_id",
         "fasta_df",
+        "metadata_df",
         "peptide_df",
-        "samples"
+        "grouping",
+        "selected_groups",
+        "aggregation_method",
     ]
     output_keys = []
 
@@ -806,6 +809,7 @@ class PlotProteinCoverage(PlotStep):
         inputs["peptide_df"] = steps.get_step_output(
             Step, "peptide_df", inputs["peptide_df_instance"]
         )
+        inputs["metadata_df"] = steps.metadata_df
         return
 
 
