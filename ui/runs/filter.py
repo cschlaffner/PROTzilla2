@@ -10,7 +10,7 @@ def filter_for_tags(runs, search_tags) -> list[dict[str, str | list[str]]]:
 def filter_for_memory_mode(runs, memory_mode) -> list[dict[str, str | list[str]]]:
     return [run for run in runs if run["memory_mode"] == memory_mode]
 
-def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]: #to be implemented
+def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
     if filters["name"]:
         runs = filter_for_name(runs, filters["name"])
     if filters["steps"]:

@@ -21,9 +21,10 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
-from ui.runs.filter import filter_runs #prob should put this file somewhere else.
+from ui.runs.filter import filter_runs #prob should put this file somewhere else. maybe views_helper?
 import protzilla.constants.paths as paths
 from protzilla.run import Run, get_available_run_names 
+from protzilla.disk_operator import DiskOperator, YamlOperator
 from protzilla.run_v2 import delete_run_folder, get_available_runinfo
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
@@ -166,26 +167,7 @@ def detail(request: HttpRequest, run_name: str):
     )
 
 
-#def index(request: HttpRequest, index_error: bool = False):
-    """
-    Renders the main index page of the PROTzilla application.
-
-    :param request: the request object
-    :type request: HttpRequest
-
-    :return: the rendered index page
-    :rtype: HttpResponse
-    """
-    return render(
-        request,
-        "runs/index.html",
-        context={
-            "available_workflows": get_available_workflow_names(),
-            "available_runs": get_available_run_names(),
-        },
-    )
-
-def index(request: HttpRequest, index_error: bool = False): #should replace index completely, but is currently a different method for unforeseen dependencies on normal index
+def index(request: HttpRequest, index_error: bool = False):
     """
     Renders the main index page of the PROTzilla application.
 
@@ -206,17 +188,15 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
         "memory_mode": filter_df_mode,
     }
 
-    #filter = {"name":"d", "steps":["MaxQuant Protein Groups Import", "kNN"], "memory_mode":"disk_memory"} #dummy filter for testing -> might need to be adapted for your workflows to actually show something
     runs, runs_favourite, all_tags = get_available_runinfo()
     filtered_runs = filter_runs(runs, filter)
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
     all_available_runs = filtered_runs_favourite + filtered_runs
+
     return render(
         request,
         "runs/index.html",
         context={
-            #"available_workflows": get_available_workflow_names(),
-            #"available_runs": filter_runs(get_available_runs(), filter), #this version is probably worse cause get_available_runs returns two things, why should filter expect two things in one param
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
             "all_available_runs": all_available_runs,
@@ -226,8 +206,16 @@ def index(request: HttpRequest, index_error: bool = False): #should replace inde
     )
     
 
-
 def favourite(request: HttpRequest):
+    """
+    Toggles the favourite state of a run. Returns the user to the (updated) index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
 
     run_name = request.POST["favourite_run_name"]
     favourite_status = request.POST["favourite_run_status"]
@@ -235,8 +223,6 @@ def favourite(request: HttpRequest):
         favourite_status = False
     else:
         favourite_status = True
-
-    from protzilla.disk_operator import DiskOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
     disk_operator = DiskOperator(run_name, "dummy_workflow_name")
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
@@ -248,12 +234,19 @@ def favourite(request: HttpRequest):
     return HttpResponseRedirect(reverse("runs:index"))
 
 def add_tag(request: HttpRequest):
+    """
+    Adds a specific tag to a run. Returns the user to the (updated) index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
 
     run_tag = request.POST["add_tag_name"]
     run_name = request.POST["add_tag_run_name"]
     print(run_tag)
-
-    from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
@@ -279,7 +272,7 @@ def add_tag(request: HttpRequest):
 
 def delete_tag(request: HttpRequest):
     """
-    Deletes a specific tag from a run
+    Deletes a specific tag from a run. Returns the user to the (updated) index page.
 
     :param request: the request object
     :type request: HttpRequest
@@ -290,8 +283,6 @@ def delete_tag(request: HttpRequest):
 
     run_name = request.POST["delete_tag_run_name"]
     run_tag = request.POST["delete_tag_name"]
-
-    from protzilla.disk_operator import YamlOperator  # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
@@ -307,8 +298,7 @@ def delete_tag(request: HttpRequest):
 
 def create_run_menu(request: HttpRequest):
     """
-    Continues an existing run. The user is redirected to the detail page of the run and
-    can resume working on the run.
+    Renders the site where the user can create a new run.
 
     :param request: the request object
     :type request: HttpRequest
@@ -396,7 +386,7 @@ def delete_(request: HttpRequest):
             {
                 "level": 40,
                 "msg": f"Couldn't delete the run '{run_name}' . Please check the permissions for this file or try running Protzilla as administrator.",
-                "trace": "hihihihihhahahaho",
+                "trace": "", 
             },
             request,
         )

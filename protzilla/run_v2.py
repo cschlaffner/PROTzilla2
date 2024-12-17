@@ -11,6 +11,7 @@ import datetime
 import protzilla.constants.paths as paths
 from protzilla.steps import Messages, Output, Plots, Step
 from protzilla.utilities import format_trace
+from protzilla.disk_operator import DiskOperator, YamlOperator
 
 
 def get_available_run_names() -> list[str]:
@@ -34,8 +35,6 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
         name = directory.name
         creation_time = directory.stat().st_ctime
         modification_time = directory.stat().st_mtime
-        
-        from protzilla.disk_operator import DiskOperator, YamlOperator # to avoid a circular import (geht das cleaner? habs einfach kopiert von unten?)
 
         disk_operator = DiskOperator(name, "dummy_workflow_name")
         directory_path = os.path.join(paths.RUNS_PATH, name)
@@ -58,8 +57,8 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
 
         run = { 
             "run_name": name,
-            "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %B %Y"), #TODO: reutrn the pure datetime, convert in html)
-            "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %B %Y"),
+            "creation_date": datetime.datetime.fromtimestamp(creation_time).strftime("%d %m %Y"), #TODO: reutrn the pure datetime, convert in html)
+            "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %m %Y"),
             "memory_mode": step_manager.df_mode,
             "run_steps" : step_names,
             "favourite_status" : step_manager.favourite,
