@@ -49,7 +49,7 @@ class CustomChoiceField(ChoiceField):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices],
+                choices=[(choice.value, choice.value) for choice in choices],
                 initial=initial,
                 *args,
                 **kwargs,
@@ -77,7 +77,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices],
+                choices=[(choice.value, choice.value) for choice in choices],
                 initial=initial,
                 *args,
                 **kwargs,
@@ -86,7 +86,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         self.widget.attrs.update({"class": "form-select mb-2"})
 
     def clean(self, value: list[str] | None):
-        return [el for el in value if el != "hidden"] if value else None
+        return [element for element in value if element != "hidden"] if value else None
 
 class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
     def __init__(self, choices: Enum | list, colors: Enum | list, initial=None, *args, **kwargs):
@@ -94,7 +94,7 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices],
+                choices=[(choice.value, choice.value) for choice in choices],
                 initial=initial,
                 *args,
                 **kwargs,
