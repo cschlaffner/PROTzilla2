@@ -30,7 +30,7 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
     runs = []
     runs_favourited = []
     all_tags = set()
-    for directory in paths.RUNS_PATH.iterdir():
+    for directory in paths.RUNS_PATH.iterdir():   #not sorted the same for different os?
         if directory.name.startswith("."):
             continue
         name = directory.name
