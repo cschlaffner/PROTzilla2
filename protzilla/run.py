@@ -46,7 +46,7 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
         for step in steps:
             step_names.append(step.display_name)
 
-        tags = []
+        tags = set()
         metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
         if os.path.isfile(metadata_yaml_path):
             yaml_operator = YamlOperator()

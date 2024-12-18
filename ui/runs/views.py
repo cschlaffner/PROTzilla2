@@ -380,14 +380,6 @@ def delete_(request: HttpRequest):
     
     try: 
         delete_run_folder(run_name)
-        display_message(
-            {
-                "level": 40,
-                "msg": f"Couldn't delete the run '{run_name}' . Please check the permissions for this file or try running Protzilla as administrator.",
-                "trace": "", 
-            },
-            request,
-        )
     except Exception as e:
         display_message(
             {
