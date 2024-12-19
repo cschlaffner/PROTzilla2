@@ -46,12 +46,12 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
         for step in steps:
             step_names.append(step.display_name)
 
-        tags = set()
         metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
         if os.path.isfile(metadata_yaml_path):
             yaml_operator = YamlOperator()
             metadata = yaml_operator.read(metadata_yaml_path)
-            tags = metadata.get("tags")
+            tags = metadata.get("tags", set())
+            favourite = metadata.get("favourite", False)
         
         for tag  in tags:
             all_tags.add(tag)
@@ -62,11 +62,11 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
             "modification_date": datetime.datetime.fromtimestamp(modification_time).strftime("%d %m %Y"),
             "memory_mode": step_manager.df_mode,
             "run_steps" : step_names,
-            "favourite_status" : step_manager.favourite,
+            "favourite_status" : favourite,
             "run_tags": tags
             }
         
-        if step_manager.favourite: 
+        if favourite: 
             runs_favourited.append(run)
         else:
             runs.append(run)

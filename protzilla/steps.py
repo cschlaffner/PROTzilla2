@@ -324,7 +324,6 @@ class StepManager:
         self.df_mode = df_mode
         self.disk_operator = disk_operator
         self.current_step_index = 0
-        self.favourite = False #might cause problems because of backwards-compatibility
         self.importing = []
         self.data_preprocessing = []
         self.data_analysis = []

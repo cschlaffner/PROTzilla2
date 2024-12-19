@@ -222,12 +222,19 @@ def favourite(request: HttpRequest):
     else:
         favourite_status = True
 
-    disk_operator = DiskOperator(run_name, "dummy_workflow_name")
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
-    yaml_path = os.path.join(directory_path, "run.yaml")
-    step_manager = disk_operator.read_run(yaml_path)
-    step_manager.favourite = not favourite_status
-    disk_operator.write_run(step_manager)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    metadata = {}
+    if not os.path.exists(metadata_yaml_path):
+        with open(metadata_yaml_path, 'w') as file:
+            pass
+    else:
+        metadata = yaml_operator.read(metadata_yaml_path)
+
+    metadata["favourite"]= not metadata.get("favourite", False)
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))
 
@@ -259,11 +266,8 @@ def add_tag(request: HttpRequest):
         metadata = yaml_operator.read(metadata_yaml_path)
         tags_from_metadata = metadata.get("tags")
         tags.update(tags_from_metadata)
-        print(tags)
     tags.add(run_tag)
-    print(tags)
     metadata["tags"]= tags
-    print(metadata)
     yaml_operator.write(Path(metadata_yaml_path), metadata)
 
     return HttpResponseRedirect(reverse("runs:index"))
