@@ -214,14 +214,8 @@ def favourite(request: HttpRequest):
     :return: the rendered index page 
     :rtype: HttpResponse
     """
-
     run_name = request.POST["favourite_run_name"]
-    favourite_status = request.POST["favourite_run_status"]
-    if favourite_status == "False":
-        favourite_status = False
-    else:
-        favourite_status = True
-
+    
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
 
