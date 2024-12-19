@@ -131,6 +131,14 @@ def filter_for_memory_mode(runs, memory_mode) -> list[dict[str, str | list[str]]
     return [run for run in runs if run["memory_mode"] == memory_mode]
 
 def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
+    """
+    Filters runs according to the given filters.
+
+    :param runs: List of runs.
+    :param filters: List of filters.
+
+    :return: List of runs.
+    """
     if filters["name"]:
         runs = filter_for_name(runs, filters["name"])
     if filters["steps"]:

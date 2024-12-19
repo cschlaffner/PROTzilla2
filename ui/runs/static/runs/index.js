@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
   first_run.style.backgroundColor = '#e8edf3';
   first_run.style.borderRadius = '10px';
 
+  const clearButton = document.getElementById('clearFilters');
+    if (clearButton) {
+        clearButton.addEventListener('click', clearFilters);
+    }
+
 });
 
 
@@ -89,4 +94,28 @@ function toggleDetails(element) {
     details.style.display = 'block';
     element.style.height = "250px";
   }
+}
+
+function clearFilters() {
+    const form = document.getElementById('filtertest');
+
+
+    // Clear text inputs
+    form.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+
+    // For search_steps
+    const searchStepsMultiSelect = new MultiSelect(document.getElementById('search_steps'));
+    searchStepsMultiSelect.data.forEach(option => {
+        option.selected = false;  // Mark as unselected
+    });
+    searchStepsMultiSelect._updateSelected();
+
+    // For search_tags
+    const searchTagsMultiSelect = new MultiSelect(document.getElementById('search_tags'));
+    searchTagsMultiSelect.data.forEach(option => {
+        option.selected = false;  // Mark as unselected
+    });
+    searchTagsMultiSelect._updateSelected();
+
+    form.submit();
 }
