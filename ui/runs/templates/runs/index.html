@@ -131,7 +131,6 @@
       <form id="change_favourite" class="mb-5" action="{% url 'runs:toggle_favourite' %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="favourite_run_name" id="favourites_run_name_id" value="{{available_runs.0.run_name}}">
-        <input type="hidden" name="favourite_run_status" id="favourites_run_status_id" value="{{available_runs.0.favourite_status}}">
       </form>
       <form id="add_tag" class="mb-5" action="{% url 'runs:add_tag' %}" method="post">
         {% csrf_token %}
