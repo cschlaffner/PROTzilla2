@@ -191,10 +191,15 @@ def index(request: HttpRequest, index_error: bool = False):
     filtered_runs_favourite = filter_runs(runs_favourite, filter) 
     all_available_runs = filtered_runs_favourite + filtered_runs
 
+
     return render(
         request,
         "runs/index.html",
         context={
+            "search_run_name" : filter_run_name,
+            "search_steps" : filter_steps,
+            "search_tags" : filter_tags,
+            "df_mode" : filter_df_mode,
             "available_runs" : filtered_runs,
             "available_runs_favourite": filtered_runs_favourite,
             "all_available_runs": all_available_runs,

@@ -149,29 +149,34 @@
         {% csrf_token %}
         <div class="mb-2">
           <h3>Select filters:</h3>
-          <input name="search_run_name" id="search_run_name" placeholder="Name contains:" class="form-control">
+            <label for="search_run_name">Name contains:</label>
+            <input name="search_run_name" id="search_run_name" placeholder="  Enter (part of a) name" class="form-control" value="{{ search_run_name }}">
         </div>
         <div class="mb-2">
-            <label for="steps">With steps:</label>
+            <label for="search_steps">With steps:</label>
             <select id="search_steps" name="search_steps" data-placeholder="Select step(s)" multiple data-multi-select>
                 {% for step in all_possible_step_names %}
-                <option value="{{ step }}">{{ step }}</option>
-                {% endfor %}  
+                <option value="{{ step }}" {% if step in search_steps %}selected{% endif %}>
+                    {{ step }}
+                </option>
+                {% endfor %}
             </select>
         </div>
         <div class="mb-2">
-            <label for="tags">With tags:</label>
+            <label for="search_tags">With tags:</label>
             <select id="search_tags" name="search_tags" data-placeholder="Select tag(s)" multiple data-multi-select>
                 {% for tag in all_tags %}
-                <option value="{{ tag }}">{{ tag }}</option>
+                <option value="{{ tag }}" {% if tag in search_tags %}selected{% endif %}>
+                    {{ tag }}
+                </option>
                 {% endfor %}  
             </select>
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>
-          <select name="df_mode" id="df_mode_id" class="form-select">
-            <option value="disk_memory" selected >standard</option>
-            <option value="disk">low memory</option>
+          <select name="df_mode" id="df_mode" class="form-select">
+            <option value="disk_memory" {% if df_mode == "disk_memory" %}selected{% endif %}>standard</option>
+            <option value="disk" {% if df_mode == "disk" %}selected{% endif %}>low memory</option>
           </select>
         </div>
         <div class="mb-2">
