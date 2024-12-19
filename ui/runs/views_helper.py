@@ -41,12 +41,18 @@ def convert_str_if_possible(s):
             return numbers
         return s
 
-def get_all_possible_step_names():
+def get_all_possible_step_names() -> list[str]:
+    """
+    Returns a list of names of step classes. Not to be confused with class display names.
+
+    :return: List of names.
+    :rtype: String
+    """
     step_classes = form_map._forward_mapping.keys()
     step_names = []
     for step in step_classes:
         step_names.append(
-            step
+            step.__name__
         )
     return step_names
 
@@ -110,7 +116,13 @@ def filter_for_name(runs, search_string) -> list[dict[str, str | list[str]]]:
     return [run for run in runs if search_string in run["run_name"]]
 
 def filter_for_steps(runs, search_steps) -> list[dict[str, str | list[str]]]:
-    return [run for run in runs if all(step in run["run_steps"] for step in search_steps)]
+    # get step display names
+    step_classes = form_map._forward_mapping.keys()
+    step_names = {}
+    for step in step_classes:
+        step_names[step.__name__] = step.display_name
+
+    return [run for run in runs if all(step_names[step] in run["run_steps"] for step in search_steps)]
 
 def filter_for_tags(runs, search_tags) -> list[dict[str, str | list[str]]]:
     return [run for run in runs if all(tag in run["run_tags"] for tag in search_tags)]
