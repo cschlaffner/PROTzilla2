@@ -137,6 +137,7 @@ def get_file_name_from_upload_path(upload_path: str) -> str:
     file_extension = file_name_randomized.split(".")[-1]
     return f"{base_name}.{file_extension}"
 
+
 def parameters_from_post(post):
     d = dict(post)
     if "csrfmiddlewaretoken" in d:

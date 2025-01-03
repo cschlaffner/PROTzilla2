@@ -13,6 +13,7 @@ from protzilla.data_integration.database_query import uniprot_columns, uniprot_d
 
 database_metadata_path = EXTERNAL_DATA_PATH / "internal" / "metadata" / "uniprot.json"
 
+
 def index(request):
     return redirect("/runs/")
 

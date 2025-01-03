@@ -1,7 +1,6 @@
 import plotly.io as pio
 import plotly.graph_objects as go
 
-
 from protzilla.disk_operator import YamlOperator
 from protzilla.constants.colors import PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR
 from protzilla.constants.paths import SETTINGS_PATH
