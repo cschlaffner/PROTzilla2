@@ -1,6 +1,7 @@
 file_format: svg
-font: Sans Serif
-font_size: 12
+font: Arial
+heading_size: 18
 height: 100
 section_id: plots
+text_size: 14
 width: 80

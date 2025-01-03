@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from protzilla.constants.paths import SETTINGS_PATH
 from protzilla.disk_operator import YamlOperator
 from protzilla.utilities.utilities import parameters_from_post
+from protzilla.utilities.plot_template import template
 from ui.settings.user_settings_forms import ExportingPlotsSettingsForm
 
 
@@ -19,7 +20,7 @@ SECTIONS = [
     },
     {
         "id": "plots",
-        "name": "Exporting Plots" 
+        "name": "Plot Customization" 
     }
 ]
 
@@ -40,6 +41,7 @@ def get_settings(section_id: str):
     path = SETTINGS_PATH / (section_id + ".yaml")
     settings = op.read(path)
     return settings
+
 
 def settings_general(request):
     settings_content = get_settings("general")
@@ -78,7 +80,7 @@ def save(request):
     op = YamlOperator()
     path = SETTINGS_PATH / (section_id + ".yaml")
     settings = op.write(path, params)
-    # TO DO: Adjust current Plotly Template
+    template.update(params)
     return HttpResponseRedirect(reverse("settings:last_view"))
 
 

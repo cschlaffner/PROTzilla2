@@ -11,8 +11,22 @@ class FileFormat(Enum):
     jpg = "jpg"
 
 class Font(Enum):
+    # Currently available fonts for Plotly https://plotly.com/python-api-reference/generated/plotly.graph_objects.layout.title.html?highlight=layout%20title#plotly.graph_objects.layout.title.Font.family
     arial = "Arial"
+    balto = "Balto"
+    courier_new = "Courier New"
+    droid_sans = "Droid Sans"
+    droid_serif = "Droid Serif"
+    droid_sans_mono = "Droid Sans Mono"
+    gravitas_one = "Gravitas One"
+    old_standard_tt = "Old Standard TT"
+    open_sans = "Open Sans"
+    overpass = "Overpass"
+    pt_sans_narrow = "PT Sans Narrow"
+    raleway = "Raleway"
     sans_serif = "Sans Serif"
+    times_new_roman = "Times New Roman"
+    verdana = "Verdana"
 
 class ExportingPlotsSettingsForm(Form):
     def __init__(self, *args, **kwargs):
@@ -23,7 +37,7 @@ class ExportingPlotsSettingsForm(Form):
                 self.fields[field_name].initial = value
 
     file_format = CustomChoiceField(
-        label="File format",
+        label="Download file format",
         choices=FileFormat
     )
     width = CustomNumberField(
@@ -40,8 +54,13 @@ class ExportingPlotsSettingsForm(Form):
         label="Font",
         choices=Font
     )
-    font_size = CustomNumberField(
-        label="Font size",
+    heading_size = CustomNumberField(
+        label="Heading size",
+        min_value=1,
+        max_value=100
+    )
+    text_size = CustomNumberField(
+        label="Text size",
         min_value=1,
         max_value=100
     )

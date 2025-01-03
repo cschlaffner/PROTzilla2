@@ -19,8 +19,8 @@
         {{ sidebar|safe }}
         <div class="content border-start">
             <div justify-content-center d-flex>
-                <h3>Configurations for Exporting Plots</h3>
-                <div class="mb-3" id="description">Configurations for plots and diagrams can be stored here. This information is automatically applied to all plot downloads.</div>
+                <h3>Configurations for Plots</h3>
+                <div class="mb-3" id="description">Configurations for plots can be entered here. This information is automatically applied to all plots in PROTzilla.</div>
                 <form action="{% url 'settings:save' %}" method="post" id="save_settings">
                     {% csrf_token %}
                     <input type="hidden" name="section_id" value="{{ section_id }}">
