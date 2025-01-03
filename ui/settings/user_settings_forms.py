@@ -12,33 +12,36 @@ class FileFormat(Enum):
 
 class Font(Enum):
     arial = "Arial"
+    sans_serif = "Sans Serif"
 
 class ExportingPlotsSettingsForm(Form):
+    def __init__(self, *args, **kwargs):
+        initial = kwargs.pop('initial', {})
+        super().__init__(*args, **kwargs)
+        for field_name, value in initial.items():
+            if field_name in self.fields:
+                self.fields[field_name].initial = value
+
     file_format = CustomChoiceField(
         label="File format",
-        choices=FileFormat,
-        initial=FileFormat.svg
+        choices=FileFormat
     )
     width = CustomNumberField(
         label="Width (in mm)",
         min_value=10,
-        max_value=1000,
-        initial=100
+        max_value=1000
     )
     height = CustomNumberField(
         label="Height (in mm)",
         min_value=10,
-        max_value=1000,
-        initial=80
+        max_value=1000
     )
     font = CustomChoiceField(
         label="Font",
-        choices=Font,
-        initial=Font.arial
+        choices=Font
     )
     font_size = CustomNumberField(
         label="Font size",
         min_value=1,
-        max_value=100,
-        initial=11
+        max_value=100
     )

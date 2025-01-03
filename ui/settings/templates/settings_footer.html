@@ -9,27 +9,24 @@
         <div class="justify-content-end d-flex col flex-column">
             <div class="col">
                 <div class="justify-content-end d-flex">
-                    <form action="{% url 'settings:last_view' %}" method="post" id="save_settings">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <a id = "cancel" class="btn btn-grey mr-auto" data-bs-toggle="modal" data-bs-target="#unsavedChangesModal">Cancel</a>
-                            <div class="modal fade" id="unsavedChangesModal" tabindex="-1" role="dialog" aria-labelledby="unsavedChangesModalLabel" aria-hidden="true" style="display: none;" >
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="unsavedChangesModalLabel">Unsaved Changes</h5>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p>There are changes that haven't been saved yet. Are you sure you want to discard all changes?</p>
-                                            <a href="{% url 'settings:last_view' %}" id = "back" class="btn btn-grey mr-auto">Discard Changes</a>
-                                            <button id= "back" type="button" class="btn btn-red mr-auto" data-bs-dismiss="modal">Back</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button id="settings_submit" type="submit" class="btn btn-red mr-auto">Save</button>
-                        </div>
-                    </form>
+                    <div class="form-group">
+                        <a id = "cancel" class="btn btn-grey mr-auto" data-bs-toggle="modal" data-bs-target="#unsavedChangesModal">Cancel</a>
+                        <button id="settings_submit" type="submit" class="btn btn-red mr-auto">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="unsavedChangesModal" tabindex="-1" role="dialog" aria-labelledby="unsavedChangesModalLabel" aria-hidden="true" style="display: none;" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unsavedChangesModalLabel">Unsaved Changes</h5>
+                </div>
+                <div class="modal-body">
+                    <p>There are changes that haven't been saved yet. Are you sure you want to discard all changes?</p>
+                    <a href="{% url 'settings:last_view' %}" id = "back" class="btn btn-grey mr-auto">Discard Changes</a>
+                    <button id= "back" type="button" class="btn btn-red mr-auto" data-bs-dismiss="modal">Back</button>
                 </div>
             </div>
         </div>

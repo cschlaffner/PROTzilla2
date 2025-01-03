@@ -1,9 +1,0 @@
-- id: general
-  name: General
-- file_format: svg
-  font: Sans Serif
-  font_size: 11
-  height: 80
-  id: plots
-  name: Exporting plots
-  width: 100

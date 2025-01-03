@@ -29,6 +29,7 @@ from protzilla.utilities.utilities import (
     format_trace,
     get_memory_usage,
     name_to_title,
+    parameters_from_post,
 )
 from protzilla.workflow import get_available_workflow_names
 from protzilla.constants.paths import WORKFLOWS_PATH
@@ -38,7 +39,7 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages
 
 from .form_mapping import (
     get_empty_plot_form_by_method,

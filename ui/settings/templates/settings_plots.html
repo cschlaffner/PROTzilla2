@@ -1,7 +1,7 @@
   
 {% extends 'base.html' %}
 {% load static %}
-{# params: sidebar, settings_form #}
+{# params: sidebar, settings_form, section_id #}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
@@ -21,18 +21,22 @@
             <div justify-content-center d-flex>
                 <h3>Configurations for Exporting Plots</h3>
                 <div class="mb-3" id="description">Configurations for plots and diagrams can be stored here. This information is automatically applied to all plot downloads.</div>
-                <div class="mb-2" id="settings-form">
-                    {% for field in settings_form %}
-                        <div class="fieldWrapper">
-                            {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                            {{ field }}
-                        </div>
-                    {% endfor %}
-                </div>
+                <form action="{% url 'settings:save' %}" method="post" id="save_settings">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_id" value="{{ section_id }}">
+                    <div class="mb-2" id="settings-form">
+                        {% for field in settings_form %}
+                            <div class="fieldWrapper">
+                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% block footer %}
+                        {% include "settings_footer.html" %}
+                    {% endblock %}
+                </form>
             </div>
         </div>
     </div>
-    {% block footer %}
-        {% include "settings_footer.html" %}
-    {% endblock %}
 {% endblock %} 
