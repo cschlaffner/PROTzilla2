@@ -146,8 +146,8 @@
     <div class="col-2">
       <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
         {% csrf_token %}
-        <div class="mb-2">
           <h3>Select filters:</h3>
+        <div class="mb-2">
             <label for="search_run_name">Name contains:</label>
             <input name="search_run_name" id="search_run_name" type="text" placeholder="  Enter (part of a) name" class="form-control" value="{{ search_run_name }}">
         </div>
@@ -173,9 +173,12 @@
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>
-          <select name="df_mode" id="df_mode" class="form-select">
-            <option value="disk_memory" {% if df_mode == "disk_memory" %}selected{% endif %}>standard</option>
-            <option value="disk" {% if df_mode == "disk" %}selected{% endif %}>low memory</option>
+          <select id="df_mode" name="df_mode" data-placeholder="Select memory mode" multiple data-multi-select>
+                {% for mode in all_memory_modes %}
+                <option value="{{ mode }}" {% if mode in df_mode %}selected{% endif %}>
+                    {{ mode }}
+                </option>
+                {% endfor %}
           </select>
         </div>
         <div class="mb-2">

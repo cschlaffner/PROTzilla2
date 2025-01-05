@@ -102,16 +102,23 @@ function clearFilters() {
     // Clear text inputs
     form.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
 
-    // For search_steps
+    // Clear search_steps
     const searchStepsMultiSelect = new MultiSelect(document.getElementById('search_steps'));
     searchStepsMultiSelect.data.forEach(option => {
         option.selected = false;  // Mark as unselected
     });
     searchStepsMultiSelect._updateSelected();
 
-    // For search_tags
+    // Clear search_tags
     const searchTagsMultiSelect = new MultiSelect(document.getElementById('search_tags'));
     searchTagsMultiSelect.data.forEach(option => {
+        option.selected = false;  // Mark as unselected
+    });
+    searchTagsMultiSelect._updateSelected();
+
+    // Clear df_mode
+    const dfModeMultiSelect = new MultiSelect(document.getElementById('df_mode'));
+    dfModeMultiSelect.data.forEach(option => {
         option.selected = false;  // Mark as unselected
     });
     searchTagsMultiSelect._updateSelected();

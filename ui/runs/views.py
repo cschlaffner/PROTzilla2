@@ -178,7 +178,7 @@ def index(request: HttpRequest, index_error: bool = False):
     filter_run_name = request.POST.get("search_run_name", "")
     filter_steps = request.POST.getlist("search_steps[]", []) #not search_steps beacuse the multi-select overrides the way the values are stored in the <select> element.
     filter_tags = request.POST.getlist("search_tags[]", [])
-    filter_df_mode = request.POST.get("df_mode") #no alternative specified when empty because it has a default setting in the html file
+    filter_df_mode = request.POST.getlist("df_mode[]", [])
     filter = {
         "name": filter_run_name,
         "steps": filter_steps,
@@ -205,6 +205,7 @@ def index(request: HttpRequest, index_error: bool = False):
             "all_available_runs": all_available_runs,
             "all_possible_step_names": get_all_possible_step_names(),
             "all_tags": all_tags,
+            "all_memory_modes": ["standard", "low memory"],
         },
     )
     

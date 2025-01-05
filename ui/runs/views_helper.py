@@ -127,8 +127,9 @@ def filter_for_steps(runs, search_steps) -> list[dict[str, str | list[str]]]:
 def filter_for_tags(runs, search_tags) -> list[dict[str, str | list[str]]]:
     return [run for run in runs if all(tag in run["run_tags"] for tag in search_tags)]
 
-def filter_for_memory_mode(runs, memory_mode) -> list[dict[str, str | list[str]]]:
-    return [run for run in runs if run["memory_mode"] == memory_mode]
+def filter_for_memory_mode(runs, memory_modes) -> list[dict[str, str | list[str]]]:
+    internal_memory_modes = {"disk_memory": "standard", "disk": "low memory"}
+    return [run for run in runs if internal_memory_modes.get(run["memory_mode"]) in memory_modes]
 
 def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
     """
