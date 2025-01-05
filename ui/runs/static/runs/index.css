@@ -89,3 +89,9 @@ input[value="Continue"] {
   white-space: nowrap;
 }
 
+.button-container {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 10px;
+    margin-top: 10px;
+}
