@@ -20,16 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // mark first run as selected
-  let first_run = document.getElementById('run-1');
-  first_run.style.backgroundColor = '#e8edf3';
-  first_run.style.borderRadius = '10px';
-
+  // clear filter
   const clearButton = document.getElementById('clearFilters');
     if (clearButton) {
         clearButton.addEventListener('click', clearFilters);
     }
-
+  
+    //show details of selected run, when reloading
+    let selected_run = document.getElementById(localStorage.getItem("selected_run"));
+    selected_run.click();
+    
 });
 
 
@@ -80,6 +80,7 @@ function toggleDetails(element) {
     if (item !== element) {
       item.classList.remove('expanded');
       item.querySelector('.details').style.display = 'none';
+      item.style.height = "40px";
     }
   });
 
@@ -91,8 +92,10 @@ function toggleDetails(element) {
   } else {
     element.classList.add('expanded');
     details.style.display = 'block';
-    element.style.height = "250px";
+    element.style.height = "250px"; 
   }
+
+  localStorage.setItem("selected_run", element.getAttribute('id'));
 }
 
 function clearFilters() {
