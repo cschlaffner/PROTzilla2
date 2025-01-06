@@ -190,6 +190,21 @@
             <input type="button" id="clearFilters" value="Clear filters" class="btn btn-grey">
         </div>
       </form>
+        <form id="sorting" class="mb-5" action="{% url 'runs:index' %}" method="post">
+            {% csrf_token %}
+              <h4>Sort entries: </h4>
+            <div class="mb-2">
+              <label for="sort_methods">Select one or multiple sorting methods:</label>
+              <select id="sort_methods" name="sort_methods" data-placeholder="Select..." multiple data-multi-select>
+                    {% for method in all_sorting_methods %}
+                    <option value="{{ method }}" {% if method in sort_methods %}selected{% endif %}>
+                        {{ method }}
+                    </option>
+                    {% endfor %}
+              </select>
+            </div>
+        <input type="submit" value="Apply sorting" class="btn btn-grey">
+        </form>
     </div>
   </div>
 </div>

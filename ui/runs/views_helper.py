@@ -7,6 +7,8 @@ from protzilla.steps import StepManager
 from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
 
+from typing import Callable
+
 
 def parameters_from_post(post):
     d = dict(post)
@@ -148,6 +150,13 @@ def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
         runs = filter_for_tags(runs, filters["tags"])
     if filters["memory_mode"]:
         runs = filter_for_memory_mode(runs, filters["memory_mode"])
+    return runs
+
+def sort_runs(runs: list[dict[str, str | list[str]]], sorting_methods: list[str], all_sorting_methods: dict[str, tuple[Callable[[dict[str, str | list[str]]], str], bool]]):
+    for method in sorting_methods:
+        if method in all_sorting_methods:
+            key_func, reverse = all_sorting_methods[method]  # Extract the key function and reverse flag
+            runs = sorted(runs, key=key_func, reverse=reverse)
     return runs
 
 def display_message(message: dict, request):
