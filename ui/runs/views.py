@@ -18,6 +18,7 @@ from django.http import (
 from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
+from django.http import JsonResponse
 
 from protzilla.run import Run, get_available_run_names 
 from protzilla.run_v2 import delete_run_folder
@@ -525,19 +526,40 @@ def tables_content(request, run_name, index, key):
         outputs = run.steps.previous_steps[index].output[key]
     else:
         outputs = run.current_outputs[key]
-    out = outputs.replace(np.nan, None)
+
+    outputs = outputs.replace(np.nan, None)
 
     if "clean-ids" in request.GET:
-        for column in out.columns:
+        for column in outputs.columns:
             if "protein" in column.lower():
-                out[column] = out[column].map(
+                outputs[column] = outputs[column].map(
                     lambda group: ";".join(
                         unique_justseen(map(clean_uniprot_id, group.split(";")))
                     )
                 )
-    return JsonResponse(
-        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
-    )
+
+    page = int(request.GET.get("page", 1))
+    per_page = int(request.GET.get("per_page", 10))
+
+    total_items = len(outputs)
+    total_pages = (total_items + per_page - 1) // per_page
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_data = outputs.iloc[start:end]
+    start_item = start + 1
+    end_item = min(end, total_items)
+
+    response_data = {
+        "columns": paginated_data.to_dict("split")["columns"],
+        "data": paginated_data.to_dict("split")["data"],
+        "page": page,
+        "total_pages": total_pages,
+        "total_items": total_items,
+        "start_item": start_item,
+        "end_item": end_item
+    }
+
+    return JsonResponse(response_data)
 
 
 def change_method(request, run_name):
