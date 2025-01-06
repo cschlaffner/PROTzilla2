@@ -27,8 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   
     //show details of selected run, when reloading
-    let selected_run = document.getElementById(localStorage.getItem("selected_run"));
-    selected_run.click();
+    if (localStorage.getItem("selected_run") != null) {
+      let selected_run = document.getElementById(localStorage.getItem("selected_run"));
+      selected_run.click();
+    }
     
 });
 
@@ -89,13 +91,14 @@ function toggleDetails(element) {
     element.classList.remove('expanded');
     details.style.display = 'none';
     element.style.height = "40px";
+    localStorage.setItem("selected_run", null);
+
   } else {
     element.classList.add('expanded');
     details.style.display = 'block';
     element.style.height = "250px"; 
+    localStorage.setItem("selected_run", element.getAttribute('id'));
   }
-
-  localStorage.setItem("selected_run", element.getAttribute('id'));
 }
 
 function clearFilters() {
