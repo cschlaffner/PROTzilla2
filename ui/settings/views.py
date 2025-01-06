@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from protzilla.constants.paths import SETTINGS_PATH
 from protzilla.disk_operator import YamlOperator
 from protzilla.utilities.utilities import parameters_from_post
-from protzilla.utilities.plot_template import template
+from ui.settings.plot_template import template
 from ui.settings.user_settings_forms import ExportingPlotsSettingsForm
 
 
