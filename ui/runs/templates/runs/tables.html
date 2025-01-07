@@ -9,86 +9,11 @@
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/datatables-1.13.4.min.js' %}"></script>
-
+    
+    <script type="text/javascript" src="{% static 'js/datatables-controls.js' %}"></script>
     <script>
-        $(document).ready(function () {
-            let currentPage = 1;
-            let perPage = 10;
-        
-            function loadTableData(page, rowsPerPage) {
-                $.ajax({
-                    url: "{% url 'runs:tables_content' run_name index key %}",
-                    data: {
-                        clean_ids: "{{ clean_ids }}",
-                        page: page,
-                        per_page: rowsPerPage
-                    },
-                    type: "GET",
-                    success: function (response) {
-                        const columns = response.columns;
-                        const data = response.data;
-                        const thead = $("<thead>").append(
-                            $("<tr>").append(columns.map(col => $("<th>").text(col)))
-                        );
-                        const tbody = $("<tbody>").append(
-                            data.map(row => {
-                                return $("<tr>").append(row.map(cell => $("<td>").text(cell || '')));
-                            })
-                        );
-                        $("#datatable").empty().append(thead).append(tbody);
-        
-                        $('#datatable').DataTable({
-                            destroy: true,
-                            paging: false,
-                            searching: true,
-                            info: false, 
-                            lengthChange: false,
-                            pageLength: rowsPerPage,
-                            language: {
-                                search: "Search on Page:"
-                            }
-                        });
-        
-                        $("#pagination").html('');
-                        if (response.page > 1) {
-                            $("#pagination").append('<button class="btn btn-grey" id="prev-page">Previous</button>');
-                        }
-                        if (response.page < response.total_pages) {
-                            $("#pagination").append('<button class="btn btn-grey" id="next-page">Next</button>');
-                        }
-        
-                        const startElement = response.start_item;
-                        const endElement = response.end_item;
-                        const totalItems = response.total_items;
-        
-                        $("#page-info").html(
-                            `Page ${response.page} of ${response.total_pages}, Showing ${startElement} to ${endElement} of ${totalItems} items`
-                        );
-                    }
-                });
-            }
-
-            loadTableData(currentPage, perPage);
-        
-            $(document).on("click", "#prev-page", function () {
-                if (currentPage > 1) {
-                    currentPage--;
-                    loadTableData(currentPage, perPage);
-                }
-            });
-            $(document).on("click", "#next-page", function () {
-                currentPage++;
-                loadTableData(currentPage, perPage);
-            });
-        
-            $(document).on('change', '#rowsPerPage', function() {
-                perPage = $(this).val();
-                loadTableData(1, perPage);
-            });
-            $(document).on('change', '#tables_dropdown', function() {
-                window.location.href = $(this).val()
-            })
-        });
+        const RUNS_TABLES_CONTENT_URL = "{% url 'runs:tables_content' run_name index key %}";
+        const CLEAN_IDS = "{{ clean_ids }}";
     </script>
 {% endblock %}
 
@@ -113,7 +38,9 @@
             </div>
         </div>
 
-        <table id="datatable" class="display"></table>
+        <div style="overflow-x: auto;">
+            <table id="datatable" class="display"></table>
+        </div>        
 
         <div class="d-flex justify-content-between">
             <div class="d-flex justify-content-between">

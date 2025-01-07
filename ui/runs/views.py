@@ -546,8 +546,6 @@ def tables_content(request, run_name, index, key):
     start = (page - 1) * per_page
     end = start + per_page
     paginated_data = outputs.iloc[start:end]
-    start_item = start + 1
-    end_item = min(end, total_items)
 
     response_data = {
         "columns": paginated_data.to_dict("split")["columns"],
@@ -555,8 +553,8 @@ def tables_content(request, run_name, index, key):
         "page": page,
         "total_pages": total_pages,
         "total_items": total_items,
-        "start_item": start_item,
-        "end_item": end_item
+        "start_item": start + 1,
+        "end_item": min(end, total_items)
     }
 
     return JsonResponse(response_data)
