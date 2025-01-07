@@ -46,6 +46,7 @@ from .form_mapping import (
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
+from ui.settings.views import get_settings
 
 active_runs: dict[str, Run] = {}
 
@@ -454,7 +455,8 @@ def download_plots(request: HttpRequest, run_name: str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    format_ = request.GET["format"]
+    settings = get_settings("plots")
+    format_ = settings["file_format"]
     index = run.steps.current_step_index
     section = run.current_step.section
     operation = run.current_step.operation

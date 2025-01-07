@@ -29,11 +29,6 @@
     margin-top: 10px;
     background-color: rgb(255, 255, 255);
 }
-.radio-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 .custom-font {
     justify-content: flex-start;
     align-items: center;

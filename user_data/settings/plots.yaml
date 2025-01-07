@@ -1,7 +1,7 @@
 custom_font: Ubuntu Mono
-file_format: svg
-font: Courier New
-heading_size: 30
+file_format: jpg
+font: Sans Serif
+heading_size: 18
 height: 100
 section_id: plots
 text_size: 12
