@@ -11,14 +11,25 @@ def get_settings(section_id: str):
     settings = op.read(path)
     return settings
 
+def determine_font(params: dict):
+    """
+    This method determines if a custom font was selected or not.
+    """
+    if(params["font"] == "Custom"):
+        font = params["custom_font"]
+    else:
+        font = params["font"]
+    return font
+
 class PlotTemplate:
     def __init__(self):
         params = get_settings("plots")
+        font = determine_font(params)
         self.layout = go.Layout(
             title={
                 "font": {
                     "size": params["heading_size"],
-                    "family": params["font"]
+                    "family": font
                 },
                 "y": 0.98,
                 "x": 0.5,
@@ -27,7 +38,7 @@ class PlotTemplate:
             },
             font={
                 "size": params["text_size"],
-                "family": params["font"]
+                "family": font
             },
             colorway=[PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR],
             plot_bgcolor="white",
@@ -46,10 +57,11 @@ class PlotTemplate:
         Updates the used Plotly template. If the dictionary contains a known key, the value will be accepted and saved.
         :param params: Dictionary containing properties of the Plotly template.
         """
+        font = determine_font(params)
         self.layout.title.font.size = params["heading_size"]
-        self.layout.title.font.family = params["font"]
+        self.layout.title.font.family = font
         self.layout.font.size = params["text_size"]
-        self.layout.font.family = params["font"]
+        self.layout.font.family = font
         self.apply()
 
     def apply(self):

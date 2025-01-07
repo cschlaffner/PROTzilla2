@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{# params: sidebar, settings_form #}
+{# params: initials, sidebar, section_id #}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'settings_style.css' %}">
@@ -24,12 +24,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="section_id" value="{{ section_id }}">
                     <div class="mb-2" id="settings-form">
-                        {% for field in settings_form %}
-                            <div class="fieldWrapper">
-                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                {{ field }}
-                            </div>
-                        {% endfor %}
+                        <!-- TO DO: Add general settings fields -->
                     </div>
                     {% block footer %}
                         {% include "settings_footer.html" %}

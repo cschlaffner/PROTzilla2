@@ -10,7 +10,6 @@ from protzilla.constants.paths import SETTINGS_PATH
 from protzilla.disk_operator import YamlOperator
 from protzilla.utilities.utilities import parameters_from_post
 from ui.settings.plot_template import template
-from ui.settings.user_settings_forms import ExportingPlotsSettingsForm
 
 
 SECTIONS = [
@@ -45,14 +44,13 @@ def get_settings(section_id: str):
 
 def settings_general(request):
     settings_content = get_settings("general")
-    settings_form = "" #TO DO: Add class GeneralSettingsForm
     sidebar = make_sidebar(request, "general")
     return render(
         request,
         "settings_general.html",
         context=dict(
+            initials=settings_content,
             sidebar=sidebar,
-            settings_form=settings_form,
             section_id="general"
         )
     )
@@ -60,14 +58,13 @@ def settings_general(request):
 
 def settings_plots(request):
     settings_content = get_settings("plots")
-    settings_form = ExportingPlotsSettingsForm(initial=settings_content)
     sidebar = make_sidebar(request, "plots")
     return render(
         request,
         "settings_plots.html",
         context=dict(
+            initials=settings_content,
             sidebar=sidebar,
-            settings_form=settings_form,
             section_id="plots"
         )
     )
@@ -75,7 +72,6 @@ def settings_plots(request):
 
 def save(request):
     params = parameters_from_post(request.POST)
-    print(f"#####{params}")
     section_id = request.POST.get("section_id")
     op = YamlOperator()
     path = SETTINGS_PATH / (section_id + ".yaml")
