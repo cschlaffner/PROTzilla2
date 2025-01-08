@@ -38,13 +38,9 @@
         {% csrf_token %}
         <input type="submit" value="Create new Run" class="btn btn-red" style="float: right;">
       </form>
-      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
-        {% csrf_token %}
-        <div class="mb-2">
-          <h3>Continue an existing run:
-            <span id="selectedRun" style="display: none;">{{ all_available_runs.0.run_name }}</span>
-          </h3>
-          
+     <h3>Continue an existing run:
+         <span id="selectedRun" style="display: none;">{{ all_available_runs.0.run_name }}</span>
+     </h3>
         <!-- Header Section -->
         <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
           <li class="d-flex justify-content-between" style="font-weight: bold;">
@@ -55,7 +51,11 @@
                   </svg>
                 </button>
               </span>
-              <span style="width: 30%" class="center">Name</span>
+              <span style="width: 30%" class="center">
+                  Name
+                  <button onclick="sortList(0, 'asc')" style="margin-left: 5px;">↑</button>
+                  <button onclick="sortList(0, 'desc')" style="margin-left: 5px;">↓</button>
+                </span>
               <span style="width: 15%">Created</span>
               <span style="width: 15%">Last modified</span>
               <span style="width: 15%">Memory mode</span>
@@ -67,16 +67,16 @@
 
             </li>
         </ul>
+        <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
 
         <!-- Run selection -->
-          <ul class="w-100" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
+        <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <ul class="w-100" id="run_selection" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
             {% for run in all_available_runs %}
-            {% if forloop.counter == 1 %}
-              <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
-            {% else %}
-              <hr style="margin: 5px 0px;">
-            {% endif %}
             <li class="d-flex justify-content-between list-item" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}'); toggleDetails(this)">
+
               <div id="main-content" class="justify-content-between d-flex">
                 <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}')">
                   {% if run.favourite_status == False %}
@@ -117,7 +117,7 @@
                 </div>
                 <input type="submit" value="Continue" class="btn btn-red">
               </div>
-
+                <hr style="margin: 5px 0px;">
             </li>
             {% endfor %}
           </ul>
