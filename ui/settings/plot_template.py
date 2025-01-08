@@ -49,7 +49,9 @@ class PlotTemplate:
             modebar={
                 "remove": ["autoScale2d", "lasso", "lasso2d", "toImage", "select2d"],
             },
-            dragmode="pan"
+            dragmode="pan",
+            height=params["height"],
+            width=params["width"]
         )
     
     def update(self, params: dict):
@@ -62,6 +64,8 @@ class PlotTemplate:
         self.layout.title.font.family = font
         self.layout.font.size = params["text_size"]
         self.layout.font.family = font
+        self.layout.height = params["height"]
+        self.layout.width = params["width"]
         self.apply()
 
     def apply(self):
