@@ -278,7 +278,8 @@ def add_tag(request: HttpRequest):
     else:
         metadata = yaml_operator.read(metadata_yaml_path)
         tags_from_metadata = metadata.get("tags")
-        tags.update(tags_from_metadata)
+        if tags_from_metadata:
+            tags.update(tags_from_metadata)
     tags.add(run_tag)
     metadata["tags"]= tags
     yaml_operator.write(Path(metadata_yaml_path), metadata)

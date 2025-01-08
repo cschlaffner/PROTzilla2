@@ -57,7 +57,7 @@ def get_available_runinfo() -> tuple[list[dict[str, str | list[str]]], list[dict
             tags = metadata.get("tags", set())
             favourite = metadata.get("favourite", False)
         
-        for tag  in tags:
+        for tag in tags:
             all_tags.add(tag)
 
         run = { 
