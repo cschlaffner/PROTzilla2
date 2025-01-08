@@ -33,18 +33,70 @@
   <div class="p2 flex-grow-1" style="margin-top: 30px;">
     <div class="row">
     <!-- CONTINUE MENU-->
-    <div class="col-9 mx-4">
+    <div class="col-11 mx-4">
       <form action="{% url 'runs:create_run_menu' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Create new Run" class="btn btn-red" style="float: right;">
       </form>
-      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
-        {% csrf_token %}
         <div class="mb-2">
-          <h3>Continue an existing run:
-            <span id="selectedRun" style="display: none;">{{ all_available_runs.0.run_name }}</span>
-          </h3>
+          <h3>Continue an existing run:</h3>
+
+          <button class="btn btn-grey" type="button" onclick="showFilterPopUp()">
+            Filter
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="grey" class="bi bi-filter" viewBox="0 0 16 16">
+              <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+            </svg>
+          </button>
+          <div class="overlay" id="filter-popup-overlay"></div>
+          <div class="popup" id="filter-popup-container">
+            <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
+              {% csrf_token %}
+                <h3>Select filters:</h3>
+              <div class="mb-2">
+                  <label for="search_run_name">Name contains:</label>
+                  <input name="search_run_name" id="search_run_name" type="text" placeholder="  Enter (part of a) name" class="form-control" value="{{ search_run_name }}">
+              </div>
+              <div class="mb-2">
+                  <label for="search_steps">With steps:</label>
+                  <select id="search_steps" name="search_steps" data-placeholder="Select step(s)" multiple data-multi-select>
+                      {% for step in all_possible_step_names %}
+                      <option value="{{ step }}" {% if step in search_steps %}selected{% endif %}>
+                          {{ step }}
+                      </option>
+                      {% endfor %}
+                  </select>
+              </div>
+              <div class="mb-2">
+                  <label for="search_tags">With tags:</label>
+                  <select id="search_tags" name="search_tags" data-placeholder="Select tag(s)" multiple data-multi-select>
+                      {% for tag in all_tags %}
+                      <option value="{{ tag }}" {% if tag in search_tags %}selected{% endif %}>
+                          {{ tag }}
+                      </option>
+                      {% endfor %}  
+                  </select>
+              </div>
+              <div class="mb-2">
+                <label for="df_mode">Memory mode:</label>
+                <select id="df_mode" name="df_mode" data-placeholder="Select memory mode" multiple data-multi-select>
+                      {% for mode in all_memory_modes %}
+                      <option value="{{ mode }}" {% if mode in df_mode %}selected{% endif %}>
+                          {{ mode }}
+                      </option>
+                      {% endfor %}
+                </select>
+              </div>
+              <div class="mb-2"></div>
+              <div class="button-container">
+                <input type="submit" value="Apply filters" class="btn btn-grey">
+                <input type="button" id="clearFilters" value="Clear filters" class="btn btn-grey">
+              </div>
+            </form>
+            <button class="btn btn-grey" type="button" id="filter-popup-close" onclick="closeFilterPopUp()">Close</button>
+          </div>
           
+        <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
+          {% csrf_token %}
         <!-- Header Section -->
         <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
           <li class="d-flex justify-content-between" style="font-weight: bold;">
@@ -102,18 +154,22 @@
 
               <!-- Run details -->
               <div class="details">
+                <button class="btn btn-grey" type="button" onclick="showTagPopUp(); event.stopPropagation()">
+                  Add Tags
+                </button>
+                <div id="tag-popup-overlay"></div>
+                <div id="tag-popup-container">hi
+                  <!-- <input type="text" name="tag_name" id="tag_name_id_{{run.run_name}}" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
+                  <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')">Add Tag</button> -->
+                </div>
                 <span>Tags:</span>
-                <div class="tags">
+                <div class="tags-container">
                   {% for tag in run.run_tags %}
-                    <span class="tag btn-orange">{{ tag }}</span>
-                    <button type="button" class="delete-btn btn btn-grey" onclick="deleteTag('{{run.run_name}}', '{{tag}}')">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="orange" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                      </svg>
-                    </button>
+                    <div class="tag">{{ tag }}
+                      <span class="remove" onclick="event.stopPropagation();deleteTag('{{run.run_name}}', '{{tag}}')">&times;</span>
+                    </div>
                   {% endfor %}
-                  <input type="text" name="tag_name" id="tag_name_id_{{run.run_name}}" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
-                  <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')">Add Tag</button>
+                  
                 </div>
                 <input type="submit" value="Continue" class="btn btn-red">
               </div>
@@ -144,52 +200,7 @@
         <input type="hidden" name="delete_tag_run_name" id="delete_tag_run_name_id" value="">
       </form>
     </div>
-    <div class="col-2">
-      <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
-        {% csrf_token %}
-          <h3>Select filters:</h3>
-        <div class="mb-2">
-            <label for="search_run_name">Name contains:</label>
-            <input name="search_run_name" id="search_run_name" type="text" placeholder="  Enter (part of a) name" class="form-control" value="{{ search_run_name }}">
-        </div>
-        <div class="mb-2">
-            <label for="search_steps">With steps:</label>
-            <select id="search_steps" name="search_steps" data-placeholder="Select step(s)" multiple data-multi-select>
-                {% for step in all_possible_step_names %}
-                <option value="{{ step }}" {% if step in search_steps %}selected{% endif %}>
-                    {{ step }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-2">
-            <label for="search_tags">With tags:</label>
-            <select id="search_tags" name="search_tags" data-placeholder="Select tag(s)" multiple data-multi-select>
-                {% for tag in all_tags %}
-                <option value="{{ tag }}" {% if tag in search_tags %}selected{% endif %}>
-                    {{ tag }}
-                </option>
-                {% endfor %}  
-            </select>
-        </div>
-        <div class="mb-2">
-          <label for="df_mode">Memory mode:</label>
-          <select id="df_mode" name="df_mode" data-placeholder="Select memory mode" multiple data-multi-select>
-                {% for mode in all_memory_modes %}
-                <option value="{{ mode }}" {% if mode in df_mode %}selected{% endif %}>
-                    {{ mode }}
-                </option>
-                {% endfor %}
-          </select>
-        </div>
-        <div class="mb-2">
-
-        </div>
-        <div class="button-container">
-            <input type="submit" value="Apply filters" class="btn btn-grey">
-            <input type="button" id="clearFilters" value="Clear filters" class="btn btn-grey">
-        </div>
-      </form>
+    
         <form id="sorting" class="mb-5" action="{% url 'runs:index' %}" method="post">
             {% csrf_token %}
               <h4>Sort entries: </h4>

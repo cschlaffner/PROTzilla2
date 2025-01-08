@@ -26,13 +26,12 @@ ul li div {
   padding: 0 10px;
 }
 
-
-
 /* Continue btn postioning */
 
 input[value="Continue"] {
-  margin-top: 20px;
-  float: right;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 /* Arkordeon */
@@ -42,11 +41,14 @@ input[value="Continue"] {
   display: none;
   background-color: #f9f9f9;
   padding: 10px;
+  padding-bottom: 60px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  height: 200px;
   margin: 10px;
+  min-height: 200px;
+  max-height: 500px;
   position: relative;
+  overflow-x: hidden;
 }
 
 .list-item {
@@ -70,22 +72,34 @@ input[value="Continue"] {
   padding-bottom: 10px;
 }
 
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 5px;
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  background-color: rgb(232, 237, 243);
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.tag .remove {
+  margin-left: 0.5rem;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.tag .remove:hover {
+  color: #dc3545;
 }
 
-.tag {
-  display: inline-block;
-  position: relative;
-  border-radius: 5px;
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
-  padding: 5px 10px;
-  font-size: 0.9rem;
-  white-space: nowrap;
+.tags-container {
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap; 
+  row-gap: 0.5rem; 
+  column-gap: 0.5rem;
+  justify-content: flex-start; 
+  align-items: flex-start;
+  box-sizing: border-box;
 }
 
 .button-container {
@@ -94,3 +108,60 @@ input[value="Continue"] {
     gap: 10px;
     margin-top: 10px;
 }
+
+/* FILTER POPUP */
+#filter-popup-container {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 700px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  text-align: center;
+}
+
+#filter-popup-overlay {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* TAG POPUP */
+#tag-popup-container {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  width: 700px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  text-align: center;
+}
+
+#tag-popup-overlay {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+
+

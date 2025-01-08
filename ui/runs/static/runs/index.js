@@ -48,7 +48,6 @@ function selectRun(runName, runId, numberOfRuns){
       }
   }    
 
-  document.getElementById('selectedRun').textContent = runName;
   document.getElementById('run_name_id').value = runName;
 };
 
@@ -96,7 +95,7 @@ function toggleDetails(element) {
   } else {
     element.classList.add('expanded');
     details.style.display = 'block';
-    element.style.height = "250px"; 
+    element.style.height = "auto"; 
     localStorage.setItem("selected_run", element.getAttribute('id'));
   }
 }
@@ -130,4 +129,24 @@ function clearFilters() {
     searchTagsMultiSelect._updateSelected();
 
     form.submit();
+}
+
+function showFilterPopUp(){
+  document.getElementById('filter-popup-container').style.display = 'block';
+  document.getElementById('filter-popup-overlay').style.display = 'block';
+}
+
+function closeFilterPopUp(){
+  document.getElementById('filter-popup-container').style.display = 'none';
+  document.getElementById('filter-popup-overlay').style.display = 'none';
+}
+
+function showTagPopUp(){
+  document.getElementById('tag-popup-container').style.display = 'block';
+  document.getElementById('tag-popup-overlay').style.display = 'block';
+}
+
+function closeTagPopUp(){
+  document.getElementById('tag-popup-container').style.display = 'none';
+  document.getElementById('tag-popup-overlay').style.display = 'none';
 }
