@@ -50,13 +50,6 @@ from .form_mapping import (
 from .views_helper import sort_runs
 
 active_runs: dict[str, Run] = {}
-SORTING_METHODS = {
-    "alphabetically A-Z": (lambda run: run["run_name"].lower(), False),
-    "alphabetically Z-A": (lambda run: run["run_name"].lower(), True),
-    "by date created": (lambda run: run["creation_date"], False),
-    "by date modified": (lambda run: run["modification_date"], False),
-}
-
 
 def detail(request: HttpRequest, run_name: str):
     """
@@ -195,12 +188,11 @@ def index(request: HttpRequest, index_error: bool = False):
 
     runs, runs_favourite, all_tags = get_available_runinfo()
     filtered_runs = filter_runs(runs, filter)
-    filtered_runs_favourite = filter_runs(runs_favourite, filter) 
+    filtered_runs_favourite = filter_runs(runs_favourite, filter)
 
-    sort_methods = request.POST.getlist("sort_methods[]", [])
-    # TODO sorting method!
-    sorted_runs = sort_runs(filtered_runs, sort_methods, SORTING_METHODS)
-    sorted_runs_favorite = sort_runs(filtered_runs_favourite, sort_methods, SORTING_METHODS)
+    sort_by_click_method = request.POST.get("sort_by", "")
+    sorted_runs = sort_runs(filtered_runs, sort_by_click_method)
+    sorted_runs_favorite = sort_runs(filtered_runs_favourite, sort_by_click_method)
 
     all_available_runs = sorted_runs_favorite + sorted_runs
 
@@ -218,7 +210,7 @@ def index(request: HttpRequest, index_error: bool = False):
             "all_possible_step_names": get_all_possible_step_names(),
             "all_tags": all_tags,
             "all_memory_modes": ["standard", "low memory"],
-            "all_sorting_methods": SORTING_METHODS.keys(),
+            "current_sort": sort_by_click_method,
         },
     )
     

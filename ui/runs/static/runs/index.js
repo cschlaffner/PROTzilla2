@@ -131,33 +131,3 @@ function clearFilters() {
 
     form.submit();
 }
-
-function sortList(columnIndex, order) {
-  // Select the list items (excluding the header)
-  const list = document.querySelector('#run_selection');
-  const items = Array.from(list.querySelectorAll('li')).filter(item => item !== list.querySelector('li')); // Exclude the header
-
-  // Sort the items based on the content of the 'columnIndex' (0 for 'Name')
-  items.sort((a, b) => {
-    const textA = a.children[columnIndex].innerText.trim().toLowerCase();  // Get text of the target span (e.g., Name)
-    const textB = b.children[columnIndex].innerText.trim().toLowerCase();  // Get text of the target span (e.g., Name)
-
-    if (order === 'asc') {
-      return textA.localeCompare(textB); // Sort A-Z
-    } else {
-      return textB.localeCompare(textA); // Sort Z-A
-    }
-  });
-
-  // Re-insert the sorted items back into the list
-  items.forEach(item => list.appendChild(item));
-}
-
-// Event listeners for sorting buttons
-document.querySelector('button[onclick="sortList(0, \'asc\' )"]').addEventListener('click', function() {
-  sortList(0, 'asc');  // Sorting by Name (A-Z)
-});
-
-document.querySelector('button[onclick="sortList(0, \'desc\' )"]').addEventListener('click', function() {
-  sortList(0, 'desc');  // Sorting by Name (Z-A)
-});

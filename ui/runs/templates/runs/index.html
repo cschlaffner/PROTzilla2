@@ -42,8 +42,12 @@
          <span id="selectedRun" style="display: none;">{{ all_available_runs.0.run_name }}</span>
      </h3>
         <!-- Header Section -->
-        <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
-          <li class="d-flex justify-content-between" style="font-weight: bold;">
+        <form id="sorting_by_click" action="{% url 'runs:index' %}" method="post">
+          {% csrf_token %}
+          <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
+            <li class="d-flex justify-content-between align-items-center" style="font-weight: bold;">
+
+              <!-- Star Symbol -->
               <span>
                 <button type="button" class="btn">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ded704" class="bi bi-star-fill" viewBox="0 0 16 16">
@@ -51,22 +55,82 @@
                   </svg>
                 </button>
               </span>
-              <span style="width: 30%" class="center">
-                  Name
-                  <button onclick="sortList(0, 'asc')" style="margin-left: 5px;">↑</button>
-                  <button onclick="sortList(0, 'desc')" style="margin-left: 5px;">↓</button>
+
+                <!-- Name Column -->
+                <span style="width: 30%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'name_asc' %}name_desc{% else %}name_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Name
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'name_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
                 </span>
-              <span style="width: 15%">Created</span>
-              <span style="width: 15%">Last modified</span>
-              <span style="width: 15%">Memory mode</span>
-              <button type="button" class="btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                  <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                </svg>
-              </button>
+
+                <!-- Created Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'created_asc' %}created_desc{% else %}created_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Created
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'created_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+                <!-- Last Modified Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'last_modified_asc' %}last_modified_desc{% else %}last_modified_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Last Modified
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'last_modified_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+                <!-- Memory Mode Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'memory_mode_asc' %}memory_mode_desc{% else %}memory_mode_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Memory Mode
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'memory_mode_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+              <!-- Garbage Can Symbol -->
+              <span>
+                <button type="button" class="btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                  </svg>
+                </button>
+              </span>
 
             </li>
-        </ul>
+          </ul>
+        </form>
+
+
+
         <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
 
         <!-- Run selection -->
@@ -190,67 +254,12 @@
             <input type="button" id="clearFilters" value="Clear filters" class="btn btn-grey">
         </div>
       </form>
-        <form id="sorting" class="mb-5" action="{% url 'runs:index' %}" method="post">
-            {% csrf_token %}
-              <h4>Sort entries: </h4>
-            <div class="mb-2">
-              <label for="sort_methods">Select one or multiple sorting methods:</label>
-              <select id="sort_methods" name="sort_methods" data-placeholder="Select..." multiple data-multi-select>
-                    {% for method in all_sorting_methods %}
-                    <option value="{{ method }}" {% if method in sort_methods %}selected{% endif %}>
-                        {{ method }}
-                    </option>
-                    {% endfor %}
-              </select>
-            </div>
-        <input type="submit" value="Apply sorting" class="btn btn-grey">
-        </form>
     </div>
   </div>
 </div>
 
 </div>
 <script type="text/javascript" src="{% static 'runs/MultiSelect.js' %}"></script>
-<!--<script>
-  // Initialize the Multi Selects
-  new MultiSelect('#dynamic', {
-    data: [
-        {
-            value: 'opt1',
-            text: 'Option 1'
-        },
-        {
-            value: 'opt2',
-            html: '<strong>Option 2 with HTML!</strong>'
-        },
-        {
-            value: 'opt3',
-            text: 'Option 3',
-            selected: true
-        },
-        {
-            value: 'opt4',
-            text: 'Option 4'
-        },
-        {
-            value: 'opt5',
-            text: 'Option 5'
-        }
-    ],
-    placeholder: 'Select an option',
-    search: true,
-    selectAll: true,
-    listAll: false,
-    max: 2,
-    onChange: function(value, text, element) {
-        console.log('Change:', value, text, element);
-    },
-    onSelect: function(value, text, element) {
-        console.log('Selected:', value, text, element);
-    },
-    onUnselect: function(value, text, element) {
-        console.log('Unselected:', value, text, element);
-    }
-  });
-</script>-->
+
+</div>
 {% endblock %}

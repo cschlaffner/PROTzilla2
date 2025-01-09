@@ -9,6 +9,17 @@ from ui.runs.utilities.alert import build_trace_alert
 
 from typing import Callable
 
+SORTING_METHODS = {
+    "name_asc": (lambda run: run["run_name"].lower(), False),
+    "name_desc": (lambda run: run["run_name"].lower(), True),
+    "created_asc": (lambda run: run["creation_date"], False),
+    "created_desc": (lambda run: run["creation_date"], True),
+    "last_modified_asc": (lambda run: run["modification_date"], False),
+    "last_modified_desc": (lambda run: run["modification_date"], True),
+    "memory_mode_asc": (lambda run: run["memory_mode"].lower(), False),
+    "memory_mode_desc": (lambda run: run["memory_mode"].lower(), True),
+}
+
 
 def parameters_from_post(post):
     d = dict(post)
@@ -152,11 +163,18 @@ def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
         runs = filter_for_memory_mode(runs, filters["memory_mode"])
     return runs
 
-def sort_runs(runs: list[dict[str, str | list[str]]], sorting_methods: list[str], all_sorting_methods: dict[str, tuple[Callable[[dict[str, str | list[str]]], str], bool]]):
-    for method in sorting_methods:
-        if method in all_sorting_methods:
-            key_func, reverse = all_sorting_methods[method]  # Extract the key function and reverse flag
-            runs = sorted(runs, key=key_func, reverse=reverse)
+def sort_runs(runs: list[dict[str, str | list[str]]], sorting_method: str):
+    """
+        Filters runs according to the given sorting method. Favorite and normal are handled seperately at the moment.
+
+        :param runs: List of runs.
+        :param sorting_method: One method as in dictionary SORTING_METHODS.
+
+        :return: List of runs.
+        """
+    if sorting_method in SORTING_METHODS:
+        key_func, reverse = SORTING_METHODS[sorting_method]  # Extract the key function and reverse flag
+        runs = sorted(runs, key=key_func, reverse=reverse)
     return runs
 
 def display_message(message: dict, request):
