@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element, SubElement, tostring
+from xml.etree.ElementTree import Element, SubElement, tostring, ParseError
 
 import pandas as pd
 import requests
@@ -107,8 +107,12 @@ def biomart_database(
                 if server:
                     db = server.databases[database_name]
                     return db
-
+            except ParseError as e:
+                if "Service unavailable" in str(e):
+                    print(f"ParseError: Expected XML but received an HTML error page indicating the service at {url} is unavailable.")
+                    continue
             except requests.ConnectionError:
+                print(f"ConnectionError: Could not connect to {url}.")
                 continue
 
 
