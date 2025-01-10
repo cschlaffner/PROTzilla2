@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 
 import time
@@ -28,8 +29,11 @@ from protzilla.data_integration.enrichment_analysis_gsea import (
     gsea_preranked,
     create_ranked_df,
 )
+from protzilla.data_integration.database_query import is_biomart_available
 
 # isort:end_skip_file
+
+biomart_availability = is_biomart_available()
 
 
 @pytest.fixture
@@ -377,6 +381,8 @@ def test_GO_analysis_with_STRING_too_many_col_df():
 
 
 def test_GO_analysis_with_enrichr_wrong_proteins_input():
+    if biomart_availability == False:
+        pytest.skip("BioMart servers are not available. Skipping related tests.")
     current_out = GO_analysis_with_Enrichr(
         proteins_df="Protein1;Protein2;aStringOfProteins",
         organism="human",
@@ -393,6 +399,8 @@ def test_GO_analysis_with_enrichr_wrong_proteins_input():
 
 
 def test_GO_analysis_with_enrichr_wrong_gene_sets_input():
+    if biomart_availability == False:
+        pytest.skip("BioMart servers are not available. Skipping related tests.")
     current_out = GO_analysis_with_Enrichr(
         proteins_df=pd.DataFrame(
             {"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}
@@ -406,6 +414,8 @@ def test_GO_analysis_with_enrichr_wrong_gene_sets_input():
 
 
 def test_GO_analysis_with_no_gene_sets_input():
+    if biomart_availability == False:
+        pytest.skip("BioMart servers are not available. Skipping related tests.")
     current_out = GO_analysis_with_Enrichr(
         proteins_df=pd.DataFrame(
             {"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}
@@ -422,7 +432,9 @@ def test_GO_analysis_with_no_gene_sets_input():
 
 
 @patch("protzilla.data_integration.database_query.uniprot_groups_to_genes")
-def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
+def test_GO_analysis_with_Enrichr(mock_uniprot_groups_to_gene, data_folder_tests):
+    if biomart_availability == False:
+        pytest.skip("BioMart servers are not available. Skipping related tests.")
     # Check if enrichr API is available
     api_url = "https://maayanlab.cloud/Enrichr/addList"
     try:
@@ -500,6 +512,8 @@ def test_GO_analysis_with_Enrichr(mock_gene_mapping, data_folder_tests):
 
 
 def test_GO_analysis_Enrichr_wrong_background_file(data_folder_tests):
+    if biomart_availability == False:
+        pytest.skip("BioMart servers are not available. Skipping related tests.")
     current_out = GO_analysis_with_Enrichr(
         proteins_df=pd.DataFrame(
             {"Protein ID": ["Protein1"], "log2_fold_change": [1.0]}
