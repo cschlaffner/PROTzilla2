@@ -94,6 +94,7 @@ def uniprot_columns(filename):
 def biomart_database(
     database_name: str = "ENSEMBL_MART_ENSEMBL", max_attempts: int = 3
 ):
+    # This method needs to be adjusted
     mirror_list = [
         "http://ensembl.org/biomart",
         "http://asia.ensembl.org/biomart",
