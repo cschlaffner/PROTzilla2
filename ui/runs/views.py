@@ -17,11 +17,11 @@ from django.http import (
 )
 from django.shortcuts import render
 from django.urls import reverse
-from django.conf import settings
 
-from protzilla.run import Run, get_available_run_names 
-from protzilla.run_v2 import delete_run_folder
+from protzilla.constants.paths import WORKFLOWS_PATH
+from protzilla.run import Run, get_available_run_names
 from protzilla.run_helper import log_messages
+from protzilla.run_v2 import delete_run_folder
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
 from protzilla.utilities.utilities import (
@@ -31,14 +31,13 @@ from protzilla.utilities.utilities import (
     name_to_title,
 )
 from protzilla.workflow import get_available_workflow_names
-from protzilla.constants.paths import WORKFLOWS_PATH
 from ui.runs.fields import (
     make_displayed_history,
     make_method_dropdown,
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
@@ -64,12 +63,10 @@ def detail(request: HttpRequest, run_name: str):
     :return: the rendered details page
     :rtype: HttpResponse
     """
+    # get current run instance
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
-
-    # section, step, method = run.current_run_location()
-    # end_of_run = not step
 
     if request.POST:
         method_form = get_filled_form_by_request(
@@ -81,7 +78,7 @@ def detail(request: HttpRequest, run_name: str):
         method_form.fill_form(run)
     else:
         method_form = get_filled_form_by_method(run.current_step, run)
-    
+
     plot_form = get_empty_plot_form_by_method(run.current_step, run)
     description = run.current_step.method_description
 
@@ -231,6 +228,7 @@ def continue_(request: HttpRequest):
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
+
 def delete_(request: HttpRequest):
     """
     Deletes an existing run. The user is redirected to the index page.
@@ -238,15 +236,15 @@ def delete_(request: HttpRequest):
     :param request: the request object
     :type request: HttpRequest
 
-    
+
     :return: the rendered details page of the run
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
     if run_name in active_runs:
         del active_runs[run_name]
-    
-    try: 
+
+    try:
         delete_run_folder(run_name)
     except Exception as e:
         display_message(
@@ -280,7 +278,7 @@ def next_(request, run_name):
     run = active_runs[run_name]
     name = request.POST.get("name", None)
     if name:
-        run.steps.name_current_step_instance(name) 
+        run.steps.name_current_step_instance(name)
     run.step_next()
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -302,35 +300,6 @@ def back(request, run_name):
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     run.step_previous()
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
-
-
-def plot(request, run_name):
-    """
-    Creates a plot from the current step/method of the run.
-    This is only called by the plot button in the data preprocessing section aka when a plot is
-    simultaneously a step on its own.
-    Django messages are used to display additional information, warnings and errors to the user.
-
-    :param request: the request object
-    :type request: HttpRequest
-    :param run_name: the name of the run
-    :type run_name: str
-
-    :return: the rendered detail page of the run, now with the plot
-    :rtype: HttpResponse
-    """
-    if run_name not in active_runs:
-        active_runs[run_name] = Run(run_name)
-    run = active_runs[run_name]
-    parameters = parameters_from_post(request.POST)
-
-    if run.current_step.display_name == "plot":
-
-        run.step_calculate(parameters)
-    else:
-        run.step_plot(parameters)
-
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 

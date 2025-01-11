@@ -229,64 +229,34 @@ def by_reference_protein(
 
 
 def by_z_score_plot(
-        method_inputs,
-        method_outputs,
-        graph_type,
-        group_by,
-        visual_transformation
+    protein_df, output_protein_df, graph_type, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
-        graph_type,
-        group_by,
-        visual_transformation
+        protein_df, output_protein_df, graph_type, group_by, visual_transformation
     )
 
 
 def by_median_plot(
-        method_inputs,
-        method_outputs,
-        graph_type,
-        group_by,
-        visual_transformation
+    protein_df, output_protein_df, graph_type, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
-        graph_type, group_by,
-        visual_transformation
+        protein_df, output_protein_df, graph_type, group_by, visual_transformation
     )
 
 
 def by_totalsum_plot(
-        method_inputs,
-        method_outputs,
-        graph_type,
-        group_by,
-        visual_transformation
+    protein_df, output_protein_df, graph_type, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
-        graph_type, group_by,
-        visual_transformation
+        protein_df, output_protein_df, graph_type, group_by, visual_transformation
     )
 
 
 def by_reference_protein_plot(
-        method_inputs,
-        method_outputs,
-        graph_type,
-        group_by,
-        visual_transformation
+    protein_df, output_protein_df, graph_type, group_by, visual_transformation
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
-        graph_type,
-        group_by,
-        visual_transformation
+        protein_df, output_protein_df, graph_type, group_by, visual_transformation
     )
 
 

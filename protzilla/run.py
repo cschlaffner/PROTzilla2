@@ -144,10 +144,10 @@ class Run:
     def step_calculate(self, inputs: dict | None = None) -> None:
         self.steps.current_step.calculate(self.steps, inputs)
 
-    @error_handling
-    @auto_save
-    def step_plot(self, inputs: dict | None = None) -> None:
-        self.steps.current_step.plot(inputs)
+    # @error_handling
+    # @auto_save
+    # def step_plot(self, inputs: dict | None = None) -> None:
+    #     self.steps.current_step.plot(inputs)
 
     @error_handling
     @auto_save

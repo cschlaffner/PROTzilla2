@@ -121,13 +121,8 @@
                     
                     {# calculateForm #}
                     <div class="col">
-                        {% if step != "plot" %} 
-                            <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
+                        <form id="calculateForm" action="{% url 'runs:detail' run_name %}" method="post"
                                 enctype="multipart/form-data"> 
-                        {% else %}
-                            <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                            enctype="multipart/form-data">
-                        {% endif %}
 
                             {% csrf_token %}
                             <div class="mb-1">
@@ -142,12 +137,6 @@
                                 {% endfor %}
                             </div>
                             <div class="form-group">
-                                {% if section == "data_preprocessing" and not plot_form %}
-                                    <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
-                                        class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                        Plot
-                                    </a>
-                                {% endif %}
                                 {% if show_table %}
                                     <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
                                         target="_blank"
@@ -160,24 +149,6 @@
                             </div>
                         </form>
                     </div>
-                     
-                    {% if plot_form %}
-                    <div class="col">
-                        <form action="{% url 'runs:plot' run_name %}" id="plot_form" method="post"
-                                enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <fieldset id="plotfields">
-                                <div id="plot_parameters" class="mb-2">
-                                    {{ plot_form }}
-                                </div>
-                            </fieldset>
-                            <button type="submit" id="plot_parameters_submit"
-                                class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                Plot
-                            </button>
-                        </form>
-                    </div>
-                    {% endif %}
                 </div>
 
                 {# show current plots #}

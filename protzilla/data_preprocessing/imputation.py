@@ -58,7 +58,7 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
 def by_knn(
     protein_df: pd.DataFrame,
     number_of_neighbours: int = 5,
-    **kwargs,  # quantile, default is median
+    kwargs={},  # quantile, default is median
 ) -> dict:
     """
     A function to perform value imputation based on KNN
@@ -353,16 +353,16 @@ def by_normal_distribution_sampling(
 
 
 def by_knn_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,
@@ -371,16 +371,16 @@ def by_knn_plot(
 
 
 def by_normal_distribution_sampling_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,
@@ -389,16 +389,16 @@ def by_normal_distribution_sampling_plot(
 
 
 def by_simple_imputer_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,
@@ -407,16 +407,16 @@ def by_simple_imputer_plot(
 
 
 def by_min_per_sample_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,
@@ -425,16 +425,16 @@ def by_min_per_sample_plot(
 
 
 def by_min_per_protein_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,
@@ -443,16 +443,16 @@ def by_min_per_protein_plot(
 
 
 def by_min_per_dataset_plot(
-    method_inputs,
-    method_outputs,
+    protein_df,
+    output_protein_df,
     graph_type,
     graph_type_quantities,
     group_by,
     visual_transformation,
 ):
     return _build_box_hist_plot(
-        method_inputs["protein_df"],
-        method_outputs["protein_df"],
+        protein_df,
+        output_protein_df,
         graph_type,
         graph_type_quantities,
         group_by,

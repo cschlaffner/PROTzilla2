@@ -27,15 +27,14 @@ class Step:
     display_name: str = None
     operation: str = None
     method_description: str = None
-    input_keys: list[str] = []
     output_keys: list[str] = []
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
         self.inputs: dict = {}
-        self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
+        self.messages: Messages = Messages([])
         self.instance_identifier = instance_identifier
 
         if self.instance_identifier is None:
@@ -54,6 +53,9 @@ class Step:
             and self.output == other.output
         )
 
+    def update():
+        pass
+
     def calculate(self, steps: StepManager, inputs: dict) -> None:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
@@ -71,13 +73,15 @@ class Step:
         try:
             self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
-            self.validate_inputs()
 
-            output_dict = self.method(self.inputs)
+            output_dict = self.calc_method(**self.calculation_input)
             self.handle_outputs(output_dict)
             self.handle_messages(output_dict)
 
             self.validate_outputs()
+
+            self.plots = Plots(self.plot_method(**self.plot_input))
+
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -114,8 +118,8 @@ class Step:
                 )
             )
 
-    def method(self, **kwargs) -> dict:
-        raise NotImplementedError("This method must be implemented in a subclass.")
+    def plot_method(self, inputs: dict) -> Plots:
+        return Plots()
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
@@ -145,50 +149,63 @@ class Step:
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
-    def plot(self, inputs: dict = None) -> None:
-        raise NotImplementedError(
-            f"Plotting is not implemented for this step ({self.display_name}). Only preprocessing methods can have additional plots."
-        )
+    @staticmethod
+    def calc_method():
+        return {}
 
-    def validate_inputs(self, required_keys: list[str] = None) -> bool:
-        """
-        Validates the inputs of the step. If required_keys is not specified, the input_keys of the method class are used.
-        Will delete unnecessary keys from the inputs dictionary to avoid passing unwanted parameters to the method.
-        :param required_keys: The keys that are required in the inputs dictionary (optional)
-        :return: True if the inputs are valid, False otherwise
-        :raises ValueError: If a required key is missing in the inputs
-        """
-        if required_keys is None:
-            required_keys = self.input_keys
+    @staticmethod
+    def plot_method():
+        return {}
+
+    @property
+    def calculation_input(self) -> dict:
+        input_parameters = inspect.signature(self.calc_method).parameters
+        required_keys = [
+            key
+            for key, param in input_parameters.items()
+            if param.default == inspect.Parameter.empty
+        ]
         for key in required_keys:
             if key not in self.inputs:
-                raise ValueError(f"Missing input {key} in inputs")
-
-        # Deleting all unnecessary keys as to avoid "too many parameters" error
-        for key in self.inputs.copy().keys():
-            if key not in required_keys:
-                logging.info(
-                    f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
+                raise ValueError(
+                    f"Missing required input '{key}' for the calulation method"
                 )
-                self.inputs.pop(key)
 
-        return True
+        return {
+            key: self.inputs[key]
+            for key in input_parameters.keys()
+            if key in self.inputs
+        }
 
-    def validate_outputs(
-        self, required_keys: list[str] = None, soft_check: bool = False
-    ) -> bool:
+    @property
+    def plot_input(self) -> dict:
+        prefixed_output = {
+            "output_" + key: value for key, value in self.output.output.items()
+        }
+        plot_input = self.inputs | prefixed_output
+
+        input_parameters = inspect.signature(self.plot_method).parameters
+        required_keys = [
+            key
+            for key, param in input_parameters.items()
+            if param.default == inspect.Parameter.empty
+        ]
+        for key in required_keys:
+            if key not in plot_input:
+                raise ValueError(f"Missing required input '{key}' for the plot method")
+
+        return {
+            key: plot_input[key] for key in input_parameters.keys() if key in plot_input
+        }
+
+    def validate_outputs(self, soft_check: bool = False) -> bool:
         """
-        Validates the outputs of the step. If required_keys is not specified, the output_keys of the method class are used.
-
-        :param required_keys: The keys that are required in the outputs dictionary (optional)
+        Validates the outputs of the step. Uses the output_keys attribute to check if all required keys are present in the output dictionary.
         :param soft_check: Whether to raise errors or just return False if the output is invalid
         :return: True if the outputs are valid, False otherwise
         :raises ValueError: If a required key is missing in the outputs
         """
-        inspect.signature(self.method).parameters
-        if required_keys is None:
-            required_keys = self.output_keys
-        for key in required_keys:
+        for key in self.output_keys:
             if key not in self.output or self.output[key] is None:
                 if not soft_check:
                     raise ValueError(
@@ -197,6 +214,8 @@ class Step:
                 else:
                     return False
         return True
+
+        # TODO: Maybe check if output only contains output keys
 
     @property
     def finished(self) -> bool:
@@ -211,8 +230,9 @@ class Step:
 
 
 class Output:
-    def __init__(self, output: dict = None):
-        if output is None:
+
+    def __init__(self, output: dict = {}):
+        if output is None:  # TODO rausnehmen
             output = {}
 
         self.output = output

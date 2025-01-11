@@ -81,24 +81,7 @@ _forward_mapping = {
     data_integration.PlotGSEAEnrichmentPlot: data_integration_forms.PlotGSEAEnrichmentPlotForm,
 }
 
-_forward_mapping_plots = {
-    data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingPlotForm,
-    data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountPlotForm,
-    data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingPlotForm,
-    data_preprocessing.FilterSamplesByProteinIntensitiesSum: data_preprocessing_forms.FilterSamplesByProteinIntensitiesSumPlotForm,
-    data_preprocessing.TransformationLog: data_preprocessing_forms.TransformationLogPlotForm,
-    data_preprocessing.NormalisationByZScore: data_preprocessing_forms.NormalisationByZscorePlotForm,
-    data_preprocessing.NormalisationByTotalSum: data_preprocessing_forms.NormalisationByTotalSumPlotForm,
-    data_preprocessing.NormalisationByMedian: data_preprocessing_forms.NormalisationByMedianPlotForm,
-    data_preprocessing.NormalisationByReferenceProtein: data_preprocessing_forms.NormalisationByReferenceProteinPlotForm,
-    data_preprocessing.ImputationByMinPerDataset: data_preprocessing_forms.ImputationByMinPerDatasetPlotForm,
-    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationByMinPerProteinPlotForm,
-    data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSamplePlotForm,
-    data_preprocessing.SimpleImputationPerProtein: data_preprocessing_forms.SimpleImputationPerProteinPlotForm,
-    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNPlotForm,
-    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingPlotForm,
-    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdPlotForm,
-}
+_forward_mapping_plots = {}  # TODO delete this
 
 
 _reverse_mapping = {v: k for k, v in _forward_mapping.items()}
