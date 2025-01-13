@@ -94,8 +94,7 @@ def match_peptide_to_protein_ids(
 ) -> list[ProteinHit]:
     """
     Matches a peptide sequence to a dictionary of kmers in protein sequences.
-    Returns a list of tuples containing the protein ID and the start, end location of the peptide in the protein
-    sequence.
+    Returns a list of ProteinHit objects containing the protein ID and the start location of the peptide on the protein.
     """
     if len(peptide_sequence) == 0:
         raise ValueError("Peptide sequence is empty.")
@@ -107,6 +106,9 @@ def match_peptide_to_protein_ids(
     # match the kmers
     first_kmer_matches = protein_kmer_dictionary.get(first_kmer, [])
     last_kmer_matches = protein_kmer_dictionary.get(last_kmer, [])
+    if first_kmer_matches == [] or last_kmer_matches == []:
+        return []
+
     hits = [
         ProteinHit(
             protein_id, start_first_kmer, start_first_kmer + len(peptide_sequence)
@@ -171,6 +173,9 @@ def plot_protein_coverage(
     )
     sequence_kmer_dict = build_kmer_dictionary(protein_sequence_dict, k=5)
 
+    if protein_id not in protein_sequence_dict:
+        raise ValueError(f"Protein ID {protein_id} not found in protein dictionary.")
+
     protein_sequence = protein_sequence_dict[protein_id]
     peptide_matches = []
     coverage_by_group_name = {
@@ -227,6 +232,7 @@ def plot_protein_coverage(
         protein_sequence=protein_sequence,
         rows_by_group_name=rows_by_group_name,
         grouping=grouping,
+        aggregation_method=aggregation_method,
     )
 
     return dict(plots=[fig])
@@ -240,6 +246,7 @@ def build_coverage_plot(
     rows_by_group_name: dict[str, list[list[PeptideMatch]]],
     intensity_normalization: IntensityNormalization = IntensityNormalization.min_max_scaling,
     grouping: str = "",
+    aggregation_method: AggregationMethod = AggregationMethod.median,
 ) -> go.Figure:
     number_of_subplots = len(rows_by_group_name.keys())
     protein_sequence_labels = [
@@ -264,6 +271,21 @@ def build_coverage_plot(
         peptide_rows = rows_by_group_name[group_name]
         coverage = coverages_by_group_name[group_name]
 
+        # Calculate the desired heights
+        max_bar_height = max_coverage_value
+        desired_peptide_height = max_bar_height * 2  # 1:2 ratio
+
+        # Calculate the height scaling factor for peptides
+        num_peptide_rows = len(peptide_rows)
+        if num_peptide_rows > 0:
+            # Include spacing in the calculation
+            total_spacing = SEQUENCE_DEPTH_PEPTIDE_SPACING
+            peptide_box_height = (
+                desired_peptide_height - total_spacing
+            ) / num_peptide_rows
+        else:
+            peptide_box_height = 1.0
+
         add_sequence_depth_to_plot(
             fig=fig,
             coverage=coverage,
@@ -278,8 +300,10 @@ def build_coverage_plot(
         max_intensity, min_intensity = max(current_group_intensities), min(
             current_group_intensities
         )
-        scale_intensity = lambda intensity: (intensity - min_intensity) / (
-            max_intensity - min_intensity
+        scale_intensity = lambda intensity: (
+            (intensity - min_intensity) / (max_intensity - min_intensity)
+            if max_intensity != min_intensity
+            else 0
         )
         for row_index, row in enumerate(peptide_rows):
             for peptide_match in row:
@@ -291,17 +315,19 @@ def build_coverage_plot(
                     protein_sequence_labels=protein_sequence_labels,
                     row_index=row_index,
                     offset=max_coverage_value + SEQUENCE_DEPTH_PEPTIDE_SPACING,
+                    box_height=peptide_box_height,
                     color_a=INTENSITY_COLORS[0],
                     color_b=INTENSITY_COLORS[1],
                     grouping=grouping,
                 )
 
         fig.update_layout(hovermode="closest")
+        # Update y-axis range to accommodate both the bar plot and peptide sections
+        total_height = (
+            max_coverage_value + SEQUENCE_DEPTH_PEPTIDE_SPACING + desired_peptide_height
+        )
         fig.update_yaxes(
-            range=[
-                0,
-                len(peptide_rows) + max_coverage_value + SEQUENCE_DEPTH_PEPTIDE_SPACING,
-            ],
+            range=[0, total_height],
             showticklabels=False,
             showgrid=False,
             row=group_index,
@@ -310,12 +336,14 @@ def build_coverage_plot(
         fig.update_xaxes(showticklabels=False, showgrid=False, row=group_index, col=1)
     fig.update_xaxes(showticklabels=True, row=number_of_subplots, col=1)
 
-    add_intensity_legend(fig)
+    add_intensity_legend(fig, aggregation_method)
 
     return fig
 
 
-def add_intensity_legend(fig):
+def add_intensity_legend(
+    fig, aggregation_method: AggregationMethod = AggregationMethod.median
+):
     color_scale = [[0, INTENSITY_COLORS[0]], [1, INTENSITY_COLORS[1]]]
     color_legend_trace = go.Scatter(
         x=[None],
@@ -327,7 +355,7 @@ def add_intensity_legend(fig):
             cmin=0,
             cmax=1,
             colorbar=dict(
-                title="Intensity of peptide",
+                title=f"Intensity of peptide<br>(aggregated via {aggregation_method})",
                 x=1.0,  # Move further outside the plot
                 len=0.9,  # Increase length of colorbar (70% of subplot height)
                 thickness=30,  # Increase thickness of colorbar
@@ -366,6 +394,7 @@ def add_peptide_to_plot(
     protein_sequence_labels: list[str],
     row_index: int,
     offset: int,
+    box_height: float,
     color_a: str = "#FFFFFF",
     color_b: str = PLOT_COLOR_SEQUENCE[3],
     grouping: str = "",
@@ -374,7 +403,7 @@ def add_peptide_to_plot(
         peptide_match.start_location_on_protein,
         peptide_match.end_location_on_protein,
     )
-    y0, y1 = row_index + offset, row_index + offset + 1
+    y0, y1 = row_index * box_height + offset, (row_index + 1) * box_height + offset
     # interpolate between the two colors
     color = interpolate_color(color_a, color_b, normalized_intensity)
     PEPTIDE_SHAPE = dict(
@@ -450,6 +479,10 @@ def distribute_to_rows(
     Distributes peptide matches to rows such that no two peptides overlap in the same row.
     Greedy algorithm (see Interval Scheduling Problem).
     """
+    if len(peptide_matches) == 0:
+        raise ValueError(
+            "Attempted to distribute empty list of peptide matches to rows in plot."
+        )
     peptide_matches.sort(
         key=lambda peptide_match: peptide_match.start_location_on_protein
     )
@@ -474,4 +507,8 @@ def distribute_to_rows(
 
 
 def get_max_coverage(coverage: dict[list[int]]) -> int:
+    if len(coverage) == 0:
+        raise ValueError(
+            "Cannot calculate maximum coverage value: No coverage data provided."
+        )
     return max([max(coverage) for coverage in coverage.values()])
