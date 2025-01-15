@@ -159,7 +159,7 @@
                 <span style="width: 15%">{{ run.creation_date }}</span>
                 <span style="width: 15%">{{ run.modification_date }}</span>
                 <span style="width: 15%">{{ run.memory_mode }}</span>
-                <input type="submit" value="Continue" class="btn btn-red" onclick="event.stopPropagation();">
+                <input type="submit" value="Continue" class="colorchange-btn btn btn-grey" onclick="event.stopPropagation();">
               </div>
 
               <!-- Run details -->
@@ -168,7 +168,7 @@
                 <div class="tags">
                   {% for tag in run.run_tags %}
                     <span class="tag btn-orange">{{ tag }}</span>
-                    <button type="button" class="delete-btn btn btn-grey" onclick="deleteTag('{{run.run_name}}', '{{tag}}')">
+                    <button type="button" class="colorchange-btn btn btn-grey" onclick="deleteTag('{{run.run_name}}', '{{tag}}')">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="orange" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                         <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                       </svg>
@@ -176,7 +176,7 @@
                   {% endfor %}
                   <input type="text" name="tag_name" id="tag_name_id_{{run.run_name}}" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
                   <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')">Add Tag</button>
-                  <button type="button" class="delete-btn btn btn-grey" onclick="deleteRun('{{run.run_name}}')">
+                  <button type="button" class="colorchange-btn btn btn-grey" onclick="deleteRun('{{run.run_name}}')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                       <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                     </svg>

@@ -2,9 +2,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // Delete Btns
-  const delete_btns = document.querySelectorAll('.delete-btn');
+  const colorchange_btns = document.querySelectorAll('.colorchange-btn');
 
-  delete_btns.forEach(button => {
+  colorchange_btns.forEach(button => {
     const svg = button.querySelector('svg');
 
     button.addEventListener('mouseover', () => {
