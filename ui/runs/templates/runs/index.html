@@ -131,16 +131,18 @@
 
 
 
-        <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
-
         <!-- Run selection -->
         <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
           <ul class="w-100" id="run_selection" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
             {% for run in all_available_runs %}
+                {% if forloop.counter == 1 %}
+                  <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
+                {% else %}
+                  <hr style="margin: 5px 0px;">
+                {% endif %}
             <li class="d-flex justify-content-between list-item" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}'); toggleDetails(this)">
-
               <div id="main-content" class="justify-content-between d-flex">
                 <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}')">
                   {% if run.favourite_status == False %}
@@ -181,7 +183,6 @@
                   </button>
                 </div>
               </div>
-                <hr style="margin: 5px 0px;">
             </li>
             {% endfor %}
           </ul>
