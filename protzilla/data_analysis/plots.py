@@ -68,7 +68,7 @@ def scatter_plot(
         fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
         fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
         fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
-        return dict(plots=[fig])
+        return [fig]
     except ValueError as e:
         msg = ""
         if intensity_df_wide.shape[1] < 2:
@@ -179,7 +179,7 @@ def create_volcano_plot(
         selector=dict(name=f"Not Significant {item_type}s"),
     )
 
-    return dict(plots=[fig])
+    return [fig]
 
 
 def clustergram_plot(
@@ -258,7 +258,7 @@ def clustergram_plot(
         clustergram.update_layout(
             autosize=True,
         )
-        return dict(plots=[clustergram])
+        return [clustergram]
     except AssertionError as e:
         if not isinstance(input_df, pd.DataFrame):
             msg = (
@@ -305,9 +305,7 @@ def prot_quant_plot(
     :param similarity_measure: method to compare the chosen proteingroup with all others. The two
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
-
-
-    :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
+    :return: returns a dictionary containing a list with a plotly figure
     """
 
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df
@@ -459,4 +457,4 @@ def prot_quant_plot(
         ),
     )
 
-    return dict(plots=[fig])
+    return [fig]

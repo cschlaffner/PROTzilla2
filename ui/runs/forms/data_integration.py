@@ -172,11 +172,11 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
         "...]})"
     )
     gene_sets_enrichr = CustomChoiceField(choices=[], label="Gene set libraries")
-    background_field = CustomChoiceField(
-        choices=GOAnalysisWithEnrichrBackgroundField,
-        label="Background",
-        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file,
-    )
+    # background_field = CustomChoiceField(
+    #     choices=GOAnalysisWithEnrichrBackgroundField,
+    #     label="Background",
+    #     initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file,
+    # )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one gene per line, csv or txt)",
         initial=None,
@@ -270,12 +270,13 @@ class EnrichmentAnalysisGOAnalysisOfflineForm(MethodForm):
     direction = CustomChoiceField(
         choices=Direction, label="Direction of the analysis", initial=Direction.both
     )
-    background_field = CustomChoiceField(
-        choices=GOAnalysisWithEnrichrBackgroundField,
-        label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
-        "will otherwise be ignored!",
-        initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file,
-    )
+    # isn't used in the function
+    # background_field = CustomChoiceField(
+    #     choices=GOAnalysisWithEnrichrBackgroundField,
+    #     label="How do you want to provide the background set? This parameter works only for uploaded gene sets and "
+    #     "will otherwise be ignored!",
+    #     initial=GOAnalysisWithEnrichrBackgroundField.upload_a_file,
+    # )
     background_path = CustomFileField(
         label="Background set with uppercase gene symbols (one protein per line, csv or txt)",
         initial=None,

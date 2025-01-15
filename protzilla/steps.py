@@ -74,13 +74,14 @@ class Step:
             self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
 
-            output_dict = self.calc_method(**self.calculation_input)
-            self.handle_outputs(output_dict)
-            self.handle_messages(output_dict)
+            if self.calc_method:
+                calc_output = self.calc_method(**self.calculation_input)
+                self.handle_calc_outputs(calc_output)
+                self.validate_outputs()
 
-            self.validate_outputs()
-
-            self.plots = Plots(self.plot_method(**self.plot_input))
+            if self.plot_method:
+                plot_output = self.plot_method(**self.plot_input)
+                self.handle_plot_outputs(plot_output)
 
         except NotImplementedError as e:
             self.messages.append(
@@ -118,16 +119,13 @@ class Step:
                 )
             )
 
-    def plot_method(self, inputs: dict) -> Plots:
-        return Plots()
-
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
 
-    def handle_outputs(self, outputs: dict) -> None:
+    def handle_calc_outputs(self, outputs: dict) -> None:
         """
         Handles the dictionary from the calculation method and creates an Output object from it.
-        Responsible for checking if the output is a dictionary and if it is empty, and setting the output attribute of the instance.
+        Responsible for checking that the output is a dictonary and not empty, and setting the output attribute of the instance.
 
         :param outputs: A dictionary received after the calculation
         :return: None
@@ -139,6 +137,28 @@ class Step:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
 
+        self.handle_messages(outputs)
+
+    def handle_plot_outputs(self, outputs: dict|list) -> None:
+        """
+        Handles the dictionary from the plot method and creates a Plots object from it.
+        Responsible for clearing and setting the plots attribute of the class.
+        :param outputs: A dictionary or a list received after the plot method
+        :return: None
+        """
+
+        if not isinstance(outputs, dict) and not isinstance(outputs, list):
+            raise TypeError("Output of plot method is not a dictionary or a list.")
+        
+        if isinstance(outputs, dict):
+            plots = outputs.pop("plots", [])
+            self.output.output.update(outputs)
+            self.handle_messages(outputs)
+        else:
+            plots = outputs
+        
+        self.plots = Plots(plots)
+
     def handle_messages(self, outputs: dict) -> None:
         """
         Handles the messages from the calculation method and creates a Messages object from it.
@@ -149,13 +169,8 @@ class Step:
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
 
-    @staticmethod
-    def calc_method():
-        return {}
-
-    @staticmethod
-    def plot_method():
-        return {}
+    calc_method = None
+    plot_method = None
 
     @property
     def calculation_input(self) -> dict:
@@ -518,15 +533,13 @@ class StepManager:
     def protein_df(self) -> pd.DataFrame:
         from protzilla.steps import Step
 
-        df = self.get_step_output(Step, "protein_df")
-        return df
+        return self.get_step_output(Step, "protein_df")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
         from protzilla.methods.importing import ImportingStep
 
         return self.get_step_output(ImportingStep, "metadata_df")
-        logging.warning("No metadata_df found in steps")
 
     @property
     def preprocessed_output(self) -> Output:

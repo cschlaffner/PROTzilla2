@@ -27,7 +27,10 @@ def perform_classification(
     scoring,
     model_selection_scoring="accuracy",
     test_validate_split=None,
-    **parameters,
+    n_splits: int = 5,
+    n_repeats: int = 10,
+    random_state_cv: int = 42,
+    p_samples = None,
 ):
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
@@ -54,7 +57,7 @@ def perform_classification(
         return "Please select a cross validation strategy"
     elif validation_strategy != "Manual" and grid_search_method == "Manual":
         model = clf.set_params(**clf_parameters)
-        cv = perform_cross_validation(validation_strategy, **parameters)
+        cv = perform_cross_validation(validation_strategy, n_splits,n_repeats,random_state_cv=random_state_cv, p_samples=p_samples)
         scores = cross_validate(
             model, input_df, labels_df, scoring=scoring, cv=cv, return_train_score=True
         )
@@ -66,7 +69,7 @@ def perform_classification(
         return model, model_evaluation_df
     elif validation_strategy != "Manual" and grid_search_method != "Manual":
         clf_parameters = create_dict_with_lists_as_values(clf_parameters)
-        cv = perform_cross_validation(validation_strategy, **parameters)
+        cv = perform_cross_validation(validation_strategy, n_splits, n_repeats, random_state_cv=random_state_cv, p_samples=p_samples)
         model = perform_grid_search_cv(
             grid_search_method,
             clf,
@@ -83,7 +86,6 @@ def perform_classification(
         )
         return model.best_estimator_, model_evaluation_df
 
-
 def random_forest(
     input_df: pd.DataFrame,
     metadata_df: pd.DataFrame,
@@ -93,11 +95,25 @@ def random_forest(
     criterion="gini",
     max_depth=None,
     bootstrap=True,
+
+    #test_split_parameters
+    test_size: float = 0.2,
+    split_stratify: str = "yes",
+    shuffle: bool = True,
     random_state=42,
+
+    #classification_parameters
     model_selection: str = "Grid search",
-    validation_strategy: str = "Cross Validation",
     scoring: list[str] = ["accuracy"],
-    **kwargs,
+    model_selection_scoring = "accuracy",
+    train_val_split: float | None = None,
+    validation_strategy: str = "Cross Validation",
+
+    #cross_validation_parameters
+    n_splits: int = 5,
+    n_repeats: int = 10,
+    random_state_cv: int = 42,
+    p_samples = None,
 ):
     """
     Perform classification using a random forest classifier from sklearn.
@@ -155,7 +171,9 @@ def random_forest(
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
         labels_df["Encoded Label"],
-        **kwargs,
+        test_size,
+        shuffle=shuffle,
+        split_stratify=split_stratify,
     )
 
     clf = RandomForestClassifier()
@@ -179,7 +197,12 @@ def random_forest(
         clf,
         clf_parameters,
         scoring,
-        **kwargs,
+        model_selection_scoring,
+        train_val_split,
+        n_splits,
+        n_repeats,
+        random_state_cv,
+        p_samples,
     )
 
     X_test.reset_index(inplace=True)
@@ -206,14 +229,28 @@ def svm(
     gamma="scale",  # only relevant ‘rbf’, ‘poly’ and ‘sigmoid’.
     coef0=0.0,  # relevant for "poly" and "sigmoid"
     probability=True,
-    tol=0.001,
+    tolerance=0.001,
     class_weight=None,
     max_iter=-1,
     random_state=42,
+
+    #test_split_parameters
+    test_size: float = 0.2,
+    split_stratify: str = "yes",
+    shuffle: bool = True,
+
+    #classification_parameters
     model_selection: str = "Grid search",
-    validation_strategy: str = "Cross Validation",
     scoring: list[str] = ["accuracy"],
-    **kwargs,
+    model_selection_scoring = "accuracy",
+    train_val_split: float | None = None,
+    validation_strategy: str = "Cross Validation",
+
+    #cross_validation_parameters
+    n_splits: int = 5,
+    n_repeats: int = 10,
+    random_state_cv: int = 42,
+    p_samples = None,
 ):
     """
     Perform classification using the support vector machine classifier from sklearn.
@@ -276,7 +313,9 @@ def svm(
     X_train, X_test, y_train, y_test = perform_train_test_split(
         input_df_wide,
         labels_df["Encoded Label"],
-        **kwargs,
+        test_size,
+        shuffle=shuffle,
+        split_stratify=split_stratify
     )
 
     clf = SVC()
@@ -287,7 +326,7 @@ def svm(
         gamma=gamma,
         coef0=coef0,
         probability=probability,
-        tol=tol,
+        tol=tolerance,
         class_weight=class_weight,
         max_iter=max_iter,
         random_state=random_state,
@@ -303,7 +342,12 @@ def svm(
         clf,
         clf_parameters,
         scoring,
-        **kwargs,
+        model_selection_scoring,
+        train_val_split,
+        n_splits,
+        n_repeats,
+        random_state_cv,
+        p_samples,
     )
 
     X_test.reset_index(inplace=True)

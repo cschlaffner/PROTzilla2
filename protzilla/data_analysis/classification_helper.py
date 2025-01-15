@@ -95,7 +95,6 @@ def perform_cross_validation(
     shuffle="yes",
     random_state_cv=42,
     p_samples=None,
-    **parameters,
 ):
     shuffle = shuffle == "yes"
     random_state_cv = None if not shuffle else random_state_cv
@@ -213,7 +212,6 @@ def perform_train_test_split(
     random_state=42,
     shuffle=True,
     split_stratify="yes",
-    **kwargs,
 ):
     # by default this contains already filtered samples from metadata, we need to remove those
     labels_df = labels_df[labels_df.index.isin(input_df.index)]

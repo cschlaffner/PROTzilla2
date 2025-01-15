@@ -44,17 +44,11 @@ def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="
     return dict(protein_df=transformed_df, peptide_df=transformed_peptide_df)
 
 
-def by_log_plot(method_inputs, method_outputs, graph_type, group_by):
-    return _build_box_hist_plot(
-        method_inputs["protein_df"], method_outputs["protein_df"], graph_type, group_by
-    )
-
-
-def _build_box_hist_plot(df, result_df, graph_type, group_by):
+def by_log_plot(protein_df, output_protein_df, graph_type, group_by):
     if graph_type == "Boxplot":
         fig = create_box_plots(
-            dataframe_a=df,
-            dataframe_b=result_df,
+            dataframe_a=protein_df,
+            dataframe_b=output_protein_df,
             name_a="Before Transformation",
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
@@ -63,8 +57,8 @@ def _build_box_hist_plot(df, result_df, graph_type, group_by):
         )
     if graph_type == "Histogram":
         fig = create_histograms(
-            dataframe_a=df,
-            dataframe_b=result_df,
+            dataframe_a=protein_df,
+            dataframe_b=output_protein_df,
             name_a="Before Transformation",
             name_b="After Transformation",
             heading="Distribution of Protein Intensities",
