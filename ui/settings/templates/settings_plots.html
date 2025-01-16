@@ -10,23 +10,7 @@
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
 
-    <script>
-        $( document ).ready(function () {
-            function selectCustomFontRadio() {
-                const radio = document.getElementById('customFontRadio');
-                const input = document.getElementById('customFontInput');
-                radio.checked = true;
-            }
-
-            $(".action-button").each(function () {
-                $(this).click(function () {
-                    const form = document.getElementById("settings-form");
-                    form.action = $(this).data("action");
-                    form.submit();
-                });
-            });
-        });
-    </script>
+    <script type="text/javascript" src="{% static 'settings.js' %}"></script>
 {% endblock %}
 
 {% block title %}
@@ -109,7 +93,7 @@
                                     <input type="radio" name="font" value="Custom" id="customFontRadio"
                                     {% if initials.font == "Custom" %}checked{% endif %}> Custom font:
                                 </label>
-                                <input class="form-control" type="text" id="customFontInput" name="custom_font" value="{{ initials.custom_font}}" onclick="selectCustomFontRadio()"
+                                <input class="form-control" type="text" id="customFontInput" name="custom_font" value="{{ initials.custom_font}}"
                                 placeholder="Custom font name" title="If this font can't be found, your browser's default font will be selected.">    
                             </div>
                             <div class="row">
