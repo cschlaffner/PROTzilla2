@@ -30,6 +30,8 @@ from protzilla.utilities.utilities import (
     format_trace,
     get_memory_usage,
     name_to_title,
+    clean_uniprot_id,
+    unique_justseen
 )
 from protzilla.workflow import get_available_workflow_names
 from protzilla.constants.paths import WORKFLOWS_PATH
@@ -39,7 +41,7 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_filtered_data, set_filtered_data
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
@@ -516,47 +518,66 @@ def navigate(request, run_name: str):
     run.step_goto(index, section_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-
 def tables_content(request, run_name, index, key):
+    """
+    Handles the content of a table during a run, including filtering, searching, sorting, and pagination.
+
+    :param request: the request object
+    :param run_name: the name of the run
+    :param index: the index of the current step
+    :param key: the key of the datatable
+
+    :return: a JSON response containing the table data
+    """
+
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    # TODO this will change with df_mode implementation
-    if index < len(run.steps.previous_steps):
-        outputs = run.steps.previous_steps[index].output[key]
-    else:
-        outputs = run.current_outputs[key]
 
-    outputs = outputs.replace(np.nan, None)
+    filtered_data  = get_filtered_data(run, index, key)
 
+    if request.GET.get("is_new_search", "false").lower() == "true":
+        filtered_data  = get_filtered_data(run, index, key, reset=True)
+        search_query = request.GET.get("search_query", "").lower()
+        if search_query:
+            mask = filtered_data .astype(str).stack().str.contains(search_query, case=False, na=False).unstack()
+            filtered_data  = filtered_data [mask.any(axis=1)]
+            set_filtered_data(run, index, key, filtered_data )
+
+    if request.GET.get("is_new_sorting", "false").lower() == "true":
+        sorting_column_idx = int(request.GET.get("sorting_column_index", "0").lower())
+        is_sort_ascending = request.GET.get("is_sort_ascending", "true").lower() == "true"
+        column_name = filtered_data .columns[sorting_column_idx]
+        filtered_data  = filtered_data .sort_values(by=column_name, ascending=is_sort_ascending)
+        set_filtered_data(run, index, key, filtered_data )
+  
     if "clean-ids" in request.GET:
-        for column in outputs.columns:
+        for column in filtered_data .columns:
             if "protein" in column.lower():
-                outputs[column] = outputs[column].map(
+                filtered_data [column] = filtered_data [column].map(
                     lambda group: ";".join(
                         unique_justseen(map(clean_uniprot_id, group.split(";")))
                     )
                 )
 
-    page = int(request.GET.get("page", 1))
-    per_page = int(request.GET.get("per_page", 10))
+    current_page = int(request.GET.get("current_page", 1))
+    rows_per_page = int(request.GET.get("rows_per_page", 10))
 
-    total_items = len(outputs)
-    total_pages = (total_items + per_page - 1) // per_page
-    start = (page - 1) * per_page
-    end = start + per_page
-    paginated_data = outputs.iloc[start:end]
+    total_items = len(filtered_data )
+    total_pages = (total_items + rows_per_page - 1) // rows_per_page
+    start_idy = (current_page - 1) * rows_per_page
+    end_idy = start_idy + rows_per_page
+    paginated_data = filtered_data .iloc[start_idy:end_idy]
 
     response_data = {
         "columns": paginated_data.to_dict("split")["columns"],
         "data": paginated_data.to_dict("split")["data"],
-        "page": page,
+        "page": current_page,
         "total_pages": total_pages,
         "total_items": total_items,
-        "start_item": start + 1,
-        "end_item": min(end, total_items)
+        "start_item": start_idy + 1,
+        "end_item": min(end_idy, total_items)
     }
-
     return JsonResponse(response_data)
 
 

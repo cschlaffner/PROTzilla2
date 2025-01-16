@@ -1,6 +1,7 @@
 import re
 
 from django.contrib import messages
+import numpy as np
 
 import ui.runs.form_mapping as form_map
 from protzilla.steps import StepManager
@@ -149,3 +150,31 @@ def clear_messages(request):
     for message in messages.get_messages(request):
         pass
     storage.used = True
+
+
+def get_filtered_data(run, index, key, reset=False):
+    if index < len(run.steps.previous_steps):
+        if key not in run.steps.previous_steps[index].datatable_filtered_output or reset:
+            outputs = run.steps.previous_steps[index].output[key]
+            filtered_data = outputs.copy()
+            filtered_data = filtered_data.replace(np.nan, None)
+            run.steps.previous_steps[index].datatable_filtered_output[key] = filtered_data
+        else:
+            filtered_data = run.steps.previous_steps[index].datatable_filtered_output[key]
+   
+    else:
+        if key not in run.current_filtered_data or reset:
+            outputs = run.current_outputs[key]
+            filtered_data = outputs.copy()
+            filtered_data = filtered_data.replace(np.nan, None)
+            run.current_filtered_data[key] = filtered_data
+        else:
+            filtered_data = run.current_filtered_data[key]
+
+    return filtered_data
+
+def set_filtered_data(run, index, key, filtered_data):
+    if index < len(run.steps.previous_steps):
+        run.steps.previous_steps[index].datatable_filtered_output[key] = filtered_data
+    else:
+        run.current_filtered_data[key] = filtered_data
