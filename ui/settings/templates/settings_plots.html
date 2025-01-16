@@ -1,19 +1,32 @@
   
 {% extends 'base.html' %}
 {% load static %}
-{# params: initials, sidebar, section_id #}
+{# params: initials, sidebar, plot, section_id #}
 
 {% block css %}
 {% endblock %}
 
 {% block js %}
-<script>
-    function selectCustomFontRadio() {
-        const radio = document.getElementById('customFontRadio');
-        const input = document.getElementById('customFontInput');
-        radio.checked = true;
-    }
-</script>
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
+
+    <script>
+        $( document ).ready(function () {
+            function selectCustomFontRadio() {
+                const radio = document.getElementById('customFontRadio');
+                const input = document.getElementById('customFontInput');
+                radio.checked = true;
+            }
+
+            $(".action-button").each(function () {
+                $(this).click(function () {
+                    const form = document.getElementById("settings-form");
+                    form.action = $(this).data("action");
+                    form.submit();
+                });
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block title %}
@@ -27,10 +40,10 @@
             <div justify-content-center d-flex>
                 <h3>Configurations for Plots</h3>
                 <div class="mb-3" id="description">Configurations for plots can be entered here. This information is automatically applied to all plots in PROTzilla.</div>
-                <form action="{% url 'settings:save' %}" method="post" id="save_settings">
+                <form method="post" id="settings-form">
                     {% csrf_token %}
                     <input type="hidden" name="section_id" value="{{ section_id }}">
-                    <div class="mb-2" id="settings-form">
+                    <div class="mb-2">
                         <div class="mt-3" id="download-section">
                             <h5>Downloading Plots</h5>
                             <div class="fieldWrapper">
@@ -112,6 +125,16 @@
                         </div>
                     
                     </div>
+                    <div class="plot-wrapper mb-2">
+                        {{ plot|safe }}
+                    </div>
+                    <button id="update-plot" type="button" class="btn btn-grey mr-auto action-button" data-action="{% url 'settings:update_plot_preview' %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                          </svg>
+                        Update plot
+                    </button>
                     {% block footer %}
                         {% include "settings_footer.html" %}
                     {% endblock %}

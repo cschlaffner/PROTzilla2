@@ -11,7 +11,7 @@
                 <div class="justify-content-end d-flex">
                     <div class="form-group">
                         <a id = "cancel" class="btn btn-grey mr-auto" data-bs-toggle="modal" data-bs-target="#unsavedChangesModal">Cancel</a>
-                        <button id="settings_submit" type="submit" class="btn btn-red mr-auto">Save</button>
+                        <button type="button" class="btn btn-red mr-auto action-button" data-action="{% url 'settings:save' %}">Save</button>
                     </div>
                 </div>
             </div>

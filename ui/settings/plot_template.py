@@ -66,7 +66,6 @@ class PlotTemplate:
         self.layout.font.family = font
         self.layout.height = params["height"]
         self.layout.width = params["width"]
-        self.apply()
 
     def apply(self):
         """
