@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring, ParseError
 import pandas as pd
 import requests
 from requests import HTTPError
+import warnings
 
 from biomart import BiomartServer
 
@@ -93,7 +94,10 @@ def uniprot_columns(filename):
     ).columns.tolist()
 
 
-def is_biomart_available(database_name: str="ENSEMBL_MART_ENSEMBL", max_attempts: int=3):
+def is_biomart_available(
+        database_name: str="ENSEMBL_MART_ENSEMBL",
+        max_attempts: int=3
+    ) -> bool:
     mirror_list = [
         "http://ensembl.org/biomart",
         "http://asia.ensembl.org/biomart",
@@ -108,13 +112,13 @@ def is_biomart_available(database_name: str="ENSEMBL_MART_ENSEMBL", max_attempts
                     return True
             except ParseError as e:
                 if "Service unavailable" in str(e):
-                    print(f"ParseError: Expected XML but received an HTML error page indicating the service at {url} is unavailable.")
+                    warnings.warn(f"ParseError: Expected XML but received an HTML error page indicating the service at {url} is unavailable.", RuntimeWarning)
                     continue
             except HTTPError as e:
-                print(f"HTTPError: Server at {url} responded with {e.response.status_code} {e.response.reason}.")
+                warnings.warn(f"HTTPError: Server at {url} responded with {e.response.status_code} {e.response.reason}.", RuntimeWarning)
                 continue
             except requests.ConnectionError:
-                print(f"ConnectionError: Could not connect to {url}.")
+                warnings.warn(f"ConnectionError: Could not connect to {url}.", RuntimeWarning)
                 continue
     return False
 
@@ -130,9 +134,8 @@ def biomart_database(
         for _ in range(max_attempts):
             for url in mirror_list:
                 server = BiomartServer(url)
-                if server:
-                    db = server.databases[database_name]
-                    return db
+                db = server.databases[database_name]
+                return db
 
 
 def uniprot_databases():
