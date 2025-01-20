@@ -55,26 +55,6 @@ $(document).ready(function () {
             }
         });
     });
-      // control calculate button in footer
-    var calculateButton = $('#calculate_parameters_submit');
-
-    calculateButton.click(function() {
-        var form = $(".calc_form")[0];
-
-        if (form.checkValidity()) {
-            form.submit();
-
-            // show loading spinner on calculate button
-            calculateButton.html(`
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                Calculating...
-            `);
-            calculateButton.prop('disabled', true);
-
-        } else {
-            form.reportValidity();
-        }
-    });
 
     // Plot button spinner
     $('#plot_form').on('submit', function() {
@@ -142,3 +122,19 @@ $(document).ready(function () {
     });
     
 });
+
+// control calculate button in footer
+function onCalculateClick(element) {
+    var form = $(".calc_form")[0];
+
+    if (form.checkValidity()) {
+        form.submit();
+
+        // show loading spinner on calculate button
+        element.innerHTML = `Calculating <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+        element.setAttribute('disabled', true);
+
+    } else {
+        form.reportValidity();
+    }
+}
