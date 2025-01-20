@@ -30,7 +30,7 @@ class Step:
     method_description: str = None
     input_keys: list[str] = []
     output_keys: list[str] = []
-    calculation_status: Literal["complete","outdated","incomplete"] = "incomplete"
+    calculation_status: Literal["complete","outdated","incomplete","failed"] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
@@ -61,7 +61,7 @@ class Step:
             self.inputs = inputs.copy()
         self.form_inputs = self.inputs.copy()
 
-    def calculate(self, steps: StepManager, inputs: dict) -> None:
+    def calculate(self, steps: StepManager, inputs: dict) -> bool:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
 
@@ -71,20 +71,25 @@ class Step:
         """
         stepIndex = steps.all_steps.index(self)
         previousStep = steps.all_steps[stepIndex-1]
-        print(self, previousStep)
-        if (previousStep.calculation_status == "outdated" ):
-            previousStep.calculate(steps,inputs)
-        #steps._clear_future_steps()
-        if (steps.current_step_index == stepIndex):
-            self.updateInputs(inputs)
+        
         try:
+            if (previousStep.calculation_status == "outdated" ):
+                if not previousStep.calculate(steps,inputs):
+                    return False
+
+            if (steps.current_step_index == stepIndex):
+                self.updateInputs(inputs)
             self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
             self.validate_inputs()
             output_dict = self.method(self.inputs)
             self.handle_outputs(output_dict)
-            self.handle_messages(output_dict)
+            self.handle_messages(output_dict,steps,stepIndex)
             self.validate_outputs()
+            self.calculation_status = "complete"
+            if (steps.failed_step_index == stepIndex):
+                    steps.failed_step_index = -1
+            return True
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -110,17 +115,18 @@ class Step:
                 )
             )
         except Exception as e:
-            self.messages.append(
-                dict(
-                    level=logging.ERROR,
-                    msg=(
-                        f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
-                        f"Please check your parameters or report a potential programming issue."
-                    ),
-                    trace=format_trace(traceback.format_exception(e)),
+            if str(e)!="":
+                self.messages.append(
+                    dict(
+                        level=logging.ERROR,
+                        msg=(
+                            f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
+                            f"Please check your parameters or report a potential programming issue."
+                        ),
+                        trace=format_trace(traceback.format_exception(e)),
+                    )
                 )
-            )
-        self.calculation_status = "complete"
+        return False       
 
     def method(self, **kwargs) -> dict:
         raise NotImplementedError("This method must be implemented in a subclass.")
@@ -143,7 +149,7 @@ class Step:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
 
-    def handle_messages(self, outputs: dict) -> None:
+    def handle_messages(self, outputs: dict, steps: StepManager, stepIndex: int) -> None:
         """
         Handles the messages from the calculation method and creates a Messages object from it.
         Responsible for clearing and setting the messages attribute of the class.
@@ -152,6 +158,10 @@ class Step:
         """
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
+        if messages != []:
+            self.calculation_status = "failed"
+            steps.failed_step_index = stepIndex
+            raise Exception("")
 
     def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
@@ -334,6 +344,7 @@ class StepManager:
         self.df_mode = df_mode
         self.disk_operator = disk_operator
         self.current_step_index = 0
+        self.failed_step_index = -1
         self.importing = []
         self.data_preprocessing = []
         self.data_analysis = []
@@ -445,7 +456,7 @@ class StepManager:
         """
         Get the specific input of the inputs of a specific step type. The step type can also a parent class of the
         step type, in which case the input of the most recent step of the specific type is returned.
-        :param step_type: The type of the step as a class object
+        :param step_type: The type of the step as a class objectresults_exist
         :param input_key: The key of the desired input in the input dictionary of the step
         :return: The value of the input of the step or None
         """
@@ -478,10 +489,9 @@ class StepManager:
         else:
             raise ValueError(f"Unknown section {section}")
     
-    def set_steps_outdated(self) -> None:
-        print("steps",self.following_steps)
+    def set_steps_outdated(self, offset:int) -> None:
         count=0
-        for step in self.following_steps:
+        for step in self.following_steps[offset:]:
             if (step.calculation_status == "complete"):
                 step.calculation_status = "outdated"
                 count+=1

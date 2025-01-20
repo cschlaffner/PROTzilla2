@@ -14,6 +14,9 @@
 <div>
     {% for step in section.steps %}
         <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %} d-flex align-items-center">
+            <div id="calculationIcon_{{ step.index_global }}">
+                <img src="{% static step.calculation_icon_path %}" width="25" height="25">
+            </div>
             <form action="{% url 'runs:navigate' run_name %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="section_name" value="{{ section.id }}">
@@ -21,11 +24,7 @@
                 <button class="me-1" style="border: none; background: none; text-align: left">
                     <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
                 </button>
-            </form>
-
-            <div id="calculationIcon_{{ step.index_global }}">
-                <img src="{% static step.calculation_icon_path %}" width="25" height="25">
-            </div>
+            </form>   
 
             {% if not step.selected and not step.finished %}
                 {# button to remove step from workflow #}
