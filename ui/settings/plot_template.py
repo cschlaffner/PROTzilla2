@@ -21,6 +21,12 @@ def determine_font(params: dict):
         font = params["font"]
     return font
 
+def convert_millimeter_to_pixel(millimeter: int):
+    inches = millimeter / 25.4
+    dpi = 300
+    pixel = inches * dpi
+    return pixel
+
 class PlotTemplate:
     def __init__(self):
         params = get_settings("plots")
@@ -64,8 +70,8 @@ class PlotTemplate:
         self.layout.title.font.family = font
         self.layout.font.size = params["text_size"]
         self.layout.font.family = font
-        self.layout.height = params["height"]
-        self.layout.width = params["width"]
+        self.layout.height = convert_millimeter_to_pixel(params["height"])
+        self.layout.width = convert_millimeter_to_pixel(params["width"])
 
     def apply(self):
         """

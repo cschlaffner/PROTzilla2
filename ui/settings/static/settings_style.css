@@ -34,7 +34,7 @@
     align-items: center;
     gap: 20px;
 }
-#customFont.form-control {
+#customFontInput.form-control {
     display: inline-block !important;
     width: 400px;
     margin: 10px;
@@ -44,4 +44,7 @@
     height: fit-content;
     border: 1px solid #e8edf3;
     border-radius: .375rem;
+}
+.field-wrapper {
+    margin-bottom: 10px;
 }
