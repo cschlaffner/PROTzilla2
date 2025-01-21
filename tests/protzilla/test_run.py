@@ -91,7 +91,7 @@ class TestRun:
     def test_step_goto(self, caplog, run_imported):
         step = ImputationByMinPerProtein()
         run_imported.step_add(step)
-        run_imported.step_goto(0, "data_preprocessing")
+        run_imported.step_goto(0, "data_preprocessing_wrong")
         assert any(
             message["level"] == logging.ERROR and "ValueError" in message["msg"]
             for message in run_imported.current_messages
