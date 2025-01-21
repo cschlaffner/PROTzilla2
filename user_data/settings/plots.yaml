@@ -2,7 +2,7 @@ custom_font: Ubuntu Mono
 file_format: png
 font: Arial
 heading_size: 22
-height: 500
+height: 400
 section_id: plots
 text_size: 16
-width: 800
+width: 500
