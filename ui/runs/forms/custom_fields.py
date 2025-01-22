@@ -85,7 +85,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         self.widget = CustomSelectMultiple()
         self.widget.attrs.update({"class": "form-select mb-2"})
 
-    def clean(self, value: list[str] | None):
+    def clean(self, value: list[str] | None) -> list[str] | None:
         return [element for element in value if element != "hidden"] if value else None
 
 class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
@@ -104,7 +104,7 @@ class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
         self.widget.attrs.update({"class": "form-select mb-2"})
 
 
-    def clean(self, value: list[str] | None):
+    def clean(self, value: list[str] | None) -> dict[str, str] | None:
         if not value:
             return None
         

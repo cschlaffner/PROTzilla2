@@ -216,7 +216,7 @@ class EnrichmentAnalysisGOAnalysisWithEnrichrForm(MethodForm):
             self.toggle_visibility("gene_sets_enrichr", True)
             self.fields["gene_sets_enrichr"].choices = fill_helper.to_choices(
                 gseapy.get_library_name()
-            )  #  check whether we need to pass the organism name here
+            )  # TODO check whether we need to pass the organism name here
         else:
             self.toggle_visibility("gene_sets_path", True)
 
@@ -325,7 +325,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         choices=GeneSetsField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
         initial="Choose from Enrichr options"
-        # : Dynamic parameters
+        # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(
         label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -335,15 +335,15 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
         "SetName2: [Gene2, Gene3, ...]})",
         initial=None,
     )
-    # : gene_sets_enrichr dynamic filling
+    # Todo: gene_sets_enrichr dynamic filling
     gene_sets_enrichr = CustomChoiceField(choices=[], label="Gene sets")
     grouping = CustomChoiceField(
         choices=[],
         label="Grouping from metadata",
         initial=None
-        # : Dynamic parameters
+        # Todo: Dynamic parameters
     )
-    # : add dynamic filling to group1, group2
+    # Todo: add dynamic filling to group1, group2
     group1 = CustomChoiceField(choices=[], label="Group1", initial=None)
 
     group2 = CustomChoiceField(choices=[], label="Group2", initial=None)
@@ -403,7 +403,7 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
             self.toggle_visibility("gene_sets_enrichr", True)
             self.fields["gene_sets_enrichr"].choices = fill_helper.to_choices(
                 gseapy.get_library_name()
-            )  #  check whether we need to pass the organism name here
+            )  # TODO check whether we need to pass the organism name here
         else:
             self.toggle_visibility("gene_sets_path", True)
 
@@ -447,20 +447,20 @@ class EnrichmentAnalysisWithGSEAForm(MethodForm):
 
 
 class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
-    # : protein_df
-    # : ranking_column
+    # Todo: protein_df
+    # Todo: ranking_column
     ranking_direction = CustomChoiceField(
         choices=RankingDirectionField,
         label="Sort the ranking column (ascending - smaller values are better, "
         "descending - larger values are better)",
         initial=RankingDirectionField.ascending,
     )
-    # : gene_mapping
+    # Todo: gene_mapping
     gene_sets_field = CustomChoiceField(
         choices=GeneSetsField,
         label="How do you want to provide the gene sets? (reselect to show dynamic fields)",
         initial=GeneSetsField.choose_from_enrichr_options
-        # : Dynamic parameters
+        # Todo: Dynamic parameters
     )
     gene_sets_path = CustomFileField(
         label="Upload gene sets with uppercase gene symbols (any of the following file "
@@ -470,7 +470,7 @@ class EnrichmentAnalysisWithPrerankedGSEAForm(MethodForm):
         "SetName2: [Gene2, Gene3, ...]})",
         initial=None,
     )
-    # : gene_sets_enrichr
+    # Todo: gene_sets_enrichr
     min_size = CustomNumberField(
         label="Minimum number of genes from gene set also in data", initial=15
     )
@@ -514,7 +514,7 @@ class DatabaseIntegrationByGeneMappingForm(MethodForm):
     )
     dataframe = CustomChoiceField(
         choices=[], label="Step to use"
-    )  #  this looks and sounds very generic, be more specific, maybe it needs diffexp step
+    )  # TODO this looks and sounds very generic, be more specific, maybe it needs diffexp step
 
     def fill_form(self, run: Run) -> None:
         self.fields["database_names"].choices = fill_helper.to_choices(
@@ -526,8 +526,8 @@ class DatabaseIntegrationByGeneMappingForm(MethodForm):
 
 
 class DatabaseIntegrationByUniprotForm(MethodForm):
-    # : uniprot
-    # : Add dynamic fill for database name and fields
+    # Todo: uniprot
+    # Todo: Add dynamic fill for database name and fields
     database_name = CustomChoiceField(
         choices=[],
         label="Uniprot databases (offline)",
@@ -536,7 +536,7 @@ class DatabaseIntegrationByUniprotForm(MethodForm):
 
 
 class PlotGOEnrichmentBarPlotForm(MethodForm):
-    # : input:df fill dynamic with fill_forms
+    # TODO: input:df fill dynamic with fill_forms
     input_df_step_instance = CustomChoiceField(
         choices=[], label="Choose dataframe to be plotted"
     )

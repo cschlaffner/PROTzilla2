@@ -27,8 +27,8 @@ def GO_enrichment_bar_plot(
 
     :param input_df: GO enrichment results
     :type input_df: pandas.DataFrame
-    :param gene_sets: Categories/Sets from enrichment to plot
-    :type gene_sets: list
+    :param gene_sets: Categories/Sets from enrichment to plot with colors per category
+    :type gene_sets: dict
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value or FDR. Only terms with
