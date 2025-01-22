@@ -75,7 +75,7 @@ class MetadataImportMethodDiann(ImportingStep):
 
     output_keys = ["metadata_df", "protein_df"]
 
-    method = staticmethod(metadata_import_method_diann)
+    calc_method = staticmethod(metadata_import_method_diann)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["protein_df"] = steps.get_step_output(DiannImport, "protein_df")

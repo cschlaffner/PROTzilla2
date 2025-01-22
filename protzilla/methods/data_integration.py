@@ -37,6 +37,7 @@ class EnrichmentAnalysisGOAnalysisWithString(DataIntegrationStep):
         inputs["proteins_df"] = steps.get_step_output(
             Step, "differentially_expressed_proteins_df", inputs["protein_df"]
         )  # TODO name fix
+        print("##########Checkpoint: ", inputs.get("proteins_df"), inputs["proteins_df"].columns)
         if (
             inputs.get("proteins_df") is None
             or not "log2_fold_change" in inputs["proteins_df"].columns
@@ -176,7 +177,7 @@ class PlotGOEnrichmentDotPlot(PlotStep):
 
     output_keys = ["plots"]
 
-    calc_method = staticmethod(di_plots.GO_enrichment_dot_plot)
+    plot_method = staticmethod(di_plots.GO_enrichment_dot_plot)
 
 
 class PlotGSEADotPlot(PlotStep):

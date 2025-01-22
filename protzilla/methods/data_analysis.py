@@ -500,7 +500,8 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
 
     output_keys = [
-        "graph_path" "protein_id",
+        "graph_path",
+        "protein_id",
         "peptide_matches",
         "peptide_mismatches",
         "filtered_blocks",
