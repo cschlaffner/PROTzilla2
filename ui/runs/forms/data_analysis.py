@@ -304,6 +304,11 @@ class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
     alpha = CustomFloatField(
         label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
     )
+    p_value_calculation_method = CustomChoiceField(
+        choices=PValueCalculationMethod,
+        label="P-value calculation method",
+        initial=PValueCalculationMethod.auto,
+    )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
     group2 = CustomChoiceField(choices=[], label="Group 2")
