@@ -158,10 +158,11 @@ class Step:
         """
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
-        if messages != []:
-            self.calculation_status = "failed"
-            steps.failed_step_index = stepIndex
-            raise Exception("")
+        for message in messages:
+            if message["level"] == logging.ERROR:
+                self.calculation_status = "failed"
+                steps.failed_step_index = stepIndex
+                raise Exception("")
 
     def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
