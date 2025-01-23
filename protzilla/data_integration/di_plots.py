@@ -15,9 +15,8 @@ def GO_enrichment_bar_plot(
     top_terms,
     cutoff,
     value,
-    gene_sets=[],
+    gene_sets={},
     title="",
-    colors=PLOT_COLOR_SEQUENCE,
     figsize=None,
 ):
     """
@@ -28,8 +27,8 @@ def GO_enrichment_bar_plot(
 
     :param input_df: GO enrichment results
     :type input_df: pandas.DataFrame
-    :param gene_sets: Categories/Sets from enrichment to plot
-    :type gene_sets: list
+    :param gene_sets: Categories/Sets from enrichment to plot with colors per category
+    :type gene_sets: dict
     :param top_terms: Number of top enriched terms per category
     :type top_terms: int
     :param cutoff: Cutoff for the Adjusted p-value or FDR. Only terms with
@@ -73,8 +72,6 @@ def GO_enrichment_bar_plot(
     if not gene_sets:
         msg = "Please select at least one category to plot."
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
-    if not isinstance(gene_sets, list):
-        gene_sets = [gene_sets]
     if value not in ["fdr", "p-value"]:
         msg = "Invalid value. Value must be either 'fdr' or 'p-value'."
         return dict(messages=[dict(level=logging.ERROR, msg=msg)])
@@ -108,9 +105,8 @@ def GO_enrichment_bar_plot(
     elif value == "p-value":
         column = "P-value" if restring_input else "Adjusted P-value"
 
+    colors = gene_sets.values()
 
-    if colors == "" or colors is None or len(colors) == 0:
-        colors = PLOT_COLOR_SEQUENCE
     size_y = top_terms * 0.5 * len(gene_sets)
     try:
         ax = gseapy.barplot(
