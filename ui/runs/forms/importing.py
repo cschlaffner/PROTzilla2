@@ -192,3 +192,7 @@ class EvidenceImportForm(MethodForm):
         self.fields["map_to_uniprot"].initial = run.steps.get_step_input(
             [MaxQuantImport, MsFraggerImport, DiannImport], "map_to_uniprot"
         )
+
+
+class FastaImportForm(MethodForm):
+    file_path = CustomFileField(label="Fasta file")

@@ -7,15 +7,17 @@ from protzilla.data_analysis.clustering import (
     k_means,
 )
 from protzilla.data_analysis.differential_expression_anova import anova
-from protzilla.data_analysis.differential_expression_kruskal_wallis import kruskal_wallis_test_on_ptm_data, \
-    kruskal_wallis_test_on_intensity_data
+from protzilla.data_analysis.differential_expression_kruskal_wallis import (
+    kruskal_wallis_test_on_intensity_data,
+    kruskal_wallis_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_mann_whitney import (
-    mann_whitney_test_on_intensity_data, mann_whitney_test_on_ptm_data)
+    mann_whitney_test_on_intensity_data,
+    mann_whitney_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import ptms_per_sample, \
-    ptms_per_protein_and_sample, select_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -23,11 +25,12 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
+from protzilla.data_analysis.protein_coverage import plot_protein_coverage
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
-    select_peptides_of_protein,
     ptms_per_protein_and_sample,
     ptms_per_sample,
+    select_peptides_of_protein,
 )
 from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
@@ -164,8 +167,10 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -191,7 +196,9 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         if steps.get_step_output(Step, "protein_df", inputs["protein_df"]) is not None:
-            inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+            inputs["protein_df"] = steps.get_step_output(
+                Step, "protein_df", inputs["protein_df"]
+            )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -200,8 +207,10 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "ptm_df",
@@ -234,8 +243,10 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -265,8 +276,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -288,7 +301,9 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
         return kruskal_wallis_test_on_intensity_data(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+        inputs["protein_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["protein_df"]
+        )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -297,8 +312,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "ptm_df",
@@ -327,9 +344,11 @@ class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
 class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
-    method_description = ("Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
-                          "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
-                          "can define a fold change threshold and an alpha level to highlight significant items.")
+    method_description = (
+        "Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
+        "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
+        "can define a fold change threshold and an alpha level to highlight significant items."
+    )
     input_keys = [
         "p_values",
         "fc_threshold",
@@ -762,6 +781,38 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
         return inputs
 
 
+class PlotProteinCoverage(PlotStep):
+    display_name = "Protein Coverage Plot"
+    operation = "plot"
+    method_description = (
+        "Create a protein coverage plot from a protein graph and peptide data"
+    )
+
+    input_keys = [
+        "protein_id",
+        "fasta_df",
+        "metadata_df",
+        "peptide_df",
+        "grouping",
+        "selected_groups",
+        "aggregation_method",
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return plot_protein_coverage(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["fasta_df"] = steps.get_step_output(
+            Step, "fasta_df", inputs["fasta_df_instance"]
+        )
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df_instance"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        return
+
+
 class ProteinGraphVariationGraph(DataAnalysisStep):
     display_name = "Protein Variation Graph"
     operation = "protein_graph"
@@ -841,17 +892,23 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         inputs["metadata_df"] = steps.metadata_df
 
         if inputs["auto_select"]:
-            significant_proteins = (
-                steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
-            index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
-            most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
+            significant_proteins = steps.get_step_output(
+                DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]
+            )
+            index_of_most_significant_protein = significant_proteins[
+                "corrected_p_value"
+            ].idxmin()
+            most_significant_protein = significant_proteins.loc[
+                index_of_most_significant_protein
+            ]
             inputs["protein_id"] = [most_significant_protein["Protein ID"]]
-            self.messages.append({
-                "level": logging.INFO,
-                "msg":
-                    f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
-                    f"from {inputs['protein_list']}"
-            })
+            self.messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                    f"from {inputs['protein_list']}",
+                }
+            )
 
         return inputs
 
@@ -859,8 +916,10 @@ class SelectPeptidesForProtein(DataAnalysisStep):
 class PTMsPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of a single protein of interest. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of a single protein of interest. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     input_keys = [
         "peptide_df",
@@ -882,8 +941,10 @@ class PTMsPerSample(DataAnalysisStep):
 class PTMsProteinAndPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample and Protein"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of all Proteins. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of all Proteins. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     input_keys = [
         "peptide_df",

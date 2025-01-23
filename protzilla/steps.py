@@ -7,6 +7,7 @@ import traceback
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
+from protzilla.constants.protzilla_logging import logger
 
 import pandas as pd
 import plotly
@@ -455,6 +456,9 @@ class StepManager:
                 and input_key in step.inputs
             ):
                 return step.inputs[input_key]
+        logging.warning(
+            f"No input {input_key} found for step type {step_type} and instance identifier {instance_identifier}"
+        )
         return None
 
     def all_steps_in_section(self, section: str) -> list[Step]:
@@ -506,7 +510,6 @@ class StepManager:
         from protzilla.methods.importing import ImportingStep
 
         return self.get_step_output(ImportingStep, "metadata_df")
-        logging.warning("No metadata_df found in steps")
 
     @property
     def preprocessed_output(self) -> Output:

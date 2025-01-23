@@ -1,5 +1,6 @@
 from protzilla.run import Run
 from protzilla.steps import Step
+from protzilla.constants.protzilla_logging import logger
 
 
 def to_choices(choices: list[str], required: bool = True) -> list[tuple[str, str]]:
@@ -29,6 +30,9 @@ def get_choices(
 
 
 def get_choices_for_metadata_non_sample_columns(run: Run) -> list[tuple[str, str]]:
+    if run.steps.metadata_df is None:
+        logger.warning("No metadata_df found in run")
+        return []
     return to_choices(
         run.steps.metadata_df.columns[
             run.steps.metadata_df.columns != "Sample"
