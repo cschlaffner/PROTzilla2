@@ -107,9 +107,8 @@ def is_biomart_available(
         for url in mirror_list:
             try:
                 server = BiomartServer(url)
-                if server:
-                    db = server.databases[database_name]
-                    return True
+                db = server.databases[database_name]
+                return True
             except ParseError as e:
                 if "Service unavailable" in str(e):
                     warnings.warn(f"ParseError: Expected XML but received an HTML error page indicating the service at {url} is unavailable.", RuntimeWarning)
