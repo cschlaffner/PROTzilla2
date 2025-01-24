@@ -23,7 +23,7 @@ SECTIONS = [
     },
     {
         "id": "plots",
-        "name": "Plot Customization" 
+        "name": "Plot Configurations" 
     }
 ]
 
@@ -55,6 +55,7 @@ def settings_general(request):
         context=dict(
             initials=settings_content,
             sidebar=sidebar,
+            sections=SECTIONS,
             section_id="general"
         )
     )
@@ -71,6 +72,7 @@ def settings_plots(request):
             initials=settings_content,
             sidebar=sidebar,
             plot=plot,
+            sections=SECTIONS,
             section_id="plots"
         )
     )

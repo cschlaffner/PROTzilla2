@@ -1,9 +1,23 @@
 $( document ).ready(function () {
+    let formHasChanged = false;
+    const sectionId = document.getElementById('settings-form').dataset.sectionId;
+
+    $("#settings-form :input").on("change input", function () {
+        formHasChanged = true;
+    });
+
+    $("#cancel, #settings-icon").click(function (e) {
+        if(formHasChanged) {
+            e.preventDefault();
+            $("#unsavedChangesModal").modal("show");
+        }
+    });
+
     $("#customFontInput").click(function () {
         const radio = document.getElementById('customFontRadio');
         const input = document.getElementById('customFontInput');
         radio.checked = true;
-    })
+    });
 
     $(".action-button").each(function () {
         $(this).click(function () {

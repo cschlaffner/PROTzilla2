@@ -10,7 +10,7 @@
             <div class="col">
                 <div class="justify-content-end d-flex">
                     <div class="form-group">
-                        <a id = "cancel" class="btn btn-grey mr-auto" data-bs-toggle="modal" data-bs-target="#unsavedChangesModal">Cancel</a>
+                        <a id="cancel" href="{% url 'settings:last_view' %}" class="btn btn-grey mr-auto">Cancel</a>
                         <button type="button" class="btn btn-red mr-auto action-button" data-action="{% url 'settings:save' %}">Save</button>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
                 </div>
                 <div class="modal-body">
                     <p>There are changes that haven't been saved yet. Are you sure you want to discard all changes?</p>
-                    <a href="{% url 'settings:last_view' %}" id = "back" class="btn btn-grey mr-auto">Discard Changes</a>
+                    <a id="back" href="{% url 'settings:last_view' %}" class="btn btn-grey mr-auto">Discard Changes</a>
                     <button id= "back" type="button" class="btn btn-red mr-auto" data-bs-dismiss="modal">Back</button>
                 </div>
             </div>
