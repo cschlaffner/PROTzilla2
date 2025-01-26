@@ -177,7 +177,7 @@ class PlotGOEnrichmentDotPlot(PlotStep):
 
     output_keys = ["plots"]
 
-    plot_method = staticmethod(di_plots.GO_enrichment_dot_plot)
+    calc_method = staticmethod(di_plots.GO_enrichment_dot_plot)
 
 
 class PlotGSEADotPlot(PlotStep):
