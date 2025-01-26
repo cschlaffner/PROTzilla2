@@ -1,0 +1,27 @@
+<div class="checkbox-container border p-3 rounded">
+    {% for option_value, option_label in choices %}
+    <div class="d-flex" style="align-items: center">
+        <div class="checkbox-item px-2 w-50">
+            <input type="checkbox" id="{{ name }}_{{ option_label}}_checkbox" name="{{ name }}" value="{{ option_value }}" {% if option_value in values %}checked{% endif %}>
+            <label for="{{ name }}_{{ option_label}}_checkbox">{{ option_label }}</label>
+        </div>
+        <div class="ms-auto px-2 w-50">
+            <select class="form-select" name="{{ name }}">
+                {% for color, color_label in colors %}
+                    {% with color_value="color_"|add:option_value|add:"_"|add:color %}
+                        <option value={{ color_value }}
+                        {% if values %}
+                            {% if color_value in values %}selected{% endif %}
+                        {% else %}
+                            {% if forloop.parentloop.counter0 == forloop.counter0 %}selected{% endif %}
+                        {% endif %} 
+                        >
+                            {{ color_label }}
+                        </option>
+                    {% endwith %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+</div>

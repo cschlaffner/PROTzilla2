@@ -13,6 +13,7 @@ from django.forms import (
 from django.forms.widgets import CheckboxInput, SelectMultiple
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
+from django.template.loader import render_to_string
 
 # Custom widgets
 
@@ -48,7 +49,7 @@ class CustomChoiceField(ChoiceField):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices],
+                choices=[(choice.value, choice.value) for choice in choices],
                 initial=initial,
                 *args,
                 **kwargs,
@@ -76,7 +77,7 @@ class CustomMultipleChoiceField(MultipleChoiceField):
             super().__init__(choices=choices, initial=initial, *args, **kwargs)
         else:
             super().__init__(
-                choices=[(el.value, el.value) for el in choices],
+                choices=[(choice.value, choice.value) for choice in choices],
                 initial=initial,
                 *args,
                 **kwargs,
@@ -84,8 +85,71 @@ class CustomMultipleChoiceField(MultipleChoiceField):
         self.widget = CustomSelectMultiple()
         self.widget.attrs.update({"class": "form-select mb-2"})
 
-    def clean(self, value: list[str] | None):
-        return [el for el in value if el != "hidden"] if value else None
+    def clean(self, value: list[str] | None) -> list[str] | None:
+        return [element for element in value if element != "hidden"] if value else None
+
+class CustomCheckboxMultipleChoiceField(MultipleChoiceField):
+    def __init__(self, choices: Enum | list, colors: Enum | list, initial=None, *args, **kwargs):
+        if isinstance(choices, list):
+            super().__init__(choices=choices, initial=initial, *args, **kwargs)
+        else:
+            super().__init__(
+                choices=[(choice.value, choice.value) for choice in choices],
+                initial=initial,
+                *args,
+                **kwargs,
+            )
+        self.widget = CustomCheckboxSelectMultipleWidget()
+        self.widget.colors = colors
+        self.widget.attrs.update({"class": "form-select mb-2"})
+
+
+    def clean(self, value: list[str] | None) -> dict[str, str] | None:
+        if not value:
+            return None
+        
+        gen_sets = []
+        colors = {}
+        result = {}
+        
+        for element in value:
+            if element.startswith("color_"):
+                _,gen_set,color = element.split('_', 2)
+                colors[gen_set] = color
+            else:
+                gen_sets.append(element)
+
+        for gen_set in sorted(gen_sets):
+            if gen_set in colors:
+                result[gen_set] = colors[gen_set]
+
+        return result
+    
+
+class CustomCheckboxSelectMultipleWidget(SelectMultiple):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.colors = []
+
+    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+        if isinstance(value, dict):
+            reformat_value = []
+            for gen_set, color in value.items():
+                reformat_value.append(gen_set)
+                reformat_value.append(f"color_{gen_set}_{color}")
+            value = reformat_value
+
+        return mark_safe(
+            render_to_string(
+                "runs/field_component_color_selection.html",
+                context={
+                    "name": name,
+                    "choices": self.choices,
+                    "colors": self.colors,
+                    "values": value,
+                    }
+            )
+        )
 
 
 class CustomFileField(FileField):
