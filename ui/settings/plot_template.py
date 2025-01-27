@@ -5,11 +5,26 @@ from protzilla.disk_operator import YamlOperator
 from protzilla.constants.colors import PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR
 from protzilla.constants.paths import SETTINGS_PATH
 
-def get_settings(section_id: str):
+
+def load_settings(section_id: str):
+    # TO DO: Muss hier per default das Tenplate geupdated und applied werden?
     op = YamlOperator()
     path = SETTINGS_PATH / (section_id + ".yaml")
-    settings = op.read(path)
+    if path.exists():
+        settings = op.read(path)
+    else:
+        default_path = SETTINGS_PATH / (section_id + "_default.yaml")
+        settings = op.read(default_path)
+        save_settings(settings, section_id)
     return settings
+
+def save_settings(params: dict, section_id: str):
+    op = YamlOperator()
+    path = SETTINGS_PATH / (section_id + ".yaml")
+    op.write(path, params)
+    if template:
+        template.update(params)
+        template.apply()
 
 def determine_font(params: dict):
     """
@@ -29,7 +44,7 @@ def convert_millimeter_to_pixel(millimeter: int):
 
 class PlotTemplate:
     def __init__(self):
-        params = get_settings("plots")
+        params = load_settings("plots")
         font = determine_font(params)
         self.layout = go.Layout(
             title={
@@ -56,8 +71,8 @@ class PlotTemplate:
                 "remove": ["autoScale2d", "lasso", "lasso2d", "toImage", "select2d"],
             },
             dragmode="pan",
-            height=params["height"],
-            width=params["width"]
+            height=convert_millimeter_to_pixel(params["height"]),
+            width=convert_millimeter_to_pixel(params["width"])
         )
     
     def update(self, params: dict):

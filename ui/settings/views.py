@@ -9,11 +9,9 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, NoReverseMatch
 from django.template.loader import render_to_string
 
-from protzilla.constants.paths import SETTINGS_PATH
-from protzilla.disk_operator import YamlOperator
 from protzilla.utilities.utilities import parameters_from_post
 from protzilla.data_preprocessing.plots import create_bar_plot
-from ui.settings.plot_template import template
+from ui.settings.plot_template import template, load_settings, save_settings
 
 
 SECTIONS = [
@@ -39,15 +37,8 @@ def make_sidebar(request, section_id):
     )
 
 
-def get_settings(section_id: str):
-    op = YamlOperator()
-    path = SETTINGS_PATH / (section_id + ".yaml")
-    settings = op.read(path)
-    return settings
-
-
 def settings_general(request):
-    settings_content = get_settings("general")
+    settings_content = load_settings("general")
     sidebar = make_sidebar(request, "general")
     return render(
         request,
@@ -62,7 +53,7 @@ def settings_general(request):
 
 
 def settings_plots(request):
-    settings_content = get_settings("plots")
+    settings_content = load_settings("plots")
     sidebar = make_sidebar(request, "plots")
     plot = make_preview_plot(settings_content)
     return render(
@@ -79,7 +70,6 @@ def settings_plots(request):
 
 
 def make_preview_plot(params: dict):
-    #updated_template = template
     template.update(params)
     fig = create_bar_plot(
         ["Example 1", "Example 2"],
@@ -113,11 +103,7 @@ def update_plot_preview(request):
 def save(request):
     params = parameters_from_post(request.POST)
     section_id = request.POST.get("section_id")
-    op = YamlOperator()
-    path = SETTINGS_PATH / (section_id + ".yaml")
-    settings = op.write(path, params)
-    template.update(params)
-    template.apply()
+    save_settings(params, section_id)
     return HttpResponseRedirect(reverse("settings:last_view"))
 
 
