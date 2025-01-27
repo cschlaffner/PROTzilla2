@@ -140,6 +140,8 @@ class DiskOperator:
                 run[KEYS.STEPS].append(self._write_step(step))
             self.yaml_operator.write(self.run_file, run)
 
+
+
     def read_workflow(self) -> StepManager:
         return self.read_run(self.workflow_file)
 

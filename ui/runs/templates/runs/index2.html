@@ -1,0 +1,144 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'runs/index.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class=" d-flex align-items-center justify-content-center" id="contain">
+  <div class="p2">
+  <div class="col">
+    {% if messages %}
+      <div class="messages">
+          {% for message in messages %}
+              <div class="alert alert-dismissible fade show ps-5{% if message.tags %} {{ message.tags }}{% endif %}"
+                    role="alert">
+                  {{ message | safe }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"
+                          aria-label="Close"></button>
+              </div>
+          {% endfor %}
+      </div>
+      <br>
+    {% endif %}
+  </div>
+</div>
+<div class="p2 flex-grow-1">
+  <div class="row">
+    <div class="col-3 mx-4">
+      <form action="{% url 'runs:create' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Work on a new run:</h3>
+          <input name="run_name" id="run_name" placeholder="Add run name" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label for="workflow_config_name">With workflow:</label>
+          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
+            {% for name in available_workflows %}
+            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label for="df_mode">Memory mode:</label>
+          <select name="df_mode" id="df_mode" class="form-select">
+            <option value="disk_memory" selected >standard</option>
+            <option value="disk">low memory</option>
+          </select>
+        </div>
+        <input type="submit" value="Create" class="btn btn-red">
+      </form>
+    </div>
+
+    <!-- CONTINUE MENU-->
+    <div class="col-7 mx-4">
+      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+          <h3>Continue an existing run:
+            <span id="selectedRun">{{ all_available_runs.0.run_name }}</span>
+          </h3>
+          
+          <!-- Header Section -->
+        <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
+          <li class="d-flex justify-content-between" style="font-weight: bold; border-bottom: 1px solid #ccc; padding: 5px 0;">
+              <span style="width: 8%"></span>
+              <span style="width: 32%">Name</span>
+              <span style="width: 18%">Created</span>
+              <span style="width: 18%">Last modified</span>
+              <span style="width: 24%">Memory mode</span>
+            </li>
+        </ul>
+
+        <!-- Run selection -->
+          <ul class="w-100" aria-labelledby="dropdownMenuButton" style="max-height: 200px; overflow-y: scroll !important; padding:0;">
+            {% for run in all_available_runs %}
+            <li class="d-flex justify-content-between" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}')">
+              <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}', '{{run.favourite_status}}')">
+                {% if run.favourite_status == False %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                  <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+                </svg>
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ded704" class="bi bi-star-fill" viewBox="0 0 16 16">
+                  <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.314-.16-.888.282-.95l4.898-.696 2.197-4.482c.197-.4.73-.4.927 0l2.197 4.482 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.444-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                </svg>
+                {% endif %}
+              </button>
+              <span style="width: 30%"><b>{{ run.run_name }}</b></span>
+              <span style="width: 15%">{{ run.creation_date }}</span>
+              <span style="width: 15%">{{ run.modification_date }}</span>
+              <span style="width: 15%">{{ run.memory_mode }}</span>
+              <button type="button" class="btn btn-red" onclick="deleteRun('{{run.run_name}}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                  <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                </svg>
+              </button>
+            </li>
+            <hr style="margin: 5px 0px;">
+            {% endfor %}
+          </ul>
+            
+        </div>
+        <input type="hidden" name="run_name" id="run_name_id" value="{{available_runs.0.run_name}}">
+        <input type="submit" value="Continue" class="btn btn-red">
+      </form>
+      <form id="delete_run" class="mb-5" action="{% url 'runs:delete' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="delete_run_name" id="delete_run_name_id" value="{{available_runs.0.run_name}}">
+      </form>
+      <form id="change_favourite" class="mb-5" action="{% url 'runs:toggle_favourite' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="favourite_run_name" id="favourites_run_name_id" value="{{available_runs.0.run_name}}">
+        <input type="hidden" name="favourite_run_status" id="favourites_run_status_id" value="{{available_runs.0.favourite_status}}">
+      </form>
+      <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
+    </div>
+    <div class="col-1 mx-4">
+      <div class="mb-2">
+        <h3>Continue an existing run:
+        </h3>
+      </div>
+    </div>
+    
+  </div>
+
+<div class="p2">
+  <div class="row">
+      <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="filter" value='{"name": "i", "steps": "", "memory_mode": "disk_memory"}'>
+    <input type="submit" value="Filter" class="btn btn-red">
+  </form>
+</div>
+</div>
+</div>
+
+{% endblock %}

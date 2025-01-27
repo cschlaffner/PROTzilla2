@@ -1,12 +1,20 @@
+
 {% extends 'base.html' %}
 {% load static %}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
+    <link href="{% static 'runs/MultiSelect.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'runs/index.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center" id="contain">
+
+<div class="container-fluid" >
+  <div class="p2">
   <div class="col">
     {% if messages %}
       <div class="messages">
@@ -21,64 +29,238 @@
       </div>
       <br>
     {% endif %}
-  <div class="row">
-    <div class="col mx-4">
-      <form action="{% url 'runs:create' %}" method="post">
+  </div>
+  <div class="p2 flex-grow-1" style="margin-top: 30px;">
+    <div class="row">
+    <!-- CONTINUE MENU-->
+    <div class="col-9 mx-4">
+      <form action="{% url 'runs:create_run_menu' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Create new Run" class="btn btn-red" style="float: right;">
+      </form>
+     <h3>Continue an existing run:
+         <span id="selectedRun" style="display: none;">{{ all_available_runs.0.run_name }}</span>
+     </h3>
+        <!-- Header Section -->
+        <form id="sorting_by_click" action="{% url 'runs:index' %}" method="post">
+          {% csrf_token %}
+          <ul class="w-100 header-list" style="list-style-type: none; margin: 0; padding: 0;">
+            <li class="d-flex justify-content-between align-items-center" style="font-weight: bold;">
+
+              <!-- Star Symbol -->
+              <span>
+                <button type="button" class="btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ded704" class="bi bi-star-fill" viewBox="0 0 16 16">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.314-.16-.888.282-.95l4.898-.696 2.197-4.482c.197-.4.73-.4.927 0l2.197 4.482 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.444-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                  </svg>
+                </button>
+              </span>
+
+                <!-- Name Column -->
+                <span style="width: 30%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'name_asc' %}name_desc{% else %}name_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Name
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'name_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+                <!-- Created Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'created_asc' %}created_desc{% else %}created_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Created
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'created_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+                <!-- Last Modified Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'last_modified_asc' %}last_modified_desc{% else %}last_modified_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Last Modified
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'last_modified_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+                <!-- Memory Mode Column -->
+                <span style="width: 15%" class="center">
+                  <button
+                    type="submit"
+                    name="sort_by"
+                    value="{% if current_sort == 'memory_mode_asc' %}memory_mode_desc{% else %}memory_mode_asc{% endif %}"
+                    class="btn btn-link p-0 d-flex align-items-center"
+                    style="color: black; text-decoration: none; font-weight: bold;">
+                    Memory Mode
+                    <span class="sort-arrow" style="margin-left: 8px;">
+                      {% if current_sort == 'memory_mode_asc' %}↓{% else %}↑{% endif %}
+                    </span>
+                  </button>
+                </span>
+
+              <!--  
+              <span>
+                <button type="button" class="btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                  </svg>
+                </button>
+              </span> -->
+
+            </li>
+          </ul>
+        </form>
+
+
+
+        <!-- Run selection -->
+        <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
         {% csrf_token %}
         <div class="mb-2">
-          <h3>Work on a new run:</h3>
-          <input name="run_name" id="run_name" placeholder="Add run name" class="form-control">
+          <ul class="w-100" id="run_selection" aria-labelledby="dropdownMenuButton" style="max-height: 60vh; overflow-y: scroll !important; padding:0;">
+            {% for run in all_available_runs %}
+                {% if forloop.counter == 1 %}
+                  <hr style="margin: 5px 0px; border: none; height: 2px; background-color: grey; border-radius: 1px">
+                {% else %}
+                  <hr style="margin: 5px 0px;">
+                {% endif %}
+            <li class="d-flex justify-content-between list-item" id="run-{{ forloop.counter }}" onclick="selectRun('{{run.run_name}}', '{{ forloop.counter }}', '{{ all_available_runs|length }}'); toggleDetails(this)">
+              <div id="main-content" class="justify-content-between d-flex">
+                <button type="button" class="btn" onclick="toggleFavouriteRun('{{run.run_name}}')">
+                  {% if run.favourite_status == False %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                    <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+                  </svg>
+                  {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ded704" class="bi bi-star-fill" viewBox="0 0 16 16">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73-3.522-3.356c-.33-.314-.16-.888.282-.95l4.898-.696 2.197-4.482c.197-.4.73-.4.927 0l2.197 4.482 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.444-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                  </svg>
+                  {% endif %}
+                </button>
+                <span style="width: 30%"><b>{{ run.run_name }}</b></span>
+                <span style="width: 15%">{{ run.creation_date }}</span>
+                <span style="width: 15%">{{ run.modification_date }}</span>
+                <span style="width: 15%">{{ run.memory_mode }}</span>
+                <input type="submit" value="Continue" class="colorchange-btn btn btn-grey" onclick="event.stopPropagation();">
+              </div>
+
+              <!-- Run details -->
+              <div class="details">
+                <span>Tags:</span>
+                <div class="tags">
+                  {% for tag in run.run_tags %}
+                    <span class="tag btn-orange">{{ tag }}</span>
+                    <button type="button" class="colorchange-btn btn btn-grey" onclick="deleteTag('{{run.run_name}}', '{{tag}}')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="orange" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                      </svg>
+                    </button>
+                  {% endfor %}
+                  <input type="text" name="tag_name" id="tag_name_id_{{run.run_name}}" placeholder="Tag name:" class="form-control" onclick="event.stopPropagation();">
+                  <button type="button" class="btn btn-grey" onclick="addTag('{{run.run_name}}')">Add Tag</button>
+                  <button type="button" class="colorchange-btn btn btn-grey" onclick="deleteRun('{{run.run_name}}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                      <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+            
+        </div>
+        <input type="hidden" name="run_name" id="run_name_id" value="{{available_runs.0.run_name}}">
+      </form>
+      <form id="delete_run" class="mb-5" action="{% url 'runs:delete' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="delete_run_name" id="delete_run_name_id" value="{{available_runs.0.run_name}}">
+      </form>
+      <form id="change_favourite" class="mb-5" action="{% url 'runs:toggle_favourite' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="favourite_run_name" id="favourites_run_name_id" value="{{available_runs.0.run_name}}">
+      </form>
+      <form id="add_tag" class="mb-5" action="{% url 'runs:add_tag' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="add_tag_name" id="add_tag_name_id" value="">
+        <input type="hidden" name="add_tag_run_name" id="add_tag_run_name_id" value="">
+      </form>
+      <form id="delete_tag" class="mb-5" action="{% url 'runs:delete_tag' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="delete_tag_name" id="delete_tag_name_id" value="">
+        <input type="hidden" name="delete_tag_run_name" id="delete_tag_run_name_id" value="">
+      </form>
+    </div>
+    <div class="col-2">
+      <form id="filtertest" class="mb-5" action="{% url 'runs:index' %}" method="post">
+        {% csrf_token %}
+          <h3>Select filters:</h3>
+        <div class="mb-2">
+            <label for="search_run_name">Name contains:</label>
+            <input name="search_run_name" id="search_run_name" type="text" placeholder="  Enter (part of a) name" class="form-control" value="{{ search_run_name }}">
         </div>
         <div class="mb-2">
-          <label for="workflow_config_name">With workflow:</label>
-          <select name="workflow_config_name" id="workflow_config_name" class="form-select">
-            {% for name in available_workflows %}
-            <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
-            {% endfor %}
-          </select>
+            <label for="search_steps">With steps:</label>
+            <select id="search_steps" name="search_steps" data-placeholder="Select step(s)" multiple data-multi-select>
+                {% for step in all_possible_step_names %}
+                <option value="{{ step }}" {% if step in search_steps %}selected{% endif %}>
+                    {{ step }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="search_tags">With tags:</label>
+            <select id="search_tags" name="search_tags" data-placeholder="Select tag(s)" multiple data-multi-select>
+                {% for tag in all_tags %}
+                <option value="{{ tag }}" {% if tag in search_tags %}selected{% endif %}>
+                    {{ tag }}
+                </option>
+                {% endfor %}  
+            </select>
         </div>
         <div class="mb-2">
           <label for="df_mode">Memory mode:</label>
-          <select name="df_mode" id="df_mode" class="form-select">
-            <option value="disk_memory" selected >standard</option>
-            <option value="disk">low memory</option>
+          <select id="df_mode" name="df_mode" data-placeholder="Select memory mode" multiple data-multi-select>
+                {% for mode in all_memory_modes %}
+                <option value="{{ mode }}" {% if mode in df_mode %}selected{% endif %}>
+                    {{ mode }}
+                </option>
+                {% endfor %}
           </select>
         </div>
-        <input type="submit" value="Create" class="btn btn-red">
-      </form>
-    </div>
-
-    <div class="col mx-4">
-      <form class="mb-5" action="{% url 'runs:continue' %}" method="post">
-        {% csrf_token %}
         <div class="mb-2">
-          <h3>Continue an existing run:</h3>
-          <select name="run_name" id="run_name_option" class="form-select">
-            {% for name in available_runs %}
-            <option value="{{ name }}">{{ name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <input type="submit" value="Continue" class="btn btn-red">
-      </form>
-    <a class="btn btn-grey" href="{% url 'databases' %}">Manage databases</a>
-    </div>
 
-    <div class="col mx-4">
-      <form class="mb-5" action="{% url 'runs:delete' %}" method="post">
-        {% csrf_token %}
-        <div class="mb-2">
-          <h3>Delete an existing run:</h3>
-          <select name="run_name" id="run_name_option" class="form-select">
-            {% for name in available_runs %}
-            <option value="{{ name }}">{{ name }}</option>
-            {% endfor %}
-          </select>
         </div>
-        <input type="submit" value="Delete" class="btn btn-red">
+        <div class="button-container">
+            <input type="submit" value="Apply filters" class="btn btn-grey">
+            <input type="button" id="clearFilters" value="Clear filters" class="btn btn-grey">
+        </div>
       </form>
     </div>
   </div>
 </div>
 
+</div>
+<script type="text/javascript" src="{% static 'runs/MultiSelect.js' %}"></script>
+
+</div>
 {% endblock %}

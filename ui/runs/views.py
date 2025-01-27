@@ -2,6 +2,7 @@ import io
 import tempfile
 import traceback
 import zipfile
+import json
 from pathlib import Path
 
 import networkx as nx
@@ -19,8 +20,9 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.conf import settings
 
-from protzilla.run import Run, get_available_run_names 
-from protzilla.run_v2 import delete_run_folder
+import protzilla.constants.paths as paths
+from protzilla.run import Run, delete_run_folder, get_available_runinfo 
+from protzilla.disk_operator import DiskOperator, YamlOperator
 from protzilla.run_helper import log_messages
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
@@ -38,16 +40,16 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_all_possible_step_names, filter_runs
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
+from .views_helper import sort_runs
 
 active_runs: dict[str, Run] = {}
-
 
 def detail(request: HttpRequest, run_name: str):
     """
@@ -173,14 +175,153 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+    filter_run_name = request.POST.get("search_run_name", "")
+    filter_steps = request.POST.getlist("search_steps[]", []) #not search_steps beacuse the multi-select overrides the way the values are stored in the <select> element.
+    filter_tags = request.POST.getlist("search_tags[]", [])
+    filter_df_mode = request.POST.getlist("df_mode[]", [])
+    filter = {
+        "name": filter_run_name,
+        "steps": filter_steps,
+        "tags": filter_tags,
+        "memory_mode": filter_df_mode,
+    }
+
+    runs, runs_favourite, all_tags = get_available_runinfo()
+    filtered_runs = filter_runs(runs, filter)
+    filtered_runs_favourite = filter_runs(runs_favourite, filter)
+
+    sort_by_click_method = request.POST.get("sort_by", "")
+    sorted_runs = sort_runs(filtered_runs, sort_by_click_method)
+    sorted_runs_favorite = sort_runs(filtered_runs_favourite, sort_by_click_method)
+
+    all_available_runs = sorted_runs_favorite + sorted_runs
+
     return render(
         request,
         "runs/index.html",
         context={
-            "available_workflows": get_available_workflow_names(),
-            "available_runs": get_available_run_names(),
+            "search_run_name" : filter_run_name,
+            "search_steps" : filter_steps,
+            "search_tags" : filter_tags,
+            "df_mode" : filter_df_mode,
+            "available_runs" : filtered_runs,
+            "available_runs_favourite": filtered_runs_favourite,
+            "all_available_runs": all_available_runs,
+            "all_possible_step_names": get_all_possible_step_names(),
+            "all_tags": all_tags,
+            "all_memory_modes": ["standard", "low memory"],
+            "current_sort": sort_by_click_method,
         },
     )
+    
+
+def favourite(request: HttpRequest):
+    """
+    Toggles the favourite state of a run. Returns the user to the (updated) index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
+    run_name = request.POST["favourite_run_name"]
+    
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    metadata = {}
+    if not os.path.exists(metadata_yaml_path):
+        with open(metadata_yaml_path, 'w') as file:
+            pass
+    else:
+        metadata = yaml_operator.read(metadata_yaml_path)
+
+    metadata["favourite"]= not metadata.get("favourite", False)
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+def add_tag(request: HttpRequest):
+    """
+    Adds a specific tag to a run. Returns the user to the (updated) index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
+
+    run_tag = request.POST["add_tag_name"]
+    run_name = request.POST["add_tag_run_name"]
+    print(run_tag)
+
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    tags = set()
+    metadata = {}
+    if not os.path.exists(metadata_yaml_path):
+        with open(metadata_yaml_path, 'w') as file:
+            pass
+    else:
+        metadata = yaml_operator.read(metadata_yaml_path)
+        tags_from_metadata = metadata.get("tags")
+        if tags_from_metadata:
+            tags.update(tags_from_metadata)
+    tags.add(run_tag)
+    metadata["tags"]= tags
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+def delete_tag(request: HttpRequest):
+    """
+    Deletes a specific tag from a run. Returns the user to the (updated) index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered index page 
+    :rtype: HttpResponse
+    """
+
+    run_name = request.POST["delete_tag_run_name"]
+    run_tag = request.POST["delete_tag_name"]
+
+    directory_path = os.path.join(paths.RUNS_PATH, run_name)
+    metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
+
+    yaml_operator = YamlOperator()
+    metadata = yaml_operator.read(metadata_yaml_path)
+    tags = metadata.get("tags")
+    tags.remove(run_tag)
+    metadata["tags"] = tags
+    yaml_operator.write(Path(metadata_yaml_path), metadata)
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+def create_run_menu(request: HttpRequest):
+    """
+    Renders the site where the user can create a new run.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
+
+    return render(
+        request,
+        "runs/create_run_menu.html",
+        context={
+            "available_workflows": get_available_workflow_names(),
+        },
+        )
 
 
 def create(request: HttpRequest):
@@ -243,7 +384,7 @@ def delete_(request: HttpRequest):
     :return: the rendered details page of the run
     :rtype: HttpResponse
     """
-    run_name = request.POST["run_name"]
+    run_name = request.POST["delete_run_name"]
     if run_name in active_runs:
         del active_runs[run_name]
     

@@ -5,9 +5,13 @@ from . import views
 app_name = "runs"
 urlpatterns = [
     path("", views.index, name="index"),
-    path("create", views.create, name="create"),
+    path("create_run_menu", views.create_run_menu, name="create_run_menu"),
+    path("create", views.create, name="create"), #create, continue and delete paths should be in main/urls.py, also change index.html accordingly |  probably not actually
     path("continue", views.continue_, name="continue"),
     path("delete", views.delete_, name="delete"),
+    path("add_tag", views.add_tag, name="add_tag"),
+    path("delete_tag", views.delete_tag, name="delete_tag"),
+    path("toggle_favourite", views.favourite, name="toggle_favourite"),
     path("detail/<str:run_name>", views.detail, name="detail"),
     path("<str:run_name>/plot", views.plot, name="plot"),
     path("<str:run_name>/tables/<int:index>", views.tables, name="tables_nokey"),

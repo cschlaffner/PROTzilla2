@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'runs/index.css' %}">
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}
+
+{% block content %}
+<div class="p2 flex-grow-1">
+    <div class="row">
+      <div class="col-3 mx-4">
+        <form action="{% url 'runs:create' %}" method="post">
+          {% csrf_token %}
+          <div class="mb-2">
+            <h3>Work on a new run:</h3>
+            <input name="run_name" id="run_name" placeholder="Add run name" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label for="workflow_config_name">With workflow:</label>
+            <select name="workflow_config_name" id="workflow_config_name" class="form-select">
+              {% for name in available_workflows %}
+              <option value="{{ name }}" {% if name == "standard" %} selected {% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label for="df_mode">Memory mode:</label>
+            <select name="df_mode" id="df_mode" class="form-select">
+              <option value="disk_memory" selected >standard</option>
+              <option value="disk">low memory</option>
+            </select>
+          </div>
+          <input type="submit" value="Create" class="btn btn-red">
+        </form>
+      </div>
+{% endblock %}

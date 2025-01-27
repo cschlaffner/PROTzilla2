@@ -7,6 +7,19 @@ from protzilla.steps import StepManager
 from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
 
+from typing import Callable
+
+SORTING_METHODS = {
+    "name_asc": (lambda run: run["run_name"].lower(), False),
+    "name_desc": (lambda run: run["run_name"].lower(), True),
+    "created_asc": (lambda run: run["creation_date"], False),
+    "created_desc": (lambda run: run["creation_date"], True),
+    "last_modified_asc": (lambda run: run["modification_date"], False),
+    "last_modified_desc": (lambda run: run["modification_date"], True),
+    "memory_mode_asc": (lambda run: run["memory_mode"].lower(), False),
+    "memory_mode_desc": (lambda run: run["memory_mode"].lower(), True),
+}
+
 
 def parameters_from_post(post):
     d = dict(post)
@@ -40,6 +53,21 @@ def convert_str_if_possible(s):
                 numbers.append(num)
             return numbers
         return s
+
+def get_all_possible_step_names() -> list[str]:
+    """
+    Returns a list of names of step classes. Not to be confused with class display names.
+
+    :return: List of names.
+    :rtype: String
+    """
+    step_classes = form_map._forward_mapping.keys()
+    step_names = []
+    for step in step_classes:
+        step_names.append(
+            step.__name__
+        )
+    return step_names
 
 
 def get_displayed_steps(
@@ -97,6 +125,57 @@ def get_displayed_steps(
         )
     return displayed_steps
 
+def filter_for_name(runs, search_string) -> list[dict[str, str | list[str]]]:
+    return [run for run in runs if search_string in run["run_name"]]
+
+def filter_for_steps(runs, search_steps) -> list[dict[str, str | list[str]]]:
+    # get step display names
+    step_classes = form_map._forward_mapping.keys()
+    step_names = {}
+    for step in step_classes:
+        step_names[step.__name__] = step.display_name
+
+    return [run for run in runs if all(step_names[step] in run["run_steps"] for step in search_steps)]
+
+def filter_for_tags(runs, search_tags) -> list[dict[str, str | list[str]]]:
+    return [run for run in runs if all(tag in run["run_tags"] for tag in search_tags)]
+
+def filter_for_memory_mode(runs, memory_modes) -> list[dict[str, str | list[str]]]:
+    internal_memory_modes = {"disk_memory": "standard", "disk": "low memory"}
+    return [run for run in runs if internal_memory_modes.get(run["memory_mode"]) in memory_modes]
+
+def filter_runs(runs, filters) -> list[dict[str, str | list[str]]]:
+    """
+    Filters runs according to the given filters.
+
+    :param runs: List of runs.
+    :param filters: List of filters.
+
+    :return: List of runs.
+    """
+    if filters["name"]:
+        runs = filter_for_name(runs, filters["name"])
+    if filters["steps"]:
+        runs = filter_for_steps(runs, filters["steps"])
+    if filters["tags"]:
+        runs = filter_for_tags(runs, filters["tags"])
+    if filters["memory_mode"]:
+        runs = filter_for_memory_mode(runs, filters["memory_mode"])
+    return runs
+
+def sort_runs(runs: list[dict[str, str | list[str]]], sorting_method: str):
+    """
+        Filters runs according to the given sorting method. Favorite and normal are handled seperately at the moment.
+
+        :param runs: List of runs.
+        :param sorting_method: One method as in dictionary SORTING_METHODS.
+
+        :return: List of runs.
+        """
+    if sorting_method in SORTING_METHODS:
+        key_func, reverse = SORTING_METHODS[sorting_method]  # Extract the key function and reverse flag
+        runs = sorted(runs, key=key_func, reverse=reverse)
+    return runs
 
 def display_message(message: dict, request):
     """
