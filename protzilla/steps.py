@@ -217,19 +217,6 @@ class Step:
                     return False
         return True
 
-    #@property
-    #def calculation_status(self) -> Literal["done","outdated","missing_inputs"]:
-    #    if ()
-    # def finished(self) -> bool:
-    #     """
-    #     Return whether the step has valid outputs and is therefore considered finished.
-    #     Plot steps without required outputs are considered finished if they have plots.
-    #     :return: True if the step is finished, False otherwise
-    #     """
-    #     if len(self.output_keys) == 0:
-    #         return not self.plots.empty
-    #     return self.validate_outputs(soft_check=True)
-
 
 class Output:
     def __init__(self, output: dict = None):
@@ -658,14 +645,7 @@ class StepManager:
 
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
-        #if (step.calculation_status != "incomplete"):
-        #if new_step_index < self.current_step_index:
         self.current_step_index = new_step_index
-        #else:
-        #     step.calculate(self, step.form_inputs)
-        #     self.next_step()
-        #     self.goto_step(step_index, section)
-        #    raise ValueError("Cannot go to a step that is after the current step")
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """
@@ -706,6 +686,3 @@ class StepManager:
             step.output = Output()
             step.messages = Messages()
             step.plots = Plots()
-
-    # def _calculate_previous_steps(self, steps: StepManager, index: int) -> None:
-    #     for step in 

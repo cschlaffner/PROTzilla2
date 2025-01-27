@@ -105,3 +105,13 @@ class TestRun:
     def test_step_change_method(self, run_imported):
         run_imported.step_change_method("DiannImport")
         assert run_imported.current_step.__class__.__name__ == "DiannImport"
+
+    def test_set_steps_outdated(self,run_imported,maxquant_data_file):
+        step = ImputationByMinPerProtein()
+        run_imported.step_add(step)
+        run_imported.step_next()
+        assert run_imported.current_step.calculation_status == "incomplete"
+        run_imported.step_calculate(inputs={"shrinking_value": 0.5})
+        assert run_imported.current_step.calculation_status == "complete"
+        run_imported.step_set_outdated()
+        assert run_imported.current_step.calculation_status == "outdated"
