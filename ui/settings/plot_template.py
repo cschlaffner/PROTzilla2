@@ -22,7 +22,7 @@ def save_settings(params: dict, section_id: str):
     op = YamlOperator()
     path = SETTINGS_PATH / (section_id + ".yaml")
     op.write(path, params)
-    if template:
+    if section_id == "plots" and template:
         template.update(params)
         template.apply()
 

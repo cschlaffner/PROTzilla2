@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
 
-from ui.settings.plot_template import *
 from protzilla.data_preprocessing.plots_helper import generate_tics
 from protzilla.utilities import default_intensity_column
 from protzilla.constants.colors import *

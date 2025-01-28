@@ -27,9 +27,9 @@ SECTIONS = [
 
 
 def make_sidebar(request, section_id):
-    template = "settings_sidebar.html"
+    sidebar_template = "settings_sidebar.html"
     return render_to_string(
-        template,
+        sidebar_template,
         context=dict(
             sections=SECTIONS,
             selected_section=section_id
