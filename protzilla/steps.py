@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.io as pio
 import plotly.graph_objects as go
-from PIL import Image
+from PIL import Image, features
 
 from protzilla.utilities import format_trace
 
@@ -290,15 +290,17 @@ class Plots:
         
         for plot in self.plots:
             plot, scale_factor = adjust_for_export(plot, settings)
+            # For Plotly GO Figure 
             if isinstance(plot, go.Figure):
-                if format_ in ["eps", "tiff"]:
+                if format_ in ["tiff", "eps"]:
                     binary_png = pio.to_image(plot, format="png", scale=scale_factor)
                     img = Image.open(BytesIO(binary_png)).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
+                    elif format_ == "eps":
                         img.save(binary, format=format_)
+                    binary.seek(0)
                     exports.append(binary)
                 else:
                     binary_png = pio.to_image(plot, format=format_, scale=scale_factor)
@@ -307,14 +309,15 @@ class Plots:
                 plot = plot["plot_base64"]
 
             # TO DO: Include scale_factor here
-            if isinstance(plot, bytes):  # base64 encoded plots
-                if format_ in ["eps", "tiff"]:
+            # For base64 encoded plot
+            if isinstance(plot, bytes):
+                if format_ in ["tiff", "eps"]:
                     img = Image.open(BytesIO(base64.b64decode(plot))).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
-                        img.save(binary, format=format_)
+                    elif format_ == "eps":
+                        img.save(binary, format="eps")
                     binary.seek(0)
                     exports.append(binary)
                 elif format_ in ["png", "jpg"]:
