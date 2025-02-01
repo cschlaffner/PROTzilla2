@@ -16,13 +16,13 @@ from ui.settings.plot_template import template, load_settings, save_settings
 
 SECTIONS = [
     {
-        "id": "general",
-        "name": "General"
-    },
-    {
         "id": "plots",
         "name": "Plot Configurations" 
-    }
+    },
+    {
+        "id": "databases",
+        "name": "Manage Databases"
+    },
 ]
 
 
@@ -33,21 +33,6 @@ def make_sidebar(request, section_id):
         context=dict(
             sections=SECTIONS,
             selected_section=section_id
-        )
-    )
-
-
-def settings_general(request):
-    settings_content = load_settings("general")
-    sidebar = make_sidebar(request, "general")
-    return render(
-        request,
-        "settings_general.html",
-        context=dict(
-            initials=settings_content,
-            sidebar=sidebar,
-            sections=SECTIONS,
-            section_id="general"
         )
     )
 
@@ -98,6 +83,21 @@ def update_plot_preview(request):
             section_id="plots"
         )
    ) 
+
+
+def settings_databases(request):
+    settings_content = load_settings("databases")
+    sidebar = make_sidebar(request, "databases")
+    return render(
+        request,
+        "settings_databases.html",
+        context=dict(
+            initials=settings_content,
+            sidebar=sidebar,
+            sections=SECTIONS,
+            section_id="databases"
+        )
+    )
 
 
 def save(request):
