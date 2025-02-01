@@ -460,7 +460,9 @@ def download_plots(request: HttpRequest, run_name: str):
     index = run.steps.current_step_index
     section = run.current_step.section
     operation = run.current_step.operation
-    exported = run.current_plots.export(format_=format_)
+    exported = run.current_plots.export(settings)
+    if len(exported) == 0:
+        raise RuntimeError("List of exported plots is empty.")
     if len(exported) == 1:
         filename = f"{index}-{section}-{operation}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
