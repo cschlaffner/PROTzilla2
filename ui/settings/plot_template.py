@@ -49,66 +49,53 @@ def determine_font(params: dict) -> str:
         font = params["font"]
     return font
 
-# TO DO: Adjust font size as well
-def resize_for_web(
-        width: int,
-        height: int
-) -> dict:
+def resize_for_display(params: dict) -> dict:
     """
     Scales the input sizes to sizes that can be easily displayed in a webbrowser.
-    :param width: Plot width from user input.
-    :param height: Plot height from user input.
-    :return: Dict containing the scaled sizes.
+    :param params: Dict containing the plot settings.
+    :return: Dict containing plot settings with scaled sizes.
     """
-    ratio = width / height
-    scaled_height = SCALED_WIDTH / ratio
+    # Figure size
+    ratio = params["width"] / params["height"]
+    display_height = int(SCALED_WIDTH / ratio)
     
-    return dict(
-        width=SCALED_WIDTH,
-        height=int(scaled_height)
-    )
+    # Font size
+    pt_to_mm = 1 / 72 * 24.5
+    ratio = SCALED_WIDTH / params["width"]
+    display_heading = int(params["heading_size"] * pt_to_mm * ratio)
+    display_text = int(params["text_size"] * pt_to_mm * ratio)
 
-def adjust_for_export(
+    params["display_width"] = SCALED_WIDTH
+    params["display_height"] = display_height
+    params["display_heading_size"] = display_heading
+    params["display_text_size"] = display_text
+
+    return params
+
+def get_scale_factor(
         fig: go.Figure,
         params: dict
-    ) -> int:
+    ) -> float:
     """
     Calculates the scale factor for downloading the plot in desired size and resolution.
-    Adjusts the font sizes in Plotly figure to maintain experienced sizes after scaling.
     :param fig: Plotly figure to be scaled.
     :param params: Dict containing the plot settings.
-    :return: Figure with scaled font size and scale factor to scale the whole plot to desired size.
+    :return: Scale factor to scale the whole plot to desired size.
     """
     dpi = 300
     current_width = fig.layout.width or SCALED_WIDTH
     scale_factor = (params["width"] / 24.5 * dpi) / current_width
 
-    pt_to_mm = 1 / 72 * 24.5
-    font_ratio = current_width / params["width"]
-    fig.update_layout(
-        title = {
-            "font": {
-                "size": int(params["heading_size"] * pt_to_mm * font_ratio)
-            }
-        },
-        font = {
-            "size": int(params["text_size"] * pt_to_mm * font_ratio)
-        }
-    )
-    return fig, scale_factor
+    return scale_factor
 
 class PlotTemplate:
     def __init__(self):
-        params = load_settings("plots")
+        params = resize_for_display(load_settings("plots"))
         font = determine_font(params)
-        sizes = resize_for_web(
-            params["width"],
-            params["height"]
-        )
         self.layout = go.Layout(
             title={
                 "font": {
-                    "size": params["heading_size"],
+                    "size": params["display_heading_size"],
                     "family": font
                 },
                 "y": 0.95,
@@ -117,7 +104,7 @@ class PlotTemplate:
                 "yanchor": "top"
             },
             font={
-                "size": params["text_size"],
+                "size": params["display_text_size"],
                 "family": font
             },
             colorway=[PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR],
@@ -130,8 +117,8 @@ class PlotTemplate:
                 "remove": ["autoScale2d", "lasso", "lasso2d", "toImage", "select2d"],
             },
             dragmode="pan",
-            height=sizes["height"],
-            width=sizes["width"],
+            height=params["display_height"],
+            width=params["display_width"],
             margin={
                 "t": 50,
                 "b": 50
@@ -143,18 +130,15 @@ class PlotTemplate:
         Updates all relevant parameters of this Plotly template.
         :param params: Dict containing properties of the Plotly template.
         """
+        params = resize_for_display(params)
         font = determine_font(params)
         self.layout.title.font.family = font
         self.layout.font.family = font
      
-        sizes = resize_for_web(
-            params["width"],
-            params["height"]
-        )
-        self.layout.height = sizes["height"]
-        self.layout.width = sizes["width"]
-        self.layout.title.font.size = params["heading_size"]
-        self.layout.font.size = params["text_size"]
+        self.layout.height = params["display_height"]
+        self.layout.width = params["display_width"]
+        self.layout.title.font.size = params["display_heading_size"]
+        self.layout.font.size = params["display_text_size"]
 
     def apply(self):
         """

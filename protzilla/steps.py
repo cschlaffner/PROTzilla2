@@ -284,13 +284,13 @@ class Plots:
         :param settings: Dict containing the plot settings.
         :return: List of all exported plots.
         """
-        from ui.settings.plot_template import adjust_for_export
+        from ui.settings.plot_template import get_scale_factor
         exports = []
         format_ = settings["file_format"]
         
         for plot in self.plots:
-            plot, scale_factor = adjust_for_export(plot, settings)
-            # For Plotly GO Figure 
+            scale_factor = get_scale_factor(plot, settings)
+            # For Plotly GO Figure
             if isinstance(plot, go.Figure):
                 if format_ in ["tiff", "eps"]:
                     binary_png = pio.to_image(plot, format="png", scale=scale_factor)
