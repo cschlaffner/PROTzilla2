@@ -1,5 +1,6 @@
 import logging
 
+import protzilla.constants.ms_constants
 from protzilla.data_analysis.classification import random_forest, svm
 from protzilla.data_analysis.clustering import (
     expectation_maximisation,
@@ -7,15 +8,17 @@ from protzilla.data_analysis.clustering import (
     k_means,
 )
 from protzilla.data_analysis.differential_expression_anova import anova
-from protzilla.data_analysis.differential_expression_kruskal_wallis import kruskal_wallis_test_on_ptm_data, \
-    kruskal_wallis_test_on_intensity_data
+from protzilla.data_analysis.differential_expression_kruskal_wallis import (
+    kruskal_wallis_test_on_intensity_data,
+    kruskal_wallis_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_mann_whitney import (
-    mann_whitney_test_on_intensity_data, mann_whitney_test_on_ptm_data)
+    mann_whitney_test_on_intensity_data,
+    mann_whitney_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import ptms_per_sample, \
-    ptms_per_protein_and_sample, select_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -23,11 +26,17 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
+from protzilla.data_analysis.predict_spectra import (
+    compare_experimental_with_predicted_spectra,
+    plot_mirror_spectrum,
+    plot_spectrum,
+    predict,
+)
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
-    select_peptides_of_protein,
     ptms_per_protein_and_sample,
     ptms_per_sample,
+    select_peptides_of_protein,
 )
 from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
@@ -164,8 +173,10 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -191,7 +202,9 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         if steps.get_step_output(Step, "protein_df", inputs["protein_df"]) is not None:
-            inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+            inputs["protein_df"] = steps.get_step_output(
+                Step, "protein_df", inputs["protein_df"]
+            )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -200,8 +213,10 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "ptm_df",
@@ -234,8 +249,10 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -265,8 +282,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "protein_df",
@@ -288,7 +307,9 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
         return kruskal_wallis_test_on_intensity_data(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+        inputs["protein_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["protein_df"]
+        )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -297,8 +318,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     input_keys = [
         "ptm_df",
@@ -327,9 +350,11 @@ class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
 class PlotVolcano(PlotStep):
     display_name = "Volcano Plot"
     operation = "plot"
-    method_description = ("Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
-                          "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
-                          "can define a fold change threshold and an alpha level to highlight significant items.")
+    method_description = (
+        "Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
+        "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
+        "can define a fold change threshold and an alpha level to highlight significant items."
+    )
     input_keys = [
         "p_values",
         "fc_threshold",
@@ -841,26 +866,197 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         inputs["metadata_df"] = steps.metadata_df
 
         if inputs["auto_select"]:
-            significant_proteins = (
-                steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
-            index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
-            most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
+            significant_proteins = steps.get_step_output(
+                DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]
+            )
+            index_of_most_significant_protein = significant_proteins[
+                "corrected_p_value"
+            ].idxmin()
+            most_significant_protein = significant_proteins.loc[
+                index_of_most_significant_protein
+            ]
             inputs["protein_id"] = [most_significant_protein["Protein ID"]]
-            self.messages.append({
-                "level": logging.INFO,
-                "msg":
-                    f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
-                    f"from {inputs['protein_list']}"
-            })
+            self.messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                    f"from {inputs['protein_list']}",
+                }
+            )
 
         return inputs
+
+
+class PredictSpectrum(DataAnalysisStep):
+    display_name = "Predict spectra with various models"
+    operation = "spectrum_prediction"
+    method_description = "Predict the MS/MS spectra of a list of peptides using different models. The models are trained on experimental data and predict the intensity of the fragment ions"
+
+    input_keys = [
+        "peptide_df",
+        "model_name",
+        "output_format",
+        "collision_energy",
+        "fragmentation_type",
+        "column_seperator",
+        "output_dir",
+        "file_name",
+    ]
+    output_keys = [
+        "predicted_spectra",
+        "predicted_spectra_metadata",
+        "predicted_spectra_peaks",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return predict(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
+        inputs["output_dir"] = steps.disk_operator.dataframe_dir.absolute()
+        return inputs
+
+
+class PlotPredictedSpectrum(PlotStep):
+    display_name = "Predicted Spectrum Plot"
+    operation = "plot"
+    method_description = "Plot the predicted spectrum of a peptide"
+
+    input_keys = [
+        "metadata_df",
+        "peaks_df",
+        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+        protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+        "annotation_threshold",
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return plot_spectrum(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["metadata_df"] = steps.get_step_output(
+            Step,
+            "predicted_spectra_metadata",
+            instance_identifier=inputs["prediction_df_step_instance"],
+        )
+        inputs["peaks_df"] = steps.get_step_output(
+            Step,
+            "predicted_spectra_peaks",
+            instance_identifier=inputs["prediction_df_step_instance"],
+        )
+        inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE] = int(
+            inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+        )
+        return inputs
+
+
+class PlotMirrorSpectrum(PlotStep):
+    display_name = "Predicted Spectrum Mirror Plot"
+    operation = "plot"
+    method_description = "Plot the predicted spectrum of a peptide"
+
+    input_keys = [
+        "metadata_df",
+        "peaks_df",
+        "plot_df",
+        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+        protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+        "annotation_threshold",
+    ]
+    output_keys = []
+
+    def method(self, inputs: dict) -> dict:
+        return plot_mirror_spectrum(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["metadata_df"] = steps.get_step_output(
+            Step,
+            "predicted_spectra_metadata",
+            instance_identifier=inputs["prediction_df_step_instance"],
+        )
+        inputs["peaks_df"] = steps.get_step_output(
+            Step,
+            "predicted_spectra_peaks",
+            instance_identifier=inputs["prediction_df_step_instance"],
+        )
+        inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE] = int(
+            inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+        )
+
+        extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
+            drop=True
+        )
+        spectrum = extracted_spectrum_df[
+            (
+                extracted_spectrum_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ]
+                == inputs[protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE]
+            )
+            & (
+                extracted_spectrum_df[
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                ]
+                == int(
+                    inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
+                )
+            )
+            & (extracted_spectrum_df["experiment"] == inputs["experiment_name"])
+            & (
+                extracted_spectrum_df["spectra_ref"]
+                == inputs["experiment_spectrum_name"]
+            )
+        ]
+
+        inputs["plot_df"] = spectrum
+
+        return inputs
+
+
+class CompareExperimentalWithPredictedSpectra(PlotStep):
+    """This step requires you to replace the Output of the EvidenceImport with a csv file containing the experimental spectra.
+    The spectrum prediction should predict these spectra, such that they can be compared to one another
+    """
+
+    display_name = "Compare Experimental With Predicted Spectra"
+    operation = "plot"
+    method_description = "Plot the predicted spectrum of a peptide"
+
+    input_keys = [
+        "experimental_df",
+        "predicted_df",
+    ]
+    output_keys = ["comparison_result_df"]
+
+    def method(self, inputs: dict) -> dict:
+        return compare_experimental_with_predicted_spectra(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        pass
+
+        metadata_df = steps.get_step_output(
+            Step,
+            "predicted_spectra_metadata",
+        )
+        peaks_df = steps.get_step_output(
+            Step,
+            "predicted_spectra_peaks",
+        )
+        inputs["predicted_df"] = metadata_df.merge(peaks_df, on="unique_id")
+        extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
+            drop=True
+        )
+        inputs["experimental_df"] = extracted_spectrum_df
 
 
 class PTMsPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of a single protein of interest. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of a single protein of interest. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     input_keys = [
         "peptide_df",
@@ -882,8 +1078,10 @@ class PTMsPerSample(DataAnalysisStep):
 class PTMsProteinAndPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample and Protein"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of all Proteins. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of all Proteins. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     input_keys = [
         "peptide_df",

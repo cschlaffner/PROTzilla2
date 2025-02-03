@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import traceback
 import zipfile
@@ -7,6 +8,7 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
+from django.conf import settings
 from django.http import (
     FileResponse,
     HttpRequest,
@@ -17,11 +19,11 @@ from django.http import (
 )
 from django.shortcuts import render
 from django.urls import reverse
-from django.conf import settings
 
-from protzilla.run import Run, get_available_run_names 
-from protzilla.run_v2 import delete_run_folder
+from protzilla.disk_operator import FileOutput
+from protzilla.run import Run, get_available_run_names
 from protzilla.run_helper import log_messages
+from protzilla.run_v2 import delete_run_folder
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
 from protzilla.utilities.utilities import (
@@ -113,7 +115,9 @@ def detail(request: HttpRequest, run_name: str):
 
     show_table = (
         not run.current_outputs.is_empty
-        and any(isinstance(v, pd.DataFrame) for _, v in run.current_outputs)
+        and any(
+            isinstance(v, (pd.DataFrame, FileOutput)) for _, v in run.current_outputs
+        )
         or any(check_is_path(v) for _, v in run.current_outputs)
     )
 
@@ -232,6 +236,7 @@ def continue_(request: HttpRequest):
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
+
 def delete_(request: HttpRequest):
     """
     Deletes an existing run. The user is redirected to the index page.
@@ -239,15 +244,15 @@ def delete_(request: HttpRequest):
     :param request: the request object
     :type request: HttpRequest
 
-    
+
     :return: the rendered details page of the run
     :rtype: HttpResponse
     """
     run_name = request.POST["run_name"]
     if run_name in active_runs:
         del active_runs[run_name]
-    
-    try: 
+
+    try:
         delete_run_folder(run_name)
     except Exception as e:
         display_message(
@@ -281,7 +286,7 @@ def next_(request, run_name):
     run = active_runs[run_name]
     name = request.POST.get("name", None)
     if name:
-        run.steps.name_current_step_instance(name) 
+        run.steps.name_current_step_instance(name)
     run.step_next()
 
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -355,7 +360,7 @@ def tables(request, run_name, index, key=None):
 
     options = []
     for k, value in outputs:
-        if isinstance(value, pd.DataFrame) and k != key:
+        if isinstance(value, (pd.DataFrame, FileOutput)) and k != key:
             options.append(k)
 
     if key is None and options:
@@ -520,24 +525,33 @@ def tables_content(request, run_name, index, key):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    # TODO this will change with df_mode implementation
     if index < len(run.steps.previous_steps):
         outputs = run.steps.previous_steps[index].output[key]
     else:
         outputs = run.current_outputs[key]
-    out = outputs.replace(np.nan, None)
 
-    if "clean-ids" in request.GET:
-        for column in out.columns:
-            if "protein" in column.lower():
-                out[column] = out[column].map(
-                    lambda group: ";".join(
-                        unique_justseen(map(clean_uniprot_id, group.split(";")))
+    if isinstance(outputs, pd.DataFrame):
+        out = outputs.replace(np.nan, None)
+
+        if "clean-ids" in request.GET:
+            for column in out.columns:
+                if "protein" in column.lower():
+                    out[column] = out[column].map(
+                        lambda group: ";".join(
+                            unique_justseen(map(clean_uniprot_id, group.split(";")))
+                        )
                     )
-                )
-    return JsonResponse(
-        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
-    )
+        return JsonResponse(
+            dict(
+                is_text_content=False,
+                columns=out.to_dict("split")["columns"],
+                data=out.to_dict("split")["data"],
+            )
+        )
+    elif isinstance(outputs, FileOutput):
+        return JsonResponse(dict(is_text_content=True, content=outputs.content))
+    else:
+        return JsonResponse(dict(is_text_content=True, content=str(outputs)))
 
 
 def change_method(request, run_name):

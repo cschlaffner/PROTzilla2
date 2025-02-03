@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from protzilla.constants.ms_constants import DataKeys
 from protzilla.constants.paths import TEST_DATA_PATH
 from protzilla.importing import peptide_import
 
@@ -174,7 +175,9 @@ def test_evidence_import(intensity_name):
     )
 
     pd.testing.assert_frame_equal(
-        outputs["peptide_df"].drop(columns=["PEP"]),
+        outputs["peptide_df"].drop(
+            columns=["PEP", DataKeys.PRECURSOR_CHARGE, DataKeys.PRECURSOR_MZ]
+        ),
         evidence_df(intensity_name).drop(columns=["PEP"]),
         check_dtype=False,
     )

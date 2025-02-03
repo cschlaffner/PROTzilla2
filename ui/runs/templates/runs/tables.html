@@ -4,6 +4,19 @@
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/datatables-1.13.4.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'runs/style.css' %}">
+    <style>
+        .text-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+        }
+    </style>
 {% endblock %}
 
 {% block js %}
@@ -16,29 +29,33 @@
                 data: "{{ clean_ids }}",
                 type: "GET",
                 success: function (response) {
-                    let tr = $("<tr>");
-                    response.columns.forEach(element => {
-                        tr.append($("<th>").text(element))
-                    });
-                    $("#datatable").html($("<thead>").append(tr))
-                        .DataTable({
-                            data: response.data,
-                            columnDefs: [{
-                                targets: "_all",
-                                render: function (data, type, row) {
-                                    if (type !== 'display') {
-                                        return data;
-                                    }
-                                    if (typeof data === 'string' && data.startsWith("https://")) {
-                                        return data.split(' ').map(url => `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`).join(' ')
-                                    }
-                                    if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
-                                        return data.toPrecision(4);
-                                    }
-                                    return `<div style="word-break:break-all">${data}</div>`;
-                                },
-                            }],
+                    if (response.is_text_content) {
+                        $("#datatable").html('<div class="text-content">' + response.content + '</div>');
+                    } else {
+                        let tr = $("<tr>");
+                        response.columns.forEach(element => {
+                            tr.append($("<th>").text(element))
                         });
+                        $("#datatable").html($("<thead>").append(tr))
+                            .DataTable({
+                                data: response.data,
+                                columnDefs: [{
+                                    targets: "_all",
+                                    render: function (data, type, row) {
+                                        if (type !== 'display') {
+                                            return data;
+                                        }
+                                        if (typeof data === 'string' && data.startsWith("https://")) {
+                                            return data.split(' ').map(url => `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`).join(' ')
+                                        }
+                                        if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
+                                            return data.toPrecision(4);
+                                        }
+                                        return `<div style="word-break:break-all">${data}</div>`;
+                                    },
+                                }],
+                            });
+                    }
                 }
             });
             $('#tables_dropdown').on("change", function () {
@@ -47,7 +64,6 @@
         });
     </script>
 {% endblock %}
-
 {% block content %}
     <div class="p-3">
         <p>

@@ -1,16 +1,14 @@
-import logging
 from enum import Enum, StrEnum
 
-from protzilla.methods.data_preprocessing import DataPreprocessingStep
+import pandas as pd
+
+import protzilla.constants.ms_constants
+import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
 from protzilla.methods.data_analysis import (
     DataAnalysisStep,
-    DifferentialExpressionLinearModel,
-    DifferentialExpressionTTest,
     DimensionReductionUMAP,
-    DataAnalysisStep,
     PTMsPerSample,
     SelectPeptidesForProtein,
-    DifferentialExpressionMannWhitneyOnPTM,
 )
 from protzilla.methods.data_preprocessing import DataPreprocessingStep
 from protzilla.run import Run
@@ -25,7 +23,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
-    CustomBooleanField,
+    TextDisplayField,
 )
 
 
@@ -169,7 +167,11 @@ class DifferentialExpressionANOVAForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
@@ -256,7 +258,11 @@ class DifferentialExpressionLinearModelForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
     group1 = CustomChoiceField(choices=[], label="Group 1")
@@ -293,16 +299,18 @@ class DifferentialExpressionLinearModelForm(MethodForm):
 class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
     is_dynamic = True
 
-    protein_df = CustomChoiceField(
-        choices=[], label="Step to use protein data from"
-    )
+    protein_df = CustomChoiceField(choices=[], label="Step to use protein data from")
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     p_value_calculation_method = CustomChoiceField(
         choices=PValueCalculationMethod,
@@ -314,9 +322,13 @@ class DifferentialExpressionMannWhitneyOnIntensityForm(MethodForm):
     group2 = CustomChoiceField(choices=[], label="Group 2")
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
 
-        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -351,7 +363,11 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
     p_value_calculation_method = CustomChoiceField(
         choices=PValueCalculationMethod,
@@ -367,7 +383,9 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
 
-        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
 
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
 
@@ -395,16 +413,18 @@ class DifferentialExpressionMannWhitneyOnPTMForm(MethodForm):
 class DifferentialExpressionKruskalWallisOnIntensityForm(MethodForm):
     is_dynamic = True
 
-    protein_df = CustomChoiceField(
-        choices=[], label="Step to use protein data from"
-    )
+    protein_df = CustomChoiceField(choices=[], label="Step to use protein data from")
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
@@ -413,9 +433,13 @@ class DifferentialExpressionKruskalWallisOnIntensityForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["protein_df"].choices = fill_helper.get_choices_for_protein_df_steps(run)
+        self.fields[
+            "protein_df"
+        ].choices = fill_helper.get_choices_for_protein_df_steps(run)
 
-        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -425,16 +449,18 @@ class DifferentialExpressionKruskalWallisOnIntensityForm(MethodForm):
 class DifferentialExpressionKruskalWallisOnPTMForm(MethodForm):
     is_dynamic = True
 
-    ptm_df = CustomChoiceField(
-        choices=[], label="Step to use ptm data from"
-    )
+    ptm_df = CustomChoiceField(choices=[], label="Step to use ptm data from")
     multiple_testing_correction_method = CustomChoiceField(
         choices=MultipleTestingCorrectionMethod,
         label="Multiple testing correction",
         initial=MultipleTestingCorrectionMethod.benjamini_hochberg,
     )
     alpha = CustomFloatField(
-        label="Error rate (alpha)", min_value=0, max_value=1, step_size=0.01, initial=0.05
+        label="Error rate (alpha)",
+        min_value=0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.05,
     )
 
     grouping = CustomChoiceField(choices=[], label="Grouping from metadata")
@@ -446,7 +472,9 @@ class DifferentialExpressionKruskalWallisOnPTMForm(MethodForm):
         self.fields["ptm_df"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(PTMsPerSample, "ptm_df")
         )
-        self.fields["grouping"].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
+        self.fields[
+            "grouping"
+        ].choices = fill_helper.get_choices_for_metadata_non_sample_columns(run)
         grouping = self.data.get("grouping", self.fields["grouping"].choices[0][0])
         self.fields["selected_groups"].choices = fill_helper.to_choices(
             run.steps.metadata_df[grouping].unique()
@@ -471,7 +499,8 @@ class PlotVolcanoForm(MethodForm):
     def fill_form(self, run: Run) -> None:
         self.fields["input_dict"].choices = fill_helper.to_choices(
             run.steps.get_instance_identifiers(
-                Step, ["corrected_p_values_df", "log2_fold_change_df"],
+                Step,
+                ["corrected_p_values_df", "log2_fold_change_df"],
             )
         )
 
@@ -491,7 +520,9 @@ class PlotVolcanoForm(MethodForm):
         if step_output is not None:
             items_of_interest = step_output["PTM"].unique()
 
-        self.fields["items_of_interest"].choices = fill_helper.to_choices(items_of_interest)
+        self.fields["items_of_interest"].choices = fill_helper.to_choices(
+            items_of_interest
+        )
 
 
 class PlotScatterPlotForm(MethodForm):
@@ -809,7 +840,7 @@ class ClassificationRandomForestForm(MethodForm):
     # TODO: Workflow_meta line 1763
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1770
@@ -897,7 +928,7 @@ class ClassificationSVMForm(MethodForm):
     )
     train_val_split = CustomNumberField(
         label="Choose the size of the validation data set (you can either enter the absolute number of validation "
-              "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
+        "samples or a number between 0.0 and 1.0 to represent the percentage of validation samples)",
         initial=0.20,
     )
     # TODO: Workflow_meta line 1973
@@ -1014,7 +1045,7 @@ class DimensionReductionUMAPForm(MethodForm):
     )
     n_neighbors = CustomNumberField(
         label="The size of local neighborhood (in terms of number of neighboring sample points) used for manifold "
-              "approximation",
+        "approximation",
         min_value=2,
         max_value=100,
         step_size=1,
@@ -1055,7 +1086,7 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
     k = CustomNumberField(label="k-mer length", min_value=1, step_size=1, initial=5)
     allowed_mismatches = CustomNumberField(
         label="Number of allowed mismatched amino acids per peptide. For many allowed mismatches, this can take a "
-              "long time.",
+        "long time.",
         min_value=0,
         step_size=1,
         initial=2,
@@ -1111,6 +1142,291 @@ class FLEXIQuantLFForm(MethodForm):
         )
 
 
+class PredictSpectrumForm(MethodForm):
+    is_dynamic = True
+    model_name = CustomChoiceField(
+        choices=fill_helper.to_choices(spu.PredictionModels),
+        label="Choose the deep learning model to predict with",
+    )
+    model_info = TextDisplayField(
+        label="Model info", text=""
+    )  # we dynamically fill this in fill_form
+    output_format = CustomChoiceField(
+        choices=fill_helper.to_choices(spu.OutputFormats),
+        label="The format of the output file",
+    )
+    collision_energy = CustomNumberField(
+        label="Collision energy",
+        min_value=1,
+        max_value=1000,
+        step_size=1,
+        initial=30,
+    )
+    fragmentation_type = CustomChoiceField(
+        label="Fragmentation type",
+        choices=fill_helper.to_choices(
+            protzilla.constants.ms_constants.FragmentationType
+        ),
+    )
+    column_seperator = CustomChoiceField(
+        label="Output file column seperator",
+        choices=fill_helper.to_choices(spu.GenericTextSeparator),
+    )
+    file_name = CustomCharField(
+        label="Output file name (please choose a descriptive name)",
+        initial="predicted_spectra",
+    )
+
+    def fill_form(self, run: Run) -> None:
+        current_model = self.get_field("model_name")
+        current_output_format = self.get_field("output_format")
+        show_collision_energy = current_model != spu.PredictionModels.PROSITINTENSITYCID
+        show_fragmentation_type = (
+            current_model == spu.PredictionModels.PROSITINTENSITYTMT
+        )
+        show_column_seperator = current_output_format == spu.OutputFormats.CSV_TSV
+        self.fields["model_info"].update_text(
+            spu.formatted_citation_dict[current_model]
+        )
+        self.toggle_visibility("collision_energy", show_collision_energy)
+        self.toggle_visibility("fragmentation_type", show_fragmentation_type)
+        self.toggle_visibility("column_seperator", show_column_seperator)
+
+
+class PlotPredictedSpectrumForm(MethodForm):
+    is_dynamic = True
+    import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
+
+    prediction_df_step_instance = CustomChoiceField(
+        choices=[],
+        label="Choose the prediction dataframe",
+    )
+
+    peptide_sequences = CustomChoiceField(
+        choices=[],
+        label="Choose the peptide to plot",
+    )
+    precursor_charges = CustomChoiceField(
+        choices=[],
+        label="Choose the charge of the peptide",
+    )
+
+    annotation_threshold = CustomFloatField(
+        label="Annotation threshold (peaks with intensity below this value will not be annotated)",
+        min_value=0.0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.2,
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["prediction_df_step_instance"].choices = fill_helper.get_choices(
+            run, spu.OutputsPredictFunction.PREDICTED_SPECTRA, Step
+        )
+        prediction_df_instance = self.data.get(
+            "input_df", self.fields["prediction_df_step_instance"].choices[0][0]
+        )
+        if prediction_df_instance is None:
+            raise ValueError("No prediction dataframe found")
+
+        prediction_df = run.steps.get_step_output(
+            Step,
+            spu.OutputsPredictFunction.PREDICTED_SPECTRA_METADATA,
+            prediction_df_instance,
+        )
+
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        ].choices = fill_helper.to_choices(
+            sorted(
+                prediction_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ].unique()
+            )
+        )
+
+        peptide_sequence = self.data.get(
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+            self.fields[
+                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+            ].choices[0][0],
+        )
+
+        if peptide_sequence is None:
+            raise ValueError("No peptide found")
+
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+        ].choices = fill_helper.to_choices(
+            prediction_df[
+                prediction_df[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ]
+                == peptide_sequence
+            ][protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE].unique()
+        )
+
+
+class PlotMirrorSpectrumForm(MethodForm):
+    import pandas as pd
+
+    is_dynamic = True
+    import protzilla.data_analysis.spectrum_prediction.spectrum_prediction_utils as spu
+
+    prediction_df_step_instance = CustomChoiceField(
+        choices=[],
+        label="Choose the prediction dataframe",
+    )
+
+    peptide_sequences = CustomChoiceField(
+        choices=[],
+        label="Choose the peptide",
+    )
+
+    precursor_charges = CustomChoiceField(
+        choices=[],
+        label="Choose the charge",
+    )
+
+    experiment_name = CustomChoiceField(
+        choices=[],
+        label="Choose the experiment name",
+    )
+
+    experiment_spectrum_name = CustomChoiceField(
+        choices=[],
+        label="Choose the spectrum of the experiment",
+    )
+
+    annotation_threshold = CustomFloatField(
+        label="Annotation threshold (peaks with intensity below this value will not be annotated)",
+        min_value=0.0,
+        max_value=1,
+        step_size=0.01,
+        initial=0.2,
+    )
+
+    def fill_form(self, run: Run) -> None:
+        self.fields["prediction_df_step_instance"].choices = fill_helper.get_choices(
+            run, spu.OutputsPredictFunction.PREDICTED_SPECTRA, Step
+        )
+        prediction_df_instance = self.data.get(
+            "prediction_df_step_instance",
+            self.fields["prediction_df_step_instance"].choices[0][0],
+        )
+        if prediction_df_instance is None:
+            raise ValueError("No prediction dataframe found")
+
+        prediction_df = run.steps.get_step_output(
+            Step,
+            spu.OutputsPredictFunction.PREDICTED_SPECTRA_METADATA,
+            prediction_df_instance,
+        )
+
+        extracted_spectrum_df = run.steps.get_step_output(Step, "peptide_df")
+
+        # Find common peptides and charges
+        common_peptide_charges = pd.merge(
+            prediction_df[
+                [
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+                ]
+            ],
+            extracted_spectrum_df[
+                [
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+                ]
+            ],
+            on=[
+                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
+            ],
+        ).drop_duplicates()
+
+        # Populate peptide choices
+        self.fields[
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        ].choices = fill_helper.to_choices(
+            sorted(
+                common_peptide_charges[
+                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                ].unique()
+            )
+        )
+
+        selected_peptide = self.get_field(
+            protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+        )
+        if selected_peptide:
+            # Populate charge choices based on selected peptide
+            self.fields[
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+            ].choices = fill_helper.to_choices(
+                common_peptide_charges[
+                    common_peptide_charges[
+                        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                    ]
+                    == selected_peptide
+                ][protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE].unique()
+            )
+
+            selected_charge = self.get_field(
+                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+            )
+            if selected_charge:
+                # Populate experiment_name choices
+                self.fields["experiment_name"].choices = fill_helper.to_choices(
+                    extracted_spectrum_df[
+                        (
+                            extracted_spectrum_df[
+                                protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                            ]
+                            == selected_peptide
+                        )
+                        & (
+                            extracted_spectrum_df[
+                                protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                            ]
+                            == int(selected_charge)
+                        )
+                    ]["experiment"].unique()
+                )
+
+                selected_experiment = self.get_field("experiment_name")
+                if selected_experiment:
+                    # Populate experiment_spectrum_name choices
+                    self.fields[
+                        "experiment_spectrum_name"
+                    ].choices = fill_helper.to_choices(
+                        extracted_spectrum_df[
+                            (
+                                extracted_spectrum_df[
+                                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
+                                ]
+                                == selected_peptide
+                            )
+                            & (
+                                extracted_spectrum_df[
+                                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
+                                ]
+                                == int(selected_charge)
+                            )
+                            & (
+                                extracted_spectrum_df["experiment"]
+                                == selected_experiment
+                            )
+                        ]["spectra_ref"].unique()
+                    )
+
+
+class CompareExperimentalWithPredictedSpectraForm(MethodForm):
+    """
+    This does not have any parameters.
+    """
+
+
 class SelectPeptidesForProteinForm(MethodForm):
     is_dynamic = True
 
@@ -1148,13 +1464,17 @@ class SelectPeptidesForProteinForm(MethodForm):
 
         selected_auto_select = self.data.get("auto_select")
 
-        choices = fill_helper.to_choices([] if selected_auto_select else ["all proteins"])
-        choices.extend(fill_helper.get_choices(
-            run, "significant_proteins_df", DataAnalysisStep
-        ))
+        choices = fill_helper.to_choices(
+            [] if selected_auto_select else ["all proteins"]
+        )
+        choices.extend(
+            fill_helper.get_choices(run, "significant_proteins_df", DataAnalysisStep)
+        )
         self.fields["protein_list"].choices = choices
 
-        chosen_list = self.data.get("protein_list", self.fields["protein_list"].choices[0][0])
+        chosen_list = self.data.get(
+            "protein_list", self.fields["protein_list"].choices[0][0]
+        )
         if not selected_auto_select:
             self.toggle_visibility("sort_proteins", True)
             self.toggle_visibility("protein_ids", True)
@@ -1168,7 +1488,9 @@ class SelectPeptidesForProteinForm(MethodForm):
                     self.fields["protein_ids"].choices = fill_helper.to_choices(
                         run.steps.get_step_output(
                             DataAnalysisStep, "significant_proteins_df", chosen_list
-                        ).sort_values(by="corrected_p_value")["Protein ID"].unique()
+                        )
+                        .sort_values(by="corrected_p_value")["Protein ID"]
+                        .unique()
                     )
                 else:
                     self.fields["protein_ids"].choices = fill_helper.to_choices(
@@ -1188,9 +1510,7 @@ class PTMsPerSampleForm(MethodForm):
     )
 
     def fill_form(self, run: Run) -> None:
-        self.fields["peptide_df"].choices = fill_helper.get_choices(
-            run, "peptide_df"
-        )
+        self.fields["peptide_df"].choices = fill_helper.get_choices(run, "peptide_df")
 
         single_protein_peptides = run.steps.get_instance_identifiers(
             SelectPeptidesForProtein, "peptide_df"

@@ -1,3 +1,5 @@
+import re
+
 from protzilla.run import Run
 from protzilla.steps import Step
 
@@ -34,3 +36,15 @@ def get_choices_for_metadata_non_sample_columns(run: Run) -> list[tuple[str, str
             run.steps.metadata_df.columns != "Sample"
         ].unique()
     )
+
+
+def enclose_links_in_html(text):
+    url_pattern = r"(https?://\S+|www\.\S+)"
+
+    def replace_with_href(match):
+        url = match.group(0)
+        if url.startswith("www."):
+            url = "http://" + url
+        return f'<a href="{url}">{url}</a>'
+
+    return re.sub(url_pattern, replace_with_href, text)
