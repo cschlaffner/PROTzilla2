@@ -1,5 +1,3 @@
-import logging
-
 from protzilla.methods.data_preprocessing import ImputationByMinPerProtein
 from protzilla.methods.importing import MaxQuantImport
 
@@ -92,12 +90,7 @@ class TestRun:
         step = ImputationByMinPerProtein()
         run_imported.step_add(step)
         run_imported.step_goto(0, "data_preprocessing")
-        assert any(
-            message["level"] == logging.ERROR and "ValueError" in message["msg"]
-            for message in run_imported.current_messages
-        ), "No error messages found in run.current_messages"
-        assert run_imported.current_step != step
-        run_imported.step_next()
+        assert run_imported.current_messages.empty
         assert run_imported.current_step == step
         run_imported.step_goto(0, "importing")
         assert run_imported.current_step == run_imported.steps.all_steps[0]
