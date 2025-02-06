@@ -153,6 +153,16 @@ def clear_messages(request):
 
 
 def get_filtered_data(run, index, key, reset=False):
+    """
+    Retrieves the corresponding output data and creates a copy for the filtered data in the data table
+
+    :param run: the corresponding run
+    :param index: the index of the current step
+    :param key: the key of the datatable
+    :param reset: the option to reload the real output data
+
+    :return: a dict with the filtered data for the table 
+    """
     if index < len(run.steps.previous_steps):
         if key not in run.steps.previous_steps[index].datatable_filtered_output or reset:
             outputs = run.steps.previous_steps[index].output[key]
@@ -174,6 +184,14 @@ def get_filtered_data(run, index, key, reset=False):
     return filtered_data
 
 def set_filtered_data(run, index, key, filtered_data):
+    """
+    Saves the filtered data from the table
+    
+    :param run: the corresponding run
+    :param index: the index of the current step
+    :param key: the key of the datatable
+    :param filtered_data: the filtered data from the table 
+    """
     if index < len(run.steps.previous_steps):
         run.steps.previous_steps[index].datatable_filtered_output[key] = filtered_data
     else:

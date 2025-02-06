@@ -534,27 +534,28 @@ def tables_content(request, run_name, index, key):
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
-    filtered_data  = get_filtered_data(run, index, key)
+    filtered_data = get_filtered_data(run, index, key)
 
     if request.GET.get("is_new_search", "false").lower() == "true":
-        filtered_data  = get_filtered_data(run, index, key, reset=True)
+        filtered_data = get_filtered_data(run, index, key, reset=True)
         search_query = request.GET.get("search_query", "").lower()
         if search_query:
-            mask = filtered_data .astype(str).stack().str.contains(search_query, case=False, na=False).unstack()
-            filtered_data  = filtered_data [mask.any(axis=1)]
+            mask = filtered_data.astype(str).stack().str.contains(search_query, case=False, na=False).unstack()
+            filtered_data = filtered_data [mask.any(axis=1)]
             set_filtered_data(run, index, key, filtered_data )
 
     if request.GET.get("is_new_sorting", "false").lower() == "true":
-        sorting_column_idx = int(request.GET.get("sorting_column_index", "0").lower())
+        sorting_column_idx = int(request.GET.get("sorting_column_index", "0"))
         is_sort_ascending = request.GET.get("is_sort_ascending", "true").lower() == "true"
-        column_name = filtered_data .columns[sorting_column_idx]
-        filtered_data  = filtered_data .sort_values(by=column_name, ascending=is_sort_ascending)
+        primary_column = filtered_data.columns[sorting_column_idx]
+        secondary_column = filtered_data.columns[0]
+        filtered_data = filtered_data.sort_values(by=[primary_column, secondary_column], ascending=[is_sort_ascending, True])
         set_filtered_data(run, index, key, filtered_data )
   
     if "clean-ids" in request.GET:
-        for column in filtered_data .columns:
+        for column in filtered_data.columns:
             if "protein" in column.lower():
-                filtered_data [column] = filtered_data [column].map(
+                filtered_data[column] = filtered_data[column].map(
                     lambda group: ";".join(
                         unique_justseen(map(clean_uniprot_id, group.split(";")))
                     )
@@ -565,9 +566,9 @@ def tables_content(request, run_name, index, key):
 
     total_items = len(filtered_data )
     total_pages = (total_items + rows_per_page - 1) // rows_per_page
-    start_idy = (current_page - 1) * rows_per_page
-    end_idy = start_idy + rows_per_page
-    paginated_data = filtered_data .iloc[start_idy:end_idy]
+    start_id_y = (current_page - 1) * rows_per_page
+    end_id_y = start_id_y + rows_per_page
+    paginated_data = filtered_data .iloc[start_id_y:end_id_y]
 
     response_data = {
         "columns": paginated_data.to_dict("split")["columns"],
@@ -575,8 +576,8 @@ def tables_content(request, run_name, index, key):
         "page": current_page,
         "total_pages": total_pages,
         "total_items": total_items,
-        "start_item": start_idy + 1,
-        "end_item": min(end_idy, total_items)
+        "start_item": start_id_y + 1,
+        "end_item": min(end_id_y, total_items)
     }
     return JsonResponse(response_data)
 

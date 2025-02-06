@@ -35,7 +35,7 @@ class Step:
         self.inputs: dict = {}
         self.messages: Messages = Messages([])
         self.output: Output = Output()
-        self.datatable_filtered_data: dict = {}
+        self.filtered_datatable: dict = {}
         self.plots: Plots = Plots()
         self.instance_identifier = instance_identifier
 
