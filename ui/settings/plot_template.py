@@ -6,7 +6,9 @@ from protzilla.disk_operator import YamlOperator
 from protzilla.constants.colors import PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR
 from protzilla.constants.paths import SETTINGS_PATH
 
+
 SCALED_WIDTH = 600
+template = None
 
 def load_settings(section_id: str) -> dict:
     """
