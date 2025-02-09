@@ -1,6 +1,5 @@
 import pytest
 import plotly.graph_objects as go
-from unittest.mock import patch, MagicMock
 
 from protzilla.constants.colors import PLOT_PRIMARY_COLOR, PLOT_SECONDARY_COLOR
 from protzilla.constants.paths import SETTINGS_PATH

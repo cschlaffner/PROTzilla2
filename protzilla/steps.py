@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.io as pio
 import plotly.graph_objects as go
-from PIL import Image, features
+from PIL import Image
 
 from protzilla.utilities import format_trace
 
