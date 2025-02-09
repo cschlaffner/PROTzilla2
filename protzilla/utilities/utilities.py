@@ -11,6 +11,7 @@ from string import ascii_letters
 import pandas as pd
 import psutil
 
+from django.http import QueryDict
 
 # recipie from https://docs.python.org/3/library/itertools.html
 def unique_justseen(iterable, key=None):
@@ -138,7 +139,12 @@ def get_file_name_from_upload_path(upload_path: str) -> str:
     return f"{base_name}.{file_extension}"
 
 
-def parameters_from_post(post):
+def parameters_from_post(post: QueryDict) -> dict:
+    """
+    Removes token from dict and converts the remaining entries into suitable data formats.
+    :param post: Django dict containing POST data.
+    :return: Dict containing the parameters in suitable formats.
+    """
     d = dict(post)
     if "csrfmiddlewaretoken" in d:
         del d["csrfmiddlewaretoken"]
@@ -153,6 +159,11 @@ def parameters_from_post(post):
 
 
 def convert_str_if_possible(s):
+    """
+    Converts an input value into suitable representation as a string.
+    :param s: Input value.
+    :return: Converted input value.
+    """
     try:
         f = float(s)
         return int(f) if int(f) == f else f

@@ -281,6 +281,7 @@ class Plots:
     def export(self, settings: dict) -> list:
         """
         Converts all plots from this step to files according to the format and size in the Plotly template.
+        An exported plot is represented as BytesIO object containing binary image data.
         :param settings: Dict containing the plot settings.
         :return: List of all exported plots.
         """
