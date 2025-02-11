@@ -68,7 +68,7 @@ def scatter_plot(
         fig.update_layout(plot_bgcolor=colors["plot_bgcolor"])
         fig.update_xaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
         fig.update_yaxes(gridcolor=colors["gridcolor"], linecolor=colors["linecolor"])
-        return [fig]
+        return dict(plots=[fig])
     except ValueError as e:
         msg = ""
         if intensity_df_wide.shape[1] < 2:
@@ -179,7 +179,7 @@ def create_volcano_plot(
         selector=dict(name=f"Not Significant {item_type}s"),
     )
 
-    return [fig]
+    return dict(plots=[fig])
 
 
 def clustergram_plot(
@@ -258,7 +258,7 @@ def clustergram_plot(
         clustergram.update_layout(
             autosize=True,
         )
-        return [clustergram]
+        return dict(plots=[clustergram])
     except AssertionError as e:
         if not isinstance(input_df, pd.DataFrame):
             msg = (
@@ -457,4 +457,4 @@ def prot_quant_plot(
         ),
     )
 
-    return [fig]
+    return dict(plots=[fig])

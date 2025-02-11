@@ -715,9 +715,8 @@ def test_GO_analysis_offline_no_protein_sets():
         proteins_df=proteins_df,
         gene_sets_path="",
         differential_expression_col="fold_change",
-        direction="up",
-        background=None,
         gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
+        direction="up",
     )
 
     assert "messages" in current_out
@@ -736,7 +735,6 @@ def test_GO_analysis_offline_invalid_protein_set_file():
         gene_sets_path="an_invalid_filetype.png",
         differential_expression_col="fold_change",
         direction="up",
-        background="",
         gene_mapping_df=pd.DataFrame(columns=["Protein ID", "Gene"]),
     )
 
