@@ -8,6 +8,10 @@ from protzilla.constants.paths import SETTINGS_PATH
 
 
 SCALED_WIDTH = 600
+PT_TO_INCH = 1 / 72
+INCH_TO_MM = 25.4
+DPI = 300
+
 template = None
 
 def load_settings(section_id: str) -> dict:
@@ -62,10 +66,9 @@ def resize_for_display(params: dict) -> dict:
     display_height = int(SCALED_WIDTH / ratio)
     
     # Font size
-    pt_to_mm = 1 / 72 * 24.5
     ratio = SCALED_WIDTH / params["width"]
-    display_heading = int(params["heading_size"] * pt_to_mm * ratio)
-    display_text = int(params["text_size"] * pt_to_mm * ratio)
+    display_heading = int(params["heading_size"] * PT_TO_INCH * INCH_TO_MM * ratio)
+    display_text = int(params["text_size"] * PT_TO_INCH * INCH_TO_MM * ratio)
 
     params["display_width"] = SCALED_WIDTH
     params["display_height"] = display_height
@@ -84,9 +87,8 @@ def get_scale_factor(
     :param params: Dict containing the plot settings.
     :return: Scale factor to scale the whole plot to desired size.
     """
-    dpi = 300
     current_width = fig.layout.width or SCALED_WIDTH
-    scale_factor = (params["width"] / 24.5 * dpi) / current_width
+    scale_factor = (params["width"] / INCH_TO_MM * DPI) / current_width
 
     return scale_factor
 

@@ -14,9 +14,7 @@ $( document ).ready(function () {
     });
 
     $("#customFontInput").click(function () {
-        const radio = document.getElementById('customFontRadio');
-        const input = document.getElementById('customFontInput');
-        radio.checked = true;
+        $("#customFontRadio").prop("checked", true);
     });
 
     $(".action-button").each(function () {
