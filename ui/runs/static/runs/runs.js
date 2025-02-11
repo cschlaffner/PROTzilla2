@@ -48,7 +48,6 @@ $(document).ready(function () {
             data: $(this).serialize(),
             success: function(response) {
                 for (let i=0; i<response.count; i++) {
-                    console.log("gg")
                     $(`#calculationIcon_${index+i} img`).attr('src', `${staticUrl}${response.status}_icon.svg`);
                 }
                 

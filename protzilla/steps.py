@@ -30,7 +30,7 @@ class Step:
     method_description: str = None
     input_keys: list[str] = []
     output_keys: list[str] = []
-    calculation_status: Literal["complete","outdated","incomplete","failed"] = "incomplete"
+    calculation_status: Literal["complete", "outdated", "incomplete", "failed"] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
@@ -115,7 +115,6 @@ class Step:
                 )
             )
         except Exception as e:
-            if str(e)!="":
                 self.messages.append(
                     dict(
                         level=logging.ERROR,
@@ -162,7 +161,7 @@ class Step:
             if message["level"] == logging.ERROR:
                 self.calculation_status = "failed"
                 steps.failed_step_index = stepIndex
-                raise Exception("")
+                raise Exception("Calculation failed")
 
     def plot(self, inputs: dict = None) -> None:
         raise NotImplementedError(
@@ -444,7 +443,7 @@ class StepManager:
         """
         Get the specific input of the inputs of a specific step type. The step type can also a parent class of the
         step type, in which case the input of the most recent step of the specific type is returned.
-        :param step_type: The type of the step as a class objectresults_exist
+        :param step_type: The type of the step as a class object
         :param input_key: The key of the desired input in the input dictionary of the step
         :return: The value of the input of the step or None
         """
@@ -477,8 +476,8 @@ class StepManager:
         else:
             raise ValueError(f"Unknown section {section}")
     
-    def set_steps_outdated(self, offset:int) -> None:
-        count=0
+    def set_steps_outdated(self, offset: int) -> None:
+        count = 0
         for step in self.following_steps[offset:]:
             if (step.calculation_status == "complete"):
                 step.calculation_status = "outdated"

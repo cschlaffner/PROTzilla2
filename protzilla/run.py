@@ -168,7 +168,7 @@ class Run:
         self.steps.goto_step(step_index, section)
 
     @error_handling
-    def step_set_outdated(self,offset: int = 0) -> int:
+    def step_set_outdated(self, offset: int = 0) -> int:
         return self.steps.set_steps_outdated(offset)
 
     @error_handling

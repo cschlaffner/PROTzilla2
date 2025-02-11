@@ -699,7 +699,7 @@ def update_form(request: HttpRequest, run_name:str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
-    count=0
+    count = 0
     if (run.current_step.calculation_status == "complete"):
         count = run.step_set_outdated()
     method_form = get_filled_form_by_request(

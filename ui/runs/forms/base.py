@@ -98,11 +98,9 @@ class MethodForm(Form):
                 self.fields[field_name] = field
                 self.cleaned_data[field_name] = None
     def submit(self, run: Run) -> None:
-        print("submit", self)
         self.add_missing_fields()
         run.step_calculate(self.cleaned_data)
 
     def update_form(self, run: Run) -> None:
-        print("update", self)
         self.add_missing_fields()
         run.update_inputs(self.cleaned_data)
