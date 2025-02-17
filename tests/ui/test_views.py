@@ -106,7 +106,7 @@ def test_all_button_parameters():
 
 
 def test_step_finished(run_standard):
-    assert not run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "incomplete"
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/proteinGroups_small_cut.txt",
@@ -116,11 +116,11 @@ def test_step_finished(run_standard):
     }
     run_standard.step_calculate(parameters)
 
-    assert run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "complete"
 
     run_standard.step_next()
 
-    assert not run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "incomplete"
 
     parameters = {
         "file_path": f"",
@@ -128,7 +128,7 @@ def test_step_finished(run_standard):
     }
     run_standard.step_calculate(parameters)
 
-    assert not run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "failed"
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/nonexistent_file.txt",
@@ -136,7 +136,7 @@ def test_step_finished(run_standard):
     }
     run_standard.step_calculate(parameters)
 
-    assert not run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "failed"
 
     parameters = {
         "file_path": f"{PROJECT_PATH}/tests/metadata_cut_columns.csv",
@@ -144,4 +144,4 @@ def test_step_finished(run_standard):
     }
     run_standard.step_calculate(parameters)
 
-    assert run_standard.current_step.finished
+    assert run_standard.current_step.calculation_status == "complete"

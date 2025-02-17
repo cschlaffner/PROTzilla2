@@ -39,4 +39,5 @@ urlpatterns = [
         views.download_table,
         name="download_table",
     ),
+    path("<str:run_name>/update_form", views.update_form, name="update_form"),
 ]

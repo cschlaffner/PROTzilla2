@@ -41,11 +41,7 @@ def mock_perform_method(runner: Runner):
         mock_perform.methods.append(str(runner.run.current_step))
         mock_perform.inputs.append(runner.run.current_step.inputs)
 
-        # side effect to mark the step as finished
-        runner.run.current_step.output = Output(
-            {key: "mock_output_value" for key in runner.run.current_step.output_keys})
-        if len(runner.run.current_step.output_keys) == 0:
-            runner.run.current_step.plots = Plots(["mock_plot"])
+        runner.run.current_step.calculation_status = "complete"
 
     mock_perform.side_effect = mock_current_parameters
 

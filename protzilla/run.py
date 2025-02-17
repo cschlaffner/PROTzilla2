@@ -146,6 +146,11 @@ class Run:
 
     @error_handling
     @auto_save
+    def update_inputs(self, inputs: dict) -> None:
+        self.steps.current_step.updateInputs(inputs)
+
+    @error_handling
+    @auto_save
     def step_plot(self, inputs: dict | None = None) -> None:
         self.steps.current_step.plot(inputs)
 
@@ -161,6 +166,10 @@ class Run:
     @error_handling
     def step_goto(self, step_index: int, section: str) -> None:
         self.steps.goto_step(step_index, section)
+
+    @error_handling
+    def step_set_outdated(self, offset: int = 0) -> int:
+        return self.steps.set_steps_outdated(offset)
 
     @error_handling
     @auto_save

@@ -57,10 +57,12 @@ def get_displayed_steps(
                     "id": step.operation,
                     "name": name_to_title(step.operation),
                     "index": index_in_section,
+                    "index_global": index_global,
                     "section": step.section,
                     "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
+                    "calculation_icon_path": "img/" + step.calculation_status + "_icon.svg"
                 }
             )
 
@@ -93,6 +95,7 @@ def get_displayed_steps(
                 "steps": workflow_steps,
                 "selected": steps.current_section == section,
                 "finished": index_global - 1 < steps.current_step_index,
+                "calculation_status": step.calculation_status,
             }
         )
     return displayed_steps
