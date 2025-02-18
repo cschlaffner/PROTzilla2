@@ -224,7 +224,7 @@
                 {% if current_plots %}
                     <div class="mt-4" id="plots">
                         {% for plot in current_plots %}
-                            <div class="plot-wrapper">
+                            <div class="plot-wrapper mb-2">
                                 {{ plot|safe }}
                             </div>
                         {% endfor %}
@@ -234,15 +234,13 @@
                     <div class="d-flex col">
                         {% if current_plots %}
                             <form action="{% url 'runs:download_plots' run_name %}">
-                                <select class="form-select mb-2" name="format">
-                                    <option value="png" selected="selected">png</option>
-                                    <option value="tiff">tiff</option>
-                                    <option value="svg">svg</option>
-                                    <option value="pdf">pdf</option>
-                                    <option value="eps">eps</option>
-                                    <option value="jpg">jpg</option>
-                                </select>
-                                <button class="btn btn-grey">Download plots</button>
+                                <button class="btn btn-grey d-flex align-items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                    </svg>
+                                    Download plots
+                                </button>
                             </form>
                         {% endif %}
                     </div>
@@ -287,11 +285,11 @@
                                                             Do you want to proceed?
                                                             <hr>
                                                             <a href="{% url 'runs:back' run_name %}" id = "backButton" class="btn btn-red mr-auto">Back</a>
-                                                            <button id= "cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <button id="cancel" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
                                         {% endif %}
                                         {% if not last_step %}
                                           <button class="btn btn-red" {% if not results_exist %} disabled {% endif %} >Next</button>

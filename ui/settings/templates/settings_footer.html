@@ -1,0 +1,34 @@
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'settings_style.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="footer border-top mt-3 row align-items-center">
+        <div class="justify-content-end d-flex col flex-column">
+            <div class="col">
+                <div class="justify-content-end d-flex">
+                    <div class="form-group">
+                        <a id="cancel" href="{% url 'settings:last_view' %}" class="btn btn-grey mr-auto">Cancel</a>
+                        <button type="button" class="btn btn-red mr-auto action-button" data-action="{% url 'settings:save' %}">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="unsavedChangesModal" tabindex="-1" role="dialog" aria-labelledby="unsavedChangesModalLabel" aria-hidden="true" style="display: none;" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unsavedChangesModalLabel">Unsaved Changes</h5>
+                </div>
+                <div class="modal-body">
+                    <p>There are changes that haven't been saved yet. Are you sure you want to discard all changes?</p>
+                    <a id="back" href="{% url 'settings:last_view' %}" class="btn btn-grey mr-auto">Discard Changes</a>
+                    <button id= "back" type="button" class="btn btn-red mr-auto" data-bs-dismiss="modal">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

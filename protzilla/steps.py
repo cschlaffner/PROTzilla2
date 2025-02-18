@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
-import plotly
+import plotly.io as pio
+import plotly.graph_objects as go
 from PIL import Image
 
 from protzilla.utilities import format_trace
@@ -284,33 +285,47 @@ class Plots:
     def empty(self) -> bool:
         return len(self.plots) == 0
 
-    def export(self, format_):
+    def export(self, settings: dict) -> list:
+        """
+        Converts all plots from this step to files according to the format and size in the Plotly template.
+        An exported plot is represented as BytesIO object containing binary image data.
+        :param settings: Dict containing the plot settings.
+        :return: List of all exported plots.
+        """
+        from ui.settings.plot_template import get_scale_factor
         exports = []
+        format_ = settings["file_format"]
+        
         for plot in self.plots:
-            if isinstance(plot, plotly.graph_objs.Figure):
-                if format_ in ["eps", "tiff"]:
-                    png_binary = plotly.io.to_image(plot, format="png", scale=4)
-                    img = Image.open(BytesIO(png_binary)).convert("RGB")
+            scale_factor = get_scale_factor(plot, settings)
+            # For Plotly GO Figure
+            if isinstance(plot, go.Figure):
+                if format_ in ["tiff", "eps"]:
+                    binary_png = pio.to_image(plot, format="png", scale=scale_factor)
+                    img = Image.open(BytesIO(binary_png)).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
+                    elif format_ == "eps":
                         img.save(binary, format=format_)
+                    binary.seek(0)
                     exports.append(binary)
                 else:
-                    binary_string = plotly.io.to_image(plot, format=format_, scale=4)
-                    exports.append(BytesIO(binary_string))
+                    binary_png = pio.to_image(plot, format=format_, scale=scale_factor)
+                    exports.append(BytesIO(binary_png))
             elif isinstance(plot, dict) and "plot_base64" in plot:
                 plot = plot["plot_base64"]
 
-            if isinstance(plot, bytes):  # base64 encoded plots
-                if format_ in ["eps", "tiff"]:
+            # TO DO: Include scale_factor here
+            # For base64 encoded plot
+            if isinstance(plot, bytes):
+                if format_ in ["tiff", "eps"]:
                     img = Image.open(BytesIO(base64.b64decode(plot))).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
-                        img.save(binary, format=format_)
+                    elif format_ == "eps":
+                        img.save(binary, format="eps")
                     binary.seek(0)
                     exports.append(binary)
                 elif format_ in ["png", "jpg"]:

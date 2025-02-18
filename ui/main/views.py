@@ -19,6 +19,7 @@ def index(request):
 
 
 def databases(request):
+    request.session['last_view'] = "databases"
     databases = uniprot_databases()
     df_infos = {}
     if database_metadata_path.exists():

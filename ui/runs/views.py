@@ -29,6 +29,7 @@ from protzilla.utilities.utilities import (
     format_trace,
     get_memory_usage,
     name_to_title,
+    parameters_from_post,
 )
 from protzilla.workflow import get_available_workflow_names
 from protzilla.constants.paths import WORKFLOWS_PATH
@@ -38,13 +39,14 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages
 
 from .form_mapping import (
     get_empty_plot_form_by_method,
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
+from ui.settings.views import load_settings
 
 active_runs: dict[str, Run] = {}
 
@@ -67,6 +69,9 @@ def detail(request: HttpRequest, run_name: str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
+
+    request.session['last_view'] = "runs:detail"
+    request.session['run_name'] = run_name
 
     # section, step, method = run.current_run_location()
     # end_of_run = not step
@@ -175,6 +180,9 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+
+    request.session['last_view'] = "runs:index"
+
     return render(
         request,
         "runs/index.html",
@@ -449,11 +457,14 @@ def download_plots(request: HttpRequest, run_name: str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    format_ = request.GET["format"]
+    settings = load_settings("plots")
+    format_ = settings["file_format"]
     index = run.steps.current_step_index
     section = run.current_step.section
     operation = run.current_step.operation
-    exported = run.current_plots.export(format_=format_)
+    exported = run.current_plots.export(settings)
+    if len(exported) == 0:
+        raise RuntimeError("List of exported plots is empty.")
     if len(exported) == 1:
         filename = f"{index}-{section}-{operation}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
