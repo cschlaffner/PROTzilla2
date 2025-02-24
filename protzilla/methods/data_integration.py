@@ -157,7 +157,6 @@ class PlotGOEnrichmentBarPlot(PlotStep):
 
     output_keys = ["plots"]
 
-    # TODO: input figsize optional?
     calc_method = staticmethod(di_plots.GO_enrichment_bar_plot)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
