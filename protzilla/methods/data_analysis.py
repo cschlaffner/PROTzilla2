@@ -29,7 +29,8 @@ from protzilla.data_analysis.ptm_analysis import (
     ptms_per_protein_and_sample,
     ptms_per_sample,
 )
-from protzilla.data_analysis.ptm_quantification import flexiquant_lf
+from protzilla.data_analysis.ptm_quantification.flexiquant import flexiquant_lf
+from protzilla.data_analysis.ptm_quantification.multiflex import multiflex_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -794,10 +795,10 @@ class FLEXIQuantLF(PlotStep):
         "peptide_df",
         "metadata_df",
         "reference_group",
+        "grouping_column",
         "protein_id",
         "num_init",
         "mod_cutoff",
-        "grouping_column",
     ]
     output_keys = [
         "raw_scores",
@@ -815,6 +816,44 @@ class FLEXIQuantLF(PlotStep):
         )
 
         inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class MultiFLEXLF(PlotStep):
+    display_name = "MultiFLEX-LF"
+    operation = "modification_quantification"
+    method_description = "Quantifies the extent of protein modifications in proteomics data by using robust linear regression to compare modified and unmodified peptide precursors and facilitates the analysis of modification dynamics and coregulated modifications across large datasets without the need for preselecting specific proteins."
+
+    input_keys = [
+        "peptide_df",
+        "metadata_df",
+        "reference_group",
+        "num_init",
+        "mod_cutoff",
+        "imputation_cosine_similarity",
+        "deseq2_normalization",
+        "colormap",
+    ]
+
+    output_keys = [
+        "RM_scores_clustered",
+        "diff_modified",
+        "raw_scores",
+        "removed_peptides",
+        "RM_scores",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return multiflex_lf(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["colormap"] = int(inputs["colormap"])
+        return inputs
 
 
 class SelectPeptidesForProtein(DataAnalysisStep):

@@ -65,7 +65,7 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
     )
     cleaned = ordered.assign(**{"Protein ID": new_groups})
 
-    return dict(peptide_df=cleaned)
+    return dict(peptide_df=ordered)
 
 
 def evidence_import(file_path, intensity_name, map_to_uniprot) -> dict:
