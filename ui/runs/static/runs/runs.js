@@ -32,14 +32,6 @@ $(document).ready(function () {
         $('#chosen-' + id).text(this.files[0].name);
     });
 
-    // Plot button spinner
-    $('#plot_form').on('submit', function() {
-        $('#plot_parameters_submit').html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Plotting...
-        `);
-        $('#plot_parameters_submit').prop('disabled', true);
-    });
     $("#calculateForm").find("#plot_parameters_submit").click(function() {
         $(this).html(`
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

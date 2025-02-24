@@ -81,8 +81,6 @@ _forward_mapping = {
     data_integration.PlotGSEAEnrichmentPlot: data_integration_forms.PlotGSEAEnrichmentPlotForm,
 }
 
-_forward_mapping_plots = {}  # TODO delete this
-
 
 _reverse_mapping = {v: k for k, v in _forward_mapping.items()}
 
@@ -118,10 +116,6 @@ def _get_form_class_by_step(step: Step) -> type[MethodForm]:
         raise ValueError(f"No form has been provided for {type(step).__name__} step.")
 
 
-def _get_plot_form_class_by_step(step: Step) -> type[MethodForm]:
-    return _forward_mapping_plots.get(type(step))
-
-
 def _get_step_class_by_form(form: MethodForm) -> type[Step]:
     step_class = _reverse_mapping.get(type(form))
     if step_class:
@@ -132,11 +126,6 @@ def _get_step_class_by_form(form: MethodForm) -> type[Step]:
 
 def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
     return _get_form_class_by_step(step)(run=run)
-
-
-def get_empty_plot_form_by_method(step: Step, run: Run) -> MethodForm:
-    plot_form_class = _get_plot_form_class_by_step(step)
-    return plot_form_class(run=run) if plot_form_class else None
 
 
 def get_filled_form_by_method(

@@ -40,7 +40,6 @@ from ui.runs.fields import (
 from ui.runs.views_helper import display_message, display_messages
 
 from .form_mapping import (
-    get_empty_plot_form_by_method,
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
@@ -79,7 +78,6 @@ def detail(request: HttpRequest, run_name: str):
     else:
         method_form = get_filled_form_by_method(run.current_step, run)
 
-    plot_form = get_empty_plot_form_by_method(run.current_step, run)
     description = run.current_step.method_description
 
     log_messages(run.current_step.messages)
