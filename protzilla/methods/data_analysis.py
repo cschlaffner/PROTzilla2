@@ -41,15 +41,6 @@ class DataAnalysisStep(Step):
         return inputs
 
 
-class PlotStep(DataAnalysisStep):
-    step = "plot"
-
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
-        plots = self.output.output.pop("plots", [])
-        self.plots = Plots(plots)
-
-
 class DifferentialExpressionANOVA(DataAnalysisStep):
     display_name = "ANOVA"
     operation = "differential_expression"

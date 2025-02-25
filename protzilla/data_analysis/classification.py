@@ -26,7 +26,7 @@ def perform_classification(
     clf_parameters,
     scoring,
     model_selection_scoring="accuracy",
-    test_validate_split=None,
+    train_validate_split=None,
     n_splits: int = 5,
     n_repeats: int = 10,
     random_state_cv: int = 42,
@@ -34,7 +34,7 @@ def perform_classification(
 ):
     if validation_strategy == "Manual" and grid_search_method == "Manual":
         X_train, X_val, y_train, y_val = perform_train_test_split(
-            input_df, labels_df, test_size=test_validate_split
+            input_df, labels_df, test_size=train_validate_split
         )
         model = clf.set_params(**clf_parameters)
         model.fit(X_train, y_train)
@@ -91,22 +91,22 @@ def random_forest(
     metadata_df: pd.DataFrame,
     labels_column: str,
     positive_label: str = None,
-    n_estimators=100,
-    criterion="gini",
-    max_depth=None,
-    bootstrap=True,
+    n_estimators: int = 100,
+    criterion: str = "gini",
+    max_depth: int = None,
+    bootstrap: bool = True,
 
     #test_split_parameters
     test_size: float = 0.2,
     split_stratify: str = "yes",
     shuffle: bool = True,
-    random_state=42,
+    random_state: int = 42,
 
     #classification_parameters
     model_selection: str = "Grid search",
     scoring: list[str] = ["accuracy"],
-    model_selection_scoring = "accuracy",
-    train_val_split: float | None = None,
+    model_selection_scoring: str = "accuracy",
+    train_val_split: float = 0.25,
     validation_strategy: str = "Cross Validation",
 
     #cross_validation_parameters
@@ -125,9 +125,8 @@ def random_forest(
     :param labels_column: The column name in the `metadata_df` dataframe that contains
         the target variable (labels) for classification.
     :type labels_column: str
-    :param train_test_split: The proportion of data to be used for testing. Default is
-        0.2 (80-20 train-test split).
-    :type train_test_split: int, optional
+    :param positive_label: The label that should be considered as the positive class.
+    :type positive_label: str, optional
     :param n_estimators: The number of decision trees to be used in the random forest.
     :type n_estimators: int, optional
     :param criterion: The impurity measure used for tree construction.
@@ -137,16 +136,35 @@ def random_forest(
     :type max_depth: int or None, optional
     :param bootstrap: Whether bootstrap samples should be used when building trees.
     :type bootstrap: bool, optional
+    :param test_size: The proportion of data to be used for testing. Default is
+        0.2 (80-20 train-test split).
+    :type test_size: float, optional
+    :param split_stratify: If not None, data is split in a stratified fashion, using this as
+        the class labels.
+    :type split_stratify: str, optional
+    :param shuffle: Whether to shuffle the data before splitting.
+    :type shuffle: bool, optional
     :param random_state: The random seed for reproducibility.
-    :type random_state: int
+    :type random_state: int, optional
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
-    :param validation_strategy: The strategy for model validation.
-    :type validation_strategy: str
     :param scoring: The scoring metric(s) used to evaluate the model's performance
         during validation.
     :type scoring: list[str]
-    :param **kwargs: Additional keyword arguments to be passed to the function.
+    :param model_selection_scoring: The scoring metric used to select the best model.
+    :type model_selection_scoring: str, optional
+    :param train_val_split: The proportion of data to be used for validation from the train part of the train-test-split. Default is 0.25.
+    :type train_val_split: float, optional
+    :param validation_strategy: The strategy for model validation.
+    :type validation_strategy: str
+    :param n_splits: The number of folds in a KFold.
+    :type n_splits: int, optional
+    :param n_repeats: The number of times cross-validator needs to be repeated.
+    :type n_repeats: int, optional
+    :param random_state_cv: The random seed for reproducibility.
+    :type random_state_cv: int, optional
+    :param p_samples: The number of samples to be used in the cross-validation.
+    :type p_samples: float, optional
     :return: A RandomForestClassifier instance, a dataframe consisting of the model's
         training parameters and the validation score, along with four dataframes
         containing the respective test and training samples and labels.

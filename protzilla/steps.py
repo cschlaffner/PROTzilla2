@@ -60,9 +60,6 @@ class Step:
         if inputs:
             self.inputs = inputs.copy()
 
-    def update():
-        pass
-
     def calculate(self, steps: StepManager, inputs: dict) -> bool:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
@@ -193,7 +190,7 @@ class Step:
         self.messages.extend(messages)
 
     calc_method = None
-    plot_method = None
+    plot_method = None # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
 
     @property
     def calculation_input(self) -> dict:
@@ -217,6 +214,7 @@ class Step:
 
     @property
     def plot_input(self) -> dict:
+        # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
         prefixed_output = {
             "output_" + key: value for key, value in self.output.output.items()
         }
@@ -257,7 +255,7 @@ class Step:
 class Output:
 
     def __init__(self, output: dict = {}):
-        if output is None:  # TODO rausnehmen
+        if output is None:
             output = {}
 
         self.output = output

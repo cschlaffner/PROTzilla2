@@ -57,8 +57,7 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
 
 def by_knn(
     protein_df: pd.DataFrame,
-    number_of_neighbours: int = 5,
-    kwargs={},  # quantile, default is median
+    number_of_neighbours: int = 5
 ) -> dict:
     """
     A function to perform value imputation based on KNN
@@ -79,9 +78,6 @@ def by_knn(
     :param number_of_neighbours: number of neighbouring samples used for
         imputation. Default: 5
     :type number_of_neighbours: int
-    :param **kwargs: additional keyword arguments passed to
-        KNNImputer.fit_transform
-    :type kwargs: dict
     :return: returns an imputed dataframe in typical protzilla long format
         and a list of messages
     :rtype: pd.DataFrame
