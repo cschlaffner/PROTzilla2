@@ -7,9 +7,11 @@ import traceback
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
-import plotly
+import plotly.io as pio
+import plotly.graph_objects as go
 from PIL import Image
 
 from protzilla.utilities import format_trace
@@ -28,6 +30,7 @@ class Step:
     operation: str = None
     method_description: str = None
     output_keys: list[str] = []
+    calculation_status: Literal["complete", "outdated", "incomplete", "failed"] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
@@ -53,10 +56,14 @@ class Step:
             and self.output == other.output
         )
 
+    def updateInputs(self, inputs: dict) -> None:
+        if inputs:
+            self.inputs = inputs.copy()
+
     def update():
         pass
 
-    def calculate(self, steps: StepManager, inputs: dict) -> None:
+    def calculate(self, steps: StepManager, inputs: dict) -> bool:
         """
         Core calculation method for all steps, receives the inputs from the front-end and calculates the output.
 
@@ -64,13 +71,16 @@ class Step:
         :param inputs: These inputs will be supplied to the method. Only keys in the input_keys of the method class will actually be supplied to the method
         :return: None
         """
-        steps._clear_future_steps()
-
-        if inputs:
-            self.inputs = inputs.copy()
-        self.form_inputs = self.inputs.copy()
-
+        stepIndex = steps.all_steps.index(self)
+        previousStep = steps.all_steps[stepIndex-1]
+        
         try:
+            if (previousStep.calculation_status == "outdated" ):
+                if not previousStep.calculate(steps,inputs):
+                    return False
+
+            if (steps.current_step_index == stepIndex):
+                self.updateInputs(inputs)
             self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
 
@@ -79,9 +89,21 @@ class Step:
                 self.handle_calc_outputs(calc_output)
                 self.validate_outputs()
 
+                self.calculation_status = "complete"
+                if (steps.failed_step_index == stepIndex):
+                        steps.failed_step_index = -1
+                
+                for message in self.messages:
+                    if message["level"] == logging.ERROR:
+                        self.calculation_status = "failed"
+                        steps.failed_step_index = stepIndex
+                        raise Exception("Calculation failed")
+
             if self.plot_method:
                 plot_output = self.plot_method(**self.plot_input)
                 self.handle_plot_outputs(plot_output)
+            
+            return True
 
         except NotImplementedError as e:
             self.messages.append(
@@ -118,6 +140,7 @@ class Step:
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
+        return False
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
@@ -230,19 +253,6 @@ class Step:
                     return False
         return True
 
-        # TODO: Maybe check if output only contains output keys
-
-    @property
-    def finished(self) -> bool:
-        """
-        Return whether the step has valid outputs and is therefore considered finished.
-        Plot steps without required outputs are considered finished if they have plots.
-        :return: True if the step is finished, False otherwise
-        """
-        if len(self.output_keys) == 0:
-            return not self.plots.empty
-        return self.validate_outputs(soft_check=True)
-
 
 class Output:
 
@@ -312,33 +322,47 @@ class Plots:
     def empty(self) -> bool:
         return len(self.plots) == 0
 
-    def export(self, format_):
+    def export(self, settings: dict) -> list:
+        """
+        Converts all plots from this step to files according to the format and size in the Plotly template.
+        An exported plot is represented as BytesIO object containing binary image data.
+        :param settings: Dict containing the plot settings.
+        :return: List of all exported plots.
+        """
+        from ui.settings.plot_template import get_scale_factor
         exports = []
+        format_ = settings["file_format"]
+        
         for plot in self.plots:
-            if isinstance(plot, plotly.graph_objs.Figure):
-                if format_ in ["eps", "tiff"]:
-                    png_binary = plotly.io.to_image(plot, format="png", scale=4)
-                    img = Image.open(BytesIO(png_binary)).convert("RGB")
+            scale_factor = get_scale_factor(plot, settings)
+            # For Plotly GO Figure
+            if isinstance(plot, go.Figure):
+                if format_ in ["tiff", "eps"]:
+                    binary_png = pio.to_image(plot, format="png", scale=scale_factor)
+                    img = Image.open(BytesIO(binary_png)).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
+                    elif format_ == "eps":
                         img.save(binary, format=format_)
+                    binary.seek(0)
                     exports.append(binary)
                 else:
-                    binary_string = plotly.io.to_image(plot, format=format_, scale=4)
-                    exports.append(BytesIO(binary_string))
+                    binary_png = pio.to_image(plot, format=format_, scale=scale_factor)
+                    exports.append(BytesIO(binary_png))
             elif isinstance(plot, dict) and "plot_base64" in plot:
                 plot = plot["plot_base64"]
 
-            if isinstance(plot, bytes):  # base64 encoded plots
-                if format_ in ["eps", "tiff"]:
+            # TO DO: Include scale_factor here
+            # For base64 encoded plot
+            if isinstance(plot, bytes):
+                if format_ in ["tiff", "eps"]:
                     img = Image.open(BytesIO(base64.b64decode(plot))).convert("RGB")
                     binary = BytesIO()
                     if format_ == "tiff":
                         img.save(binary, format="tiff", compression="tiff_lzw")
-                    else:
-                        img.save(binary, format=format_)
+                    elif format_ == "eps":
+                        img.save(binary, format="eps")
                     binary.seek(0)
                     exports.append(binary)
                 elif format_ in ["png", "jpg"]:
@@ -359,6 +383,7 @@ class StepManager:
         self.df_mode = df_mode
         self.disk_operator = disk_operator
         self.current_step_index = 0
+        self.failed_step_index = -1
         self.importing = []
         self.data_preprocessing = []
         self.data_analysis = []
@@ -502,10 +527,22 @@ class StepManager:
             return self.sections[section]
         else:
             raise ValueError(f"Unknown section {section}")
+    
+    def set_steps_outdated(self, offset: int) -> None:
+        count = 0
+        for step in self.following_steps[offset:]:
+            if (step.calculation_status == "complete"):
+                step.calculation_status = "outdated"
+                count+=1
+        return count
 
     @property
     def previous_steps(self) -> list[Step]:
         return self.all_steps[: self.current_step_index]
+    
+    @property
+    def following_steps(self) -> list[Step]:
+        return self.all_steps[self.current_step_index :]
 
     @property
     def current_step(self) -> Step:
@@ -548,7 +585,7 @@ class StepManager:
         if self.current_section == "data_preprocessing":
             return (
                 self.current_step.output
-                if self.current_step.finished
+                if self.current_step.calculation_status!="incomplete"
                 else self.previous_steps[-1].output
             )
         return self.data_preprocessing[-1].output
@@ -657,10 +694,7 @@ class StepManager:
 
         step = self.all_steps_in_section(section)[step_index]
         new_step_index = self.all_steps.index(step)
-        if new_step_index < self.current_step_index:
-            self.current_step_index = new_step_index
-        else:
-            raise ValueError("Cannot go to a step that is after the current step")
+        self.current_step_index = new_step_index
 
     def name_current_step_instance(self, new_instance_identifier: str) -> None:
         """

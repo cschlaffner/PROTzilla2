@@ -29,6 +29,8 @@ from protzilla.utilities.utilities import (
     format_trace,
     get_memory_usage,
     name_to_title,
+    clean_uniprot_id,
+    unique_justseen,
 )
 from protzilla.workflow import get_available_workflow_names
 from ui.runs.fields import (
@@ -43,6 +45,7 @@ from .form_mapping import (
     get_filled_form_by_method,
     get_filled_form_by_request,
 )
+from ui.settings.views import load_settings
 
 active_runs: dict[str, Run] = {}
 
@@ -66,6 +69,9 @@ def detail(request: HttpRequest, run_name: str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
+
+    request.session['last_view'] = "runs:detail"
+    request.session['run_name'] = run_name
 
     if request.POST:
         method_form = get_filled_form_by_request(
@@ -136,12 +142,13 @@ def detail(request: HttpRequest, run_name: str):
                 type(run.current_step).__name__,
             ),
             name_field=make_name_field(
-                run.current_step.finished, run, False
+                run.current_step.calculation_status!="incomplete", run, False
             ),  # TODO end_of_run
             current_plots=current_plots,
-            results_exist=run.current_step.finished,
+            results_exist=run.current_step.calculation_status in ["complete","outdated"],
+            allow_calculate= run.steps.current_step_index <= run.steps.failed_step_index or run.steps.failed_step_index == -1,
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=run.current_step.finished,
+            show_plot_button=run.current_step.calculation_status!="incomplete",
             # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
@@ -152,7 +159,7 @@ def detail(request: HttpRequest, run_name: str):
             description=description,
             method_form=method_form,
             is_form_dynamic=method_form.is_dynamic,
-            plot_form=plot_form,
+            current_step_index=run.steps.current_step_index,
         ),
     )
 
@@ -167,6 +174,9 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+
+    request.session['last_view'] = "runs:index"
+
     return render(
         request,
         "runs/index.html",
@@ -413,11 +423,14 @@ def download_plots(request: HttpRequest, run_name: str):
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    format_ = request.GET["format"]
+    settings = load_settings("plots")
+    format_ = settings["file_format"]
     index = run.steps.current_step_index
     section = run.current_step.section
     operation = run.current_step.operation
-    exported = run.current_plots.export(format_=format_)
+    exported = run.current_plots.export(settings)
+    if len(exported) == 0:
+        raise RuntimeError("List of exported plots is empty.")
     if len(exported) == 1:
         filename = f"{index}-{section}-{operation}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
@@ -456,6 +469,7 @@ def delete_step(request: HttpRequest, run_name: str):
     section = post["section"][0]
 
     run.step_remove(step_index=index, section=section)
+    run.step_set_outdated(offset=1)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -657,3 +671,16 @@ def download_table(request, run_name, index, key):
     csv_bytes = buffer.getvalue()
 
     return FileResponse(csv_bytes, content_type="text/csv")
+
+def update_form(request: HttpRequest, run_name:str):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
+    run: Run = active_runs[run_name]
+    count = 0
+    if (run.current_step.calculation_status == "complete"):
+        count = run.step_set_outdated()
+    method_form = get_filled_form_by_request(
+            request, run
+        )
+    method_form.update_form(run)
+    return(JsonResponse({"status":run.current_step.calculation_status, "count":count}))
