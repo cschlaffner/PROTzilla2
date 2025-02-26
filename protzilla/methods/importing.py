@@ -9,6 +9,7 @@ from protzilla.importing.ms_data_import import (
     diann_import,
     max_quant_import,
     ms_fragger_import,
+    simple_csv_import
 )
 from protzilla.importing.peptide_import import peptide_import, evidence_import
 from protzilla.steps import Step, StepManager
@@ -59,6 +60,17 @@ class MsFraggerImport(ImportingStep):
     def method(self, inputs):
         return ms_fragger_import(**inputs)
 
+class SimpleCSVImport(ImportingStep):
+    display_name = "Simple CSV Intensities Import"
+    operation = "Protein Data Import"
+    method_description = ("Import protein intensities from a csv file. The csv requires a column 'Protein ID', "
+                          "the remaining column names should be the sample names. The values should be the intensities.")
+
+    input_keys = ["file_path", "map_to_uniprot", "aggregation_method"]
+    output_keys = ["protein_df"]
+
+    def method(self, inputs):
+        return simple_csv_import(**inputs)
 
 class MetadataImport(ImportingStep):
     display_name = "Metadata Import"

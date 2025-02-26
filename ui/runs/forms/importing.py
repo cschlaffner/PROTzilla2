@@ -66,7 +66,16 @@ class DiannImportForm(MethodForm):
         initial="Sum",
     )
 
-
+class SimpleCSVImportForm(MethodForm):
+    file_path = CustomFileField(label="CSV file containing the intensities")
+    map_to_uniprot = CustomBooleanField(
+        label="Map to Uniprot IDs using Biomart (online)", required=False
+    )
+    aggregation_method = CustomChoiceField(
+        choices=AggregationMethods,
+        label="Aggregation method used to aggregate duplicate values for protein groups",
+        initial="Sum",
+    )
 class MSFraggerImportForm(MethodForm):
     file_path = CustomFileField(
         label="MSFragger intensities file (combined_proteins.tsv)"

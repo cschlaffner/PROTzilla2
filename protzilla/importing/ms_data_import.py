@@ -123,6 +123,47 @@ def diann_import(file_path, map_to_uniprot=False, aggregation_method: str ="Sum"
         return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
 
 
+def simple_csv_import(file_path: str, map_to_uniprot=False, aggregation_method: str = "Sum") -> dict:
+    """
+    Imports a simple CSV file with protein IDs in the first column and intensity values in the remaining columns.
+
+    :param file_path: Path to the CSV file
+    :type file_path: str
+    :param map_to_uniprot: Whether to map protein IDs to UniProt IDs
+    :type map_to_uniprot: bool
+    :param aggregation_method: Method to aggregate duplicate protein groups ("Sum", "Mean", or "Median")
+    :type aggregation_method: str
+    :return: Dictionary containing the processed dataframe and metadata
+    """
+    try:
+        df = pd.read_csv(file_path, sep=",", low_memory=False, na_values=["", 0], keep_default_na=True)
+
+        # Check if "Protein ID" column exists
+        if "Protein ID" not in df.columns:
+            msg = "Column 'Protein ID' not found in the provided file. Please check your file format."
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+        # Get sample columns (all columns except "Protein ID")
+        sample_columns = [col for col in df.columns if col != "Protein ID"]
+
+        if not sample_columns:
+            msg = "No sample columns found in the provided file. Please check your file format."
+            return dict(messages=[dict(level=logging.ERROR, msg=msg)])
+
+        # Create a dataframe with only the protein IDs and sample columns
+        intensity_df = df[["Protein ID"] + sample_columns]
+
+        # Use a fixed intensity name for the output
+        intensity_name = "Intensity"
+
+        # Pass to the common transform and clean function
+        return transform_and_clean(intensity_df, intensity_name, map_to_uniprot, aggregation_method)
+
+    except Exception as e:
+        msg = f"An error occurred while reading the file: {e.__class__.__name__} {e}. Please provide a valid CSV file."
+        return dict(messages=[dict(level=logging.ERROR, msg=msg, trace=format_trace(traceback.format_exception(e)))])
+
+
 def transform_and_clean(
     df: pd.DataFrame, intensity_name: str, map_to_uniprot: bool, aggregation_method: str ="Sum"
 ) -> dict:
