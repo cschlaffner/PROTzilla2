@@ -263,7 +263,7 @@ def clean_protein_groups(protein_groups, map_to_uniprot=True):
     for group in found_ids_per_group:
         all_ids_of_group = []
         for old_id in group:
-            if uniprot_regex.search(old_id):
+            if uniprot_regex.search(old_id): # Issue 574: ENSEMBL ids are not mapped to uniprot
                 all_ids_of_group.append(old_id)
             elif map_to_uniprot:
                 new_ids = pd.Series(id_to_uniprot.get(old_id, []))

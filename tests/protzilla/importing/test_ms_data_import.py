@@ -9,6 +9,104 @@ from protzilla.constants.paths import PROJECT_PATH
 from protzilla.importing import ms_data_import
 
 
+def simple_csv_import_intensity_df():
+    """Create expected dataframe for simple CSV import test"""
+    sample_data = { 'Sample': ['Sample1', 'Sample1', 'Sample1', 'Sample1', 'Sample1', 'Sample2', 'Sample2', 'Sample2', 'Sample2', 'Sample2'],
+                    'Protein ID': ['A2A5R2', 'A2A7S8', 'A2A863', 'A2AGT5', 'A2AJ76', 'A2A5R2', 'A2A7S8', 'A2A863', 'A2AGT5', 'A2AJ76'],
+                    'Gene': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                    'Intensity': [18210618.0, 4133918.5, 144354336.0, 5645782.0, 9055790.0, 25468630.0, 7812505.5, 139428224.0, 3202878.8, 19467296.0]}
+
+    df = pd.DataFrame(data=sample_data)
+    df.sort_values(by=["Sample", "Protein ID"], ignore_index=True, inplace=True)
+    return df
+
+
+def test_simple_csv_import():
+    """Test basic functionality of simple_csv_import"""
+    outputs = ms_data_import.simple_csv_import(
+        file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data.csv", )
+
+    expected_protein_df = simple_csv_import_intensity_df()
+
+    # Drop Gene column for comparison as it's just placeholders
+    expected_protein_df = expected_protein_df.drop(columns=["Gene"])
+    result_protein_df = outputs["protein_df"].drop(columns=["Gene"])
+
+    pd.testing.assert_frame_equal(expected_protein_df, result_protein_df)
+
+
+def test_simple_csv_import_file_not_exist():
+    """Test error handling when file doesn't exist"""
+    outputs = ms_data_import.simple_csv_import(file_path="non_existent_file_path", )
+
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
+    assert any("found" in message["msg"].lower() for message in outputs["messages"])
+
+
+def test_simple_csv_import_no_protein_id_column():
+    """Test error handling when Protein ID column is missing"""
+    outputs = ms_data_import.simple_csv_import(
+        file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data_no_protein_column.csv", )
+
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
+    assert any("Protein ID" in message["msg"] for message in outputs["messages"])
+
+
+def test_simple_csv_import_no_sample_columns():
+    """Test error handling when no sample columns are present"""
+    outputs = ms_data_import.simple_csv_import(
+        file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data_no_samples.csv", )
+
+    assert "protein_df" not in outputs
+    assert "messages" in outputs
+    assert any(message["level"] == logging.ERROR for message in outputs["messages"])
+    assert any("No sample columns" in message["msg"] for message in outputs["messages"])
+
+
+def test_simple_csv_import_aggregation_methods():
+    """Test different aggregation methods"""
+    for method in ["Sum", "Mean", "Median"]:
+        outputs = ms_data_import.simple_csv_import(
+            file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data_duplicates.csv",
+            aggregation_method=method)
+
+        assert "protein_df" in outputs
+        # The exact values would depend on the test data and method,
+        # but we can at least check that processing completes
+        assert outputs["protein_df"] is not None
+
+
+def test_simple_csv_import_filters_contaminants():
+    """Test that contaminant proteins are filtered"""
+    outputs = ms_data_import.simple_csv_import(
+        file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data_contaminants.csv", )
+
+    protein_ids = outputs["protein_df"]["Protein ID"].unique().tolist()
+
+    # All instances of CON__ should be filtered out
+    assert all(not any(id_.startswith("CON__") for id_ in group.split(";")) for group in protein_ids)
+
+    # Check that contaminants list is not empty
+    assert len(outputs["contaminants"]) > 0
+
+# Issue 574: ENSEMBL ids are not mapped to uniprot. Once resolved, uncomment this
+# @patch("protzilla.importing.ms_data_import.map_ids_to_uniprot")
+# def test_simple_csv_import_with_mapping(ids_to_uniprot_mock):
+#     """Test UniProt ID mapping functionality"""
+#     ids_to_uniprot_mock.return_value = {"ENSP12345678901": ["P54321"]}
+#
+#     outputs = ms_data_import.simple_csv_import(
+#         file_path=f"{PROJECT_PATH}/tests/test_data/simple_csv_data/simple_protein_data_ensembl.csv",
+#         map_to_uniprot=True)
+#
+#     # Check that the mapped IDs are present in the output
+#     protein_ids = outputs["protein_df"]["Protein ID"].unique().tolist()
+#     assert "P54321" in protein_ids
+
 def ms_fragger_import_intensity_df(intensity_name):
     ms_fragger_list = (
         ["DDM_0pt1_01", "A2A5R2", "Arfgef2"],
