@@ -280,6 +280,8 @@ def svm(
     :param labels_column: The column name in the `metadata_df` dataframe that contains
         the target variable (labels) for classification.
     :type labels_column: str
+    :param positive_label: The label that should be considered as the positive class.
+    :type positive_label: str, optional
     :param C: Regularization parameter
     :type C: float
     :param kernel: Specifies the kernel type.
@@ -300,14 +302,34 @@ def svm(
     :type max_iter: int
     :param random_state: The random seed for reproducibility.
     :type random_state: int
+    :param test_size: The proportion of data to be used for testing. Default is
+        0.2 (80-20 train-test split).
+    :type test_size: float, optional
+    :param split_stratify: If not None, data is split in a stratified fashion, using this as
+        the class labels.
+    :type split_stratify: str, optional
+    :param shuffle: Whether to shuffle the data before splitting.
+    :type shuffle: bool, optional   
+
     :param model_selection: The model selection method for hyperparameter tuning.
     :type model_selection: str
-    :param validation_strategy: The strategy for model validation.
-    :type validation_strategy: str
     :param scoring: The scoring metric(s) used to evaluate the model's performance
         during validation.
     :type scoring: list[str]
-    :param **kwargs: Additional keyword arguments to be passed to the function.
+    :param model_selection_scoring: The scoring metric used to select the best model.
+    :type model_selection_scoring: str, optional
+    :param train_val_split: The proportion of data to be used for validation from the train part of the train-test-split. Default is 0.25.
+    :type train_val_split: float, optional
+    :param validation_strategy: The strategy for model validation.
+    :type validation_strategy: str
+    :param n_splits: The number of folds in a KFold.
+    :type n_splits: int, optional
+    :param n_repeats: The number of times cross-validator needs to be repeated.
+    :type n_repeats: int, optional
+    :param random_state_cv: The random seed for reproducibility.
+    :type random_state_cv: int, optional
+    :param p_samples: The number of samples to be used in the cross-validation.
+    :type p_samples: float, optional
     :return: A dict containing: a SVC instance, a dataframe consisting of the model's
         training parameters and the validation score, along with four dataframes
         containing the respective test and training samples and labels.
