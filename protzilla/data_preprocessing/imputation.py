@@ -57,7 +57,8 @@ def flag_invalid_values(df: pd.DataFrame, messages: list) -> dict:
 
 def by_knn(
     protein_df: pd.DataFrame,
-    number_of_neighbours: int = 5
+    number_of_neighbours: int = 5,
+    fit_params = {}
 ) -> dict:
     """
     A function to perform value imputation based on KNN
@@ -89,7 +90,7 @@ def by_knn(
     columns = transformed_df.columns
 
     imputer = KNNImputer(n_neighbors=number_of_neighbours)
-    transformed_df = imputer.fit_transform(transformed_df, **kwargs)
+    transformed_df = imputer.fit_transform(transformed_df, **fit_params)
     transformed_df = pd.DataFrame(transformed_df, columns=columns, index=index)
 
     # Turn the wide format into the long format
