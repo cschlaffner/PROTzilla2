@@ -89,13 +89,6 @@ class Step:
                 self.calculation_status = "complete"
                 if (steps.failed_step_index == stepIndex):
                         steps.failed_step_index = -1
-                
-                for message in self.messages:
-                    if message["level"] == logging.ERROR:
-                        self.calculation_status = "failed"
-                        steps.failed_step_index = stepIndex
-                        raise Exception("Calculation failed")
-
             if self.plot_method:
                 plot_output = self.plot_method(**self.plot_input)
                 self.handle_plot_outputs(plot_output)
@@ -137,6 +130,13 @@ class Step:
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
+        
+        for message in self.messages:
+                    if message["level"] == logging.ERROR:
+                        self.calculation_status = "failed"
+                        steps.failed_step_index = stepIndex
+                        raise Exception("Calculation failed")
+
         return False
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
@@ -241,9 +241,15 @@ class Step:
         :return: True if the outputs are valid, False otherwise
         :raises ValueError: If a required key is missing in the outputs
         """
+        
+        print("Val0.0")
         for key in self.output_keys:
+            print("Val0.5")
             if key not in self.output or self.output[key] is None:
+                print("Val0.7")
                 if not soft_check:
+                    
+                    print("val1.0")
                     raise ValueError(
                         f"Output validation failed: missing output {key} in outputs."
                     )
