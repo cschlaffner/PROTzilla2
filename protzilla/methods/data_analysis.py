@@ -27,8 +27,6 @@ from protzilla.data_analysis.plots import (
     scatter_plot,
 )
 from protzilla.data_analysis.predict_spectra import (
-    compare_experimental_with_predicted_spectra,
-    plot_mirror_spectrum,
     plot_spectrum,
     predict,
 )
@@ -887,6 +885,7 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         return inputs
 
 
+# TODO convert to new frontend
 class PredictSpectrum(DataAnalysisStep):
     display_name = "Predict spectra with various models"
     operation = "spectrum_prediction"
@@ -917,6 +916,7 @@ class PredictSpectrum(DataAnalysisStep):
         return inputs
 
 
+# TODO convert to new frontend
 class PlotPredictedSpectrum(PlotStep):
     display_name = "Predicted Spectrum Plot"
     operation = "plot"
@@ -949,105 +949,6 @@ class PlotPredictedSpectrum(PlotStep):
             inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
         )
         return inputs
-
-
-class PlotMirrorSpectrum(PlotStep):
-    display_name = "Predicted Spectrum Mirror Plot"
-    operation = "plot"
-    method_description = "Plot the predicted spectrum of a peptide"
-
-    input_keys = [
-        "metadata_df",
-        "peaks_df",
-        "plot_df",
-        protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE,
-        protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE,
-        "annotation_threshold",
-    ]
-    output_keys = []
-
-    def method(self, inputs: dict) -> dict:
-        return plot_mirror_spectrum(**inputs)
-
-    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["metadata_df"] = steps.get_step_output(
-            Step,
-            "predicted_spectra_metadata",
-            instance_identifier=inputs["prediction_df_step_instance"],
-        )
-        inputs["peaks_df"] = steps.get_step_output(
-            Step,
-            "predicted_spectra_peaks",
-            instance_identifier=inputs["prediction_df_step_instance"],
-        )
-        inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE] = int(
-            inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
-        )
-
-        extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
-            drop=True
-        )
-        spectrum = extracted_spectrum_df[
-            (
-                extracted_spectrum_df[
-                    protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE
-                ]
-                == inputs[protzilla.constants.ms_constants.DataKeys.PEPTIDE_SEQUENCE]
-            )
-            & (
-                extracted_spectrum_df[
-                    protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE
-                ]
-                == int(
-                    inputs[protzilla.constants.ms_constants.DataKeys.PRECURSOR_CHARGE]
-                )
-            )
-            & (extracted_spectrum_df["experiment"] == inputs["experiment_name"])
-            & (
-                extracted_spectrum_df["spectra_ref"]
-                == inputs["experiment_spectrum_name"]
-            )
-        ]
-
-        inputs["plot_df"] = spectrum
-
-        return inputs
-
-
-class CompareExperimentalWithPredictedSpectra(PlotStep):
-    """This step requires you to replace the Output of the EvidenceImport with a csv file containing the experimental spectra.
-    The spectrum prediction should predict these spectra, such that they can be compared to one another
-    """
-
-    display_name = "Compare Experimental With Predicted Spectra"
-    operation = "plot"
-    method_description = "Plot the predicted spectrum of a peptide"
-
-    input_keys = [
-        "experimental_df",
-        "predicted_df",
-    ]
-    output_keys = ["comparison_result_df"]
-
-    def method(self, inputs: dict) -> dict:
-        return compare_experimental_with_predicted_spectra(**inputs)
-
-    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        pass
-
-        metadata_df = steps.get_step_output(
-            Step,
-            "predicted_spectra_metadata",
-        )
-        peaks_df = steps.get_step_output(
-            Step,
-            "predicted_spectra_peaks",
-        )
-        inputs["predicted_df"] = metadata_df.merge(peaks_df, on="unique_id")
-        extracted_spectrum_df = steps.get_step_output(Step, "peptide_df").reset_index(
-            drop=True
-        )
-        inputs["experimental_df"] = extracted_spectrum_df
 
 
 class PTMsPerSample(DataAnalysisStep):
