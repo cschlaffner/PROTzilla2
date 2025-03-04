@@ -47,7 +47,7 @@ def by_log(
             msg.append(
                 dict(
                     msg=f"Warning: {len(untransformable_peptide_data_df)} data points of peptide data with zero or negative intensity values were found and will be dropped. "
-                    f"Please adapt your preprocessing pipeline if this is unexpected.",
+                    f"Please adapt your preprocessing workflow if this is unexpected.",
                     level=logging.WARNING,
                 )
             )
