@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 import protzilla.constants.colors as colorscheme
 
-from ..constants.colors import PROTZILLA_DISCRETE_COLOR_OUTLIER_SEQUENCE
+from ..constants.colors import PLOT_COLOR_SEQUENCE
 from protzilla.utilities import default_intensity_column
 
 
