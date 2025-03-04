@@ -81,29 +81,11 @@ _forward_mapping = {
     data_integration.PlotGSEAEnrichmentPlot: data_integration_forms.PlotGSEAEnrichmentPlotForm,
 }
 
-_forward_mapping_plots = {
-    data_preprocessing.FilterProteinsBySamplesMissing: data_preprocessing_forms.FilterProteinsBySamplesMissingPlotForm,
-    data_preprocessing.FilterByProteinsCount: data_preprocessing_forms.FilterByProteinsCountPlotForm,
-    data_preprocessing.FilterSamplesByProteinsMissing: data_preprocessing_forms.FilterSamplesByProteinsMissingPlotForm,
-    data_preprocessing.FilterSamplesByProteinIntensitiesSum: data_preprocessing_forms.FilterSamplesByProteinIntensitiesSumPlotForm,
-    data_preprocessing.TransformationLog: data_preprocessing_forms.TransformationLogPlotForm,
-    data_preprocessing.NormalisationByZScore: data_preprocessing_forms.NormalisationByZscorePlotForm,
-    data_preprocessing.NormalisationByTotalSum: data_preprocessing_forms.NormalisationByTotalSumPlotForm,
-    data_preprocessing.NormalisationByMedian: data_preprocessing_forms.NormalisationByMedianPlotForm,
-    data_preprocessing.NormalisationByReferenceProtein: data_preprocessing_forms.NormalisationByReferenceProteinPlotForm,
-    data_preprocessing.ImputationByMinPerDataset: data_preprocessing_forms.ImputationByMinPerDatasetPlotForm,
-    data_preprocessing.ImputationByMinPerProtein: data_preprocessing_forms.ImputationByMinPerProteinPlotForm,
-    data_preprocessing.ImputationByMinPerSample: data_preprocessing_forms.ImputationByMinPerSamplePlotForm,
-    data_preprocessing.SimpleImputationPerProtein: data_preprocessing_forms.SimpleImputationPerProteinPlotForm,
-    data_preprocessing.ImputationByKNN: data_preprocessing_forms.ImputationByKNNPlotForm,
-    data_preprocessing.ImputationByNormalDistributionSampling: data_preprocessing_forms.ImputationByNormalDistributionSamplingPlotForm,
-    data_preprocessing.FilterPeptidesByPEPThreshold: data_preprocessing_forms.FilterPeptidesByPEPThresholdPlotForm,
-}
-
 
 _reverse_mapping = {v: k for k, v in _forward_mapping.items()}
 
 
+# all methods of all steps saved as: dict[section][operation][name] : class
 def generate_hierarchical_dict() -> dict[str, dict[str, dict[str, type[Step]]]]:
     # Initialize an empty dictionary
     hierarchical_dict = {}
@@ -134,10 +116,6 @@ def _get_form_class_by_step(step: Step) -> type[MethodForm]:
         raise ValueError(f"No form has been provided for {type(step).__name__} step.")
 
 
-def _get_plot_form_class_by_step(step: Step) -> type[MethodForm]:
-    return _forward_mapping_plots.get(type(step))
-
-
 def _get_step_class_by_form(form: MethodForm) -> type[Step]:
     step_class = _reverse_mapping.get(type(form))
     if step_class:
@@ -148,11 +126,6 @@ def _get_step_class_by_form(form: MethodForm) -> type[Step]:
 
 def get_empty_form_by_method(step: Step, run: Run) -> MethodForm:
     return _get_form_class_by_step(step)(run=run)
-
-
-def get_empty_plot_form_by_method(step: Step, run: Run) -> MethodForm:
-    plot_form_class = _get_plot_form_class_by_step(step)
-    return plot_form_class(run=run) if plot_form_class else None
 
 
 def get_filled_form_by_method(

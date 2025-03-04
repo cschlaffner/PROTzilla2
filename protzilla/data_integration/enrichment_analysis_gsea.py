@@ -86,7 +86,6 @@ def gsea_preranked(
     weighted_score=1.0,
     seed=123,
     threads=4,
-    **kwargs,
 ):
     """
     Ranks proteins by a provided value column according to ranking_direction and
@@ -294,7 +293,6 @@ def gsea(
     weighted_score=1.0,
     seed=123,
     threads=4,
-    **kwargs,
 ):
     """
     Performs Gene Set Enrichment Analysis (GSEA) on a dataframe with protein IDs, samples and intensities.

@@ -14,8 +14,6 @@
         const staticUrl = "{% static 'img/' %}";
     </script>
     <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
-    {# TODO 129 Better buttons for analysis and importing #}
-
 {% endblock %}
 
 {% block title %}
@@ -120,105 +118,41 @@
                 {% endif %}
 
                 {# show current step #}
-                {% if not end_of_run %}
-                    <div class="row justify-content-center d-flex">
-                        <h3>{{ display_name }}</h3>
-                        <div class="row mb-3" id="description">{{ description }}</div>
-                        {# if there are plot parameters, display method and plot parameters next to each other #}
-                        {% if plot_form %}
-                            <div class="col">
-                                <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="calc_form" method="post"
-                                      enctype="multipart/form-data">
-                                    {% csrf_token %}
-                                    <div class="mb-1">
-                                        {{ method_dropdown }}
-                                    </div>
-                                    <div class="mb-2" id="method-form">
-                                        {% for field in method_form %}
-                                            <div class="fieldWrapper">
-                                                {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                                {{ field }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </form>
+                 <div class="row justify-content-center d-flex">
+                    <h3>{{ display_name }}</h3>
+                    <div class="row mb-3" id="description">{{ description }}</div>
+                    
+                    {# calculateForm #}
+                    <div class="col">
+                        <form id="calc_form_{{current_step_index}}" class="calc_form" action="{% url 'runs:detail' run_name %}" method="post"
+                                enctype="multipart/form-data"> 
+
+                            {% csrf_token %}
+                            <div class="mb-1">
+                                {{ method_dropdown }}
                             </div>
-                            <div class="col">
-                                <form action="{% url 'runs:plot' run_name %}" id="plot_form_{{current_step_index}}" class="form" method="post"
-                                      enctype="multipart/form-data">
-                                    {% csrf_token %}
-                                    <fieldset id="plotfields">
-                                        <div id="plot_parameters" class="mb-2">
-                                            {{ plot_form }}
-                                        </div>
-                                    </fieldset>
-                                    <button type="submit" id="plot_parameters_submit"
-                                        class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                        Plot
-                                    </button>
-                                </form>
+                            <div class="mb-2" id="method-form">
+                                {% for field in method_form %}
+                                    <div class="fieldWrapper">
+                                        {% if field.field.label %}{{ field.label_tag }}{% endif %}
+                                        {{ field }}
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% else %}
-                            <div class="col-7">
-                                {% if step != "plot" %}
-                                    <form action="{% url 'runs:detail' run_name %}" id="calc_form_{{current_step_index}}" class="calc_form" method="post"
-                                          enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <div class="mb-2">
-                                            {{ method_dropdown }}
-                                        </div>
-                                        <div class="mb-2" id="method-form">
-                                            {% for field in method_form %}
-                                                <div class="fieldWrapper">
-                                                    {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                                    {{ field }}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                        <div class="form-group">
-                                            {% if section == "data_preprocessing" %}
-                                                <a href="{% url 'runs:plot' run_name %}" id="plot_parameters_submit"
-                                                    class="btn btn-grey {% if not show_plot_button %} disabled {% endif %}">
-                                                    Plot
-                                                </a>
-                                            {% endif %}
-                                            {% if show_table %}
-                                                <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
-                                                   target="_blank"
-                                                   class="col btn btn-grey me-2">View table</a>
-                                            {% endif %}
-                                            {% if show_protein_graph %}
-                                                <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
-                                                   class="btn btn-grey" target="_blank">View Protein Graph</a>
-                                            {% endif %}
-                                        </div>
-                                    </form>
-                                {% else %}
-                                    <form action="{% url 'runs:plot' run_name %}" id="plot_form_{{current_step_index}}" class="form" method="post"
-                                          enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        {{ method_dropdown }}
-                                        <div class="mb-2" id="method-form">
-                                            {% for field in method_form %}
-                                                <div class="fieldWrapper">
-                                                    {% if field.field.label %}{{ field.label_tag }}{% endif %}
-                                                    {{ field }}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" id="plot_parameters_submit"
-                                                   class="btn btn-grey">Plot</button>
-                                        </div>
-                                    </form>
+                            <div class="form-group">
+                                {% if show_table %}
+                                    <a href="{% url 'runs:tables_nokey' run_name displayed_history|length %}"
+                                        target="_blank"
+                                        class="col btn btn-grey me-2">View table</a>
+                                {% endif %}
+                                {% if show_protein_graph %}
+                                    <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
+                                        class="btn btn-grey" target="_blank">View Protein Graph</a>
                                 {% endif %}
                             </div>
-                        {% endif %}
+                        </form>
                     </div>
-                {% else %}
-                    <p>You are at the end of the run. Go back to add more steps of the same section, or add steps of
-                        the next sections on the right.</p>
-                {% endif %}
+                </div>
 
                 {# show current plots #}
                 {% if current_plots %}

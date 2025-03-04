@@ -10,14 +10,15 @@ from protzilla.data_preprocessing.plots import (
     create_pca_2d_scatter_plot,
     create_pca_3d_scatter_plot,
 )
+
 from ..utilities.transform_dfs import long_to_wide
 
 
 def by_isolation_forest(
-        protein_df: pd.DataFrame,
-        peptide_df: pd.DataFrame | None,
-        n_estimators: int = 100,
-        n_jobs: int = -1,
+    protein_df: pd.DataFrame,
+    peptide_df: pd.DataFrame | None,
+    n_estimators: int = 100,
+    n_jobs: int = -1,
 ) -> dict:
     """
     This function filters out outliers using a clustering
@@ -62,8 +63,11 @@ def by_isolation_forest(
         ].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = (None if peptide_df is None
-                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+        peptide_df = (
+            None
+            if peptide_df is None
+            else peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        )
 
         return dict(
             protein_df=protein_df,
@@ -125,8 +129,11 @@ def by_local_outlier_factor(
         outlier_list = df_lof_data[df_lof_data["Outlier"]].index.tolist()
 
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = (None if peptide_df is None
-                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+        peptide_df = (
+            None
+            if peptide_df is None
+            else peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        )
 
         return dict(
             protein_df=protein_df,
@@ -232,8 +239,11 @@ def by_pca(
             df_transformed_pca_data["Outlier"]
         ].index.tolist()
         protein_df = protein_df[~(protein_df["Sample"].isin(outlier_list))]
-        peptide_df = (None if peptide_df is None
-                      else peptide_df[~(peptide_df["Sample"].isin(outlier_list))])
+        peptide_df = (
+            None
+            if peptide_df is None
+            else peptide_df[~(peptide_df["Sample"].isin(outlier_list))]
+        )
 
         return dict(
             protein_df=protein_df,
@@ -255,19 +265,22 @@ def by_pca(
         )
 
 
-def by_isolation_forest_plot(method_inputs, method_outputs):
-    return [create_anomaly_score_bar_plot(method_outputs["anomaly_df"])]
+def by_isolation_forest_plot(output_anomaly_df):
+    return [create_anomaly_score_bar_plot(output_anomaly_df)]
 
 
-def by_local_outlier_factor_plot(method_inputs, method_outputs):
-    return [create_anomaly_score_bar_plot(method_outputs["anomaly_df"])]
+def by_local_outlier_factor_plot(output_anomaly_df):
+    return [create_anomaly_score_bar_plot(output_anomaly_df)]
 
 
-def by_pca_plot(method_inputs, method_outputs):
-    pca_df = method_outputs["pca_df"]
-    number_of_components = method_outputs["number_of_components"]
-    explained_variance_ratio = method_outputs["explained_variance_ratio"]
-    if number_of_components == 2:
-        return [create_pca_2d_scatter_plot(pca_df, explained_variance_ratio)]
-    if number_of_components == 3:
-        return [create_pca_3d_scatter_plot(pca_df, explained_variance_ratio)]
+def by_pca_plot(
+    output_pca_df, output_number_of_components, output_explained_variance_ratio
+):
+    if output_number_of_components == 2:
+        return [
+            create_pca_2d_scatter_plot(output_pca_df, output_explained_variance_ratio)
+        ]
+    if output_number_of_components == 3:
+        return [
+            create_pca_3d_scatter_plot(output_pca_df, output_explained_variance_ratio)
+        ]

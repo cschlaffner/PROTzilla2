@@ -3,9 +3,7 @@ import pandas as pd
 from protzilla.data_preprocessing.plots import create_bar_plot, create_pie_plot
 
 
-def by_pep_value(
-    peptide_df: pd.DataFrame, threshold: float
-) -> dict:
+def by_pep_value(peptide_df: pd.DataFrame, threshold: float) -> dict:
     """
     This function filters out all peptides with a PEP value (assigned to all samples
     together for each peptide) below a certain threshold.
@@ -35,11 +33,11 @@ def by_pep_value(
     )
 
 
-def by_pep_value_plot(method_inputs, method_outputs, graph_type):
+def by_pep_value_plot(output_peptide_df, output_filtered_peptides, graph_type):
     value_dict = dict(
         values_of_sectors=[
-            len(method_outputs["peptide_df"]),
-            len(method_outputs["filtered_peptides"]),
+            len(output_peptide_df),
+            len(output_filtered_peptides),
         ],
         names_of_sectors=["Samples kept", "Samples filtered"],
         heading="Number of Filtered Samples",

@@ -29,16 +29,15 @@ class Step:
     display_name: str = None
     operation: str = None
     method_description: str = None
-    input_keys: list[str] = []
     output_keys: list[str] = []
     calculation_status: Literal["complete", "outdated", "incomplete", "failed"] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
         self.inputs: dict = {}
-        self.messages: Messages = Messages([])
         self.output: Output = Output()
         self.plots: Plots = Plots()
+        self.messages: Messages = Messages([])
         self.instance_identifier = instance_identifier
 
         if self.instance_identifier is None:
@@ -60,7 +59,6 @@ class Step:
     def updateInputs(self, inputs: dict) -> None:
         if inputs:
             self.inputs = inputs.copy()
-        self.form_inputs = self.inputs.copy()
 
     def calculate(self, steps: StepManager, inputs: dict) -> bool:
         """
@@ -73,24 +71,30 @@ class Step:
         stepIndex = steps.all_steps.index(self)
         previousStep = steps.all_steps[stepIndex-1]
         
-        try:
-            if (previousStep.calculation_status == "outdated" ):
-                if not previousStep.calculate(steps,inputs):
-                    return False
+        if (previousStep.calculation_status == "outdated" ):
+            if not previousStep.calculate(steps,inputs):
+                return False
 
-            if (steps.current_step_index == stepIndex):
-                self.updateInputs(inputs)
-            self.messages.clear()
+        if (steps.current_step_index == stepIndex):
+            self.updateInputs(inputs)
+        self.messages.clear()
+        
+
+        try:
             self.insert_dataframes(steps, self.inputs)
-            self.validate_inputs()
-            output_dict = self.method(self.inputs)
-            self.handle_outputs(output_dict)
-            self.handle_messages(output_dict,steps,stepIndex)
-            self.validate_outputs()
+            if self.calc_method:
+                calc_output = self.calc_method(**self.calculation_input)
+                self.handle_calc_outputs(calc_output)
+                self.validate_outputs()
+
             self.calculation_status = "complete"
             if (steps.failed_step_index == stepIndex):
-                    steps.failed_step_index = -1
-            return True
+                steps.failed_step_index = -1
+            
+            if self.plot_method:
+                plot_output = self.plot_method(**self.plot_input)
+                self.handle_plot_outputs(plot_output)
+
         except NotImplementedError as e:
             self.messages.append(
                 dict(
@@ -116,28 +120,30 @@ class Step:
                 )
             )
         except Exception as e:
-                self.messages.append(
-                    dict(
-                        level=logging.ERROR,
-                        msg=(
-                            f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
-                            f"Please check your parameters or report a potential programming issue."
-                        ),
-                        trace=format_trace(traceback.format_exception(e)),
-                    )
+            self.messages.append(
+                dict(
+                    level=logging.ERROR,
+                    msg=(
+                        f"An error occurred while calculating this step: {e.__class__.__name__} {e} "
+                        f"Please check your parameters or report a potential programming issue."
+                    ),
+                    trace=format_trace(traceback.format_exception(e)),
                 )
-        return False       
+            )
+        
+        if self.calculation_status != "complete":
+            self.calculation_status = "failed"
+            steps.failed_step_index = stepIndex
 
-    def method(self, **kwargs) -> dict:
-        raise NotImplementedError("This method must be implemented in a subclass.")
+        return self.calculation_status == "complete"
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
 
-    def handle_outputs(self, outputs: dict) -> None:
+    def handle_calc_outputs(self, outputs: dict) -> None:
         """
         Handles the dictionary from the calculation method and creates an Output object from it.
-        Responsible for checking if the output is a dictionary and if it is empty, and setting the output attribute of the instance.
+        Responsible for checking that the output is a dictonary and not empty, and setting the output attribute of the instance.
 
         :param outputs: A dictionary received after the calculation
         :return: None
@@ -149,7 +155,29 @@ class Step:
             raise ValueError("Output of calculation is empty.")
         self.output = Output(outputs)
 
-    def handle_messages(self, outputs: dict, steps: StepManager, stepIndex: int) -> None:
+        self.handle_messages(outputs)
+
+    def handle_plot_outputs(self, outputs: dict|list) -> None:
+        """
+        Handles the dictionary from the plot method and creates a Plots object from it.
+        Responsible for clearing and setting the plots attribute of the class.
+        :param outputs: A dictionary or a list received after the plot method
+        :return: None
+        """
+
+        if not isinstance(outputs, dict) and not isinstance(outputs, list):
+            raise TypeError("Output of plot method is not a dictionary or a list.")
+        
+        if isinstance(outputs, dict):
+            plots = outputs.pop("plots", [])
+            self.output.output.update(outputs)
+            self.handle_messages(outputs)
+        else:
+            plots = outputs
+        
+        self.plots = Plots(plots)
+
+    def handle_messages(self, outputs: dict) -> None:
         """
         Handles the messages from the calculation method and creates a Messages object from it.
         Responsible for clearing and setting the messages attribute of the class.
@@ -158,58 +186,68 @@ class Step:
         """
         messages = outputs.get("messages", [])
         self.messages.extend(messages)
-        for message in messages:
-            if message["level"] == logging.ERROR:
-                self.calculation_status = "failed"
-                steps.failed_step_index = stepIndex
-                raise Exception("Calculation failed")
 
-    def plot(self, inputs: dict = None) -> None:
-        raise NotImplementedError(
-            f"Plotting is not implemented for this step ({self.display_name}). Only preprocessing methods can have additional plots."
-        )
+    calc_method = None
+    plot_method = None # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
 
-    def validate_inputs(self, required_keys: list[str] = None) -> bool:
-        """
-        Validates the inputs of the step. If required_keys is not specified, the input_keys of the method class are used.
-        Will delete unnecessary keys from the inputs dictionary to avoid passing unwanted parameters to the method.
-        :param required_keys: The keys that are required in the inputs dictionary (optional)
-        :return: True if the inputs are valid, False otherwise
-        :raises ValueError: If a required key is missing in the inputs
-        """
-        if required_keys is None:
-            required_keys = self.input_keys
+    @property
+    def calculation_input(self) -> dict:
+        input_parameters = inspect.signature(self.calc_method).parameters
+        required_keys = [
+            key
+            for key, param in input_parameters.items()
+            if param.default == inspect.Parameter.empty
+        ]
         for key in required_keys:
             if key not in self.inputs:
-                raise ValueError(f"Missing input {key} in inputs")
-
-        # Deleting all unnecessary keys as to avoid "too many parameters" error
-        for key in self.inputs.copy().keys():
-            if key not in required_keys:
-                logging.info(
-                    f"Removing unnecessary key {key} from inputs. If this is not wanted, add the key to input_keys of the method class."
+                raise ValueError(
+                    f"Missing required input '{key}' for the calulation method"
                 )
-                self.inputs.pop(key)
 
-        return True
+        return {
+            key: self.inputs[key]
+            for key in input_parameters.keys()
+            if key in self.inputs
+        }
 
-    def validate_outputs(
-        self, required_keys: list[str] = None, soft_check: bool = False
-    ) -> bool:
+    @property
+    def plot_input(self) -> dict:
+        # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
+        prefixed_output = {
+            "output_" + key: value for key, value in self.output.output.items()
+        }
+        plot_input = self.inputs | prefixed_output
+
+        input_parameters = inspect.signature(self.plot_method).parameters
+        required_keys = [
+            key
+            for key, param in input_parameters.items()
+            if param.default == inspect.Parameter.empty
+        ]
+        for key in required_keys:
+            if key not in plot_input:
+                raise ValueError(f"Missing required input '{key}' for the plot method")
+
+        return {
+            key: plot_input[key] for key in input_parameters.keys() if key in plot_input
+        }
+
+    def validate_outputs(self, soft_check: bool = False) -> bool:
         """
-        Validates the outputs of the step. If required_keys is not specified, the output_keys of the method class are used.
-
-        :param required_keys: The keys that are required in the outputs dictionary (optional)
+        Validates the outputs of the step. Uses the output_keys attribute to check if all required keys are present in the output dictionary.
         :param soft_check: Whether to raise errors or just return False if the output is invalid
         :return: True if the outputs are valid, False otherwise
         :raises ValueError: If a required key is missing in the outputs
         """
-        inspect.signature(self.method).parameters
-        if required_keys is None:
-            required_keys = self.output_keys
-        for key in required_keys:
+        
+        print("Val0.0")
+        for key in self.output_keys:
+            print("Val0.5")
             if key not in self.output or self.output[key] is None:
+                print("Val0.7")
                 if not soft_check:
+                    
+                    print("val1.0")
                     raise ValueError(
                         f"Output validation failed: missing output {key} in outputs."
                     )
@@ -219,7 +257,8 @@ class Step:
 
 
 class Output:
-    def __init__(self, output: dict = None):
+
+    def __init__(self, output: dict = {}):
         if output is None:
             output = {}
 
@@ -257,7 +296,7 @@ class Messages:
         return self.messages[key]
 
     def __repr__(self):
-        return f"Messages: {[message['message'] for message in self.messages]}"
+        return f"Messages: {[message['msg'] for message in self.messages]}"
 
     def append(self, param):
         self.messages.append(param)
@@ -533,15 +572,13 @@ class StepManager:
     def protein_df(self) -> pd.DataFrame:
         from protzilla.steps import Step
 
-        df = self.get_step_output(Step, "protein_df")
-        return df
+        return self.get_step_output(Step, "protein_df")
 
     @property
     def metadata_df(self) -> pd.DataFrame | None:
         from protzilla.methods.importing import ImportingStep
 
         return self.get_step_output(ImportingStep, "metadata_df")
-        logging.warning("No metadata_df found in steps")
 
     @property
     def preprocessed_output(self) -> Output:

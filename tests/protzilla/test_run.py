@@ -60,16 +60,15 @@ class TestRun:
         step = ImputationByMinPerProtein()
         run_imported.step_add(step)
         run_imported.step_next()
-        run_imported.step_calculate(inputs={"shrinking_value": 0.5})
-        assert run_imported.current_step == step
-        run_imported.step_plot(
-            inputs={
+        run_imported.step_calculate(
+            inputs={"shrinking_value": 0.5,
                 "graph_type": "Boxplot",
                 "graph_type_quantities": "Pie chart",
                 "group_by": "None",
                 "visual_transformation": "linear",
             }
         )
+        assert run_imported.current_step == step
         print(run_imported.current_step.plots)
         assert not run_imported.current_step.plots.empty
 
