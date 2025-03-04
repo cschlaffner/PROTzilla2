@@ -3,6 +3,9 @@
 user_data/runs/*
 user_data/workflows/*
 user_data/external_data/*
+user_data/settings/*
+!user_data/settings/plots_default.yaml
+!user_data/settings/databases_default.yaml
 user_data/debug/*
 ui/static/admin/*
 ui/uploads/*

@@ -22,6 +22,7 @@ from .custom_fields import (
     CustomFloatField,
     CustomMultipleChoiceField,
     CustomNumberField,
+    CustomCheckboxMultipleChoiceField,
 )
 
 PROTEIN_DF = "protein_df"
@@ -539,7 +540,8 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     input_df_step_instance = CustomChoiceField(
         choices=[], label="Choose dataframe to be plotted"
     )
-    gene_sets = CustomMultipleChoiceField(choices=[], label="Sets to be plotted")
+    # TODO: after the color naming has been optimised in all filese, the underlying line can be updated: (color, color) for color in PLOT_COLOR_SEQUENCE
+    gene_sets = CustomCheckboxMultipleChoiceField(choices=[], colors=[(v, k[4:]) for k, v, in list(mcolors.TABLEAU_COLORS.items())], label="Sets to be plotted")
     value = CustomChoiceField(
         choices=GOEnrichmentBarPlotValue,
         label="Value (bars will be plotted as -log10(value)), fdr only for GO analysis with STRING, p_value is adjusted if available",
@@ -561,15 +563,7 @@ class PlotGOEnrichmentBarPlotForm(MethodForm):
     )
     title = CustomCharField(label="Title of the plot (optional)", required=False)
 
-    colors = CustomMultipleChoiceField(
-        choices=[], label="Colors for the plot (optional)"
-    )  # TODO this should  not have to be set in fill_form
-
     def fill_form(self, run: Run) -> None:
-        self.fields["colors"].choices = [
-            (v, k) for k, v, in mcolors.CSS4_COLORS.items()
-        ]
-
         self.fields["input_df_step_instance"].choices = fill_helper.get_choices(
             run, "enrichment_df"
         )

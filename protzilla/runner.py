@@ -81,15 +81,14 @@ class Runner:
             if step.section == "importing":
                 self._insert_commandline_inputs(step)
             self._perform_current_step(step.form_inputs)
-            if self.all_plots and step.section == "data_preprocessing":
-                step.plot()
+            
             if step.plots and not step.plots.empty:
                 self._save_plots_html(step)
 
             log_messages(self.run.current_messages)
             self.run.current_messages.clear()
 
-            if not step.finished:
+            if step.calculation_status!="complete":
                 break
 
             self.run.step_next()

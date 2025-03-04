@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+  <circle cx="8" cy="8" r="8" fill="#FABC60"/>
+  <path fill-rule="evenodd" 
+        d="M8 4.5a3.5 3.5 0 1 0 3.15 2.04.7.7 0 0 1 1-.417A4.5 4.5 0 1 1 8 3.5z" 
+        stroke="white" 
+        stroke-width="0.5"/>
+  <path d="M8 5.716V2.284a.4.4 0 0 1 .65-.308l1.8 1.5c.16.13.16.366 0 .496L8.65 6.092A.4.4 0 0 1 8 5.716z" 
+        stroke="white" 
+        stroke-width="0.5"/>
+</svg>

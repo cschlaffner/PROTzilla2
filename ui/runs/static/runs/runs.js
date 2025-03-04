@@ -32,20 +32,27 @@ $(document).ready(function () {
         $('#chosen-' + id).text(this.files[0].name);
     });
 
-    // Plot button spinner
-    $('#plot_form').on('submit', function() {
-        $('#plot_parameters_submit').html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Plotting...
-        `);
-        $('#plot_parameters_submit').prop('disabled', true);
-    });
-    $("#calculateForm").find("#plot_parameters_submit").click(function() {
-        $(this).html(`
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Plotting...
-        `);
-        $(this).prop('disabled', true);
+
+    //save forms on change
+    $('.calc_form').on( "change", function() {
+        var triggeredForm = $(this);
+        var formId = triggeredForm.attr('id');
+        var index = Number(formId.split("_").pop());
+        
+        $.ajax({
+            url: `/runs/${run_name}/update_form`,  // The URL for the Django view
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()  // CSRF token for security
+            },
+            data: $(this).serialize(),
+            success: function(response) {
+                for (let i=0; i<response.count; i++) {
+                    $(`#calculationIcon_${index+i} img`).attr('src', `${staticUrl}${response.status}_icon.svg`);
+                }
+                
+            }
+        });
     });
 
     // save current state of accordion in sessionStorage
@@ -96,11 +103,12 @@ $(document).ready(function () {
         saveAccordionState(); // Save the current state to sessionStorage
         updateAccordionIcons(); // Update icons after state change
     });
+    
 });
 
 // control calculate button in footer
 function onCalculateClick(element) {
-    var form = $("#calculateForm")[0];
+    var form = $(".calc_form")[0];
 
     if (form.checkValidity()) {
         form.submit();

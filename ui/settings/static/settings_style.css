@@ -1,0 +1,50 @@
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+.sidebar {
+    width: 320px;
+    height: 100vh;
+}
+.selected {
+    background-color: #E8EDF3 !important;
+}
+.btn-section {
+    background-color: white;
+    width: 300px !important;
+    height: 60px;
+    align-items: center;
+}
+.content {
+    padding-top: 20px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+.footer {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 8%;
+    margin-top: 10px;
+    background-color: rgb(255, 255, 255);
+}
+.custom-font {
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+}
+#customFontInput.form-control {
+    display: inline-block !important;
+    width: 400px;
+    margin: 10px;
+}
+.plot-wrapper {
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #e8edf3;
+    border-radius: .375rem;
+}
+.field-wrapper {
+    margin-bottom: 10px;
+}

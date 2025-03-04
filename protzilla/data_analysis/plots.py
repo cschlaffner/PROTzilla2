@@ -305,9 +305,7 @@ def prot_quant_plot(
     :param similarity_measure: method to compare the chosen proteingroup with all others. The two
         methods are "cosine similarity" and "euclidean distance".
     :param similarity: similarity score of the chosen similarity measurement method.
-
-
-    :return: returns a dictionary containing a list with a plotly figure and/or a list of messages
+    :return: returns a dictionary containing a list with a plotly figure
     """
 
     wide_df = long_to_wide(input_df) if is_long_format(input_df) else input_df

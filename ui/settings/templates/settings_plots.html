@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{# params: initials, sidebar, plot, sections, section_id #}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plotly-2.18.0.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'settings.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>PROTzilla - Settings</title>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        {{ sidebar|safe }}
+        <div class="content border-start">
+            <div d-flex>
+                <h3>Configurations for Plots</h3>
+                <div class="mb-3" id="description">
+                    Configurations for plots can be entered here. This information is automatically applied to all plots in PROTzilla.
+                </div>
+                <form method="post" id="settings-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_id" value="{{ section_id }}">
+                    <div class="row g-3">
+                        <!-- Left column with fields -->
+                        <div class="col-6 mb-2">
+                            <!-- Download section -->
+                            <div class="mt-3" id="download-section">
+                                <h5>Downloading Plots</h5>
+                                <div class="field-wrapper">
+                                    <label for="id_file_format">File format:</label>
+                                    <select name="file_format" class="form-select mb-2" id="id_file_format">
+                                        <option value="png" {% if initials.file_format == "png" %}selected{% endif %}>png</option>
+                                        <option value="tiff" {% if initials.file_format == "tiff" %}selected{% endif %}>tiff</option>
+                                        <option value="svg" {% if initials.file_format == "svg" %}selected{% endif %}>svg</option>
+                                        <option value="pdf" {% if initials.file_format == "pdf" %}selected{% endif %}>pdf</option>
+                                        <option value="eps" {% if initials.file_format == "eps" %}selected{% endif %}>eps</option>
+                                        <option value="jpg" {% if initials.file_format == "jpg" %}selected{% endif %}>jpg</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="field-wrapper">
+                                            <label for="id_width">Width (in mm):</label>
+                                            <input type="number" name="width" value="{{ initials.width }}" min="10" max="1000" step="any" class="form-control mb-2" required id="id_width">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="field-wrapper">
+                                            <label for="id_height">Height (in mm):</label>
+                                            <input type="number" name="height" value="{{ initials.height }}" min="10" max="1000" step="any" class="form-control mb-2" required id="id_height">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Text section -->
+                            <div class="mt-3" id="text-section">
+                                <h5>Texts</h5>
+                                <div>Font:</div>
+                                <div class="field-wrapper">
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <label>
+                                                <input type="radio" name="font" value="Arial" {% if initials.font == "Arial" %}checked{% endif %}> Arial
+                                            </label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label>
+                                                <input type="radio" name="font" value="Courier New" {% if initials.font == "Courier New" %}checked{% endif %}> Courier New
+                                            </label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label>
+                                                <input type="radio" name="font" value="Helvetica" {% if initials.font == "Helvetica" %}checked{% endif %}> Helvetica
+                                            </label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label>
+                                                <input type="radio" name="font" value="Sans Serif" {% if initials.font == "Sans Serif" %}checked{% endif %}> Sans Serif
+                                            </label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <label>
+                                                <input type="radio" name="font" value="Times New Roman" {% if initials.font == "Times New Roman" %}checked{% endif %}> Times New Roman
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="custom-font">
+                                        <label>
+                                            <input type="radio" name="font" value="Custom" id="customFontRadio" {% if initials.font == "Custom" %}checked{% endif %}> Custom font:
+                                        </label>
+                                        <input class="form-control" type="text" id="customFontInput" name="custom_font" value="{{ initials.custom_font}}"
+                                        placeholder="Custom font name" title="If this font can't be found, your browser's default font will be selected.">    
+                                    </div>
+                                </div>
+                                <div class="field-wrapper">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="id_heading_size">Heading size (in pt):</label>
+                                            <input type="number" name="heading_size" value="{{ initials.heading_size }}" min="1" max="100" step="any" class="form-control mb-2" required id="id_heading_size">
+                                        </div>
+                                        <div class="col">
+                                            <label for="id_text_size">Text size (in pt):</label>
+                                            <input type="number" name="text_size" value="{{ initials.text_size }}" min="1" max="100" step="any" class="form-control mb-2" required id="id_text_size">
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        <!-- Right column with plot preview -->
+                        <div class="col-5">
+                            <div class="plot-wrapper mb-3">
+                                {{ plot|safe }}
+                            </div>
+                            <button id="update-plot" type="button" class="btn btn-grey mr-auto action-button" data-action="{% url 'settings:update_plot_preview' %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                                </svg>
+                                Update plot
+                            </button>
+                        </div>
+                    </div>
+                    {% block footer %}
+                        {% include "settings_footer.html" %}
+                    {% endblock %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

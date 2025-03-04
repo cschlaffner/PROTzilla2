@@ -63,9 +63,6 @@ class FilterProteinsBySamplesMissingForm(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class FilterProteinsBySamplesMissingPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -79,9 +76,6 @@ class FilterByProteinsCountForm(MethodForm):
         min_value=0,
         initial=2,
     )
-
-
-class FilterByProteinsCountPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -97,9 +91,6 @@ class FilterSamplesByProteinsMissingForm(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class FilterSamplesByProteinsMissingPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -113,9 +104,6 @@ class FilterSamplesByProteinIntensitiesSumForm(MethodForm):
         min_value=0,
         initial=2,
     )
-
-
-class FilterSamplesByProteinIntensitiesSumPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",
@@ -162,9 +150,6 @@ class TransformationLogForm(MethodForm):
         label="Log transformation base:",
         initial=LogTransformationBaseType.log2,
     )
-
-
-class TransformationLogPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -176,10 +161,6 @@ class TransformationLogPlotForm(MethodForm):
 
 
 class NormalisationByZScoreForm(MethodForm):
-    pass
-
-
-class NormalisationByZscorePlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -196,10 +177,6 @@ class NormalisationByZscorePlotForm(MethodForm):
 
 
 class NormalisationByTotalSumForm(MethodForm):
-    pass
-
-
-class NormalisationByTotalSumPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -223,9 +200,6 @@ class NormalisationByMedianForm(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class NormalisationByMedianPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -254,9 +228,6 @@ class NormalisationByReferenceProteinForms(MethodForm):
         "protein in each sample. Samples where this value is zero will be "
         "removed and returned separately."
     )
-
-
-class NormalisationByReferenceProteinPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -283,9 +254,6 @@ class ImputationByMinPerDatasetForm(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class ImputationByMinPerDatasetPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -317,9 +285,6 @@ class ImputationByMinPerProteinForm(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class ImputationByMinPerProteinPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -348,9 +313,6 @@ class ImputationByMinPerSampleForms(MethodForm):
         step_size=0.1,
         initial=0.5,
     )
-
-
-class ImputationByMinPerSamplePlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -377,9 +339,6 @@ class SimpleImputationPerProteinForm(MethodForm):
         label="Strategy",
         initial=SimpleImputerStrategyType.mean,
     )
-
-
-class SimpleImputationPerProteinPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -407,9 +366,6 @@ class ImputationByKNNForms(MethodForm):
         step_size=1,
         initial=5,
     )
-
-
-class ImputationByKNNPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -442,9 +398,6 @@ class ImputationByNormalDistributionSamplingForm(MethodForm):
     scaling_factor = CustomFloatField(
         label="Scaling factor", min_value=0, max_value=1, step_size=0.1, initial=0.5
     )
-
-
-class ImputationByNormalDistributionSamplingPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BoxAndHistogramGraph,
         label="Graph type",
@@ -470,9 +423,6 @@ class FilterPeptidesByPEPThresholdForm(MethodForm):
         label="Threshold value for PEP", min_value=0, initial=0
     )
     peptide_df = CustomChoiceField(choices=EmptyEnum, label="peptide_df")
-
-
-class FilterPeptidesByPEPThresholdPlotForm(MethodForm):
     graph_type = CustomChoiceField(
         choices=BarAndPieChart,
         label="Graph type",

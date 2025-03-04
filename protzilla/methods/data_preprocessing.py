@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import logging
-import traceback
-
 from protzilla.data_preprocessing import (
     filter_proteins,
     filter_samples,
@@ -12,8 +9,7 @@ from protzilla.data_preprocessing import (
     peptide_filter,
     transformation,
 )
-from protzilla.steps import Plots, Step, StepManager
-from protzilla.utilities import format_trace
+from protzilla.steps import Step, StepManager
 
 
 class DataPreprocessingStep(Step):
@@ -32,34 +28,6 @@ class DataPreprocessingStep(Step):
         inputs["peptide_df"] = steps.get_step_output(Step, "peptide_df")
         return inputs
 
-    def plot(self, inputs: dict = None):
-        if inputs is None:
-            inputs = self.plot_inputs
-        else:
-            self.plot_inputs = inputs.copy()
-        inputs = self.insert_dataframes_for_plot(inputs)
-        try:
-            self.plots = Plots(self.plot_method(inputs))
-        except Exception as e:
-            self.messages.append(
-                dict(
-                    level=logging.ERROR,
-                    msg=(
-                        f"An error occurred while plotting this step: {e.__class__.__name__} {e} "
-                        f"Please check your parameters or report a potential programming issue."
-                    ),
-                    trace=format_trace(traceback.format_exception(e)),
-                )
-            )
-
-    def insert_dataframes_for_plot(self, inputs: dict) -> dict:
-        inputs["method_inputs"] = self.inputs
-        inputs["method_outputs"] = self.output
-        return inputs
-
-    def plot_method(self, inputs):
-        raise NotImplementedError("Plot method not implemented for this step")
-
 
 class FilterProteinsBySamplesMissing(DataPreprocessingStep):
     display_name = "By samples missing"
@@ -68,13 +36,8 @@ class FilterProteinsBySamplesMissing(DataPreprocessingStep):
         "Filter proteins based on the amount of samples with nan values"
     )
 
-    input_keys = ["protein_df", "peptide_df", "percentage"]
-
-    def method(self, inputs):
-        return filter_proteins.by_samples_missing(**inputs)
-
-    def plot_method(self, inputs):
-        return filter_proteins.by_samples_missing_plot(**inputs)
+    calc_method = staticmethod(filter_proteins.by_samples_missing)
+    plot_method = staticmethod(filter_proteins.by_samples_missing_plot)
 
 
 class FilterByProteinsCount(DataPreprocessingStep):
@@ -82,13 +45,8 @@ class FilterByProteinsCount(DataPreprocessingStep):
     operation = "filter_samples"
     method_description = "Filter by protein count per sample"
 
-    input_keys = ["protein_df", "peptide_df", "deviation_threshold"]
-
-    def method(self, inputs):
-        return filter_samples.by_protein_count(**inputs)
-
-    def plot_method(self, inputs):
-        return filter_samples.by_protein_count_plot(**inputs)
+    calc_method = staticmethod(filter_samples.by_protein_count)
+    plot_method = staticmethod(filter_samples.by_protein_count_plot)
 
 
 class FilterSamplesByProteinsMissing(DataPreprocessingStep):
@@ -98,13 +56,8 @@ class FilterSamplesByProteinsMissing(DataPreprocessingStep):
         "Filter samples based on the amount of proteins with nan values"
     )
 
-    input_keys = ["protein_df", "peptide_df", "percentage"]
-
-    def method(self, inputs):
-        return filter_samples.by_proteins_missing(**inputs)
-
-    def plot_method(self, inputs):
-        return filter_samples.by_proteins_missing_plot(**inputs)
+    calc_method = staticmethod(filter_samples.by_proteins_missing)
+    plot_method = staticmethod(filter_samples.by_proteins_missing_plot)
 
 
 class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
@@ -112,13 +65,8 @@ class FilterSamplesByProteinIntensitiesSum(DataPreprocessingStep):
     operation = "filter_samples"
     method_description = "Filter by sum of protein intensities per sample"
 
-    input_keys = ["protein_df", "peptide_df", "deviation_threshold"]
-
-    def method(self, inputs):
-        return filter_samples.by_protein_intensity_sum(**inputs)
-
-    def plot_method(self, inputs):
-        return filter_samples.by_protein_intensity_sum_plot(**inputs)
+    calc_method = staticmethod(filter_samples.by_protein_intensity_sum)
+    plot_method = staticmethod(filter_samples.by_protein_intensity_sum_plot)
 
 
 class OutlierDetectionByPCA(DataPreprocessingStep):
@@ -126,13 +74,8 @@ class OutlierDetectionByPCA(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using PCA"
 
-    input_keys = ["protein_df", "peptide_df", "number_of_components", "threshold"]
-
-    def method(self, inputs):
-        return outlier_detection.by_pca(**inputs)
-
-    def plot_method(self, inputs):
-        return outlier_detection.by_pca_plot(**inputs)
+    calc_method = staticmethod(outlier_detection.by_pca)
+    plot_method = staticmethod(outlier_detection.by_pca_plot)
 
 
 class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
@@ -140,13 +83,8 @@ class OutlierDetectionByLocalOutlierFactor(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using the local outlier factor"
 
-    input_keys = ["protein_df", "peptide_df", "number_of_neighbors"]
-
-    def method(self, inputs):
-        return outlier_detection.by_local_outlier_factor(**inputs)
-
-    def plot_method(self, inputs):
-        return outlier_detection.by_local_outlier_factor_plot(**inputs)
+    calc_method = staticmethod(outlier_detection.by_local_outlier_factor)
+    plot_method = staticmethod(outlier_detection.by_local_outlier_factor_plot)
 
 
 class OutlierDetectionByIsolationForest(DataPreprocessingStep):
@@ -154,13 +92,8 @@ class OutlierDetectionByIsolationForest(DataPreprocessingStep):
     operation = "outlier_detection"
     method_description = "Detect outliers using Isolation Forest"
 
-    input_keys = ["protein_df", "peptide_df", "n_estimators"]
-
-    def method(self, inputs):
-        return outlier_detection.by_isolation_forest(**inputs)
-
-    def plot_method(self, inputs):
-        return outlier_detection.by_isolation_forest_plot(**inputs)
+    calc_method = staticmethod(outlier_detection.by_isolation_forest)
+    plot_method = staticmethod(outlier_detection.by_isolation_forest_plot)
 
 
 class TransformationLog(DataPreprocessingStep):
@@ -168,13 +101,8 @@ class TransformationLog(DataPreprocessingStep):
     operation = "transformation"
     method_description = "Transform data by log"
 
-    input_keys = [ "protein_df", "peptide_df", "log_base"]
-
-    def method(self, inputs):
-        return transformation.by_log(**inputs)
-
-    def plot_method(self, inputs):
-        return transformation.by_log_plot(**inputs)
+    calc_method = staticmethod(transformation.by_log)
+    plot_method = staticmethod(transformation.by_log_plot)
 
 
 class NormalisationByZScore(DataPreprocessingStep):
@@ -182,13 +110,8 @@ class NormalisationByZScore(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by Z-Score"
 
-    plot_input_names = ["protein_df"]
-
-    def method(self, inputs):
-        return normalisation.by_z_score(**inputs)
-
-    def plot_method(self, inputs):
-        return normalisation.by_z_score_plot(**inputs)
+    calc_method = staticmethod(normalisation.by_z_score)
+    plot_method = staticmethod(normalisation.by_z_score_plot)
 
 
 class NormalisationByTotalSum(DataPreprocessingStep):
@@ -196,13 +119,8 @@ class NormalisationByTotalSum(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by total sum"
 
-    plot_input_names = ["protein_df"]
-
-    def method(self, inputs):
-        return normalisation.by_totalsum(**inputs)
-
-    def plot_method(self, inputs):
-        return normalisation.by_totalsum_plot(**inputs)
+    calc_method = staticmethod(normalisation.by_totalsum)
+    plot_method = staticmethod(normalisation.by_totalsum_plot)
 
 
 class NormalisationByMedian(DataPreprocessingStep):
@@ -210,13 +128,8 @@ class NormalisationByMedian(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by median"
 
-    input_keys = ["protein_df", "percentile"]
-
-    def method(self, inputs):
-        return normalisation.by_median(**inputs)
-
-    def plot_method(self, inputs):
-        return normalisation.by_median_plot(**inputs)
+    calc_method = staticmethod(normalisation.by_median)
+    plot_method = staticmethod(normalisation.by_median_plot)
 
 
 class NormalisationByReferenceProtein(DataPreprocessingStep):
@@ -224,13 +137,8 @@ class NormalisationByReferenceProtein(DataPreprocessingStep):
     operation = "normalisation"
     method_description = "Normalise data by reference protein"
 
-    input_keys = ["protein_df", "reference_protein"]
-
-    def method(self, inputs):
-        return normalisation.by_reference_protein(**inputs)
-
-    def plot_method(self, inputs):
-        return normalisation.by_reference_protein_plot(**inputs)
+    calc_method = staticmethod(normalisation.by_reference_protein)
+    plot_method = staticmethod(normalisation.by_reference_protein_plot)
 
 
 class ImputationByMinPerDataset(DataPreprocessingStep):
@@ -238,13 +146,8 @@ class ImputationByMinPerDataset(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per dataset"
 
-    input_keys = ["protein_df", "shrinking_value"]
-
-    def method(self, inputs):
-        return imputation.by_min_per_dataset(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_min_per_dataset_plot(**inputs)
+    calc_method = staticmethod(imputation.by_min_per_dataset)
+    plot_method = staticmethod(imputation.by_min_per_dataset_plot)
 
 
 class ImputationByMinPerProtein(DataPreprocessingStep):
@@ -252,13 +155,8 @@ class ImputationByMinPerProtein(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per protein"
 
-    input_keys = ["protein_df", "shrinking_value"]
-
-    def method(self, inputs):
-        return imputation.by_min_per_protein(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_min_per_protein_plot(**inputs)
+    calc_method = staticmethod(imputation.by_min_per_protein)
+    plot_method = staticmethod(imputation.by_min_per_protein_plot)
 
 
 class ImputationByMinPerSample(DataPreprocessingStep):
@@ -266,13 +164,8 @@ class ImputationByMinPerSample(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Impute missing values by the minimum per sample"
 
-    input_keys = ["protein_df", "shrinking_value"]
-
-    def method(self, inputs):
-        return imputation.by_min_per_protein(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_min_per_sample_plot(**inputs)
+    calc_method = staticmethod(imputation.by_min_per_protein)
+    plot_method = staticmethod(imputation.by_min_per_sample_plot)
 
 
 class SimpleImputationPerProtein(DataPreprocessingStep):
@@ -283,13 +176,8 @@ class SimpleImputationPerProtein(DataPreprocessingStep):
         "sklearn.SimpleImputer class"
     )
 
-    input_keys = ["protein_df", "strategy"]
-
-    def method(self, inputs):
-        return imputation.by_simple_imputer(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_simple_imputer_plot(**inputs)
+    calc_method = staticmethod(imputation.by_simple_imputer)
+    plot_method = staticmethod(imputation.by_simple_imputer_plot)
 
 
 class ImputationByKNN(DataPreprocessingStep):
@@ -301,13 +189,8 @@ class ImputationByKNN(DataPreprocessingStep):
         "the features that neither is missing are close."
     )
 
-    input_keys = ["protein_df", "number_of_neighbours"]
-
-    def method(self, inputs):
-        return imputation.by_knn(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_knn_plot(**inputs)
+    calc_method = staticmethod(imputation.by_knn)
+    plot_method = staticmethod(imputation.by_knn_plot)
 
 
 class ImputationByNormalDistributionSampling(DataPreprocessingStep):
@@ -315,25 +198,15 @@ class ImputationByNormalDistributionSampling(DataPreprocessingStep):
     operation = "imputation"
     method_description = "Imputation methods include normal distribution sampling per protein or per dataset"
 
-    input_keys = ["protein_df", "strategy", "down_shift", "scaling_factor"]
-
-    def method(self, inputs):
-        return imputation.by_normal_distribution_sampling(**inputs)
-
-    def plot_method(self, inputs):
-        return imputation.by_normal_distribution_sampling_plot(**inputs)
+    calc_method = staticmethod(imputation.by_normal_distribution_sampling)
+    plot_method = staticmethod(imputation.by_normal_distribution_sampling_plot)
 
 
 class FilterPeptidesByPEPThreshold(DataPreprocessingStep):
     display_name = "PEP threshold"
     operation = "filter_peptides"
     method_description = "Filter by PEP-threshold"
-
-    input_keys = ["protein_df", "peptide_df", "threshold"]
     output_keys = ["protein_df", "peptide_df", "filtered_peptides"]
 
-    def method(self, inputs):
-        return peptide_filter.by_pep_value(**inputs)
-
-    def plot_method(self, inputs):
-        return peptide_filter.by_pep_value_plot(**inputs)
+    calc_method = staticmethod(peptide_filter.by_pep_value)
+    plot_method = staticmethod(peptide_filter.by_pep_value_plot)

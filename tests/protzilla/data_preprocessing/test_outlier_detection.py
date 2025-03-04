@@ -75,7 +75,7 @@ def test_outlier_detection_with_isolation_forest(
         "n_jobs": -1,
     }
     method_outputs = by_isolation_forest(**method_inputs)
-    fig = by_isolation_forest_plot(method_inputs, method_outputs)[0]
+    fig = by_isolation_forest_plot(method_outputs["anomaly_df"])[0]
     if show_figures:
         fig.show()
 
@@ -110,7 +110,7 @@ def test_outlier_detection_by_local_outlier_factor(
         "n_jobs": -1,
     }
     method_outputs = by_local_outlier_factor(**method_inputs)
-    fig = by_local_outlier_factor_plot(method_inputs, method_outputs)[0]
+    fig = by_local_outlier_factor_plot(method_outputs["anomaly_df"])[0]
     if show_figures:
         fig.show()
         assert_peptide_filtering_matches_protein_filtering(
@@ -144,7 +144,7 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df, peptides
         "number_of_components": 3,
     }
     method_outputs = by_pca(**method_inputs)
-    fig = by_pca_plot(method_inputs, method_outputs)[0]
+    fig = by_pca_plot(method_outputs["pca_df"], method_outputs["number_of_components"], method_outputs["explained_variance_ratio"])[0]
     if show_figures:
         fig.show()
 

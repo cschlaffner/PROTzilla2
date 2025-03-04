@@ -9,40 +9,6 @@ from protzilla.utilities import name_to_title
 from ui.runs.utilities.alert import build_trace_alert
 
 
-def parameters_from_post(post):
-    d = dict(post)
-    if "csrfmiddlewaretoken" in d:
-        del d["csrfmiddlewaretoken"]
-    parameters = {}
-    for k, v in d.items():
-        if len(v) > 1:
-            # only used for named_output parameters and multiselect fields
-            parameters[k] = v
-        else:
-            parameters[k] = convert_str_if_possible(v[0])
-    return parameters
-
-
-def convert_str_if_possible(s):
-    try:
-        f = float(s)
-        return int(f) if int(f) == f else f
-    except ValueError:
-        if s == "checked":
-            # s is a checkbox
-            return True
-        if re.fullmatch(r"\d+(\.\d+)?(\|\d+(\.\d+)?)*", s):
-            # s is a multi-numeric input e.g. 1-0.12-5
-            numbers_str = re.findall(r"\d+(?:\.\d+)?", s)
-            numbers = []
-            for num in numbers_str:
-                num = float(num)
-                num = int(num) if int(num) == num else num
-                numbers.append(num)
-            return numbers
-        return s
-
-
 def get_displayed_steps(
     steps: StepManager,
 ) -> list[dict]:  # TODO i think this broke with the new naming scheme, should be redone
@@ -58,10 +24,12 @@ def get_displayed_steps(
                     "id": step.operation,
                     "name": name_to_title(step.operation),
                     "index": index_in_section,
+                    "index_global": index_global,
                     "section": step.section,
                     "method_name": step.display_name,
                     "selected": step == steps.current_step,
                     "finished": index_global < steps.current_step_index,
+                    "calculation_icon_path": "img/" + step.calculation_status + "_icon.svg"
                 }
             )
 
@@ -94,6 +62,7 @@ def get_displayed_steps(
                 "steps": workflow_steps,
                 "selected": steps.current_section == section,
                 "finished": index_global - 1 < steps.current_step_index,
+                "calculation_status": step.calculation_status,
             }
         )
     return displayed_steps

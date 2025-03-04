@@ -1,4 +1,5 @@
-{# params: run_name section{id, name, finished, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, method_name}} #}
+{% load static %}
+{# params: run_name section{id, finished, name, selected, possible_steps{id, name, methods{id, name, description}}, steps{id, name, finished, selected, index, index_global, method_name, calculation_icon_path}} #}
 
 {% block js %}
     <script>
@@ -13,6 +14,9 @@
 <div>
     {% for step in section.steps %}
         <div class="wrapper {% if step.selected %}selected{% endif %} {% if step.finished %}finished{% endif %} d-flex align-items-center">
+            <div id="calculationIcon_{{ step.index_global }}">
+                <img src="{% static step.calculation_icon_path %}" width="25" height="25">
+            </div>
             <form action="{% url 'runs:navigate' run_name %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="section_name" value="{{ section.id }}">
@@ -20,7 +24,7 @@
                 <button class="me-1" style="border: none; background: none; text-align: left">
                     <p class="me-1">{{ step.name }}: <i>{{ step.method_name }}</i></p>
                 </button>
-            </form>
+            </form>   
 
             {% if not step.selected and not step.finished %}
                 {# button to remove step from workflow #}
@@ -35,7 +39,7 @@
                     </button>                    
                 </form>
             {% endif %}
-
+            
         </div>
     {% endfor %}
 </div>

@@ -88,11 +88,11 @@ class KEYS:
     STEP_OUTPUTS = "output"
     STEP_FORM_INPUTS = "form_inputs"
     STEP_INPUTS = "inputs"
-    STEP_PLOT_INPUTS = "plot_inputs"
     STEP_MESSAGES = "messages"
     STEP_PLOTS = "plots"
     STEP_INSTANCE_IDENTIFIER = "instance_identifier"
     STEP_TYPE = "type"
+    STEP_CALCULATION_STATUS = "calculation_status"
     DF_MODE = "df_mode"
 
 
@@ -176,7 +176,7 @@ class DiskOperator:
         if steps.current_step.instance_identifier in file.name:
             return False
         return any(
-            step.instance_identifier in file.name and step.finished
+            step.instance_identifier in file.name and step.calculation_status!="incomplete"
             for step in steps.all_steps
         )
 
@@ -207,19 +207,16 @@ class DiskOperator:
                 instance_identifier=step_data.get(KEYS.STEP_INSTANCE_IDENTIFIER),
             )
             step.inputs = step_data.get(KEYS.STEP_INPUTS, {})
-            if step.section == "data_preprocessing":
-                step.plot_inputs = step_data.get(KEYS.STEP_PLOT_INPUTS, {})
             step.messages = Messages(step_data.get(KEYS.STEP_MESSAGES, []))
             step.output = self._read_outputs(step_data.get(KEYS.STEP_OUTPUTS, {}))
             step.plots = self._read_plots(step_data.get(KEYS.STEP_PLOTS, []))
             step.form_inputs = step_data.get(KEYS.STEP_FORM_INPUTS, {})
+            step.calculation_status = step_data.get(KEYS.STEP_CALCULATION_STATUS,"incomplete")
             return step
 
     def _write_step(self, step: Step, workflow_mode: bool = False) -> dict:
         with ErrorHandler():
             step_data = {}
-            if step.section == "data_preprocessing":
-                step_data[KEYS.STEP_PLOT_INPUTS] = sanitize_inputs(step.plot_inputs)
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
             step_data[KEYS.STEP_FORM_INPUTS] = sanitize_inputs(step.form_inputs)
@@ -232,6 +229,7 @@ class DiskOperator:
                     instance_identifier=step.instance_identifier, output=step.output
                 )
                 step_data[KEYS.STEP_MESSAGES] = step.messages.messages
+                step_data[KEYS.STEP_CALCULATION_STATUS] = step.calculation_status
             return step_data
 
     def _read_outputs(self, output: dict) -> Output:

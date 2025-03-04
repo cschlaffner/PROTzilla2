@@ -185,7 +185,7 @@ def test_log2_transformation(
     }
     method_outputs = by_log(**method_inputs)
 
-    fig = by_log_plot(method_inputs, method_outputs, "Boxplot", "Protein ID")[0]
+    fig = by_log_plot(log2_transformation_df, method_outputs["protein_df"], "Boxplot", "Protein ID")[0]
     if show_figures:
         fig.show()
 
@@ -218,8 +218,8 @@ def test_log10_transformation(
     method_output = by_log(**method_inputs)
 
     fig = by_log_plot(
-        method_inputs,
-        method_output,
+        log10_transformation_df,
+        method_output["protein_df"],
         "Boxplot",
         "Protein ID",
     )[0]

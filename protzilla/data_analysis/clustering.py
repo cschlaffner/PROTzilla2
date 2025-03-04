@@ -28,7 +28,6 @@ def k_means(
     n_init: int = 10,
     max_iter: int = 300,
     tolerance: float = 1e-4,
-    **kwargs,
 ):
     """
     A method that uses k-means to partition a number of samples in k clusters. The
@@ -106,8 +105,7 @@ def k_means(
             clf,
             clf_parameters,
             scoring,
-            labels_df=labels_df["Encoded Label"],
-            **kwargs,
+            labels_df=labels_df["Encoded Label"]
         )
 
         # create dataframes for ouput dict
@@ -159,7 +157,7 @@ def expectation_maximisation(
     init_params: str = "kmeans",
     max_iter: int = 100,
     random_state=42,
-    **kwargs,
+    model_selection_scoring=None,
 ):
     """
     Performs expectation maximization clustering with a Gaussian Mixture Model, using
@@ -236,7 +234,7 @@ def expectation_maximisation(
         clf_parameters,
         scoring,
         labels_df=labels_df["Encoded Label"],
-        **kwargs,
+        model_selection_scoring = model_selection_scoring,
     )
 
     cluster_labels_df = pd.DataFrame(
@@ -264,7 +262,7 @@ def hierarchical_agglomerative_clustering(
     n_clusters: int = 2,
     metric: str = "euclidean",
     linkage: str = "ward",
-    **kwargs,
+    model_selection_scoring=None,
 ):
     """
     Performs Agglomerative Clustering by recursively merging a pair of clusters of
@@ -327,7 +325,7 @@ def hierarchical_agglomerative_clustering(
         clf_parameters,
         scoring,
         labels_df=labels_df["Encoded Label"],
-        **kwargs,
+        model_selection_scoring = model_selection_scoring,
     )
 
     cluster_labels_df = pd.DataFrame(
@@ -348,7 +346,6 @@ def perform_clustering(
     scoring,
     labels_df=None,
     model_selection_scoring=None,
-    **parameters,
 ):
     if model_selection == "Manual":
         model = clf.set_params(**clf_parameters)

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{# params: initials, sidebar, section_id, sections #}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'settings_style.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'settings.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>PROTzilla - Settings</title>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        {{ sidebar|safe }}
+        <div class="content border-start">
+            <div justify-content-center d-flex>
+                <h3>Manage Databases</h3>
+                <div class="mb-3" id="description">In this section, you can manage your UniProt integration by uploading protein
+                    data tables to enabling gene mapping.</div>
+
+                <form method="post" id="settings-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="section_id" value="{{ section_id }}">
+
+                    <!-- PLEASE NOTE: This HTML is a placeholder. TO DO: Move "Manage databases" content to this page. -->
+                    <p><b>Please note: This page is an placeholder for displaying the database management in the future.</b></p>
+                    
+                    <div class="mb-2" id="settings-form">
+                        <h5>Datebases</h5>
+                        <div class="field-wrapper">
+                            <label for="id_selected_database">Selected Database:</label>
+                            <select name="selected_database" class="form-select mb-2" id="id_selected_database">
+                                <option value="Database 1" {% if initials.selected_database == "Database 1" %}selected{% endif %}>Database 1</option>
+                                <option value="Database 2" {% if initials.selected_database == "Database 2" %}selected{% endif %}>Database 2</option>
+                                <option value="Database 3" {% if initials.selected_database == "Database 3" %}selected{% endif %}>Database 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% block footer %}
+                        {% include "settings_footer.html" %}
+                    {% endblock %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

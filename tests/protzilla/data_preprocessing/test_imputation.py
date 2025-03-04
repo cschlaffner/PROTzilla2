@@ -159,8 +159,8 @@ def test_imputation_min_value_per_df(
     method_outputs = by_min_per_dataset(**method_inputs)
 
     fig1, fig2 = by_min_per_dataset_plot(
-        method_inputs,
-        method_outputs,
+        input_imputation_df,
+        method_outputs["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -194,8 +194,8 @@ def test_imputation_min_value_per_sample(
     method_outputs = by_min_per_sample(**method_inputs)
 
     fig1, fig2 = by_min_per_sample_plot(
-        method_inputs,
-        method_outputs,
+        input_imputation_df,
+        method_outputs["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -229,8 +229,8 @@ def test_imputation_min_value_per_protein(
     method_outputs = by_min_per_protein(**method_inputs)
 
     fig1, fig2 = by_min_per_protein_plot(
-        method_inputs,
-        method_outputs,
+        input_imputation_df,
+        method_outputs["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -264,8 +264,8 @@ def test_imputation_mean_per_protein(
     method_outputs = by_simple_imputer(**method_inputs)
 
     fig1, fig2 = by_simple_imputer_plot(
-        method_inputs,
-        method_outputs,
+        input_imputation_df,
+        method_outputs["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -297,8 +297,8 @@ def test_imputation_knn(show_figures, input_imputation_df, assertion_df_knn):
     method_outputs = by_knn(**method_inputs)
 
     fig1, fig2 = by_knn_plot(
-        method_inputs,
-        method_outputs,
+        input_imputation_df,
+        method_outputs["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
@@ -339,8 +339,8 @@ def test_imputation_normal_distribution_sampling(show_figures, input_imputation_
     )
 
     fig1, fig2 = by_normal_distribution_sampling_plot(
-        method_inputs_perProtein,
-        method_outputs_perProtein,
+        input_imputation_df,
+        method_outputs_perProtein["protein_df"],
         "Boxplot",
         "Bar chart",
         "Sample",
