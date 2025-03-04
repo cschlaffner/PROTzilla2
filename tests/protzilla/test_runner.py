@@ -12,7 +12,6 @@ sys.path.append(f"{PROJECT_PATH}/..")
 sys.path.append(f"{PROJECT_PATH}")
 
 from protzilla.runner import Runner, _serialize_graphs
-from protzilla.steps import Output, Plots
 from runner_cli import args_parser
 
 
@@ -41,12 +40,7 @@ def mock_perform_method(runner: Runner):
         mock_perform.methods.append(str(runner.run.current_step))
         mock_perform.inputs.append(runner.run.current_step.inputs)
 
-        # side effect to mark the step as finished
-        runner.run.current_step.output = Output(
-            {key: "mock_output_value" for key in runner.run.current_step.output_keys}
-        )
-        if len(runner.run.current_step.output_keys) == 0:
-            runner.run.current_step.plots = Plots(["mock_plot"])
+        runner.run.current_step.calculation_status = "complete"
 
     mock_perform.side_effect = mock_current_parameters
 
@@ -95,8 +89,8 @@ def test_runner_imports(
         "FilterSamplesByProteinIntensitiesSum",
         "ImputationByKNN",
         "OutlierDetectionByLocalOutlierFactor",
-        "NormalisationByMedian",
         "TransformationLog",
+        "NormalisationByMedian",
         "PlotProtQuant",
         "DifferentialExpressionTTest",
         "PlotVolcano",
@@ -122,8 +116,8 @@ def test_runner_imports(
         call({"deviation_threshold": 2.0}),
         call({"number_of_neighbours": 5}),
         call({"number_of_neighbors": 20}),
-        call({"percentile": 0.5}),
         call({"log_base": "log2"}),
+        call({"percentile": 0.5}),
         call({"similarity_measure": "euclidean distance"}),
         call({"alpha": 0.05}),
         call({"fc_threshold": 1}),
@@ -184,8 +178,6 @@ def test_runner_calculates(monkeypatch, tests_folder_name, ms_data_path, metadat
     mock_plot = mock_perform_plot(runner)
 
     monkeypatch.setattr(runner, "_perform_current_step", mock_method)
-    for step in runner.run.steps.data_preprocessing:
-        monkeypatch.setattr(step, "plot", mock_plot)
 
     runner.compute_workflow()
 
@@ -229,30 +221,6 @@ def test_runner_calculates_logging(caplog, tests_folder_name, ms_data_path):
 
     assert "ERROR" in caplog.text
     assert "FileNotFoundError" in caplog.text
-
-
-def test_runner_plots(monkeypatch, tests_folder_name, ms_data_path, metadata_path):
-    plot_args = [
-        "only_import_and_filter_proteins",
-        ms_data_path,
-        f"--run_name={tests_folder_name}/test_runner_{random_string()}",
-        f"--meta_data_path={metadata_path}",
-        "--all_plots",
-    ]
-    kwargs = args_parser().parse_args(plot_args).__dict__
-    runner = Runner(**kwargs)
-
-    mock_method = mock_perform_method(runner)
-    mock_plot = mock_perform_plot(runner)
-
-    monkeypatch.setattr(runner, "_perform_current_step", mock_method)
-    for step in runner.run.steps.data_preprocessing:
-        monkeypatch.setattr(step, "plot", mock_plot)
-
-    runner.compute_workflow()
-
-    assert mock_plot.call_count == 1
-    assert mock_plot.inputs == [{"graph_type": "Bar chart"}]
 
 
 def test_serialize_graphs():

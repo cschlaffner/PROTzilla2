@@ -286,6 +286,17 @@ def evidence_peptide_df():
             ],
             [
                 "Sample1",
+                "Protein3",
+                "SEQGG",
+                7000000,
+                "Unmodified",
+                "_SEQGG_",
+                None,
+                0.00007,
+                "Raw_File_1",
+            ],
+            [
+                "Sample1",
                 "Protein4",
                 "SEQH",
                 8000000,

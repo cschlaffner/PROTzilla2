@@ -82,3 +82,21 @@ html, body {
     height: auto;
     resize: none;
 }
+.header {
+    position: sticky;
+    top: 80px;
+}
+
+.footer {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 8%;
+    margin-top: 10px;
+    background-color: rgb(255, 255, 255);
+}
+.plot-wrapper {
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #e8edf3;
+    border-radius: .375rem;
+}

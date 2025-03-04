@@ -18,15 +18,19 @@ from django.http import (
 from django.shortcuts import render
 from django.urls import reverse
 
+from protzilla.constants.paths import WORKFLOWS_PATH
 from protzilla.run import Run, get_available_run_names
 from protzilla.run_helper import log_messages
+from protzilla.run_v2 import delete_run_folder
 from protzilla.stepfactory import StepFactory
 from protzilla.steps import Step
 from protzilla.utilities.utilities import (
     check_is_path,
+    clean_uniprot_id,
     format_trace,
     get_memory_usage,
     name_to_title,
+    unique_justseen,
 )
 from protzilla.workflow import get_available_workflow_names
 from ui.runs.fields import (
@@ -35,13 +39,10 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post
+from ui.runs.views_helper import display_message, display_messages
+from ui.settings.views import load_settings
 
-from .form_mapping import (
-    get_empty_plot_form_by_method,
-    get_filled_form_by_method,
-    get_filled_form_by_request,
-)
+from .form_mapping import get_filled_form_by_method, get_filled_form_by_request
 
 active_runs: dict[str, Run] = {}
 
@@ -61,12 +62,13 @@ def detail(request: HttpRequest, run_name: str):
     :return: the rendered details page
     :rtype: HttpResponse
     """
+    # get current run instance
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run: Run = active_runs[run_name]
 
-    # section, step, method = run.current_run_location()
-    # end_of_run = not step
+    request.session["last_view"] = "runs:detail"
+    request.session["run_name"] = run_name
 
     if request.POST:
         method_form = get_filled_form_by_request(
@@ -74,12 +76,10 @@ def detail(request: HttpRequest, run_name: str):
         )  # TODO maybe not do this as it is done after the calculation
         if method_form.is_valid():
             method_form.submit(run)
-        plot_form = get_empty_plot_form_by_method(run.current_step, run)
         # in case the fill_form now would change it
         method_form.fill_form(run)
     else:
         method_form = get_filled_form_by_method(run.current_step, run)
-        plot_form = get_empty_plot_form_by_method(run.current_step, run)
 
     description = run.current_step.method_description
 
@@ -147,12 +147,15 @@ def detail(request: HttpRequest, run_name: str):
                 type(run.current_step).__name__,
             ),
             name_field=make_name_field(
-                run.current_step.finished, run, False
+                run.current_step.calculation_status != "incomplete", run, False
             ),  # TODO end_of_run
             current_plots=current_plots,
-            results_exist=run.current_step.finished,
+            results_exist=run.current_step.calculation_status
+            in ["complete", "outdated"],
+            allow_calculate=run.steps.current_step_index <= run.steps.failed_step_index
+            or run.steps.failed_step_index == -1,
             show_back=run.steps.current_step_index > 0,
-            show_plot_button=run.current_step.finished,
+            show_plot_button=run.current_step.calculation_status != "incomplete",
             # TODO include plot exists and plot parameters match current plot or remove this and replace with results exist
             sidebar=make_sidebar(request, run),
             last_step=run.steps.current_step_index == len(run.steps.all_steps) - 1,
@@ -166,6 +169,7 @@ def detail(request: HttpRequest, run_name: str):
             plot_form=plot_form,
             display_output=display_output_form,
             display_output_result=display_output_text,
+            current_step_index=run.steps.current_step_index,
         ),
     )
 
@@ -180,6 +184,9 @@ def index(request: HttpRequest, index_error: bool = False):
     :return: the rendered index page
     :rtype: HttpResponse
     """
+
+    request.session["last_view"] = "runs:index"
+
     return render(
         request,
         "runs/index.html",
@@ -240,6 +247,38 @@ def continue_(request: HttpRequest):
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
+def delete_(request: HttpRequest):
+    """
+    Deletes an existing run. The user is redirected to the index page.
+
+    :param request: the request object
+    :type request: HttpRequest
+
+
+    :return: the rendered details page of the run
+    :rtype: HttpResponse
+    """
+    run_name = request.POST["run_name"]
+    if run_name in active_runs:
+        del active_runs[run_name]
+
+    try:
+        delete_run_folder(run_name)
+    except Exception as e:
+        display_message(
+            {
+                "level": 40,
+                "msg": f"Couldn't delete the run '{run_name}' . Please check the permissions for this file or try running Protzilla as administrator.",
+                "trace": format_trace(traceback.format_exception(e)),
+            },
+            request,
+        )
+        traceback.print_exc()
+        return HttpResponseRedirect(reverse("runs:index"))
+
+    return HttpResponseRedirect(reverse("runs:index"))
+
+
 def next_(request, run_name):
     """
     Skips to and renders the next step/method of the run.
@@ -252,6 +291,8 @@ def next_(request, run_name):
     :return: the rendered detail page of the run with the next step/method
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     name = request.POST.get("name", None)
     if name:
@@ -273,35 +314,10 @@ def back(request, run_name):
     :return: the rendered detail page of the run with the previous step/method
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     run.step_previous()
-    return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
-
-
-def plot(request, run_name):
-    """
-    Creates a plot from the current step/method of the run.
-    This is only called by the plot button in the data preprocessing section aka when a plot is
-    simultaneously a step on its own.
-    Django messages are used to display additional information, warnings and errors to the user.
-
-    :param request: the request object
-    :type request: HttpRequest
-    :param run_name: the name of the run
-    :type run_name: str
-
-    :return: the rendered detail page of the run, now with the plot
-    :rtype: HttpResponse
-    """
-    run = active_runs[run_name]
-    parameters = parameters_from_post(request.POST)
-
-    if run.current_step.display_name == "plot":
-        del parameters["chosen_method"]
-        run.step_calculate(parameters)
-    else:
-        run.current_step.plot(parameters)
-
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -363,6 +379,8 @@ def add(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run, new method visible in sidebar
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     method = dict(request.POST)["method"][0]
 
@@ -383,9 +401,19 @@ def export_workflow(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     requested_workflow_name = request.POST["name"]
     run._workflow_export(requested_workflow_name)
+    display_message(
+        {
+            "level": 20,
+            "msg": f"Workflow '{requested_workflow_name}' was exported successfully.<br>You can view the file at {WORKFLOWS_PATH}.",
+        },
+        request,
+    )
+
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -402,13 +430,17 @@ def download_plots(request: HttpRequest, run_name: str):
     :return: a FileResponse with the plots
     :rtype: FileResponse
     """
-
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    format_ = request.GET["format"]
+    settings = load_settings("plots")
+    format_ = settings["file_format"]
     index = run.steps.current_step_index
     section = run.current_step.section
     operation = run.current_step.operation
-    exported = run.current_plots.export(format_=format_)
+    exported = run.current_plots.export(settings)
+    if len(exported) == 0:
+        raise RuntimeError("List of exported plots is empty.")
     if len(exported) == 1:
         filename = f"{index}-{section}-{operation}.{format_}"
         return FileResponse(exported[0], filename=filename, as_attachment=True)
@@ -438,6 +470,8 @@ def delete_step(request: HttpRequest, run_name: str):
     :return: the rendered detail page of the run, deleted method no longer visible in sidebar
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -445,6 +479,7 @@ def delete_step(request: HttpRequest, run_name: str):
     section = post["section"][0]
 
     run.step_remove(step_index=index, section=section)
+    run.step_set_outdated(offset=1)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
 
@@ -457,6 +492,8 @@ def navigate(request, run_name: str):
 
     :return: the rendered detail page of the run with the specified step/method
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
 
     post = dict(request.POST)
@@ -470,6 +507,8 @@ def navigate(request, run_name: str):
 
 
 def tables_content(request, run_name, index, key):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     # TODO this will change with df_mode implementation
     if index < len(run.steps.previous_steps):
@@ -595,6 +634,8 @@ def fill_form(request: HttpRequest, run_name: str):
     :return: the filled form
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     method_form = get_filled_form_by_request(request, run)
     form_html = ""
@@ -617,6 +658,8 @@ def add_name(request, run_name):
     :return: the rendered detail page of the run
     :rtype: HttpResponse
     """
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
     run.name_step(int(request.POST["index"]), request.POST["name"])
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
@@ -638,3 +681,15 @@ def download_table(request, run_name, index, key):
     csv_bytes = buffer.getvalue()
 
     return FileResponse(csv_bytes, content_type="text/csv")
+
+
+def update_form(request: HttpRequest, run_name: str):
+    if run_name not in active_runs:
+        active_runs[run_name] = Run(run_name)
+    run: Run = active_runs[run_name]
+    count = 0
+    if run.current_step.calculation_status == "complete":
+        count = run.step_set_outdated()
+    method_form = get_filled_form_by_request(request, run)
+    method_form.update_form(run)
+    return JsonResponse({"status": run.current_step.calculation_status, "count": count})

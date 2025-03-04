@@ -23,7 +23,9 @@ def get_choices(
     :param output_key: the output key (e.g. "protein_df" or "enrichment_df"
     :return: a list of tuples containing the instance identifier and the instance identifier
     """
-    return to_choices(run.steps.get_instance_identifiers(step_type, output_key))
+    return reversed(
+        to_choices(run.steps.get_instance_identifiers(step_type, output_key))
+    )
 
 
 def get_choices_for_metadata_non_sample_columns(run: Run) -> list[tuple[str, str]]:

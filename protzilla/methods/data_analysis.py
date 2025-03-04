@@ -7,10 +7,14 @@ from protzilla.data_analysis.clustering import (
     k_means,
 )
 from protzilla.data_analysis.differential_expression_anova import anova
+from protzilla.data_analysis.differential_expression_kruskal_wallis import (
+    kruskal_wallis_test_on_intensity_data,
+    kruskal_wallis_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_mann_whitney import (
-    mann_whitney_test_on_columns,
     mann_whitney_test_on_intensity_data,
+    mann_whitney_test_on_ptm_data,
 )
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
@@ -23,16 +27,17 @@ from protzilla.data_analysis.plots import (
 )
 from protzilla.data_analysis.power_analysis import (
     power_calculation,
+    power_calculation_for_all_proteins,
     sample_size_calculation,
     sample_size_calculation_for_all_proteins,
-    power_calculation_for_all_proteins,
 )
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
-    filter_peptides_of_protein,
     ptms_per_protein_and_sample,
     ptms_per_sample,
+    select_peptides_of_protein,
 )
+from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
 from protzilla.steps import Plots, Step, StepManager
 
@@ -58,15 +63,6 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
     operation = "differential_expression"
     method_description = "A function that uses ANOVA to test the difference between two or more groups defined in the clinical data. The ANOVA test is conducted on the level of each protein. The p-values are corrected for multiple testing."
 
-    input_keys = [
-        "intensity_df",
-        "multiple_testing_correction_method",
-        "alpha",
-        "log_base",
-        "grouping",
-        "selected_groups",
-        "metadata_df",
-    ]
     output_keys = [
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
@@ -76,8 +72,7 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
         "filtered_proteins",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return anova(**inputs)
+    calc_method = staticmethod(anova)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
@@ -85,26 +80,12 @@ class DifferentialExpressionANOVA(DataAnalysisStep):
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        raise NotImplementedError("Plotting is not implemented yet for this step.")
-
 
 class DifferentialExpressionTTest(DataAnalysisStep):
     display_name = "t-Test"
     operation = "differential_expression"
     method_description = "A function to conduct a two sample t-test between groups defined in the clinical data. The t-test is conducted on the level of each protein. The p-values are corrected for multiple testing. The fold change is calculated by group2/group1."
 
-    input_keys = [
-        "ttest_type",
-        "intensity_df",
-        "multiple_testing_correction_method",
-        "alpha",
-        "log_base",
-        "grouping",
-        "group1",
-        "group2",
-        "metadata_df",
-    ]
     output_keys = [
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
@@ -114,8 +95,7 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         "corrected_alpha",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return t_test(**inputs)
+    calc_method = staticmethod(t_test)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
@@ -123,25 +103,12 @@ class DifferentialExpressionTTest(DataAnalysisStep):
         inputs["metadata_df"] = steps.metadata_df
         return inputs
 
-    def plot(self, inputs):
-        raise NotImplementedError("Plotting is not implemented yet for this step.")
-
 
 class DifferentialExpressionLinearModel(DataAnalysisStep):
     display_name = "Linear Model"
     operation = "differential_expression"
     method_description = "A function to fit a linear model using ordinary least squares for each protein. The linear model fits the protein intensities on Y axis and the grouping on X for group1 X=-1 and group2 X=1. The p-values are corrected for multiple testing."
 
-    input_keys = [
-        "intensity_df",
-        "multiple_testing_correction_method",
-        "alpha",
-        "log_base",
-        "grouping",
-        "group1",
-        "group2",
-        "metadata_df",
-    ]
     output_keys = [
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
@@ -151,17 +118,13 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
         "filtered_proteins",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return linear_model(**inputs)
+    calc_method = staticmethod(linear_model)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         inputs["intensity_df"] = steps.protein_df
         inputs["metadata_df"] = steps.metadata_df
         return inputs
-
-    def plot(self, inputs):
-        raise NotImplementedError("Plotting is not implemented yet for this step.")
 
 
 class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
@@ -172,33 +135,21 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
         "The p-values are corrected for multiple testing."
     )
 
-    input_keys = [
-        "intensity_df",
-        "metadata_df",
-        "grouping",
-        "group1",
-        "group2",
-        "alpha",
-        "multiple_testing_correction_method",
-    ]
     output_keys = [
         "differentially_expressed_proteins_df",
         "significant_proteins_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return mann_whitney_test_on_intensity_data(**inputs)
+    calc_method = staticmethod(mann_whitney_test_on_intensity_data)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        if (
-            steps.get_step_output(Step, "protein_df", inputs["intensity_df"])
-            is not None
-        ):
-            inputs["intensity_df"] = steps.get_step_output(
-                Step, "protein_df", inputs["intensity_df"]
+        if steps.get_step_output(Step, "protein_df", inputs["protein_df"]) is not None:
+            inputs["protein_df"] = steps.get_step_output(
+                Step, "protein_df", inputs["protein_df"]
             )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
@@ -213,58 +164,107 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
         "The p-values are corrected for multiple testing."
     )
 
-    input_keys = [
-        "df",
-        "metadata_df",
-        "grouping",
-        "group1",
-        "group2",
-        "alpha",
-        "multiple_testing_correction_method",
-        "columns_name",
-    ]
     output_keys = [
         "differentially_expressed_ptm_df",
         "significant_ptm_df",
         "corrected_p_values_df",
+        "u_statistic_df",
         "log2_fold_change_df",
         "corrected_alpha",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return mann_whitney_test_on_columns(**inputs)
+    calc_method = staticmethod(mann_whitney_test_on_ptm_data)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
-        inputs["columns_name"] = "PTM"
+        inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
+    display_name = "Kruskal-Wallis Test"
+    operation = "differential_expression"
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
+
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "corrected_alpha",
+    ]
+
+    calc_method = staticmethod(kruskal_wallis_test_on_intensity_data)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
+
+
+class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
+    display_name = "Kruskal-Wallis Test"
+    operation = "differential_expression"
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
+
+    output_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "corrected_p_values_df",
+        "corrected_alpha",
+    ]
+
+    calc_method = staticmethod(kruskal_wallis_test_on_intensity_data)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["protein_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["protein_df"]
+        )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
 
-    def handle_outputs(self, outputs: dict) -> None:
-        outputs["differentially_expressed_ptm_df"] = outputs.pop(
-            "differential_expressed_columns_df", None
-        )
-        outputs["significant_ptm_df"] = outputs.pop("significant_columns_df", None)
-        super().handle_outputs(outputs)
+
+class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
+    display_name = "Kruskal-Wallis Test"
+    operation = "Peptide analysis"
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
+
+    output_keys = [
+        "differentially_expressed_ptm_df",
+        "significant_ptm_df",
+        "corrected_p_values_df",
+        "corrected_alpha",
+    ]
+
+    calc_method = staticmethod(kruskal_wallis_test_on_ptm_data)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["ptm_df"] = steps.get_step_output(Step, "ptm_df", inputs["ptm_df"])
+        inputs["metadata_df"] = steps.metadata_df
+        return inputs
 
 
-class PlotVolcano(PlotStep):
+class PlotVolcano(DataAnalysisStep):
     display_name = "Volcano Plot"
     operation = "plot"
-    input_keys = [
-        "p_values",
-        "fc_threshold",
-        "alpha",
-        "group1",
-        "group2",
-        "proteins_of_interest",
-        "log2_fc",
-    ]
+    method_description = (
+        "Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
+        "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
+        "can define a fold change threshold and an alpha level to highlight significant items."
+    )
+
     output_keys = []
 
-    def method(self, inputs: dict) -> dict:
-        return create_volcano_plot(**inputs)
+    plot_method = staticmethod(create_volcano_plot)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["p_values"] = steps.get_step_output(
@@ -281,22 +281,20 @@ class PlotVolcano(PlotStep):
             Step, "log2_fold_change_df", inputs["input_dict"]
         )
 
+        if step.operation == "differential_expression":
+            inputs["item_type"] = "Protein ID"
+        elif step.operation == "Peptide analysis":
+            inputs["item_type"] = "PTM"
+
         return inputs
 
 
-class PlotScatterPlot(PlotStep):
+class PlotScatterPlot(DataAnalysisStep):
     display_name = "Scatter Plot"
     operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
 
-    input_keys = [
-        "input_df",
-        "color_df",
-    ]
-    output_keys = []
-
-    def method(self, inputs: dict) -> dict:
-        return scatter_plot(**inputs)
+    plot_method = staticmethod(scatter_plot)
 
     # TODO: input
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
@@ -307,20 +305,12 @@ class PlotScatterPlot(PlotStep):
         return inputs
 
 
-class PlotClustergram(PlotStep):
+class PlotClustergram(DataAnalysisStep):
     display_name = "Clustergram"
     operation = "plot"
     method_description = "Creates a clustergram from data"
 
-    input_keys = [
-        "input_df",
-        "sample_group_df",
-        "flip_axes",
-    ]
-    output_keys = ["plots"]
-
-    def method(self, inputs: dict) -> dict:
-        return clustergram_plot(**inputs)
+    plot_method = staticmethod(clustergram_plot)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -328,18 +318,14 @@ class PlotClustergram(PlotStep):
         return inputs
 
 
-class PlotProtQuant(PlotStep):
+class PlotProtQuant(DataAnalysisStep):
     display_name = "Protein Quantification Plot"
     operation = "plot"
     method_description = (
         "Creates a line chart for intensity across samples for protein groups"
     )
 
-    input_keys = ["input_df", "protein_group", "similarity_measure", "similarity"]
-    output_keys = []
-
-    def method(self, inputs: dict) -> dict:
-        return prot_quant_plot(**inputs)
+    plot_method = staticmethod(prot_quant_plot)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.get_step_output(
@@ -348,40 +334,28 @@ class PlotProtQuant(PlotStep):
         return inputs
 
 
-class PlotPrecisionRecallCurve(PlotStep):
+class PlotPrecisionRecallCurve(DataAnalysisStep):
     display_name = "Precision Recall"
     operation = "plot"
     method_description = "The precision-recall curve shows the tradeoff between precision and recall for different threshold"
 
-    input_keys = [
-        # TODO: Input
-        "plot_title",
-    ]
-
     # Todo: output_keys
 
-    def method(self, inputs: dict) -> dict:
-        return evaluate_classification_model(**inputs)
+    calc_method = staticmethod(evaluate_classification_model)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         # TODO: Input
         return inputs
 
 
-class PlotROC(PlotStep):
+class PlotROC(DataAnalysisStep):
     display_name = "Receiver Operating Characteristic curve"
     operation = "plot"
     method_description = "The ROC curve helps assess the model's ability to discriminate between positive and negative classes and determine an optimal threshold for decision making"
 
-    input_keys = [
-        # TODO: Input
-        "plot_title",
-    ]
-
     # Todo: output_keys
 
-    def method(self, inputs: dict) -> dict:
-        return evaluate_classification_model(**inputs)
+    calc_method = staticmethod(evaluate_classification_model)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         # Todo: Input
@@ -393,20 +367,6 @@ class ClusteringKMeans(DataAnalysisStep):
     operation = "clustering"
     method_description = "Partitions a number of samples in k clusters using k-means"
 
-    input_keys = [
-        "input_df",
-        "labels_column",
-        "positive_label",
-        "model_selection",
-        "model_selection_scoring",
-        "scoring",
-        "n_clusters",
-        "random_state",
-        "init_centroid_strategy",
-        "n_init",
-        "max_iter",
-        "tolerance" "metadata_df",
-    ]
     output_keys = [
         "model",
         "model_evaluation_df",
@@ -414,8 +374,7 @@ class ClusteringKMeans(DataAnalysisStep):
         "cluster_centers_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return k_means(**inputs)
+    calc_method = staticmethod(k_means)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -428,21 +387,6 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
     operation = "clustering"
     method_description = "A clustering algorithm that seeks to find the maximum likelihood estimates for a mixture of multivariate Gaussian distributions"
 
-    input_keys = [
-        "input_df",
-        "labels_column",
-        "positive_label",
-        "model_selection",
-        "model_selection_scoring",
-        "scoring",
-        "n_components",
-        "reg_covar",
-        "covariance_type",
-        "init_params",
-        "max_iter",
-        "random_state",
-        "metadata_df",
-    ]
     output_keys = [
         "model",
         "model_evaluation_df",
@@ -450,8 +394,7 @@ class ClusteringExpectationMaximisation(DataAnalysisStep):
         "cluster_labels_probabilities_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return expectation_maximisation(**inputs)
+    calc_method = staticmethod(expectation_maximisation)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -466,26 +409,13 @@ class ClusteringHierarchicalAgglomerative(DataAnalysisStep):
         "Performs hierarchical clustering utilizing a bottom-up approach"
     )
 
-    input_keys = [
-        "input_df",
-        "labels_column",
-        "positive_label",
-        "model_selection",
-        "model_selection_scoring",
-        "scoring",
-        "n_clusters",
-        "metric",
-        "linkage",
-        "metadata_df",
-    ]
     output_keys = [
         "model",
         "model_evaluation_df",
         "cluster_labels_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return hierarchical_agglomerative_clustering(**inputs)
+    calc_method = staticmethod(hierarchical_agglomerative_clustering)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -498,27 +428,6 @@ class ClassificationRandomForest(DataAnalysisStep):
     operation = "classification"
     method_description = "A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting."
 
-    input_keys = [
-        "input_df",
-        "labels_column",
-        "positive_label",
-        "test_size",
-        "split_stratify",
-        "validation_strategy",
-        "train_val_split",
-        "n_splits",
-        "shuffle",
-        "n_repeats",
-        "random_state_cv",
-        "p_samples",
-        "scoring",
-        "model_selection",
-        "model_selection_scoring",
-        "criterion",
-        "max_depth",
-        "random_state",
-        "metadata_df",
-    ]
     output_keys = [
         "model",
         "model_evaluation_df",
@@ -528,8 +437,7 @@ class ClassificationRandomForest(DataAnalysisStep):
         "y_test_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return random_forest(**inputs)
+    calc_method = staticmethod(random_forest)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -542,27 +450,6 @@ class ClassificationSVM(DataAnalysisStep):
     operation = "classification"
     method_description = "A support vector machine constructs a hyperplane or set of hyperplanes in a high- or infinite-dimensional space, which can be used for classification."
 
-    input_keys = [
-        "input_df",
-        "labels_column",
-        "positive_label",
-        "test_size",
-        "split_stratify",
-        "validation_strategy",
-        "train_val_split",
-        "n_splits",
-        "shuffle",
-        "n_repeats",
-        "random_state_cv",
-        "p_samples",
-        "scoring",
-        "model_selection",
-        "model_selection_scoring",
-        "C",
-        "kernel",
-        "tolerance" "random_state",
-        "metadata_df",
-    ]
     output_keys = [
         "model",
         "model_evaluation_df",
@@ -572,8 +459,7 @@ class ClassificationSVM(DataAnalysisStep):
         "y_test_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return svm(**inputs)
+    calc_method = staticmethod(svm)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -606,19 +492,9 @@ class DimensionReductionTSNE(DataAnalysisStep):
     operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using t-SNE"
 
-    input_keys = [
-        "input_df",
-        "n_components",
-        "perplexity",
-        "metric",
-        "random_state",
-        "n_iter",
-        "n_iter_without_progress",
-    ]
     output_keys = ["embedded_data"]
 
-    def method(self, inputs: dict) -> dict:
-        return t_sne(**inputs)
+    calc_method = staticmethod(t_sne)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.protein_df
@@ -631,18 +507,9 @@ class DimensionReductionUMAP(DataAnalysisStep):
     operation = "dimension_reduction"
     method_description = "Dimension reduction of a dataframe using UMAP"
 
-    input_keys = [
-        "input_df",
-        "n_neighbors",
-        "n_components",
-        "min_dist",
-        "metric",
-        "random_state",
-    ]
     output_keys = ["embedded_data"]
 
-    def method(self, inputs: dict) -> dict:
-        return umap(**inputs)
+    calc_method = staticmethod(umap)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["input_df"] = steps.get_step_output(
@@ -656,21 +523,15 @@ class ProteinGraphPeptidesToIsoform(DataAnalysisStep):
     operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a Protein and map the peptides onto the graph for coverage visualisation. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. Only `Variant`-Features are included in the graph. This, currently, only works with Uniport-IDs and while you are online."
 
-    input_keys = [
-        "protein_id",
-        "run_name",
-        "peptide_df",
-        "k" "allowed_mismatches",
-    ]
     output_keys = [
-        "graph_path" "protein_id",
+        "graph_path",
+        "protein_id",
         "peptide_matches",
         "peptide_mismatches",
         "filtered_blocks",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return peptides_to_isoform(**inputs)
+    calc_method = staticmethod(peptides_to_isoform)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.peptide_df
@@ -683,17 +544,12 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
     operation = "protein_graph"
     method_description = "Create a variation graph (.graphml) for a protein, including variation-features. The protein data will be downloaded from https://rest.uniprot.org/uniprotkb/<Protein ID>.txt. This, currently, only works with Uniport-IDs and while you are online."
 
-    input_keys = [
-        "protein_id",
-        "run_name",
-    ]
     output_keys = [
         "graph_path",
         "filtered_blocks",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return variation_graph(**inputs)
+    calc_method = staticmethod(variation_graph)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.peptide_df
@@ -701,26 +557,45 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         return inputs
 
 
-class SelectPeptidesForProtein(DataAnalysisStep):
-    display_name = "Filter Peptides of Protein"
-    operation = "Peptide analysis"
-    method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
+class FLEXIQuantLF(DataAnalysisStep):
+    display_name = "FLEXIQuant-LF"
+    operation = "modification_quantification"
+    method_description = "FLEXIQuant-LF is an unbiased, label-free computational tool to indirectly detect modified peptides and to quantify the degree of modification based solely on the unmodified peptide species."
 
-    input_keys = [
-        "peptide_df",
-        "protein_ids",
-    ]
     output_keys = [
-        "peptide_df",
+        "raw_scores",
+        "RM_scores",
+        "diff_modified",
+        "removed_peptides",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return filter_peptides_of_protein(**inputs)
+    plot_method = staticmethod(flexiquant_lf)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.get_step_output(
             Step, "peptide_df", inputs["peptide_df"]
         )
+
+        inputs["metadata_df"] = steps.metadata_df
+
+
+class SelectPeptidesForProtein(DataAnalysisStep):
+    display_name = "Select Peptides of Protein"
+    operation = "Peptide analysis"
+    method_description = "Filter peptides for the a selected Protein of Interest from a peptide dataframe"
+
+    output_keys = [
+        "peptide_df",
+    ]
+
+    calc_method = staticmethod(select_peptides_of_protein)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["peptide_df"] = steps.get_step_output(
+            Step, "peptide_df", inputs["peptide_df"]
+        )
+
+        inputs["metadata_df"] = steps.metadata_df
 
         if inputs["auto_select"]:
             significant_proteins = steps.get_step_output(
@@ -752,15 +627,11 @@ class PTMsPerSample(DataAnalysisStep):
         "This function requires a peptide dataframe with PTM information."
     )
 
-    input_keys = [
-        "peptide_df",
-    ]
     output_keys = [
         "ptm_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return ptms_per_sample(**inputs)
+    calc_method = staticmethod(ptms_per_sample)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.get_step_output(
@@ -777,15 +648,11 @@ class PTMsProteinAndPerSample(DataAnalysisStep):
         "This function requires a peptide dataframe with PTM information."
     )
 
-    input_keys = [
-        "peptide_df",
-    ]
     output_keys = [
         "ptm_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return ptms_per_protein_and_sample(**inputs)
+    calc_method = staticmethod(ptms_per_protein_and_sample)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["peptide_df"] = steps.get_step_output(
@@ -855,7 +722,7 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     ]
     output_keys = [
         "required_sample_size",
-        "variance_protein_group", #TODO: remove this line before merging into main
+        "variance_protein_group",  # TODO: remove this line before merging into main
     ]
 
     def method(self, inputs: dict) -> dict:
@@ -934,6 +801,7 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
         self.display_output[
             "required_sample_size_for_all_proteins"
         ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
+
 
 class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
     display_name = "Power Calculation for All Proteins"

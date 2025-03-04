@@ -33,18 +33,27 @@ def peptide_import(file_path, intensity_name, map_to_uniprot) -> dict:
         keep_default_na=True,
     )
 
-    df = read.drop(columns=["Intensity"])
-    id_df = df[id_columns]
-    intensity_df = df.filter(regex=f"^{peptide_intensity_name} ", axis=1)
-    intensity_df.columns = [
-        c[len(peptide_intensity_name) + 1 :] for c in intensity_df.columns
-    ]
-    molten = pd.melt(
-        pd.concat([id_df, intensity_df], axis=1),
-        id_vars=id_columns,
-        var_name="Sample",
-        value_name="Intensity",
-    )
+    if peptide_intensity_name != "Intensity":
+        df = read.drop(columns=["Intensity"])
+    else:
+        df = read
+
+    if "Sample" not in df.columns:
+        id_df = df[id_columns]
+        intensity_df = df.filter(regex=f"^{peptide_intensity_name} ", axis=1)
+        intensity_df.columns = [
+            c[len(peptide_intensity_name) + 1 :] for c in intensity_df.columns
+        ]
+        molten = pd.melt(
+            pd.concat([id_df, intensity_df], axis=1),
+            id_vars=id_columns,
+            var_name="Sample",
+            value_name="Intensity",
+        )
+
+    else:
+        final_df = df.rename(columns={"Proteins": "Protein ID"})
+        ordered = final_df[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]
 
     molten = molten.rename(columns={"Leading razor protein": "Protein ID"})
     ordered = molten[["Sample", "Protein ID", "Sequence", "Intensity", "PEP"]]

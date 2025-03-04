@@ -103,7 +103,7 @@ def random_forest_out(
         meta_df,
         "Group",
         n_estimators=3,
-        test_validate_split=0.20,
+        train_val_split=0.20,
         model_selection=model_selection,
         validation_strategy=validation_strategy,
         random_state=42,

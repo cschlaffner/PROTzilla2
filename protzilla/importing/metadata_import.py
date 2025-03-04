@@ -40,6 +40,9 @@ def file_importer(file_path: str) -> tuple[pd.DataFrame, str]:
                 "File format not supported. \
             Supported file formats are csv, xlsx, psv or tsv",
             )
+        # If duplicates are not remove this could negatively impact downstream analysis, e.g. produces wrong p-values
+        # in differential expression tests.
+        meta_df = meta_df.drop_duplicates()
         msg = "Metadata file successfully imported."
         return meta_df, msg
     except pd.errors.EmptyDataError:
@@ -68,7 +71,7 @@ def metadata_import_method(
         messages.append(
             {
                 "level": logging.INFO,
-                "msg": "The imported dataframe indicates an incorrent orientation. Consider viewing the table to ensure the orientation is correct.",
+                "msg": "The imported dataframe indicates an incorrect orientation. Consider viewing the table to ensure the orientation is correct.",
             }
         )
 

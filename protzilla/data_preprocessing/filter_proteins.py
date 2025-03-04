@@ -45,12 +45,14 @@ def by_samples_missing(
     )
 
 
-def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type):
+def by_samples_missing_plot(
+    output_remaining_proteins, output_filtered_proteins, graph_type
+):
     if graph_type == "Pie chart":
         fig = create_pie_plot(
             values_of_sectors=[
-                len(remaining_proteins),
-                len(filtered_proteins),
+                len(output_remaining_proteins),
+                len(output_filtered_proteins),
             ],
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
@@ -58,19 +60,11 @@ def _build_pie_bar_plot(remaining_proteins, filtered_proteins, graph_type):
     elif graph_type == "Bar chart":
         fig = create_bar_plot(
             values_of_sectors=[
-                len(remaining_proteins),
-                len(filtered_proteins),
+                len(output_remaining_proteins),
+                len(output_filtered_proteins),
             ],
             names_of_sectors=["Proteins kept", "Proteins filtered"],
             heading="Number of Filtered Proteins",
             y_title="Number of Proteins",
         )
     return [fig]
-
-
-def by_samples_missing_plot(method_inputs, method_outputs, graph_type):
-    return _build_pie_bar_plot(
-        method_outputs["remaining_proteins"],
-        method_outputs["filtered_proteins"],
-        graph_type,
-    )

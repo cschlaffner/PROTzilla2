@@ -80,7 +80,7 @@ def test_filter_proteins_by_missing_samples(
         filter_proteins_by_samples_missing_df, peptide_df=None, percentage=1.0
     )
 
-    fig = by_samples_missing_plot(filter_proteins_df, method_output, "Pie chart")[0]
+    fig = by_samples_missing_plot(method_output["remaining_proteins"], method_output["filtered_proteins"], "Pie chart")[0]
     if show_figures:
         fig.show()
     assert method_output["filtered_proteins"] == [

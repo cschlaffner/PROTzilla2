@@ -17,7 +17,7 @@ from protzilla.steps import Step, StepManager
 class ImportingStep(Step):
     section = "importing"
 
-    def method(self, inputs):
+    def calc_method(self):
         raise NotImplementedError("This method must be implemented in a subclass.")
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
@@ -25,51 +25,45 @@ class ImportingStep(Step):
 
 
 class MaxQuantImport(ImportingStep):
-    display_name = "MaxQuant"
-    operation = "msdataimport"
-    method_description = "Import MaxQuant data"
+    display_name = "MaxQuant Protein Groups Import"
+    operation = "Protein Data Import"
+    method_description = "Import the protein groups file form output of MaxQuant"
 
-    input_keys = ["file_path", "map_to_uniprot", "intensity_name", "aggregation_method"]
     output_keys = ["protein_df"]
 
-    def method(self, inputs):
-        return max_quant_import(**inputs)
+    calc_method = staticmethod(max_quant_import)
 
 
 class DiannImport(ImportingStep):
-    display_name = "DIA-NN"
-    operation = "msdataimport"
+    display_name = "DIA-NN Import"
+    operation = "Protein Data Import"
     method_description = "DIA-NN data import"
 
-    input_keys = ["file_path", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
 
-    def method(self, inputs):
-        return diann_import(**inputs)
+    calc_method = staticmethod(diann_import)
 
 
 class MsFraggerImport(ImportingStep):
-    display_name = "MS Fragger"
-    operation = "msdataimport"
-    method_description = "MS Fragger data import"
+    display_name = "MS Fragger Combined Protein Import"
+    operation = "Protein Data Import"
+    method_description = (
+        "Import the combined_protein.tsv file form output of MS Fragger"
+    )
 
-    input_keys = ["file_path", "intensity_name", "map_to_uniprot", "aggregation_method"]
     output_keys = ["protein_df"]
 
-    def method(self, inputs):
-        return ms_fragger_import(**inputs)
+    calc_mehtod = staticmethod(ms_fragger_import)
 
 
 class MetadataImport(ImportingStep):
-    display_name = "Metadata import"
+    display_name = "Metadata Import"
     operation = "metadataimport"
     method_description = "Import metadata"
 
-    input_keys = ["file_path", "feature_orientation", "protein_df"]
     output_keys = ["metadata_df"]
 
-    def method(self, inputs):
-        return metadata_import_method(**inputs)
+    calc_method = staticmethod(metadata_import_method)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["protein_df"] = steps.get_step_output(ImportingStep, "protein_df")
@@ -77,15 +71,13 @@ class MetadataImport(ImportingStep):
 
 
 class MetadataImportMethodDiann(ImportingStep):
-    display_name = "Metadata import DIA-NN"
+    display_name = "DIA-NN Metadata Import"
     operation = "metadataimport"
     method_description = "Import metadata for run relationships of DIA-NN"
 
-    input_keys = ["file_path", "groupby_sample", "protein_df"]
     output_keys = ["metadata_df", "protein_df"]
 
-    def method(self, inputs):
-        return metadata_import_method_diann(**inputs)
+    calc_method = staticmethod(metadata_import_method_diann)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["protein_df"] = steps.get_step_output(DiannImport, "protein_df")
@@ -99,16 +91,9 @@ class MetadataColumnAssignment(ImportingStep):
         "Assign columns to metadata categories, repeatable for each category"
     )
 
-    input_keys = [
-        "metadata_required_column",
-        "metadata_unknown_column",
-        "protein_df",
-        "metadata_df",
-    ]
     output_keys = ["metadata_df", "protein_df"]
 
-    def method(self, inputs):
-        return metadata_column_assignment(**inputs)
+    calc_method = staticmethod(metadata_column_assignment)
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         inputs["protein_df"] = steps.get_step_output(ImportingStep, "protein_df")
@@ -119,24 +104,20 @@ class MetadataColumnAssignment(ImportingStep):
 
 
 class PeptideImport(ImportingStep):
-    display_name = "Peptide import"
+    display_name = "MaxQuant Peptide Import"
     operation = "peptide_import"
     method_description = "Import peptide data"
 
-    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
     output_keys = ["peptide_df"]
 
-    def method(self, inputs):
-        return peptide_import(**inputs)
+    calc_method = staticmethod(peptide_import)
 
 
 class EvidenceImport(ImportingStep):
-    display_name = "Evidence import"
+    display_name = "MaxQuant Evidence Import"
     operation = "peptide_import"
     method_description = "Import an evidence file"
 
-    input_keys = ["file_path", "intensity_name", "map_to_uniprot"]
     output_keys = ["peptide_df"]
 
-    def method(self, inputs):
-        return evidence_import(**inputs)
+    calc_method = staticmethod(evidence_import)

@@ -133,22 +133,18 @@ def by_proteins_missing(
     )
 
 
-def by_protein_intensity_sum_plot(method_inputs, method_outputs, graph_type):
-    return _build_pie_bar_plot(
-        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
-    )
+def by_protein_intensity_sum_plot(
+    output_protein_df, output_filtered_samples, graph_type
+):
+    return _build_pie_bar_plot(output_protein_df, output_filtered_samples, graph_type)
 
 
-def by_proteins_missing_plot(method_inputs, method_outputs, graph_type):
-    return _build_pie_bar_plot(
-        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
-    )
+def by_proteins_missing_plot(output_protein_df, output_filtered_samples, graph_type):
+    return _build_pie_bar_plot(output_protein_df, output_filtered_samples, graph_type)
 
 
-def by_protein_count_plot(method_inputs, method_outputs, graph_type):
-    return _build_pie_bar_plot(
-        method_outputs["protein_df"], method_outputs["filtered_samples"], graph_type
-    )
+def by_protein_count_plot(output_protein_df, output_filtered_samples, graph_type):
+    return _build_pie_bar_plot(output_protein_df, output_filtered_samples, graph_type)
 
 
 def _build_pie_bar_plot(result_df, filtered_sampels, graph_type):
