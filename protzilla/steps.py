@@ -71,29 +71,29 @@ class Step:
         stepIndex = steps.all_steps.index(self)
         previousStep = steps.all_steps[stepIndex-1]
         
+        if (previousStep.calculation_status == "outdated" ):
+            if not previousStep.calculate(steps,inputs):
+                return False
+
+        if (steps.current_step_index == stepIndex):
+            self.updateInputs(inputs)
+        self.messages.clear()
+        
+
         try:
-            if (previousStep.calculation_status == "outdated" ):
-                if not previousStep.calculate(steps,inputs):
-                    return False
-
-            if (steps.current_step_index == stepIndex):
-                self.updateInputs(inputs)
-            self.messages.clear()
             self.insert_dataframes(steps, self.inputs)
-
             if self.calc_method:
                 calc_output = self.calc_method(**self.calculation_input)
                 self.handle_calc_outputs(calc_output)
                 self.validate_outputs()
 
-                self.calculation_status = "complete"
-                if (steps.failed_step_index == stepIndex):
-                        steps.failed_step_index = -1
+            self.calculation_status = "complete"
+            if (steps.failed_step_index == stepIndex):
+                steps.failed_step_index = -1
+            
             if self.plot_method:
                 plot_output = self.plot_method(**self.plot_input)
                 self.handle_plot_outputs(plot_output)
-            
-            return True
 
         except NotImplementedError as e:
             self.messages.append(
@@ -131,13 +131,11 @@ class Step:
                 )
             )
         
-        for message in self.messages:
-                    if message["level"] == logging.ERROR:
-                        self.calculation_status = "failed"
-                        steps.failed_step_index = stepIndex
-                        raise Exception("Calculation failed")
+        if self.calculation_status != "complete":
+            self.calculation_status = "failed"
+            steps.failed_step_index = stepIndex
 
-        return False
+        return self.calculation_status == "complete"
 
     def insert_dataframes(self, steps: StepManager, inputs: dict) -> dict:
         return inputs
@@ -298,7 +296,7 @@ class Messages:
         return self.messages[key]
 
     def __repr__(self):
-        return f"Messages: {[message['message'] for message in self.messages]}"
+        return f"Messages: {[message['msg'] for message in self.messages]}"
 
     def append(self, param):
         self.messages.append(param)
