@@ -51,7 +51,7 @@ class MsFraggerImport(ImportingStep):
 
     output_keys = ["protein_df"]
 
-    calc_mehtod = staticmethod(ms_fragger_import)
+    calc_method = staticmethod(ms_fragger_import)
 
 
 class MetadataImport(ImportingStep):
