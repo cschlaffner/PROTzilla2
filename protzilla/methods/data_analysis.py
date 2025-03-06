@@ -49,15 +49,6 @@ class DataAnalysisStep(Step):
         return inputs
 
 
-class PlotStep(DataAnalysisStep):
-    step = "plot"
-
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
-        plots = self.output.output.pop("plots", [])
-        self.plots = Plots(plots)
-
-
 class DifferentialExpressionANOVA(DataAnalysisStep):
     display_name = "ANOVA"
     operation = "differential_expression"
@@ -666,21 +657,9 @@ class PowerAnalysisPowerCalculation(DataAnalysisStep):
     operation = "Power Analysis"
     method_description = "Calculates power of the test for given protein groups"
 
-    input_keys = [
-        "significant_proteins_df",
-        "differentially_expressed_proteins_df",
-        "selected_protein_group",
-        "fc_threshold",
-        "alpha",
-        "group1",
-        "group2",
-        "individual_column",
-        "metadata_df",
-    ]
     output_keys = ["power"]
 
-    def method(self, inputs: dict) -> dict:
-        return power_calculation(**inputs)
+    calc_method = staticmethod(power_calculation)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
@@ -698,8 +677,8 @@ class PowerAnalysisPowerCalculation(DataAnalysisStep):
         inputs["group2"] = step.inputs["group2"]
         return inputs
 
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
+    def handle_calc_outputs(self, outputs : dict):
+        super().handle_calc_outputs(outputs)
         self.display_output["power"] = f"Power of the test: {outputs['power']}"
 
 
@@ -708,25 +687,12 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
     operation = "Power Analysis"
     method_description = "Calculates sample size for given protein groups"
 
-    input_keys = [
-        "differentially_expressed_proteins_df",
-        "selected_protein_group",
-        "significant_proteins_df",
-        "fc_threshold",
-        "alpha",
-        "group1",
-        "group2",
-        "power",
-        "individual_column",
-        "metadata_df",
-    ]
     output_keys = [
         "required_sample_size",
         "variance_protein_group",  # TODO: remove this line before merging into main
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return sample_size_calculation(**inputs)
+    calc_method = staticmethod(sample_size_calculation)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
@@ -744,32 +710,18 @@ class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
         inputs["group2"] = step.inputs["group2"]
         return inputs
 
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
+    def handle_calc_outputs(self, outputs: dict):
+        super().handle_calc_outputs(outputs)
         self.display_output[
             "required_sample_size"
         ] = f"Required Sample Size: {outputs['required_sample_size']}"
 
 
-class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
+class PowerAnalysisSampleSizeCalculationForAllProteins(Step):
     display_name = "Sample Size Calculation for All Proteins"
     operation = "Power Analysis"
     method_description = "Calculates sample size for a selected group of proteins and returns the maximum required sample size."
 
-    input_keys = [
-        "differentially_expressed_proteins_df",
-        "significant_proteins_df",
-        "significant_proteins_only",
-        "fc_threshold",
-        "alpha",
-        "group1",
-        "group2",
-        "power",
-        "individual_column",
-        "metadata_df",
-        "select_all_proteins",
-        "selected_protein_groups",
-    ]
     output_keys = [
         "required_sample_size_for_all_proteins",
         "differentially_expressed_proteins_df",
@@ -777,8 +729,7 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
         "significant_proteins_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return sample_size_calculation_for_all_proteins(**inputs)
+    plot_method = staticmethod(sample_size_calculation_for_all_proteins)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
@@ -796,31 +747,18 @@ class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
         inputs["group2"] = step.inputs["group2"]
         return inputs
 
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
+    def handle_plot_outputs(self, outputs: dict):
+        super().handle_plot_outputs(outputs)
         self.display_output[
             "required_sample_size_for_all_proteins"
         ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
 
 
-class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
+class PowerAnalysisPowerCalculationForAllProteins():
     display_name = "Power Calculation for All Proteins"
     operation = "Power Analysis"
     method_description = "Calculates power for a selected group of proteins and returns the minimum power."
 
-    input_keys = [
-        "differentially_expressed_proteins_df",
-        "significant_proteins_df",
-        "significant_proteins_only",
-        "fc_threshold",
-        "alpha",
-        "group1",
-        "group2",
-        "individual_column",
-        "metadata_df",
-        "select_all_proteins",
-        "selected_protein_groups",
-    ]
     output_keys = [
         "power_for_all_proteins",
         "differentially_expressed_proteins_df",
@@ -828,8 +766,7 @@ class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
         "significant_proteins_df",
     ]
 
-    def method(self, inputs: dict) -> dict:
-        return power_calculation_for_all_proteins(**inputs)
+    plot_method = staticmethod(power_calculation_for_all_proteins)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
@@ -847,8 +784,8 @@ class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
         inputs["group2"] = step.inputs["group2"]
         return inputs
 
-    def handle_outputs(self, outputs: dict):
-        super().handle_outputs(outputs)
+    def handle_plot_outputs(self, outputs: dict):
+        super().handle_plot_outputs(outputs)
         self.display_output[
             "power_for_all_proteins"
         ] = f"Power for all Proteins: {outputs['power_for_all_proteins']}"
