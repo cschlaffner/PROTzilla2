@@ -5,7 +5,9 @@ from protzilla.data_preprocessing.plots import create_box_plots, create_histogra
 from protzilla.utilities import default_intensity_column
 
 
-def by_log(protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10") -> dict:
+def by_log(
+    protein_df: pd.DataFrame, peptide_df: pd.DataFrame | None, log_base="log10"
+) -> dict:
     """
     This function log-transforms intensity
     DataFrames. Supports log-transformation to the base

@@ -58,6 +58,18 @@ steps:
       alpha: 0.05
     inputs: { }
     type: DifferentialExpressionTTest
+  - form_inputs: { }
+    inputs: { }
+    type: PowerAnalysisSampleSizeCalculation
+  - form_inputs: { }
+    inputs: { }
+    type: PowerAnalysisPowerCalculation
+  - form_inputs: {}
+    inputs: { }
+    type: PowerAnalysisSampleSizeCalculationForAllProteins
+  - form_inputs: { }
+    inputs: { }
+    type: PowerAnalysisPowerCalculationForAllProteins
   - form_inputs:
       fc_threshold: 1
     inputs: { }

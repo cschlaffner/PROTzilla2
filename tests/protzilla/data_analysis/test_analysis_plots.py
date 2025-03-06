@@ -83,7 +83,9 @@ def test_plots_volcano_plot_no_annotation(ttest_input, ttest_output, show_figure
         fig.show()
 
 
-def test_plots_volcano_plot_multiple_annotations(ttest_input, ttest_output, show_figures):
+def test_plots_volcano_plot_multiple_annotations(
+    ttest_input, ttest_output, show_figures
+):
     fig = create_volcano_plot(
         p_values=ttest_output["corrected_p_values_df"],
         log2_fc=ttest_output["log2_fold_change_df"],

@@ -149,6 +149,14 @@
                                     <a href="{% url 'runs:protein_graph' run_name displayed_history|length %}"
                                         class="btn btn-grey" target="_blank">View Protein Graph</a>
                                 {% endif %}
+                                {% if display_output %}
+                                    <div class="mb-5">
+                                        <label for="display_output"></label>
+                                            <textarea class="form-control display-output-textarea" id="display_output"
+                                                      readonly>{{ display_output_result }}
+                                            </textarea>
+                                    </div>
+                                {% endif %}
                             </div>
                         </form>
                     </div>

@@ -65,8 +65,7 @@ def outlier_detection_df_with_nan():
 
 
 def test_outlier_detection_with_isolation_forest(
-    show_figures, outlier_detection_df,
-        peptides_df
+    show_figures, outlier_detection_df, peptides_df
 ):
     method_inputs = {
         "protein_df": outlier_detection_df,
@@ -144,7 +143,11 @@ def test_outlier_detection_with_pca(show_figures, outlier_detection_df, peptides
         "number_of_components": 3,
     }
     method_outputs = by_pca(**method_inputs)
-    fig = by_pca_plot(method_outputs["pca_df"], method_outputs["number_of_components"], method_outputs["explained_variance_ratio"])[0]
+    fig = by_pca_plot(
+        method_outputs["pca_df"],
+        method_outputs["number_of_components"],
+        method_outputs["explained_variance_ratio"],
+    )[0]
     if show_figures:
         fig.show()
 

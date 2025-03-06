@@ -10,7 +10,7 @@ from protzilla.importing.ms_data_import import (
     max_quant_import,
     ms_fragger_import,
 )
-from protzilla.importing.peptide_import import peptide_import, evidence_import
+from protzilla.importing.peptide_import import evidence_import, peptide_import
 from protzilla.steps import Step, StepManager
 
 
@@ -47,7 +47,9 @@ class DiannImport(ImportingStep):
 class MsFraggerImport(ImportingStep):
     display_name = "MS Fragger Combined Protein Import"
     operation = "Protein Data Import"
-    method_description = "Import the combined_protein.tsv file form output of MS Fragger"
+    method_description = (
+        "Import the combined_protein.tsv file form output of MS Fragger"
+    )
 
     output_keys = ["protein_df"]
 

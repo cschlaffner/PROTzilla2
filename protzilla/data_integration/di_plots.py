@@ -7,8 +7,6 @@ import pandas as pd
 from protzilla.constants.protzilla_logging import logger
 from protzilla.utilities.utilities import fig_to_base64
 
-from protzilla.constants.colors import PLOT_COLOR_SEQUENCE
-
 
 def GO_enrichment_bar_plot(
     input_df,

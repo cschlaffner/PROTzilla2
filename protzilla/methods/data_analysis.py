@@ -7,15 +7,17 @@ from protzilla.data_analysis.clustering import (
     k_means,
 )
 from protzilla.data_analysis.differential_expression_anova import anova
-from protzilla.data_analysis.differential_expression_kruskal_wallis import kruskal_wallis_test_on_ptm_data, \
-    kruskal_wallis_test_on_intensity_data
+from protzilla.data_analysis.differential_expression_kruskal_wallis import (
+    kruskal_wallis_test_on_intensity_data,
+    kruskal_wallis_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_linear_model import linear_model
 from protzilla.data_analysis.differential_expression_mann_whitney import (
-    mann_whitney_test_on_intensity_data, mann_whitney_test_on_ptm_data)
+    mann_whitney_test_on_intensity_data,
+    mann_whitney_test_on_ptm_data,
+)
 from protzilla.data_analysis.differential_expression_t_test import t_test
 from protzilla.data_analysis.dimension_reduction import t_sne, umap
-from protzilla.data_analysis.ptm_analysis import ptms_per_sample, \
-    ptms_per_protein_and_sample, select_peptides_of_protein
 from protzilla.data_analysis.model_evaluation import evaluate_classification_model
 from protzilla.data_analysis.plots import (
     clustergram_plot,
@@ -23,11 +25,17 @@ from protzilla.data_analysis.plots import (
     prot_quant_plot,
     scatter_plot,
 )
+from protzilla.data_analysis.power_analysis import (
+    power_calculation,
+    power_calculation_for_all_proteins,
+    sample_size_calculation,
+    sample_size_calculation_for_all_proteins,
+)
 from protzilla.data_analysis.protein_graphs import peptides_to_isoform, variation_graph
 from protzilla.data_analysis.ptm_analysis import (
-    select_peptides_of_protein,
     ptms_per_protein_and_sample,
     ptms_per_sample,
+    select_peptides_of_protein,
 )
 from protzilla.data_analysis.ptm_quantification import flexiquant_lf
 from protzilla.methods.data_preprocessing import TransformationLog
@@ -39,6 +47,15 @@ class DataAnalysisStep(Step):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         return inputs
+
+
+class PlotStep(DataAnalysisStep):
+    step = "plot"
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        plots = self.output.output.pop("plots", [])
+        self.plots = Plots(plots)
 
 
 class DifferentialExpressionANOVA(DataAnalysisStep):
@@ -113,8 +130,10 @@ class DifferentialExpressionLinearModel(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     output_keys = [
         "differentially_expressed_proteins_df",
@@ -129,7 +148,9 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
         if steps.get_step_output(Step, "protein_df", inputs["protein_df"]) is not None:
-            inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+            inputs["protein_df"] = steps.get_step_output(
+                Step, "protein_df", inputs["protein_df"]
+            )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -138,8 +159,10 @@ class DifferentialExpressionMannWhitneyOnIntensity(DataAnalysisStep):
 class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
     display_name = "Mann-Whitney Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Mann-Whitney U test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     output_keys = [
         "differentially_expressed_ptm_df",
@@ -161,8 +184,10 @@ class DifferentialExpressionMannWhitneyOnPTM(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     output_keys = [
         "differentially_expressed_proteins_df",
@@ -182,8 +207,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "differential_expression"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     output_keys = [
         "differentially_expressed_proteins_df",
@@ -195,7 +222,9 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
     calc_method = staticmethod(kruskal_wallis_test_on_intensity_data)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["protein_df"] = steps.get_step_output(Step, "protein_df", inputs["protein_df"])
+        inputs["protein_df"] = steps.get_step_output(
+            Step, "protein_df", inputs["protein_df"]
+        )
         inputs["metadata_df"] = steps.metadata_df
         inputs["log_base"] = steps.get_step_input(TransformationLog, "log_base")
         return inputs
@@ -204,8 +233,10 @@ class DifferentialExpressionKruskalWallisOnIntensity(DataAnalysisStep):
 class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
     display_name = "Kruskal-Wallis Test"
     operation = "Peptide analysis"
-    method_description = ("A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
-                          "The p-values are corrected for multiple testing.")
+    method_description = (
+        "A function to conduct a Kruskal-Wallis test between groups defined in the clinical data."
+        "The p-values are corrected for multiple testing."
+    )
 
     output_keys = [
         "differentially_expressed_ptm_df",
@@ -225,10 +256,12 @@ class DifferentialExpressionKruskalWallisOnPTM(DataAnalysisStep):
 class PlotVolcano(DataAnalysisStep):
     display_name = "Volcano Plot"
     operation = "plot"
-    method_description = ("Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
-                          "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
-                          "can define a fold change threshold and an alpha level to highlight significant items.")
-    
+    method_description = (
+        "Plots the results of a differential expression analysis in a volcano plot. The x-axis shows "
+        "the log2 fold change and the y-axis shows the -log10 of the corrected p-values. The user "
+        "can define a fold change threshold and an alpha level to highlight significant items."
+    )
+
     output_keys = []
 
     plot_method = staticmethod(create_volcano_plot)
@@ -258,7 +291,7 @@ class PlotVolcano(DataAnalysisStep):
 
 class PlotScatterPlot(DataAnalysisStep):
     display_name = "Scatter Plot"
-    operation = "plot" 
+    operation = "plot"
     method_description = "Creates a scatter plot from data. This requires a dimension reduction method to be run first, as the input dataframe should contain only 2 or 3 columns."
 
     plot_method = staticmethod(scatter_plot)
@@ -565,17 +598,23 @@ class SelectPeptidesForProtein(DataAnalysisStep):
         inputs["metadata_df"] = steps.metadata_df
 
         if inputs["auto_select"]:
-            significant_proteins = (
-                steps.get_step_output(DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]))
-            index_of_most_significant_protein = significant_proteins['corrected_p_value'].idxmin()
-            most_significant_protein = significant_proteins.loc[index_of_most_significant_protein]
+            significant_proteins = steps.get_step_output(
+                DataAnalysisStep, "significant_proteins_df", inputs["protein_list"]
+            )
+            index_of_most_significant_protein = significant_proteins[
+                "corrected_p_value"
+            ].idxmin()
+            most_significant_protein = significant_proteins.loc[
+                index_of_most_significant_protein
+            ]
             inputs["protein_id"] = [most_significant_protein["Protein ID"]]
-            self.messages.append({
-                "level": logging.INFO,
-                "msg":
-                    f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
-                    f"from {inputs['protein_list']}"
-            })
+            self.messages.append(
+                {
+                    "level": logging.INFO,
+                    "msg": f"Selected the most significant Protein: {most_significant_protein['Protein ID']}, "
+                    f"from {inputs['protein_list']}",
+                }
+            )
 
         return inputs
 
@@ -583,8 +622,10 @@ class SelectPeptidesForProtein(DataAnalysisStep):
 class PTMsPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of a single protein of interest. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of a single protein of interest. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     output_keys = [
         "ptm_df",
@@ -602,8 +643,10 @@ class PTMsPerSample(DataAnalysisStep):
 class PTMsProteinAndPerSample(DataAnalysisStep):
     display_name = "PTMs per Sample and Protein"
     operation = "Peptide analysis"
-    method_description = ("Analyze the post-translational modifications (PTMs) of all Proteins. "
-                          "This function requires a peptide dataframe with PTM information.")
+    method_description = (
+        "Analyze the post-translational modifications (PTMs) of all Proteins. "
+        "This function requires a peptide dataframe with PTM information."
+    )
 
     output_keys = [
         "ptm_df",
@@ -616,3 +659,196 @@ class PTMsProteinAndPerSample(DataAnalysisStep):
             Step, "peptide_df", inputs["peptide_df"]
         )
         return inputs
+
+
+class PowerAnalysisPowerCalculation(DataAnalysisStep):
+    display_name = "Power Calculation"
+    operation = "Power Analysis"
+    method_description = "Calculates power of the test for given protein groups"
+
+    input_keys = [
+        "significant_proteins_df",
+        "differentially_expressed_proteins_df",
+        "selected_protein_group",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "individual_column",
+        "metadata_df",
+    ]
+    output_keys = ["power"]
+
+    def method(self, inputs: dict) -> dict:
+        return power_calculation(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output["power"] = f"Power of the test: {outputs['power']}"
+
+
+class PowerAnalysisSampleSizeCalculation(DataAnalysisStep):
+    display_name = "Sample Size Calculation"
+    operation = "Power Analysis"
+    method_description = "Calculates sample size for given protein groups"
+
+    input_keys = [
+        "differentially_expressed_proteins_df",
+        "selected_protein_group",
+        "significant_proteins_df",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "power",
+        "individual_column",
+        "metadata_df",
+    ]
+    output_keys = [
+        "required_sample_size",
+        "variance_protein_group",  # TODO: remove this line before merging into main
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return sample_size_calculation(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output[
+            "required_sample_size"
+        ] = f"Required Sample Size: {outputs['required_sample_size']}"
+
+
+class PowerAnalysisSampleSizeCalculationForAllProteins(PlotStep):
+    display_name = "Sample Size Calculation for All Proteins"
+    operation = "Power Analysis"
+    method_description = "Calculates sample size for a selected group of proteins and returns the maximum required sample size."
+
+    input_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "significant_proteins_only",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "power",
+        "individual_column",
+        "metadata_df",
+        "select_all_proteins",
+        "selected_protein_groups",
+    ]
+    output_keys = [
+        "required_sample_size_for_all_proteins",
+        "differentially_expressed_proteins_df",
+        "sample_size_dataframe",
+        "significant_proteins_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return sample_size_calculation_for_all_proteins(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output[
+            "required_sample_size_for_all_proteins"
+        ] = f"Required Sample Size for all Proteins: {outputs['required_sample_size_for_all_proteins']}"
+
+
+class PowerAnalysisPowerCalculationForAllProteins(PlotStep):
+    display_name = "Power Calculation for All Proteins"
+    operation = "Power Analysis"
+    method_description = "Calculates power for a selected group of proteins and returns the minimum power."
+
+    input_keys = [
+        "differentially_expressed_proteins_df",
+        "significant_proteins_df",
+        "significant_proteins_only",
+        "fc_threshold",
+        "alpha",
+        "group1",
+        "group2",
+        "individual_column",
+        "metadata_df",
+        "select_all_proteins",
+        "selected_protein_groups",
+    ]
+    output_keys = [
+        "power_for_all_proteins",
+        "differentially_expressed_proteins_df",
+        "power_dataframe",
+        "significant_proteins_df",
+    ]
+
+    def method(self, inputs: dict) -> dict:
+        return power_calculation_for_all_proteins(**inputs)
+
+    def insert_dataframes(self, steps: StepManager, inputs) -> dict:
+        inputs["differentially_expressed_proteins_df"] = steps.get_step_output(
+            Step, "differentially_expressed_proteins_df", inputs["input_dict"]
+        )
+        step = next(
+            s for s in steps.all_steps if s.instance_identifier == inputs["input_dict"]
+        )
+        inputs["significant_proteins_df"] = steps.get_step_output(
+            Step, "significant_proteins_df", inputs["input_dict"]
+        )
+        inputs["metadata_df"] = steps.metadata_df
+        inputs["alpha"] = step.inputs["alpha"]
+        inputs["group1"] = step.inputs["group1"]
+        inputs["group2"] = step.inputs["group2"]
+        return inputs
+
+    def handle_outputs(self, outputs: dict):
+        super().handle_outputs(outputs)
+        self.display_output[
+            "power_for_all_proteins"
+        ] = f"Power for all Proteins: {outputs['power_for_all_proteins']}"

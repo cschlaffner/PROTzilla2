@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
-import plotly.io as pio
 import plotly.graph_objects as go
+import plotly.io as pio
 from PIL import Image
 
 from protzilla.utilities import format_trace
@@ -30,7 +30,9 @@ class Step:
     operation: str = None
     method_description: str = None
     output_keys: list[str] = []
-    calculation_status: Literal["complete", "outdated", "incomplete", "failed"] = "incomplete"
+    calculation_status: Literal[
+        "complete", "outdated", "incomplete", "failed"
+    ] = "incomplete"
 
     def __init__(self, instance_identifier: str | None = None):
         self.form_inputs: dict = {}
@@ -38,6 +40,7 @@ class Step:
         self.output: Output = Output()
         self.plots: Plots = Plots()
         self.messages: Messages = Messages([])
+        self.display_output: DisplayOutput = DisplayOutput()
         self.instance_identifier = instance_identifier
 
         if self.instance_identifier is None:
@@ -69,16 +72,15 @@ class Step:
         :return: None
         """
         stepIndex = steps.all_steps.index(self)
-        previousStep = steps.all_steps[stepIndex-1]
-        
-        if (previousStep.calculation_status == "outdated" ):
-            if not previousStep.calculate(steps,inputs):
+        previousStep = steps.all_steps[stepIndex - 1]
+
+        if previousStep.calculation_status == "outdated":
+            if not previousStep.calculate(steps, inputs):
                 return False
 
-        if (steps.current_step_index == stepIndex):
+        if steps.current_step_index == stepIndex:
             self.updateInputs(inputs)
         self.messages.clear()
-        
 
         try:
             self.insert_dataframes(steps, self.inputs)
@@ -88,9 +90,9 @@ class Step:
                 self.validate_outputs()
 
             self.calculation_status = "complete"
-            if (steps.failed_step_index == stepIndex):
+            if steps.failed_step_index == stepIndex:
                 steps.failed_step_index = -1
-            
+
             if self.plot_method:
                 plot_output = self.plot_method(**self.plot_input)
                 self.handle_plot_outputs(plot_output)
@@ -130,7 +132,7 @@ class Step:
                     trace=format_trace(traceback.format_exception(e)),
                 )
             )
-        
+
         if self.calculation_status != "complete":
             self.calculation_status = "failed"
             steps.failed_step_index = stepIndex
@@ -157,7 +159,7 @@ class Step:
 
         self.handle_messages(outputs)
 
-    def handle_plot_outputs(self, outputs: dict|list) -> None:
+    def handle_plot_outputs(self, outputs: dict | list) -> None:
         """
         Handles the dictionary from the plot method and creates a Plots object from it.
         Responsible for clearing and setting the plots attribute of the class.
@@ -167,14 +169,14 @@ class Step:
 
         if not isinstance(outputs, dict) and not isinstance(outputs, list):
             raise TypeError("Output of plot method is not a dictionary or a list.")
-        
+
         if isinstance(outputs, dict):
             plots = outputs.pop("plots", [])
             self.output.output.update(outputs)
             self.handle_messages(outputs)
         else:
             plots = outputs
-        
+
         self.plots = Plots(plots)
 
     def handle_messages(self, outputs: dict) -> None:
@@ -188,7 +190,7 @@ class Step:
         self.messages.extend(messages)
 
     calc_method = None
-    plot_method = None # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
+    plot_method = None  # if the plot method uses the output of the calculation method, it should be prefixed with "output_"
 
     @property
     def calculation_input(self) -> dict:
@@ -239,14 +241,13 @@ class Step:
         :return: True if the outputs are valid, False otherwise
         :raises ValueError: If a required key is missing in the outputs
         """
-        
+
         print("Val0.0")
         for key in self.output_keys:
             print("Val0.5")
             if key not in self.output or self.output[key] is None:
                 print("Val0.7")
                 if not soft_check:
-                    
                     print("val1.0")
                     raise ValueError(
                         f"Output validation failed: missing output {key} in outputs."
@@ -257,7 +258,6 @@ class Step:
 
 
 class Output:
-
     def __init__(self, output: dict = {}):
         if output is None:
             output = {}
@@ -332,9 +332,10 @@ class Plots:
         :return: List of all exported plots.
         """
         from ui.settings.plot_template import get_scale_factor
+
         exports = []
         format_ = settings["file_format"]
-        
+
         for plot in self.plots:
             scale_factor = get_scale_factor(plot, settings)
             # For Plotly GO Figure
@@ -370,6 +371,31 @@ class Plots:
                 elif format_ in ["png", "jpg"]:
                     exports.append(BytesIO(base64.b64decode(plot)))
         return exports
+
+
+class DisplayOutput:
+    def __init__(self, display_output: dict = None):
+        if display_output is None:
+            display_output = {}
+        self.display_output = display_output
+
+    def __iter__(self):
+        return iter(self.display_output)
+
+    def __repr__(self):
+        return f"DisplayOutput: {self.display_output}"
+
+    def __contains__(self, key):
+        return key in self.display_output
+
+    def __getitem__(self, key):
+        return self.display_output[key]
+
+    def __setitem__(self, key, value):
+        self.display_output[key] = value
+
+    def is_empty(self) -> bool:
+        return len(self.display_output) == 0
 
 
 class StepManager:
@@ -529,19 +555,19 @@ class StepManager:
             return self.sections[section]
         else:
             raise ValueError(f"Unknown section {section}")
-    
+
     def set_steps_outdated(self, offset: int) -> None:
         count = 0
         for step in self.following_steps[offset:]:
-            if (step.calculation_status == "complete"):
+            if step.calculation_status == "complete":
                 step.calculation_status = "outdated"
-                count+=1
+                count += 1
         return count
 
     @property
     def previous_steps(self) -> list[Step]:
         return self.all_steps[: self.current_step_index]
-    
+
     @property
     def following_steps(self) -> list[Step]:
         return self.all_steps[self.current_step_index :]
@@ -587,7 +613,7 @@ class StepManager:
         if self.current_section == "data_preprocessing":
             return (
                 self.current_step.output
-                if self.current_step.calculation_status!="incomplete"
+                if self.current_step.calculation_status != "incomplete"
                 else self.previous_steps[-1].output
             )
         return self.data_preprocessing[-1].output

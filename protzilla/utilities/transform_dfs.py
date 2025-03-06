@@ -17,7 +17,9 @@ def long_to_wide(intensity_df: pd.DataFrame, value_name: str | None = None):
         packages such as sklearn
     :rtype: pd.DataFrame
     """
-    values_name = default_intensity_column(intensity_df) if value_name is None else value_name
+    values_name = (
+        default_intensity_column(intensity_df) if value_name is None else value_name
+    )
     return pd.pivot(
         intensity_df, index="Sample", columns="Protein ID", values=values_name
     )

@@ -34,3 +34,7 @@ def get_choices_for_metadata_non_sample_columns(run: Run) -> list[tuple[str, str
             run.steps.metadata_df.columns != "Sample"
         ].unique()
     )
+
+
+def get_choices_for_metadata_all_columns(run: Run) -> list[tuple[str, str]]:
+    return to_choices(run.steps.metadata_df.columns)

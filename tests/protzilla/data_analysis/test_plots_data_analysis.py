@@ -101,14 +101,20 @@ def test_scatter_plot_4d_df(wide_4d_df, color_df):
 
     assert "messages" in outputs
     assert "plots" not in outputs
-    assert any("Consider reducing the dimensionality" in message["msg"] for message in outputs["messages"])
+    assert any(
+        "Consider reducing the dimensionality" in message["msg"]
+        for message in outputs["messages"]
+    )
 
 
 def test_scatter_plot_color_df_2d(show_figures, wide_2d_df):
     outputs = scatter_plot(wide_2d_df, wide_2d_df)
     assert "messages" in outputs
     assert "plots" not in outputs
-    assert any("The color dataframe should have 1 dimension only" in message["msg"] for message in outputs["messages"])
+    assert any(
+        "The color dataframe should have 1 dimension only" in message["msg"]
+        for message in outputs["messages"]
+    )
 
 
 def test_clustergram(show_figures, wide_4d_df, color_df):
@@ -151,8 +157,10 @@ def test_clustergram_input_not_right_type(wide_4d_df):
     assert "messages" in outputs2
     assert "plots" not in outputs2
     assert any(
-        'The selected input for "grouping dataframe" is not a dataframe, ' in message["msg"]
-        for message in outputs2["messages"])
+        'The selected input for "grouping dataframe" is not a dataframe, '
+        in message["msg"]
+        for message in outputs2["messages"]
+    )
 
 
 def test_clustergram_dimension_mismatch(wide_4d_df):
@@ -176,7 +184,10 @@ def test_clustergram_dimension_mismatch(wide_4d_df):
     )
     assert "messages" in outputs
     assert "plots" not in outputs
-    assert any("There is a dimension mismatch" in message["msg"] for message in outputs["messages"])
+    assert any(
+        "There is a dimension mismatch" in message["msg"]
+        for message in outputs["messages"]
+    )
 
 
 def test_clustergram_different_samples(wide_4d_df):
@@ -200,6 +211,7 @@ def test_clustergram_different_samples(wide_4d_df):
     assert "messages" in outputs
     assert "plots" not in outputs
     assert any(
-        "The input dataframe and the grouping contain different samples" in message["msg"]
+        "The input dataframe and the grouping contain different samples"
+        in message["msg"]
         for message in outputs["messages"]
     )
