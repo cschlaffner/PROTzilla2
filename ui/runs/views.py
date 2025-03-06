@@ -17,6 +17,9 @@ from django.http import (
 )
 from django.shortcuts import render
 from django.urls import reverse
+from django.conf import settings
+from django.http import JsonResponse
+
 
 from protzilla.constants.paths import WORKFLOWS_PATH
 from protzilla.run import Run, get_available_run_names
@@ -39,7 +42,8 @@ from ui.runs.fields import (
     make_name_field,
     make_sidebar,
 )
-from ui.runs.views_helper import display_message, display_messages
+
+from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_filtered_data, set_filtered_data
 
 from .form_mapping import (
     get_filled_form_by_method,
@@ -495,29 +499,68 @@ def navigate(request, run_name: str):
     run.step_goto(index, section_name)
     return HttpResponseRedirect(reverse("runs:detail", args=(run_name,)))
 
-
 def tables_content(request, run_name, index, key):
+    """
+    Handles the content of a table during a run, including filtering, searching, sorting, and pagination.
+
+    :param request: the request object
+    :param run_name: the name of the run
+    :param index: the index of the current step
+    :param key: the key of the datatable
+
+    :return: a JSON response containing the table data
+    """
+
     if run_name not in active_runs:
         active_runs[run_name] = Run(run_name)
     run = active_runs[run_name]
-    # TODO this will change with df_mode implementation
-    if index < len(run.steps.previous_steps):
-        outputs = run.steps.previous_steps[index].output[key]
-    else:
-        outputs = run.current_outputs[key]
-    out = outputs.replace(np.nan, None)
 
+    filtered_data = get_filtered_data(run, index, key)
+
+    if request.GET.get("is_new_search", "false").lower() == "true":
+        filtered_data = get_filtered_data(run, index, key, reset=True)
+        search_query = request.GET.get("search_query", "").lower()
+        if search_query:
+            mask = filtered_data.astype(str).stack().str.contains(search_query, case=False, na=False).unstack()
+            filtered_data = filtered_data [mask.any(axis=1)]
+            set_filtered_data(run, index, key, filtered_data )
+
+    if request.GET.get("is_new_sorting", "false").lower() == "true":
+        sorting_column_idx = int(request.GET.get("sorting_column_index", "0"))
+        is_sort_ascending = request.GET.get("is_sort_ascending", "true").lower() == "true"
+        primary_column = filtered_data.columns[sorting_column_idx]
+        secondary_column = filtered_data.columns[0]
+        filtered_data = filtered_data.sort_values(by=[primary_column, secondary_column], ascending=[is_sort_ascending, True])
+        set_filtered_data(run, index, key, filtered_data )
+  
     if "clean-ids" in request.GET:
-        for column in out.columns:
+        for column in filtered_data.columns:
             if "protein" in column.lower():
-                out[column] = out[column].map(
+                filtered_data[column] = filtered_data[column].map(
                     lambda group: ";".join(
                         unique_justseen(map(clean_uniprot_id, group.split(";")))
                     )
                 )
-    return JsonResponse(
-        dict(columns=out.to_dict("split")["columns"], data=out.to_dict("split")["data"])
-    )
+
+    current_page = int(request.GET.get("current_page", 1))
+    rows_per_page = int(request.GET.get("rows_per_page", 10))
+
+    total_items = len(filtered_data )
+    total_pages = (total_items + rows_per_page - 1) // rows_per_page
+    start_id_y = (current_page - 1) * rows_per_page
+    end_id_y = start_id_y + rows_per_page
+    paginated_data = filtered_data .iloc[start_id_y:end_id_y]
+
+    response_data = {
+        "columns": paginated_data.to_dict("split")["columns"],
+        "data": paginated_data.to_dict("split")["data"],
+        "page": current_page,
+        "total_pages": total_pages,
+        "total_items": total_items,
+        "start_item": start_id_y + 1,
+        "end_item": min(end_id_y, total_items)
+    }
+    return JsonResponse(response_data)
 
 
 def change_method(request, run_name):

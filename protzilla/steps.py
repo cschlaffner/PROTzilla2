@@ -36,6 +36,7 @@ class Step:
         self.form_inputs: dict = {}
         self.inputs: dict = {}
         self.output: Output = Output()
+        self.filtered_datatable: dict = {}
         self.plots: Plots = Plots()
         self.messages: Messages = Messages([])
         self.instance_identifier = instance_identifier

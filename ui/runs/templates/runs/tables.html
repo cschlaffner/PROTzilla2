@@ -9,42 +9,11 @@
 {% block js %}
     <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/datatables-1.13.4.min.js' %}"></script>
+    
+    <script type="text/javascript" src="{% static 'js/datatables-controls.js' %}"></script>
     <script>
-        $(document).ready(function () {
-            $.ajax({
-                url: "{% url 'runs:tables_content' run_name index key %}",
-                data: "{{ clean_ids }}",
-                type: "GET",
-                success: function (response) {
-                    let tr = $("<tr>");
-                    response.columns.forEach(element => {
-                        tr.append($("<th>").text(element))
-                    });
-                    $("#datatable").html($("<thead>").append(tr))
-                        .DataTable({
-                            data: response.data,
-                            columnDefs: [{
-                                targets: "_all",
-                                render: function (data, type, row) {
-                                    if (type !== 'display') {
-                                        return data;
-                                    }
-                                    if (typeof data === 'string' && data.startsWith("https://")) {
-                                        return data.split(' ').map(url => `<a href="${url}" target="_blank">${url.split('/').pop()}</a>`).join(' ')
-                                    }
-                                    if (typeof data === 'number' && (!Number.isInteger(data) || data >= 1e4)) {
-                                        return data.toPrecision(4);
-                                    }
-                                    return `<div style="word-break:break-all">${data}</div>`;
-                                },
-                            }],
-                        });
-                }
-            });
-            $('#tables_dropdown').on("change", function () {
-                window.location.href = $(this).val()
-            })
-        });
+        const RUNS_TABLES_CONTENT_URL = "{% url 'runs:tables_content' run_name index key %}";
+        const CLEAN_IDS = "{{ clean_ids }}";
     </script>
 {% endblock %}
 
@@ -52,22 +21,46 @@
     <div class="p-3">
         <p>
             Index {{ index|add:1 }}, Section {{ section }}, step {{ step }}, method {{ method }}
-            <br>
         </p>
+
         <div class="d-flex justify-content-between">
             <div class="input-group mb-3 w-50">
                 <span class="input-group-text">Choose table</span>
                 {% include 'runs/field_select_with_label.html' with key="tables_dropdown" categories=options only %}
             </div>
             <div>
-            {% if clean_ids %}
-                <a class="mb-3 btn btn-grey" href="{% url 'runs:tables' run_name index key %}">Enable Isoforms</a>
-            {% else %}
-                <a class="mb-3 btn btn-grey" href="?clean-ids">Disable Isoforms</a>
-            {% endif %}
-            <a class="mb-3 btn btn-grey" href="{% url 'runs:download_table' run_name index key %}">Download Table</a>
+                {% if clean_ids %}
+                    <a class="mb-3 btn btn-grey" href="{% url 'runs:tables' run_name index key %}">Enable Isoforms</a>
+                {% else %}
+                    <a class="mb-3 btn btn-grey" href="?clean-ids">Disable Isoforms</a>
+                {% endif %}
+                <a class="mb-3 btn btn-grey" href="{% url 'runs:download_table' run_name index key %}">Download Table</a>
             </div>
         </div>
-        <table id="datatable" class="display"></table>
-    </div>
+
+        <div class="input-group mb-3 w-50">
+            <input type="text" id="searchInput" class="form-control" placeholder="Type search query here..." >
+            <button class="btn btn-grey ms-1" id="search-btn">Search</button>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table id="datatable" class="display"></table>
+        </div>        
+
+        <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between">
+                <div class="input-group mt-3 w-auto">
+                    <span class="input-group-text">Rows per page</span>
+                    <select id="rowsPerPage" class="form-select form-select-sm">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div id="page-info" class="mt-3 ms-3 d-flex align-items-center"></div>
+            </div>
+            <div id="pagination" class="pagination-buttons d-flex justify-content-end mt-3"></div>
+        </div>
+    </div>        
 {% endblock %}
