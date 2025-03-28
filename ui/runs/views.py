@@ -43,7 +43,7 @@ from ui.runs.fields import (
     make_sidebar,
 )
 
-from ui.runs.views_helper import display_message, display_messages, parameters_from_post, get_filtered_data, set_filtered_data
+from ui.runs.views_helper import display_message, display_messages, get_filtered_data, set_filtered_data
 
 from .form_mapping import (
     get_filled_form_by_method,
