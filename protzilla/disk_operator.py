@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-from plotly.io import read_json, write_json
+from plotly.io import read_json, write_json, write_image
 
 import protzilla.utilities as utilities
 from protzilla.constants import paths
@@ -126,6 +126,7 @@ class DiskOperator:
             return step_manager
 
     def write_run(self, step_manager: StepManager) -> None:
+        print("i try to wrtie")
         with ErrorHandler():
             if not self.run_dir.exists():
                 self.run_dir.mkdir(parents=True, exist_ok=True)
@@ -139,6 +140,7 @@ class DiskOperator:
             for step in step_manager.all_steps:
                 run[KEYS.STEPS].append(self._write_step(step))
             self.yaml_operator.write(self.run_file, run)
+            print("i wrote the run!")
 
 
 
@@ -225,22 +227,27 @@ class DiskOperator:
             step_data[KEYS.STEP_TYPE] = step.__class__.__name__
             step_data[KEYS.STEP_INSTANCE_IDENTIFIER] = step.instance_identifier
             step_data[KEYS.STEP_FORM_INPUTS] = sanitize_inputs(step.form_inputs)
+            print("write step:", step)
             if not workflow_mode:
+                print("write step 2")
                 step_data[KEYS.STEP_INPUTS] = sanitize_inputs(step.inputs)
-                step_data[KEYS.STEP_PLOTS] = self._write_plots(
+                print("write step 3")
+                step_data[KEYS.STEP_PLOTS] = self._write_plots(     #broken - Jannes, 10.04.2025
                     step.instance_identifier, step.plots
                 )
+                print("write step 4")
                 step_data[KEYS.STEP_OUTPUTS] = self._write_output(
                     instance_identifier=step.instance_identifier, output=step.output
                 )
                 step_data[KEYS.STEP_MESSAGES] = step.messages.messages
+                print("write step 5")
             return step_data
 
     def _read_outputs(self, output: dict) -> Output:
         with ErrorHandler():
             step_output = {}
             for key, value in output.items():
-                if isinstance(value, str) and Path(value).exists():
+                if isinstance(value, str) and Path(value).exists() and ".graphml" not in value:
                     step_output[key] = self.dataframe_operator.read(value)
                 else:
                     step_output[key] = value
@@ -268,16 +275,28 @@ class DiskOperator:
 
     def _write_plots(self, instance_identifier: str, plots: Plots) -> dict:
         with ErrorHandler():
+            print("try to write plots")
+            print(plots)
             plots_data = {}
             for i, plot in enumerate(plots):
+                print(1)
                 file_path = self.plot_dir / f"{instance_identifier}_plot{i}.json"
+                print(2)
                 self.plot_dir.mkdir(parents=True, exist_ok=True)
+                print(3)
                 if not isinstance(
                     plot, bytes
                 ):  # TODO the data integration plots are of type byte, and therefore cannot be written using this methodology
+                    print(4)
                     write_json(plot, file_path)
-                    plot.write_image(str(file_path).replace(".json", ".png"))
+                    try: 
+                        plot.write_image(str(file_path).replace(".json", ".png"))
+                    except Exception as e:
+                        print(e)
+                    print(6)
                     plots_data[i] = str(file_path)
+                    print(7)
+            print("juhu")
             return plots_data
 
     @property

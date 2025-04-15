@@ -1043,7 +1043,7 @@ class DimensionReductionUMAPForm(MethodForm):
 
 
 class ProteinGraphPeptidesToIsoformForm(MethodForm):
-    protein_ID = CustomCharField(
+    protein_id = CustomCharField(
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2255 - 2263
@@ -1058,7 +1058,7 @@ class ProteinGraphPeptidesToIsoformForm(MethodForm):
 
 
 class ProteinGraphVariationGraphForm(MethodForm):
-    protein_ID = CustomCharField(
+    protein_id = CustomCharField(
         label="Protein ID", initial="Enter the Uniprot-ID of the protein"
     )
     # TODO: workflow_meta line 2291 - 2295

@@ -12,7 +12,7 @@ from protzilla.constants.protzilla_logging import logger
 from logging import INFO, ERROR
 
 
-def variation_graph(protein_id: str, run_name: str):
+def variation_graph(protein_id: str, run_name="Protgraph"):
     """
     Wrapper function for creating a Protein-Variation-Graph for a given UniProt Protein.
     VARIANT feature entries inserting amino acids are filtered out before graph creation
@@ -76,14 +76,24 @@ def _create_protein_variation_graph(protein_id: str, run_name: str) -> dict:
             messages=[dict(level=ERROR, msg=msg, trace=request.__dict__)],
         )
 
+    bingbong = Path(RUNS_PATH, "Protgraph/graphs/", f"{protein_id}.txt")
+
+
     output_folder_path = run_path / "graphs"
     output_csv = output_folder_path / f"{protein_id}.csv"
     graph_path = output_folder_path / f"{protein_id}.graphml"
-    cmd_str = f"protgraph -egraphml {path_to_protein_file} \
+    """cmd_str = f"protgraph {bingbong} \
+                -egraphml \
                 --export_output_folder={output_folder_path} \
                 --output_csv={output_csv} \
                 -ft VARIANT \
-                -d skip"
+                -d skip" """
+    cmd_str = f"""protgraph "{bingbong}" \
+    -egraphml \
+    --export_output_folder="{output_folder_path}" \
+    --output_csv="{output_csv}" \
+    --feature_table VARIANT \
+    --digestion skip"""
 
     subprocess.run(cmd_str, shell=True)
 

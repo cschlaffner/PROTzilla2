@@ -256,7 +256,6 @@ def add_tag(request: HttpRequest):
 
     run_tag = request.POST["add_tag_name"]
     run_name = request.POST["add_tag_run_name"]
-    print(run_tag)
 
     directory_path = os.path.join(paths.RUNS_PATH, run_name)
     metadata_yaml_path = os.path.join(directory_path, "metadata.yaml")
@@ -717,9 +716,14 @@ def protein_graph(request, run_name, index: int):
         )
 
     graph_path = outputs["graph_path"]
-    peptide_matches = outputs.get("peptide_matches", [])
-    peptide_mismatches = outputs.get("peptide_mismatches", [])
-    protein_id = outputs.get("protein_id", "")
+    peptide_matches = []
+    if "peptide_matches" in outputs:
+        peptide_matches = outputs["peptide_matches"]
+    peptide_mismatches = []
+    if "peptide_mismatches" in outputs:
+        peptide_matches = outputs["peptide_mismatches"]
+
+    protein_id = outputs["protein_id"]
 
     if not Path(graph_path).exists():
         return HttpResponseBadRequest(f"Graph file {graph_path} does not exist")
@@ -756,6 +760,11 @@ def protein_graph(request, run_name, index: int):
     edges = [{"data": {"source": u, "target": v}} for u, v in graph.edges()]
     elements = nodes + edges
 
+    filtered_blocks = []
+    if "filtered_blocks" in outputs:
+        filtered_blocks = outputs["filtered_blocks"]
+    
+
     return render(
         request,
         "runs/protein_graph.html",
@@ -764,7 +773,7 @@ def protein_graph(request, run_name, index: int):
             "peptide_matches": peptide_matches,
             "peptide_mismatches": peptide_mismatches,
             "protein_id": protein_id,
-            "filtered_blocks": outputs.get("filtered_blocks", []),
+            "filtered_blocks": filtered_blocks,
             "max_peptides": max_peptides,
             "min_peptides": min_peptides,
             "run_name": run_name,

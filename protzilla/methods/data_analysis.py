@@ -769,7 +769,7 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
 
     input_keys = [
         "protein_id",
-        "run_name",
+        #"run_name",
     ]
     output_keys = [
         "graph_path",
@@ -780,8 +780,6 @@ class ProteinGraphVariationGraph(DataAnalysisStep):
         return variation_graph(**inputs)
 
     def insert_dataframes(self, steps: StepManager, inputs) -> dict:
-        inputs["peptide_df"] = steps.peptide_df
-        inputs["isoform_df"] = steps.isoform_df
         return inputs
 
 
