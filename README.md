@@ -1,5 +1,7 @@
-# PROTzilla2
+# PROTzilla2 (deprecated)
 [![Coverage badge](https://github.com/antonneubauer/PROTzilla2/raw/python-coverage-comment-action-data/badge.svg)](https://github.com/antonneubauer/PROTzilla2/tree/python-coverage-comment-action-data)  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+# New PROTzilla can be found here: https://github.com/cschlaffner/PROTzilla
 
 
 PROTzilla aims to be a one-stop-shop for proteomics-researchers (with or without a background in programming) providing a platform that allows a user to go from raw data to paper-ready graphics in a user-friendly web-based interface. While doing so we focus on scaleable data-analysis as well as shareable and reproducible results and methods. 
